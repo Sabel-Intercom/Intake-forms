@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cirqul — Discovery Capture · Sabel</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d1b2a;
+    --navy-mid: #162233;
+    --navy-card: #1c2d40;
+    --navy-border: #243648;
+    --red: #e8192c;
+    --red-dim: rgba(232,25,44,0.15);
+    --red-glow: rgba(232,25,44,0.08);
+    --white: #f0f4f8;
+    --muted: #7a9bb5;
+    --muted-dim: #4a6480;
+    --accent: #2eb8e6;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --text: #d4e4f0;
+    --label: #8bafc9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--navy-mid);
+    border-right: 1px solid var(--navy-border);
+    position: fixed;
+    top: 0; left: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--navy-border);
+  }
+
+  .sidebar-logo .wordmark {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+
+  .sidebar-logo .client-tag {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    margin-top: 4px;
+  }
+
+  .sidebar-logo .doc-type {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    letter-spacing: 0.06em;
+  }
+
+  .sidebar-nav {
+    padding: 16px 0;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { color: var(--white); background: var(--red-glow); }
+  .nav-item.active { color: var(--white); border-left-color: var(--red); background: var(--red-dim); }
+
+  .nav-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted-dim);
+    min-width: 18px;
+  }
+
+  .nav-item.active .nav-number { color: var(--red); }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--navy-border);
+    font-size: 10px;
+    color: var(--muted-dim);
+  }
+
+  .save-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Sora', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: opacity 0.15s;
+    margin-bottom: 10px;
+  }
+
+  .save-btn:hover { opacity: 0.88; }
+
+  /* ── Main ── */
+  .main {
+    margin-left: 220px;
+    flex: 1;
+    padding: 40px 48px;
+    max-width: 900px;
+  }
+
+  .page-header {
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--navy-border);
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+
+  .page-header p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .prefill-notice {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(46,184,230,0.12);
+    border: 1px solid rgba(46,184,230,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--accent);
+    margin-top: 12px;
+  }
+
+  .prefill-notice::before { content: "●"; font-size: 8px; }
+
+  /* ── Sections ── */
+  .section {
+    margin-bottom: 36px;
+    scroll-margin-top: 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    background: var(--red-dim);
+    border: 1px solid rgba(232,25,44,0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+
+  .section-desc {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--navy-card);
+    border: 1px solid var(--navy-border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  /* ── Grid ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .span-2 { grid-column: span 2; }
+
+  /* ── Form elements ── */
+  .field { display: flex; flex-direction: column; gap: 5px; }
+
+  label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--label);
+    letter-spacing: 0.04em;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  select,
+  textarea {
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    padding: 9px 12px;
+    transition: border-color 0.15s;
+    outline: none;
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--red);
+  }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  select option { background: var(--navy-mid); }
+
+  /* Pre-filled indicator */
+  input.prefilled, select.prefilled, textarea.prefilled {
+    border-color: rgba(46,184,230,0.3);
+    background: rgba(46,184,230,0.04);
+  }
+
+  /* ── Checkbox groups ── */
+  .check-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .check-item:hover { border-color: var(--muted-dim); }
+  .check-item.checked { border-color: var(--red); background: var(--red-glow); }
+
+  .check-item input[type="checkbox"] { display: none; }
+
+  .check-box {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--muted-dim);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.15s;
+  }
+
+  .check-item.checked .check-box {
+    background: var(--red);
+    border-color: var(--red);
+  }
+
+  .check-item.checked .check-box::after {
+    content: "✓";
+    font-size: 10px;
+    color: white;
+    font-weight: 700;
+  }
+
+  .check-label { font-size: 13px; color: var(--text); line-height: 1.4; }
+  .check-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Tags / pill selects ── */
+  .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--navy-border);
+    background: var(--navy-mid);
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .pill:hover { border-color: var(--muted-dim); color: var(--white); }
+  .pill.selected { background: var(--red-dim); border-color: rgba(232,25,44,0.4); color: var(--white); }
+
+  /* ── Status badges ── */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-amber { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+  .badge-green { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+  .badge-red { background: var(--red-dim); color: #ff6b7a; border: 1px solid rgba(232,25,44,0.3); }
+
+  /* ── Inline alert ── */
+  .alert {
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .alert-amber { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: #fcd47a; }
+  .alert-blue { background: rgba(46,184,230,0.08); border: 1px solid rgba(46,184,230,0.2); color: #7dd3f0; }
+
+  /* ── Range ── */
+  .range-wrap { display: flex; align-items: center; gap: 12px; }
+  input[type="range"] {
+    flex: 1;
+    accent-color: var(--red);
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .range-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--white);
+    min-width: 60px;
+    text-align: right;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--navy-border);
+    margin: 20px 0;
+  }
+
+  /* ── Submit ── */
+  .form-footer {
+    padding: 32px 0 60px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .submit-btn {
+    padding: 13px 32px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: opacity 0.15s;
+  }
+
+  .submit-btn:hover { opacity: 0.88; }
+
+  .submit-note { font-size: 12px; color: var(--muted); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--navy-card);
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    display: none;
+    z-index: 999;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .toast.show { display: block; animation: slideUp 0.3s ease; }
+
+  @keyframes slideUp {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 24px 20px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .span-2 { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="wordmark">Sabel</div>
+    <div class="client-tag">Cirqul</div>
+    <div class="doc-type">Discovery Capture</div>
+  </div>
+  <div class="sidebar-nav">
+    <a class="nav-item active" href="#s1" onclick="setActive(this)">
+      <span class="nav-number">01</span> Company & Contacts
+    </a>
+    <a class="nav-item" href="#s2" onclick="setActive(this)">
+      <span class="nav-number">02</span> Business Overview
+    </a>
+    <a class="nav-item" href="#s3" onclick="setActive(this)">
+      <span class="nav-number">03</span> Intercom Setup
+    </a>
+    <a class="nav-item" href="#s4" onclick="setActive(this)">
+      <span class="nav-number">04</span> Scope & Pillars
+    </a>
+    <a class="nav-item" href="#s5" onclick="setActive(this)">
+      <span class="nav-number">05</span> Technical Reqs
+    </a>
+    <a class="nav-item" href="#s6" onclick="setActive(this)">
+      <span class="nav-number">06</span> Fin Configuration
+    </a>
+    <a class="nav-item" href="#s7" onclick="setActive(this)">
+      <span class="nav-number">07</span> Timeline & Go-Live
+    </a>
+    <a class="nav-item" href="#s8" onclick="setActive(this)">
+      <span class="nav-number">08</span> Commercials
+    </a>
+    <a class="nav-item" href="#s9" onclick="setActive(this)">
+      <span class="nav-number">09</span> Follow-up & Notes
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <button class="save-btn" onclick="saveToLocal()">Save Draft</button>
+    <div>Auto-saves to browser</div>
+  </div>
+</nav>
+
+<!-- Main -->
+<main class="main">
+  <div class="page-header">
+    <h1>Discovery Capture — Cirqul</h1>
+    <p>Fill in or confirm details from the discovery call. Use this to build the proposal.</p>
+    <span class="prefill-notice">Pre-filled from call recording — confirm and complete blanks</span>
+  </div>
+
+  <form id="discoveryForm">
+
+    <!-- ── 01 Company & Contacts ── -->
+    <div class="section" id="s1">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <div>
+          <div class="section-title">Company & Contacts</div>
+          <div class="section-desc">Who are we dealing with and how do we reach them?</div>
+        </div>
+      </div>
+
+      <div class="alert alert-amber">
+        <span>⚠</span>
+        <span>NDA requested by client before going deeper. Michael will send NDA; we send legal name, address, and registration details.</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Company</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Company Name</label>
+            <input type="text" name="company_name" class="prefilled" value="Cirqul">
+          </div>
+          <div class="field">
+            <label>Industry</label>
+            <input type="text" name="industry" class="prefilled" value="Debt Collection / Personal Finance (Fintech)">
+          </div>
+          <div class="field">
+            <label>Location / HQ</label>
+            <input type="text" name="location" class="prefilled" value="Las Vegas, Nevada, USA">
+          </div>
+          <div class="field">
+            <label>Time Zone</label>
+            <input type="text" name="timezone" class="prefilled" value="Pacific (UTC-8)">
+          </div>
+          <div class="field span-2">
+            <label>Website</label>
+            <input type="text" name="website" placeholder="e.g. https://cirqul.com">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Primary Contact</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Name</label>
+            <input type="text" name="contact1_name" class="prefilled" value="Michael A. Carey">
+          </div>
+          <div class="field">
+            <label>Role</label>
+            <input type="text" name="contact1_role" class="prefilled" value="Marketing / Sales">
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" name="contact1_email" placeholder="michael@cirqul.com">
+          </div>
+          <div class="field">
+            <label>Phone</label>
+            <input type="text" name="contact1_phone" placeholder="+1...">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Other Key Stakeholders</div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Founder / CEO name</label>
+            <input type="text" name="founder_name" placeholder="Confirm name">
+          </div>
+          <div class="field">
+            <label>Head of Technology / CTO</label>
+            <input type="text" name="cto_name" placeholder="Name">
+          </div>
+          <div class="field">
+            <label>Chief Compliance Officer</label>
+            <input type="text" name="cco_name" placeholder="Name">
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="field">
+          <label>Who will be our day-to-day point of contact post-kickoff?</label>
+          <input type="text" name="day_to_day" placeholder="Name + role">
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Who has final sign-off on the Intercom setup / Fin content?</label>
+          <input type="text" name="signoff_authority" placeholder="Name + role">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Team Size</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Total headcount (approx.)</label>
+            <input type="number" name="team_size" class="prefilled" value="15">
+          </div>
+          <div class="field">
+            <label>Offshore / contractors</label>
+            <input type="text" name="offshore" class="prefilled" value="Design + development offshore">
+          </div>
+          <div class="field">
+            <label>Dedicated support / CX person?</label>
+            <select name="has_support_person">
+              <option value="no_yet" selected>Not yet — founder/team covering for now</option>
+              <option value="yes">Yes</option>
+              <option value="planned">Planned hire</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>If planned hire — timeframe?</label>
+            <input type="text" name="support_hire_timeframe" placeholder="e.g. Q2 2026">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 02 Business Overview ── -->
+    <div class="section" id="s2">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <div>
+          <div class="section-title">Business Overview</div>
+          <div class="section-desc">What does Cirqul do and how does Intercom fit in?</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Business Lines</div>
+        <div class="check-group">
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="biz_debt" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Debt Collection — buy and manage consumer debt, offer flexible repayment</div>
+              <div class="check-sub">Branded Intercom interface; customers receive email/SMS/AI voice then land on a portal to manage their debt</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="biz_pfm" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Personal Financial Management — standalone app/tool (Kara)</div>
+              <div class="check-sub">Budgeting, goal-setting, gig-work resources, financial wellness — subscription at $24.99/month which also services debt payments</div>
+            </div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label>How do the two lines intersect? (confirm model)</label>
+          <textarea name="biz_intersection" class="prefilled">Subscriber pays $24.99/month which covers both app access and debt repayment (e.g. owe $1,000 → subscribe → monthly payments reduce debt). Monetisation also through in-app tools (gig work, savings tips etc.) without pushing more debt.</textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">AI-First Approach</div>
+        <div class="alert alert-blue">
+          <span>ℹ</span>
+          <span>Cirqul's model is no human agents where possible. Debt customers may prefer AI precisely because of shame/embarrassment — a potential differentiator for keeping Fin in the loop rather than escalating.</span>
+        </div>
+        <div class="field">
+          <label>What percentage of interactions do they expect Fin to resolve autonomously?</label>
+          <input type="text" name="fin_target_resolution" placeholder="e.g. 90%+, or 'as high as possible'">
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>What triggers a human escalation? (confirm)</label>
+          <textarea name="escalation_triggers" class="prefilled">Debt disputes, edge cases Fin can't resolve, customer explicitly requests human. Goal is to minimise escalations — team will handle manually for now.</textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Who handles escalations internally (short-term)?</label>
+          <input type="text" name="escalation_handler" placeholder="Name or role">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Regulatory & Compliance Notes</div>
+        <div class="field">
+          <label>Key compliance constraints on Intercom / AI comms (confirm)</label>
+          <textarea name="compliance_notes" class="prefilled">Debt collection is heavily regulated re: SMS outreach (TCPA etc.) — Twilio not viable, found compliant SMS provider. Identity verification required before surfacing any debt data (SSN + email + phone or similar). Debt disputes handled via Fin but must be airtight.</textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Who is the CCO / legal point of contact for compliance sign-off?</label>
+          <input type="text" name="compliance_contact" placeholder="Name + email">
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 03 Intercom Setup ── -->
+    <div class="section" id="s3">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <div>
+          <div class="section-title">Intercom Setup</div>
+          <div class="section-desc">What's already live and what's missing?</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Current Plan</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Intercom Plan</label>
+            <select name="intercom_plan">
+              <option value="startup" selected>Startup (~$75/month — has everything)</option>
+              <option value="essential">Essential</option>
+              <option value="advanced">Advanced</option>
+              <option value="expert">Expert</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Contract / plan length</label>
+            <input type="text" name="intercom_contract" placeholder="e.g. 12 months, month-to-month">
+          </div>
+          <div class="field">
+            <label>Intercom workspace URL</label>
+            <input type="text" name="intercom_workspace" placeholder="e.g. app.intercom.com/a/apps/abc123">
+          </div>
+          <div class="field">
+            <label>Current Fin responses active?</label>
+            <select name="fin_active">
+              <option value="partial" selected>Partially — basic DB lookups and offer info configured</option>
+              <option value="no">No — not yet configured</option>
+              <option value="yes">Yes — running in production</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">What's Already Built in Intercom</div>
+        <div class="field">
+          <label>Summary from call (edit as needed)</label>
+          <textarea name="already_built" class="prefilled">Database connection exists — Fin can look up a contact by email/identifier and retrieve debt amount + available offers. Some knowledge resources added (savings tips, ways to earn extra income etc.). Branded Intercom messenger shown on website (white box bug noted — not loading correctly). Outbound outreach via email + SMS being set up.</textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>What's missing / not yet built? (fill in from follow-up call)</label>
+          <textarea name="not_built" placeholder="e.g. Identity verification flow, audience segmentation, Fin Actions (update payments), financial management section, SMS integration, workflows..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Intercom Messenger</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Is the messenger branded?</label>
+            <select name="branded_messenger">
+              <option value="yes" selected>Yes — branded as Kara (their AI persona)</option>
+              <option value="partial">Partially</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Messenger name / persona</label>
+            <input type="text" name="fin_persona" class="prefilled" value="Kara">
+          </div>
+          <div class="field">
+            <label>Where does the messenger appear?</label>
+            <select name="messenger_location">
+              <option value="debt_portal" selected>Debt repayment portal / landing page</option>
+              <option value="pfm_app">PFM app</option>
+              <option value="both">Both</option>
+              <option value="marketing_site">Marketing site</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Is there a mobile app (now or planned)?</label>
+            <select name="mobile_app">
+              <option value="planned" selected>Planned for PFM side</option>
+              <option value="yes">Yes, live</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 04 Scope & Pillars ── -->
+    <div class="section" id="s4">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <div>
+          <div class="section-title">Scope & Pillars</div>
+          <div class="section-desc">Which Sabel milestones are in play for this engagement?</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Active Pillars (tick all that apply)</div>
+        <div class="check-group">
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="pillar_foundations" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Intercom Foundations</div>
+              <div class="check-sub">Inbox setup, audience segmentation (debt vs PFM), routing, business hours, messenger config</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="pillar_automation" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Automation Engine</div>
+              <div class="check-sub">Workflows, outbound triggers, identity verification flow, debt dispute handling, payment update actions</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="pillar_fin" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Fin Enablement</div>
+              <div class="check-sub">Knowledge build-out, Fin Actions (DB read + write), audience-specific Fin behaviour (debt vs PFM), resolution optimisation</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="pillar_migration">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Migration Accelerator</div>
+              <div class="check-sub">Not discussed — confirm if any data needs migrating from a previous CX platform</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Key Deliverables to Confirm (from follow-up call)</div>
+        <div class="field">
+          <label>Phase 1 — must-have for go-live</label>
+          <textarea name="phase1_deliverables" class="prefilled" style="min-height:100px;">Identity verification flow (email + SSN + phone before surfacing debt data)
+Audience segmentation — debt side vs PFM side
+Kara / Fin configured for debt offers, repayment options, disputes
+Outbound triggers (email, SMS) → portal landing page
+Payment slider / Name Your Amount flow connected to DB
+Fin Actions — update payment plan in DB when agreed</textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Phase 2 — post-launch enhancements</label>
+          <textarea name="phase2_deliverables" placeholder="e.g. SMS integration via compliant provider, PFM section build-out, Fin Analyse add-on, AI voice integration..."></textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Likely out of scope / later</label>
+          <textarea name="out_of_scope" class="prefilled">Sales Agent / eCommerce Agent (Intercom — coming soon but different pricing model). Fully custom mobile app build. Any work outside Intercom.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 05 Technical Requirements ── -->
+    <div class="section" id="s5">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <div>
+          <div class="section-title">Technical Requirements</div>
+          <div class="section-desc">Integrations, data, auth, and anything that needs engineering.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Authentication</div>
+        <div class="field">
+          <label>Identity verification method (confirm)</label>
+          <textarea name="auth_method" class="prefilled">JWT tokens for Intercom identity. Pre-verification required before any debt data is surfaced: user must provide email + SSN + one other identifier (phone?). Fin performs identity check against DB — hard stop if fails. Token passed in link from outbound email/SMS so Fin knows which offers to surface.</textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Is there an existing customer portal / logged-in app?</label>
+          <select name="existing_portal">
+            <option value="partial" selected>Partial — debt repayment landing page exists, no full auth portal yet</option>
+            <option value="yes">Yes — full customer portal</option>
+            <option value="no">No</option>
+            <option value="planned">Planned</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Database & Integrations</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Primary database / backend</label>
+            <input type="text" name="db_type" placeholder="e.g. PostgreSQL, MySQL, AWS RDS — confirm with CTO">
+          </div>
+          <div class="field">
+            <label>API available for Intercom to connect to?</label>
+            <select name="api_available">
+              <option value="yes" selected>Yes — DB lookups already working</option>
+              <option value="partial">Partial — some endpoints exist</option>
+              <option value="no">No — needs building</option>
+              <option value="unknown">Unknown — confirm with CTO</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label>What data does Fin need to read from the DB?</label>
+            <textarea name="db_read" class="prefilled">Debt amount, available offers/discounts, payment history, current repayment plan, subscriber status (debt-only vs PFM), contact verification fields (SSN, email, phone)</textarea>
+          </div>
+          <div class="field span-2">
+            <label>What data does Fin need to write back to the DB? (Fin Actions)</label>
+            <textarea name="db_write" class="prefilled">Update agreed payment amount / plan length. Record conversation outcome. Possibly create subscription record for PFM sign-up.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">SMS Integration</div>
+        <div class="alert alert-amber">
+          <span>⚠</span>
+          <span>Intercom native SMS (Twilio) not viable — regulated debt collection industry. Compliant SMS provider found, integration underway.</span>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>SMS provider name</label>
+            <input type="text" name="sms_provider" placeholder="Confirm provider name with Michael / CTO">
+          </div>
+          <div class="field">
+            <label>Integration status</label>
+            <select name="sms_status">
+              <option value="in_progress" selected>In progress — going through integration now</option>
+              <option value="live">Live</option>
+              <option value="not_started">Not started</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label>How does SMS connect to Intercom? (confirm with CTO)</label>
+            <input type="text" name="sms_intercom_method" placeholder="e.g. webhook, custom channel, third-party connector...">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Payment Integration</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Payment processor</label>
+            <input type="text" name="payment_processor" placeholder="e.g. Stripe, Braintree — confirm">
+          </div>
+          <div class="field">
+            <label>Does payment happen inside Intercom or redirect?</label>
+            <select name="payment_flow">
+              <option value="redirect" selected>Redirects out (portal / payment page)</option>
+              <option value="intercom">Stays in Intercom / Fin</option>
+              <option value="unknown">Unknown — confirm</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label>Payment link / bank details — how is this delivered post-agreement?</label>
+            <textarea name="payment_delivery" class="prefilled">Fin sends link to bank account / card collection page once offer agreed. Slider determines monthly amount + term. Name Your Amount — Kara negotiates a floor amount.</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 06 Fin Configuration ── -->
+    <div class="section" id="s6">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <div>
+          <div class="section-title">Fin Configuration</div>
+          <div class="section-desc">Topics, audiences, tone, and what Fin can / cannot do.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Audiences</div>
+        <div class="field">
+          <label>Audience 1 — Debt side (confirm parameters)</label>
+          <textarea name="audience_debt" class="prefilled">Identity verified + debt record in DB. Fin scope: debt balance, offer negotiation, repayment plan setup, disputes, payment updates. Escalation: dispute edge cases, anything Fin can't resolve.</textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Audience 2 — PFM / financial management</label>
+          <textarea name="audience_pfm" class="prefilled">Subscribers to Kara financial management tool. No debt in DB (or debt cleared). Fin scope: budgeting tips, savings, gig work resources, app features. Separate knowledge base content needed.</textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Audience 3 — Both (debt + PFM subscriber)</label>
+          <textarea name="audience_both" class="prefilled">Contact exists in both — Fin asks which area they need help with, then handles accordingly from both knowledge sets.</textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Fin Knowledge</div>
+        <div class="field">
+          <label>Existing knowledge / content (confirm what exists)</label>
+          <textarea name="existing_knowledge" class="prefilled">Minimal — some offer/deal info fed from DB, basic financial tips articles. Needs full build-out.</textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>What knowledge needs to be created from scratch?</label>
+          <textarea name="knowledge_to_build" placeholder="e.g. Debt dispute process, offer explanation, repayment plan options, compliance disclosures, PFM tips library, how payments work..."></textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Do they have SOPs / internal docs we can use to train Fin?</label>
+          <select name="has_sops">
+            <option value="unknown" selected>Unknown — ask at follow-up call</option>
+            <option value="yes">Yes</option>
+            <option value="partial">Partial</option>
+            <option value="no">No — needs building from scratch</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Fin Tone & Persona</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Fin persona name</label>
+            <input type="text" name="fin_name" class="prefilled" value="Kara">
+          </div>
+          <div class="field">
+            <label>Desired tone</label>
+            <select name="fin_tone">
+              <option value="empathetic" selected>Empathetic, non-judgemental, supportive</option>
+              <option value="professional">Professional / formal</option>
+              <option value="friendly">Friendly / conversational</option>
+              <option value="tbd">TBD — confirm</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label>Specific tone guidance / things Kara should never say</label>
+            <textarea name="fin_tone_notes" class="prefilled">Never shame or lecture. Avoid words like "debt" where possible — prefer "balance" or "account". Non-confrontational. Human-like empathy but not overly chatty.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Resolution Targets</div>
+        <div class="field">
+          <label>Phase 1 target resolution rate</label>
+          <div class="range-wrap">
+            <input type="range" id="res_range" name="target_resolution" min="40" max="100" value="70" oninput="document.getElementById('res_val').innerText = this.value + '%'">
+            <span class="range-val" id="res_val">70%</span>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Notes on resolution expectations</label>
+          <textarea name="resolution_notes" class="prefilled">Phase 1 target: 60–70% via knowledge + DB reads. Phase 2+ with Fin Actions (write-back) targeting 80–90%+. Unique model — may not need traditional escalation if debt customers prefer AI.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 07 Timeline & Go-Live ── -->
+    <div class="section" id="s7">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <div>
+          <div class="section-title">Timeline & Go-Live</div>
+          <div class="section-desc">When do they need to be live and what does that look like?</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Go-Live Dates</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Target go-live date</label>
+            <input type="text" name="golive_date" class="prefilled" value="End of March 2026 (imminent — was Feb, delayed by SMS)">
+          </div>
+          <div class="field">
+            <label>Is this date fixed or flexible?</label>
+            <select name="date_fixed">
+              <option value="soft" selected>Soft — as soon as possible</option>
+              <option value="hard">Hard deadline</option>
+              <option value="flexible">Flexible</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Expected initial traffic volume</label>
+            <input type="text" name="initial_traffic" class="prefilled" value="Low — ramping up slowly (25mph, not 100mph)">
+          </div>
+          <div class="field">
+            <label>When does SMS outreach go live?</label>
+            <input type="text" name="sms_golive" placeholder="Confirm — currently integrating provider">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Proposed Phasing</div>
+        <div class="field">
+          <label>Phase 1 — Sprint (confirm scope + duration)</label>
+          <textarea name="phase1_scope" class="prefilled">Identity verification, audience setup, Fin for debt side (offers, disputes, repayment), Fin Actions (DB write-back for payment updates), outbound triggers. Estimate 6–8 weeks.</textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Phase 2</label>
+          <textarea name="phase2_scope" class="prefilled">SMS integration (compliant provider), PFM / Kara knowledge build-out, Fin Analyse add-on ($99/mo), possible retainer.</textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Phase 3 (indicative)</label>
+          <textarea name="phase3_scope" placeholder="AI voice integration? Mobile app Intercom setup? Further automation?"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Our Availability</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Earliest we can start</label>
+            <input type="text" name="sabel_start" placeholder="Check pipeline — confirm after NDA">
+          </div>
+          <div class="field">
+            <label>Resource assigned</label>
+            <input type="text" name="sabel_resource" class="prefilled" value="Richard (L3) + Chris (L1/L2 delivery)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 08 Commercials ── -->
+    <div class="section" id="s8">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <div>
+          <div class="section-title">Commercials</div>
+          <div class="section-desc">Budget signals, structure, and engagement model. Internal only — not in client docs.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Budget Signals from Call</div>
+        <div class="alert alert-blue">
+          <span>ℹ</span>
+          <span>Michael gave a verbal ballpark — not a commitment. Use to guide scoping.</span>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Total lifetime indication (verbal)</label>
+            <input type="text" name="budget_total" class="prefilled" value="USD $15,000–$20,000">
+          </div>
+          <div class="field">
+            <label>Phase 1 indication</label>
+            <input type="text" name="budget_phase1" class="prefilled" value="~USD $10,000 for initial 6-week sprint">
+          </div>
+          <div class="field">
+            <label>Flexibility on minimum engagement?</label>
+            <select name="min_engagement">
+              <option value="yes" selected>Yes — open to starting smaller if needed</option>
+              <option value="no">No — wants full scope upfront</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Currency</label>
+            <select name="currency">
+              <option value="USD" selected>USD</option>
+              <option value="AUD">AUD</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Budget notes</label>
+          <textarea name="budget_notes" class="prefilled">Pre-revenue startup (~1 year with no revenue). Startup Intercom plan. Flexible on phasing — happy to start with a smaller chunk if it demonstrates value. Interest in retainer post-launch.</textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Engagement Model Preference</div>
+        <div class="pill-group" id="engagement_pills">
+          <div class="pill selected" onclick="togglePill(this)" data-val="project">Project-based</div>
+          <div class="pill" onclick="togglePill(this)" data-val="retainer">Ongoing retainer</div>
+          <div class="pill selected" onclick="togglePill(this)" data-val="phased">Phased milestones</div>
+          <div class="pill" onclick="togglePill(this)" data-val="adhoc">Ad-hoc hours</div>
+        </div>
+        <input type="hidden" name="engagement_model" id="engagement_model_val" value="project,phased">
+        <div class="field" style="margin-top:14px;">
+          <label>Notes</label>
+          <textarea name="engagement_notes" class="prefilled">Michael open to starting small and growing. Interested in retainer for ongoing support post-setup. Not expecting everything in one go.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 09 Follow-up & Notes ── -->
+    <div class="section" id="s9">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <div>
+          <div class="section-title">Follow-up & Notes</div>
+          <div class="section-desc">Next steps, open questions, and anything to chase before writing the proposal.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Next Steps</div>
+        <div class="check-group">
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="ns_nda" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Send Sabel legal name, address, and company registration to Michael</div>
+              <div class="check-sub">Michael will send the NDA; we sign straight away</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="ns_followup_call" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Schedule follow-up discovery call (later this week)</div>
+              <div class="check-sub">Bring Chris — go deeper into Phase 1 scope, data, timelines, existing Intercom config</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="ns_reference">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Find finance-sector client reference for Michael</div>
+              <div class="check-sub">Someone who can speak to their experience — not necessarily same use case</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="ns_proposal">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Draft proposal after follow-up call</div>
+              <div class="check-sub">Phase 1 scope only — indicative Phase 2/3 in appendix</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Open Questions (to resolve at follow-up)</div>
+        <div class="field">
+          <label>Questions to ask at the next call</label>
+          <textarea name="open_questions" class="prefilled" style="min-height:160px;">1. Founder name + direct contact details
+2. CTO name + will they join the follow-up call?
+3. What SMS provider did they land on?
+4. Full stack / DB tech — can CTO share API docs before the call?
+5. Do they have any SOPs, compliance scripts, or training docs we can feed Fin?
+6. Who is the final sign-off for Fin content / compliance?
+7. Is there a customer portal login flow already built? (JWT implementation)
+8. What does the payment flow look like end-to-end post-agreement?
+9. Do they have a Fin Analyse add-on ($99/month) or is that TBD?
+10. Are they open to a discovery workshop (paid) before proposal?</textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">General Notes</div>
+        <div class="field">
+          <label>Anything else to capture</label>
+          <textarea name="general_notes" placeholder="Add anything from the call that doesn't fit above..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Proposal Scope Estimate (internal — do not share)</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Estimated hours — Phase 1</label>
+            <input type="number" name="est_hours_p1" placeholder="e.g. 50">
+          </div>
+          <div class="field">
+            <label>Estimated hours — Phase 2</label>
+            <input type="number" name="est_hours_p2" placeholder="e.g. 25">
+          </div>
+          <div class="field">
+            <label>Complexity rating</label>
+            <select name="complexity">
+              <option value="high" selected>High — novel use case, significant DB integration + Fin Actions</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Risk rating</label>
+            <select name="risk">
+              <option value="medium" selected>Medium — pre-revenue, regulated industry, SMS dependency</option>
+              <option value="high">High</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label>Notes for proposal build</label>
+            <textarea name="proposal_notes" class="prefilled">Scope Phase 1 tightly around go-live requirements. Don't over-scope PFM side until SMS sorted and debt side is live. Flag regulated industry as complexity driver. Consider a paid discovery/scoping session as Phase 0 to derisk the proposal.</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-footer">
+      <button type="button" class="submit-btn" onclick="saveToLocal()">Save & Export Notes</button>
+      <span class="submit-note">Saves locally — copy the JSON to share with Chris or drop into the proposal build.</span>
+    </div>
+
+  </form>
+</main>
+
+<div class="toast" id="toast">✓ Discovery notes saved</div>
+
+<script>
+  // ── Nav active state ──
+  function setActive(el) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ── Scroll spy ──
+  const sections = document.querySelectorAll('.section');
+  const navItems = document.querySelectorAll('.nav-item');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 80) current = s.id;
+    });
+    navItems.forEach(n => {
+      n.classList.remove('active');
+      if (n.getAttribute('href') === '#' + current) n.classList.add('active');
+    });
+  });
+
+  // ── Checkbox toggle ──
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    const cb = el.querySelector('input[type="checkbox"]');
+    if (cb) cb.checked = !cb.checked;
+  }
+
+  // ── Pill toggle ──
+  function togglePill(el) {
+    el.classList.toggle('selected');
+    updatePillVal();
+  }
+
+  function updatePillVal() {
+    const vals = [...document.querySelectorAll('#engagement_pills .pill.selected')]
+      .map(p => p.dataset.val).join(',');
+    document.getElementById('engagement_model_val').value = vals;
+  }
+
+  // ── Save to local ──
+  function saveToLocal() {
+    const form = document.getElementById('discoveryForm');
+    const data = {};
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(inp => {
+      if (inp.name) {
+        if (inp.type === 'checkbox') {
+          data[inp.name] = inp.checked;
+        } else {
+          data[inp.name] = inp.value;
+        }
+      }
+    });
+    data._saved = new Date().toISOString();
+    data._client = 'Cirqul';
+    localStorage.setItem('sabel_discovery_cirqul', JSON.stringify(data, null, 2));
+
+    // Also show JSON in console for copy
+    console.log('=== CIRQUL DISCOVERY CAPTURE ===');
+    console.log(JSON.stringify(data, null, 2));
+
+    showToast();
+  }
+
+  // ── Restore from local ──
+  function restoreFromLocal() {
+    const saved = localStorage.getItem('sabel_discovery_cirqul');
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    const form = document.getElementById('discoveryForm');
+    Object.entries(data).forEach(([key, val]) => {
+      const el = form.querySelector(`[name="${key}"]`);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = val;
+      else el.value = val;
+    });
+  }
+
+  function showToast() {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Restore on load
+  window.addEventListener('load', restoreFromLocal);
+
+  // Auto-save every 60s
+  setInterval(saveToLocal, 60000);
+</script>
+
+</body>
+</html>
