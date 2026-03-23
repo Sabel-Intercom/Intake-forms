@@ -1190,9 +1190,9 @@ document.getElementById('kickoffForm').addEventListener('submit', function(e) {
 
   fetch(form.action, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
     body:    urlEncoded,
-    headers: { 'Accept': 'application/json' },
   })
   .then(function(response) {
     if (response.ok) {
