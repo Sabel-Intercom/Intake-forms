@@ -1,0 +1,2272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spartans Project Tracker · Sabel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0B0B0C; }
+    #root { min-height: 100vh; }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script>
+"use strict";
+
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+var _React = React,
+  useState = _React.useState,
+  useCallback = _React.useCallback,
+  useMemo = _React.useMemo;
+
+// ─── Brand tokens ─────────────────────────────────────────────────────────────
+var C = {
+  bg: "#0B0B0C",
+  card: "#0F1113",
+  card2: "#141618",
+  card3: "#191C20",
+  card4: "#1E2228",
+  w: "#FFFFFF",
+  red: "#E10600",
+  redDim: "rgba(225,6,0,0.15)",
+  body: "#E2E8F0",
+  muted: "#94A3B8",
+  border: "#2A3547",
+  border2: "#1A2232",
+  mono: "#64748B"
+};
+var OWNERS = {
+  Chris: {
+    c: "#60A5FA",
+    bg: "rgba(96,165,250,.12)",
+    bd: "rgba(96,165,250,.3)"
+  },
+  Richard: {
+    c: "#C084FC",
+    bg: "rgba(192,132,252,.12)",
+    bd: "rgba(192,132,252,.3)"
+  },
+  Greg: {
+    c: "#34D399",
+    bg: "rgba(52,211,153,.12)",
+    bd: "rgba(52,211,153,.3)"
+  },
+  Spartans: {
+    c: "#FBBF24",
+    bg: "rgba(251,191,36,.12)",
+    bd: "rgba(251,191,36,.3)"
+  }
+};
+var STATUSES_DEF = {
+  "Complete": {
+    t: "#4ADE80",
+    bg: "rgba(74,222,128,.1)",
+    bd: "rgba(74,222,128,.3)"
+  },
+  "In Progress": {
+    t: "#60A5FA",
+    bg: "rgba(96,165,250,.1)",
+    bd: "rgba(96,165,250,.3)"
+  },
+  "Pending": {
+    t: "#94A3B8",
+    bg: "rgba(148,163,184,.08)",
+    bd: "rgba(148,163,184,.22)"
+  },
+  "Dependency": {
+    t: "#FBBF24",
+    bg: "rgba(251,191,36,.1)",
+    bd: "rgba(251,191,36,.3)"
+  },
+  "Blocked": {
+    t: "#F87171",
+    bg: "rgba(248,113,113,.1)",
+    bd: "rgba(248,113,113,.3)"
+  },
+  "TBC": {
+    t: "#64748B",
+    bg: "rgba(100,116,139,.08)",
+    bd: "rgba(100,116,139,.18)"
+  }
+};
+var STATUS_CYCLE = ["Pending", "In Progress", "Complete", "Dependency", "Blocked", "TBC"];
+var PHASES = {
+  setup: {
+    c: "#64748B",
+    l: "WEEK 0 — SETUP & ACCESS"
+  },
+  foundations: {
+    c: "#3B82F6",
+    l: "WEEKS 1–2 — FOUNDATIONS & HELP CENTRE"
+  },
+  fin: {
+    c: "#10B981",
+    l: "WEEKS 2–3 — FIN AI, API & MULTILINGUAL"
+  },
+  uat: {
+    c: "#9333EA",
+    l: "WEEK 4 — UAT, ENABLEMENT & E2E TESTING"
+  },
+  golive: {
+    c: "#E10600",
+    l: "GO-LIVE — WEB CHAT + EMAIL"
+  },
+  post: {
+    c: "#94A3B8",
+    l: "POST GO-LIVE — STABILISATION"
+  }
+};
+
+// ─── Timeline geometry ────────────────────────────────────────────────────────
+var TL_START = new Date("2026-03-02");
+var TL_END = new Date("2026-05-04");
+var TL_DAYS = (TL_END - TL_START) / 864e5;
+var WEEK_HEADERS = [];
+{
+  var d = new Date(TL_START);
+  while (d < TL_END) {
+    WEEK_HEADERS.push(new Date(d));
+    d = new Date(d.getTime() + 7 * 864e5);
+  }
+}
+var dateToX = function dateToX(s) {
+  return Math.max(0, Math.min(100, (new Date(s + "T12:00:00") - TL_START) / 864e5 / TL_DAYS * 100));
+};
+var dateSpan = function dateSpan(s, e) {
+  return Math.max(0.8, Math.min(100 - dateToX(s), Math.max(1, (new Date(e + "T12:00:00") - new Date(s + "T12:00:00")) / 864e5 + 1) / TL_DAYS * 100));
+};
+var fmtDate = function fmtDate(s) {
+  return new Date(s + "T12:00:00").toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short"
+  });
+};
+
+// Live today
+var TODAY = new Date();
+var todayX = Math.max(0, Math.min(100, (TODAY - TL_START) / 864e5 / TL_DAYS * 100));
+var todayStr = TODAY.toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric"
+});
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+var _uid = 100;
+var uid = function uid() {
+  return "t".concat(++_uid);
+};
+var INIT = [{
+  id: "setup",
+  tasks: [{
+    id: "s1",
+    task: "Create Slack project channel, share with Spartans team",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-02",
+    end: "2026-03-03",
+    status: "Complete",
+    notes: "",
+    dep: false
+  }, {
+    id: "s2",
+    task: "Share pre-call context and SOW with Spartans lead",
+    owner: "Richard",
+    co: "",
+    start: "2026-03-02",
+    end: "2026-03-04",
+    status: "Complete",
+    notes: "",
+    dep: false
+  }, {
+    id: "s3",
+    task: "Schedule Week 1 alignment call",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-02",
+    end: "2026-03-03",
+    status: "Complete",
+    notes: "",
+    dep: false
+  }, {
+    id: "s4",
+    task: "■ Intercom workspace admin access for Sabel",
+    owner: "Spartans",
+    co: "",
+    start: "2026-03-06",
+    end: "2026-03-06",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }, {
+    id: "s5",
+    task: "■ Initial agent list and roles (~10 agents)",
+    owner: "Spartans",
+    co: "",
+    start: "2026-03-06",
+    end: "2026-03-06",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }, {
+    id: "s6",
+    task: "■ Back-office API endpoint docs and sandbox credentials",
+    owner: "Spartans",
+    co: "",
+    start: "2026-03-06",
+    end: "2026-03-06",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }, {
+    id: "s7",
+    task: "■ Existing FAQ content or email templates for Help Centre",
+    owner: "Spartans",
+    co: "",
+    start: "2026-03-06",
+    end: "2026-03-06",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }]
+}, {
+  id: "foundations",
+  tasks: [{
+    id: "f1",
+    task: "Workspace setup — identity, brand, region, seat allocation",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-09",
+    end: "2026-03-13",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "f2",
+    task: "Channel setup — Messenger (web + in-product) and email",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-09",
+    end: "2026-03-13",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "f3",
+    task: "Inbox creation and routing logic",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-09",
+    end: "2026-03-13",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "f4",
+    task: "SLA policies configured per inbox",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-09",
+    end: "2026-03-13",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "f5",
+    task: "Conversation attributes and data fields defined",
+    owner: "Chris",
+    co: "Richard",
+    start: "2026-03-09",
+    end: "2026-03-13",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "f6",
+    task: "Team structure — Natasha, Velika, Sanja and light seats",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-16",
+    end: "2026-03-20",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "f7",
+    task: "Manager-level reporting access configured",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-16",
+    end: "2026-03-20",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "f8",
+    task: "Help Centre structure — collections, sections, hierarchy",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-16",
+    end: "2026-03-20",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "f9",
+    task: "Foundational Help Centre articles authored and published",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-16",
+    end: "2026-03-20",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "f10",
+    task: "Help Centre configured for web and in-product surfaces",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-16",
+    end: "2026-03-20",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "f11",
+    task: "■ Inbox structure and routing logic approval",
+    owner: "Spartans",
+    co: "",
+    start: "2026-03-13",
+    end: "2026-03-13",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }, {
+    id: "f12",
+    task: "■ Light seat stakeholder list confirmed (finance, dev)",
+    owner: "Spartans",
+    co: "",
+    start: "2026-03-13",
+    end: "2026-03-13",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }, {
+    id: "f13",
+    task: "■ SLA targets per channel confirmed",
+    owner: "Spartans",
+    co: "",
+    start: "2026-03-13",
+    end: "2026-03-13",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }, {
+    id: "f14",
+    task: "■ Top support topics and most frequent queries",
+    owner: "Spartans",
+    co: "",
+    start: "2026-03-13",
+    end: "2026-03-13",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }]
+}, {
+  id: "fin",
+  tasks: [{
+    id: "fn1",
+    task: "Fin AI configured against completed Help Centre",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-16",
+    end: "2026-03-20",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "fn2",
+    task: "Fin topic coverage review and confidence calibration",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-16",
+    end: "2026-03-20",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "fn3",
+    task: "■ Brand tone guide and approved response language examples",
+    owner: "Spartans",
+    co: "",
+    start: "2026-03-16",
+    end: "2026-03-16",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }, {
+    id: "fn4",
+    task: "■ Up to 4 Fin workflow use cases confirmed and prioritised",
+    owner: "Spartans",
+    co: "",
+    start: "2026-03-16",
+    end: "2026-03-16",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }, {
+    id: "fn5",
+    task: "Fin workflow 1 built and tested",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-23",
+    end: "2026-03-27",
+    status: "Pending",
+    notes: "Use case TBC at kickoff",
+    dep: false
+  }, {
+    id: "fn6",
+    task: "Fin workflow 2 built and tested",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-23",
+    end: "2026-03-27",
+    status: "Pending",
+    notes: "Use case TBC at kickoff",
+    dep: false
+  }, {
+    id: "fn7",
+    task: "Fin workflow 3 built and tested",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-23",
+    end: "2026-03-27",
+    status: "Pending",
+    notes: "Use case TBC at kickoff",
+    dep: false
+  }, {
+    id: "fn8",
+    task: "Fin workflow 4 built and tested",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-23",
+    end: "2026-03-27",
+    status: "Pending",
+    notes: "Use case TBC at kickoff",
+    dep: false
+  }, {
+    id: "fn9",
+    task: "Fin escalation paths and hand-off routing configured",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-23",
+    end: "2026-03-27",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "fn10",
+    task: "■ API credentials and sandbox access confirmed active",
+    owner: "Spartans",
+    co: "",
+    start: "2026-03-20",
+    end: "2026-03-20",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }, {
+    id: "fn11",
+    task: "Back-office API integration — balance and transaction lookups",
+    owner: "Greg",
+    co: "",
+    start: "2026-03-23",
+    end: "2026-03-27",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "fn12",
+    task: "Fin Task configured and end-to-end tested",
+    owner: "Greg",
+    co: "Chris",
+    start: "2026-03-23",
+    end: "2026-03-27",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "fn13",
+    task: "■ Languages for multilingual Fin support confirmed",
+    owner: "Spartans",
+    co: "",
+    start: "2026-03-20",
+    end: "2026-03-20",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }, {
+    id: "fn14",
+    task: "Multilingual and real-time translation configured",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-23",
+    end: "2026-03-27",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }]
+}, {
+  id: "uat",
+  tasks: [{
+    id: "u1",
+    task: "E2E testing — all Fin workflows with real API and sandbox",
+    owner: "Chris",
+    co: "Spartans",
+    start: "2026-03-30",
+    end: "2026-04-03",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "u2",
+    task: "Fin test conversations across all priority scenarios",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-30",
+    end: "2026-04-03",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "u3",
+    task: "Fin configuration iterated based on test results",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-30",
+    end: "2026-04-03",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "u4",
+    task: "Agent and manager enablement session (recorded)",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-30",
+    end: "2026-04-03",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "u5",
+    task: "Enablement: Inbox, conversation management, ticketing",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-30",
+    end: "2026-04-03",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "u6",
+    task: "Enablement: Fin-first support model, escalation handling",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-30",
+    end: "2026-04-03",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "u7",
+    task: "Enablement: CX Score and sentiment reporting for managers",
+    owner: "Chris",
+    co: "",
+    start: "2026-03-30",
+    end: "2026-04-03",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "u8",
+    task: "Sabel go-live readiness checklist completed",
+    owner: "Richard",
+    co: "Chris",
+    start: "2026-03-30",
+    end: "2026-04-04",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "u9",
+    task: "■ Go-live readiness sign-off from Spartans lead",
+    owner: "Spartans",
+    co: "",
+    start: "2026-04-04",
+    end: "2026-04-04",
+    status: "Dependency",
+    notes: "",
+    dep: true
+  }]
+}, {
+  id: "golive",
+  tasks: [{
+    id: "g1",
+    task: "LiveChat and Gmail routing cut over to Intercom",
+    owner: "Chris",
+    co: "Spartans",
+    start: "2026-04-07",
+    end: "2026-04-07",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "g2",
+    task: "Fin AI Agent activated on all configured channels",
+    owner: "Chris",
+    co: "",
+    start: "2026-04-07",
+    end: "2026-04-07",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "g3",
+    task: "Operating hours and assignment rules confirmed live",
+    owner: "Chris",
+    co: "",
+    start: "2026-04-07",
+    end: "2026-04-07",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "g4",
+    task: "Sabel on standby for go-live day support",
+    owner: "Chris",
+    co: "Richard",
+    start: "2026-04-07",
+    end: "2026-04-07",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }]
+}, {
+  id: "post",
+  tasks: [{
+    id: "p1",
+    task: "Post go-live check-in — performance and agent feedback",
+    owner: "Chris",
+    co: "",
+    start: "2026-04-14",
+    end: "2026-04-14",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "p2",
+    task: "Fin performance review — resolution rate, escalations, gaps",
+    owner: "Chris",
+    co: "",
+    start: "2026-04-14",
+    end: "2026-04-18",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "p3",
+    task: "Open items and snag list resolved",
+    owner: "Chris",
+    co: "Richard",
+    start: "2026-04-14",
+    end: "2026-04-24",
+    status: "Pending",
+    notes: "",
+    dep: false
+  }, {
+    id: "p4",
+    task: "Help Centre content roadmap — high-volume language variants",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-21",
+    end: "2026-04-30",
+    status: "TBC",
+    notes: "",
+    dep: false
+  }]
+}];
+
+// ─── SVG logo ─────────────────────────────────────────────────────────────────
+var SabelLogo = function SabelLogo(_ref) {
+  var _ref$h = _ref.h,
+    h = _ref$h === void 0 ? 32 : _ref$h;
+  return /*#__PURE__*/React.createElement("svg", {
+    height: h,
+    viewBox: "0 0 240 64",
+    fill: "none",
+    style: {
+      display: "block",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M32 58 C20 42 6 34 2 18",
+    stroke: "#E10600",
+    strokeWidth: "2.4",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M32 58 C44 42 58 34 62 18",
+    stroke: "#E10600",
+    strokeWidth: "2.4",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "32",
+    cy: "59",
+    r: "3",
+    fill: "#E10600"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "72",
+    y: "50",
+    fontFamily: "Helvetica Neue,Helvetica,Arial,sans-serif",
+    fontWeight: "800",
+    fontSize: "38",
+    letterSpacing: "5",
+    fill: "#FFFFFF"
+  }, "SABEL"));
+};
+
+// ─── Font helpers ─────────────────────────────────────────────────────────────
+var MONO = {
+  fontFamily: "'Courier New',Courier,monospace"
+};
+var SANS = {
+  fontFamily: "'Helvetica Neue',Helvetica,Arial,sans-serif"
+};
+
+// ─── Atoms ────────────────────────────────────────────────────────────────────
+function OwnerBadge(_ref2) {
+  var owner = _ref2.owner,
+    onClick = _ref2.onClick,
+    _ref2$sz = _ref2.sz,
+    sz = _ref2$sz === void 0 ? 10 : _ref2$sz;
+  if (!owner) return null;
+  var s = OWNERS[owner] || {
+    c: C.mono,
+    bg: "rgba(100,116,139,.1)",
+    bd: "rgba(100,116,139,.2)"
+  };
+  return /*#__PURE__*/React.createElement("span", {
+    onClick: onClick,
+    style: _objectSpread({
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 4,
+      padding: "2px 8px 2px 5px",
+      borderRadius: 2,
+      cursor: onClick ? "pointer" : "default",
+      fontSize: sz,
+      fontWeight: 700,
+      letterSpacing: "0.04em",
+      whiteSpace: "nowrap",
+      color: s.c,
+      background: s.bg,
+      border: "1px solid ".concat(s.bd),
+      transition: "opacity .12s"
+    }, MONO)
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 6,
+      height: 6,
+      borderRadius: "50%",
+      background: s.c,
+      display: "inline-block"
+    }
+  }), owner);
+}
+function StatusPill(_ref3) {
+  var status = _ref3.status,
+    onClick = _ref3.onClick;
+  var s = STATUSES_DEF[status] || STATUSES_DEF.Pending;
+  return /*#__PURE__*/React.createElement("span", {
+    onClick: onClick,
+    title: onClick ? "Click to cycle status" : "",
+    style: _objectSpread(_objectSpread({
+      display: "inline-block",
+      padding: "2px 8px",
+      borderRadius: 2,
+      whiteSpace: "nowrap",
+      fontSize: 9,
+      fontWeight: 700
+    }, MONO), {}, {
+      cursor: onClick ? "pointer" : "default",
+      letterSpacing: "0.05em",
+      color: s.t,
+      background: s.bg,
+      border: "1px solid ".concat(s.bd),
+      userSelect: "none",
+      transition: "all .1s"
+    })
+  }, status);
+}
+function DeleteBtn(_ref4) {
+  var onDelete = _ref4.onDelete;
+  var _useState = useState(false),
+    _useState2 = _slicedToArray(_useState, 2),
+    conf = _useState2[0],
+    setConf = _useState2[1];
+  if (conf) return /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "inline-flex",
+      gap: 3,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: onDelete,
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8,
+      color: "#F87171",
+      background: "rgba(248,113,113,.12)",
+      border: "1px solid rgba(248,113,113,.3)",
+      padding: "1px 6px",
+      borderRadius: 2,
+      cursor: "pointer"
+    })
+  }, "yes"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick(e) {
+      e.stopPropagation();
+      setConf(false);
+    },
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8,
+      color: C.mono,
+      background: "none",
+      border: "1px solid ".concat(C.border),
+      padding: "1px 6px",
+      borderRadius: 2,
+      cursor: "pointer"
+    })
+  }, "no"));
+  return /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick(e) {
+      e.stopPropagation();
+      setConf(true);
+    },
+    title: "Delete row",
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 14,
+      lineHeight: "1",
+      color: C.border,
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      padding: "0 4px",
+      transition: "color .12s"
+    }),
+    onMouseEnter: function onMouseEnter(e) {
+      return e.currentTarget.style.color = "#F87171";
+    },
+    onMouseLeave: function onMouseLeave(e) {
+      return e.currentTarget.style.color = C.border;
+    }
+  }, "\xD7");
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+function App() {
+  var _useState3 = useState(INIT),
+    _useState4 = _slicedToArray(_useState3, 2),
+    phases = _useState4[0],
+    setPhases = _useState4[1];
+  var _useState5 = useState(new Set()),
+    _useState6 = _slicedToArray(_useState5, 2),
+    planCol = _useState6[0],
+    setPlanCol = _useState6[1];
+  var _useState7 = useState(true),
+    _useState8 = _slicedToArray(_useState7, 2),
+    tlOpen = _useState8[0],
+    setTlOpen = _useState8[1];
+  var _useState9 = useState(new Set()),
+    _useState0 = _slicedToArray(_useState9, 2),
+    tlCol = _useState0[0],
+    setTlCol = _useState0[1];
+  var _useState1 = useState(new Set(["Chris", "Richard", "Greg", "Spartans"])),
+    _useState10 = _slicedToArray(_useState1, 2),
+    activeO = _useState10[0],
+    setActiveO = _useState10[1];
+  var _useState11 = useState(null),
+    _useState12 = _slicedToArray(_useState11, 2),
+    ed = _useState12[0],
+    setEd = _useState12[1]; // {id,field}
+  var _useState13 = useState(""),
+    _useState14 = _slicedToArray(_useState13, 2),
+    edVal = _useState14[0],
+    setEdVal = _useState14[1];
+
+  // mutations
+  var updTask = useCallback(function (id, patch) {
+    return setPhases(function (p) {
+      return p.map(function (ph) {
+        return _objectSpread(_objectSpread({}, ph), {}, {
+          tasks: ph.tasks.map(function (t) {
+            return t.id === id ? _objectSpread(_objectSpread({}, t), patch) : t;
+          })
+        });
+      });
+    });
+  }, []);
+  var delTask = useCallback(function (id) {
+    return setPhases(function (p) {
+      return p.map(function (ph) {
+        return _objectSpread(_objectSpread({}, ph), {}, {
+          tasks: ph.tasks.filter(function (t) {
+            return t.id !== id;
+          })
+        });
+      });
+    });
+  }, []);
+  var addTask = useCallback(function (phId) {
+    var id = uid(),
+      today = new Date().toISOString().split("T")[0];
+    var end = new Date(Date.now() + 5 * 864e5).toISOString().split("T")[0];
+    setPhases(function (p) {
+      return p.map(function (ph) {
+        return ph.id === phId ? _objectSpread(_objectSpread({}, ph), {}, {
+          tasks: [].concat(_toConsumableArray(ph.tasks), [{
+            id: id,
+            task: "New task",
+            owner: "Chris",
+            co: "",
+            dep: false,
+            start: today,
+            end: end,
+            status: "Pending",
+            notes: ""
+          }])
+        }) : ph;
+      });
+    });
+    setTimeout(function () {
+      setEd({
+        id: id,
+        field: "task"
+      });
+      setEdVal("New task");
+    }, 30);
+  }, []);
+
+  // edit helpers
+  var startEd = function startEd(id, field, val) {
+    setEd({
+      id: id,
+      field: field
+    });
+    setEdVal(val);
+  };
+  var commitEd = function commitEd(val, close) {
+    setEdVal(val);
+    if (close && ed) {
+      updTask(ed.id, _defineProperty({}, ed.field, val));
+      setEd(null);
+    }
+  };
+  var cancelEd = function cancelEd() {
+    return setEd(null);
+  };
+  var isEd = function isEd(id, field) {
+    return (ed === null || ed === void 0 ? void 0 : ed.id) === id && (ed === null || ed === void 0 ? void 0 : ed.field) === field;
+  };
+
+  // stats
+  var allT = useMemo(function () {
+    return phases.flatMap(function (p) {
+      return p.tasks;
+    });
+  }, [phases]);
+  var stats = useMemo(function () {
+    return {
+      total: allT.length,
+      done: allT.filter(function (t) {
+        return t.status === "Complete";
+      }).length,
+      active: allT.filter(function (t) {
+        return t.status === "In Progress";
+      }).length,
+      deps: allT.filter(function (t) {
+        return t.dep && t.status !== "Complete";
+      }).length,
+      blocked: allT.filter(function (t) {
+        return t.status === "Blocked";
+      }).length
+    };
+  }, [allT]);
+  var pct = Math.round(stats.done / Math.max(1, stats.total) * 100);
+  var taskVis = function taskVis(t) {
+    return activeO.has(t.owner) || t.co && activeO.has(t.co);
+  };
+  var toggleS = function toggleS(setter, id) {
+    return setter(function (s) {
+      var n = new Set(s);
+      n.has(id) ? n["delete"](id) : n.add(id);
+      return n;
+    });
+  };
+
+  // ── Inline editor components ─────────────────────────────────────────────
+  var TextEdit = function TextEdit(_ref5) {
+    var id = _ref5.id,
+      field = _ref5.field,
+      val = _ref5.val,
+      _ref5$ph = _ref5.ph,
+      ph = _ref5$ph === void 0 ? "…" : _ref5$ph,
+      _ref5$minW = _ref5.minW,
+      minW = _ref5$minW === void 0 ? 80 : _ref5$minW,
+      _ref5$style = _ref5.style,
+      style = _ref5$style === void 0 ? {} : _ref5$style;
+    if (!isEd(id, field)) return /*#__PURE__*/React.createElement("span", {
+      onClick: function onClick() {
+        return startEd(id, field, val);
+      },
+      title: "Click to edit",
+      style: _objectSpread({
+        fontSize: 11,
+        color: C.body,
+        cursor: "pointer",
+        display: "block",
+        borderBottom: "1px dotted ".concat(C.border),
+        paddingBottom: 1,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        minWidth: minW
+      }, style)
+    }, val || /*#__PURE__*/React.createElement("i", {
+      style: {
+        color: C.border
+      }
+    }, ph));
+    return /*#__PURE__*/React.createElement("input", {
+      autoFocus: true,
+      value: edVal,
+      onChange: function onChange(e) {
+        return setEdVal(e.target.value);
+      },
+      onBlur: function onBlur() {
+        return commitEd(edVal, true);
+      },
+      onKeyDown: function onKeyDown(e) {
+        if (e.key === "Enter") commitEd(edVal, true);
+        if (e.key === "Escape") cancelEd();
+      },
+      style: _objectSpread(_objectSpread({}, SANS), {}, {
+        background: C.card4,
+        color: C.body,
+        border: "1px solid ".concat(C.red, "55"),
+        borderRadius: 2,
+        padding: "2px 6px",
+        fontSize: 11,
+        outline: "none",
+        boxShadow: "0 0 0 2px ".concat(C.red, "18"),
+        minWidth: minW,
+        width: "100%"
+      }, style)
+    });
+  };
+  var OwnerEdit = function OwnerEdit(_ref6) {
+    var id = _ref6.id,
+      field = _ref6.field,
+      val = _ref6.val;
+    if (!isEd(id, field)) return val ? /*#__PURE__*/React.createElement(OwnerBadge, {
+      owner: val,
+      onClick: function onClick() {
+        return startEd(id, field, val);
+      }
+    }) : /*#__PURE__*/React.createElement("span", {
+      onClick: function onClick() {
+        return startEd(id, field, "");
+      },
+      style: {
+        fontSize: 9,
+        color: C.border,
+        cursor: "pointer",
+        borderBottom: "1px dotted ".concat(C.border)
+      }
+    }, "\u2014");
+    return /*#__PURE__*/React.createElement("select", {
+      autoFocus: true,
+      value: edVal,
+      onChange: function onChange(e) {
+        return setEdVal(e.target.value);
+      },
+      onBlur: function onBlur() {
+        updTask(id, _defineProperty({}, field, edVal));
+        setEd(null);
+      },
+      onKeyDown: function onKeyDown(e) {
+        if (e.key === "Escape") cancelEd();
+      },
+      style: _objectSpread(_objectSpread({}, SANS), {}, {
+        background: C.card4,
+        color: C.body,
+        border: "1px solid ".concat(C.red, "55"),
+        borderRadius: 2,
+        padding: "2px 6px",
+        fontSize: 10,
+        outline: "none"
+      })
+    }, ["Chris", "Richard", "Greg", "Spartans", ""].map(function (o) {
+      return /*#__PURE__*/React.createElement("option", {
+        key: o,
+        value: o
+      }, o || "—");
+    }));
+  };
+  var DateEdit = function DateEdit(_ref7) {
+    var id = _ref7.id,
+      field = _ref7.field,
+      val = _ref7.val;
+    if (!isEd(id, field)) return /*#__PURE__*/React.createElement("span", {
+      onClick: function onClick() {
+        return startEd(id, field, val);
+      },
+      title: "Click to edit",
+      style: {
+        fontSize: 11,
+        color: C.body,
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+        borderBottom: "1px dotted ".concat(C.border),
+        paddingBottom: 1
+      }
+    }, fmtDate(val));
+    return /*#__PURE__*/React.createElement("input", {
+      type: "date",
+      autoFocus: true,
+      value: edVal,
+      onChange: function onChange(e) {
+        return setEdVal(e.target.value);
+      },
+      onBlur: function onBlur() {
+        return commitEd(edVal, true);
+      },
+      onKeyDown: function onKeyDown(e) {
+        if (e.key === "Escape") cancelEd();
+      },
+      style: _objectSpread(_objectSpread({}, SANS), {}, {
+        background: C.card4,
+        color: C.body,
+        border: "1px solid ".concat(C.red, "55"),
+        borderRadius: 2,
+        padding: "2px 4px",
+        fontSize: 10,
+        outline: "none",
+        width: 108
+      })
+    });
+  };
+
+  // ── PLAN TABLE ───────────────────────────────────────────────────────────
+  var TH = {
+    fontFamily: "'Courier New',Courier,monospace",
+    fontSize: 8,
+    color: C.mono,
+    fontWeight: 700,
+    letterSpacing: "0.1em",
+    padding: "5px 10px",
+    borderBottom: "1px solid ".concat(C.border),
+    background: "#0A0C0E",
+    textAlign: "left",
+    whiteSpace: "nowrap"
+  };
+  var TD = {
+    padding: "5px 10px",
+    borderBottom: "1px solid ".concat(C.border, "18"),
+    verticalAlign: "middle"
+  };
+
+  // ── GANTT ────────────────────────────────────────────────────────────────
+  var LW = 200;
+  var ROW_H = 26;
+  var PH_H = 28;
+  var TodayLine = function TodayLine() {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "absolute",
+        left: "".concat(todayX, "%"),
+        top: 0,
+        bottom: 0,
+        width: 1,
+        background: C.red,
+        opacity: .45,
+        pointerEvents: "none",
+        zIndex: 3
+      }
+    });
+  };
+  var GanttBar = function GanttBar(_ref8) {
+    var task = _ref8.task;
+    var o = OWNERS[task.owner] || OWNERS.Chris;
+    var lp = dateToX(task.start);
+    var wp = dateSpan(task.start, task.end);
+    var pt = task.start === task.end;
+    if (task.dep) return /*#__PURE__*/React.createElement("div", {
+      title: "".concat(task.task, " \u2014 ").concat(fmtDate(task.start)),
+      style: {
+        position: "absolute",
+        left: "calc(".concat(lp, "% - 6px)"),
+        top: "50%",
+        transform: "translateY(-50%) rotate(45deg)",
+        width: 10,
+        height: 10,
+        background: OWNERS.Spartans.c,
+        borderRadius: 1,
+        zIndex: 3,
+        boxShadow: "0 0 8px ".concat(OWNERS.Spartans.c, "55")
+      }
+    });
+    if (pt) return /*#__PURE__*/React.createElement("div", {
+      title: "".concat(task.task, " \u2014 ").concat(fmtDate(task.start)),
+      style: {
+        position: "absolute",
+        left: "calc(".concat(lp, "% - 8px)"),
+        top: "50%",
+        transform: "translateY(-50%)",
+        fontSize: 17,
+        color: C.red,
+        zIndex: 3,
+        lineHeight: 1,
+        textShadow: "0 0 10px ".concat(C.red)
+      }
+    }, "\u2605");
+    return /*#__PURE__*/React.createElement("div", {
+      title: "".concat(task.task, "\n").concat(task.owner).concat(task.co ? " + " + task.co : "", "\n").concat(fmtDate(task.start), " \u2192 ").concat(fmtDate(task.end)),
+      style: {
+        position: "absolute",
+        left: "".concat(lp, "%"),
+        width: "".concat(wp, "%"),
+        top: "50%",
+        transform: "translateY(-50%)",
+        height: ROW_H - 7,
+        background: "linear-gradient(90deg,".concat(o.c, "bb,").concat(o.c, "77)"),
+        borderRadius: 2,
+        zIndex: 2,
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: 5,
+        boxSizing: "border-box",
+        border: "1px solid ".concat(o.c, "50")
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread({
+        fontSize: 7.5,
+        color: "#fff",
+        fontWeight: 700,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis"
+      }, MONO)
+    }, task.owner, task.co ? " + ".concat(task.co) : ""));
+  };
+  var Gantt = function Gantt() {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        border: "1px solid ".concat(C.border2),
+        borderRadius: 4,
+        overflow: "hidden",
+        boxShadow: "0 4px 28px rgba(0,0,0,.55)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        overflowY: "auto",
+        maxHeight: 500,
+        overflowX: "auto",
+        position: "relative"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        position: "sticky",
+        top: 0,
+        zIndex: 30,
+        background: C.card3,
+        borderBottom: "2px solid ".concat(C.border),
+        minWidth: LW + WEEK_HEADERS.length * 62
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: LW,
+        minWidth: LW,
+        flexShrink: 0,
+        position: "sticky",
+        left: 0,
+        zIndex: 40,
+        background: C.card3,
+        borderRight: "1px solid ".concat(C.border),
+        padding: "6px 12px",
+        display: "flex",
+        alignItems: "center"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 8,
+        color: C.mono,
+        letterSpacing: "0.1em"
+      })
+    }, "TASK")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flex: 1,
+        position: "relative"
+      }
+    }, WEEK_HEADERS.map(function (w, i) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: i,
+        style: {
+          flex: "0 0 62px",
+          width: 62,
+          borderLeft: "1px solid ".concat(C.border, "22"),
+          padding: "6px 4px",
+          background: C.card3
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: _objectSpread(_objectSpread({}, MONO), {}, {
+          fontSize: 7.5,
+          color: C.mono
+        })
+      }, w.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short"
+      })));
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "absolute",
+        left: "".concat(todayX, "%"),
+        top: 0,
+        bottom: 0,
+        width: 1,
+        background: C.red,
+        opacity: .7,
+        zIndex: 5
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 7,
+        color: C.red,
+        position: "absolute",
+        top: "50%",
+        left: 3,
+        transform: "translateY(-50%)",
+        whiteSpace: "nowrap"
+      })
+    }, "\u25BC ", todayStr)))), phases.map(function (phase) {
+      var m = PHASES[phase.id];
+      var col = tlCol.has(phase.id);
+      var vis = phase.tasks.filter(taskVis);
+      if (!vis.length) return null;
+      var nonDep = vis.filter(function (t) {
+        return !t.dep;
+      });
+      var span = null;
+      if (nonDep.length) {
+        var s0 = nonDep.reduce(function (a, t) {
+          return t.start < a ? t.start : a;
+        }, nonDep[0].start);
+        var e0 = nonDep.reduce(function (a, t) {
+          return t.end > a ? t.end : a;
+        }, nonDep[0].end);
+        span = {
+          l: dateToX(s0),
+          w: dateSpan(s0, e0)
+        };
+      }
+      return /*#__PURE__*/React.createElement("div", {
+        key: phase.id
+      }, /*#__PURE__*/React.createElement("div", {
+        onClick: function onClick() {
+          return toggleS(setTlCol, phase.id);
+        },
+        style: {
+          display: "flex",
+          cursor: "pointer",
+          userSelect: "none",
+          borderTop: "1px solid ".concat(C.border),
+          background: "linear-gradient(90deg,".concat(m.c, "1C 0%,").concat(C.card2, " 70%)"),
+          minWidth: LW + WEEK_HEADERS.length * 62
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          width: LW,
+          minWidth: LW,
+          flexShrink: 0,
+          position: "sticky",
+          left: 0,
+          zIndex: 20,
+          background: "linear-gradient(90deg,".concat(m.c, "2A,").concat(C.card2, ")"),
+          borderRight: "1px solid ".concat(C.border),
+          padding: "5px 10px",
+          height: PH_H,
+          display: "flex",
+          alignItems: "center",
+          gap: 7
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: _objectSpread(_objectSpread({}, MONO), {}, {
+          fontSize: 8,
+          color: m.c
+        })
+      }, col ? "▶" : "▼"), /*#__PURE__*/React.createElement("span", {
+        style: _objectSpread(_objectSpread({}, MONO), {}, {
+          fontSize: 8,
+          color: m.c,
+          fontWeight: 700,
+          letterSpacing: "0.06em",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap"
+        })
+      }, m.l)), /*#__PURE__*/React.createElement("div", {
+        style: {
+          flex: 1,
+          position: "relative",
+          height: PH_H
+        }
+      }, span && !col && /*#__PURE__*/React.createElement("div", {
+        style: {
+          position: "absolute",
+          left: "".concat(span.l, "%"),
+          width: "".concat(span.w, "%"),
+          top: "50%",
+          transform: "translateY(-50%)",
+          height: 6,
+          background: "".concat(m.c, "30"),
+          borderRadius: 3,
+          border: "1px solid ".concat(m.c, "45"),
+          zIndex: 1
+        }
+      }), /*#__PURE__*/React.createElement(TodayLine, null))), !col && vis.map(function (t, i) {
+        return /*#__PURE__*/React.createElement("div", {
+          key: t.id,
+          style: {
+            display: "flex",
+            background: i % 2 === 0 ? C.bg : C.card,
+            borderTop: "1px solid ".concat(C.border, "15"),
+            minWidth: LW + WEEK_HEADERS.length * 62
+          }
+        }, /*#__PURE__*/React.createElement("div", {
+          style: {
+            width: LW,
+            minWidth: LW,
+            flexShrink: 0,
+            position: "sticky",
+            left: 0,
+            zIndex: 10,
+            background: i % 2 === 0 ? C.bg : C.card,
+            borderRight: "1px solid ".concat(C.border),
+            padding: "0 8px 0 10px",
+            height: ROW_H,
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+            overflow: "hidden"
+          }
+        }, t.dep && /*#__PURE__*/React.createElement("span", {
+          style: {
+            color: OWNERS.Spartans.c,
+            fontSize: 9,
+            flexShrink: 0
+          }
+        }, "\u25C6"), /*#__PURE__*/React.createElement("span", {
+          title: t.task,
+          style: {
+            fontSize: 9.5,
+            color: t.dep ? OWNERS.Spartans.c : C.body,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap"
+          }
+        }, t.task)), /*#__PURE__*/React.createElement("div", {
+          style: {
+            flex: 1,
+            position: "relative",
+            height: ROW_H
+          }
+        }, /*#__PURE__*/React.createElement(GanttBar, {
+          task: t
+        }), /*#__PURE__*/React.createElement(TodayLine, null)));
+      }));
+    })));
+  };
+
+  // ── Owner filter bar ────────────────────────────────────────────────────
+  var OwnerFilter = function OwnerFilter() {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        marginBottom: 12,
+        flexWrap: "wrap"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 8,
+        color: C.mono,
+        letterSpacing: "0.1em"
+      })
+    }, "FILTER BY PARTY:"), Object.entries(OWNERS).map(function (_ref9) {
+      var _ref0 = _slicedToArray(_ref9, 2),
+        o = _ref0[0],
+        s = _ref0[1];
+      var on = activeO.has(o);
+      return /*#__PURE__*/React.createElement("button", {
+        key: o,
+        onClick: function onClick() {
+          return toggleS(setActiveO, o);
+        },
+        style: _objectSpread(_objectSpread({
+          display: "flex",
+          alignItems: "center",
+          gap: 5,
+          padding: "4px 12px",
+          borderRadius: 2,
+          cursor: "pointer",
+          background: on ? s.bg : "transparent",
+          border: "1px solid ".concat(on ? s.c : C.border),
+          color: on ? s.c : C.mono
+        }, MONO), {}, {
+          fontSize: 9.5,
+          fontWeight: 700,
+          letterSpacing: "0.05em",
+          opacity: on ? 1 : 0.3,
+          transition: "all .14s"
+        })
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          width: 7,
+          height: 7,
+          borderRadius: "50%",
+          background: on ? s.c : C.mono,
+          display: "inline-block",
+          transition: "background .14s"
+        }
+      }), o);
+    }), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        return setActiveO(new Set(Object.keys(OWNERS)));
+      },
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 8.5,
+        color: C.mono,
+        background: "none",
+        border: "1px solid ".concat(C.border),
+        padding: "4px 10px",
+        borderRadius: 2,
+        cursor: "pointer",
+        letterSpacing: "0.05em"
+      })
+    }, "ALL"));
+  };
+
+  // ── Stat card ───────────────────────────────────────────────────────────
+  var Stat = function Stat(_ref1) {
+    var label = _ref1.label,
+      val = _ref1.val,
+      col = _ref1.col;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "7px 14px",
+        borderRadius: 3,
+        background: C.card3,
+        border: "1px solid ".concat(C.border2),
+        minWidth: 60
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread({
+        fontSize: 20,
+        fontWeight: 800,
+        color: col,
+        lineHeight: 1
+      }, SANS)
+    }, val), /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 7,
+        color: C.mono,
+        letterSpacing: "0.08em",
+        marginTop: 2
+      })
+    }, label));
+  };
+
+  // ── RENDER ───────────────────────────────────────────────────────────────
+  return /*#__PURE__*/React.createElement("div", {
+    style: _objectSpread(_objectSpread({
+      background: C.bg,
+      minHeight: "100vh",
+      color: C.body
+    }, SANS), {}, {
+      position: "relative"
+    })
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      left: "50%",
+      top: 0,
+      bottom: 0,
+      width: 1,
+      background: "linear-gradient(180deg,transparent 0%,".concat(C.red, " 30%,").concat(C.red, " 70%,transparent 100%)"),
+      opacity: 0.055,
+      pointerEvents: "none",
+      zIndex: 0
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "sticky",
+      top: 0,
+      zIndex: 100,
+      background: C.card2,
+      borderBottom: "1px solid ".concat(C.border),
+      boxShadow: "0 2px 24px rgba(0,0,0,.65)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 2,
+      background: "linear-gradient(90deg,".concat(C.red, " 0%,").concat(C.red, "44 55%,transparent 100%)")
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 24px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 20,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement(SabelLogo, {
+    h: 30
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 1,
+      height: 34,
+      background: C.border
+    }
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.mono,
+      letterSpacing: "0.16em",
+      marginBottom: 3
+    })
+  }, "PROJECT TRACKER"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 17,
+      fontWeight: 800,
+      color: C.w,
+      letterSpacing: "0.03em",
+      lineHeight: 1
+    }
+  }, "SPARTANS"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: C.muted,
+      marginTop: 2
+    }
+  }, "Nexus International Entertainment Ltd."))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement(Stat, {
+    label: "COMPLETE",
+    val: stats.done,
+    col: "#4ADE80"
+  }), /*#__PURE__*/React.createElement(Stat, {
+    label: "IN PROGRESS",
+    val: stats.active,
+    col: "#60A5FA"
+  }), /*#__PURE__*/React.createElement(Stat, {
+    label: "OUTSTANDING",
+    val: stats.deps,
+    col: "#FBBF24"
+  }), stats.blocked > 0 && /*#__PURE__*/React.createElement(Stat, {
+    label: "BLOCKED",
+    val: stats.blocked,
+    col: "#F87171"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 5,
+      padding: "7px 14px",
+      borderRadius: 3,
+      background: C.card3,
+      border: "1px solid ".concat(C.border2),
+      minWidth: 96
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "baseline"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7,
+      color: C.mono
+    })
+  }, "OVERALL"), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 15,
+      color: C.w,
+      fontWeight: 800
+    })
+  }, pct, "%")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "100%",
+      height: 3,
+      background: C.border,
+      borderRadius: 2,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "".concat(pct, "%"),
+      height: "100%",
+      borderRadius: 2,
+      transition: "width .5s",
+      background: "linear-gradient(90deg,".concat(C.red, ",#FF6B6B)")
+    }
+  })))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "24px 24px 48px",
+      position: "relative",
+      zIndex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 40
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 9,
+      color: C.red
+    })
+  }, "\u25FC"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 800,
+      fontSize: 13,
+      color: C.w,
+      letterSpacing: "0.08em"
+    }
+  }, "PROJECT PLAN"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 1,
+      background: "linear-gradient(90deg,".concat(C.border, ",transparent)")
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.mono
+    })
+  }, "DOUBLE-CLICK task name \xB7 CLICK to edit owner / dates / status \xB7 + ADD ROW per phase")), phases.map(function (phase) {
+    var m = PHASES[phase.id],
+      col = planCol.has(phase.id);
+    var done = phase.tasks.filter(function (t) {
+      return t.status === "Complete";
+    }).length;
+    var ppct = Math.round(done / Math.max(1, phase.tasks.length) * 100);
+    return /*#__PURE__*/React.createElement("div", {
+      key: phase.id,
+      style: {
+        marginBottom: 6,
+        borderRadius: 4,
+        overflow: "hidden",
+        border: "1px solid ".concat(C.border2),
+        boxShadow: "0 2px 10px rgba(0,0,0,.4)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      onClick: function onClick() {
+        return toggleS(setPlanCol, phase.id);
+      },
+      style: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        background: "linear-gradient(90deg,".concat(m.c, "1A 0%,").concat(C.card2, " 65%)"),
+        borderLeft: "3px solid ".concat(m.c),
+        padding: "8px 14px",
+        cursor: "pointer",
+        userSelect: "none"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 10
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 9,
+        color: m.c,
+        display: "inline-block",
+        transform: "rotate(".concat(col ? "-90" : "0", "deg)"),
+        transition: "transform .2s"
+      })
+    }, "\u25BC"), /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 9.5,
+        color: m.c,
+        fontWeight: 700,
+        letterSpacing: "0.09em"
+      })
+    }, m.l)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 12
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 64,
+        height: 3,
+        background: C.border,
+        borderRadius: 2,
+        overflow: "hidden"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: "".concat(ppct, "%"),
+        height: "100%",
+        background: m.c,
+        borderRadius: 2,
+        transition: "width .4s"
+      }
+    })), /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 8,
+        color: C.mono
+      })
+    }, done, "/", phase.tasks.length)), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick(e) {
+        e.stopPropagation();
+        addTask(phase.id);
+      },
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 9,
+        color: m.c,
+        background: "".concat(m.c, "12"),
+        border: "1px solid ".concat(m.c, "38"),
+        borderRadius: 2,
+        padding: "2px 9px",
+        cursor: "pointer",
+        letterSpacing: "0.04em"
+      })
+    }, "+ ADD ROW"))), !col && /*#__PURE__*/React.createElement("div", {
+      style: {
+        overflowX: "auto"
+      }
+    }, /*#__PURE__*/React.createElement("table", {
+      style: {
+        width: "100%",
+        borderCollapse: "collapse",
+        background: C.bg,
+        tableLayout: "fixed",
+        minWidth: 900
+      }
+    }, /*#__PURE__*/React.createElement("colgroup", null, /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 290
+      }
+    }), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 106
+      }
+    }), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 106
+      }
+    }), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 96
+      }
+    }), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 96
+      }
+    }), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 112
+      }
+    }), /*#__PURE__*/React.createElement("col", null), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 38
+      }
+    })), /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, ["TASK", "OWNER", "CO-OWNER", "START", "END", "STATUS", "NOTES", ""].map(function (h) {
+      return /*#__PURE__*/React.createElement("th", {
+        key: h,
+        style: TH
+      }, h);
+    }))), /*#__PURE__*/React.createElement("tbody", null, phase.tasks.map(function (t, i) {
+      return /*#__PURE__*/React.createElement("tr", {
+        key: t.id,
+        style: {
+          background: i % 2 === 0 ? C.bg : C.card,
+          transition: "background .1s"
+        },
+        onMouseEnter: function onMouseEnter(e) {
+          return e.currentTarget.style.background = C.card3;
+        },
+        onMouseLeave: function onMouseLeave(e) {
+          return e.currentTarget.style.background = i % 2 === 0 ? C.bg : C.card;
+        }
+      }, /*#__PURE__*/React.createElement("td", {
+        style: _objectSpread(_objectSpread({}, TD), {}, {
+          paddingLeft: t.dep ? 8 : 10
+        })
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 5
+        }
+      }, t.dep && /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: OWNERS.Spartans.c,
+          fontSize: 10,
+          flexShrink: 0
+        }
+      }, "\u25C6"), isEd(t.id, "task") ? /*#__PURE__*/React.createElement("input", {
+        autoFocus: true,
+        value: edVal,
+        onChange: function onChange(e) {
+          return setEdVal(e.target.value);
+        },
+        onBlur: function onBlur() {
+          return commitEd(edVal, true);
+        },
+        onKeyDown: function onKeyDown(e) {
+          if (e.key === "Enter") commitEd(edVal, true);
+          if (e.key === "Escape") cancelEd();
+        },
+        style: _objectSpread(_objectSpread({}, SANS), {}, {
+          background: C.card4,
+          color: C.body,
+          border: "1px solid ".concat(C.red, "55"),
+          borderRadius: 2,
+          padding: "2px 6px",
+          fontSize: 11,
+          outline: "none",
+          width: "100%"
+        })
+      }) : /*#__PURE__*/React.createElement("span", {
+        onDoubleClick: function onDoubleClick() {
+          return startEd(t.id, "task", t.task);
+        },
+        title: "Double-click to edit",
+        style: {
+          fontSize: 11,
+          color: t.dep ? OWNERS.Spartans.c : C.body,
+          cursor: "text",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          display: "block",
+          maxWidth: 262
+        }
+      }, t.task))), /*#__PURE__*/React.createElement("td", {
+        style: TD
+      }, /*#__PURE__*/React.createElement(OwnerEdit, {
+        id: t.id,
+        field: "owner",
+        val: t.owner
+      })), /*#__PURE__*/React.createElement("td", {
+        style: TD
+      }, /*#__PURE__*/React.createElement(OwnerEdit, {
+        id: t.id,
+        field: "co",
+        val: t.co
+      })), /*#__PURE__*/React.createElement("td", {
+        style: TD
+      }, /*#__PURE__*/React.createElement(DateEdit, {
+        id: t.id,
+        field: "start",
+        val: t.start
+      })), /*#__PURE__*/React.createElement("td", {
+        style: TD
+      }, /*#__PURE__*/React.createElement(DateEdit, {
+        id: t.id,
+        field: "end",
+        val: t.end
+      })), /*#__PURE__*/React.createElement("td", {
+        style: TD
+      }, /*#__PURE__*/React.createElement(StatusPill, {
+        status: t.status,
+        onClick: function onClick() {
+          return updTask(t.id, {
+            status: STATUS_CYCLE[(STATUS_CYCLE.indexOf(t.status) + 1) % STATUS_CYCLE.length]
+          });
+        }
+      })), /*#__PURE__*/React.createElement("td", {
+        style: _objectSpread(_objectSpread({}, TD), {}, {
+          minWidth: 140
+        })
+      }, /*#__PURE__*/React.createElement(TextEdit, {
+        id: t.id,
+        field: "notes",
+        val: t.notes,
+        ph: "Add note\u2026",
+        minW: 100
+      })), /*#__PURE__*/React.createElement("td", {
+        style: _objectSpread(_objectSpread({}, TD), {}, {
+          textAlign: "center",
+          padding: "5px 4px"
+        })
+      }, /*#__PURE__*/React.createElement(DeleteBtn, {
+        onDelete: function onDelete() {
+          return delTask(t.id);
+        }
+      })));
+    })))));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+      margin: "0 0 28px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 1,
+      background: C.border2
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8,
+      color: C.border,
+      letterSpacing: "0.12em"
+    })
+  }, "TIMELINE"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 1,
+      background: C.border2
+    }
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 9,
+      color: C.red
+    })
+  }, "\u25FC"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 800,
+      fontSize: 13,
+      color: C.w,
+      letterSpacing: "0.08em"
+    }
+  }, "PROJECT TIMELINE"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 1,
+      background: "linear-gradient(90deg,".concat(C.border, ",transparent)")
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setTlOpen(function (v) {
+        return !v;
+      });
+    },
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8.5,
+      color: C.muted,
+      letterSpacing: "0.07em",
+      background: "none",
+      border: "1px solid ".concat(C.border),
+      padding: "4px 12px",
+      borderRadius: 2,
+      cursor: "pointer",
+      transition: "all .14s"
+    }),
+    onMouseEnter: function onMouseEnter(e) {
+      e.currentTarget.style.borderColor = C.red;
+      e.currentTarget.style.color = C.w;
+    },
+    onMouseLeave: function onMouseLeave(e) {
+      e.currentTarget.style.borderColor = C.border;
+      e.currentTarget.style.color = C.muted;
+    }
+  }, tlOpen ? "▲ COLLAPSE" : "▼ EXPAND")), tlOpen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(OwnerFilter, null), /*#__PURE__*/React.createElement(Gantt, null), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 14,
+      alignItems: "center",
+      marginTop: 10,
+      padding: "8px 12px",
+      background: C.card2,
+      borderRadius: 3,
+      border: "1px solid ".concat(C.border2),
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.mono
+    })
+  }, "KEY:"), Object.entries(OWNERS).map(function (_ref10) {
+    var _ref11 = _slicedToArray(_ref10, 2),
+      o = _ref11[0],
+      s = _ref11[1];
+    return /*#__PURE__*/React.createElement("span", {
+      key: o,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 5
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 22,
+        height: 7,
+        borderRadius: 2,
+        background: s.c,
+        opacity: .8
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 7.5,
+        color: C.muted
+      })
+    }, o));
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 5
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 9,
+      height: 9,
+      background: OWNERS.Spartans.c,
+      transform: "rotate(45deg)",
+      borderRadius: 1
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.muted
+    })
+  }, "Dependency")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 5
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.red,
+      fontSize: 13
+    }
+  }, "\u2605"), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.muted
+    })
+  }, "Milestone")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 5
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 1,
+      height: 13,
+      background: C.red,
+      opacity: .7
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.muted
+    })
+  }, "Today \u2014 ", todayStr)))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: "1px solid ".concat(C.border2),
+      padding: "12px 24px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      background: C.card2
+    }
+  }, /*#__PURE__*/React.createElement(SabelLogo, {
+    h: 18
+  }), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8,
+      color: C.mono,
+      letterSpacing: "0.12em"
+    })
+  }, "PERFECT MADE POSSIBLE"), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8,
+      color: C.mono
+    })
+  }, "sabelcustomersuccess.com")));
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+  </script>
+</body>
+</html>
