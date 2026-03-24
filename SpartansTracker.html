@@ -38,8 +38,6 @@ var _React = React,
   useState = _React.useState,
   useCallback = _React.useCallback,
   useMemo = _React.useMemo;
-
-// ─── Brand tokens ─────────────────────────────────────────────────────────────
 var C = {
   bg: "#0B0B0C",
   card: "#0F1113",
@@ -136,8 +134,6 @@ var PHASES = {
     l: "POST GO-LIVE — STABILISATION"
   }
 };
-
-// ─── Timeline geometry ────────────────────────────────────────────────────────
 var TL_START = new Date("2026-03-02");
 var TL_END = new Date("2026-05-04");
 var TL_DAYS = (TL_END - TL_START) / 864e5;
@@ -161,8 +157,6 @@ var fmtDate = function fmtDate(s) {
     month: "short"
   });
 };
-
-// Live today
 var TODAY = new Date();
 var todayX = Math.max(0, Math.min(100, (TODAY - TL_START) / 864e5 / TL_DAYS * 100));
 var todayStr = TODAY.toLocaleDateString("en-GB", {
@@ -170,8 +164,6 @@ var todayStr = TODAY.toLocaleDateString("en-GB", {
   month: "short",
   year: "numeric"
 });
-
-// ─── Data ─────────────────────────────────────────────────────────────────────
 var _uid = 100;
 var uid = function uid() {
   return "t".concat(++_uid);
@@ -188,7 +180,7 @@ var INIT = [{
     status: "Complete",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "s2",
     task: "Share pre-call context and SOW with Spartans lead",
@@ -199,7 +191,7 @@ var INIT = [{
     status: "Complete",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "s3",
     task: "Schedule Week 1 alignment call",
@@ -210,7 +202,7 @@ var INIT = [{
     status: "Complete",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "s4",
     task: "■ Intercom workspace admin access for Sabel",
@@ -221,7 +213,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: "https://www.intercom.com/help/en/articles/183-set-up-identity-verification-for-web-and-mobile"
+    url: ""
   }, {
     id: "s5",
     task: "■ Initial agent list and roles (~10 agents)",
@@ -232,7 +224,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: ""
+    url: ""
   }, {
     id: "s6",
     task: "■ Back-office API endpoint docs and sandbox credentials",
@@ -243,7 +235,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: "https://developers.intercom.com/docs/build-an-integration/learn-more/rest-apis"
+    url: ""
   }, {
     id: "s7",
     task: "■ Existing FAQ content or email templates for Help Centre",
@@ -254,7 +246,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: ""
+    url: ""
   }]
 }, {
   id: "foundations",
@@ -268,7 +260,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/168-install-intercom-in-your-product-for-logged-in-users"
+    url: "https://www.intercom.com/help/en/articles/168-install-intercom-in-your-product-for-logged-in-users"
   }, {
     id: "f2",
     task: "Channel setup — Messenger (web + in-product) and email",
@@ -279,7 +271,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/167-install-intercom-in-your-product-for-visitors-and-leads"
+    url: "https://www.intercom.com/help/en/articles/167-install-intercom-in-your-product-for-visitors-and-leads"
   }, {
     id: "f3",
     task: "Inbox creation and routing logic",
@@ -290,7 +282,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "f4",
     task: "SLA policies configured per inbox",
@@ -301,7 +293,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "f5",
     task: "Conversation attributes and data fields defined",
@@ -312,7 +304,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/179-send-custom-user-attributes-to-intercom"
+    url: "https://www.intercom.com/help/en/articles/179-send-custom-user-attributes-to-intercom"
   }, {
     id: "f6",
     task: "Team structure — Natasha, Velika, Sanja and light seats",
@@ -323,7 +315,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "f7",
     task: "Manager-level reporting access configured",
@@ -334,7 +326,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "f8",
     task: "Help Centre structure — collections, sections, hierarchy",
@@ -345,7 +337,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/56644-customize-your-help-center"
+    url: "https://www.intercom.com/help/en/articles/56644-customize-your-help-center"
   }, {
     id: "f9",
     task: "Foundational Help Centre articles authored and published",
@@ -356,7 +348,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/56644-customize-your-help-center"
+    url: ""
   }, {
     id: "f10",
     task: "Help Centre configured for web and in-product surfaces",
@@ -367,7 +359,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/2982784-control-who-can-see-your-articles"
+    url: "https://www.intercom.com/help/en/articles/56644-customize-your-help-center"
   }, {
     id: "f11",
     task: "■ Inbox structure and routing logic approval",
@@ -378,7 +370,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: ""
+    url: ""
   }, {
     id: "f12",
     task: "■ Light seat stakeholder list confirmed (finance, dev)",
@@ -389,7 +381,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: ""
+    url: ""
   }, {
     id: "f13",
     task: "■ SLA targets per channel confirmed",
@@ -400,7 +392,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: ""
+    url: ""
   }, {
     id: "f14",
     task: "■ Top support topics and most frequent queries",
@@ -411,7 +403,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: ""
+    url: ""
   }]
 }, {
   id: "fin",
@@ -425,7 +417,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/9357948-manage-knowledge-audiences-and-targeting"
+    url: "https://www.intercom.com/help/en/articles/9357948-manage-knowledge-audiences-and-targeting"
   }, {
     id: "fn2",
     task: "Fin topic coverage review and confidence calibration",
@@ -436,7 +428,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/9357945-sync-and-manage-websites"
+    url: "https://www.intercom.com/help/en/articles/9357948-manage-knowledge-audiences-and-targeting"
   }, {
     id: "fn3",
     task: "■ Brand tone guide and approved response language examples",
@@ -447,7 +439,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: ""
+    url: ""
   }, {
     id: "fn4",
     task: "■ Up to 4 Fin workflow use cases confirmed and prioritised",
@@ -458,7 +450,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: ""
+    url: ""
   }, {
     id: "fn5",
     task: "Fin workflow 1 built and tested",
@@ -469,7 +461,7 @@ var INIT = [{
     status: "Pending",
     notes: "Use case TBC at kickoff",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
+    url: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
   }, {
     id: "fn6",
     task: "Fin workflow 2 built and tested",
@@ -480,7 +472,7 @@ var INIT = [{
     status: "Pending",
     notes: "Use case TBC at kickoff",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
+    url: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
   }, {
     id: "fn7",
     task: "Fin workflow 3 built and tested",
@@ -491,7 +483,7 @@ var INIT = [{
     status: "Pending",
     notes: "Use case TBC at kickoff",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
+    url: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
   }, {
     id: "fn8",
     task: "Fin workflow 4 built and tested",
@@ -502,7 +494,7 @@ var INIT = [{
     status: "Pending",
     notes: "Use case TBC at kickoff",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
+    url: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
   }, {
     id: "fn9",
     task: "Fin escalation paths and hand-off routing configured",
@@ -513,7 +505,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "fn10",
     task: "■ API credentials and sandbox access confirmed active",
@@ -524,7 +516,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: "https://developers.intercom.com/docs/build-an-integration/learn-more/rest-apis"
+    url: ""
   }, {
     id: "fn11",
     task: "Back-office API integration — balance and transaction lookups",
@@ -535,7 +527,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/6298282-setting-up-a-custom-action"
+    url: "https://www.intercom.com/help/en/articles/6298282-setting-up-a-custom-action"
   }, {
     id: "fn12",
     task: "Fin Task configured and end-to-end tested",
@@ -546,7 +538,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
+    url: "https://www.intercom.com/help/en/articles/6298282-setting-up-a-custom-action"
   }, {
     id: "fn13",
     task: "■ Languages for multilingual Fin support confirmed",
@@ -557,7 +549,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: ""
+    url: ""
   }, {
     id: "fn14",
     task: "Multilingual and real-time translation configured",
@@ -568,7 +560,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/180-localize-intercom-to-work-with-multiple-languages#h_4411ec05b9"
+    url: "https://www.intercom.com/help/en/articles/3107388-support-multiple-languages-in-your-help-center#configure-your-help-center-to-support-multiple-languages"
   }]
 }, {
   id: "uat",
@@ -582,7 +574,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"
+    url: "https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"
   }, {
     id: "u2",
     task: "Fin test conversations across all priority scenarios",
@@ -593,7 +585,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"
+    url: "https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"
   }, {
     id: "u3",
     task: "Fin configuration iterated based on test results",
@@ -604,7 +596,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "u4",
     task: "Agent and manager enablement session (recorded)",
@@ -615,7 +607,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "u5",
     task: "Enablement: Inbox, conversation management, ticketing",
@@ -626,7 +618,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "u6",
     task: "Enablement: Fin-first support model, escalation handling",
@@ -637,7 +629,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "u7",
     task: "Enablement: CX Score and sentiment reporting for managers",
@@ -648,7 +640,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "u8",
     task: "Sabel go-live readiness checklist completed",
@@ -659,7 +651,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "u9",
     task: "■ Go-live readiness sign-off from Spartans lead",
@@ -670,7 +662,7 @@ var INIT = [{
     status: "Dependency",
     notes: "",
     dep: true,
-    link: ""
+    url: ""
   }]
 }, {
   id: "golive",
@@ -684,7 +676,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/6522819-forward-your-email-to-your-team-inbox"
+    url: "https://www.intercom.com/help/en/articles/6522819-forward-your-email-to-your-team-inbox"
   }, {
     id: "g2",
     task: "Fin AI Agent activated on all configured channels",
@@ -695,7 +687,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "g3",
     task: "Operating hours and assignment rules confirmed live",
@@ -706,7 +698,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "g4",
     task: "Sabel on standby for go-live day support",
@@ -717,7 +709,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }]
 }, {
   id: "post",
@@ -731,7 +723,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "p2",
     task: "Fin performance review — resolution rate, escalations, gaps",
@@ -742,7 +734,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "p3",
     task: "Open items and snag list resolved",
@@ -753,7 +745,7 @@ var INIT = [{
     status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    url: ""
   }, {
     id: "p4",
     task: "Help Centre content roadmap — high-volume language variants",
@@ -764,11 +756,9 @@ var INIT = [{
     status: "TBC",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/3107405-add-translations-to-public-articles"
+    url: "https://www.intercom.com/help/en/articles/3107388-support-multiple-languages-in-your-help-center#configure-your-help-center-to-support-multiple-languages"
   }]
 }];
-
-// ─── SVG logo ─────────────────────────────────────────────────────────────────
 var SabelLogo = function SabelLogo(_ref) {
   var _ref$h = _ref.h,
     h = _ref$h === void 0 ? 32 : _ref$h;
@@ -805,16 +795,12 @@ var SabelLogo = function SabelLogo(_ref) {
     fill: "#FFFFFF"
   }, "SABEL"));
 };
-
-// ─── Font helpers ─────────────────────────────────────────────────────────────
 var MONO = {
   fontFamily: "'Courier New',Courier,monospace"
 };
 var SANS = {
   fontFamily: "'Helvetica Neue',Helvetica,Arial,sans-serif"
 };
-
-// ─── Atoms ────────────────────────────────────────────────────────────────────
 function OwnerBadge(_ref2) {
   var owner = _ref2.owner,
     onClick = _ref2.onClick,
@@ -941,16 +927,14 @@ function DeleteBtn(_ref4) {
     }
   }, "\xD7");
 }
-
-// ─── Link icon ────────────────────────────────────────────────────────────────
-function LinkIcon(_ref5) {
+function DocLink(_ref5) {
   var url = _ref5.url;
   if (!url) return null;
   return /*#__PURE__*/React.createElement("a", {
     href: url,
     target: "_blank",
     rel: "noopener noreferrer",
-    title: "Intercom guide",
+    title: "Intercom documentation",
     onClick: function onClick(e) {
       return e.stopPropagation();
     },
@@ -958,30 +942,29 @@ function LinkIcon(_ref5) {
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
-      width: 16,
-      height: 16,
-      borderRadius: 3,
+      width: 14,
+      height: 14,
+      borderRadius: 2,
       flexShrink: 0,
-      background: "rgba(46,184,230,0.12)",
-      border: "1px solid rgba(46,184,230,0.25)",
-      color: "#2eb8e6",
+      background: "rgba(232,25,44,0.12)",
+      border: "1px solid rgba(232,25,44,0.25)",
+      color: C.red,
+      fontSize: 8,
       textDecoration: "none",
-      transition: "all .12s",
-      fontSize: 9,
+      opacity: .7,
+      transition: "all .15s",
       lineHeight: 1
     },
     onMouseEnter: function onMouseEnter(e) {
-      e.currentTarget.style.background = "rgba(46,184,230,0.25)";
-      e.currentTarget.style.borderColor = "rgba(46,184,230,0.55)";
+      e.currentTarget.style.opacity = 1;
+      e.currentTarget.style.background = "rgba(232,25,44,0.22)";
     },
     onMouseLeave: function onMouseLeave(e) {
-      e.currentTarget.style.background = "rgba(46,184,230,0.12)";
-      e.currentTarget.style.borderColor = "rgba(46,184,230,0.25)";
+      e.currentTarget.style.opacity = .7;
+      e.currentTarget.style.background = "rgba(232,25,44,0.12)";
     }
   }, "\u2197");
 }
-
-// ─── Main ─────────────────────────────────────────────────────────────────────
 function App() {
   var _useState3 = useState(INIT),
     _useState4 = _slicedToArray(_useState3, 2),
@@ -1011,8 +994,6 @@ function App() {
     _useState14 = _slicedToArray(_useState13, 2),
     edVal = _useState14[0],
     setEdVal = _useState14[1];
-
-  // mutations
   var updTask = useCallback(function (id, patch) {
     return setPhases(function (p) {
       return p.map(function (ph) {
@@ -1052,7 +1033,7 @@ function App() {
             end: end,
             status: "Pending",
             notes: "",
-            link: ""
+            url: ""
           }])
         }) : ph;
       });
@@ -1065,8 +1046,6 @@ function App() {
       setEdVal("New task");
     }, 30);
   }, []);
-
-  // edit helpers
   var startEd = function startEd(id, field, val) {
     setEd({
       id: id,
@@ -1087,8 +1066,6 @@ function App() {
   var isEd = function isEd(id, field) {
     return (ed === null || ed === void 0 ? void 0 : ed.id) === id && (ed === null || ed === void 0 ? void 0 : ed.field) === field;
   };
-
-  // stats
   var allT = useMemo(function () {
     return phases.flatMap(function (p) {
       return p.tasks;
@@ -1122,8 +1099,6 @@ function App() {
       return n;
     });
   };
-
-  // ── Inline editor components ─────────────────────────────────────────────
   var TextEdit = function TextEdit(_ref6) {
     var id = _ref6.id,
       field = _ref6.field,
@@ -1275,8 +1250,6 @@ function App() {
       })
     });
   };
-
-  // ── PLAN TABLE ───────────────────────────────────────────────────────────
   var TH = {
     fontFamily: "'Courier New',Courier,monospace",
     fontSize: 8,
@@ -1294,8 +1267,6 @@ function App() {
     borderBottom: "1px solid ".concat(C.border, "18"),
     verticalAlign: "middle"
   };
-
-  // ── GANTT ────────────────────────────────────────────────────────────────
   var LW = 200;
   var ROW_H = 26;
   var PH_H = 28;
@@ -1594,9 +1565,32 @@ function App() {
             color: t.dep ? OWNERS.Spartans.c : C.body,
             overflow: "hidden",
             textOverflow: "ellipsis",
-            whiteSpace: "nowrap"
+            whiteSpace: "nowrap",
+            flex: 1
           }
-        }, t.task)), /*#__PURE__*/React.createElement("div", {
+        }, t.task), t.url && /*#__PURE__*/React.createElement("a", {
+          href: t.url,
+          target: "_blank",
+          rel: "noopener noreferrer",
+          onClick: function onClick(e) {
+            return e.stopPropagation();
+          },
+          title: "Intercom docs",
+          style: {
+            color: C.red,
+            fontSize: 8,
+            flexShrink: 0,
+            textDecoration: "none",
+            opacity: .5,
+            transition: "opacity .15s"
+          },
+          onMouseEnter: function onMouseEnter(e) {
+            return e.currentTarget.style.opacity = 1;
+          },
+          onMouseLeave: function onMouseLeave(e) {
+            return e.currentTarget.style.opacity = .5;
+          }
+        }, "\u2197")), /*#__PURE__*/React.createElement("div", {
           style: {
             flex: 1,
             position: "relative",
@@ -1608,8 +1602,6 @@ function App() {
       }));
     })));
   };
-
-  // ── Owner filter bar ────────────────────────────────────────────────────
   var OwnerFilter = function OwnerFilter() {
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -1678,8 +1670,6 @@ function App() {
       })
     }, "ALL"));
   };
-
-  // ── Stat card ───────────────────────────────────────────────────────────
   var Stat = function Stat(_ref10) {
     var label = _ref10.label,
       val = _ref10.val,
@@ -1711,8 +1701,6 @@ function App() {
       })
     }, label));
   };
-
-  // ── RENDER ───────────────────────────────────────────────────────────────
   return /*#__PURE__*/React.createElement("div", {
     style: _objectSpread(_objectSpread({
       background: C.bg,
@@ -1898,7 +1886,7 @@ function App() {
       fontSize: 7.5,
       color: C.mono
     })
-  }, "DOUBLE-CLICK task name \xB7 CLICK to edit owner / dates / status \xB7 \u2197 opens Intercom guide \xB7 + ADD ROW per phase")), phases.map(function (phase) {
+  }, "DOUBLE-CLICK task name \xB7 CLICK to edit owner / dates / status \xB7 + ADD ROW per phase \xB7 \u2197 = Intercom docs")), phases.map(function (phase) {
     var m = PHASES[phase.id],
       col = planCol.has(phase.id);
     var done = phase.tasks.filter(function (t) {
@@ -2071,9 +2059,7 @@ function App() {
           fontSize: 10,
           flexShrink: 0
         }
-      }, "\u25C6"), /*#__PURE__*/React.createElement(LinkIcon, {
-        url: t.link
-      }), isEd(t.id, "task") ? /*#__PURE__*/React.createElement("input", {
+      }, "\u25C6"), isEd(t.id, "task") ? /*#__PURE__*/React.createElement("input", {
         autoFocus: true,
         value: edVal,
         onChange: function onChange(e) {
@@ -2108,10 +2094,13 @@ function App() {
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
+          flex: 1,
           display: "block",
           maxWidth: 242
         }
-      }, t.task))), /*#__PURE__*/React.createElement("td", {
+      }, t.task), /*#__PURE__*/React.createElement(DocLink, {
+        url: t.url
+      }))), /*#__PURE__*/React.createElement("td", {
         style: TD
       }, /*#__PURE__*/React.createElement(OwnerEdit, {
         id: t.id,
@@ -2343,24 +2332,16 @@ function App() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: 14,
-      height: 14,
-      borderRadius: 2,
-      background: "rgba(46,184,230,0.15)",
-      border: "1px solid rgba(46,184,230,0.3)",
-      color: "#2eb8e6",
-      fontSize: 8,
-      fontWeight: 700
+      fontSize: 9,
+      color: C.red,
+      fontFamily: "monospace"
     }
   }, "\u2197"), /*#__PURE__*/React.createElement("span", {
     style: _objectSpread(_objectSpread({}, MONO), {}, {
       fontSize: 7.5,
       color: C.muted
     })
-  }, "Intercom guide")))))), /*#__PURE__*/React.createElement("div", {
+  }, "Intercom docs link")))))), /*#__PURE__*/React.createElement("div", {
     style: {
       borderTop: "1px solid ".concat(C.border2),
       padding: "12px 24px",
