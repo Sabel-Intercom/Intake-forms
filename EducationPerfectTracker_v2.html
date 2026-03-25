@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spartans Project Tracker · Sabel</title>
+  <title>Education Perfect Project Tracker · Sabel</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0B0B0C; }
@@ -40,7 +40,7 @@ var _React = React,
   useMemo = _React.useMemo,
   useEffect = _React.useEffect,
   useRef = _React.useRef;
-var API = "https://sabel-webhook.vercel.app/api/tracker?key=spartans-tracker-v1";
+var API = "https://sabel-webhook.vercel.app/api/tracker?key=education-perfect-tracker-v1";
 var C = {
   bg: "#0B0B0C",
   card: "#0F1113",
@@ -67,19 +67,14 @@ var OWNERS = {
     bg: "rgba(192,132,252,.12)",
     bd: "rgba(192,132,252,.3)"
   },
-  Greg: {
-    c: "#34D399",
-    bg: "rgba(52,211,153,.12)",
-    bd: "rgba(52,211,153,.3)"
-  },
-  Spartans: {
+  EP: {
     c: "#FBBF24",
     bg: "rgba(251,191,36,.12)",
     bd: "rgba(251,191,36,.3)"
   }
 };
-var SABEL_OWNERS = new Set(["Chris", "Richard", "Greg"]);
-var CLIENT_OWNERS = new Set(["Spartans"]);
+var SABEL_OWNERS = new Set(["Chris", "Richard"]);
+var CLIENT_OWNERS = new Set(["EP"]);
 var STATUSES_DEF = {
   "Complete": {
     t: "#4ADE80",
@@ -120,27 +115,27 @@ var PHASES = {
   },
   foundations: {
     c: "#3B82F6",
-    l: "WEEKS 1–2 — FOUNDATIONS & HELP CENTRE"
+    l: "WEEKS 1–2 — INTERCOM FOUNDATIONS"
+  },
+  automation: {
+    c: "#9333EA",
+    l: "WEEKS 2–4 — AUTOMATION ENGINE (337 WORKFLOWS)"
   },
   fin: {
     c: "#10B981",
-    l: "WEEKS 2–3 — FIN AI, API & MULTILINGUAL"
+    l: "WEEKS 3–4 — FIN ENABLEMENT & INTEGRATIONS"
   },
-  uat: {
-    c: "#9333EA",
-    l: "WEEK 4 — UAT, ENABLEMENT & E2E TESTING"
+  migration: {
+    c: "#F59E0B",
+    l: "WEEKS 1–6 — MIGRATION ACCELERATOR"
   },
   golive: {
     c: "#E10600",
-    l: "GO-LIVE — WEB CHAT + EMAIL"
-  },
-  post: {
-    c: "#94A3B8",
-    l: "POST GO-LIVE — STABILISATION"
+    l: "WEEKS 7–8 — TRAINING, GO-LIVE & HANDOVER"
   }
 };
-var TL_START = new Date("2026-03-02");
-var TL_END = new Date("2026-05-04");
+var TL_START = new Date("2026-03-30");
+var TL_END = new Date("2026-06-15");
 var TL_DAYS = (TL_END - TL_START) / 864e5;
 var WEEK_HEADERS = [];
 {
@@ -177,77 +172,88 @@ var INIT = [{
   id: "setup",
   tasks: [{
     id: "s1",
-    task: "Create Slack project channel, share with Spartans team",
-    owner: "Chris",
+    task: "Create Slack project channel and share with EP team",
+    owner: "Richard",
     co: "",
-    start: "2026-03-02",
-    end: "2026-03-03",
-    status: "Complete",
+    start: "2026-03-30",
+    end: "2026-03-31",
+    status: "Pending",
     notes: "",
     dep: false,
     link: ""
   }, {
     id: "s2",
-    task: "Share pre-call context and SOW with Spartans lead",
+    task: "Send kickoff intake form to Education Perfect",
     owner: "Richard",
     co: "",
-    start: "2026-03-02",
-    end: "2026-03-04",
-    status: "Complete",
+    start: "2026-03-30",
+    end: "2026-04-01",
+    status: "Pending",
     notes: "",
     dep: false,
     link: ""
   }, {
     id: "s3",
-    task: "Schedule Week 1 alignment call",
+    task: "Schedule Week 1 kickoff call",
     owner: "Chris",
     co: "",
-    start: "2026-03-02",
-    end: "2026-03-03",
-    status: "Complete",
+    start: "2026-03-30",
+    end: "2026-04-01",
+    status: "Pending",
     notes: "",
     dep: false,
     link: ""
   }, {
     id: "s4",
     task: "■ Intercom workspace admin access for Sabel",
-    owner: "Spartans",
+    owner: "EP",
     co: "",
-    start: "2026-03-06",
-    end: "2026-03-06",
-    status: "Complete",
-    notes: "",
+    start: "2026-04-01",
+    end: "2026-04-03",
+    status: "Dependency",
+    notes: "Required before any build starts",
     dep: true,
     link: "https://www.intercom.com/help/en/articles/183-set-up-identity-verification-for-web-and-mobile"
   }, {
     id: "s5",
-    task: "■ Initial agent list and roles (~10 agents)",
-    owner: "Spartans",
+    task: "■ Help Scout admin access for Migr8Now migration tooling",
+    owner: "EP",
     co: "",
-    start: "2026-03-06",
-    end: "2026-03-06",
-    status: "Complete",
-    notes: "",
+    start: "2026-04-01",
+    end: "2026-04-03",
+    status: "Dependency",
+    notes: "Required before migration discovery can begin",
     dep: true,
     link: ""
   }, {
     id: "s6",
-    task: "■ Back-office API endpoint docs and sandbox credentials",
-    owner: "Spartans",
+    task: "■ Workflow register — all 337 workflows with name and purpose",
+    owner: "EP",
     co: "",
-    start: "2026-03-06",
-    end: "2026-03-06",
-    status: "Complete",
-    notes: "",
+    start: "2026-04-01",
+    end: "2026-04-06",
+    status: "Dependency",
+    notes: "Required before workflow build begins",
     dep: true,
-    link: "https://developers.intercom.com/docs/build-an-integration/learn-more/rest-apis"
+    link: ""
   }, {
     id: "s7",
-    task: "■ Existing FAQ content or email templates for Help Centre",
-    owner: "Spartans",
+    task: "■ Inbox and team structure — 13 inboxes, hours, SLA targets",
+    owner: "EP",
     co: "",
-    start: "2026-03-06",
-    end: "2026-03-06",
+    start: "2026-04-01",
+    end: "2026-04-06",
+    status: "Dependency",
+    notes: "",
+    dep: true,
+    link: ""
+  }, {
+    id: "s8",
+    task: "■ Agent and team roster — email addresses and assignments",
+    owner: "EP",
+    co: "",
+    start: "2026-04-01",
+    end: "2026-04-06",
     status: "Dependency",
     notes: "",
     dep: true,
@@ -257,548 +263,626 @@ var INIT = [{
   id: "foundations",
   tasks: [{
     id: "f1",
-    task: "Workspace setup — identity, brand, region, seat allocation",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-09",
-    end: "2026-03-13",
-    status: "Complete",
+    task: "Kickoff call — align on scope, priorities, and access",
+    owner: "Richard",
+    co: "Chris",
+    start: "2026-04-06",
+    end: "2026-04-06",
+    status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/168-install-intercom-in-your-product-for-logged-in-users"
+    link: ""
   }, {
     id: "f2",
-    task: "Channel setup — Messenger (web + in-product) and email",
+    task: "Configure 13 inboxes — naming, defaults, operating rules",
     owner: "Chris",
     co: "",
-    start: "2026-03-09",
-    end: "2026-03-13",
-    status: "Complete",
+    start: "2026-04-07",
+    end: "2026-04-10",
+    status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/167-install-intercom-in-your-product-for-visitors-and-leads"
+    link: ""
   }, {
     id: "f3",
-    task: "Inbox creation and routing logic",
+    task: "Roles and permissions — admins, team leads, agents",
     owner: "Chris",
     co: "",
-    start: "2026-03-09",
-    end: "2026-03-13",
-    status: "Complete",
+    start: "2026-04-07",
+    end: "2026-04-10",
+    status: "Pending",
     notes: "",
     dep: false,
     link: ""
   }, {
     id: "f4",
-    task: "SLA policies configured per inbox",
+    task: "Assignment rules and operating views for triage and escalations",
     owner: "Chris",
     co: "",
-    start: "2026-03-09",
-    end: "2026-03-13",
-    status: "Blocked",
-    notes: "No SLA's - may be a future addition",
+    start: "2026-04-07",
+    end: "2026-04-10",
+    status: "Pending",
+    notes: "",
     dep: false,
     link: ""
   }, {
     id: "f5",
-    task: "Conversation attributes and data fields defined",
+    task: "Tags, custom fields, and macros setup",
     owner: "Chris",
     co: "Richard",
-    start: "2026-03-09",
-    end: "2026-03-13",
+    start: "2026-04-13",
+    end: "2026-04-17",
     status: "Pending",
     notes: "",
     dep: false,
     link: "https://www.intercom.com/help/en/articles/179-send-custom-user-attributes-to-intercom"
   }, {
     id: "f6",
-    task: "Team structure — Natasha, Velika, Sanja and light seats",
+    task: "Validate operations with test conversations",
     owner: "Chris",
     co: "",
-    start: "2026-03-16",
-    end: "2026-03-20",
-    status: "Complete",
+    start: "2026-04-14",
+    end: "2026-04-17",
+    status: "Pending",
     notes: "",
     dep: false,
-    link: ""
+    link: "https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"
   }, {
     id: "f7",
-    task: "Manager-level reporting access configured",
-    owner: "Chris",
+    task: "Reporting foundations — baseline views, KPI definitions",
+    owner: "Richard",
     co: "",
-    start: "2026-03-16",
-    end: "2026-03-20",
-    status: "Blocked",
-    notes: "dependencies being attributes available for report building",
+    start: "2026-04-14",
+    end: "2026-04-17",
+    status: "Pending",
+    notes: "",
     dep: false,
     link: ""
   }, {
     id: "f8",
-    task: "Help Centre structure — collections, sections, hierarchy",
-    owner: "Chris",
+    task: "■ JIRA project details — issue types and required fields",
+    owner: "EP",
     co: "",
-    start: "2026-03-16",
-    end: "2026-03-20",
-    status: "Blocked",
-    notes: "WIP - awaiting documents from Spartans",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/56644-customize-your-help-center"
+    start: "2026-04-06",
+    end: "2026-04-10",
+    status: "Dependency",
+    notes: "Required before JIRA integration build",
+    dep: true,
+    link: "https://www.intercom.com/help/en/articles/7918909-jira-for-tickets-app"
   }, {
     id: "f9",
-    task: "Foundational Help Centre articles authored and published",
-    owner: "Chris",
+    task: "■ Aircall users mapped to Intercom agent email addresses",
+    owner: "EP",
     co: "",
-    start: "2026-03-16",
-    end: "2026-03-20",
-    status: "Blocked",
+    start: "2026-04-06",
+    end: "2026-04-10",
+    status: "Dependency",
     notes: "",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/56644-customize-your-help-center"
+    dep: true,
+    link: ""
   }, {
     id: "f10",
-    task: "Help Centre configured for web and in-product surfaces",
-    owner: "Chris",
+    task: "■ Slack channels for escalation notifications confirmed",
+    owner: "EP",
     co: "",
-    start: "2026-03-16",
-    end: "2026-03-20",
-    status: "Blocked",
+    start: "2026-04-06",
+    end: "2026-04-10",
+    status: "Dependency",
     notes: "",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/2982784-control-who-can-see-your-articles"
+    dep: true,
+    link: ""
   }, {
     id: "f11",
-    task: "■ Inbox structure and routing logic approval",
-    owner: "Spartans",
+    task: "■ Zendesk QA admin or reviewer access provided",
+    owner: "EP",
     co: "",
-    start: "2026-03-13",
-    end: "2026-03-13",
-    status: "Dependency",
-    notes: "Aside from VIP, these is completed — VIP queue/escalation still being defined by Spartans",
-    dep: true,
-    link: ""
-  }, {
-    id: "f12",
-    task: "■ Light seat stakeholder list confirmed (finance, dev)",
-    owner: "Spartans",
-    co: "",
-    start: "2026-03-13",
-    end: "2026-03-13",
-    status: "Dependency",
-    notes: "",
-    dep: true,
-    link: ""
-  }, {
-    id: "f13",
-    task: "■ SLA targets per channel confirmed",
-    owner: "Spartans",
-    co: "",
-    start: "2026-03-13",
-    end: "2026-03-13",
-    status: "Dependency",
-    notes: "",
-    dep: true,
-    link: ""
-  }, {
-    id: "f14",
-    task: "■ Top support topics and most frequent queries",
-    owner: "Spartans",
-    co: "",
-    start: "2026-03-13",
-    end: "2026-03-13",
+    start: "2026-04-06",
+    end: "2026-04-10",
     status: "Dependency",
     notes: "",
     dep: true,
     link: ""
   }]
 }, {
-  id: "fin",
+  id: "automation",
   tasks: [{
-    id: "fn1",
-    task: "Fin AI configured against completed Help Centre",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-16",
-    end: "2026-03-20",
-    status: "Blocked",
-    notes: "Added guidance based on current knowledge",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/9357948-manage-knowledge-audiences-and-targeting"
-  }, {
-    id: "fn2",
-    task: "Fin topic coverage review and confidence calibration",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-16",
-    end: "2026-03-20",
-    status: "Blocked",
-    notes: "",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/9357945-sync-and-manage-websites"
-  }, {
-    id: "fn3",
-    task: "■ Brand tone guide and approved response language examples",
-    owner: "Spartans",
-    co: "",
-    start: "2026-03-16",
-    end: "2026-03-16",
-    status: "Dependency",
-    notes: "",
-    dep: true,
-    link: ""
-  }, {
-    id: "fn4",
-    task: "■ Up to 4 Fin workflow use cases confirmed and prioritised",
-    owner: "Spartans",
-    co: "",
-    start: "2026-03-16",
-    end: "2026-03-16",
-    status: "Dependency",
-    notes: "",
-    dep: true,
-    link: ""
-  }, {
-    id: "fn5",
-    task: "Fin workflow 1 built and tested",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-23",
-    end: "2026-03-27",
-    status: "Blocked",
-    notes: "Use case TBC at kickoff",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
-  }, {
-    id: "fn6",
-    task: "Fin workflow 2 built and tested",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-23",
-    end: "2026-03-27",
-    status: "Blocked",
-    notes: "Use case TBC at kickoff",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
-  }, {
-    id: "fn7",
-    task: "Fin workflow 3 built and tested",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-23",
-    end: "2026-03-27",
-    status: "Blocked",
-    notes: "Use case TBC at kickoff",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
-  }, {
-    id: "fn8",
-    task: "Fin workflow 4 built and tested",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-23",
-    end: "2026-03-27",
-    status: "Blocked",
-    notes: "Use case TBC at kickoff",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
-  }, {
-    id: "fn9",
-    task: "Fin escalation paths and hand-off routing configured",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-23",
-    end: "2026-03-27",
-    status: "Blocked",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "fn10",
-    task: "■ API credentials and sandbox access confirmed active",
-    owner: "Spartans",
-    co: "",
-    start: "2026-03-20",
-    end: "2026-03-20",
-    status: "Dependency",
-    notes: "",
-    dep: true,
-    link: "https://developers.intercom.com/docs/build-an-integration/learn-more/rest-apis"
-  }, {
-    id: "fn11",
-    task: "Back-office API integration — balance and transaction lookups",
-    owner: "Greg",
-    co: "",
-    start: "2026-03-23",
-    end: "2026-03-27",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/6298282-setting-up-a-custom-action"
-  }, {
-    id: "fn12",
-    task: "Fin Task configured and end-to-end tested",
-    owner: "Greg",
-    co: "Chris",
-    start: "2026-03-23",
-    end: "2026-03-27",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
-  }, {
-    id: "fn13",
-    task: "■ Languages for multilingual Fin support confirmed",
-    owner: "Spartans",
-    co: "",
-    start: "2026-03-20",
-    end: "2026-03-20",
-    status: "Dependency",
-    notes: "",
-    dep: true,
-    link: ""
-  }, {
-    id: "fn14",
-    task: "Multilingual and real-time translation configured",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-23",
-    end: "2026-03-27",
-    status: "Complete",
-    notes: "",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/180-localize-intercom-to-work-with-multiple-languages#h_4411ec05b9"
-  }]
-}, {
-  id: "uat",
-  tasks: [{
-    id: "u1",
-    task: "E2E testing — all Fin workflows with real API and sandbox",
-    owner: "Chris",
-    co: "Spartans",
-    start: "2026-03-30",
-    end: "2026-04-03",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"
-  }, {
-    id: "u2",
-    task: "Fin test conversations across all priority scenarios",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-30",
-    end: "2026-04-03",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"
-  }, {
-    id: "u3",
-    task: "Fin configuration iterated based on test results",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-30",
-    end: "2026-04-03",
-    status: "Dependency",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "u4",
-    task: "Agent and manager enablement session (recorded)",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-30",
-    end: "2026-04-03",
-    status: "Dependency",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "u5",
-    task: "Enablement: Inbox, conversation management, ticketing",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-30",
-    end: "2026-04-03",
-    status: "Dependency",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "u6",
-    task: "Enablement: Fin-first support model, escalation handling",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-30",
-    end: "2026-04-03",
-    status: "Dependency",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "u7",
-    task: "Enablement: CX Score and sentiment reporting for managers",
-    owner: "Chris",
-    co: "",
-    start: "2026-03-30",
-    end: "2026-04-03",
-    status: "Dependency",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "u8",
-    task: "Sabel go-live readiness checklist completed",
+    id: "a1",
+    task: "Workflow register review — confirm inventory and outcomes",
     owner: "Richard",
     co: "Chris",
-    start: "2026-03-30",
-    end: "2026-04-04",
+    start: "2026-04-13",
+    end: "2026-04-15",
     status: "Pending",
     notes: "",
     dep: false,
     link: ""
   }, {
-    id: "u9",
-    task: "■ Go-live readiness sign-off from Spartans lead",
-    owner: "Spartans",
+    id: "a2",
+    task: "Group workflows by purpose and identify dependencies",
+    owner: "Richard",
     co: "",
-    start: "2026-04-04",
-    end: "2026-04-04",
-    status: "Dependency",
-    notes: "",
-    dep: true,
+    start: "2026-04-13",
+    end: "2026-04-15",
+    status: "Pending",
+    notes: "Routing, SLA, escalation, notifications, lifecycle",
+    dep: false,
     link: ""
-  }]
-}, {
-  id: "golive",
-  tasks: [{
-    id: "g1",
-    task: "LiveChat and Gmail routing cut over to Intercom",
-    owner: "Chris",
-    co: "Spartans",
-    start: "2026-04-07",
-    end: "2026-04-07",
+  }, {
+    id: "a3",
+    task: "Agree build order and rollout sequencing",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-15",
+    end: "2026-04-16",
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/6522819-forward-your-email-to-your-team-inbox"
+    link: ""
   }, {
-    id: "g2",
-    task: "Fin AI Agent activated on all configured channels",
+    id: "a4",
+    task: "Build routing and assignment logic across all teams and inboxes",
     owner: "Chris",
     co: "",
-    start: "2026-04-07",
-    end: "2026-04-07",
+    start: "2026-04-16",
+    end: "2026-04-22",
     status: "Pending",
     notes: "",
     dep: false,
     link: ""
   }, {
-    id: "g3",
-    task: "Operating hours and assignment rules confirmed live",
+    id: "a5",
+    task: "Build SLA and escalation logic including breach handling",
     owner: "Chris",
     co: "",
-    start: "2026-04-07",
-    end: "2026-04-07",
+    start: "2026-04-16",
+    end: "2026-04-22",
     status: "Pending",
     notes: "",
     dep: false,
     link: ""
   }, {
-    id: "g4",
-    task: "Sabel on standby for go-live day support",
-    owner: "Chris",
-    co: "Richard",
-    start: "2026-04-07",
-    end: "2026-04-07",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: ""
-  }]
-}, {
-  id: "post",
-  tasks: [{
-    id: "p1",
-    task: "Post go-live check-in — performance and agent feedback",
+    id: "a6",
+    task: "Build internal notifications and Slack alerting rules",
     owner: "Chris",
     co: "",
-    start: "2026-04-14",
-    end: "2026-04-14",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "p2",
-    task: "Fin performance review — resolution rate, escalations, gaps",
-    owner: "Chris",
-    co: "",
-    start: "2026-04-14",
-    end: "2026-04-18",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "p3",
-    task: "Open items and snag list resolved",
-    owner: "Chris",
-    co: "Richard",
-    start: "2026-04-14",
+    start: "2026-04-20",
     end: "2026-04-24",
     status: "Pending",
     notes: "",
     dep: false,
     link: ""
   }, {
-    id: "p4",
-    task: "Help Centre content roadmap — high-volume language variants",
-    owner: "Richard",
+    id: "a7",
+    task: "Build tagging and field update rules for reporting",
+    owner: "Chris",
     co: "",
-    start: "2026-04-21",
-    end: "2026-04-30",
-    status: "TBC",
+    start: "2026-04-20",
+    end: "2026-04-24",
+    status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/3107405-add-translations-to-public-articles"
+    link: ""
+  }, {
+    id: "a8",
+    task: "Build exception paths — VIP, duplicates, outages, spam",
+    owner: "Chris",
+    co: "Richard",
+    start: "2026-04-22",
+    end: "2026-04-28",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "a9",
+    task: "Apply consistent standards across all workflows",
+    owner: "Chris",
+    co: "",
+    start: "2026-04-24",
+    end: "2026-04-28",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "a10",
+    task: "Workflow QA — end-to-end testing across all 13 inboxes",
+    owner: "Richard",
+    co: "Chris",
+    start: "2026-04-27",
+    end: "2026-05-01",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"
+  }, {
+    id: "a11",
+    task: "Validate routing accuracy, SLA and escalation behaviour",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-27",
+    end: "2026-05-01",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "a12",
+    task: "Two refinement rounds against agreed workflow register",
+    owner: "Richard",
+    co: "Chris",
+    start: "2026-04-29",
+    end: "2026-05-01",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "a13",
+    task: "Final publish and change log for internal reference",
+    owner: "Richard",
+    co: "",
+    start: "2026-05-01",
+    end: "2026-05-01",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }]
+}, {
+  id: "fin",
+  tasks: [{
+    id: "fn1",
+    task: "■ Fin content sources — priority intents and tone of voice",
+    owner: "EP",
+    co: "",
+    start: "2026-04-13",
+    end: "2026-04-17",
+    status: "Dependency",
+    notes: "Required before Fin setup workshop",
+    dep: true,
+    link: "https://www.intercom.com/help/en/articles/9357948-manage-knowledge-audiences-and-targeting"
+  }, {
+    id: "fn2",
+    task: "■ EP engineering contact confirmed for custom integration",
+    owner: "EP",
+    co: "",
+    start: "2026-04-13",
+    end: "2026-04-17",
+    status: "Dependency",
+    notes: "",
+    dep: true,
+    link: "https://developers.intercom.com/docs/build-an-integration/learn-more/rest-apis"
+  }, {
+    id: "fn3",
+    task: "Fin setup workshop — coverage goals, tone, handover rules",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-20",
+    end: "2026-04-21",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/9357948-manage-knowledge-audiences-and-targeting"
+  }, {
+    id: "fn4",
+    task: "Knowledge readiness pass — structure articles for Fin retrieval",
+    owner: "Chris",
+    co: "",
+    start: "2026-04-21",
+    end: "2026-04-24",
+    status: "Pending",
+    notes: "Titles, headings, clarity, remove duplication",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/9357945-sync-and-manage-websites"
+  }, {
+    id: "fn5",
+    task: "Fin configuration — settings, tone, guardrails, routing",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-27",
+    end: "2026-05-01",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/9357948-manage-knowledge-audiences-and-targeting"
+  }, {
+    id: "fn6",
+    task: "Test priority intents and refine based on results",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-29",
+    end: "2026-05-01",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "fn7",
+    task: "Establish tuning checklist for ongoing improvement",
+    owner: "Richard",
+    co: "",
+    start: "2026-05-01",
+    end: "2026-05-01",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "fn8",
+    task: "JIRA integration — configure, validate field mapping",
+    owner: "Chris",
+    co: "",
+    start: "2026-04-20",
+    end: "2026-04-22",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/7918909-jira-for-tickets-app"
+  }, {
+    id: "fn9",
+    task: "Aircall integration — connect, validate call logging",
+    owner: "Chris",
+    co: "",
+    start: "2026-04-20",
+    end: "2026-04-22",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "fn10",
+    task: "Slack integration — channels and escalation notifications",
+    owner: "Chris",
+    co: "",
+    start: "2026-04-22",
+    end: "2026-04-23",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/6522819-forward-your-email-to-your-team-inbox"
+  }, {
+    id: "fn11",
+    task: "Zendesk QA integration support and validation approach",
+    owner: "Chris",
+    co: "",
+    start: "2026-04-22",
+    end: "2026-04-23",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "fn12",
+    task: "Custom integration briefing with EP engineering team",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-23",
+    end: "2026-04-24",
+    status: "Pending",
+    notes: "Define scope, data mapping, event flows, security",
+    dep: false,
+    link: "https://developers.intercom.com/docs/build-an-integration/learn-more/rest-apis"
+  }, {
+    id: "fn13",
+    task: "Integration testing — end-to-end across all four integrations",
+    owner: "Chris",
+    co: "Richard",
+    start: "2026-05-04",
+    end: "2026-05-08",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }]
+}, {
+  id: "migration",
+  tasks: [{
+    id: "m1",
+    task: "Help Scout migration discovery and mapping",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-06",
+    end: "2026-04-10",
+    status: "Pending",
+    notes: "Confirm mailbox structure, map tags, fields, statuses",
+    dep: false,
+    link: ""
+  }, {
+    id: "m2",
+    task: "Confirm user mapping and define acceptance criteria",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-08",
+    end: "2026-04-10",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "m3",
+    task: "Sample migration run — import into controlled environment",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-13",
+    end: "2026-04-15",
+    status: "Pending",
+    notes: "Validate readability, identity, timestamps, edge cases",
+    dep: false,
+    link: ""
+  }, {
+    id: "m4",
+    task: "Validate tag and field mapping from sample run",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-15",
+    end: "2026-04-17",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "m5",
+    task: "■ Sample migration sign-off — written approval to proceed",
+    owner: "EP",
+    co: "",
+    start: "2026-04-17",
+    end: "2026-04-17",
+    status: "Dependency",
+    notes: "Required before full migration can run",
+    dep: true,
+    link: ""
+  }, {
+    id: "m6",
+    task: "Full migration — execute import of ~330k conversations",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-20",
+    end: "2026-04-24",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "m7",
+    task: "Validate record counts, error logs, and data completeness",
+    owner: "Richard",
+    co: "",
+    start: "2026-04-24",
+    end: "2026-04-24",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "m8",
+    task: "Delta migration run prior to cutover",
+    owner: "Richard",
+    co: "",
+    start: "2026-05-11",
+    end: "2026-05-13",
+    status: "Pending",
+    notes: "At least one delta run before go-live",
+    dep: false,
+    link: ""
+  }, {
+    id: "m9",
+    task: "Confirm data completeness against acceptance criteria",
+    owner: "Richard",
+    co: "",
+    start: "2026-05-13",
+    end: "2026-05-15",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }]
+}, {
+  id: "golive",
+  tasks: [{
+    id: "g1",
+    task: "Admin and team lead enablement session",
+    owner: "Richard",
+    co: "Chris",
+    start: "2026-05-18",
+    end: "2026-05-20",
+    status: "Pending",
+    notes: "Workflows, inbox ops, Fin management, reporting basics",
+    dep: false,
+    link: ""
+  }, {
+    id: "g2",
+    task: "Handover pack and configuration summary prepared",
+    owner: "Richard",
+    co: "",
+    start: "2026-05-20",
+    end: "2026-05-22",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "g3",
+    task: "Cutover preparation — Help Scout routing cut over to Intercom",
+    owner: "Chris",
+    co: "Richard",
+    start: "2026-05-22",
+    end: "2026-05-25",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/6522819-forward-your-email-to-your-team-inbox"
+  }, {
+    id: "g4",
+    task: "★ Go-live",
+    owner: "Richard",
+    co: "Chris",
+    start: "2026-05-25",
+    end: "2026-05-25",
+    status: "Pending",
+    notes: "Target: May 2026",
+    dep: false,
+    link: ""
+  }, {
+    id: "g5",
+    task: "Cutover support — Sabel on standby go-live day",
+    owner: "Richard",
+    co: "Chris",
+    start: "2026-05-25",
+    end: "2026-05-25",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "g6",
+    task: "Final validation spot checks across all 13 inboxes",
+    owner: "Richard",
+    co: "",
+    start: "2026-05-26",
+    end: "2026-05-27",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "g7",
+    task: "Resolve exceptions and confirm stability",
+    owner: "Chris",
+    co: "Richard",
+    start: "2026-05-26",
+    end: "2026-05-29",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "g8",
+    task: "Migration summary and outcomes report delivered",
+    owner: "Richard",
+    co: "",
+    start: "2026-05-27",
+    end: "2026-05-29",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
   }]
 }];
+var SABEL_LOGO_SRC = "data:image/png;base64,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01T0RHJH0ERFkQhERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERB//2Q==";
 var SabelLogo = function SabelLogo(_ref) {
   var _ref$h = _ref.h,
     h = _ref$h === void 0 ? 32 : _ref$h;
-  return /*#__PURE__*/React.createElement("svg", {
-    height: h,
-    viewBox: "0 0 240 64",
-    fill: "none",
+  return /*#__PURE__*/React.createElement("img", {
+    src: SABEL_LOGO_SRC,
     style: {
+      height: h,
       display: "block",
-      flexShrink: 0
-    }
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M32 58 C20 42 6 34 2 18",
-    stroke: "#E10600",
-    strokeWidth: "2.4",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M32 58 C44 42 58 34 62 18",
-    stroke: "#E10600",
-    strokeWidth: "2.4",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "32",
-    cy: "59",
-    r: "3",
-    fill: "#E10600"
-  }), /*#__PURE__*/React.createElement("text", {
-    x: "72",
-    y: "50",
-    fontFamily: "Helvetica Neue,Helvetica,Arial,sans-serif",
-    fontWeight: "800",
-    fontSize: "38",
-    letterSpacing: "5",
-    fill: "#FFFFFF"
-  }, "SABEL"));
+      flexShrink: 0,
+      objectFit: "contain"
+    },
+    alt: "Sabel"
+  });
 };
 var MONO = {
   fontFamily: "'Courier New',Courier,monospace"
@@ -998,7 +1082,7 @@ function DualProgress(_ref4) {
       color: "#FBBF24",
       letterSpacing: "0.08em"
     })
-  }, "SPARTANS"), /*#__PURE__*/React.createElement("span", {
+  }, "EP"), /*#__PURE__*/React.createElement("span", {
     style: _objectSpread(_objectSpread({}, MONO), {}, {
       fontSize: 15,
       color: C.w,
@@ -1209,7 +1293,7 @@ function App() {
     _useState0 = _slicedToArray(_useState9, 2),
     tlCol = _useState0[0],
     setTlCol = _useState0[1];
-  var _useState1 = useState(new Set(["Chris", "Richard", "Greg", "Spartans"])),
+  var _useState1 = useState(new Set(["Chris", "Richard", "EP"])),
     _useState10 = _slicedToArray(_useState1, 2),
     activeO = _useState10[0],
     setActiveO = _useState10[1];
@@ -1471,7 +1555,7 @@ function App() {
         fontSize: 10,
         outline: "none"
       })
-    }, ["Chris", "Richard", "Greg", "Spartans", ""].map(function (o) {
+    }, ["Chris", "Richard", "EP", ""].map(function (o) {
       return /*#__PURE__*/React.createElement("option", {
         key: o,
         value: o
@@ -1571,10 +1655,10 @@ function App() {
         transform: "translateY(-50%) rotate(45deg)",
         width: 10,
         height: 10,
-        background: OWNERS.Spartans.c,
+        background: OWNERS.EP.c,
         borderRadius: 1,
         zIndex: 3,
-        boxShadow: "0 0 8px ".concat(OWNERS.Spartans.c, "55")
+        boxShadow: "0 0 8px ".concat(OWNERS.EP.c, "55")
       }
     });
     if (pt) return /*#__PURE__*/React.createElement("div", {
@@ -1825,7 +1909,7 @@ function App() {
           }
         }, t.dep && /*#__PURE__*/React.createElement("span", {
           style: {
-            color: OWNERS.Spartans.c,
+            color: OWNERS.EP.c,
             fontSize: 9,
             flexShrink: 0
           }
@@ -1833,7 +1917,7 @@ function App() {
           title: t.task,
           style: {
             fontSize: 9.5,
-            color: t.dep ? OWNERS.Spartans.c : C.body,
+            color: t.dep ? OWNERS.EP.c : C.body,
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap"
@@ -1918,37 +2002,6 @@ function App() {
       })
     }, "ALL"));
   };
-  var Stat = function Stat(_ref15) {
-    var label = _ref15.label,
-      val = _ref15.val,
-      col = _ref15.col;
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "7px 14px",
-        borderRadius: 3,
-        background: C.card3,
-        border: "1px solid ".concat(C.border2),
-        minWidth: 60
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: _objectSpread({
-        fontSize: 20,
-        fontWeight: 800,
-        color: col,
-        lineHeight: 1
-      }, SANS)
-    }, val), /*#__PURE__*/React.createElement("span", {
-      style: _objectSpread(_objectSpread({}, MONO), {}, {
-        fontSize: 7,
-        color: C.mono,
-        letterSpacing: "0.08em",
-        marginTop: 2
-      })
-    }, label));
-  };
   return /*#__PURE__*/React.createElement("div", {
     style: _objectSpread(_objectSpread({
       background: C.bg,
@@ -2021,13 +2074,13 @@ function App() {
       letterSpacing: "0.03em",
       lineHeight: 1
     }
-  }, "SPARTANS"), /*#__PURE__*/React.createElement("div", {
+  }, "EDUCATION PERFECT"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 9,
       color: C.muted,
       marginTop: 2
     }
-  }, "Nexus International Entertainment Ltd."))), /*#__PURE__*/React.createElement("div", {
+  }, "Help Scout \u2192 Intercom Implementation"))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -2280,7 +2333,7 @@ function App() {
         }
       }, t.dep && /*#__PURE__*/React.createElement("span", {
         style: {
-          color: OWNERS.Spartans.c,
+          color: OWNERS.EP.c,
           fontSize: 10,
           flexShrink: 0
         }
@@ -2316,7 +2369,7 @@ function App() {
         title: "Double-click to edit",
         style: {
           fontSize: 11,
-          color: t.dep ? OWNERS.Spartans.c : C.body,
+          color: t.dep ? OWNERS.EP.c : C.body,
           cursor: "text",
           overflow: "hidden",
           textOverflow: "ellipsis",
@@ -2470,10 +2523,10 @@ function App() {
       fontSize: 7.5,
       color: C.mono
     })
-  }, "KEY:"), Object.entries(OWNERS).map(function (_ref16) {
-    var _ref17 = _slicedToArray(_ref16, 2),
-      o = _ref17[0],
-      s = _ref17[1];
+  }, "KEY:"), Object.entries(OWNERS).map(function (_ref15) {
+    var _ref16 = _slicedToArray(_ref15, 2),
+      o = _ref16[0],
+      s = _ref16[1];
     return /*#__PURE__*/React.createElement("span", {
       key: o,
       style: {
@@ -2505,7 +2558,7 @@ function App() {
     style: {
       width: 9,
       height: 9,
-      background: OWNERS.Spartans.c,
+      background: OWNERS.EP.c,
       transform: "rotate(45deg)",
       borderRadius: 1
     }
@@ -2597,6 +2650,7 @@ function App() {
     })
   }, "sabelcustomersuccess.com")));
 }
+
 ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
   </script>
 </body>
