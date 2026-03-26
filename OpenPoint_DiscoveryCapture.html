@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenPoint — Discovery Capture · Sabel</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d1b2a;
+    --navy-mid: #162233;
+    --navy-card: #1c2d40;
+    --navy-border: #243648;
+    --red: #e8192c;
+    --red-dim: rgba(232,25,44,0.15);
+    --red-glow: rgba(232,25,44,0.08);
+    --white: #f0f4f8;
+    --muted: #7a9bb5;
+    --muted-dim: #4a6480;
+    --accent: #2eb8e6;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --text: #d4e4f0;
+    --label: #8bafc9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--navy-mid);
+    border-right: 1px solid var(--navy-border);
+    position: fixed;
+    top: 0; left: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--navy-border);
+  }
+
+  .sidebar-logo .wordmark {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+
+  .sidebar-logo .client-tag {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    margin-top: 4px;
+  }
+
+  .sidebar-logo .doc-type {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    letter-spacing: 0.06em;
+  }
+
+  .sidebar-nav {
+    padding: 16px 0;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { color: var(--white); background: var(--red-glow); }
+  .nav-item.active { color: var(--white); border-left-color: var(--red); background: var(--red-dim); }
+
+  .nav-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted-dim);
+    min-width: 18px;
+  }
+
+  .nav-item.active .nav-number { color: var(--red); }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--navy-border);
+    font-size: 10px;
+    color: var(--muted-dim);
+  }
+
+  .save-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Sora', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: opacity 0.15s;
+    margin-bottom: 10px;
+  }
+
+  .save-btn:hover { opacity: 0.88; }
+
+  /* ── Main ── */
+  .main {
+    margin-left: 220px;
+    flex: 1;
+    padding: 40px 48px;
+    max-width: 900px;
+  }
+
+  .page-header {
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--navy-border);
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+
+  .page-header p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .prefill-notice {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(46,184,230,0.12);
+    border: 1px solid rgba(46,184,230,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--accent);
+    margin-top: 12px;
+  }
+
+  .prefill-notice::before { content: "●"; font-size: 8px; }
+
+  /* ── Sections ── */
+  .section {
+    margin-bottom: 36px;
+    scroll-margin-top: 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    background: var(--red-dim);
+    border: 1px solid rgba(232,25,44,0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+
+  .section-desc {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--navy-card);
+    border: 1px solid var(--navy-border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  /* ── Grid ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .span-2 { grid-column: span 2; }
+  .span-3 { grid-column: span 3; }
+
+  /* ── Form elements ── */
+  .field { display: flex; flex-direction: column; gap: 5px; }
+
+  label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--label);
+    letter-spacing: 0.04em;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  select,
+  textarea {
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    padding: 9px 12px;
+    transition: border-color 0.15s;
+    outline: none;
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--red);
+  }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  select option { background: var(--navy-mid); }
+
+  /* Pre-filled indicator */
+  input.prefilled, select.prefilled, textarea.prefilled {
+    border-color: rgba(46,184,230,0.3);
+    background: rgba(46,184,230,0.04);
+  }
+
+  /* ── Checkbox groups ── */
+  .check-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .check-item:hover { border-color: var(--muted-dim); }
+  .check-item.checked { border-color: var(--red); background: var(--red-glow); }
+
+  .check-item input[type="checkbox"] { display: none; }
+
+  .check-box {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--muted-dim);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.15s;
+  }
+
+  .check-item.checked .check-box {
+    background: var(--red);
+    border-color: var(--red);
+  }
+
+  .check-item.checked .check-box::after {
+    content: "✓";
+    font-size: 10px;
+    color: white;
+    font-weight: 700;
+  }
+
+  .check-label { font-size: 13px; color: var(--text); line-height: 1.4; }
+  .check-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Tags / pill selects ── */
+  .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--navy-border);
+    background: var(--navy-mid);
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .pill:hover { border-color: var(--muted-dim); color: var(--white); }
+  .pill.selected { background: var(--red-dim); border-color: rgba(232,25,44,0.4); color: var(--white); }
+
+  /* ── Status badges ── */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-amber { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+  .badge-green { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+  .badge-red { background: var(--red-dim); color: #ff6b7a; border: 1px solid rgba(232,25,44,0.3); }
+
+  /* ── Inline alert ── */
+  .alert {
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .alert-amber { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: #fcd47a; }
+  .alert-blue { background: rgba(46,184,230,0.08); border: 1px solid rgba(46,184,230,0.2); color: #7dd3f0; }
+  .alert-red { background: var(--red-dim); border: 1px solid rgba(232,25,44,0.25); color: #ff8a93; }
+
+  /* ── Range ── */
+  .range-wrap { display: flex; align-items: center; gap: 12px; }
+  input[type="range"] {
+    flex: 1;
+    accent-color: var(--red);
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .range-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--white);
+    min-width: 60px;
+    text-align: right;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--navy-border);
+    margin: 20px 0;
+  }
+
+  /* ── Submit ── */
+  .form-footer {
+    padding: 32px 0 60px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .submit-btn {
+    padding: 13px 32px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: opacity 0.15s;
+  }
+
+  .submit-btn:hover { opacity: 0.88; }
+
+  .submit-note { font-size: 12px; color: var(--muted); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--navy-card);
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    display: none;
+    z-index: 999;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .toast.show { display: block; animation: slideUp 0.3s ease; }
+
+  @keyframes slideUp {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 24px 20px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .span-2, .span-3 { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="wordmark">Sabel</div>
+    <div class="client-tag">OpenPoint</div>
+    <div class="doc-type">Discovery Capture</div>
+  </div>
+  <div class="sidebar-nav">
+    <a class="nav-item active" href="#s1" onclick="setActive(this)">
+      <span class="nav-number">01</span> Company & Contacts
+    </a>
+    <a class="nav-item" href="#s2" onclick="setActive(this)">
+      <span class="nav-number">02</span> Business Overview
+    </a>
+    <a class="nav-item" href="#s3" onclick="setActive(this)">
+      <span class="nav-number">03</span> Current Stack
+    </a>
+    <a class="nav-item" href="#s4" onclick="setActive(this)">
+      <span class="nav-number">04</span> Scope & Phases
+    </a>
+    <a class="nav-item" href="#s5" onclick="setActive(this)">
+      <span class="nav-number">05</span> Integration Reqs
+    </a>
+    <a class="nav-item" href="#s6" onclick="setActive(this)">
+      <span class="nav-number">06</span> Fin Configuration
+    </a>
+    <a class="nav-item" href="#s7" onclick="setActive(this)">
+      <span class="nav-number">07</span> Knowledge Base
+    </a>
+    <a class="nav-item" href="#s8" onclick="setActive(this)">
+      <span class="nav-number">08</span> Timeline & Decision
+    </a>
+    <a class="nav-item" href="#s9" onclick="setActive(this)">
+      <span class="nav-number">09</span> Follow-up & Notes
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <button class="save-btn" onclick="saveToLocal()">Save Draft</button>
+    <div>Auto-saves to browser</div>
+  </div>
+</nav>
+
+<!-- Main -->
+<main class="main">
+  <div class="page-header">
+    <h1>Discovery Capture — OpenPoint</h1>
+    <p>Fill in or confirm details during the discovery call. Use this to build the proposal.</p>
+    <span class="prefill-notice">Pre-filled from pre-call research — confirm and complete blanks</span>
+  </div>
+
+  <form id="discoveryForm">
+
+    <!-- ── 01 Company & Contacts ── -->
+    <div class="section" id="s1">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <div>
+          <div class="section-title">Company & Contacts</div>
+          <div class="section-desc">Who are we dealing with and how do we reach them?</div>
+        </div>
+      </div>
+
+      <div class="alert alert-amber">
+        <span>⚠</span>
+        <span>Decision deadline is tight — end of March for selection, HubSpot contract renewal due before May. Keep this moving.</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Company</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Company Name</label>
+            <input type="text" name="company_name" class="prefilled" value="OpenPoint (formerly Social Pinpoint)">
+          </div>
+          <div class="field">
+            <label>Industry</label>
+            <input type="text" name="industry" class="prefilled" value="SaaS — Stakeholder &amp; Community Engagement">
+          </div>
+          <div class="field">
+            <label>Location / HQ</label>
+            <input type="text" name="location" placeholder="e.g. Brisbane, AU / US presence?">
+          </div>
+          <div class="field">
+            <label>Time Zone</label>
+            <input type="text" name="timezone" placeholder="e.g. AEST / confirm">
+          </div>
+          <div class="field">
+            <label>Website</label>
+            <input type="text" name="website" placeholder="e.g. https://openpoint.io">
+          </div>
+          <div class="field">
+            <label>Company size (approx.)</label>
+            <input type="text" name="company_size" class="prefilled" value="~100 employees">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Primary Contact</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Name</label>
+            <input type="text" name="contact1_name" placeholder="Full name">
+          </div>
+          <div class="field">
+            <label>Role</label>
+            <input type="text" name="contact1_role" placeholder="e.g. Head of Customer Success">
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" name="contact1_email" placeholder="name@openpoint.io">
+          </div>
+          <div class="field">
+            <label>Phone</label>
+            <input type="text" name="contact1_phone" placeholder="+61...">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Other Key Stakeholders</div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Support Lead / Manager</label>
+            <input type="text" name="support_lead" placeholder="Name">
+          </div>
+          <div class="field">
+            <label>Technical / Engineering contact</label>
+            <input type="text" name="tech_contact" placeholder="Name">
+          </div>
+          <div class="field">
+            <label>Commercial / Decision-maker</label>
+            <input type="text" name="decision_maker" placeholder="Name">
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="grid-2">
+          <div class="field">
+            <label>Day-to-day contact post-kickoff</label>
+            <input type="text" name="day_to_day" placeholder="Name + role">
+          </div>
+          <div class="field">
+            <label>Who signs off on Intercom config / Fin content?</label>
+            <input type="text" name="signoff_authority" placeholder="Name + role">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Support Team Structure</div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Support agents (headcount)</label>
+            <input type="number" name="support_agents" class="prefilled" value="4">
+          </div>
+          <div class="field">
+            <label>Onboarding reps (headcount)</label>
+            <input type="number" name="onboarding_reps" class="prefilled" value="4">
+          </div>
+          <div class="field">
+            <label>Any offshore / contractors?</label>
+            <input type="text" name="offshore" placeholder="Confirm">
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="field">
+          <label>How are support and onboarding queues managed today? (same inbox, separate?)</label>
+          <textarea name="team_queue_structure" placeholder="Confirm during call..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 02 Business Overview ── -->
+    <div class="section" id="s2">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <div>
+          <div class="section-title">Business Overview</div>
+          <div class="section-desc">Products, customers, and what success looks like for OpenPoint.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Products</div>
+        <div class="check-group">
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="product_stakeholder" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Stakeholder Engagement Platform</div>
+              <div class="check-sub">Describe primary use case and customer type — confirm during call</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="product_community" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Community Engagement Platform</div>
+              <div class="check-sub">Describe primary use case and customer type — confirm during call</div>
+            </div>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="grid-2">
+          <div class="field">
+            <label>Are the two products sold separately or as a suite?</label>
+            <input type="text" name="product_packaging" placeholder="Separate SKUs / bundle / both?">
+          </div>
+          <div class="field">
+            <label>Do customers use one or both products?</label>
+            <input type="text" name="product_overlap" placeholder="Confirm">
+          </div>
+          <div class="field span-2">
+            <label>How does multi-product affect support? (separate queues, routing, KB?)</label>
+            <textarea name="multiproduct_support_impact" class="prefilled">Multi-product setup is critical — routing and content separation needed. AI needs to clarify or detect product context, especially on email where there's no in-app signal.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Customer Base & Volume</div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Conversations / month (approx.)</label>
+            <input type="text" name="volume_monthly" class="prefilled" value="400–500">
+          </div>
+          <div class="field">
+            <label>Expected AI resolutions / month (initial)</label>
+            <input type="text" name="volume_ai_target" class="prefilled" value="150–200">
+          </div>
+          <div class="field">
+            <label>Target AI resolution rate</label>
+            <input type="text" name="fin_resolution_target" class="prefilled" value="~50% Tier 1 (upside possible)">
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="field">
+          <label>What does a typical Tier 1 query look like? (confirm top 5 categories)</label>
+          <textarea name="tier1_examples" placeholder="e.g. password resets, feature how-tos, billing questions, onboarding steps..."></textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>What types of queries should never go to AI? (hard escalations)</label>
+          <textarea name="no_ai_queries" placeholder="e.g. billing disputes, contract changes, enterprise account issues..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">CSAT & Quality Bar</div>
+        <div class="alert alert-blue">
+          <span>ℹ</span>
+          <span>AI quality is stated as critical — OpenPoint has a strong focus on maintaining high CSAT. This shapes Fin configuration, tone, escalation rules, and how we measure success post-launch.</span>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Current CSAT score (if tracked)</label>
+            <input type="text" name="csat_current" placeholder="e.g. 4.6/5 or 92%">
+          </div>
+          <div class="field">
+            <label>CSAT target post-Intercom</label>
+            <input type="text" name="csat_target" placeholder="Same or better than current">
+          </div>
+          <div class="field span-2">
+            <label>How is CSAT measured today? (HubSpot survey, external tool, ad hoc?)</label>
+            <textarea name="csat_method" placeholder="Confirm current measurement approach..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 03 Current Stack ── -->
+    <div class="section" id="s3">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <div>
+          <div class="section-title">Current Stack</div>
+          <div class="section-desc">What they're running today and what needs to carry across.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Core Tools</div>
+        <div class="check-group">
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="stack_hubspot" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">HubSpot Service Hub — current helpdesk + ticketing</div>
+              <div class="check-sub">Also acts as CRM and reporting layer — remains in place post-migration</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="stack_jira" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Jira — dev escalation workflows</div>
+              <div class="check-sub">Support tickets escalated to dev via Jira — need to avoid duplicate/manual handoffs</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="stack_other">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Other tools (confirm during call)</div>
+              <div class="check-sub">e.g. Slack, Zoom, internal wikis, product telemetry, subscription management</div>
+            </div>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="field">
+          <label>Subscription / identity management platform (product-level context for Fin)</label>
+          <input type="text" name="subscription_platform" placeholder="e.g. Stripe, Chargebee, custom — confirm. Needed for product detection.">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">HubSpot Details</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>HubSpot tier / plan</label>
+            <input type="text" name="hubspot_plan" placeholder="e.g. Service Hub Professional / Enterprise">
+          </div>
+          <div class="field">
+            <label>HubSpot contract renewal date</label>
+            <input type="text" name="hubspot_renewal" class="prefilled" value="Before May 2026">
+          </div>
+          <div class="field">
+            <label>How many users / seats in HubSpot today?</label>
+            <input type="text" name="hubspot_seats" placeholder="e.g. 12 users">
+          </div>
+          <div class="field">
+            <label>Is HubSpot used for marketing automation too?</label>
+            <select name="hubspot_marketing">
+              <option value="">Select...</option>
+              <option value="yes_heavily">Yes — heavily (Marketing Hub active)</option>
+              <option value="yes_light">Yes — light use only</option>
+              <option value="no">No — Service Hub only</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>What does HubSpot own that Intercom won't? (reporting, contacts, deals, sequences?)</label>
+          <textarea name="hubspot_owns" class="prefilled">HubSpot remains the CRM and reporting layer. Intercom handles conversations only — all sync'd back. Leads, customer activity, and deals stay in HubSpot.</textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Channel Mix Today</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Primary support channel</label>
+            <input type="text" name="channel_primary" class="prefilled" value="Email (~90% of volume today)">
+          </div>
+          <div class="field">
+            <label>In-app / chat today?</label>
+            <select name="channel_chat_today">
+              <option value="no" selected>No in-app messenger currently</option>
+              <option value="yes_basic">Yes — basic chat widget</option>
+              <option value="yes_full">Yes — full chat support</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Target channel mix post-Intercom</label>
+            <input type="text" name="channel_target" class="prefilled" value="Shift significant volume to in-app messenger">
+          </div>
+          <div class="field">
+            <label>Do any customers use phone support?</label>
+            <select name="channel_phone">
+              <option value="no">No</option>
+              <option value="yes_limited">Yes — limited</option>
+              <option value="yes_regular">Yes — regular</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 04 Scope & Phases ── -->
+    <div class="section" id="s4">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <div>
+          <div class="section-title">Scope & Phases</div>
+          <div class="section-desc">What are we building and in what order?</div>
+        </div>
+      </div>
+
+      <div class="alert alert-amber">
+        <span>⚠</span>
+        <span>Richard's view: Phase 1 (Support + Fin) and Phase 2 (Lead capture / SDR) could potentially be grouped into one engagement. Confirm appetite and whether the SDR use case is genuinely separate or can be layered in.</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Phase 1 — Support Foundation + Fin AI</div>
+        <div class="check-group">
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="p1_helpdesk" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Intercom Helpdesk setup — inboxes, teams, routing</div>
+              <div class="check-sub">Multi-product routing logic is a key complexity here</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="p1_fin" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Fin AI — configured for Tier 1 automation</div>
+              <div class="check-sub">Sentiment detection, escalation rules, product-aware routing</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="p1_hubspot_int" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">HubSpot integration — 2-way sync</div>
+              <div class="check-sub">Conversations, tickets, customer data/activity, leads</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="p1_jira_int" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Jira integration — dev escalation workflow</div>
+              <div class="check-sub">Automate support → dev handoff, no manual duplication</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="p1_kb" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Knowledge base — migrate / ingest content into Fin</div>
+              <div class="check-sub">Public + internal content, segmented by product</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="p1_messenger">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Messenger deployment — in-app install across both products</div>
+              <div class="check-sub">Confirm install scope — both products? Which environments?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Phase 2 — Lead Capture / SDR Use Case</div>
+        <div class="alert alert-blue">
+          <span>ℹ</span>
+          <span>TBC — could be layered into Phase 1 or scoped as a separate engagement. Confirm priority and who owns the SDR / lead capture workflow internally.</span>
+        </div>
+        <div class="check-group">
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="p2_lead_capture">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Intercom for inbound lead capture (website/marketing)</div>
+              <div class="check-sub">Confirm if this is a separate team or shared with support</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="p2_sdr_bot">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">SDR automation / qualification bot</div>
+              <div class="check-sub">Fin or Workflow-based — confirm expected query types and handoff logic</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="p2_hubspot_leads">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Lead sync to HubSpot — contacts, deals, sequences</div>
+              <div class="check-sub">Key if HubSpot is marketing automation layer</div>
+            </div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label>Phase 2 priority (relative to Phase 1 go-live)</label>
+          <select name="p2_priority">
+            <option value="">Select...</option>
+            <option value="immediate">Immediate — scope together</option>
+            <option value="post_p1">Post Phase 1 go-live (3–6 months)</option>
+            <option value="tbd">TBD — depends on Phase 1 outcomes</option>
+            <option value="low">Low priority for now</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Scope Pillars Summary</div>
+        <div class="pill-group" id="scope_pills">
+          <div class="pill selected" onclick="togglePill(this, 'scope_pills')" data-val="helpdesk">Helpdesk Setup</div>
+          <div class="pill selected" onclick="togglePill(this, 'scope_pills')" data-val="fin_ai">Fin AI</div>
+          <div class="pill selected" onclick="togglePill(this, 'scope_pills')" data-val="hubspot">HubSpot Integration</div>
+          <div class="pill selected" onclick="togglePill(this, 'scope_pills')" data-val="jira">Jira Integration</div>
+          <div class="pill selected" onclick="togglePill(this, 'scope_pills')" data-val="kb">KB Migration</div>
+          <div class="pill" onclick="togglePill(this, 'scope_pills')" data-val="messenger">Messenger Deploy</div>
+          <div class="pill" onclick="togglePill(this, 'scope_pills')" data-val="sdr">SDR / Lead Capture</div>
+          <div class="pill" onclick="togglePill(this, 'scope_pills')" data-val="reporting">Reporting Setup</div>
+        </div>
+        <input type="hidden" name="scope_pillars" id="scope_pills_val" value="helpdesk,fin_ai,hubspot,jira,kb">
+      </div>
+    </div>
+
+    <!-- ── 05 Integration Requirements ── -->
+    <div class="section" id="s5">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <div>
+          <div class="section-title">Integration Requirements</div>
+          <div class="section-desc">HubSpot and Jira — the technical connective tissue.</div>
+        </div>
+      </div>
+
+      <div class="alert alert-red">
+        <span>⚑</span>
+        <span>HubSpot integration is flagged as critical. Must be scoped accurately — 2-way sync complexity will drive hours. Confirm object types, field mappings, and who owns HubSpot admin access.</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title">HubSpot — Sync Requirements</div>
+        <div class="check-group">
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="hs_sync_conversations" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Conversations → HubSpot tickets (2-way)</div>
+              <div class="check-sub">Confirm direction and trigger — on creation? On close? On status change?</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="hs_sync_customer_data" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Customer data / activity sync</div>
+              <div class="check-sub">Contacts, lifecycle stage, product usage — confirm which HubSpot objects</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="hs_sync_leads" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Lead sync — Intercom contacts → HubSpot CRM</div>
+              <div class="check-sub">New leads from Messenger / chat flow into HubSpot pipeline</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="hs_sync_deals">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Deal data back into Intercom (for context during conversations)</div>
+              <div class="check-sub">Confirm — is agent visibility on deal stage / plan required?</div>
+            </div>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="grid-2">
+          <div class="field">
+            <label>Will Intercom use HubSpot's native integration or custom API?</label>
+            <select name="hs_integration_method">
+              <option value="native" selected>Native Intercom ↔ HubSpot integration</option>
+              <option value="custom_api">Custom API / middleware</option>
+              <option value="zapier">Zapier / Make</option>
+              <option value="tbd">TBD — needs technical review</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Who is the HubSpot admin / owner?</label>
+            <input type="text" name="hubspot_admin" placeholder="Name + role">
+          </div>
+          <div class="field span-2">
+            <label>Any custom HubSpot properties or pipelines we need to mirror into Intercom?</label>
+            <textarea name="hubspot_custom_fields" placeholder="e.g. custom contact properties, deal stages, pipeline names..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Jira — Escalation Workflow</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>How are support → dev escalations handled today?</label>
+            <textarea name="jira_today" class="prefilled" style="min-height:60px;">Support agent manually raises Jira ticket from HubSpot. Confirm if this is via native integration or manual copy-paste.</textarea>
+          </div>
+          <div class="field">
+            <label>Target workflow in Intercom → Jira</label>
+            <textarea name="jira_target" class="prefilled" style="min-height:60px;">Agent creates Jira issue directly from Intercom conversation. Status updates should reflect in Intercom. No manual duplication.</textarea>
+          </div>
+          <div class="field">
+            <label>Jira integration method</label>
+            <select name="jira_integration">
+              <option value="native" selected>Native Intercom ↔ Jira integration</option>
+              <option value="zapier">Zapier / Make</option>
+              <option value="custom">Custom webhook</option>
+              <option value="tbd">TBD</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Which Jira project(s) receive escalations?</label>
+            <input type="text" name="jira_project" placeholder="e.g. SUPP, BUG — confirm project keys">
+          </div>
+          <div class="field span-2">
+            <label>Any other dev / engineering escalation channels? (Slack, email, etc.)</label>
+            <textarea name="other_escalation" placeholder="Confirm..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Product Detection (AI Context)</div>
+        <div class="alert alert-blue">
+          <span>ℹ</span>
+          <span>Multi-product setup means Fin needs to know which product a customer is using — especially on email where there's no in-app context. Options: detect via subscription system, email domain/tag, or ask the customer.</span>
+        </div>
+        <div class="field">
+          <label>How should Fin detect which product a customer is using?</label>
+          <select name="product_detection">
+            <option value="">Select approach...</option>
+            <option value="subscription_api">Pull from subscription / identity platform via API</option>
+            <option value="email_tag">Segment by email domain or tag in HubSpot</option>
+            <option value="fin_ask">Fin asks the customer at conversation start</option>
+            <option value="custom_attribute">Custom attribute set at app install</option>
+            <option value="tbd">TBD — needs discussion</option>
+          </select>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Notes on product detection approach</label>
+          <textarea name="product_detection_notes" placeholder="e.g. Do they have an API we can hit? Is product flag stored in HubSpot contact data?"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 06 Fin Configuration ── -->
+    <div class="section" id="s6">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <div>
+          <div class="section-title">Fin Configuration</div>
+          <div class="section-desc">How should the AI behave, escalate, and measure success?</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">AI Behaviour Requirements</div>
+        <div class="check-group">
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="fin_sentiment" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Sentiment detection — escalate frustrated / upset customers</div>
+              <div class="check-sub">Fin should detect negative sentiment and route to human before the conversation deteriorates</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="fin_product_aware" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Product-aware responses — different content per product</div>
+              <div class="check-sub">Fin must serve correct KB content based on which product the customer is using</div>
+            </div>
+          </div>
+          <div class="check-item checked" onclick="toggleCheck(this)">
+            <input type="checkbox" name="fin_escalation_rules" checked>
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Escalation rules — define clear handoff triggers</div>
+              <div class="check-sub">Beyond sentiment: billing issues, account suspension, feature requests, compliance flags</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="fin_tone">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Custom tone / persona for Fin</div>
+              <div class="check-sub">Does OpenPoint want Fin to reflect their brand voice? Confirm naming / persona preference.</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="fin_csat_survey">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">CSAT survey triggered post-resolution (Fin + human)</div>
+              <div class="check-sub">Confirm preferred survey timing and format</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Escalation Rules Detail</div>
+        <div class="field">
+          <label>Hard escalation triggers (always goes to human)</label>
+          <textarea name="escalation_hard" placeholder="e.g. billing disputes, account suspension, cancellation intent, compliance issues, enterprise accounts..."></textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Soft escalation triggers (Fin tries first, then hands off)</label>
+          <textarea name="escalation_soft" placeholder="e.g. 3 failed Fin attempts, customer explicitly asks for human, negative sentiment detected..."></textarea>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Who do escalations route to? (team / inbox)</label>
+          <input type="text" name="escalation_target" placeholder="e.g. Support team inbox, product-specific queues, senior agents only">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Fin Success Metrics</div>
+        <div class="grid-3">
+          <div class="field">
+            <label>Resolution rate target (Month 1)</label>
+            <input type="text" name="fin_resolution_m1" class="prefilled" value="~40–50%">
+          </div>
+          <div class="field">
+            <label>Resolution rate target (Month 3)</label>
+            <input type="text" name="fin_resolution_m3" placeholder="e.g. 55–65%">
+          </div>
+          <div class="field">
+            <label>Fin CSAT target</label>
+            <input type="text" name="fin_csat_target" placeholder="e.g. Match or exceed human CSAT">
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="field">
+          <label>Is there a Fin Analyse add-on in scope? (conversation analytics / topic clustering)</label>
+          <select name="fin_analyse">
+            <option value="tbd">TBD — discuss during call</option>
+            <option value="yes">Yes — include in scope</option>
+            <option value="no">No — standard Fin only</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 07 Knowledge Base ── -->
+    <div class="section" id="s7">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <div>
+          <div class="section-title">Knowledge Base & Content</div>
+          <div class="section-desc">Where does help content live and how will it feed Fin?</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Current KB State</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Where does KB content live today?</label>
+            <select name="kb_location">
+              <option value="hubspot">In HubSpot (Knowledge Base feature)</option>
+              <option value="external">External tool (Confluence, Notion, etc.)</option>
+              <option value="both" selected>Both HubSpot + external</option>
+              <option value="none">No formal KB — ad hoc docs</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Approximate article count</label>
+            <input type="number" name="kb_article_count" placeholder="e.g. 80">
+          </div>
+          <div class="field">
+            <label>Is content segmented by product today?</label>
+            <select name="kb_segmented">
+              <option value="partial">Partially — some separation</option>
+              <option value="yes">Yes — clearly separated</option>
+              <option value="no">No — mixed together</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Public vs internal content split</label>
+            <input type="text" name="kb_public_internal" placeholder="e.g. 60% public, 40% internal agent notes">
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>How current is the content? (last reviewed / updated)</label>
+          <input type="text" name="kb_freshness" placeholder="e.g. Mostly up to date / some articles 12+ months old">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">KB Destination Decision</div>
+        <div class="alert alert-blue">
+          <span>ℹ</span>
+          <span>OpenPoint is open to keeping KB external OR moving into Intercom Help Centre — but wants content in one place. This decision shapes migration scope significantly.</span>
+        </div>
+        <div class="field">
+          <label>Preferred KB approach</label>
+          <select name="kb_approach">
+            <option value="intercom" selected>Move all into Intercom Help Centre (recommended for Fin quality)</option>
+            <option value="external_connect">Keep external — connect via Fin external KB connector</option>
+            <option value="hybrid">Hybrid — Intercom for public, external for internal</option>
+            <option value="tbd">TBD — recommend during discovery</option>
+          </select>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>If migrating to Intercom — is this a Sabel migration service (Migr8Now) or client-led?</label>
+          <select name="kb_migration_owner">
+            <option value="sabel">Sabel to handle migration (Migration Accelerator milestone)</option>
+            <option value="client">Client team to migrate with Sabel guidance</option>
+            <option value="tbd">TBD</option>
+          </select>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Notes on KB decision</label>
+          <textarea name="kb_notes" placeholder="Any content in unusable format? Images, PDFs, videos? Localisation needed?"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Content Ownership Post-Launch</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Who owns KB content updates post-launch?</label>
+            <input type="text" name="kb_owner" placeholder="Name / role">
+          </div>
+          <div class="field">
+            <label>Content review cadence (planned)</label>
+            <select name="kb_review">
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="adhoc">Ad hoc / as-needed</option>
+              <option value="unknown">Not yet decided</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 08 Timeline & Decision ── -->
+    <div class="section" id="s8">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <div>
+          <div class="section-title">Timeline & Decision</div>
+          <div class="section-desc">Key dates, urgency drivers, and what's needed to close.</div>
+        </div>
+      </div>
+
+      <div class="alert alert-amber">
+        <span>⚠</span>
+        <span>Hard deadline: HubSpot contract decision before May. Decision on platform selection by end of March. This shapes how fast we need to move on proposal and onboarding.</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Key Dates</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Platform decision target</label>
+            <input type="text" name="date_decision" class="prefilled" value="End of March 2026">
+          </div>
+          <div class="field">
+            <label>HubSpot contract renewal deadline</label>
+            <input type="text" name="date_hubspot_renewal" class="prefilled" value="Before May 2026">
+          </div>
+          <div class="field">
+            <label>Desired go-live (Phase 1)</label>
+            <input type="text" name="date_golive" placeholder="e.g. May 2026 — confirm">
+          </div>
+          <div class="field">
+            <label>Any events / peak periods to avoid?</label>
+            <input type="text" name="date_avoid" placeholder="e.g. end of financial year, product launches, conferences">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Evaluation Status</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Are they actively evaluating other vendors?</label>
+            <select name="eval_competitors">
+              <option value="">Select...</option>
+              <option value="intercom_only">Intercom only — just scoping the implementation</option>
+              <option value="yes_zendesk">Yes — also looking at Zendesk</option>
+              <option value="yes_freshdesk">Yes — also looking at Freshdesk</option>
+              <option value="yes_other">Yes — other platforms (confirm)</option>
+              <option value="unknown">Not sure — confirm during call</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>What's the primary driver for leaving HubSpot?</label>
+            <select name="hubspot_leave_reason">
+              <option value="">Select...</option>
+              <option value="cost">Cost — HubSpot too expensive at renewal</option>
+              <option value="fin_ai">Fin AI capability — not available in HubSpot</option>
+              <option value="product_fit">Product fit — Intercom better for SaaS support</option>
+              <option value="multiple">Multiple reasons</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>What would make them choose Sabel over going direct to Intercom PS?</label>
+          <textarea name="sabel_differentiator" placeholder="e.g. APAC timezone support, HubSpot integration expertise, fixed-scope project model, CSAT-focused delivery..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Engagement Preferences</div>
+        <div class="pill-group" id="engagement_pills">
+          <div class="pill selected" onclick="togglePill(this, 'engagement_pills')" data-val="project">Project-based</div>
+          <div class="pill" onclick="togglePill(this, 'engagement_pills')" data-val="retainer">Ongoing retainer</div>
+          <div class="pill selected" onclick="togglePill(this, 'engagement_pills')" data-val="phased">Phased milestones</div>
+          <div class="pill" onclick="togglePill(this, 'engagement_pills')" data-val="adhoc">Ad-hoc hours</div>
+        </div>
+        <input type="hidden" name="engagement_model" id="engagement_model_val" value="project,phased">
+        <div class="grid-2" style="margin-top:14px;">
+          <div class="field">
+            <label>Currency preference</label>
+            <select name="currency">
+              <option value="AUD">AUD</option>
+              <option value="USD">USD</option>
+              <option value="NZD">NZD</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Budget range (if shared)</label>
+            <input type="text" name="budget_range" placeholder="e.g. AUD $20,000–$30,000 — confirm">
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Interest in ongoing retainer post-launch?</label>
+          <select name="retainer_interest">
+            <option value="yes">Yes — open to retainer for optimisation / support</option>
+            <option value="maybe">Maybe — depends on Phase 1 outcome</option>
+            <option value="no">No — project only</option>
+            <option value="tbd">Not discussed yet</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 09 Follow-up & Notes ── -->
+    <div class="section" id="s9">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <div>
+          <div class="section-title">Follow-up & Notes</div>
+          <div class="section-desc">Next steps, open questions, and anything to chase before writing the proposal.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Next Steps</div>
+        <div class="check-group">
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="ns_proposal">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Send Scope of Work / proposal</div>
+              <div class="check-sub">Target: within 3 business days of this call to meet end-of-March decision window</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="ns_hubspot_review">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Request access to or walkthrough of HubSpot setup</div>
+              <div class="check-sub">Needed to scope integration accurately — object types, pipelines, field names</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="ns_kb_audit">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">KB content audit — confirm volume, format, and location</div>
+              <div class="check-sub">Ask them to share a content inventory before proposal is finalised</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="ns_intercom_confirm">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Confirm Intercom plan / seat count they're purchasing</div>
+              <div class="check-sub">Needed to validate integration options available on their plan</div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <input type="checkbox" name="ns_p2_scope">
+            <div class="check-box"></div>
+            <div>
+              <div class="check-label">Clarify Phase 2 (SDR / lead capture) — scope together or separate?</div>
+              <div class="check-sub">Richard's instinct: fold into one engagement if timeline allows</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Open Questions (confirm during call)</div>
+        <div class="field">
+          <label>Questions to ask</label>
+          <textarea name="open_questions" class="prefilled" style="min-height:200px;">1. Who is the day-to-day contact and who is the final sign-off on scope / commercials?
+2. What exactly is in HubSpot — which objects, pipelines, and custom fields need to carry across?
+3. How is multi-product handled today — do customers contact a shared inbox or product-specific emails?
+4. What subscription / identity platform are they using? Can we hook Fin into it for product detection?
+5. What does the KB look like — HubSpot native KB, Confluence, Notion, something else?
+6. Are they considering keeping the KB external (Intercom connector) or moving it in fully?
+7. What are the top 5–10 query types they want Fin to handle in Month 1?
+8. What does a good Fin response look like to them? (tone, length, behaviour when it can't answer)
+9. Is Phase 2 (SDR / lead capture) in scope for the same engagement or a separate project?
+10. What is their Intercom plan and when does it activate? (affects integration options)</textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">General Notes</div>
+        <div class="field">
+          <label>Anything else to capture from the call</label>
+          <textarea name="general_notes" placeholder="Add anything that doesn't fit above — vibes, hesitations, competitors mentioned, internal politics..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Proposal Scope Estimate (internal — do not share)</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Estimated hours — Phase 1</label>
+            <input type="number" name="est_hours_p1" placeholder="e.g. 60">
+          </div>
+          <div class="field">
+            <label>Estimated hours — Phase 2 (if separate)</label>
+            <input type="number" name="est_hours_p2" placeholder="e.g. 20">
+          </div>
+          <div class="field">
+            <label>Complexity rating</label>
+            <select name="complexity">
+              <option value="medium" selected>Medium — multi-product + HubSpot + Jira, but established SaaS team</option>
+              <option value="high">High — significant integration complexity or unknowns</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Risk rating</label>
+            <select name="risk">
+              <option value="low" selected>Low — clear use case, tight deadline is a motivator not a blocker</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label>Notes for proposal build</label>
+            <textarea name="proposal_notes" class="prefilled">Key scope drivers: HubSpot 2-way sync (most complex element), multi-product routing + Fin content separation, KB migration scope (TBD), Jira escalation automation. Phase 2 SDR use case — assess whether to bundle or price separately. Timeline is tight — turnaround proposal within 3 days.</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-footer">
+      <button type="button" class="submit-btn" onclick="saveToLocal()">Save & Export Notes</button>
+      <span class="submit-note">Saves locally — copy the JSON to share with the team or drop into the proposal build.</span>
+    </div>
+
+  </form>
+</main>
+
+<div class="toast" id="toast">✓ Discovery notes saved</div>
+
+<script>
+  // ── Nav active state ──
+  function setActive(el) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ── Scroll spy ──
+  const sections = document.querySelectorAll('.section');
+  const navItems = document.querySelectorAll('.nav-item');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 80) current = s.id;
+    });
+    navItems.forEach(n => {
+      n.classList.remove('active');
+      if (n.getAttribute('href') === '#' + current) n.classList.add('active');
+    });
+  });
+
+  // ── Checkbox toggle ──
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    const cb = el.querySelector('input[type="checkbox"]');
+    if (cb) cb.checked = !cb.checked;
+  }
+
+  // ── Pill toggle ──
+  function togglePill(el, groupId) {
+    el.classList.toggle('selected');
+    const vals = [...document.querySelectorAll('#' + groupId + ' .pill.selected')]
+      .map(p => p.dataset.val).join(',');
+    const hiddenId = groupId === 'scope_pills' ? 'scope_pills_val' : 'engagement_model_val';
+    document.getElementById(hiddenId).value = vals;
+  }
+
+  // ── Save to local ──
+  function saveToLocal() {
+    const form = document.getElementById('discoveryForm');
+    const data = {};
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(inp => {
+      if (inp.name) {
+        if (inp.type === 'checkbox') {
+          data[inp.name] = inp.checked;
+        } else {
+          data[inp.name] = inp.value;
+        }
+      }
+    });
+    data._saved = new Date().toISOString();
+    data._client = 'OpenPoint';
+    localStorage.setItem('sabel_discovery_openpoint', JSON.stringify(data, null, 2));
+
+    console.log('=== OPENPOINT DISCOVERY CAPTURE ===');
+    console.log(JSON.stringify(data, null, 2));
+
+    showToast();
+  }
+
+  // ── Restore from local ──
+  function restoreFromLocal() {
+    const saved = localStorage.getItem('sabel_discovery_openpoint');
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    const form = document.getElementById('discoveryForm');
+    Object.entries(data).forEach(([key, val]) => {
+      const el = form.querySelector(`[name="${key}"]`);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = val;
+      else el.value = val;
+    });
+  }
+
+  function showToast() {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Restore on load
+  window.addEventListener('load', restoreFromLocal);
+
+  // Auto-save every 60s
+  setInterval(saveToLocal, 60000);
+</script>
+
+</body>
+</html>
