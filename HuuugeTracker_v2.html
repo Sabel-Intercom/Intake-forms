@@ -63,10 +63,10 @@ var OWNERS = {
     bg: "rgba(96,165,250,.12)",
     bd: "rgba(96,165,250,.3)"
   },
-  Richard: {
-    c: "#C084FC",
-    bg: "rgba(192,132,252,.12)",
-    bd: "rgba(192,132,252,.3)"
+  Greg: {
+    c: "#34D399",
+    bg: "rgba(52,211,153,.12)",
+    bd: "rgba(52,211,153,.3)"
   },
   Huuuge: {
     c: "#FBBF24",
@@ -74,7 +74,7 @@ var OWNERS = {
     bd: "rgba(251,191,36,.3)"
   }
 };
-var SABEL_OWNERS = new Set(["Chris", "Richard"]);
+var SABEL_OWNERS = new Set(["Chris", "Greg"]);
 var CLIENT_OWNERS = new Set(["Huuuge"]);
 var STATUSES_DEF = {
   "Complete": {
@@ -185,7 +185,7 @@ var INIT = [{
   }, {
     id: "s2",
     task: "Share SOW and project overview with Konrad",
-    owner: "Richard",
+    owner: "Chris",
     co: "",
     start: "2026-03-17",
     end: "2026-03-18",
@@ -196,7 +196,7 @@ var INIT = [{
   }, {
     id: "s3",
     task: "Send kickoff intake form to Huuuge",
-    owner: "Chris",
+    owner: "Greg",
     co: "",
     start: "2026-03-17",
     end: "2026-03-19",
@@ -208,7 +208,7 @@ var INIT = [{
     id: "s4",
     task: "Schedule Week 1 kickoff call",
     owner: "Chris",
-    co: "Richard",
+    co: "Greg",
     start: "2026-03-17",
     end: "2026-03-20",
     status: "Pending",
@@ -217,7 +217,7 @@ var INIT = [{
     link: ""
   }, {
     id: "s5",
-    task: "◆ Intercom admin access for Richard and Chris in new workspace",
+    task: "◆ Intercom admin access for Chris and Greg in new workspace",
     owner: "Huuuge",
     co: "",
     start: "2026-03-18",
@@ -309,8 +309,8 @@ var INIT = [{
   tasks: [{
     id: "f1",
     task: "Week 1 kickoff call",
-    owner: "Richard",
-    co: "Chris",
+    owner: "Chris",
+    co: "",
     start: "2026-03-23",
     end: "2026-03-23",
     status: "Pending",
@@ -320,7 +320,7 @@ var INIT = [{
   }, {
     id: "f2",
     task: "Workspace creation and configuration — teams, business hours, permissions",
-    owner: "Richard",
+    owner: "Chris",
     co: "",
     start: "2026-03-23",
     end: "2026-03-25",
@@ -331,7 +331,7 @@ var INIT = [{
   }, {
     id: "f3",
     task: "Multi-brand setup — Huuuge Casino, Billionaire Casino, HC VIP, BC VIP",
-    owner: "Richard",
+    owner: "Chris",
     co: "",
     start: "2026-03-25",
     end: "2026-03-31",
@@ -375,7 +375,7 @@ var INIT = [{
   }, {
     id: "f7",
     task: "Loyalty tag-based routing — player tag routes to VIP or non-VIP inbox",
-    owner: "Richard",
+    owner: "Chris",
     co: "",
     start: "2026-03-31",
     end: "2026-04-03",
@@ -397,8 +397,8 @@ var INIT = [{
   }, {
     id: "f9",
     task: "Validate workspace setup — test conversations across all 4 brands",
-    owner: "Chris",
-    co: "Richard",
+    owner: "Greg",
+    co: "",
     start: "2026-04-03",
     end: "2026-04-03",
     status: "Pending",
@@ -411,7 +411,7 @@ var INIT = [{
   tasks: [{
     id: "a1",
     task: "Build shared component — Player Identity Collection",
-    owner: "Richard",
+    owner: "Greg",
     co: "",
     start: "2026-04-01",
     end: "2026-04-03",
@@ -422,7 +422,7 @@ var INIT = [{
   }, {
     id: "a2",
     task: "Build shared component — Confirmation Gate",
-    owner: "Richard",
+    owner: "Greg",
     co: "",
     start: "2026-04-01",
     end: "2026-04-03",
@@ -433,7 +433,7 @@ var INIT = [{
   }, {
     id: "a3",
     task: "Build shared component — Brand-Based Queue Assignment",
-    owner: "Richard",
+    owner: "Greg",
     co: "",
     start: "2026-04-01",
     end: "2026-04-03",
@@ -444,52 +444,52 @@ var INIT = [{
   }, {
     id: "a4",
     task: "Procedure A — GDPR and Privacy Policy Workflow Set",
-    owner: "Richard",
+    owner: "Greg",
     co: "",
     start: "2026-04-06",
     end: "2026-04-10",
     status: "Pending",
-    notes: "~8 hrs — 3 linked flows: privacy policy triage, account deletion, data access request. Uses Player Identity Collection, Confirmation Gate, Brand-Based Queue Assignment",
+    notes: "~8 hrs — 3 linked flows: privacy policy triage, account deletion, data access request",
     dep: false,
     link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
   }, {
     id: "a5",
     task: "Procedure B — Purchase Issue Assistant",
-    owner: "Richard",
+    owner: "Greg",
     co: "",
     start: "2026-04-06",
     end: "2026-04-10",
     status: "Pending",
-    notes: "~8 hrs — missing/disputed purchase flows; merchant-specific receipt guides for Google Play, App Store, Kindle, Facebook, Golden Ring. Uses Brand-Based Queue Assignment",
+    notes: "~8 hrs — missing/disputed purchase flows; merchant-specific receipt guides for Google Play, App Store, Kindle, Facebook, Golden Ring",
     dep: false,
     link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
   }, {
     id: "a6",
     task: "Procedure C — Account Recovery Assistant",
-    owner: "Richard",
+    owner: "Greg",
     co: "",
     start: "2026-04-13",
     end: "2026-04-16",
     status: "Pending",
-    notes: "~6 hrs — Facebook account linking; SKU check; sync profile steps; club name collection. Uses Player Identity Collection, Brand-Based Queue Assignment",
+    notes: "~6 hrs — Facebook account linking; SKU check; sync profile steps; club name collection",
     dep: false,
     link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
   }, {
     id: "a7",
     task: "Procedure D — Self Exclusion (Bar Bot) Assistant",
-    owner: "Richard",
+    owner: "Greg",
     co: "",
     start: "2026-04-13",
     end: "2026-04-16",
     status: "Pending",
-    notes: "~6 hrs — responsible gaming resources; irreversibility disclosure; duration selection 1–5 years; unblock process. Uses Confirmation Gate, Brand-Based Queue Assignment",
+    notes: "~6 hrs — responsible gaming resources; irreversibility disclosure; duration selection 1–5 years",
     dep: false,
     link: "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"
   }, {
     id: "a8",
     task: "Workflow QA — end-to-end testing across all 4 procedures",
-    owner: "Richard",
-    co: "Chris",
+    owner: "Greg",
+    co: "",
     start: "2026-04-16",
     end: "2026-04-20",
     status: "Pending",
@@ -513,7 +513,7 @@ var INIT = [{
   }, {
     id: "fn2",
     task: "FAQ article upload and formatting — 169 articles across 24 categories",
-    owner: "Chris",
+    owner: "Greg",
     co: "",
     start: "2026-04-06",
     end: "2026-04-17",
@@ -524,7 +524,7 @@ var INIT = [{
   }, {
     id: "fn3",
     task: "Knowledge source preparation — structure and connect Help Centre to Fin",
-    owner: "Chris",
+    owner: "Greg",
     co: "",
     start: "2026-04-14",
     end: "2026-04-17",
@@ -535,7 +535,7 @@ var INIT = [{
   }, {
     id: "fn4",
     task: "Fin AI intent attributes and taxonomy setup",
-    owner: "Richard",
+    owner: "Greg",
     co: "",
     start: "2026-04-14",
     end: "2026-04-17",
@@ -546,7 +546,7 @@ var INIT = [{
   }, {
     id: "fn5",
     task: "Configure and launch Fin — conservative rollout across non-VIP brands",
-    owner: "Richard",
+    owner: "Chris",
     co: "",
     start: "2026-04-17",
     end: "2026-04-20",
@@ -557,7 +557,7 @@ var INIT = [{
   }, {
     id: "fn6",
     task: "Connect Fin to Help Centre knowledge source — URL-based",
-    owner: "Richard",
+    owner: "Chris",
     co: "",
     start: "2026-04-17",
     end: "2026-04-17",
@@ -568,7 +568,7 @@ var INIT = [{
   }, {
     id: "fn7",
     task: "Fin VIP bypass configuration and workflow branching",
-    owner: "Richard",
+    owner: "Greg",
     co: "",
     start: "2026-04-17",
     end: "2026-04-20",
@@ -579,8 +579,8 @@ var INIT = [{
   }, {
     id: "fn8",
     task: "Fin quality loop and iterative review",
-    owner: "Richard",
-    co: "Chris",
+    owner: "Chris",
+    co: "Greg",
     start: "2026-04-20",
     end: "2026-04-24",
     status: "Pending",
@@ -604,7 +604,7 @@ var INIT = [{
   tasks: [{
     id: "m1",
     task: "Custom object and contact data migration — Huuuge Casino VIP workspace",
-    owner: "Richard",
+    owner: "Greg",
     co: "",
     start: "2026-04-20",
     end: "2026-04-22",
@@ -615,7 +615,7 @@ var INIT = [{
   }, {
     id: "m2",
     task: "Custom object and contact data migration — Billionaire Casino VIP workspace",
-    owner: "Richard",
+    owner: "Greg",
     co: "",
     start: "2026-04-22",
     end: "2026-04-24",
@@ -626,7 +626,7 @@ var INIT = [{
   }, {
     id: "m3",
     task: "Validate migration — record counts and data completeness checks",
-    owner: "Richard",
+    owner: "Greg",
     co: "",
     start: "2026-04-24",
     end: "2026-04-24",
@@ -651,8 +651,8 @@ var INIT = [{
   tasks: [{
     id: "g1",
     task: "Agent enablement training — support ops team session",
-    owner: "Chris",
-    co: "Richard",
+    owner: "Greg",
+    co: "",
     start: "2026-04-20",
     end: "2026-04-22",
     status: "Pending",
@@ -663,7 +663,7 @@ var INIT = [{
     id: "g2",
     task: "Agent enablement training — VIP team session",
     owner: "Chris",
-    co: "Richard",
+    co: "",
     start: "2026-04-22",
     end: "2026-04-24",
     status: "Pending",
@@ -673,8 +673,8 @@ var INIT = [{
   }, {
     id: "g3",
     task: "UAT across all 4 brands — sign-off by Konrad",
-    owner: "Richard",
-    co: "Chris",
+    owner: "Greg",
+    co: "",
     start: "2026-04-22",
     end: "2026-04-28",
     status: "Pending",
@@ -695,8 +695,8 @@ var INIT = [{
   }, {
     id: "g5",
     task: "Trial go-live — all 4 brands live in Intercom",
-    owner: "Richard",
-    co: "Chris",
+    owner: "Greg",
+    co: "",
     start: "2026-04-28",
     end: "2026-04-28",
     status: "Pending",
@@ -707,7 +707,7 @@ var INIT = [{
     id: "g6",
     task: "Go-live cutover monitoring and post-launch iteration",
     owner: "Chris",
-    co: "Richard",
+    co: "",
     start: "2026-04-28",
     end: "2026-04-30",
     status: "Pending",
@@ -717,7 +717,7 @@ var INIT = [{
   }, {
     id: "g7",
     task: "Full Helpshift cutover — parallel run complete, Helpshift decommissioned",
-    owner: "Richard",
+    owner: "Chris",
     co: "",
     start: "2026-04-29",
     end: "2026-04-30",
@@ -728,8 +728,8 @@ var INIT = [{
   }, {
     id: "g8",
     task: "Project documentation — configuration map, workflow reference, admin handover guide",
-    owner: "Richard",
-    co: "Chris",
+    owner: "Chris",
+    co: "Greg",
     start: "2026-04-22",
     end: "2026-04-30",
     status: "Pending",
@@ -866,10 +866,10 @@ function PercentStat(_ref3) {
 }
 function DualProgress(_ref4) {
   var tasks = _ref4.tasks;
-  var sabelTasks = tasks.filter(function (t) {
+  var sT = tasks.filter(function (t) {
     return SABEL_OWNERS.has(t.owner);
   });
-  var clientTasks = tasks.filter(function (t) {
+  var cT = tasks.filter(function (t) {
     return CLIENT_OWNERS.has(t.owner);
   });
   var pct = function pct(arr) {
@@ -877,8 +877,8 @@ function DualProgress(_ref4) {
       return t.status === "Complete";
     }).length / arr.length * 100);
   };
-  var sabelPct = pct(sabelTasks);
-  var clientPct = pct(clientTasks);
+  var sP = pct(sT);
+  var cP = pct(cT);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -906,7 +906,7 @@ function DualProgress(_ref4) {
   }, /*#__PURE__*/React.createElement("span", {
     style: _objectSpread(_objectSpread({}, MONO), {}, {
       fontSize: 7,
-      color: "#C084FC",
+      color: "#34D399",
       letterSpacing: "0.08em"
     })
   }, "SABEL"), /*#__PURE__*/React.createElement("span", {
@@ -915,7 +915,7 @@ function DualProgress(_ref4) {
       color: C.w,
       fontWeight: 800
     })
-  }, sabelPct, "%")), /*#__PURE__*/React.createElement("div", {
+  }, sP, "%")), /*#__PURE__*/React.createElement("div", {
     style: {
       width: "100%",
       height: 3,
@@ -925,20 +925,20 @@ function DualProgress(_ref4) {
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      width: "".concat(sabelPct, "%"),
+      width: "".concat(sP, "%"),
       height: "100%",
       borderRadius: 2,
       transition: "width .5s",
-      background: "linear-gradient(90deg,#C084FC,#818CF8)"
+      background: "linear-gradient(90deg,#60A5FA,#34D399)"
     }
   })), /*#__PURE__*/React.createElement("span", {
     style: _objectSpread(_objectSpread({}, MONO), {}, {
       fontSize: 7,
       color: C.mono
     })
-  }, sabelTasks.filter(function (t) {
+  }, sT.filter(function (t) {
     return t.status === "Complete";
-  }).length, "/", sabelTasks.length, " tasks")), /*#__PURE__*/React.createElement("div", {
+  }).length, "/", sT.length, " tasks")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -967,7 +967,7 @@ function DualProgress(_ref4) {
       color: C.w,
       fontWeight: 800
     })
-  }, clientPct, "%")), /*#__PURE__*/React.createElement("div", {
+  }, cP, "%")), /*#__PURE__*/React.createElement("div", {
     style: {
       width: "100%",
       height: 3,
@@ -977,7 +977,7 @@ function DualProgress(_ref4) {
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      width: "".concat(clientPct, "%"),
+      width: "".concat(cP, "%"),
       height: "100%",
       borderRadius: 2,
       transition: "width .5s",
@@ -988,9 +988,9 @@ function DualProgress(_ref4) {
       fontSize: 7,
       color: C.mono
     })
-  }, clientTasks.filter(function (t) {
+  }, cT.filter(function (t) {
     return t.status === "Complete";
-  }).length, "/", clientTasks.length, " tasks")));
+  }).length, "/", cT.length, " tasks")));
 }
 function OwnerBadge(_ref5) {
   var owner = _ref5.owner,
@@ -1172,7 +1172,7 @@ function App() {
     _useState0 = _slicedToArray(_useState9, 2),
     tlCol = _useState0[0],
     setTlCol = _useState0[1];
-  var _useState1 = useState(new Set(["Chris", "Richard", "Huuuge"])),
+  var _useState1 = useState(new Set(["Chris", "Greg", "Huuuge"])),
     _useState10 = _slicedToArray(_useState1, 2),
     activeO = _useState10[0],
     setActiveO = _useState10[1];
@@ -1434,7 +1434,7 @@ function App() {
         fontSize: 10,
         outline: "none"
       })
-    }, ["Chris", "Richard", "Huuuge", ""].map(function (o) {
+    }, ["Chris", "Greg", "Huuuge", ""].map(function (o) {
       return /*#__PURE__*/React.createElement("option", {
         key: o,
         value: o
@@ -2533,7 +2533,7 @@ function App() {
   }, "sabelcustomersuccess.com")));
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
   </script>
 </body>
 </html>
