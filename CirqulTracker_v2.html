@@ -1,0 +1,2601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cirqul Project Tracker · Sabel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0B0B0C; }
+    #root { min-height: 100vh; }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script>
+"use strict";
+
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+var _React = React,
+  useState = _React.useState,
+  useCallback = _React.useCallback,
+  useMemo = _React.useMemo,
+  useEffect = _React.useEffect,
+  useRef = _React.useRef;
+var API = "https://sabel-webhook.vercel.app/api/tracker";
+var C = {
+  bg: "#0B0B0C",
+  card: "#0F1113",
+  card2: "#141618",
+  card3: "#191C20",
+  card4: "#1E2228",
+  w: "#FFFFFF",
+  red: "#E10600",
+  redDim: "rgba(225,6,0,0.15)",
+  body: "#E2E8F0",
+  muted: "#94A3B8",
+  border: "#2A3547",
+  border2: "#1A2232",
+  mono: "#64748B"
+};
+var OWNERS = {
+  Chris: {
+    c: "#60A5FA",
+    bg: "rgba(96,165,250,.12)",
+    bd: "rgba(96,165,250,.3)"
+  },
+  Richard: {
+    c: "#C084FC",
+    bg: "rgba(192,132,252,.12)",
+    bd: "rgba(192,132,252,.3)"
+  },
+  Greg: {
+    c: "#34D399",
+    bg: "rgba(52,211,153,.12)",
+    bd: "rgba(52,211,153,.3)"
+  },
+  Cirqul: {
+    c: "#FBBF24",
+    bg: "rgba(251,191,36,.12)",
+    bd: "rgba(251,191,36,.3)"
+  }
+};
+var SABEL_OWNERS = new Set(["Chris", "Richard", "Greg"]);
+var CLIENT_OWNERS = new Set(["Cirqul"]);
+var STATUSES_DEF = {
+  "Complete": {
+    t: "#4ADE80",
+    bg: "rgba(74,222,128,.1)",
+    bd: "rgba(74,222,128,.3)"
+  },
+  "In Progress": {
+    t: "#60A5FA",
+    bg: "rgba(96,165,250,.1)",
+    bd: "rgba(96,165,250,.3)"
+  },
+  "Pending": {
+    t: "#94A3B8",
+    bg: "rgba(148,163,184,.08)",
+    bd: "rgba(148,163,184,.22)"
+  },
+  "Dependency": {
+    t: "#FBBF24",
+    bg: "rgba(251,191,36,.1)",
+    bd: "rgba(251,191,36,.3)"
+  },
+  "Blocked": {
+    t: "#F87171",
+    bg: "rgba(248,113,113,.1)",
+    bd: "rgba(248,113,113,.3)"
+  },
+  "TBC": {
+    t: "#64748B",
+    bg: "rgba(100,116,139,.08)",
+    bd: "rgba(100,116,139,.18)"
+  }
+};
+var STATUS_CYCLE = ["Pending", "In Progress", "Complete", "Dependency", "Blocked", "TBC"];
+var PHASES = {
+  setup: {
+    c: "#64748B",
+    l: "WEEK 0 — KICKOFF, ACCESS & SCHEMA REVIEW"
+  },
+  foundations: {
+    c: "#3B82F6",
+    l: "WEEK 1 — INTERCOM FOUNDATIONS & FIN POLICY"
+  },
+  gate: {
+    c: "#FBBF24",
+    l: "WEEK 2 — CONNECTOR READINESS GATE & KB"
+  },
+  fin: {
+    c: "#10B981",
+    l: "WEEK 3 — FIN PROCEDURES & CONFIGURATION"
+  },
+  uat: {
+    c: "#9333EA",
+    l: "WEEK 4 — QA, QUALITY LOOP & ENABLEMENT"
+  },
+  golive: {
+    c: "#E10600",
+    l: "WEEK 5 — CONTROLLED GO-LIVE"
+  },
+  post: {
+    c: "#94A3B8",
+    l: "POST GO-LIVE — SETTLEMENT & OPTIMISATION"
+  }
+};
+var TL_START = new Date("2026-04-27");
+var TL_END = new Date("2026-06-29");
+var TL_DAYS = (TL_END - TL_START) / 864e5;
+var WEEK_HEADERS = [];
+{
+  var d = new Date(TL_START);
+  while (d < TL_END) {
+    WEEK_HEADERS.push(new Date(d));
+    d = new Date(d.getTime() + 7 * 864e5);
+  }
+}
+var dateToX = function dateToX(s) {
+  return Math.max(0, Math.min(100, (new Date(s + "T12:00:00") - TL_START) / 864e5 / TL_DAYS * 100));
+};
+var dateSpan = function dateSpan(s, e) {
+  return Math.max(0.8, Math.min(100 - dateToX(s), Math.max(1, (new Date(e + "T12:00:00") - new Date(s + "T12:00:00")) / 864e5 + 1) / TL_DAYS * 100));
+};
+var fmtDate = function fmtDate(s) {
+  return new Date(s + "T12:00:00").toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short"
+  });
+};
+var TODAY = new Date();
+var todayX = Math.max(0, Math.min(100, (TODAY - TL_START) / 864e5 / TL_DAYS * 100));
+var todayStr = TODAY.toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric"
+});
+var _uid = 100;
+var uid = function uid() {
+  return "t".concat(++_uid);
+};
+var INIT = [{
+  id: "setup",
+  tasks: [{
+    id: "s1",
+    task: "Kickoff call — scope walkthrough and team introductions",
+    owner: "Richard",
+    co: "Chris",
+    start: "2026-04-27",
+    end: "2026-04-27",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "s2",
+    task: "Create Slack project channel with Cirqul team",
+    owner: "Chris",
+    co: "",
+    start: "2026-04-27",
+    end: "2026-04-28",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "s3",
+    task: "Delivery Coordinator prepares kickoff intake and requirements",
+    owner: "Chris",
+    co: "Richard",
+    start: "2026-04-27",
+    end: "2026-04-29",
+    status: "Pending",
+    notes: "Walkthrough of 5 client inputs with Cirqul team",
+    dep: false,
+    link: ""
+  }, {
+    id: "s4",
+    task: "■ Intercom workspace admin access granted to Sabel",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-04-28",
+    end: "2026-04-29",
+    status: "Dependency",
+    notes: "Owner: CTO / Engineering",
+    dep: true,
+    link: ""
+  }, {
+    id: "s5",
+    task: "■ Supabase API endpoint docs and sample responses provided",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-04-28",
+    end: "2026-04-30",
+    status: "Dependency",
+    notes: "All 6 connectors: verify, debt summary, offer options, current plan, modify, token link",
+    dep: true,
+    link: "https://developers.intercom.com/docs/build-an-integration/learn-more/rest-apis"
+  }, {
+    id: "s6",
+    task: "■ Auth details and Supabase schema for connectors shared",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-04-28",
+    end: "2026-04-30",
+    status: "Dependency",
+    notes: "Owner: Engineering. Est. 2-3 hrs",
+    dep: true,
+    link: ""
+  }, {
+    id: "s7",
+    task: "Supabase schema review — confirm data attributes and flow",
+    owner: "Greg",
+    co: "",
+    start: "2026-04-29",
+    end: "2026-05-01",
+    status: "Pending",
+    notes: "4 hrs per SOW. Defines inputs/outputs for each of 5 procedures",
+    dep: false,
+    link: ""
+  }, {
+    id: "s8",
+    task: "Technical setup docs handover — Messenger install + JWT",
+    owner: "Greg",
+    co: "",
+    start: "2026-04-30",
+    end: "2026-05-01",
+    status: "Pending",
+    notes: "2 hrs. Written guides for Cirqul engineering to implement",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/183-set-up-identity-verification-for-web-and-mobile"
+  }]
+}, {
+  id: "foundations",
+  tasks: [{
+    id: "f1",
+    task: "Workspace configuration — teams, inboxes, business hours",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-04",
+    end: "2026-05-06",
+    status: "Pending",
+    notes: "3 hrs per SOW. Structured for lean Cirqul escalation team",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/167-install-intercom-in-your-product-for-visitors-and-leads"
+  }, {
+    id: "f2",
+    task: "Roles and permissions — agent, admin and light seats",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-04",
+    end: "2026-05-06",
+    status: "Pending",
+    notes: "2 hrs per SOW",
+    dep: false,
+    link: ""
+  }, {
+    id: "f3",
+    task: "Escalation routing workflow — Fin hand-off with summary",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-05",
+    end: "2026-05-07",
+    status: "Pending",
+    notes: "2 hrs. Agent request, dispute, hardship, verification failure",
+    dep: false,
+    link: ""
+  }, {
+    id: "f4",
+    task: "After-hours and auto-response workflow",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-06",
+    end: "2026-05-07",
+    status: "Pending",
+    notes: "1 hr per SOW",
+    dep: false,
+    link: ""
+  }, {
+    id: "f5",
+    task: "Conversation close rules and CSAT collection",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-07",
+    end: "2026-05-08",
+    status: "Pending",
+    notes: "1 hr. Timing agreed at kickoff",
+    dep: false,
+    link: ""
+  }, {
+    id: "f6",
+    task: "Fin policy guidance drafted — tone, hardship, compliance",
+    owner: "Chris",
+    co: "Richard",
+    start: "2026-05-05",
+    end: "2026-05-08",
+    status: "Pending",
+    notes: "4 hrs. Reflects Cirqul compassion tone and state-specific rules",
+    dep: false,
+    link: ""
+  }, {
+    id: "f7",
+    task: "■ Messenger install on Cara debt resolution page",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-05-04",
+    end: "2026-05-08",
+    status: "Dependency",
+    notes: "Client-side, using Sabel guide. Owner: Engineering",
+    dep: true,
+    link: "https://www.intercom.com/help/en/articles/168-install-intercom-in-your-product-for-logged-in-users"
+  }, {
+    id: "f8",
+    task: "■ JWT Messenger Security implemented",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-05-04",
+    end: "2026-05-08",
+    status: "Dependency",
+    notes: "Client-side, using Sabel guide. Binds session to verified user token",
+    dep: true,
+    link: "https://www.intercom.com/help/en/articles/183-set-up-identity-verification-for-web-and-mobile"
+  }, {
+    id: "f9",
+    task: "■ Compliance notes and brand voice materials shared",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-05-04",
+    end: "2026-05-06",
+    status: "Dependency",
+    notes: "Owner: Marketing / Compliance. Est. 3-4 hrs",
+    dep: true,
+    link: ""
+  }]
+}, {
+  id: "gate",
+  tasks: [{
+    id: "g1",
+    task: "★ CONNECTOR READINESS GATE — all 6 Supabase endpoints live",
+    owner: "Cirqul",
+    co: "Greg",
+    start: "2026-05-11",
+    end: "2026-05-11",
+    status: "Dependency",
+    notes: "Critical path. Weeks 3-5 shift in direct proportion to any delay here",
+    dep: true,
+    link: ""
+  }, {
+    id: "g2",
+    task: "■ Verify Customer Identity connector (GET) live and tested",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-05-11",
+    end: "2026-05-11",
+    status: "Dependency",
+    notes: "Built by Cirqul engineering",
+    dep: true,
+    link: ""
+  }, {
+    id: "g3",
+    task: "■ Retrieve Debt Summary connector (GET) live and tested",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-05-11",
+    end: "2026-05-11",
+    status: "Dependency",
+    notes: "Built by Cirqul engineering",
+    dep: true,
+    link: ""
+  }, {
+    id: "g4",
+    task: "■ Retrieve Payment Offer Options connector (GET) live",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-05-11",
+    end: "2026-05-11",
+    status: "Dependency",
+    notes: "Built by Cirqul engineering. Pricing algorithm output",
+    dep: true,
+    link: ""
+  }, {
+    id: "g5",
+    task: "■ Retrieve Current Payment Plan connector (GET) live",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-05-11",
+    end: "2026-05-11",
+    status: "Dependency",
+    notes: "Built by Cirqul engineering",
+    dep: true,
+    link: ""
+  }, {
+    id: "g6",
+    task: "■ Modify Payment Plan connector (PUT) live and tested",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-05-11",
+    end: "2026-05-11",
+    status: "Dependency",
+    notes: "Built by Cirqul engineering",
+    dep: true,
+    link: ""
+  }, {
+    id: "g7",
+    task: "■ Generate Tokenised Payment Link connector (POST) live",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-05-11",
+    end: "2026-05-11",
+    status: "Dependency",
+    notes: "Built by Cirqul engineering. Pre-populated checkout URL",
+    dep: true,
+    link: ""
+  }, {
+    id: "g8",
+    task: "■ Fictitious test accounts with representative debt records",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-05-11",
+    end: "2026-05-13",
+    status: "Dependency",
+    notes: "Owner: Founder / Operations. Required for QA",
+    dep: true,
+    link: ""
+  }, {
+    id: "g9",
+    task: "Knowledge base baseline built — payment, dispute, skip, privacy",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-11",
+    end: "2026-05-15",
+    status: "Pending",
+    notes: "4 hrs. Sabel provides structured baseline; Cirqul reviews and extends",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/9440354-knowledge-sources-to-power-ai-agents-and-self-serve-support#h_9a7905a0b8"
+  }, {
+    id: "g10",
+    task: "State-specific debt rights articles drafted",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-13",
+    end: "2026-05-15",
+    status: "Pending",
+    notes: "Covers states Cirqul operates in. Compliance team reviews",
+    dep: false,
+    link: ""
+  }, {
+    id: "g11",
+    task: "■ Cirqul review and extend of KB baseline",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-05-14",
+    end: "2026-05-15",
+    status: "Dependency",
+    notes: "Marketing / Compliance review before publishing",
+    dep: true,
+    link: ""
+  }]
+}, {
+  id: "fin",
+  tasks: [{
+    id: "fn1",
+    task: "Procedure — Identity Verification built",
+    owner: "Chris",
+    co: "Greg",
+    start: "2026-05-18",
+    end: "2026-05-19",
+    status: "Pending",
+    notes: "3 hrs. Mandatory entry point. Calls Verify Customer Identity",
+    dep: false,
+    link: ""
+  }, {
+    id: "fn2",
+    task: "Procedure — Debt Enquiry built",
+    owner: "Chris",
+    co: "Greg",
+    start: "2026-05-18",
+    end: "2026-05-19",
+    status: "Pending",
+    notes: "3 hrs. Calls Debt Summary + Current Plan",
+    dep: false,
+    link: ""
+  }, {
+    id: "fn3",
+    task: "Procedure — Payment Plan Selection built",
+    owner: "Chris",
+    co: "Greg",
+    start: "2026-05-19",
+    end: "2026-05-20",
+    status: "Pending",
+    notes: "3 hrs. Calls Debt Summary, Offer Options, Tokenised Payment Link",
+    dep: false,
+    link: ""
+  }, {
+    id: "fn4",
+    task: "Procedure — Payment Plan Modification built",
+    owner: "Chris",
+    co: "Greg",
+    start: "2026-05-19",
+    end: "2026-05-20",
+    status: "Pending",
+    notes: "3 hrs. Calls Current Plan, Offer Options, Modify Plan",
+    dep: false,
+    link: ""
+  }, {
+    id: "fn5",
+    task: "Procedure — Hardship and Dispute Handling built",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-20",
+    end: "2026-05-21",
+    status: "Pending",
+    notes: "3 hrs. Hardship detection patterns + dispute retrieval",
+    dep: false,
+    link: ""
+  }, {
+    id: "fn6",
+    task: "Fin configured — knowledge sources and guidance policy applied",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-21",
+    end: "2026-05-22",
+    status: "Pending",
+    notes: "2 hrs. Part of Fin Configuration and Controlled Launch",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/9357948-manage-knowledge-audiences-and-targeting"
+  }, {
+    id: "fn7",
+    task: "Conversation classification attributes configured",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-21",
+    end: "2026-05-22",
+    status: "Pending",
+    notes: "Verified/unverified, plan type, hardship flag",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/179-send-custom-user-attributes-to-intercom"
+  }, {
+    id: "fn8",
+    task: "Escalation routing to Cirqul human team configured",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-21",
+    end: "2026-05-22",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "fn9",
+    task: "Controlled rollout to internal test users",
+    owner: "Chris",
+    co: "Cirqul",
+    start: "2026-05-22",
+    end: "2026-05-22",
+    status: "Pending",
+    notes: "Deploy to Cara page for internal testing",
+    dep: false,
+    link: ""
+  }]
+}, {
+  id: "uat",
+  tasks: [{
+    id: "u1",
+    task: "Fin quality loop — happy path test scenarios",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-25",
+    end: "2026-05-26",
+    status: "Pending",
+    notes: "Part of 3 hrs Fin Quality Loop and Review",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"
+  }, {
+    id: "u2",
+    task: "Fin quality loop — hardship case scenarios",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-25",
+    end: "2026-05-26",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "u3",
+    task: "Fin quality loop — dispute handling scenarios",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-26",
+    end: "2026-05-27",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "u4",
+    task: "Fin quality loop — failed verification and counter-offer",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-26",
+    end: "2026-05-27",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "u5",
+    task: "Gaps documented, knowledge and guidance updated, re-tested",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-27",
+    end: "2026-05-28",
+    status: "Pending",
+    notes: "Iterate until ready for live traffic",
+    dep: false,
+    link: ""
+  }, {
+    id: "u6",
+    task: "Agent enablement — handling Fin escalations and KB gaps",
+    owner: "Chris",
+    co: "",
+    start: "2026-05-28",
+    end: "2026-05-29",
+    status: "Pending",
+    notes: "2 hrs per SOW. Includes reporting walkthrough",
+    dep: false,
+    link: ""
+  }, {
+    id: "u7",
+    task: "Sabel go-live readiness checklist completed",
+    owner: "Richard",
+    co: "Chris",
+    start: "2026-05-28",
+    end: "2026-05-29",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "u8",
+    task: "■ Acceptance criteria sign-off and go-live approval",
+    owner: "Cirqul",
+    co: "",
+    start: "2026-05-29",
+    end: "2026-05-29",
+    status: "Dependency",
+    notes: "Owner: Founder / Operations. Est. 2-3 hrs",
+    dep: true,
+    link: ""
+  }]
+}, {
+  id: "golive",
+  tasks: [{
+    id: "gl1",
+    task: "★ Cara goes live on debt resolution page",
+    owner: "Chris",
+    co: "Cirqul",
+    start: "2026-06-01",
+    end: "2026-06-01",
+    status: "Pending",
+    notes: "Phase 1 go-live milestone",
+    dep: false,
+    link: ""
+  }, {
+    id: "gl2",
+    task: "Fin AI activated for live customer traffic",
+    owner: "Chris",
+    co: "",
+    start: "2026-06-01",
+    end: "2026-06-01",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }, {
+    id: "gl3",
+    task: "Daily resolution rate and escalation monitoring — Week 1",
+    owner: "Chris",
+    co: "",
+    start: "2026-06-01",
+    end: "2026-06-05",
+    status: "Pending",
+    notes: "Part of 3 hrs Post-Go-Live Optimisation Support",
+    dep: false,
+    link: ""
+  }, {
+    id: "gl4",
+    task: "Sabel on standby for go-live day support",
+    owner: "Chris",
+    co: "Richard",
+    start: "2026-06-01",
+    end: "2026-06-01",
+    status: "Pending",
+    notes: "",
+    dep: false,
+    link: ""
+  }]
+}, {
+  id: "post",
+  tasks: [{
+    id: "p1",
+    task: "Week 2 review — highest-impact gaps addressed",
+    owner: "Chris",
+    co: "",
+    start: "2026-06-08",
+    end: "2026-06-12",
+    status: "Pending",
+    notes: "Part of 3 hrs Post-Go-Live Optimisation Support",
+    dep: false,
+    link: ""
+  }, {
+    id: "p2",
+    task: "Complimentary settlement period — 5 hrs across first 2 weeks",
+    owner: "Chris",
+    co: "",
+    start: "2026-06-01",
+    end: "2026-06-12",
+    status: "Pending",
+    notes: "Included at no charge. Knowledge and guidance refinement",
+    dep: false,
+    link: ""
+  }, {
+    id: "p3",
+    task: "Handover summary — recommended next iterations drafted",
+    owner: "Richard",
+    co: "Chris",
+    start: "2026-06-15",
+    end: "2026-06-19",
+    status: "Pending",
+    notes: "Ahead of Phase 2 scoping",
+    dep: false,
+    link: ""
+  }, {
+    id: "p4",
+    task: "Phase 2 scoping conversation — financial health expansion",
+    owner: "Richard",
+    co: "",
+    start: "2026-06-22",
+    end: "2026-06-26",
+    status: "TBC",
+    notes: "Hours and investment confirmed separately post go-live",
+    dep: false,
+    link: ""
+  }]
+}];
+var SABEL_LOGO_SRC = "data:image/png;base64,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01T0RHJH0ERFkQhERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERB//2Q==";
+var SabelLogo = function SabelLogo(_ref) {
+  var _ref$h = _ref.h,
+    h = _ref$h === void 0 ? 32 : _ref$h;
+  return /*#__PURE__*/React.createElement("img", {
+    src: SABEL_LOGO_SRC,
+    style: {
+      height: h,
+      display: "block",
+      flexShrink: 0,
+      objectFit: "contain"
+    },
+    alt: "Sabel"
+  });
+};
+var MONO = {
+  fontFamily: "'Courier New',Courier,monospace"
+};
+var SANS = {
+  fontFamily: "'Helvetica Neue',Helvetica,Arial,sans-serif"
+};
+function SaveStatus(_ref2) {
+  var status = _ref2.status;
+  var cfg = {
+    idle: {
+      label: "",
+      color: C.mono
+    },
+    saving: {
+      label: "● Saving…",
+      color: C.muted
+    },
+    saved: {
+      label: "✓ Saved",
+      color: "#4ADE80"
+    },
+    error: {
+      label: "✕ Save failed",
+      color: "#F87171"
+    },
+    loading: {
+      label: "● Loading…",
+      color: C.muted
+    }
+  }[status] || {
+    label: "",
+    color: C.mono
+  };
+  if (!cfg.label) return null;
+  return /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8,
+      color: cfg.color,
+      letterSpacing: "0.06em",
+      transition: "color .3s"
+    })
+  }, cfg.label);
+}
+function PercentStat(_ref3) {
+  var label = _ref3.label,
+    count = _ref3.count,
+    total = _ref3.total,
+    col = _ref3.col;
+  var pct = total === 0 ? 0 : Math.round(count / total * 100);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 4,
+      minWidth: 90,
+      padding: "7px 14px",
+      borderRadius: 3,
+      background: C.card3,
+      border: "1px solid ".concat(C.border2)
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "baseline"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7,
+      color: C.mono,
+      letterSpacing: "0.08em"
+    })
+  }, label), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 15,
+      color: col,
+      fontWeight: 800
+    })
+  }, pct, "%")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "100%",
+      height: 3,
+      background: C.border,
+      borderRadius: 2,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "".concat(pct, "%"),
+      height: "100%",
+      borderRadius: 2,
+      transition: "width .5s",
+      background: col
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7,
+      color: C.mono
+    })
+  }, count, " of ", total, " tasks"));
+}
+function DualProgress(_ref4) {
+  var tasks = _ref4.tasks;
+  var sabelTasks = tasks.filter(function (t) {
+    return SABEL_OWNERS.has(t.owner);
+  });
+  var clientTasks = tasks.filter(function (t) {
+    return CLIENT_OWNERS.has(t.owner);
+  });
+  var pct = function pct(arr) {
+    return arr.length === 0 ? 0 : Math.round(arr.filter(function (t) {
+      return t.status === "Complete";
+    }).length / arr.length * 100);
+  };
+  var sabelPct = pct(sabelTasks);
+  var clientPct = pct(clientTasks);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 4,
+      minWidth: 110,
+      padding: "7px 14px",
+      borderRadius: 3,
+      background: C.card3,
+      border: "1px solid ".concat(C.border2)
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "baseline"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7,
+      color: "#C084FC",
+      letterSpacing: "0.08em"
+    })
+  }, "SABEL"), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 15,
+      color: C.w,
+      fontWeight: 800
+    })
+  }, sabelPct, "%")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "100%",
+      height: 3,
+      background: C.border,
+      borderRadius: 2,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "".concat(sabelPct, "%"),
+      height: "100%",
+      borderRadius: 2,
+      transition: "width .5s",
+      background: "linear-gradient(90deg,#C084FC,#818CF8)"
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7,
+      color: C.mono
+    })
+  }, sabelTasks.filter(function (t) {
+    return t.status === "Complete";
+  }).length, "/", sabelTasks.length, " tasks")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 4,
+      minWidth: 110,
+      padding: "7px 14px",
+      borderRadius: 3,
+      background: C.card3,
+      border: "1px solid ".concat(C.border2)
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "baseline"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7,
+      color: "#FBBF24",
+      letterSpacing: "0.08em"
+    })
+  }, "CIRQUL"), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 15,
+      color: C.w,
+      fontWeight: 800
+    })
+  }, clientPct, "%")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "100%",
+      height: 3,
+      background: C.border,
+      borderRadius: 2,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "".concat(clientPct, "%"),
+      height: "100%",
+      borderRadius: 2,
+      transition: "width .5s",
+      background: "linear-gradient(90deg,#FBBF24,#F59E0B)"
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7,
+      color: C.mono
+    })
+  }, clientTasks.filter(function (t) {
+    return t.status === "Complete";
+  }).length, "/", clientTasks.length, " tasks")));
+}
+function OwnerBadge(_ref5) {
+  var owner = _ref5.owner,
+    onClick = _ref5.onClick,
+    _ref5$sz = _ref5.sz,
+    sz = _ref5$sz === void 0 ? 10 : _ref5$sz;
+  if (!owner) return null;
+  var s = OWNERS[owner] || {
+    c: C.mono,
+    bg: "rgba(100,116,139,.1)",
+    bd: "rgba(100,116,139,.2)"
+  };
+  return /*#__PURE__*/React.createElement("span", {
+    onClick: onClick,
+    style: _objectSpread({
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 4,
+      padding: "2px 8px 2px 5px",
+      borderRadius: 2,
+      cursor: onClick ? "pointer" : "default",
+      fontSize: sz,
+      fontWeight: 700,
+      letterSpacing: "0.04em",
+      whiteSpace: "nowrap",
+      color: s.c,
+      background: s.bg,
+      border: "1px solid ".concat(s.bd),
+      transition: "opacity .12s"
+    }, MONO)
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 6,
+      height: 6,
+      borderRadius: "50%",
+      background: s.c,
+      display: "inline-block"
+    }
+  }), owner);
+}
+function StatusPill(_ref6) {
+  var status = _ref6.status,
+    onClick = _ref6.onClick;
+  var s = STATUSES_DEF[status] || STATUSES_DEF.Pending;
+  return /*#__PURE__*/React.createElement("span", {
+    onClick: onClick,
+    title: onClick ? "Click to cycle status" : "",
+    style: _objectSpread(_objectSpread({
+      display: "inline-block",
+      padding: "2px 8px",
+      borderRadius: 2,
+      whiteSpace: "nowrap",
+      fontSize: 9,
+      fontWeight: 700
+    }, MONO), {}, {
+      cursor: onClick ? "pointer" : "default",
+      letterSpacing: "0.05em",
+      color: s.t,
+      background: s.bg,
+      border: "1px solid ".concat(s.bd),
+      userSelect: "none",
+      transition: "all .1s"
+    })
+  }, status);
+}
+function DeleteBtn(_ref7) {
+  var onDelete = _ref7.onDelete;
+  var _useState = useState(false),
+    _useState2 = _slicedToArray(_useState, 2),
+    conf = _useState2[0],
+    setConf = _useState2[1];
+  if (conf) return /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "inline-flex",
+      gap: 3,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: onDelete,
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8,
+      color: "#F87171",
+      background: "rgba(248,113,113,.12)",
+      border: "1px solid rgba(248,113,113,.3)",
+      padding: "1px 6px",
+      borderRadius: 2,
+      cursor: "pointer"
+    })
+  }, "yes"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick(e) {
+      e.stopPropagation();
+      setConf(false);
+    },
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8,
+      color: C.mono,
+      background: "none",
+      border: "1px solid ".concat(C.border),
+      padding: "1px 6px",
+      borderRadius: 2,
+      cursor: "pointer"
+    })
+  }, "no"));
+  return /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick(e) {
+      e.stopPropagation();
+      setConf(true);
+    },
+    title: "Delete row",
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 14,
+      lineHeight: "1",
+      color: C.border,
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      padding: "0 4px",
+      transition: "color .12s"
+    }),
+    onMouseEnter: function onMouseEnter(e) {
+      return e.currentTarget.style.color = "#F87171";
+    },
+    onMouseLeave: function onMouseLeave(e) {
+      return e.currentTarget.style.color = C.border;
+    }
+  }, "\xD7");
+}
+function LinkIcon(_ref8) {
+  var url = _ref8.url;
+  if (!url) return null;
+  return /*#__PURE__*/React.createElement("a", {
+    href: url,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    title: "Intercom guide",
+    onClick: function onClick(e) {
+      return e.stopPropagation();
+    },
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: 16,
+      height: 16,
+      borderRadius: 3,
+      flexShrink: 0,
+      background: "rgba(46,184,230,0.12)",
+      border: "1px solid rgba(46,184,230,0.25)",
+      color: "#2eb8e6",
+      textDecoration: "none",
+      transition: "all .12s",
+      fontSize: 9,
+      lineHeight: 1
+    },
+    onMouseEnter: function onMouseEnter(e) {
+      e.currentTarget.style.background = "rgba(46,184,230,0.25)";
+      e.currentTarget.style.borderColor = "rgba(46,184,230,0.55)";
+    },
+    onMouseLeave: function onMouseLeave(e) {
+      e.currentTarget.style.background = "rgba(46,184,230,0.12)";
+      e.currentTarget.style.borderColor = "rgba(46,184,230,0.25)";
+    }
+  }, "\u2197");
+}
+function App() {
+  var _useState3 = useState(INIT),
+    _useState4 = _slicedToArray(_useState3, 2),
+    phases = _useState4[0],
+    setPhases = _useState4[1];
+  var _useState5 = useState(new Set()),
+    _useState6 = _slicedToArray(_useState5, 2),
+    planCol = _useState6[0],
+    setPlanCol = _useState6[1];
+  var _useState7 = useState(true),
+    _useState8 = _slicedToArray(_useState7, 2),
+    tlOpen = _useState8[0],
+    setTlOpen = _useState8[1];
+  var _useState9 = useState(new Set()),
+    _useState0 = _slicedToArray(_useState9, 2),
+    tlCol = _useState0[0],
+    setTlCol = _useState0[1];
+  var _useState1 = useState(new Set(["Chris", "Richard", "Greg", "Cirqul"])),
+    _useState10 = _slicedToArray(_useState1, 2),
+    activeO = _useState10[0],
+    setActiveO = _useState10[1];
+  var _useState11 = useState(null),
+    _useState12 = _slicedToArray(_useState11, 2),
+    ed = _useState12[0],
+    setEd = _useState12[1];
+  var _useState13 = useState(""),
+    _useState14 = _slicedToArray(_useState13, 2),
+    edVal = _useState14[0],
+    setEdVal = _useState14[1];
+  var _useState15 = useState("loading"),
+    _useState16 = _slicedToArray(_useState15, 2),
+    saveStatus = _useState16[0],
+    setSaveStatus = _useState16[1];
+  var saveTimer = useRef(null);
+  var isFirstLoad = useRef(true);
+  useEffect(function () {
+    fetch(API).then(function (r) {
+      return r.json();
+    }).then(function (_ref9) {
+      var data = _ref9.data;
+      if (data) setPhases(data);
+      setSaveStatus("idle");
+    })["catch"](function () {
+      return setSaveStatus("idle");
+    });
+  }, []);
+  useEffect(function () {
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      return;
+    }
+    setSaveStatus("saving");
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(function () {
+      fetch(API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          data: phases
+        })
+      }).then(function (r) {
+        return r.json();
+      }).then(function (_ref0) {
+        var ok = _ref0.ok;
+        setSaveStatus(ok ? "saved" : "error");
+        if (ok) setTimeout(function () {
+          return setSaveStatus("idle");
+        }, 2500);
+      })["catch"](function () {
+        return setSaveStatus("error");
+      });
+    }, 1200);
+  }, [phases]);
+  var updTask = useCallback(function (id, patch) {
+    return setPhases(function (p) {
+      return p.map(function (ph) {
+        return _objectSpread(_objectSpread({}, ph), {}, {
+          tasks: ph.tasks.map(function (t) {
+            return t.id === id ? _objectSpread(_objectSpread({}, t), patch) : t;
+          })
+        });
+      });
+    });
+  }, []);
+  var delTask = useCallback(function (id) {
+    return setPhases(function (p) {
+      return p.map(function (ph) {
+        return _objectSpread(_objectSpread({}, ph), {}, {
+          tasks: ph.tasks.filter(function (t) {
+            return t.id !== id;
+          })
+        });
+      });
+    });
+  }, []);
+  var addTask = useCallback(function (phId) {
+    var id = uid(),
+      today = new Date().toISOString().split("T")[0],
+      end = new Date(Date.now() + 5 * 864e5).toISOString().split("T")[0];
+    setPhases(function (p) {
+      return p.map(function (ph) {
+        return ph.id === phId ? _objectSpread(_objectSpread({}, ph), {}, {
+          tasks: [].concat(_toConsumableArray(ph.tasks), [{
+            id: id,
+            task: "New task",
+            owner: "Chris",
+            co: "",
+            dep: false,
+            start: today,
+            end: end,
+            status: "Pending",
+            notes: "",
+            link: ""
+          }])
+        }) : ph;
+      });
+    });
+    setTimeout(function () {
+      setEd({
+        id: id,
+        field: "task"
+      });
+      setEdVal("New task");
+    }, 30);
+  }, []);
+  var startEd = function startEd(id, field, val) {
+    setEd({
+      id: id,
+      field: field
+    });
+    setEdVal(val);
+  };
+  var commitEd = function commitEd(val, close) {
+    setEdVal(val);
+    if (close && ed) {
+      updTask(ed.id, _defineProperty({}, ed.field, val));
+      setEd(null);
+    }
+  };
+  var cancelEd = function cancelEd() {
+    return setEd(null);
+  };
+  var isEd = function isEd(id, field) {
+    return (ed === null || ed === void 0 ? void 0 : ed.id) === id && (ed === null || ed === void 0 ? void 0 : ed.field) === field;
+  };
+  var allT = useMemo(function () {
+    return phases.flatMap(function (p) {
+      return p.tasks;
+    });
+  }, [phases]);
+  var stats = useMemo(function () {
+    return {
+      done: allT.filter(function (t) {
+        return t.status === "Complete";
+      }).length,
+      active: allT.filter(function (t) {
+        return t.status === "In Progress";
+      }).length,
+      deps: allT.filter(function (t) {
+        return t.dep && t.status !== "Complete";
+      }).length,
+      blocked: allT.filter(function (t) {
+        return t.status === "Blocked";
+      }).length
+    };
+  }, [allT]);
+  var taskVis = function taskVis(t) {
+    return activeO.has(t.owner) || t.co && activeO.has(t.co);
+  };
+  var toggleS = function toggleS(setter, id) {
+    return setter(function (s) {
+      var n = new Set(s);
+      n.has(id) ? n["delete"](id) : n.add(id);
+      return n;
+    });
+  };
+  var TextEdit = function TextEdit(_ref1) {
+    var id = _ref1.id,
+      field = _ref1.field,
+      val = _ref1.val,
+      _ref1$ph = _ref1.ph,
+      ph = _ref1$ph === void 0 ? "…" : _ref1$ph,
+      _ref1$minW = _ref1.minW,
+      minW = _ref1$minW === void 0 ? 80 : _ref1$minW,
+      _ref1$style = _ref1.style,
+      style = _ref1$style === void 0 ? {} : _ref1$style;
+    if (!isEd(id, field)) return /*#__PURE__*/React.createElement("span", {
+      onClick: function onClick() {
+        return startEd(id, field, val);
+      },
+      title: "Click to edit",
+      style: _objectSpread({
+        fontSize: 11,
+        color: C.body,
+        cursor: "pointer",
+        display: "block",
+        borderBottom: "1px dotted ".concat(C.border),
+        paddingBottom: 1,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        minWidth: minW
+      }, style)
+    }, val || /*#__PURE__*/React.createElement("i", {
+      style: {
+        color: C.border
+      }
+    }, ph));
+    return /*#__PURE__*/React.createElement("input", {
+      autoFocus: true,
+      value: edVal,
+      onChange: function onChange(e) {
+        return setEdVal(e.target.value);
+      },
+      onBlur: function onBlur() {
+        return commitEd(edVal, true);
+      },
+      onKeyDown: function onKeyDown(e) {
+        if (e.key === "Enter") commitEd(edVal, true);
+        if (e.key === "Escape") cancelEd();
+      },
+      style: _objectSpread(_objectSpread({}, SANS), {}, {
+        background: C.card4,
+        color: C.body,
+        border: "1px solid ".concat(C.red, "55"),
+        borderRadius: 2,
+        padding: "2px 6px",
+        fontSize: 11,
+        outline: "none",
+        boxShadow: "0 0 0 2px ".concat(C.red, "18"),
+        minWidth: minW,
+        width: "100%"
+      }, style)
+    });
+  };
+  var OwnerEdit = function OwnerEdit(_ref10) {
+    var id = _ref10.id,
+      field = _ref10.field,
+      val = _ref10.val;
+    if (!isEd(id, field)) return val ? /*#__PURE__*/React.createElement(OwnerBadge, {
+      owner: val,
+      onClick: function onClick() {
+        return startEd(id, field, val);
+      }
+    }) : /*#__PURE__*/React.createElement("span", {
+      onClick: function onClick() {
+        return startEd(id, field, "");
+      },
+      style: {
+        fontSize: 9,
+        color: C.border,
+        cursor: "pointer",
+        borderBottom: "1px dotted ".concat(C.border)
+      }
+    }, "\u2014");
+    return /*#__PURE__*/React.createElement("select", {
+      autoFocus: true,
+      value: edVal,
+      onChange: function onChange(e) {
+        return setEdVal(e.target.value);
+      },
+      onBlur: function onBlur() {
+        updTask(id, _defineProperty({}, field, edVal));
+        setEd(null);
+      },
+      onKeyDown: function onKeyDown(e) {
+        if (e.key === "Escape") cancelEd();
+      },
+      style: _objectSpread(_objectSpread({}, SANS), {}, {
+        background: C.card4,
+        color: C.body,
+        border: "1px solid ".concat(C.red, "55"),
+        borderRadius: 2,
+        padding: "2px 6px",
+        fontSize: 10,
+        outline: "none"
+      })
+    }, ["Chris", "Richard", "Greg", "Cirqul", ""].map(function (o) {
+      return /*#__PURE__*/React.createElement("option", {
+        key: o,
+        value: o
+      }, o || "—");
+    }));
+  };
+  var DateEdit = function DateEdit(_ref11) {
+    var id = _ref11.id,
+      field = _ref11.field,
+      val = _ref11.val;
+    if (!isEd(id, field)) return /*#__PURE__*/React.createElement("span", {
+      onClick: function onClick() {
+        return startEd(id, field, val);
+      },
+      title: "Click to edit",
+      style: {
+        fontSize: 11,
+        color: C.body,
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+        borderBottom: "1px dotted ".concat(C.border),
+        paddingBottom: 1
+      }
+    }, fmtDate(val));
+    return /*#__PURE__*/React.createElement("input", {
+      type: "date",
+      autoFocus: true,
+      value: edVal,
+      onChange: function onChange(e) {
+        return setEdVal(e.target.value);
+      },
+      onBlur: function onBlur() {
+        return commitEd(edVal, true);
+      },
+      onKeyDown: function onKeyDown(e) {
+        if (e.key === "Escape") cancelEd();
+      },
+      style: _objectSpread(_objectSpread({}, SANS), {}, {
+        background: C.card4,
+        color: C.body,
+        border: "1px solid ".concat(C.red, "55"),
+        borderRadius: 2,
+        padding: "2px 4px",
+        fontSize: 10,
+        outline: "none",
+        width: 108
+      })
+    });
+  };
+  var TH = {
+    fontFamily: "'Courier New',Courier,monospace",
+    fontSize: 8,
+    color: C.mono,
+    fontWeight: 700,
+    letterSpacing: "0.1em",
+    padding: "5px 10px",
+    borderBottom: "1px solid ".concat(C.border),
+    background: "#0A0C0E",
+    textAlign: "left",
+    whiteSpace: "nowrap"
+  };
+  var TD = {
+    padding: "5px 10px",
+    borderBottom: "1px solid ".concat(C.border, "18"),
+    verticalAlign: "middle"
+  };
+  var LW = 200,
+    ROW_H = 26,
+    PH_H = 28;
+  var TodayLine = function TodayLine() {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "absolute",
+        left: "".concat(todayX, "%"),
+        top: 0,
+        bottom: 0,
+        width: 1,
+        background: C.red,
+        opacity: .45,
+        pointerEvents: "none",
+        zIndex: 3
+      }
+    });
+  };
+  var GanttBar = function GanttBar(_ref12) {
+    var task = _ref12.task;
+    var o = OWNERS[task.owner] || OWNERS.Chris,
+      lp = dateToX(task.start),
+      wp = dateSpan(task.start, task.end),
+      pt = task.start === task.end;
+    if (task.dep) return /*#__PURE__*/React.createElement("div", {
+      title: "".concat(task.task, " \u2014 ").concat(fmtDate(task.start)),
+      style: {
+        position: "absolute",
+        left: "calc(".concat(lp, "% - 6px)"),
+        top: "50%",
+        transform: "translateY(-50%) rotate(45deg)",
+        width: 10,
+        height: 10,
+        background: OWNERS.Cirqul.c,
+        borderRadius: 1,
+        zIndex: 3,
+        boxShadow: "0 0 8px ".concat(OWNERS.Cirqul.c, "55")
+      }
+    });
+    if (pt) return /*#__PURE__*/React.createElement("div", {
+      title: "".concat(task.task, " \u2014 ").concat(fmtDate(task.start)),
+      style: {
+        position: "absolute",
+        left: "calc(".concat(lp, "% - 8px)"),
+        top: "50%",
+        transform: "translateY(-50%)",
+        fontSize: 17,
+        color: C.red,
+        zIndex: 3,
+        lineHeight: 1,
+        textShadow: "0 0 10px ".concat(C.red)
+      }
+    }, "\u2605");
+    return /*#__PURE__*/React.createElement("div", {
+      title: "".concat(task.task, "\n").concat(task.owner).concat(task.co ? " + " + task.co : "", "\n").concat(fmtDate(task.start), " \u2192 ").concat(fmtDate(task.end)),
+      style: {
+        position: "absolute",
+        left: "".concat(lp, "%"),
+        width: "".concat(wp, "%"),
+        top: "50%",
+        transform: "translateY(-50%)",
+        height: ROW_H - 7,
+        background: "linear-gradient(90deg,".concat(o.c, "bb,").concat(o.c, "77)"),
+        borderRadius: 2,
+        zIndex: 2,
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: 5,
+        boxSizing: "border-box",
+        border: "1px solid ".concat(o.c, "50")
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread({
+        fontSize: 7.5,
+        color: "#fff",
+        fontWeight: 700,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis"
+      }, MONO)
+    }, task.owner, task.co ? " + ".concat(task.co) : ""));
+  };
+  var Gantt = function Gantt() {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        border: "1px solid ".concat(C.border2),
+        borderRadius: 4,
+        overflow: "hidden",
+        boxShadow: "0 4px 28px rgba(0,0,0,.55)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        overflowY: "auto",
+        maxHeight: 500,
+        overflowX: "auto",
+        position: "relative"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        position: "sticky",
+        top: 0,
+        zIndex: 30,
+        background: C.card3,
+        borderBottom: "2px solid ".concat(C.border),
+        minWidth: LW + WEEK_HEADERS.length * 62
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: LW,
+        minWidth: LW,
+        flexShrink: 0,
+        position: "sticky",
+        left: 0,
+        zIndex: 40,
+        background: C.card3,
+        borderRight: "1px solid ".concat(C.border),
+        padding: "6px 12px",
+        display: "flex",
+        alignItems: "center"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 8,
+        color: C.mono,
+        letterSpacing: "0.1em"
+      })
+    }, "TASK")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flex: 1,
+        position: "relative"
+      }
+    }, WEEK_HEADERS.map(function (w, i) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: i,
+        style: {
+          flex: "0 0 62px",
+          width: 62,
+          borderLeft: "1px solid ".concat(C.border, "22"),
+          padding: "6px 4px",
+          background: C.card3
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: _objectSpread(_objectSpread({}, MONO), {}, {
+          fontSize: 7.5,
+          color: C.mono
+        })
+      }, w.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short"
+      })));
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "absolute",
+        left: "".concat(todayX, "%"),
+        top: 0,
+        bottom: 0,
+        width: 1,
+        background: C.red,
+        opacity: .7,
+        zIndex: 5
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 7,
+        color: C.red,
+        position: "absolute",
+        top: "50%",
+        left: 3,
+        transform: "translateY(-50%)",
+        whiteSpace: "nowrap"
+      })
+    }, "\u25BC ", todayStr)))), phases.map(function (phase) {
+      var m = PHASES[phase.id],
+        col = tlCol.has(phase.id),
+        vis = phase.tasks.filter(taskVis);
+      if (!vis.length) return null;
+      var nonDep = vis.filter(function (t) {
+        return !t.dep;
+      });
+      var span = null;
+      if (nonDep.length) {
+        var s0 = nonDep.reduce(function (a, t) {
+            return t.start < a ? t.start : a;
+          }, nonDep[0].start),
+          e0 = nonDep.reduce(function (a, t) {
+            return t.end > a ? t.end : a;
+          }, nonDep[0].end);
+        span = {
+          l: dateToX(s0),
+          w: dateSpan(s0, e0)
+        };
+      }
+      return /*#__PURE__*/React.createElement("div", {
+        key: phase.id
+      }, /*#__PURE__*/React.createElement("div", {
+        onClick: function onClick() {
+          return toggleS(setTlCol, phase.id);
+        },
+        style: {
+          display: "flex",
+          cursor: "pointer",
+          userSelect: "none",
+          borderTop: "1px solid ".concat(C.border),
+          background: "linear-gradient(90deg,".concat(m.c, "1C 0%,").concat(C.card2, " 70%)"),
+          minWidth: LW + WEEK_HEADERS.length * 62
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          width: LW,
+          minWidth: LW,
+          flexShrink: 0,
+          position: "sticky",
+          left: 0,
+          zIndex: 20,
+          background: "linear-gradient(90deg,".concat(m.c, "2A,").concat(C.card2, ")"),
+          borderRight: "1px solid ".concat(C.border),
+          padding: "5px 10px",
+          height: PH_H,
+          display: "flex",
+          alignItems: "center",
+          gap: 7
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: _objectSpread(_objectSpread({}, MONO), {}, {
+          fontSize: 8,
+          color: m.c
+        })
+      }, col ? "▶" : "▼"), /*#__PURE__*/React.createElement("span", {
+        style: _objectSpread(_objectSpread({}, MONO), {}, {
+          fontSize: 8,
+          color: m.c,
+          fontWeight: 700,
+          letterSpacing: "0.06em",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap"
+        })
+      }, m.l)), /*#__PURE__*/React.createElement("div", {
+        style: {
+          flex: 1,
+          position: "relative",
+          height: PH_H
+        }
+      }, span && !col && /*#__PURE__*/React.createElement("div", {
+        style: {
+          position: "absolute",
+          left: "".concat(span.l, "%"),
+          width: "".concat(span.w, "%"),
+          top: "50%",
+          transform: "translateY(-50%)",
+          height: 6,
+          background: "".concat(m.c, "30"),
+          borderRadius: 3,
+          border: "1px solid ".concat(m.c, "45"),
+          zIndex: 1
+        }
+      }), /*#__PURE__*/React.createElement(TodayLine, null))), !col && vis.map(function (t, i) {
+        return /*#__PURE__*/React.createElement("div", {
+          key: t.id,
+          style: {
+            display: "flex",
+            background: i % 2 === 0 ? C.bg : C.card,
+            borderTop: "1px solid ".concat(C.border, "15"),
+            minWidth: LW + WEEK_HEADERS.length * 62
+          }
+        }, /*#__PURE__*/React.createElement("div", {
+          style: {
+            width: LW,
+            minWidth: LW,
+            flexShrink: 0,
+            position: "sticky",
+            left: 0,
+            zIndex: 10,
+            background: i % 2 === 0 ? C.bg : C.card,
+            borderRight: "1px solid ".concat(C.border),
+            padding: "0 8px 0 10px",
+            height: ROW_H,
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+            overflow: "hidden"
+          }
+        }, t.dep && /*#__PURE__*/React.createElement("span", {
+          style: {
+            color: OWNERS.Cirqul.c,
+            fontSize: 9,
+            flexShrink: 0
+          }
+        }, "\u25C6"), /*#__PURE__*/React.createElement("span", {
+          title: t.task,
+          style: {
+            fontSize: 9.5,
+            color: t.dep ? OWNERS.Cirqul.c : C.body,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap"
+          }
+        }, t.task)), /*#__PURE__*/React.createElement("div", {
+          style: {
+            flex: 1,
+            position: "relative",
+            height: ROW_H
+          }
+        }, /*#__PURE__*/React.createElement(GanttBar, {
+          task: t
+        }), /*#__PURE__*/React.createElement(TodayLine, null)));
+      }));
+    })));
+  };
+  var OwnerFilter = function OwnerFilter() {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        marginBottom: 12,
+        flexWrap: "wrap"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 8,
+        color: C.mono,
+        letterSpacing: "0.1em"
+      })
+    }, "FILTER BY PARTY:"), Object.entries(OWNERS).map(function (_ref13) {
+      var _ref14 = _slicedToArray(_ref13, 2),
+        o = _ref14[0],
+        s = _ref14[1];
+      var on = activeO.has(o);
+      return /*#__PURE__*/React.createElement("button", {
+        key: o,
+        onClick: function onClick() {
+          return toggleS(setActiveO, o);
+        },
+        style: _objectSpread(_objectSpread({
+          display: "flex",
+          alignItems: "center",
+          gap: 5,
+          padding: "4px 12px",
+          borderRadius: 2,
+          cursor: "pointer",
+          background: on ? s.bg : "transparent",
+          border: "1px solid ".concat(on ? s.c : C.border),
+          color: on ? s.c : C.mono
+        }, MONO), {}, {
+          fontSize: 9.5,
+          fontWeight: 700,
+          letterSpacing: "0.05em",
+          opacity: on ? 1 : 0.3,
+          transition: "all .14s"
+        })
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          width: 7,
+          height: 7,
+          borderRadius: "50%",
+          background: on ? s.c : C.mono,
+          display: "inline-block",
+          transition: "background .14s"
+        }
+      }), o);
+    }), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        return setActiveO(new Set(Object.keys(OWNERS)));
+      },
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 8.5,
+        color: C.mono,
+        background: "none",
+        border: "1px solid ".concat(C.border),
+        padding: "4px 10px",
+        borderRadius: 2,
+        cursor: "pointer",
+        letterSpacing: "0.05em"
+      })
+    }, "ALL"));
+  };
+  var Stat = function Stat(_ref15) {
+    var label = _ref15.label,
+      val = _ref15.val,
+      col = _ref15.col;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "7px 14px",
+        borderRadius: 3,
+        background: C.card3,
+        border: "1px solid ".concat(C.border2),
+        minWidth: 60
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread({
+        fontSize: 20,
+        fontWeight: 800,
+        color: col,
+        lineHeight: 1
+      }, SANS)
+    }, val), /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 7,
+        color: C.mono,
+        letterSpacing: "0.08em",
+        marginTop: 2
+      })
+    }, label));
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: _objectSpread(_objectSpread({
+      background: C.bg,
+      minHeight: "100vh",
+      color: C.body
+    }, SANS), {}, {
+      position: "relative"
+    })
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      left: "50%",
+      top: 0,
+      bottom: 0,
+      width: 1,
+      background: "linear-gradient(180deg,transparent 0%,".concat(C.red, " 30%,").concat(C.red, " 70%,transparent 100%)"),
+      opacity: 0.055,
+      pointerEvents: "none",
+      zIndex: 0
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "sticky",
+      top: 0,
+      zIndex: 100,
+      background: C.card2,
+      borderBottom: "1px solid ".concat(C.border),
+      boxShadow: "0 2px 24px rgba(0,0,0,.65)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 2,
+      background: "linear-gradient(90deg,".concat(C.red, " 0%,").concat(C.red, "44 55%,transparent 100%)")
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 24px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 20,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement(SabelLogo, {
+    h: 30
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 1,
+      height: 34,
+      background: C.border
+    }
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.mono,
+      letterSpacing: "0.16em",
+      marginBottom: 3
+    })
+  }, "PROJECT TRACKER"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 17,
+      fontWeight: 800,
+      color: C.w,
+      letterSpacing: "0.03em",
+      lineHeight: 1
+    }
+  }, "CIRQUL"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: C.muted,
+      marginTop: 2
+    }
+  }, "Cara \u2014 AI Customer Experience \xB7 Phase 1"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 16,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement(SaveStatus, {
+    status: saveStatus
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement(PercentStat, {
+    label: "COMPLETE",
+    count: stats.done,
+    total: allT.length,
+    col: "#4ADE80"
+  }), /*#__PURE__*/React.createElement(PercentStat, {
+    label: "IN PROGRESS",
+    count: stats.active,
+    total: allT.length,
+    col: "#60A5FA"
+  }), /*#__PURE__*/React.createElement(PercentStat, {
+    label: "OUTSTANDING",
+    count: stats.deps,
+    total: allT.length,
+    col: "#FBBF24"
+  }), /*#__PURE__*/React.createElement(PercentStat, {
+    label: "BLOCKED",
+    count: stats.blocked,
+    total: allT.length,
+    col: "#F87171"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 1,
+      height: 44,
+      background: C.border
+    }
+  }), /*#__PURE__*/React.createElement(DualProgress, {
+    tasks: allT
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "24px 24px 48px",
+      position: "relative",
+      zIndex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 40
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 9,
+      color: C.red
+    })
+  }, "\u25FC"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 800,
+      fontSize: 13,
+      color: C.w,
+      letterSpacing: "0.08em"
+    }
+  }, "PROJECT PLAN"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 1,
+      background: "linear-gradient(90deg,".concat(C.border, ",transparent)")
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.mono
+    })
+  }, "DOUBLE-CLICK task name \xB7 CLICK to edit owner / dates / status \xB7 \u2197 opens Intercom guide \xB7 changes save automatically")), phases.map(function (phase) {
+    var m = PHASES[phase.id],
+      col = planCol.has(phase.id);
+    var done = phase.tasks.filter(function (t) {
+      return t.status === "Complete";
+    }).length;
+    var ppct = Math.round(done / Math.max(1, phase.tasks.length) * 100);
+    return /*#__PURE__*/React.createElement("div", {
+      key: phase.id,
+      style: {
+        marginBottom: 6,
+        borderRadius: 4,
+        overflow: "hidden",
+        border: "1px solid ".concat(C.border2),
+        boxShadow: "0 2px 10px rgba(0,0,0,.4)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      onClick: function onClick() {
+        return toggleS(setPlanCol, phase.id);
+      },
+      style: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        background: "linear-gradient(90deg,".concat(m.c, "1A 0%,").concat(C.card2, " 65%)"),
+        borderLeft: "3px solid ".concat(m.c),
+        padding: "8px 14px",
+        cursor: "pointer",
+        userSelect: "none"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 10
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 9,
+        color: m.c,
+        display: "inline-block",
+        transform: "rotate(".concat(col ? "-90" : "0", "deg)"),
+        transition: "transform .2s"
+      })
+    }, "\u25BC"), /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 9.5,
+        color: m.c,
+        fontWeight: 700,
+        letterSpacing: "0.09em"
+      })
+    }, m.l)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 12
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 64,
+        height: 3,
+        background: C.border,
+        borderRadius: 2,
+        overflow: "hidden"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: "".concat(ppct, "%"),
+        height: "100%",
+        background: m.c,
+        borderRadius: 2,
+        transition: "width .4s"
+      }
+    })), /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 8,
+        color: C.mono
+      })
+    }, done, "/", phase.tasks.length)), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick(e) {
+        e.stopPropagation();
+        addTask(phase.id);
+      },
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 9,
+        color: m.c,
+        background: "".concat(m.c, "12"),
+        border: "1px solid ".concat(m.c, "38"),
+        borderRadius: 2,
+        padding: "2px 9px",
+        cursor: "pointer",
+        letterSpacing: "0.04em"
+      })
+    }, "+ ADD ROW"))), !col && /*#__PURE__*/React.createElement("div", {
+      style: {
+        overflowX: "auto"
+      }
+    }, /*#__PURE__*/React.createElement("table", {
+      style: {
+        width: "100%",
+        borderCollapse: "collapse",
+        background: C.bg,
+        tableLayout: "fixed",
+        minWidth: 900
+      }
+    }, /*#__PURE__*/React.createElement("colgroup", null, /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 290
+      }
+    }), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 106
+      }
+    }), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 106
+      }
+    }), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 96
+      }
+    }), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 96
+      }
+    }), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 112
+      }
+    }), /*#__PURE__*/React.createElement("col", null), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: 38
+      }
+    })), /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, ["TASK", "OWNER", "CO-OWNER", "START", "END", "STATUS", "NOTES", ""].map(function (h) {
+      return /*#__PURE__*/React.createElement("th", {
+        key: h,
+        style: TH
+      }, h);
+    }))), /*#__PURE__*/React.createElement("tbody", null, phase.tasks.map(function (t, i) {
+      return /*#__PURE__*/React.createElement("tr", {
+        key: t.id,
+        style: {
+          background: i % 2 === 0 ? C.bg : C.card,
+          transition: "background .1s"
+        },
+        onMouseEnter: function onMouseEnter(e) {
+          return e.currentTarget.style.background = C.card3;
+        },
+        onMouseLeave: function onMouseLeave(e) {
+          return e.currentTarget.style.background = i % 2 === 0 ? C.bg : C.card;
+        }
+      }, /*#__PURE__*/React.createElement("td", {
+        style: _objectSpread(_objectSpread({}, TD), {}, {
+          paddingLeft: t.dep ? 8 : 10
+        })
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 5
+        }
+      }, t.dep && /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: OWNERS.Cirqul.c,
+          fontSize: 10,
+          flexShrink: 0
+        }
+      }, "\u25C6"), /*#__PURE__*/React.createElement(LinkIcon, {
+        url: t.link
+      }), isEd(t.id, "task") ? /*#__PURE__*/React.createElement("input", {
+        autoFocus: true,
+        value: edVal,
+        onChange: function onChange(e) {
+          return setEdVal(e.target.value);
+        },
+        onBlur: function onBlur() {
+          return commitEd(edVal, true);
+        },
+        onKeyDown: function onKeyDown(e) {
+          if (e.key === "Enter") commitEd(edVal, true);
+          if (e.key === "Escape") cancelEd();
+        },
+        style: _objectSpread(_objectSpread({}, SANS), {}, {
+          background: C.card4,
+          color: C.body,
+          border: "1px solid ".concat(C.red, "55"),
+          borderRadius: 2,
+          padding: "2px 6px",
+          fontSize: 11,
+          outline: "none",
+          width: "100%"
+        })
+      }) : /*#__PURE__*/React.createElement("span", {
+        onDoubleClick: function onDoubleClick() {
+          return startEd(t.id, "task", t.task);
+        },
+        title: "Double-click to edit",
+        style: {
+          fontSize: 11,
+          color: t.dep ? OWNERS.Cirqul.c : C.body,
+          cursor: "text",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          display: "block",
+          maxWidth: 242
+        }
+      }, t.task))), /*#__PURE__*/React.createElement("td", {
+        style: TD
+      }, /*#__PURE__*/React.createElement(OwnerEdit, {
+        id: t.id,
+        field: "owner",
+        val: t.owner
+      })), /*#__PURE__*/React.createElement("td", {
+        style: TD
+      }, /*#__PURE__*/React.createElement(OwnerEdit, {
+        id: t.id,
+        field: "co",
+        val: t.co
+      })), /*#__PURE__*/React.createElement("td", {
+        style: TD
+      }, /*#__PURE__*/React.createElement(DateEdit, {
+        id: t.id,
+        field: "start",
+        val: t.start
+      })), /*#__PURE__*/React.createElement("td", {
+        style: TD
+      }, /*#__PURE__*/React.createElement(DateEdit, {
+        id: t.id,
+        field: "end",
+        val: t.end
+      })), /*#__PURE__*/React.createElement("td", {
+        style: TD
+      }, /*#__PURE__*/React.createElement(StatusPill, {
+        status: t.status,
+        onClick: function onClick() {
+          return updTask(t.id, {
+            status: STATUS_CYCLE[(STATUS_CYCLE.indexOf(t.status) + 1) % STATUS_CYCLE.length]
+          });
+        }
+      })), /*#__PURE__*/React.createElement("td", {
+        style: _objectSpread(_objectSpread({}, TD), {}, {
+          minWidth: 140
+        })
+      }, /*#__PURE__*/React.createElement(TextEdit, {
+        id: t.id,
+        field: "notes",
+        val: t.notes,
+        ph: "Add note\u2026",
+        minW: 100
+      })), /*#__PURE__*/React.createElement("td", {
+        style: _objectSpread(_objectSpread({}, TD), {}, {
+          textAlign: "center",
+          padding: "5px 4px"
+        })
+      }, /*#__PURE__*/React.createElement(DeleteBtn, {
+        onDelete: function onDelete() {
+          return delTask(t.id);
+        }
+      })));
+    })))));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+      margin: "0 0 28px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 1,
+      background: C.border2
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8,
+      color: C.border,
+      letterSpacing: "0.12em"
+    })
+  }, "TIMELINE"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 1,
+      background: C.border2
+    }
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 9,
+      color: C.red
+    })
+  }, "\u25FC"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 800,
+      fontSize: 13,
+      color: C.w,
+      letterSpacing: "0.08em"
+    }
+  }, "PROJECT TIMELINE"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 1,
+      background: "linear-gradient(90deg,".concat(C.border, ",transparent)")
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      return setTlOpen(function (v) {
+        return !v;
+      });
+    },
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8.5,
+      color: C.muted,
+      letterSpacing: "0.07em",
+      background: "none",
+      border: "1px solid ".concat(C.border),
+      padding: "4px 12px",
+      borderRadius: 2,
+      cursor: "pointer",
+      transition: "all .14s"
+    }),
+    onMouseEnter: function onMouseEnter(e) {
+      e.currentTarget.style.borderColor = C.red;
+      e.currentTarget.style.color = C.w;
+    },
+    onMouseLeave: function onMouseLeave(e) {
+      e.currentTarget.style.borderColor = C.border;
+      e.currentTarget.style.color = C.muted;
+    }
+  }, tlOpen ? "▲ COLLAPSE" : "▼ EXPAND")), tlOpen && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(OwnerFilter, null), /*#__PURE__*/React.createElement(Gantt, null), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 14,
+      alignItems: "center",
+      marginTop: 10,
+      padding: "8px 12px",
+      background: C.card2,
+      borderRadius: 3,
+      border: "1px solid ".concat(C.border2),
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.mono
+    })
+  }, "KEY:"), Object.entries(OWNERS).map(function (_ref16) {
+    var _ref17 = _slicedToArray(_ref16, 2),
+      o = _ref17[0],
+      s = _ref17[1];
+    return /*#__PURE__*/React.createElement("span", {
+      key: o,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 5
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 22,
+        height: 7,
+        borderRadius: 2,
+        background: s.c,
+        opacity: .8
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 7.5,
+        color: C.muted
+      })
+    }, o));
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 5
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 9,
+      height: 9,
+      background: OWNERS.Cirqul.c,
+      transform: "rotate(45deg)",
+      borderRadius: 1
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.muted
+    })
+  }, "Dependency")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 5
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.red,
+      fontSize: 13
+    }
+  }, "\u2605"), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.muted
+    })
+  }, "Milestone")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 5
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 1,
+      height: 13,
+      background: C.red,
+      opacity: .7
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.muted
+    })
+  }, "Today \u2014 ", todayStr)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 5
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: 14,
+      height: 14,
+      borderRadius: 2,
+      background: "rgba(46,184,230,0.15)",
+      border: "1px solid rgba(46,184,230,0.3)",
+      color: "#2eb8e6",
+      fontSize: 8,
+      fontWeight: 700
+    }
+  }, "\u2197"), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 7.5,
+      color: C.muted
+    })
+  }, "Intercom guide")))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: "1px solid ".concat(C.border2),
+      padding: "12px 24px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      background: C.card2
+    }
+  }, /*#__PURE__*/React.createElement(SabelLogo, {
+    h: 18
+  }), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8,
+      color: C.mono,
+      letterSpacing: "0.12em"
+    })
+  }, "PERFECT MADE POSSIBLE"), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 8,
+      color: C.mono
+    })
+  }, "sabelcustomersuccess.com")));
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+  </script>
+</body>
+</html>
