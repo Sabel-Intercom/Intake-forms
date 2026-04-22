@@ -118,10 +118,6 @@ var PHASES = {
     c: "#3B82F6",
     l: "WEEKS 1–2 — INTERCOM FOUNDATIONS"
   },
-  gate: {
-    c: "#F59E0B",
-    l: "WEEKS 2–3 — CONNECTOR READINESS GATE"
-  },
   automation: {
     c: "#F59E0B",
     l: "WEEKS 2–4 — AUTOMATION ENGINE (4 WORKFLOWS)"
@@ -130,10 +126,6 @@ var PHASES = {
     c: "#10B981",
     l: "WEEKS 3–5 — FIN ENABLEMENT & HELP CENTRE"
   },
-  uat: {
-    c: "#8B5CF6",
-    l: "WEEKS 4–5 — UAT & QUALITY LOOP"
-  },
   migration: {
     c: "#8B5CF6",
     l: "WEEKS 5–6 — MIGRATION ACCELERATOR"
@@ -141,10 +133,6 @@ var PHASES = {
   golive: {
     c: "#E10600",
     l: "WEEKS 6–7 — TRAINING, GO-LIVE & HANDOVER"
-  },
-  post: {
-    c: "#14B8A6",
-    l: "WEEKS 7+ — POST GO-LIVE REVIEW"
   }
 };
 var TL_START = new Date("2026-03-17");
@@ -1689,7 +1677,7 @@ function App() {
         whiteSpace: "nowrap"
       })
     }, "\u25BC ", todayStr)))), phases.map(function (phase) {
-      var m = PHASES[phase.id] || {c: "#64748B", l: (phase.id || "").toUpperCase()},
+      var m = PHASES[phase.id],
         col = tlCol.has(phase.id),
         vis = phase.tasks.filter(taskVis);
       if (!vis.length) return null;
@@ -2059,7 +2047,7 @@ function App() {
       color: C.mono
     })
   }, "DOUBLE-CLICK task name \xB7 CLICK to edit owner / dates / status \xB7 \u2197 opens Intercom guide \xB7 changes save automatically")), phases.map(function (phase) {
-    var m = PHASES[phase.id] || {c: "#64748B", l: (phase.id || "").toUpperCase()},
+    var m = PHASES[phase.id],
       col = planCol.has(phase.id);
     var done = phase.tasks.filter(function (t) {
       return t.status === "Complete";
