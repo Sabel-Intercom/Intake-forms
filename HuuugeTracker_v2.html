@@ -1677,8 +1677,9 @@ function App() {
         whiteSpace: "nowrap"
       })
     }, "\u25BC ", todayStr)))), phases.map(function (phase) {
-      var m = PHASES[phase.id],
-        col = tlCol.has(phase.id),
+      var m = PHASES[phase.id];
+      if (!m) return null;
+      var col = tlCol.has(phase.id),
         vis = phase.tasks.filter(taskVis);
       if (!vis.length) return null;
       var nonDep = vis.filter(function (t) {
@@ -2047,8 +2048,9 @@ function App() {
       color: C.mono
     })
   }, "DOUBLE-CLICK task name \xB7 CLICK to edit owner / dates / status \xB7 \u2197 opens Intercom guide \xB7 changes save automatically")), phases.map(function (phase) {
-    var m = PHASES[phase.id],
-      col = planCol.has(phase.id);
+    var m = PHASES[phase.id];
+    if (!m) return null;
+    var col = planCol.has(phase.id);
     var done = phase.tasks.filter(function (t) {
       return t.status === "Complete";
     }).length;
