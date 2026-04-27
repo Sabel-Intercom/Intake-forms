@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AfterShip — Intercom Kickoff Intake Form</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #E10600; --red-dim: #B30500; --navy: #2A3547; --dark: #0F1318;
+    --body: #1F2937; --muted: #64748B; --border: #DDE3EA; --shade: #F4F6F8;
+    --white: #FFFFFF; --input-bg: #FAFBFC; --focus: rgba(225,6,0,0.15);
+    --radius: 6px; --mono: 'DM Mono', monospace; --sans: 'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); background: var(--shade); color: var(--body); min-height: 100vh; line-height: 1.6; }
+  .topbar { background: var(--dark); padding: 0 40px; display: flex; align-items: center; height: 56px; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid var(--red); }
+  .topbar-brand { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--white); text-transform: uppercase; }
+  .topbar-brand span { color: var(--red); margin-right: 8px; }
+  .topbar-right { margin-left: auto; font-family: var(--mono); font-size: 10px; color: #5a6a7a; letter-spacing: 0.1em; text-transform: uppercase; }
+  .progress-wrap { background: var(--dark); padding: 0 40px 16px; position: sticky; top: 56px; z-index: 99; }
+  .progress-track { height: 2px; background: #2a3547; border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--red); border-radius: 2px; width: 0%; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+  .progress-label { font-family: var(--mono); font-size: 10px; color: #5a6a7a; letter-spacing: 0.1em; margin-top: 6px; text-transform: uppercase; }
+  .hero { background: var(--navy); padding: 60px 40px 50px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--red); }
+  .hero-inner { max-width: 760px; }
+  .hero-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: var(--red); text-transform: uppercase; margin-bottom: 16px; }
+  .hero-title { font-size: 32px; font-weight: 600; color: var(--white); line-height: 1.2; margin-bottom: 10px; letter-spacing: -0.02em; }
+  .hero-client { font-size: 18px; font-weight: 400; color: var(--red); margin-bottom: 28px; }
+  .hero-rule { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; }
+  .hero-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; }
+  .hero-meta-item label { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; color: #5a6a7a; text-transform: uppercase; margin-bottom: 4px; }
+  .hero-meta-item p { font-size: 13px; color: rgba(255,255,255,0.75); }
+  .how-to { background: var(--white); border-left: 3px solid var(--red); margin: 32px auto; max-width: 840px; padding: 20px 24px; display: flex; gap: 16px; border-radius: 0 var(--radius) var(--radius) 0; }
+  .how-to-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+  .how-to-text p { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
+  .how-to-text p + p { margin-top: 6px; }
+  .how-to-text strong { color: var(--body); }
+  .page { max-width: 840px; margin: 0 auto; padding: 0 24px 80px; }
+  .section { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 24px; overflow: hidden; opacity: 0; transform: translateY(16px); animation: fadeUp 0.4s ease forwards; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .section:nth-child(1){animation-delay:.05s} .section:nth-child(2){animation-delay:.10s} .section:nth-child(3){animation-delay:.15s} .section:nth-child(4){animation-delay:.20s} .section:nth-child(5){animation-delay:.25s} .section:nth-child(6){animation-delay:.30s} .section:nth-child(7){animation-delay:.35s} .section:nth-child(8){animation-delay:.40s} .section:nth-child(9){animation-delay:.45s} .section:nth-child(10){animation-delay:.50s}
+  .section-header { padding: 18px 24px; background: var(--navy); display: flex; align-items: center; gap: 12px; }
+  .section-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; color: var(--red); background: rgba(225,6,0,0.12); padding: 3px 8px; border-radius: 3px; flex-shrink: 0; }
+  .section-title { font-size: 14px; font-weight: 600; color: var(--white); }
+  .section-body { padding: 24px; }
+  .section-note { font-size: 12.5px; color: var(--muted); font-style: italic; margin-bottom: 20px; line-height: 1.6; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+  .field-row.full { grid-template-columns: 1fr; }
+  .field-row.thirds { grid-template-columns: 1fr 1fr 1fr; }
+  @media(max-width:600px){ .field-row,.field-row.thirds { grid-template-columns: 1fr; } }
+  .field-group { display: flex; flex-direction: column; gap: 5px; }
+  .field-group label { font-size: 12px; font-weight: 500; color: var(--body); }
+  .field-group label .req { color: var(--red); margin-left: 2px; }
+  .field-group input,.field-group textarea,.field-group select { font-family: var(--sans); font-size: 13.5px; color: var(--body); background: var(--input-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 12px; outline: none; transition: border-color .2s,box-shadow .2s; width: 100%; resize: vertical; }
+  .field-group input::placeholder,.field-group textarea::placeholder { color: #b0bec5; font-style: italic; }
+  .field-group input:focus,.field-group textarea:focus,.field-group select:focus { border-color: var(--red); box-shadow: 0 0 0 3px var(--focus); }
+  .field-group textarea { min-height: 80px; }
+  .field-group textarea.tall { min-height: 110px; }
+  .proc-card { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
+  .proc-card:last-child { margin-bottom: 0; }
+  .proc-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: var(--shade); border-bottom: 1px solid var(--border); }
+  .proc-num { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; color: var(--red); text-transform: uppercase; background: rgba(225,6,0,0.08); padding: 3px 7px; border-radius: 3px; flex-shrink: 0; }
+  .proc-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .proc-desc { font-size: 12px; color: var(--muted); font-style: italic; padding: 12px 18px 0; line-height: 1.55; }
+  .proc-fields { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+  .contacts-grid { display: grid; grid-template-columns: 200px 1fr 1fr 120px; gap: 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  @media(max-width:640px){ .contacts-grid { grid-template-columns: 1fr; } }
+  .cg-header { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); background: var(--navy); padding: 9px 12px; font-weight: 500; }
+  .cg-label { font-size: 12.5px; font-weight: 500; color: var(--body); background: var(--shade); padding: 10px 12px; border-top: 1px solid var(--border); display: flex; align-items: center; }
+  .cg-input { padding: 6px 8px; border-top: 1px solid var(--border); border-left: 1px solid var(--border); background: var(--white); }
+  .cg-input input { font-family: var(--sans); font-size: 13px; color: var(--body); background: transparent; border: none; outline: none; width: 100%; padding: 4px; }
+  .cg-input input::placeholder { color: #b0bec5; font-style: italic; }
+  .milestones-grid { display: grid; grid-template-columns: 1fr 160px 1fr; gap: 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .oos-confirm { display: flex; align-items: flex-start; gap: 12px; background: var(--shade); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-top: 16px; cursor: pointer; }
+  .oos-confirm input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--red); cursor: pointer; margin-top: 2px; }
+  .oos-confirm label { font-size: 13.5px; color: var(--body); cursor: pointer; line-height: 1.55; }
+  .submit-bar { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+  .submit-info { flex: 1; min-width: 220px; }
+  .submit-info p { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .submit-info strong { color: var(--body); }
+  .btn-submit { font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--white); background: var(--red); border: none; border-radius: var(--radius); padding: 12px 28px; cursor: pointer; transition: background .2s,transform .1s; white-space: nowrap; flex-shrink: 0; }
+  .btn-submit:hover { background: var(--red-dim); }
+  .btn-submit:active { transform: scale(0.98); }
+  .btn-submit:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+  .validation-msg { display: none; background: #fff3f3; border: 1px solid #fca5a5; border-radius: var(--radius); padding: 14px 18px; font-size: 13px; color: #b91c1c; margin-bottom: 16px; line-height: 1.5; }
+  .validation-msg.show { display: block; }
+  .form-footer { text-align: center; padding: 16px 0 40px; }
+  .form-footer p { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: #a0aec0; text-transform: uppercase; }
+  .field-group input.error,.field-group textarea.error { border-color: var(--red); box-shadow: 0 0 0 3px var(--focus); }
+  .success-overlay { display: none; position: fixed; inset: 0; background: rgba(15,19,24,0.85); z-index: 999; align-items: center; justify-content: center; }
+  .success-overlay.show { display: flex; }
+  .success-card { background: var(--white); border-radius: 10px; padding: 40px 48px; max-width: 460px; width: calc(100% - 40px); text-align: center; border-top: 4px solid var(--red); animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes popIn { from { opacity:0; transform: scale(0.88) translateY(16px); } to { opacity:1; transform: scale(1) translateY(0); } }
+  .success-icon { font-size: 40px; margin-bottom: 16px; display: block; }
+  .success-card h2 { font-size: 20px; font-weight: 600; color: var(--navy); margin-bottom: 10px; }
+  .success-card p { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 6px; }
+  .success-card p strong { color: var(--body); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand"><span>●</span> Sabel Customer Success Solutions</div>
+  <div class="topbar-right">Confidential</div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label" id="progressLabel">0% complete</div>
+</div>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-label">Kickoff Intake Form</div>
+    <div class="hero-title">Intercom Implementation</div>
+    <div class="hero-client">AfterShip</div>
+    <hr class="hero-rule">
+    <div class="hero-meta">
+      <div class="hero-meta-item"><label>Prepared by</label><p>Sabel Customer Success Solutions</p></div>
+      <div class="hero-meta-item"><label>Project start</label><p>April 2026</p></div>
+      <div class="hero-meta-item"><label>Estimated duration</label><p>4 weeks</p></div>
+      <div class="hero-meta-item"><label>Est. time to complete</label><p>20–40 minutes</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="how-to">
+    <div class="how-to-icon">📋</div>
+    <div class="how-to-text">
+      <p><strong>Complete each section as fully as you can.</strong> If you are unsure of an answer, leave a note and we will cover it in our first check-in.</p>
+      <p>When you click <strong>Submit</strong>, your answers go directly to the Sabel team. You will see a confirmation on this page once sent.</p>
+    </div>
+  </div>
+
+  <form id="kickoffForm" action="https://sabel-webhook.vercel.app/api/webhook" method="POST" novalidate>
+    <input type="hidden" name="_client" value="AfterShip">
+    <input type="hidden" name="_project" value="Intercom Implementation and Migration">
+    <input type="hidden" name="_proposal_scope" value="{&quot;total_hours&quot;:34.5,&quot;total_investment&quot;:&quot;USD $6,900 plus migration run&quot;,&quot;currency&quot;:&quot;USD&quot;,&quot;pillars&quot;:[{&quot;name&quot;:&quot;Intercom Foundations&quot;,&quot;hours&quot;:34.5,&quot;deliverables&quot;:[&quot;Workspace and team structure across 30 seats with roles, permissions and business hours&quot;,&quot;10 brand profiles, each with Messenger widget, colour scheme and logo per product&quot;,&quot;Email channel connected for ticket routing from Freshdesk, plus live chat channels per brand&quot;,&quot;Conversation routing rules to direct each brand's inbound to the correct team and inbox&quot;,&quot;SLA policies per team and concurrent chat limits per agent via workload management&quot;,&quot;10 Help Centre instances created, one per product, ready for content migration&quot;,&quot;Custom conversation attributes for product, type and priority reporting&quot;,&quot;Foundations walkthrough session covering workspace, inbox model, routing and admin&quot;,&quot;Reporting and analytics enablement session including replication of Looker Studio views&quot;,&quot;Go-live support during cutover&quot;]},{&quot;name&quot;:&quot;Migration Accelerator (Migr8Now)&quot;,&quot;hours&quot;:9,&quot;deliverables&quot;:[&quot;Pre-migration validation: 100 sample records from Freshdesk and 100 from Crisp loaded into the Intercom test environment for sign-off&quot;,&quot;Delta migration and cutover coordination on go-live day&quot;,&quot;Post-migration QA spot-checks across conversations, contacts and articles&quot;,&quot;Migr8Now migration run priced by history window (1, 2, 3 or 5 years)&quot;]}],&quot;procedures&quot;:[],&quot;out_of_scope&quot;:[&quot;Help Centre article migration is TBD — total article count and structure across the 10 Help Centres to be confirmed, then scoped and quoted separately before any build&quot;,&quot;Automation Engine pillar (workflows, procedures, integrations) is not included&quot;,&quot;Fin AI Enablement is not included&quot;,&quot;Transformation Blueprint discovery is not included&quot;],&quot;assumptions&quot;:[&quot;Migration volume estimates based on 24,000 conversations per year — preferred history window must be confirmed before migration is scheduled&quot;,&quot;April timeline feasibility note: 4-week delivery requires front-loading resources and parallel workstreams, which may increase total cost; feasibility confirmed at kickoff&quot;,&quot;Monthly intake is capped at two new projects; engagement provisionally held for the next available intake window and confirmed at contract signature&quot;,&quot;If inputs or approvals are delayed, the project moves to Waiting on Client status and the delivery date shifts&quot;],&quot;milestones&quot;:[{&quot;label&quot;:&quot;Week 0 — Kickoff and access&quot;,&quot;date&quot;:&quot;Credentials confirmed, workspace provisioned, migration sample environment ready&quot;},{&quot;label&quot;:&quot;Week 1 — Workspace and brands&quot;,&quot;date&quot;:&quot;Team structure, 10 brand profiles, channel setup and business hours&quot;},{&quot;label&quot;:&quot;Week 2 — Routing and compliance&quot;,&quot;date&quot;:&quot;Inbox model, SLA policies, workload management and custom attributes&quot;},{&quot;label&quot;:&quot;Week 3 — Migration and Help Centres&quot;,&quot;date&quot;:&quot;Sample validation, full migration run initiated, 10 Help Centres populated&quot;},{&quot;label&quot;:&quot;Week 4 — Go-live and handover&quot;,&quot;date&quot;:&quot;Delta migration, cutover, training delivered, AfterShip live on Intercom&quot;}]}">
+
+    <div class="section">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div class="section-title">Project contacts</div>
+  </div>
+  <div class="section-body"><p class="section-note">Please provide the details of everyone involved in this project.</p>
+  <div class="contacts-grid">
+    <div class="cg-header">Role</div>
+    <div class="cg-header" style="border-left:1px solid rgba(255,255,255,0.1)">Name</div>
+    <div class="cg-header" style="border-left:1px solid rgba(255,255,255,0.1)">Email</div>
+    <div class="cg-header" style="border-left:1px solid rgba(255,255,255,0.1)">Notes</div>
+    <div class="cg-label">Project decision-maker</div>
+    <div class="cg-input"><input type="text" name="c_dm_name" placeholder="Full name"></div>
+    <div class="cg-input"><input type="email" name="c_dm_email" placeholder="email@company.com"></div>
+    <div class="cg-input"><input type="text" name="c_dm_notes" placeholder="Notes"></div>
+    <div class="cg-label">Day-to-day owner</div>
+    <div class="cg-input"><input type="text" name="c_oo_name" placeholder="Full name"></div>
+    <div class="cg-input"><input type="email" name="c_oo_email" placeholder="email@company.com"></div>
+    <div class="cg-input"><input type="text" name="c_oo_notes" placeholder="Notes"></div>
+    <div class="cg-label">Technical contact</div>
+    <div class="cg-input"><input type="text" name="c_tc_name" placeholder="Full name"></div>
+    <div class="cg-input"><input type="email" name="c_tc_email" placeholder="email@company.com"></div>
+    <div class="cg-input"><input type="text" name="c_tc_notes" placeholder="Notes"></div></div></div></div>
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div class="section-title">Access and permissions</div>
+  </div>
+  <div class="section-body"><p class="section-note">We need access to these systems before the build can begin.</p>
+  <div class="contacts-grid" style="grid-template-columns: 160px 1fr 1fr 140px;">
+  <div class="cg-header">System</div>
+  <div class="cg-header" style="border-left:1px solid rgba(255,255,255,0.1)">Access needed</div>
+  <div class="cg-header" style="border-left:1px solid rgba(255,255,255,0.1)">Contact to arrange</div>
+  <div class="cg-header" style="border-left:1px solid rgba(255,255,255,0.1)">Status</div>
+  <div class="cg-label">Intercom</div>
+  <div class="cg-input" style="border-left:1px solid var(--border)"><input type="text" value="Admin access for Sabel" readonly style="color:var(--muted);font-style:italic;font-size:12px;"></div>
+  <div class="cg-input"><input type="text" name="acc_intercom_contact" placeholder="Name / email"></div>
+  <div class="cg-input"><input type="text" name="acc_intercom_status" placeholder="e.g. Done, In progress"></div>
+  <div class="cg-label">Freshdesk and Crisp</div>
+  <div class="cg-input" style="border-left:1px solid var(--border)"><input type="text" value="Admin / API access for migration" readonly style="color:var(--muted);font-style:italic;font-size:12px;"></div>
+  <div class="cg-input"><input type="text" name="acc_migration_contact" placeholder="Name / email"></div>
+  <div class="cg-input"><input type="text" name="acc_migration_status" placeholder="e.g. Done, In progress"></div></div></div></div>
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div class="section-title">Key dates and milestones</div>
+  </div>
+  <div class="section-body"><p class="section-note">Confirm these dates are correct or note any changes.</p>
+  <div class="milestones-grid">
+    <div class="cg-header">Milestone</div>
+    <div class="cg-header" style="border-left:1px solid rgba(255,255,255,0.1)">Target date</div>
+    <div class="cg-header" style="border-left:1px solid rgba(255,255,255,0.1)">Notes / changes</div>
+    
+  <div class="cg-label">Project kickoff</div>
+  <div class="cg-input" style="border-left:1px solid var(--border);display:flex;align-items:center;">
+    <input type="text" value="April 2026" readonly style="color:var(--muted);font-size:12.5px;">
+  </div>
+  <div class="cg-input"><input type="text" name="ms_kickoff_notes" placeholder="Confirmed / change to..."></div>
+  <div class="cg-label">Build complete</div>
+  <div class="cg-input" style="border-left:1px solid var(--border);display:flex;align-items:center;">
+    <input type="text" value="" readonly style="color:var(--muted);font-size:12.5px;">
+  </div>
+  <div class="cg-input"><input type="text" name="ms_build_notes" placeholder="Confirmed / change to..."></div>
+  <div class="cg-label">Project completion</div>
+  <div class="cg-input" style="border-left:1px solid var(--border);display:flex;align-items:center;">
+    <input type="text" value="" readonly style="color:var(--muted);font-size:12.5px;">
+  </div>
+  <div class="cg-input"><input type="text" name="ms_complete_notes" placeholder="Confirmed / change to..."></div>
+  </div></div></div>
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div class="section-title">Out of scope confirmation</div>
+  </div>
+  <div class="section-body"><p style="font-size:13.5px;color:var(--body);line-height:1.65;margin-bottom:12px;">Please refer to your signed proposal for the full list of out-of-scope items.</p>
+  <p style="font-size:12.5px;color:var(--muted);font-style:italic;margin-bottom:4px;">Any work outside the agreed scope will be scoped and priced as a separate add-on before work begins.</p>
+  <div class="oos-confirm">
+    <input type="checkbox" id="oosCheck" name="oos_confirmed">
+    <label for="oosCheck">I confirm I have read and understood what is out of scope for this engagement.</label>
+  </div></div></div>
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div class="section-title">Inbox and Routing</div>
+  </div>
+  <div class="section-body"><p class="section-note">We are rebuilding your inbox structure and routing so conversations land in the right place automatically.</p><div class="field-row full"><div class="field-group">
+      <label>List all inboxes or queues you want to keep<span class="req">*</span></label>
+      <textarea name="inbox_list" class="tall" placeholder="e.g.
+General enquiries
+Billing
+Technical support" required></textarea>
+    </div></div><div class="field-row full"><div class="field-group">
+      <label>What types of conversations go to each inbox?</label>
+      <textarea name="inbox_routing" class="tall" placeholder="Describe how you sort conversations..."></textarea>
+    </div></div><div class="field-row "><div class="field-group">
+      <label>How are conversations assigned?</label>
+      <select name="inbox_assignment"><option value="">Select...</option><option>Round-robin (automatic, even distribution)</option><option>Load-balanced (fewest open conversations)</option><option>Manual (agents pick up their own)</option><option>Mix — depends on the inbox</option></select>
+    </div><div class="field-group">
+    <label>Business hours (days, times, timezone)</label>
+    <input type="text" name="inbox_hours" placeholder="e.g. Mon–Fri 9am–5pm AEST">
+  </div></div><div class="field-row full"><div class="field-group">
+      <label>Team assignments — which agents handle which inboxes?</label>
+      <textarea name="inbox_teams"  placeholder="e.g. Kobe handles billing; dev team handles tech..."></textarea>
+    </div></div><div class="field-row "><div class="field-group">
+      <label>Out-of-hours handling</label>
+      <textarea name="inbox_oos"  placeholder="What happens to conversations when no one is available?"></textarea>
+    </div><div class="field-group">
+    <label>Any VIP accounts or priority routing?</label>
+    <input type="text" name="inbox_vip" placeholder="e.g. Enterprise accounts route directly to Sarah">
+  </div></div><div class="field-row full"><div class="field-group">
+    <label>Existing tags or attributes to carry across?</label>
+    <input type="text" name="inbox_tags" placeholder="e.g. Urgent, Premium, Trial, Bug">
+  </div></div></div></div>
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div class="section-title">Migration — Freshdesk and Crisp to Intercom</div>
+  </div>
+  <div class="section-body"><p class="section-note">We need the following information to plan and execute the migration accurately.</p><div class="field-row "><div class="field-group">
+    <label>Approximate total ticket volume</label>
+    <input type="text" name="mig_ticket_volume" placeholder="e.g. 45,000 tickets">
+  </div><div class="field-group">
+    <label>Date range to migrate</label>
+    <input type="text" name="mig_date_range" placeholder="e.g. All tickets, or last 2 years only">
+  </div></div><div class="field-row full"><div class="field-group">
+      <label>Custom fields to migrate (list them)</label>
+      <textarea name="mig_custom_fields"  placeholder="List any custom fields in Freshdesk and Crisp that need to map to Intercom..."></textarea>
+    </div></div><div class="field-row "><div class="field-group">
+    <label>Tags to migrate</label>
+    <input type="text" name="mig_tags" placeholder="e.g. All tags, or list specific ones">
+  </div><div class="field-group">
+      <label>File attachments</label>
+      <select name="mig_attachments"><option value="">Select...</option><option>Migrate all attachments</option><option>Exclude attachments</option><option>Not sure — discuss with Sabel</option></select>
+    </div></div><div class="field-row full"><div class="field-group">
+      <label>Agents to migrate (name + email in both systems)</label>
+      <textarea name="mig_agents" class="tall" placeholder="List each agent with their email in Freshdesk and Crisp and their email in Intercom..."></textarea>
+    </div></div><div class="field-row "><div class="field-group">
+    <label>Go-live / cutover date</label>
+    <input type="text" name="mig_golive" placeholder="e.g. 15 April 2026">
+  </div><div class="field-group">
+    <label>Sign-off authority for migration validation</label>
+    <input type="text" name="mig_signoff" placeholder="Name and role">
+  </div></div><div class="field-row full"><div class="field-group">
+      <label>Any data to exclude from the migration?</label>
+      <textarea name="mig_exclude"  placeholder="e.g. Spam tickets, test tickets, tickets before a certain date..."></textarea>
+    </div></div></div></div>
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div class="section-title">Additional notes</div>
+  </div>
+  <div class="section-body"><p class="section-note">Anything not covered above — other tools we should know about, edge cases, team context, or questions for us.</p>
+  <div class="field-group">
+    <textarea name="additional_notes" class="tall" placeholder="Add anything else here..."></textarea>
+  </div></div></div>
+
+    <div class="validation-msg" id="validationMsg"></div>
+
+    <div class="submit-bar">
+      <div class="submit-info">
+        <p><strong>Ready to submit?</strong> Your answers will be sent securely to the Sabel team.</p>
+        <p style="margin-top:6px;">Responses go directly to <strong>Sabel Customer Success Solutions</strong>.</p>
+      </div>
+      <button type="submit" class="btn-submit" id="submitBtn">Submit form →</button>
+    </div>
+  </form>
+
+  <div class="form-footer">
+    <p>Perfect Made Possible · Sabel Customer Success Solutions · sabelcustomersuccess.com</p>
+  </div>
+</div>
+
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <span class="success-icon">✅</span>
+    <h2>Form submitted — thank you</h2>
+    <p>Your answers have been sent to the Sabel team. We will review everything and be in touch shortly.</p>
+  </div>
+</div>
+
+<script>
+function updateProgress() {
+  var inputs = document.querySelectorAll('input:not([readonly]):not([type="checkbox"]):not([type="hidden"]), textarea, select');
+  var filled = 0;
+  inputs.forEach(function(el) { if (el.value && el.value.trim() !== '') filled++; });
+  var pct = Math.round((filled / inputs.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = pct + '% complete';
+}
+document.addEventListener('input', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+    updateProgress();
+  }
+});
+
+
+  var requiredFields = [{"name":"inbox_list","label":"Inbox list (Inbox and Routing section)"}];
+  function validate() {
+    var errors = [];
+    requiredFields.forEach(function(f) {
+      var el = document.querySelector('[name="' + f.name + '"]');
+      if (!el || !el.value.trim()) {
+        if (el) el.classList.add('error');
+        errors.push(f.label);
+      } else {
+        if (el) el.classList.remove('error');
+      }
+    });
+    if (!document.getElementById('oosCheck').checked) {
+      errors.push('Out of scope confirmation');
+    }
+    return errors;
+  }
+
+
+document.getElementById('kickoffForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var errors = validate();
+  var msgEl  = document.getElementById('validationMsg');
+  var btn    = document.getElementById('submitBtn');
+  if (errors.length > 0) {
+    msgEl.innerHTML = '<strong>Please complete the following required fields:</strong><br>• ' + errors.join('<br>• ');
+    msgEl.classList.add('show');
+    msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  msgEl.classList.remove('show');
+  btn.disabled    = true;
+  btn.textContent = 'Submitting…';
+  var form = this;
+  var fields = form.querySelectorAll('[name]');
+  var pairs = [];
+  fields.forEach(function(el) {
+    if (el.type === 'checkbox') {
+      pairs.push(encodeURIComponent(el.name) + '=' + encodeURIComponent(el.checked ? 'Yes - confirmed' : 'Not confirmed'));
+    } else if (el.value !== undefined) {
+      pairs.push(encodeURIComponent(el.name) + '=' + encodeURIComponent(el.value || ''));
+    }
+  });
+  fetch(form.action, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+    body: pairs.join('&'),
+  })
+  .then(function(r) {
+    if (r.ok) {
+      document.getElementById('successOverlay').classList.add('show');
+      form.reset();
+      document.getElementById('progressFill').style.width = '0%';
+      document.getElementById('progressLabel').textContent = '0% complete';
+      btn.textContent = 'Submitted ✓';
+    } else {
+      return r.json().then(function(d) { throw new Error(d.error || 'Submission failed'); });
+    }
+  })
+  .catch(function(err) {
+    btn.disabled    = false;
+    btn.textContent = 'Submit form →';
+    msgEl.innerHTML = '<strong>Submission failed.</strong> Please check your connection and try again. Error: ' + err.message;
+    msgEl.classList.add('show');
+  });
+});
+document.getElementById('successOverlay').addEventListener('click', function() { this.classList.remove('show'); });
+document.querySelectorAll('input, textarea').forEach(function(el) {
+  el.addEventListener('input', function() { this.classList.remove('error'); });
+});
+updateProgress();
+</script>
+</body>
+</html>
