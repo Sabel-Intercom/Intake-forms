@@ -116,31 +116,97 @@ var STATUS_CYCLE = ["Pending", "In Progress", "Complete", "Dependency", "Blocked
 var PHASES = {
   setup: {
     c: "#64748B",
-    l: "WEEK 0 — SETUP & ACCESS"
+    l: "WEEK 0 — SETUP & ACCESS (25–29 MAY)"
   },
   foundations: {
     c: "#3B82F6",
-    l: "WEEKS 1–2 — FOUNDATIONS, INBOXES & ROUTING"
+    l: "WEEK 1 — FOUNDATIONS, INBOXES & ROUTING (1–5 JUN)"
   },
   fin: {
     c: "#10B981",
-    l: "WEEKS 3–4 — HELP CENTRE, FIN AI & AUDIENCES"
+    l: "WEEK 2 — HELP CENTRE, FIN AI & COMPLAINTS (8–12 JUN)"
   },
-  uat: {
-    c: "#9333EA",
-    l: "WEEK 5 — UAT & TEAM ENABLEMENT"
-  },
-  golive: {
+  chatlive: {
     c: "#E10600",
-    l: "WEEK 6 — GO-LIVE (EMAIL CUTOVER)"
+    l: "WEEK 3 — CHAT GO-LIVE & UAT (15 JUN)"
+  },
+  emaillive: {
+    c: "#E10600",
+    l: "WEEK 4 — EMAIL CUTOVER (22 JUN)"
   },
   post: {
     c: "#94A3B8",
-    l: "WEEKS 7–8 — POST GO-LIVE STABILISATION"
+    l: "POST — STABILISATION THROUGH TAX-TIME (23 JUN ONWARD)"
   }
 };
+
+// ── Milestones ─────────────────────────────────────────────────────────────
+var DEFAULT_MILESTONES = [{
+  id: "m1",
+  "short": "Kick-off",
+  full: "Kick-off Call Held",
+  target: "2026-05-25",
+  status: "pending",
+  completedAt: "",
+  notes: "",
+  description: "Mariela and team walked through the kick-off guide with Sabel; scope, contacts, dates and channels-first approach confirmed."
+}, {
+  id: "m2",
+  "short": "Access",
+  full: "Workspace Access Granted",
+  target: "2026-05-28",
+  status: "pending",
+  completedAt: "",
+  notes: "",
+  description: "Sabel (Chris and Greg) added as Full seats in the Raiz Intercom trial workspace. Partner seat cost waived by Intercom."
+}, {
+  id: "m3",
+  "short": "Foundations",
+  full: "Foundations Sign-off",
+  target: "2026-06-05",
+  status: "pending",
+  completedAt: "",
+  notes: "",
+  description: "Workspace, single triage inbox, specialist routing, business hours, custom attributes and tags built and confirmed by Mariela. Gate to Help Centre and Fin build."
+}, {
+  id: "m4",
+  "short": "Help Centre & Fin",
+  full: "Help Centre & Fin Sign-off",
+  target: "2026-06-12",
+  status: "pending",
+  completedAt: "",
+  notes: "",
+  description: "Help Centre published, Top 20 articles ingested, Fin AI activated with AFSL guardrails, sentiment handoff and restricted-topic list. Reviewed and approved by Raiz. Gate to chat go-live."
+}, {
+  id: "m5",
+  "short": "Chat Live",
+  full: "Chat Go-Live",
+  target: "2026-06-15",
+  status: "pending",
+  completedAt: "",
+  notes: "",
+  description: "Messenger active on the Raiz site. Fin responding live. Conversations routing to the team. Daily check-ins begin."
+}, {
+  id: "m6",
+  "short": "Email Cutover",
+  full: "Email Cutover",
+  target: "2026-06-22",
+  status: "pending",
+  completedAt: "",
+  notes: "",
+  description: "All support email addresses no longer landing in Salesforce, all new email traffic flowing into Intercom inboxes. Salesforce delta cleared over the following days."
+}, {
+  id: "m7",
+  "short": "Engagement Close",
+  full: "Engagement Close",
+  target: "2026-07-10",
+  status: "pending",
+  completedAt: "",
+  notes: "",
+  description: "Stabilisation period complete. Configuration handover documentation delivered. Engagement formally closed unless extended via Change Control."
+}];
 var TL_START = new Date("2026-05-25");
-var TL_END = new Date("2026-07-26");
+var TL_END = new Date("2026-07-12");
 var TL_DAYS = (TL_END - TL_START) / 864e5;
 var WEEK_HEADERS = [];
 {
@@ -182,7 +248,7 @@ var INIT = [{
     co: "",
     start: "2026-05-25",
     end: "2026-05-26",
-    status: "Pending",
+    status: "Done",
     notes: "Channel ID: C0AUVHLFKAR",
     dep: false,
     link: ""
@@ -193,7 +259,7 @@ var INIT = [{
     co: "",
     start: "2026-05-25",
     end: "2026-05-26",
-    status: "Pending",
+    status: "Done",
     notes: "",
     dep: false,
     link: ""
@@ -204,74 +270,63 @@ var INIT = [{
     co: "Richard",
     start: "2026-05-25",
     end: "2026-05-25",
-    status: "Pending",
-    notes: "Walk through guide; capture role list, query routing, SF historical decision",
+    status: "Done",
+    notes: "Two-stage go-live agreed: chat 15 Jun, email cutover 22 Jun. Single triage inbox confirmed.",
     dep: false,
     link: ""
   }, {
     id: "s4",
-    task: "Weekly check-in cadence agreed and recurring invite sent",
+    task: "Weekly check-in cadence agreed (Monday 3pm)",
     owner: "Chris",
     co: "Raiz",
     start: "2026-05-26",
     end: "2026-05-27",
-    status: "Pending",
-    notes: "",
+    status: "Done",
+    notes: "Daily check-ins start 8 Jun in the week before chat go-live",
     dep: false,
     link: ""
   }, {
     id: "s5",
-    task: "■ Intercom workspace admin access for Sabel (Chris, Greg)",
+    task: "■ Intercom workspace admin access for Sabel (info+1 and engineering)",
     owner: "Raiz",
     co: "",
     start: "2026-05-26",
-    end: "2026-05-27",
+    end: "2026-05-28",
     status: "Dependency",
-    notes: "App ID: b7klkohj",
-    dep: true,
-    link: "https://www.intercom.com/help/en/articles/183-set-up-identity-verification-for-web-and-mobile"
-  }, {
-    id: "s6",
-    task: "■ Dev contact identified for Messenger install, JWT, DNS",
-    owner: "Raiz",
-    co: "",
-    start: "2026-05-26",
-    end: "2026-05-27",
-    status: "Dependency",
-    notes: "Mariela to nominate",
+    notes: "App ID: b7klkohj. Trial workspace converts to production at go-live.",
     dep: true,
     link: ""
   }, {
+    id: "s6",
+    task: "Top 20 FAQ articles already prepared by Raiz",
+    owner: "Raiz",
+    co: "",
+    start: "2026-05-25",
+    end: "2026-05-28",
+    status: "Pending",
+    notes: "Mariela confirmed these exist. Send via shared Drive.",
+    dep: false,
+    link: ""
+  }, {
     id: "s7",
-    task: "■ Salesforce historical data decision (Option A or B)",
+    task: "Current Salesforce ticket-routing flow diagram shared",
     owner: "Raiz",
     co: "",
     start: "2026-05-26",
-    end: "2026-05-29",
+    end: "2026-05-28",
     status: "Dependency",
-    notes: "Recommended: Option B (leave in Outlook archive). Decision needed.",
+    notes: "For reference only — single triage inbox in Intercom",
     dep: true,
     link: ""
   }, {
     id: "s8",
-    task: "■ List of support email addresses currently in Salesforce",
+    task: "Business hours, timezone, out-of-hours behaviour confirmed",
     owner: "Raiz",
     co: "",
     start: "2026-05-26",
-    end: "2026-05-29",
+    end: "2026-05-28",
     status: "Dependency",
-    notes: "",
-    dep: true,
-    link: ""
-  }, {
-    id: "s9",
-    task: "■ Existing FAQ URLs from Contentful site shared",
-    owner: "Raiz",
-    co: "",
-    start: "2026-05-26",
-    end: "2026-05-29",
-    status: "Dependency",
-    notes: "For reference; we are rebuilding the Help Centre in Intercom",
+    notes: "Mariela",
     dep: true,
     link: ""
   }]
@@ -283,141 +338,141 @@ var INIT = [{
     owner: "Chris",
     co: "",
     start: "2026-06-01",
-    end: "2026-06-05",
+    end: "2026-06-03",
     status: "Pending",
-    notes: "15 Full + 20 Lite seats (Advanced)",
+    notes: "15 Full + 20 Lite seats (Advanced plan)",
     dep: false,
     link: "https://www.intercom.com/help/en/articles/168-install-intercom-in-your-product-for-logged-in-users"
   }, {
     id: "f2",
-    task: "Email channel setup, DNS and SPF/DKIM/DMARC verification",
+    task: "Single triage inbox configured with all routed email addresses",
     owner: "Chris",
     co: "Greg",
     start: "2026-06-01",
-    end: "2026-06-05",
+    end: "2026-06-04",
     status: "Pending",
-    notes: "Coordinate with Raiz dev contact",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/182-sending-email-from-your-own-address"
-  }, {
-    id: "f3",
-    task: "Inbox creation per email address routed in",
-    owner: "Chris",
-    co: "",
-    start: "2026-06-01",
-    end: "2026-06-05",
-    status: "Pending",
-    notes: "",
+    notes: "Confirmed approach with Raiz on call",
     dep: false,
     link: "https://www.intercom.com/help/en/articles/6522819-forward-your-email-to-your-team-inbox"
   }, {
+    id: "f3",
+    task: "Reply-from email and SPF/DKIM/DMARC verification",
+    owner: "Chris",
+    co: "Greg",
+    start: "2026-06-01",
+    end: "2026-06-04",
+    status: "Pending",
+    notes: "Coordinate with Marcin (Raiz dev contact)",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/182-sending-email-from-your-own-address"
+  }, {
     id: "f4",
-    task: "Team structure built — tiers and specialist queues",
+    task: "Specialist routing for Super queries (2 nominated agents)",
     owner: "Chris",
     co: "",
-    start: "2026-06-08",
-    end: "2026-06-10",
+    start: "2026-06-03",
+    end: "2026-06-04",
     status: "Pending",
-    notes: "Per Mariela: Tier 1, Tier 2, Specialist",
+    notes: "Mariela to nominate Super specialists",
     dep: false,
     link: ""
   }, {
     id: "f5",
-    task: "Query-based routing rules implemented",
+    task: "Conversation attributes and custom data fields defined",
     owner: "Chris",
     co: "",
-    start: "2026-06-08",
-    end: "2026-06-12",
+    start: "2026-06-03",
+    end: "2026-06-05",
     status: "Pending",
-    notes: "Tom asked for this from day one",
+    notes: "Customer identifier and product attribute for later personalisation",
     dep: false,
-    link: ""
+    link: "https://www.intercom.com/help/en/articles/179-send-custom-user-attributes-to-intercom"
   }, {
     id: "f6",
-    task: "SLA targets configured per inbox and query type",
+    task: "Tags and ticket types aligned to query taxonomy",
     owner: "Chris",
     co: "",
-    start: "2026-06-10",
-    end: "2026-06-12",
+    start: "2026-06-04",
+    end: "2026-06-05",
     status: "Pending",
-    notes: "",
+    notes: "No macro migration from Salesforce",
     dep: false,
     link: ""
   }, {
     id: "f7",
-    task: "Conversation attributes and custom data fields defined",
+    task: "Business hours and out-of-hours bot handling configured",
     owner: "Chris",
     co: "",
-    start: "2026-06-10",
-    end: "2026-06-12",
-    status: "Pending",
-    notes: "Customer role attribute is critical for Fin audiences",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/179-send-custom-user-attributes-to-intercom"
-  }, {
-    id: "f8",
-    task: "Business hours and out-of-hours handling configured",
-    owner: "Chris",
-    co: "",
-    start: "2026-06-10",
-    end: "2026-06-12",
+    start: "2026-06-04",
+    end: "2026-06-05",
     status: "Pending",
     notes: "",
     dep: false,
     link: ""
   }, {
+    id: "f8",
+    task: "■ Sabel added as Full seats (info+1 and engineering)",
+    owner: "Raiz",
+    co: "",
+    start: "2026-05-26",
+    end: "2026-05-28",
+    status: "Dependency",
+    notes: "Intercom waives partner seat cost — confirm with Cormac",
+    dep: true,
+    link: ""
+  }, {
     id: "f9",
-    task: "■ Full customer roles list and per-role knowledge mapping",
+    task: "■ Full agent list with email addresses for Full seat allocation",
     owner: "Raiz",
     co: "",
     start: "2026-06-01",
-    end: "2026-06-05",
+    end: "2026-06-03",
     status: "Dependency",
-    notes: "Mariela. Critical for audiences setup.",
+    notes: "Mariela",
     dep: true,
     link: ""
   }, {
     id: "f10",
-    task: "■ Query type list and routing rules confirmed",
-    owner: "Raiz",
-    co: "",
-    start: "2026-06-01",
-    end: "2026-06-05",
-    status: "Dependency",
-    notes: "Mariela. One row per query type.",
-    dep: true,
-    link: ""
-  }, {
-    id: "f11",
-    task: "■ Agent list with email addresses and tier assignment",
-    owner: "Raiz",
-    co: "",
-    start: "2026-06-01",
-    end: "2026-06-05",
-    status: "Dependency",
-    notes: "",
-    dep: true,
-    link: ""
-  }, {
-    id: "f12",
     task: "■ Lite seat stakeholder list (finance, dev, leadership)",
     owner: "Raiz",
     co: "",
-    start: "2026-06-05",
-    end: "2026-06-08",
+    start: "2026-06-01",
+    end: "2026-06-03",
     status: "Dependency",
     notes: "Up to 20 Lite seats available",
     dep: true,
     link: ""
   }, {
-    id: "f13",
-    task: "■ Inbox structure and routing logic sign-off",
+    id: "f11",
+    task: "■ Full list of support email addresses to route into Intercom",
     owner: "Raiz",
     co: "",
-    start: "2026-06-12",
-    end: "2026-06-12",
+    start: "2026-06-01",
+    end: "2026-06-03",
     status: "Dependency",
-    notes: "Mariela. Milestone gate to next phase.",
+    notes: "Includes complaints address if separate",
+    dep: true,
+    link: ""
+  }, {
+    id: "f12",
+    task: "■ Marcin available for Messenger install, JWT, DNS",
+    owner: "Raiz",
+    co: "",
+    start: "2026-06-01",
+    end: "2026-06-05",
+    status: "Dependency",
+    notes: "~3 hours total dev effort estimated",
+    dep: true,
+    link: ""
+  }, {
+    id: "f13",
+    task: "■ Foundations sign-off — end of Week 1",
+    owner: "Raiz",
+    co: "",
+    start: "2026-06-05",
+    end: "2026-06-05",
+    status: "Dependency",
+    notes: "Mariela. Milestone gate to Help Centre and Fin build.",
     dep: true,
     link: ""
   }]
@@ -425,330 +480,407 @@ var INIT = [{
   id: "fin",
   tasks: [{
     id: "fn1",
-    task: "Help Centre structure built — collections and hierarchy",
+    task: "Help Centre structure built — collections, hierarchy, branding",
     owner: "Chris",
     co: "",
-    start: "2026-06-15",
-    end: "2026-06-17",
+    start: "2026-06-08",
+    end: "2026-06-09",
     status: "Pending",
     notes: "Branded; not pointing at Contentful",
     dep: false,
     link: "https://www.intercom.com/help/en/articles/56644-customize-your-help-center"
   }, {
     id: "fn2",
-    task: "Foundational Help Centre articles authored",
+    task: "Top 20 articles ingested from Raiz's existing content",
     owner: "Chris",
     co: "Raiz",
-    start: "2026-06-15",
-    end: "2026-06-22",
+    start: "2026-06-08",
+    end: "2026-06-10",
     status: "Pending",
-    notes: "Top 20 query types covered. Raiz writes content; Sabel formats and structures.",
+    notes: "Word-doc content already prepared by Raiz. Structural changes routed via compliance review.",
     dep: false,
     link: ""
   }, {
     id: "fn3",
-    task: "Audiences configured against customer roles",
+    task: "Article styling and formatting standardised for Fin readability",
     owner: "Chris",
     co: "",
-    start: "2026-06-17",
-    end: "2026-06-19",
+    start: "2026-06-09",
+    end: "2026-06-10",
     status: "Pending",
-    notes: "Role-based article visibility",
+    notes: "Wording-only changes within Sabel discretion",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/2982784-control-who-can-see-your-articles"
+    link: ""
   }, {
     id: "fn4",
     task: "Fin AI activated and pointed at the Help Centre",
     owner: "Chris",
     co: "",
-    start: "2026-06-22",
-    end: "2026-06-24",
+    start: "2026-06-10",
+    end: "2026-06-11",
     status: "Pending",
     notes: "",
     dep: false,
-    link: "https://www.intercom.com/help/en/articles/9357948-manage-knowledge-audiences-and-targeting"
+    link: ""
   }, {
     id: "fn5",
-    task: "Fin persona and tone configured per brand guide",
+    task: "AFSL-aligned guardrails configured (no financial/investment advice)",
     owner: "Chris",
     co: "",
-    start: "2026-06-22",
-    end: "2026-06-24",
+    start: "2026-06-10",
+    end: "2026-06-11",
     status: "Pending",
-    notes: "",
+    notes: "No coloring outside the lines — strict guidance configured",
     dep: false,
     link: ""
   }, {
     id: "fn6",
-    task: "Fin escalation rules and hand-off routing configured",
+    task: "Sentiment detection and distressed-customer handoff configured",
     owner: "Chris",
     co: "",
-    start: "2026-06-24",
-    end: "2026-06-26",
+    start: "2026-06-10",
+    end: "2026-06-11",
     status: "Pending",
-    notes: "",
+    notes: "Aggressive or upset users routed straight to human",
     dep: false,
     link: ""
   }, {
     id: "fn7",
+    task: "Restricted topic list applied",
+    owner: "Chris",
+    co: "",
+    start: "2026-06-11",
+    end: "2026-06-11",
+    status: "Pending",
+    notes: "Regulated topics nominated by Raiz",
+    dep: false,
+    link: ""
+  }, {
+    id: "fn8",
     task: "Fin information-gathering workflow for COFA case type",
     owner: "Chris",
     co: "",
-    start: "2026-06-24",
-    end: "2026-06-26",
+    start: "2026-06-11",
+    end: "2026-06-12",
     status: "Pending",
     notes: "Quick win — collect verification docs upfront before human picks up",
     dep: false,
     link: ""
   }, {
-    id: "fn8",
-    task: "Fin tested across all customer role audiences",
+    id: "fn9",
+    task: "Complaints workflow (CONDITIONAL on requirements by 5 Jun)",
     owner: "Chris",
     co: "",
-    start: "2026-06-24",
-    end: "2026-06-26",
-    status: "Pending",
-    notes: "",
+    start: "2026-06-08",
+    end: "2026-06-12",
+    status: "TBC",
+    notes: "Web form → complaints inbox; Fin attribute detection on chat; tracker-ticket pattern; reporting attributes for IDR.",
     dep: false,
     link: ""
   }, {
-    id: "fn9",
-    task: "■ Top 20 query types ranked and confirmed",
-    owner: "Raiz",
-    co: "",
-    start: "2026-06-15",
-    end: "2026-06-15",
-    status: "Dependency",
-    notes: "Mariela",
-    dep: true,
-    link: ""
-  }, {
     id: "fn10",
-    task: "■ Brand voice and tone guide shared",
-    owner: "Raiz",
+    task: "Fin tested across all query types and guardrails",
+    owner: "Chris",
     co: "",
-    start: "2026-06-15",
-    end: "2026-06-15",
-    status: "Dependency",
-    notes: "If one exists; otherwise we will draft",
-    dep: true,
+    start: "2026-06-11",
+    end: "2026-06-12",
+    status: "Pending",
+    notes: "Especially trading/investment/advice prompts",
+    dep: false,
     link: ""
   }, {
     id: "fn11",
-    task: "■ Content owner internal — writes / approves articles",
+    task: "■ IDR and AFCA complaints requirements specification",
     owner: "Raiz",
     co: "",
-    start: "2026-06-15",
-    end: "2026-06-15",
+    start: "2026-06-01",
+    end: "2026-06-05",
     status: "Dependency",
-    notes: "",
+    notes: "By Mariela. Required for complaints workflow in this engagement; otherwise becomes Change Request.",
     dep: true,
     link: ""
   }, {
     id: "fn12",
-    task: "■ Restricted topics list — what Fin must NOT touch",
+    task: "■ Restricted topics list (what Fin must NOT touch)",
+    owner: "Raiz",
+    co: "",
+    start: "2026-06-01",
+    end: "2026-06-05",
+    status: "Dependency",
+    notes: "Regulatory/legal sensitivities",
+    dep: true,
+    link: ""
+  }, {
+    id: "fn13",
+    task: "■ Fin persona and tone direction",
+    owner: "Raiz",
+    co: "",
+    start: "2026-06-01",
+    end: "2026-06-05",
+    status: "Dependency",
+    notes: "Default: Fin. Can be renamed.",
+    dep: true,
+    link: ""
+  }, {
+    id: "fn14",
+    task: "■ Help Centre content compliance review",
+    owner: "Raiz",
+    co: "",
+    start: "2026-06-10",
+    end: "2026-06-12",
+    status: "Dependency",
+    notes: "Danny coordinates. Structural changes need this before publish.",
+    dep: true,
+    link: ""
+  }, {
+    id: "fn15",
+    task: "■ Week 2 sign-off — Help Centre and Fin ready for UAT",
+    owner: "Raiz",
+    co: "",
+    start: "2026-06-12",
+    end: "2026-06-12",
+    status: "Dependency",
+    notes: "Mariela. Milestone gate to chat go-live.",
+    dep: true,
+    link: ""
+  }]
+}, {
+  id: "chatlive",
+  tasks: [{
+    id: "cl1",
+    task: "Messenger installed on Raiz site (Marcin)",
+    owner: "Raiz",
+    co: "Greg",
+    start: "2026-06-12",
+    end: "2026-06-14",
+    status: "Pending",
+    notes: "Three-hour task. JWT setup, identity verification.",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/183-set-up-identity-verification-for-web-and-mobile"
+  }, {
+    id: "cl2",
+    task: "E2E testing of chat: query routing, Fin responses, escalation",
+    owner: "Chris",
+    co: "Raiz",
+    start: "2026-06-13",
+    end: "2026-06-14",
+    status: "Pending",
+    notes: "Weekend testing window if needed",
+    dep: false,
+    link: "https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"
+  }, {
+    id: "cl3",
+    task: "Agent enablement session (live + recorded)",
+    owner: "Chris",
+    co: "",
+    start: "2026-06-12",
+    end: "2026-06-12",
+    status: "Pending",
+    notes: "Inbox, conversation management, escalation, complaints tracker pattern",
+    dep: false,
+    link: ""
+  }, {
+    id: "cl4",
+    task: "★ CHAT GO-LIVE on Raiz site",
+    owner: "Chris",
+    co: "Richard",
+    start: "2026-06-15",
+    end: "2026-06-15",
+    status: "Pending",
+    notes: "Sabel on hand for go-live day support",
+    dep: false,
+    link: ""
+  }, {
+    id: "cl5",
+    task: "Daily check-ins (week of 15 Jun)",
+    owner: "Chris",
+    co: "Raiz",
+    start: "2026-06-15",
+    end: "2026-06-19",
+    status: "Pending",
+    notes: "30-min daily check-ins through to email cutover",
+    dep: false,
+    link: ""
+  }, {
+    id: "cl6",
+    task: "Live UAT continues alongside live chat",
+    owner: "Chris",
+    co: "Raiz",
+    start: "2026-06-15",
+    end: "2026-06-19",
+    status: "Pending",
+    notes: "Real conversations surface tuning needs",
+    dep: false,
+    link: ""
+  }, {
+    id: "cl7",
+    task: "Email cutover prep: DNS records confirmed, support@ ready",
+    owner: "Chris",
+    co: "Greg",
+    start: "2026-06-17",
+    end: "2026-06-19",
+    status: "Pending",
+    notes: "All inboxes confirmed; agents trained on new flow",
+    dep: false,
+    link: ""
+  }, {
+    id: "cl8",
+    task: "■ Chat go-live sign-off from Mariela",
     owner: "Raiz",
     co: "",
     start: "2026-06-15",
     end: "2026-06-15",
     status: "Dependency",
-    notes: "Regulatory / legal sensitivities",
+    notes: "Verbal sign-off at start of go-live day OK",
     dep: true,
     link: ""
+  }]
+}, {
+  id: "emaillive",
+  tasks: [{
+    id: "el1",
+    task: "Salesforce inbound email forwarding stopped at Raiz side",
+    owner: "Raiz",
+    co: "Greg",
+    start: "2026-06-22",
+    end: "2026-06-22",
+    status: "Pending",
+    notes: "Hard cutover — no bi-directional sync back to Salesforce",
+    dep: false,
+    link: ""
   }, {
-    id: "fn13",
-    task: "■ Fin approver named (Mariela recommended)",
+    id: "el2",
+    task: "All support email forwarding flipped to Intercom",
+    owner: "Raiz",
+    co: "Chris",
+    start: "2026-06-22",
+    end: "2026-06-22",
+    status: "Pending",
+    notes: "Co-ordinated with Marcin",
+    dep: false,
+    link: ""
+  }, {
+    id: "el3",
+    task: "★ EMAIL CUTOVER live — first email-into-Intercom test conversation",
+    owner: "Chris",
+    co: "Raiz",
+    start: "2026-06-22",
+    end: "2026-06-22",
+    status: "Pending",
+    notes: "Sabel on hand for go-live day support",
+    dep: false,
+    link: ""
+  }, {
+    id: "el4",
+    task: "Delta clearing in Salesforce — 1-2 agents close out remaining tickets",
+    owner: "Raiz",
+    co: "",
+    start: "2026-06-22",
+    end: "2026-06-26",
+    status: "Pending",
+    notes: "Rest of team works in Intercom only",
+    dep: false,
+    link: ""
+  }, {
+    id: "el5",
+    task: "Daily check-ins continue through cutover week",
+    owner: "Chris",
+    co: "Raiz",
+    start: "2026-06-22",
+    end: "2026-06-26",
+    status: "Pending",
+    notes: "30-min daily",
+    dep: false,
+    link: ""
+  }, {
+    id: "el6",
+    task: "Fin performance review at end of cutover week",
+    owner: "Chris",
+    co: "",
+    start: "2026-06-26",
+    end: "2026-06-26",
+    status: "Pending",
+    notes: "Resolution rate, escalations, gaps — feed into Fin tuning",
+    dep: false,
+    link: ""
+  }, {
+    id: "el7",
+    task: "■ Email cutover sign-off",
     owner: "Raiz",
     co: "",
     start: "2026-06-22",
     end: "2026-06-22",
     status: "Dependency",
-    notes: "",
+    notes: "Mariela. Verbal/Slack sign-off OK on the day.",
     dep: true,
-    link: ""
-  }, {
-    id: "fn14",
-    task: "■ Help Centre articles content reviewed and signed off",
-    owner: "Raiz",
-    co: "",
-    start: "2026-06-26",
-    end: "2026-06-26",
-    status: "Dependency",
-    notes: "Milestone gate to UAT",
-    dep: true,
-    link: ""
-  }]
-}, {
-  id: "uat",
-  tasks: [{
-    id: "u1",
-    task: "E2E testing — query routing across all teams",
-    owner: "Chris",
-    co: "Raiz",
-    start: "2026-06-29",
-    end: "2026-07-01",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"
-  }, {
-    id: "u2",
-    task: "Fin test conversations across all customer roles",
-    owner: "Chris",
-    co: "",
-    start: "2026-06-29",
-    end: "2026-07-01",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "u3",
-    task: "Fin configuration iterated on test feedback",
-    owner: "Chris",
-    co: "",
-    start: "2026-07-01",
-    end: "2026-07-02",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "u4",
-    task: "Agent and manager enablement session (live + recorded)",
-    owner: "Chris",
-    co: "",
-    start: "2026-07-02",
-    end: "2026-07-02",
-    status: "Pending",
-    notes: "Inbox, conversation management, escalations",
-    dep: false,
-    link: ""
-  }, {
-    id: "u5",
-    task: "Sabel go-live readiness checklist completed",
-    owner: "Richard",
-    co: "Chris",
-    start: "2026-07-02",
-    end: "2026-07-03",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "u6",
-    task: "■ Go-live readiness sign-off from Mariela",
-    owner: "Raiz",
-    co: "",
-    start: "2026-07-03",
-    end: "2026-07-03",
-    status: "Dependency",
-    notes: "Milestone gate to go-live",
-    dep: true,
-    link: ""
-  }]
-}, {
-  id: "golive",
-  tasks: [{
-    id: "g1",
-    task: "Email routing cut over from Salesforce to Intercom",
-    owner: "Chris",
-    co: "Raiz",
-    start: "2026-07-06",
-    end: "2026-07-06",
-    status: "Pending",
-    notes: "Parallel run; Salesforce stays until contract expiry",
-    dep: false,
-    link: "https://www.intercom.com/help/en/articles/6522819-forward-your-email-to-your-team-inbox"
-  }, {
-    id: "g2",
-    task: "Fin AI activated on live channels",
-    owner: "Chris",
-    co: "",
-    start: "2026-07-06",
-    end: "2026-07-06",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "g3",
-    task: "Operating hours and routing confirmed live",
-    owner: "Chris",
-    co: "",
-    start: "2026-07-06",
-    end: "2026-07-06",
-    status: "Pending",
-    notes: "",
-    dep: false,
-    link: ""
-  }, {
-    id: "g4",
-    task: "Sabel on standby for go-live day support",
-    owner: "Chris",
-    co: "Richard",
-    start: "2026-07-06",
-    end: "2026-07-06",
-    status: "Pending",
-    notes: "",
-    dep: false,
     link: ""
   }]
 }, {
   id: "post",
   tasks: [{
     id: "p1",
-    task: "Day 1 check-in — performance and agent feedback",
+    task: "Stabilisation: weekly check-ins through tax-time peak",
     owner: "Chris",
-    co: "",
-    start: "2026-07-07",
-    end: "2026-07-07",
+    co: "Richard",
+    start: "2026-06-29",
+    end: "2026-07-10",
     status: "Pending",
-    notes: "",
+    notes: "Continue weekly Monday 3pm cadence through end-of-financial-year volume",
     dep: false,
     link: ""
   }, {
     id: "p2",
-    task: "Week 1 Fin performance review",
+    task: "Fin tuning based on live traffic patterns",
     owner: "Chris",
     co: "",
-    start: "2026-07-13",
-    end: "2026-07-13",
+    start: "2026-06-29",
+    end: "2026-07-10",
     status: "Pending",
-    notes: "Resolution rate, escalations, gaps",
+    notes: "Article gaps, escalation triggers, sentiment thresholds",
     dep: false,
     link: ""
   }, {
     id: "p3",
-    task: "Open items and snag list resolved",
+    task: "Snag list close-out",
     owner: "Chris",
     co: "Richard",
-    start: "2026-07-07",
-    end: "2026-07-17",
+    start: "2026-06-29",
+    end: "2026-07-10",
     status: "Pending",
     notes: "",
     dep: false,
     link: ""
   }, {
     id: "p4",
-    task: "Handover documentation delivered to Mariela",
+    task: "Configuration handover documentation delivered",
     owner: "Richard",
     co: "Chris",
-    start: "2026-07-15",
-    end: "2026-07-17",
+    start: "2026-07-08",
+    end: "2026-07-10",
     status: "Pending",
-    notes: "Configuration record for Raiz",
+    notes: "Workspace, routing, Help Centre, Fin, complaints workflow (if delivered)",
     dep: false,
     link: ""
   }, {
     id: "p5",
-    task: "Phase 2 roadmap conversation (API, voice, overlay)",
+    task: "Salesforce historical data — Option A or B discussion",
+    owner: "Raiz",
+    co: "Richard",
+    start: "2026-07-08",
+    end: "2026-07-31",
+    status: "TBC",
+    notes: "Deferred to July/August. Option A = migration into Intercom (separate scope). Option B = leave in Outlook archive.",
+    dep: false,
+    link: ""
+  }, {
+    id: "p6",
+    task: "Phase 2 roadmap (API read, complaints expansion, voice, overlay)",
     owner: "Richard",
     co: "",
-    start: "2026-07-15",
-    end: "2026-07-17",
+    start: "2026-07-08",
+    end: "2026-07-31",
     status: "TBC",
-    notes: "Future scope discussion",
+    notes: "Future scope conversation",
     dep: false,
     link: ""
   }]
@@ -1160,47 +1292,592 @@ function LinkIcon(_ref8) {
     }
   }, "\u2197");
 }
+
+// ── Milestone Strip (horizontal cards across the top) ────────────────────
+function MilestoneStrip(_ref9) {
+  var milestones = _ref9.milestones,
+    onOpen = _ref9.onOpen,
+    onAdd = _ref9.onAdd;
+  var fmtDate = function fmtDate(s) {
+    if (!s) return "";
+    var d = new Date(s + "T12:00:00");
+    return d.toLocaleDateString("en-AU", {
+      day: "numeric",
+      month: "short"
+    });
+  };
+  var fmtCompleted = function fmtCompleted(iso) {
+    if (!iso) return "";
+    var d = new Date(iso);
+    return d.toLocaleDateString("en-AU", {
+      day: "numeric",
+      month: "short"
+    });
+  };
+  var doneCount = milestones.filter(function (m) {
+    return m.status === "done";
+  }).length;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 24px 0",
+      position: "relative",
+      zIndex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 9,
+      color: C.red
+    })
+  }, "\u25FC"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 800,
+      fontSize: 13,
+      color: C.w,
+      letterSpacing: "0.08em"
+    }
+  }, "MILESTONES"), /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 10,
+      color: C.mono
+    })
+  }, doneCount, " / ", milestones.length, " complete"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      height: 1,
+      background: "linear-gradient(90deg,".concat(C.border, ",transparent)")
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: onAdd,
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 9,
+      padding: "4px 10px",
+      background: "transparent",
+      color: C.muted,
+      border: "1px solid ".concat(C.border),
+      borderRadius: 3,
+      cursor: "pointer",
+      letterSpacing: "0.06em"
+    }),
+    onMouseEnter: function onMouseEnter(e) {
+      e.currentTarget.style.color = C.w;
+      e.currentTarget.style.borderColor = C.red;
+    },
+    onMouseLeave: function onMouseLeave(e) {
+      e.currentTarget.style.color = C.muted;
+      e.currentTarget.style.borderColor = C.border;
+    }
+  }, "+ ADD MILESTONE")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      overflowX: "auto",
+      paddingBottom: 4
+    }
+  }, milestones.map(function (m, i) {
+    var done = m.status === "done";
+    var cardBg = done ? "rgba(74,222,128,0.08)" : C.card2;
+    var cardBorder = done ? "rgba(74,222,128,0.4)" : C.border2;
+    var accentCol = done ? "#4ADE80" : C.red;
+    return /*#__PURE__*/React.createElement("div", {
+      key: m.id,
+      onClick: function onClick() {
+        return onOpen(m.id);
+      },
+      style: {
+        flex: "1 1 0",
+        minWidth: 130,
+        background: cardBg,
+        border: "1px solid ".concat(cardBorder),
+        borderLeft: "3px solid ".concat(accentCol),
+        borderRadius: 4,
+        padding: "10px 12px",
+        cursor: "pointer",
+        transition: "all .12s",
+        position: "relative"
+      },
+      onMouseEnter: function onMouseEnter(e) {
+        e.currentTarget.style.background = done ? "rgba(74,222,128,0.14)" : C.card3;
+      },
+      onMouseLeave: function onMouseLeave(e) {
+        e.currentTarget.style.background = cardBg;
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        marginBottom: 4
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 9,
+        color: accentCol,
+        fontWeight: 700,
+        letterSpacing: "0.08em"
+      })
+    }, String(i + 1).padStart(2, "0")), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 13,
+        lineHeight: 1,
+        color: accentCol
+      }
+    }, done ? "✓" : "○"), m.notes && /*#__PURE__*/React.createElement("span", {
+      title: "Has notes",
+      style: {
+        fontSize: 10,
+        color: C.muted,
+        marginLeft: "auto"
+      }
+    }, "\u270E")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        fontWeight: 700,
+        color: C.w,
+        marginBottom: 2,
+        lineHeight: 1.25,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap"
+      }
+    }, m["short"]), /*#__PURE__*/React.createElement("div", {
+      style: _objectSpread(_objectSpread({}, MONO), {}, {
+        fontSize: 9,
+        color: C.muted
+      })
+    }, done ? "done ".concat(fmtCompleted(m.completedAt)) : "target ".concat(fmtDate(m.target))));
+  })));
+}
+
+// ── Milestone Modal (detail view) ────────────────────────────────────────
+function MilestoneModal(_ref0) {
+  var milestone = _ref0.milestone,
+    onClose = _ref0.onClose,
+    onToggle = _ref0.onToggle,
+    onUpdate = _ref0.onUpdate,
+    onDelete = _ref0.onDelete;
+  if (!milestone) return null;
+  var done = milestone.status === "done";
+  var fmtCompleted = function fmtCompleted(iso) {
+    if (!iso) return "";
+    var d = new Date(iso);
+    return d.toLocaleString("en-AU", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    });
+  };
+  var stop = function stop(e) {
+    return e.stopPropagation();
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    onClick: onClose,
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.75)",
+      zIndex: 100,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: stop,
+    style: {
+      background: C.card,
+      border: "1px solid ".concat(C.border),
+      borderLeft: "4px solid ".concat(done ? "#4ADE80" : C.red),
+      borderRadius: 6,
+      padding: 24,
+      maxWidth: 560,
+      width: "100%",
+      maxHeight: "85vh",
+      overflowY: "auto",
+      boxShadow: "0 20px 60px rgba(0,0,0,.6)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 9,
+      color: C.red,
+      letterSpacing: "0.1em"
+    })
+  }, "MILESTONE"), /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    style: {
+      background: "transparent",
+      border: "none",
+      color: C.muted,
+      fontSize: 22,
+      lineHeight: 1,
+      cursor: "pointer",
+      padding: 0
+    }
+  }, "\xD7")), /*#__PURE__*/React.createElement("input", {
+    value: milestone.full,
+    onChange: function onChange(e) {
+      return onUpdate({
+        full: e.target.value,
+        "short": milestone["short"]
+      });
+    },
+    placeholder: "Milestone name",
+    style: _objectSpread(_objectSpread({}, SANS), {}, {
+      width: "100%",
+      background: "transparent",
+      color: C.w,
+      border: "none",
+      borderBottom: "1px solid ".concat(C.border),
+      padding: "6px 0 10px",
+      fontSize: 20,
+      fontWeight: 700,
+      outline: "none",
+      marginBottom: 6
+    })
+  }), /*#__PURE__*/React.createElement("input", {
+    value: milestone["short"],
+    onChange: function onChange(e) {
+      return onUpdate({
+        "short": e.target.value
+      });
+    },
+    placeholder: "Short label (shown on strip)",
+    style: _objectSpread(_objectSpread({}, SANS), {}, {
+      width: "100%",
+      background: "transparent",
+      color: C.muted,
+      border: "none",
+      padding: "4px 0",
+      fontSize: 11,
+      outline: "none",
+      marginBottom: 14,
+      fontStyle: "italic"
+    })
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 9,
+      color: C.mono,
+      letterSpacing: "0.08em",
+      display: "block",
+      marginBottom: 4
+    })
+  }, "DESCRIPTION"), /*#__PURE__*/React.createElement("textarea", {
+    value: milestone.description,
+    onChange: function onChange(e) {
+      return onUpdate({
+        description: e.target.value
+      });
+    },
+    style: _objectSpread(_objectSpread({}, SANS), {}, {
+      width: "100%",
+      background: C.card2,
+      color: C.body,
+      border: "1px solid ".concat(C.border2),
+      borderRadius: 3,
+      padding: "8px 10px",
+      fontSize: 12,
+      outline: "none",
+      resize: "vertical",
+      minHeight: 60,
+      lineHeight: 1.5
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 14,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 9,
+      color: C.mono,
+      letterSpacing: "0.08em",
+      display: "block",
+      marginBottom: 4
+    })
+  }, "TARGET DATE"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: milestone.target,
+    onChange: function onChange(e) {
+      return onUpdate({
+        target: e.target.value
+      });
+    },
+    style: _objectSpread(_objectSpread({}, SANS), {}, {
+      width: "100%",
+      background: C.card2,
+      color: C.body,
+      border: "1px solid ".concat(C.border2),
+      borderRadius: 3,
+      padding: "6px 8px",
+      fontSize: 12,
+      outline: "none"
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 9,
+      color: C.mono,
+      letterSpacing: "0.08em",
+      display: "block",
+      marginBottom: 4
+    })
+  }, "STATUS"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "7px 10px",
+      background: done ? "rgba(74,222,128,0.12)" : "rgba(251,191,36,0.10)",
+      color: done ? "#4ADE80" : "#FBBF24",
+      border: "1px solid ".concat(done ? "rgba(74,222,128,0.3)" : "rgba(251,191,36,0.3)"),
+      borderRadius: 3,
+      fontSize: 12,
+      fontWeight: 600
+    }
+  }, done ? "✓ Complete" : "○ Pending"))), done && milestone.completedAt && /*#__PURE__*/React.createElement("div", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 10,
+      color: C.muted,
+      marginBottom: 14,
+      padding: "6px 10px",
+      background: C.card2,
+      borderRadius: 3,
+      borderLeft: "2px solid #4ADE80"
+    })
+  }, "COMPLETED ", fmtCompleted(milestone.completedAt)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 9,
+      color: C.mono,
+      letterSpacing: "0.08em",
+      display: "block",
+      marginBottom: 4
+    })
+  }, "NOTES & EVIDENCE"), /*#__PURE__*/React.createElement("textarea", {
+    value: milestone.notes,
+    onChange: function onChange(e) {
+      return onUpdate({
+        notes: e.target.value
+      });
+    },
+    placeholder: "e.g. Mariela signed off via Slack on 12 Jun, link to thread...",
+    style: _objectSpread(_objectSpread({}, SANS), {}, {
+      width: "100%",
+      background: C.card2,
+      color: C.body,
+      border: "1px solid ".concat(C.border2),
+      borderRadius: 3,
+      padding: "8px 10px",
+      fontSize: 12,
+      outline: "none",
+      resize: "vertical",
+      minHeight: 80,
+      lineHeight: 1.5
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      if (confirm("Delete this milestone?")) {
+        onDelete();
+        onClose();
+      }
+    },
+    style: _objectSpread(_objectSpread({}, MONO), {}, {
+      fontSize: 9,
+      padding: "6px 12px",
+      background: "transparent",
+      color: C.mono,
+      border: "1px solid ".concat(C.border2),
+      borderRadius: 3,
+      cursor: "pointer",
+      letterSpacing: "0.06em"
+    }),
+    onMouseEnter: function onMouseEnter(e) {
+      e.currentTarget.style.color = "#F87171";
+      e.currentTarget.style.borderColor = "rgba(248,113,113,0.4)";
+    },
+    onMouseLeave: function onMouseLeave(e) {
+      e.currentTarget.style.color = C.mono;
+      e.currentTarget.style.borderColor = C.border2;
+    }
+  }, "DELETE"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    style: _objectSpread(_objectSpread({}, SANS), {}, {
+      fontSize: 12,
+      padding: "7px 14px",
+      background: "transparent",
+      color: C.muted,
+      border: "1px solid ".concat(C.border),
+      borderRadius: 3,
+      cursor: "pointer"
+    })
+  }, "Close"), /*#__PURE__*/React.createElement("button", {
+    onClick: onToggle,
+    style: _objectSpread(_objectSpread({}, SANS), {}, {
+      fontSize: 12,
+      fontWeight: 600,
+      padding: "7px 14px",
+      background: done ? C.card3 : "#4ADE80",
+      color: done ? C.w : "#0B0B0C",
+      border: "1px solid ".concat(done ? C.border : "#4ADE80"),
+      borderRadius: 3,
+      cursor: "pointer"
+    })
+  }, done ? "Mark incomplete" : "✓ Mark complete")))));
+}
 function App() {
   var _useState3 = useState(INIT),
     _useState4 = _slicedToArray(_useState3, 2),
     phases = _useState4[0],
     setPhases = _useState4[1];
-  var _useState5 = useState(new Set()),
+  var _useState5 = useState(DEFAULT_MILESTONES),
     _useState6 = _slicedToArray(_useState5, 2),
-    planCol = _useState6[0],
-    setPlanCol = _useState6[1];
-  var _useState7 = useState(true),
+    milestones = _useState6[0],
+    setMilestones = _useState6[1];
+  var _useState7 = useState(null),
     _useState8 = _slicedToArray(_useState7, 2),
-    tlOpen = _useState8[0],
-    setTlOpen = _useState8[1];
+    msOpen = _useState8[0],
+    setMsOpen = _useState8[1]; // milestone id being viewed/edited in modal
   var _useState9 = useState(new Set()),
     _useState0 = _slicedToArray(_useState9, 2),
-    tlCol = _useState0[0],
-    setTlCol = _useState0[1];
-  var _useState1 = useState(new Set(["Chris", "Richard", "Greg", "Raiz"])),
+    planCol = _useState0[0],
+    setPlanCol = _useState0[1];
+  var _useState1 = useState(true),
     _useState10 = _slicedToArray(_useState1, 2),
-    activeO = _useState10[0],
-    setActiveO = _useState10[1];
-  var _useState11 = useState(null),
+    tlOpen = _useState10[0],
+    setTlOpen = _useState10[1];
+  var _useState11 = useState(new Set()),
     _useState12 = _slicedToArray(_useState11, 2),
-    ed = _useState12[0],
-    setEd = _useState12[1];
-  var _useState13 = useState(""),
+    tlCol = _useState12[0],
+    setTlCol = _useState12[1];
+  var _useState13 = useState(new Set(["Chris", "Richard", "Greg", "Raiz"])),
     _useState14 = _slicedToArray(_useState13, 2),
-    edVal = _useState14[0],
-    setEdVal = _useState14[1];
-  var _useState15 = useState("loading"),
+    activeO = _useState14[0],
+    setActiveO = _useState14[1];
+  var _useState15 = useState(null),
     _useState16 = _slicedToArray(_useState15, 2),
-    saveStatus = _useState16[0],
-    setSaveStatus = _useState16[1];
+    ed = _useState16[0],
+    setEd = _useState16[1];
+  var _useState17 = useState(""),
+    _useState18 = _slicedToArray(_useState17, 2),
+    edVal = _useState18[0],
+    setEdVal = _useState18[1];
+  var _useState19 = useState("loading"),
+    _useState20 = _slicedToArray(_useState19, 2),
+    saveStatus = _useState20[0],
+    setSaveStatus = _useState20[1];
+  var _useState21 = useState(function () {
+      try {
+        var s = localStorage.getItem("raiz-colw");
+        if (s) return JSON.parse(s);
+      } catch (e) {}
+      return {
+        task: 340,
+        owner: 106,
+        co: 106,
+        start: 96,
+        end: 96,
+        status: 112,
+        notes: 200
+      };
+    }),
+    _useState22 = _slicedToArray(_useState21, 2),
+    colW = _useState22[0],
+    setColW = _useState22[1];
   var saveTimer = useRef(null);
   var isFirstLoad = useRef(true);
+  var resizeRef = useRef(null);
+  useEffect(function () {
+    try {
+      localStorage.setItem("raiz-colw", JSON.stringify(colW));
+    } catch (e) {}
+  }, [colW]);
+  var startResize = useCallback(function (e, key) {
+    e.preventDefault();
+    var startX = e.clientX;
+    var startW = colW[key];
+    var min = key === "task" ? 160 : key === "status" ? 90 : key === "notes" ? 100 : 70;
+    var max = key === "task" ? 700 : 360;
+    resizeRef.current = {
+      key: key,
+      startX: startX,
+      startW: startW,
+      min: min,
+      max: max
+    };
+    var onMove = function onMove(ev) {
+      var r = resizeRef.current;
+      if (!r) return;
+      var next = Math.max(r.min, Math.min(r.max, r.startW + (ev.clientX - r.startX)));
+      setColW(function (prev) {
+        return _objectSpread(_objectSpread({}, prev), {}, _defineProperty({}, r.key, next));
+      });
+    };
+    var _onUp = function onUp() {
+      resizeRef.current = null;
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", _onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", _onUp);
+  }, [colW]);
   useEffect(function () {
     fetch(API).then(function (r) {
       return r.json();
-    }).then(function (_ref9) {
-      var data = _ref9.data;
-      if (data) setPhases(data);
+    }).then(function (_ref1) {
+      var data = _ref1.data;
+      if (data) {
+        // Backward compat: old shape was just an array of phases.
+        if (Array.isArray(data)) {
+          setPhases(data);
+          // milestones stay as defaults
+        } else {
+          if (data.phases) setPhases(data.phases);
+          if (data.milestones) setMilestones(data.milestones);
+        }
+      }
       setSaveStatus("idle");
     })["catch"](function () {
       return setSaveStatus("idle");
@@ -1220,12 +1897,15 @@ function App() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          data: phases
+          data: {
+            phases: phases,
+            milestones: milestones
+          }
         })
       }).then(function (r) {
         return r.json();
-      }).then(function (_ref0) {
-        var ok = _ref0.ok;
+      }).then(function (_ref10) {
+        var ok = _ref10.ok;
         setSaveStatus(ok ? "saved" : "error");
         if (ok) setTimeout(function () {
           return setSaveStatus("idle");
@@ -1234,7 +1914,7 @@ function App() {
         return setSaveStatus("error");
       });
     }, 1200);
-  }, [phases]);
+  }, [phases, milestones]);
   var updTask = useCallback(function (id, patch) {
     return setPhases(function (p) {
       return p.map(function (ph) {
@@ -1254,6 +1934,55 @@ function App() {
             return t.id !== id;
           })
         });
+      });
+    });
+  }, []);
+
+  // Milestone handlers
+  var updMs = useCallback(function (id, patch) {
+    return setMilestones(function (ms) {
+      return ms.map(function (m) {
+        return m.id === id ? _objectSpread(_objectSpread({}, m), patch) : m;
+      });
+    });
+  }, []);
+  var toggleMs = useCallback(function (id) {
+    setMilestones(function (ms) {
+      return ms.map(function (m) {
+        if (m.id !== id) return m;
+        if (m.status === "done") return _objectSpread(_objectSpread({}, m), {}, {
+          status: "pending",
+          completedAt: ""
+        });
+        return _objectSpread(_objectSpread({}, m), {}, {
+          status: "done",
+          completedAt: new Date().toISOString()
+        });
+      });
+    });
+  }, []);
+  var addMs = useCallback(function () {
+    var id = "m" + Date.now().toString(36);
+    setMilestones(function (ms) {
+      return [].concat(_toConsumableArray(ms), [{
+        id: id,
+        "short": "New milestone",
+        full: "New milestone",
+        target: new Date().toISOString().split("T")[0],
+        status: "pending",
+        completedAt: "",
+        notes: "",
+        description: ""
+      }]);
+    });
+    setTimeout(function () {
+      return setMsOpen(id);
+    }, 30);
+  }, []);
+  var delMs = useCallback(function (id) {
+    return setMilestones(function (ms) {
+      return ms.filter(function (m) {
+        return m.id !== id;
       });
     });
   }, []);
@@ -1338,16 +2067,16 @@ function App() {
       return n;
     });
   };
-  var TextEdit = function TextEdit(_ref1) {
-    var id = _ref1.id,
-      field = _ref1.field,
-      val = _ref1.val,
-      _ref1$ph = _ref1.ph,
-      ph = _ref1$ph === void 0 ? "…" : _ref1$ph,
-      _ref1$minW = _ref1.minW,
-      minW = _ref1$minW === void 0 ? 80 : _ref1$minW,
-      _ref1$style = _ref1.style,
-      style = _ref1$style === void 0 ? {} : _ref1$style;
+  var TextEdit = function TextEdit(_ref11) {
+    var id = _ref11.id,
+      field = _ref11.field,
+      val = _ref11.val,
+      _ref11$ph = _ref11.ph,
+      ph = _ref11$ph === void 0 ? "…" : _ref11$ph,
+      _ref11$minW = _ref11.minW,
+      minW = _ref11$minW === void 0 ? 80 : _ref11$minW,
+      _ref11$style = _ref11.style,
+      style = _ref11$style === void 0 ? {} : _ref11$style;
     if (!isEd(id, field)) return /*#__PURE__*/React.createElement("span", {
       onClick: function onClick() {
         return startEd(id, field, val);
@@ -1397,10 +2126,10 @@ function App() {
       }, style)
     });
   };
-  var OwnerEdit = function OwnerEdit(_ref10) {
-    var id = _ref10.id,
-      field = _ref10.field,
-      val = _ref10.val;
+  var OwnerEdit = function OwnerEdit(_ref12) {
+    var id = _ref12.id,
+      field = _ref12.field,
+      val = _ref12.val;
     if (!isEd(id, field)) return val ? /*#__PURE__*/React.createElement(OwnerBadge, {
       owner: val,
       onClick: function onClick() {
@@ -1446,10 +2175,10 @@ function App() {
       }, o || "—");
     }));
   };
-  var DateEdit = function DateEdit(_ref11) {
-    var id = _ref11.id,
-      field = _ref11.field,
-      val = _ref11.val;
+  var DateEdit = function DateEdit(_ref13) {
+    var id = _ref13.id,
+      field = _ref13.field,
+      val = _ref13.val;
     if (!isEd(id, field)) return /*#__PURE__*/React.createElement("span", {
       onClick: function onClick() {
         return startEd(id, field, val);
@@ -1524,8 +2253,8 @@ function App() {
       }
     });
   };
-  var GanttBar = function GanttBar(_ref12) {
-    var task = _ref12.task;
+  var GanttBar = function GanttBar(_ref14) {
+    var task = _ref14.task;
     var o = OWNERS[task.owner] || OWNERS.Chris,
       lp = dateToX(task.start),
       wp = dateSpan(task.start, task.end),
@@ -1684,6 +2413,7 @@ function App() {
       var m = PHASES[phase.id],
         col = tlCol.has(phase.id),
         vis = phase.tasks.filter(taskVis);
+      if (!m) return null;
       if (!vis.length) return null;
       var nonDep = vis.filter(function (t) {
         return !t.dep;
@@ -1748,7 +2478,8 @@ function App() {
         })
       }, m.l)), /*#__PURE__*/React.createElement("div", {
         style: {
-          flex: 1,
+          flex: "0 0 auto",
+          width: WEEK_HEADERS.length * 62,
           position: "relative",
           height: PH_H
         }
@@ -1808,7 +2539,8 @@ function App() {
           }
         }, t.task)), /*#__PURE__*/React.createElement("div", {
           style: {
-            flex: 1,
+            flex: "0 0 auto",
+            width: WEEK_HEADERS.length * 62,
             position: "relative",
             height: ROW_H
           }
@@ -1833,10 +2565,10 @@ function App() {
         color: C.mono,
         letterSpacing: "0.1em"
       })
-    }, "FILTER BY PARTY:"), Object.entries(OWNERS).map(function (_ref13) {
-      var _ref14 = _slicedToArray(_ref13, 2),
-        o = _ref14[0],
-        s = _ref14[1];
+    }, "FILTER BY PARTY:"), Object.entries(OWNERS).map(function (_ref15) {
+      var _ref16 = _slicedToArray(_ref15, 2),
+        o = _ref16[0],
+        s = _ref16[1];
       var on = activeO.has(o);
       return /*#__PURE__*/React.createElement("button", {
         key: o,
@@ -1886,10 +2618,10 @@ function App() {
       })
     }, "ALL"));
   };
-  var Stat = function Stat(_ref15) {
-    var label = _ref15.label,
-      val = _ref15.val,
-      col = _ref15.col;
+  var Stat = function Stat(_ref17) {
+    var label = _ref17.label,
+      val = _ref17.val,
+      col = _ref17.col;
     return /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
@@ -2039,7 +2771,11 @@ function App() {
     }
   }), /*#__PURE__*/React.createElement(DualProgress, {
     tasks: allT
-  })))), /*#__PURE__*/React.createElement("div", {
+  })))), /*#__PURE__*/React.createElement(MilestoneStrip, {
+    milestones: milestones,
+    onOpen: setMsOpen,
+    onAdd: addMs
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "24px 24px 48px",
       position: "relative",
@@ -2079,9 +2815,10 @@ function App() {
       fontSize: 7.5,
       color: C.mono
     })
-  }, "DOUBLE-CLICK task name \xB7 CLICK to edit owner / dates / status \xB7 \u2197 opens Intercom guide \xB7 changes save automatically")), phases.map(function (phase) {
+  }, "DOUBLE-CLICK task name \xB7 CLICK to edit owner / dates / status \xB7 DRAG column edges to resize \xB7 \u2197 opens Intercom guide \xB7 changes save automatically")), phases.map(function (phase) {
     var m = PHASES[phase.id],
       col = planCol.has(phase.id);
+    if (!m) return null;
     var done = phase.tasks.filter(function (t) {
       return t.status === "Complete";
     }).length;
@@ -2188,41 +2925,69 @@ function App() {
         borderCollapse: "collapse",
         background: C.bg,
         tableLayout: "fixed",
-        minWidth: 900
+        minWidth: colW.task + colW.owner + colW.co + colW.start + colW.end + colW.status + colW.notes + 38 + 40
       }
     }, /*#__PURE__*/React.createElement("colgroup", null, /*#__PURE__*/React.createElement("col", {
       style: {
-        width: 290
+        width: colW.task
       }
     }), /*#__PURE__*/React.createElement("col", {
       style: {
-        width: 106
+        width: colW.owner
       }
     }), /*#__PURE__*/React.createElement("col", {
       style: {
-        width: 106
+        width: colW.co
       }
     }), /*#__PURE__*/React.createElement("col", {
       style: {
-        width: 96
+        width: colW.start
       }
     }), /*#__PURE__*/React.createElement("col", {
       style: {
-        width: 96
+        width: colW.end
       }
     }), /*#__PURE__*/React.createElement("col", {
       style: {
-        width: 112
+        width: colW.status
       }
-    }), /*#__PURE__*/React.createElement("col", null), /*#__PURE__*/React.createElement("col", {
+    }), /*#__PURE__*/React.createElement("col", {
+      style: {
+        width: colW.notes
+      }
+    }), /*#__PURE__*/React.createElement("col", {
       style: {
         width: 38
       }
-    })), /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, ["TASK", "OWNER", "CO-OWNER", "START", "END", "STATUS", "NOTES", ""].map(function (h) {
+    })), /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, ["TASK", "OWNER", "CO-OWNER", "START", "END", "STATUS", "NOTES", ""].map(function (h, i) {
+      var keys = ["task", "owner", "co", "start", "end", "status", "notes"];
+      var isResizable = i < 6; // all except NOTES (auto) and delete column
       return /*#__PURE__*/React.createElement("th", {
         key: h,
-        style: TH
-      }, h);
+        style: _objectSpread(_objectSpread({}, TH), {}, {
+          position: "relative"
+        })
+      }, h, isResizable && /*#__PURE__*/React.createElement("span", {
+        onMouseDown: function onMouseDown(e) {
+          return startResize(e, keys[i]);
+        },
+        style: {
+          position: "absolute",
+          right: -3,
+          top: 0,
+          bottom: 0,
+          width: 6,
+          cursor: "col-resize",
+          userSelect: "none",
+          zIndex: 5
+        },
+        onMouseEnter: function onMouseEnter(e) {
+          return e.currentTarget.style.background = "".concat(C.red, "55");
+        },
+        onMouseLeave: function onMouseLeave(e) {
+          return e.currentTarget.style.background = "transparent";
+        }
+      }));
     }))), /*#__PURE__*/React.createElement("tbody", null, phase.tasks.map(function (t, i) {
       return /*#__PURE__*/React.createElement("tr", {
         key: t.id,
@@ -2281,7 +3046,7 @@ function App() {
         onDoubleClick: function onDoubleClick() {
           return startEd(t.id, "task", t.task);
         },
-        title: "Double-click to edit",
+        title: t.task + "\n\n(Double-click to edit)",
         style: {
           fontSize: 11,
           color: t.dep ? OWNERS.Raiz.c : C.body,
@@ -2290,7 +3055,7 @@ function App() {
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
           display: "block",
-          maxWidth: 242
+          maxWidth: colW.task - (t.dep ? 44 : 36)
         }
       }, t.task))), /*#__PURE__*/React.createElement("td", {
         style: TD
@@ -2438,10 +3203,10 @@ function App() {
       fontSize: 7.5,
       color: C.mono
     })
-  }, "KEY:"), Object.entries(OWNERS).map(function (_ref16) {
-    var _ref17 = _slicedToArray(_ref16, 2),
-      o = _ref17[0],
-      s = _ref17[1];
+  }, "KEY:"), Object.entries(OWNERS).map(function (_ref18) {
+    var _ref19 = _slicedToArray(_ref18, 2),
+      o = _ref19[0],
+      s = _ref19[1];
     return /*#__PURE__*/React.createElement("span", {
       key: o,
       style: {
@@ -2563,7 +3328,23 @@ function App() {
       fontSize: 8,
       color: C.mono
     })
-  }, "sabelcustomersuccess.com")));
+  }, "sabelcustomersuccess.com")), /*#__PURE__*/React.createElement(MilestoneModal, {
+    milestone: msOpen ? milestones.find(function (m) {
+      return m.id === msOpen;
+    }) : null,
+    onClose: function onClose() {
+      return setMsOpen(null);
+    },
+    onToggle: function onToggle() {
+      toggleMs(msOpen);
+    },
+    onUpdate: function onUpdate(patch) {
+      return updMs(msOpen, patch);
+    },
+    onDelete: function onDelete() {
+      return delMs(msOpen);
+    }
+  }));
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
