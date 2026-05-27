@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ticket Adapter Parity Matrix — Migr8Now</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#171d26; --panel2:#1d2530; --ink:#e6edf3; --muted:#8b949e; --line:#2a323d;
+    --ok:#1f6f43; --okt:#7ee2a8;
+    --partial:#7a5a12; --partialt:#f2c16b;
+    --na:#3a3f48; --nat:#aab2bd;
+    --gap:#7a1f23; --gapt:#ff9ea3;
+    --fd:#b06c2e; --zd:#2e7d6b; --hs:#3b6ea5; --cr:#8a5cd0; --ics:#c0556b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:32px 28px 64px}
+  h1{font-size:22px;margin:0 0 4px}
+  h2{font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);
+     margin:36px 0 6px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .hint{color:var(--muted);font-size:12px;margin:0 0 12px;font-style:italic}
+  .sub{color:var(--muted);margin:0 0 8px;font-size:13px}
+  .wrap{max-width:1180px;margin:0 auto}
+  table{border-collapse:separate;border-spacing:3px;width:100%}
+  th,td{padding:8px 10px;border-radius:6px;vertical-align:middle}
+  thead th{background:var(--panel);color:var(--muted);font-weight:600;font-size:12px;
+    text-transform:uppercase;letter-spacing:.04em;text-align:center}
+  thead th.dim{text-align:left;min-width:260px}
+  tbody td{text-align:center;font-weight:600;font-size:13px;white-space:nowrap}
+  .col-fd{border-top:3px solid var(--fd)}
+  .col-zd{border-top:3px solid var(--zd)}
+  .col-hs{border-top:3px solid var(--hs)}
+  .col-cr{border-top:3px solid var(--cr)}
+  .col-ics{border-top:3px solid var(--ics)}
+  .ok{background:var(--ok);color:var(--okt)}
+  .partial{background:var(--partial);color:var(--partialt)}
+  .na{background:var(--na);color:var(--nat)}
+  .gap{background:var(--gap);color:var(--gapt)}
+  .note{font-size:11px;font-weight:500;opacity:.85;display:block}
+  .lbl{font-size:11px;font-weight:600;display:block;opacity:.92;white-space:normal}
+
+  /* ---- hover-flip dimension cell ---- */
+  td.dim{background:var(--panel);text-align:left;min-width:300px;padding:0;height:64px;
+    perspective:1100px;overflow:visible;position:relative}
+  .flip{position:relative;width:100%;height:100%;cursor:help}
+  .flip-inner{position:absolute;inset:0;transition:transform .45s cubic-bezier(.4,.1,.2,1);
+    transform-style:preserve-3d}
+  td.dim:hover{z-index:30}
+  td.dim:hover .flip-inner{transform:rotateY(180deg)}
+  .flip-face{position:absolute;left:0;right:0;top:0;
+    backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:6px}
+  .flip-front{height:100%;display:flex;flex-direction:column;justify-content:center;
+    padding:8px 12px;font-weight:500}
+  .flip-front .tag{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.03em}
+  /* back face grows to fit its text and overflows the cell as a popover (no clipping) */
+  .flip-back{transform:rotateY(180deg);height:auto;min-height:100%;padding:9px 12px;
+    background:var(--panel2);border:1px solid var(--line);border-radius:6px;
+    font-size:12px;line-height:1.42;font-weight:400;color:#dbe3ec;
+    box-shadow:0 10px 28px rgba(0,0,0,.55)}
+  .flip-back code{color:var(--partialt);font-size:11px}
+
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 4px}
+  .legend span{padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0 4px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .card h3{margin:0 0 6px;font-size:14px}
+  .card .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:8px}
+  .tag.arch{background:#143a33;color:var(--zd)}
+  .tag.feat{background:#3a2a12;color:var(--fd)}
+  .card p{margin:0;color:var(--muted);font-size:13px}
+  .key{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0 0;font-size:12px;color:var(--muted)}
+  .key b{color:var(--ink)}
+  .foot{color:var(--muted);font-size:12px;margin-top:30px;border-top:1px solid var(--line);padding-top:12px}
+  .blockers{background:#241115;border:1px solid #5a2025;border-radius:10px;padding:12px 16px;margin:16px 0}
+  .blockers h3{margin:0 0 6px;color:var(--gapt);font-size:14px}
+  .blockers ul{margin:6px 0 0;padding-left:18px}
+  .blockers li{margin:3px 0}
+
+  /* per-adapter metric detail */
+  .mcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px;margin:12px 0}
+  .mcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .mcard h3{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:8px}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .mcard .grp{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:8px 0 2px}
+  .mcard ul{margin:2px 0 0;padding-left:16px}
+  .mcard li{font-size:12.5px;margin:2px 0;color:#cdd6e0}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:4px;
+    padding:0 5px;font-size:11px;color:var(--ink)}
+  .uniq{color:var(--partialt);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Ticket Adapter Parity Matrix</h1>
+  <p class="sub">Migr8Now — source ticket adapters → Intercom · snapshot 2026-05-28 vs <code>origin/develop</code></p>
+
+  <div class="legend">
+    <span class="ok">✅ Implemented</span>
+    <span class="partial">⚠️ Partial / needs-audit</span>
+    <span class="na">❌ N/A — platform API can't</span>
+    <span class="gap">⛔ Gap — not implemented</span>
+  </div>
+  <div class="key">
+    <div><b>FD</b> Freshdesk · <span style="color:var(--fd)">legacy bespoke</span></div>
+    <div><b>ZD</b> Zendesk</div>
+    <div><b>HS</b> HelpScout</div>
+    <div><b>CR</b> Crisp</div>
+    <div><b>ICS</b> Intercom-source</div>
+    <div style="margin-left:auto"><b>ZD/HS/CR/ICS</b> share the Protocol stack (<code>tickets_core/</code>)</div>
+  </div>
+
+  <h2>Baseline recommendation</h2>
+  <div class="cards">
+    <div class="card">
+      <span class="tag arch">ARCHITECTURE / CODE BASELINE</span>
+      <h3>Zendesk</h3>
+      <p>Cleanest, most-complete Protocol triplet. Already the matrix-designated canonical reference for metric-cards + review/audit. Clone its <code>sources/</code> triplet + wizard for any new protocol adapter (incl. FreshService).</p>
+    </div>
+    <div class="card">
+      <span class="tag feat">FEATURE / UX BASELINE</span>
+      <h3>Freshdesk</h3>
+      <p>Richest feature set — defines wizard step order, the review/audit panel (<code>renderStep13</code>), attribute-driven inbox routing, sample/prod stage-DB split. But on the legacy bespoke stack — copy its <em>features</em>, not its <em>architecture</em>.</p>
+    </div>
+  </div>
+
+  <h2>Canonical capabilities <span style="text-transform:none;color:var(--muted);font-weight:400">(documented in capabilities.yaml — the spine)</span></h2>
+  <p class="hint">↪ Hover any feature name to flip it and read what it does.</p>
+  <table>
+    <thead><tr>
+      <th class="dim">Dimension</th>
+      <th class="col-fd">FD</th><th class="col-zd">ZD</th><th class="col-hs">HS</th><th class="col-cr">CR</th><th class="col-ics">ICS</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">On SourceTicketAdapter Protocol</div><div class="flip-face flip-back">Sits on the shared <code>SourceTicketAdapter</code> contract in <code>sources/</code> instead of bespoke per-platform code — the prerequisite for reusing the shared extract/load engine.</div></div></div></td><td class="gap">⛔<span class="note">bespoke</span></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Shared extract orchestrator</div><div class="flip-face flip-back">Uses <code>tickets_core/extract_orchestrator</code> rather than a hand-rolled per-platform extractor — gets resumable discovery + R2 drain for free.</div></div></div></td><td class="gap">⛔</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Shared load orchestrator</div><div class="flip-face flip-back">Writes into Intercom via the one shared load engine that is never forked per source. All adapters inherit the same retry/idempotency/timestamp logic.</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">validate()</div><div class="flip-face flip-back">Tests credentials and returns the account name + detected rate limit before any run starts, so the operator sees they connected to the right workspace.</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">OAuth token refresh</div><div class="flip-face flip-back">Auto-refreshes an expiring OAuth token mid-run. Only relevant for OAuth platforms — API-key/Basic-auth adapters mark this N/A.</div></div></div></td><td class="na">❌</td><td class="na">❌</td><td class="ok">✅</td><td class="na">❌</td><td class="na">❌</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Multi-region base URLs</div><div class="flip-face flip-back">Respects regional API hosts (US/EU/AU) from operator input. N/A for single-region platforms (subdomain-only).</div></div></div></td><td class="partial">⚠️</td><td class="na">❌</td><td class="na">❌</td><td class="na">❌</td><td class="ok">✅<span class="note">us/eu/au</span></td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Cheap ticket_count</div><div class="flip-face flip-back">Gets a fast total from a dedicated count endpoint to size progress bars before discovery runs. Where the API has none, the count is -1 and the bar fills during discovery.</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="na">❌</td><td class="na">❌</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Incremental-yield discovery (resumable)</div><div class="flip-face flip-back">Yields ticket IDs as it paginates so discovery is crash-resumable — never buffers the whole population into one in-memory list (a past OOM cause).</div></div></div></td><td class="gap">⛔<span class="note">list-based</span></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Date filter</div><div class="flip-face flip-back">Constrains discovery to a start/end date range, UTC-aware. Each adapter translates it to the platform's own param (ZD search query, FD updated_since, HS modifiedSince).</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Delta cursor (cross-run, mid-pass)</div><div class="flip-face flip-back">Persists a high-water mark across runs and can resume mid-pagination, so catch-up/delta sweeps only scan the new window and survive interruption.</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Archived / deleted tickets</div><div class="flip-face flip-back">Discovers archived or soft-deleted tickets when in scope. N/A where the platform has no separate archive (closed just stays in the main list forever).</div></div></div></td><td class="ok">✅</td><td class="partial">⚠️</td><td class="na">❌</td><td class="na">❌</td><td class="na">❌</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Fetch ticket / parts / contact</div><div class="flip-face flip-back">Pulls one ticket, its replies/notes in chronological order, and the requester contact — all normalised into the canonical models.</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Fetch company</div><div class="flip-face flip-back">Resolves the organisation/company entity attached to a ticket. N/A where the platform has no company concept (HS, Crisp).</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="na">❌</td><td class="na">❌</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">HTML-aware part dedup</div><div class="flip-face flip-back">Strips HTML on both sides before hashing when comparing staged vs IC parts, so dedup doesn't falsely report parts missing. Protocol adapters dedup at ticket level today — apply if a part-comparison issue surfaces.</div></div></div></td><td class="ok">✅</td><td class="gap">⛔</td><td class="ok">✅</td><td class="partial">⚠️</td><td class="gap">⛔</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">System-part filter</div><div class="flip-face flip-back">Drops system events (assignment / close / open) from the conversation parts so only real content migrates. N/A where the comment stream contains no system parts.</div></div></div></td><td class="na">❌<span class="note">n/a</span></td><td class="na">❌<span class="note">n/a</span></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Attachments → R2 re-host</div><div class="flip-face flip-back">Downloads attachments during extract and re-hosts them on Cloudflare R2 so Intercom can fetch durable URLs instead of expiring source links.</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Directory listings (agents…tags)</div><div class="flip-face flip-back">Lists agents, groups, statuses, types/channels, custom fields and tags to populate the wizard's mapping screens.</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Directory cache-for-run</div><div class="flip-face flip-back">Caches the directory listings for the run's lifetime instead of re-fetching on every request — saves API budget and latency.</div></div></div></td><td class="gap">⛔</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Historical timestamps (ticket + part)</div><div class="flip-face flip-back">Preserves the original created_at on the ticket and on each part so Intercom replays the real conversation timeline (via IC's admin-scoped custom-created_at path).</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Rate: shared limiter + Retry-After</div><div class="flip-face flip-back">All HTTP routes through the shared rate limiter and honours the Retry-After header strictly — no faster-than-header retry. Load-bearing against past 429 storms.</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Rate: telemetry to UI</div><div class="flip-face flip-back">Surfaces bucket headroom / API limit / calls-in-last-minute to the operator UI. Crisp returns no rate headers, so its telemetry is observable only via 429s.</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="partial">⚠️</td><td class="partial">⚠️<span class="note">no headers</span></td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">UI: metric cards</div><div class="flip-face flip-back">Renders the live stat-card grid (success / skipped / failed / total + API-limit), polled every 10s — no SSE. <em>See the Metric Cards section below for the per-adapter breakdown.</em></div></div></div></td><td class="ok">✅</td><td class="ok">✅<span class="note">ref</span></td><td class="ok">✅</td><td class="ok">✅<span class="note">landed since audit</span></td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">UI: review / audit panel</div><div class="flip-face flip-back">Final wizard step: migration status, failed+retry, skipped+retry, API call log, and purge — lets the operator close the loop without dropping into SSH or SQL.</div></div></div></td><td class="ok">✅<span class="note">reference</span></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="partial">⚠️<span class="note">landed since audit</span></td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">UI: local + UTC times</div><div class="flip-face flip-back">Renders timestamps in the operator's local timezone and UTC side-by-side. Wanted everywhere; built nowhere — a cheap shared-core win in <code>wizard_shell.js</code>.</div></div></div></td><td class="gap">⛔</td><td class="gap">⛔</td><td class="partial">⚠️</td><td class="gap">⛔</td><td class="gap">⛔</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Newer capabilities <span style="text-transform:none;color:var(--muted);font-weight:400">(post-2026-05-01 — NOT yet tracked in capabilities.yaml)</span></h2>
+  <p class="hint">↪ Hover to flip.</p>
+  <table>
+    <thead><tr>
+      <th class="dim">Capability</th>
+      <th class="col-fd">FD</th><th class="col-zd">ZD</th><th class="col-hs">HS</th><th class="col-cr">CR</th><th class="col-ics">ICS</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Custom-attribute mapping</div><div class="flip-face flip-back">Maps source ticket custom fields onto Intercom conversation/ticket custom attributes. The one newer capability at full 5/5 (FD via its own config, others via shared core).</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Copy-tags toggle</div><div class="flip-face flip-back">Optional toggle to copy source tags onto the migrated Intercom record. Lives in shared <code>tickets_core</code>, so all protocol adapters inherit it.</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Attribute-driven inbox routing</div><div class="flip-face flip-back">Routes migrated conversations to IC inboxes/teams based on a source attribute's value — beyond flat group→inbox mapping. <strong>FD-only</strong>; lives in legacy <code>tickets/</code> with zero shared-core refs.</div></div></div></td><td class="ok">✅<span class="note">FD-only</span></td><td class="gap">⛔</td><td class="gap">⛔</td><td class="gap">⛔</td><td class="gap">⛔</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Sample/prod stage-DB split</div><div class="flip-face flip-back">Isolates sample-run staging data from prod-run data in separate databases so a sample can't pollute prod. <strong>FD-only</strong> full (stage-in-PK); protocol adapters have per-stage config but share one DB.</div></div></div></td><td class="ok">✅<span class="note">full</span></td><td class="partial">⚠️<span class="note">config only</span></td><td class="partial">⚠️<span class="note">config only</span></td><td class="partial">⚠️<span class="note">config only</span></td><td class="partial">⚠️<span class="note">config only</span></td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">_prod mapping twins (per-stage ids)</div><div class="flip-face flip-back">Keeps a second set of id-mappings (agents / inboxes / types / status) for the prod workspace, distinct from the sample one. Crisp + ICS split only credentials — a prod run reuses the sample workspace's mappings.</div></div></div></td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="gap">⛔<span class="note">creds only</span></td><td class="gap">⛔<span class="note">creds only</span></td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Ticket title prefix</div><div class="flip-face flip-back">Prefix migrated ticket/conversation titles with a source label (e.g. "[Zendesk] …"). Does not exist on any adapter — only attribute-<em>name</em> prefixing exists, which is a different thing.</div></div></div></td><td class="gap">⛔</td><td class="gap">⛔</td><td class="gap">⛔</td><td class="gap">⛔</td><td class="gap">⛔</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Metric cards — per-adapter breakdown <span style="text-transform:none;color:var(--muted);font-weight:400">(the wizard stat-card grids differ a lot)</span></h2>
+  <p class="hint">↪ Hover a card-type to flip and read what that metric reports. Cells show the label each adapter uses (or ⛔ absent).</p>
+  <table>
+    <thead><tr>
+      <th class="dim">Card / metric</th>
+      <th class="col-fd">FD</th><th class="col-zd">ZD</th><th class="col-hs">HS</th><th class="col-cr">CR</th><th class="col-ics">ICS</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Success counter</div><div class="flip-face flip-back">Tickets that succeeded. Label changes by phase: "Extracted" during extract, "Loaded"/"OK" during load — a source of cross-adapter inconsistency.</div></div></div></td><td class="ok"><span class="lbl">Extracted / OK</span></td><td class="ok"><span class="lbl">OK → LOADED</span></td><td class="ok"><span class="lbl">Extracted / Loaded</span></td><td class="ok"><span class="lbl">OK</span></td><td class="ok"><span class="lbl">OK</span></td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Skipped (drill-in)</div><div class="flip-face flip-back">Tickets intentionally skipped (already migrated / out of scope). The ▸ marker means the card is clickable into the skipped-list — only FD and HS make it clickable.</div></div></div></td><td class="ok"><span class="lbl">Skipped ▸</span></td><td class="ok"><span class="lbl">SKIPPED</span></td><td class="ok"><span class="lbl">Skipped ▸</span></td><td class="ok"><span class="lbl">Skipped</span></td><td class="ok"><span class="lbl">SKIPPED</span></td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Failed (drill-in)</div><div class="flip-face flip-back">Tickets that errored. ▸ = clickable into the failure list with bulk retry. Clickable only in FD and HS.</div></div></div></td><td class="ok"><span class="lbl">Failed ▸</span></td><td class="ok"><span class="lbl">FAILED</span></td><td class="ok"><span class="lbl">Failed ▸</span></td><td class="ok"><span class="lbl">Failed</span></td><td class="ok"><span class="lbl">FAILED</span></td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Total / Discovered</div><div class="flip-face flip-back">The denominator — total tickets to process this run. HS uniquely labels the extract total "Discovered".</div></div></div></td><td class="ok"><span class="lbl">Total</span></td><td class="ok"><span class="lbl">TOTAL</span></td><td class="partial"><span class="lbl">Discovered</span></td><td class="ok"><span class="lbl">Total</span></td><td class="ok"><span class="lbl">TOTAL</span></td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Pending (load)</div><div class="flip-face flip-back">Remaining unprocessed tickets during the load phase. ZD/HS/FD relabel the Total slot to "PENDING" on load; Crisp and ICS have no pending card.</div></div></div></td><td class="ok"><span class="lbl">Pending</span></td><td class="ok"><span class="lbl">PENDING</span></td><td class="ok"><span class="lbl">Pending</span></td><td class="gap">⛔</td><td class="gap">⛔</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Cumulative (all sessions)</div><div class="flip-face flip-back">Running totals across every session for this migration, not just the current run: Total OK / Total Skip / Total Fail / Pending. Only FD and HS show it.</div></div></div></td><td class="ok"><span class="lbl">4-card grid</span></td><td class="gap">⛔</td><td class="ok"><span class="lbl">4-card grid</span></td><td class="gap">⛔</td><td class="gap">⛔</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">API limit (header)</div><div class="flip-face flip-back">The platform's API ceiling read from rate-limit headers — the throughput budget. Only FD ("(HEADER)") and ZD show it. Most useful for tuning worker concurrency.</div></div></div></td><td class="ok"><span class="lbl">API LIMIT (HEADER)</span></td><td class="ok"><span class="lbl">API LIMIT</span></td><td class="gap">⛔</td><td class="gap">⛔</td><td class="partial"><span class="lbl">config only</span></td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Last-min used</div><div class="flip-face flip-back">API calls consumed in the last minute — live throughput against the ceiling above. Only FD and ZD.</div></div></div></td><td class="ok"><span class="lbl">Last Min Used</span></td><td class="ok"><span class="lbl">LAST MIN USED</span></td><td class="gap">⛔</td><td class="gap">⛔</td><td class="gap">⛔</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Rate-limit HITS</div><div class="flip-face flip-back">Count of times a rate limit was actually hit (429s), per platform. The hidden-until-hit grid. ICS uniquely labels its two "SOURCE RATE LIMITS" / "IC RATE LIMITS" (both sides are Intercom). ZD has no hit-count card.</div></div></div></td><td class="ok"><span class="lbl">FD + IC</span></td><td class="gap">⛔</td><td class="ok"><span class="lbl">HS + IC</span></td><td class="ok"><span class="lbl">Crisp + IC</span></td><td class="ok"><span class="lbl uniq">SOURCE + IC</span></td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">R2 uploads</div><div class="flip-face flip-back">Attachments re-hosted to Cloudflare R2 during the run. ICS uniquely shows it as an <code>uploaded/queued</code> ratio. Absent in HS and Crisp.</div></div></div></td><td class="ok"><span class="lbl">R2 Uploads</span></td><td class="ok"><span class="lbl">R2 UPLOADS</span></td><td class="gap">⛔</td><td class="gap">⛔</td><td class="ok"><span class="lbl uniq">R2 uploaded/queued</span></td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Warning-category grid</div><div class="flip-face flip-back">Per-category soft-warning counts, hidden until warnings occur: Agent assign / Team inbox / Tags / Status / Conv. parts / Attributes. Identical six in FD and HS only.</div></div></div></td><td class="ok"><span class="lbl">6-card grid</span></td><td class="gap">⛔</td><td class="ok"><span class="lbl">6-card grid</span></td><td class="gap">⛔</td><td class="gap">⛔</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">R2-backfill phase grid</div><div class="flip-face flip-back">FD-only dedicated phase: re-host attachments whose temp URLs expired before push. Cards: Uploaded / Expired / Skipped / Workers / FD API per min / API Limit.</div></div></div></td><td class="ok"><span class="lbl uniq">6-card grid</span></td><td class="gap">⛔</td><td class="gap">⛔</td><td class="gap">⛔</td><td class="gap">⛔</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Push phase grid</div><div class="flip-face flip-back">FD-only dedicated phase: push staged tickets to IC, tracking Pushed / Ready to push / Pending backfill / Workers / IC API per min / API Limit.</div></div></div></td><td class="ok"><span class="lbl uniq">8-card grid</span></td><td class="gap">⛔</td><td class="gap">⛔</td><td class="gap">⛔</td><td class="gap">⛔</td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Config readout (Workers / Rate set)</div><div class="flip-face flip-back">Cards showing the run's concurrency (worker count) and the rate-limit setting in effect. ZD and ICS show them as config cards; FD shows Workers inside its phase grids.</div></div></div></td><td class="partial"><span class="lbl">in phase grids</span></td><td class="ok"><span class="lbl">WORKERS + RL SET</span></td><td class="gap">⛔</td><td class="gap">⛔</td><td class="ok"><span class="lbl">WORKERS + RL SET</span></td></tr>
+      <tr><td class="dim"><div class="flip"><div class="flip-inner"><div class="flip-face flip-front">Panel layout</div><div class="flip-face flip-back">How the wizard arranges phases into card panels — the single biggest structural divergence between adapters.</div></div></div></td><td class="partial"><span class="lbl">5 panels</span></td><td class="ok"><span class="lbl">1 + load sub-grid</span></td><td class="ok"><span class="lbl">2-phase + audit</span></td><td class="ok"><span class="lbl">1 unified</span></td><td class="ok"><span class="lbl">1 (load reuses extract)</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="mcards">
+    <div class="mcard">
+      <h3><span class="dot" style="background:var(--fd)"></span>Freshdesk — richest, multi-panel</h3>
+      <div class="grp">Extract</div><ul><li>Extracted · Failed · Total</li><li>API LIMIT (HEADER) · Last Min Used · R2 Uploads</li></ul>
+      <div class="grp uniq">R2-Backfill (unique)</div><ul><li>Uploaded · Expired · Skipped · Workers · FD API/min · API Limit</li></ul>
+      <div class="grp uniq">Push to Intercom (unique)</div><ul><li>Pushed · Skipped · Failed · Ready to push · Pending backfill · Workers · IC API/min · API Limit</li></ul>
+      <div class="grp">Load</div><ul><li>OK · Skipped ▸ · Failed ▸ · Total</li><li>Cumulative: Total OK/Skip/Fail · Pending</li><li>API LIMIT (HEADER) · Last Min Used</li></ul>
+      <div class="grp">Delta/audit</div><ul><li>OK · Skipped · Failed · Total</li><li>Warnings: Agent · Team · Tags · Status · Parts · Attributes</li><li>FD + IC rate-limit hits</li></ul>
+    </div>
+
+    <div class="mcard">
+      <h3><span class="dot" style="background:var(--zd)"></span>Zendesk — canonical reference</h3>
+      <div class="grp">Extract</div><ul><li>OK · SKIPPED · FAILED · TOTAL</li><li>API LIMIT · LAST MIN USED · R2 UPLOADS</li><li>Config: WORKERS · RATE LIMIT SET</li></ul>
+      <div class="grp">Load sub-grid (non-sample)</div><ul><li>LOADED · SKIPPED · FAILED · PENDING</li><li>IC API LIMIT · IC LAST MIN</li></ul>
+      <div class="grp">Notable</div><ul><li>Defines the OK→LOADED / TOTAL→PENDING phase relabel</li><li>No rate-limit-hit cards · no warning grid · no cumulative grid</li></ul>
+    </div>
+
+    <div class="mcard">
+      <h3><span class="dot" style="background:var(--hs)"></span>HelpScout — two-phase + audit</h3>
+      <div class="grp">Phase 1 · Extract</div><ul><li>Extracted · Failed · <span class="uniq">Discovered</span> (= total)</li></ul>
+      <div class="grp">Phase 2 · Load</div><ul><li>Loaded · Skipped ▸ · Failed ▸ · Pending</li><li>Cumulative: Total OK/Skip/Fail · Pending</li></ul>
+      <div class="grp">Audit panel</div><ul><li>OK · Skipped ▸ · Failed ▸ · Total</li><li>Warnings: Agent · Team · Tags · Status · Parts · Attributes</li><li>HS + IC rate-limit hits</li></ul>
+      <div class="grp">Notable</div><ul><li>No API-limit / last-min throughput cards anywhere</li></ul>
+    </div>
+
+    <div class="mcard">
+      <h3><span class="dot" style="background:var(--cr)"></span>Crisp — leanest</h3>
+      <div class="grp">Single unified panel</div><ul><li>OK · Skipped · Failed · Total</li><li>Crisp + IC rate-limit hits (hidden until hit)</li><li>Phase shown as a text indicator, not cards</li></ul>
+      <div class="grp">Missing vs others</div><ul><li>No R2 card · no API-limit/throughput · no cumulative · no warning grid · no separate load grid · cards not clickable</li></ul>
+    </div>
+
+    <div class="mcard">
+      <h3><span class="dot" style="background:var(--ics)"></span>Intercom-source — ZD-like, one panel</h3>
+      <div class="grp">Single panel (load reuses extract cards)</div><ul><li>OK · SKIPPED · FAILED · TOTAL</li><li><span class="uniq">SOURCE RATE LIMITS</span> · IC RATE LIMITS</li><li>R2 UPLOADS (<span class="uniq">uploaded/queued</span>) · Config: WORKERS · RATE LIMIT SET</li></ul>
+      <div class="grp">Notable</div><ul><li>Only adapter naming rate cards source-vs-IC (both sides Intercom)</li><li>No separate load sub-grid · no warning grid · no throughput cards</li></ul>
+    </div>
+  </div>
+
+  <div class="blockers">
+    <h3>Parity blockers &amp; metric-card divergences to normalise</h3>
+    <ul>
+      <li><b>Attribute-driven inbox routing</b> — FD-only, in legacy <code>tickets/</code>; lift into shared core.</li>
+      <li><b>Full sample/prod stage-DB isolation</b> — FD has stage-in-PK; protocol adapters share one DB.</li>
+      <li><b>Freshdesk's bespoke-stack debt</b> — blocks FD from sharing features instead of forking them.</li>
+      <li><b>FreshService does not exist</b> — empty branch + API docs skill only. Greenfield from the ZD baseline.</li>
+      <li><b>Metric-card label drift</b> — success card is "Extracted"/"Loaded"/"OK"/"LOADED" depending on adapter+phase; Total↔PENDING↔Discovered for the same slot; clickable drill-in only on FD/HS. A shared card component in <code>wizard_shell.js</code> would normalise labels + give every adapter the throughput, cumulative and warning grids that only FD/HS/ZD have today.</li>
+    </ul>
+  </div>
+
+  <p class="foot">
+    Source of truth: <code>src/support_migrator/tickets_core/capabilities.yaml</code> (last_audited 2026-05-01, ~4 weeks stale on the newer dimensions).
+    Metric-card data read from each <code>static/&lt;platform&gt;/wizard.js</code> on <code>origin/develop</code>, 2026-05-28.
+    Companion write-up: <code>~/Downloads/ticket-adapter-parity-deep-dive.md</code>.
+  </p>
+
+</div>
+</body>
+</html>
