@@ -63,8 +63,12 @@
   .ghead{background:var(--card2); padding:11px 16px; display:flex; align-items:center; gap:10px;
     border-left:3px solid var(--red);}
   .ghead h2{font-size:13px; font-weight:700; color:#fff; letter-spacing:.02em;}
+  .ghead .ghrs{font-family:'Courier New',monospace; font-size:10px; color:var(--body);
+    letter-spacing:.06em; margin-left:auto;}
+  .ghead .ghrs b{color:#fff;}
+  .ghead .ghrs .post{color:var(--rich); margin-left:8px;}
   .ghead .gcount{font-family:'Courier New',monospace; font-size:9px; color:var(--mono);
-    letter-spacing:.1em; margin-left:auto;}
+    letter-spacing:.1em; margin-left:14px;}
 
   /* Item row */
   .item{display:grid; grid-template-columns:18px 1fr auto; gap:12px; align-items:start;
@@ -157,6 +161,22 @@
     padding:2px 6px; background:rgba(192,132,252,.10);}
   .item.post{opacity:.62;}
   .item.post .name{color:var(--muted);}
+  /* Hours-by-section matrix */
+  .hsec-head, .hsec-row{display:grid; grid-template-columns:1fr 132px 92px; gap:8px; align-items:center;
+    padding:8px 0; border-bottom:1px solid rgba(42,53,71,.5);}
+  .hsec-head{font-family:'Courier New',monospace; font-size:8.5px; letter-spacing:.12em;
+    color:var(--mono); text-transform:uppercase; border-bottom:1px solid var(--border);}
+  .hsec-head span:not(:first-child){text-align:right;}
+  .hsec-name{color:var(--body); font-size:12.5px;}
+  .hsec-june, .hsec-post{text-align:right; font-family:'Courier New',monospace; font-size:11.5px;}
+  .hsec-june{color:var(--body);} .hsec-june b{color:#fff;}
+  .hsec-post{color:var(--rich);}
+  .hsec-row.reserve .hsec-name{color:var(--muted);}
+  .rnote{font-size:9px; color:var(--mono); margin-left:8px; letter-spacing:.04em;}
+  .hsec-row.total{border-bottom:none; border-top:1px solid var(--border); margin-top:4px; padding-top:10px;}
+  .hsec-row.total .hsec-name{color:#fff; font-weight:700;}
+  .hsec-row.total .hsec-june b{color:var(--amber);}
+  .hsec-row.total .hsec-post{color:var(--rich); font-weight:700;}
   /* Tick-to-complete control on each board task */
   .tickbox{display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px;
     border:2px solid #3a4150; border-radius:5px; margin-right:9px; cursor:pointer; flex:0 0 18px;
@@ -301,8 +321,9 @@ function render(){
       var ka=sortKey(a), kb=sortKey(b);
       return ka < kb ? -1 : (ka > kb ? 1 : 0);
     });
-    var head = '<div class="ghead"><h2>'+g.name+'</h2><span class="gcount">'+
-      g.items.length+' ITEMS</span></div>';
+    var head = '<div class="ghead"><h2>'+g.name+'</h2>'+
+      groupHoursChip(g)+
+      '<span class="gcount">'+g.items.length+' ITEMS</span></div>';
     var rows = "";
     items.forEach(function(it){
       var tickbox = '<span class="tickbox'+(it.done?" on":"")+'" data-done="'+it.id+'" title="'+(it.done?"Completed. Tap to reopen":"Mark complete")+'">'+(it.done?"&#10003;":"")+'</span>';
@@ -371,62 +392,74 @@ function lineState(h){
   return "todo";
 }
 
+// Per board group: June allocated/used (non-post items) and Post-June allocated (post items).
+function groupHours(g){
+  var jA=0, jU=0, pA=0;
+  g.items.forEach(function(it){
+    var h = itemHrs(it);
+    if(it.phase === "post"){ pA += h; }
+    else { jA += h; if(it.done) jU += h; }
+  });
+  return {jA:jA, jU:jU, pA:pA};
+}
+
+function groupHoursChip(g){
+  var x = groupHours(g), s = "";
+  if(x.jA > 0) s += '<b>'+x.jU+'</b> / '+x.jA+'h';
+  if(x.pA > 0) s += '<span class="post">+'+x.pA+'h post</span>';
+  if(s === "") s = "&ndash;";
+  return '<span class="ghrs">'+s+'</span>';
+}
+
 function renderHours(){
-  var june = hours.filter(function(h){return h.bucket==="june";});
-  var post = hours.filter(function(h){return h.bucket==="post";});
-  function sum(arr, f){ var t=0; arr.forEach(function(h){t+=f(h);}); return t; }
-  var juneAlloc = sum(june, function(h){return h.allocated;});
-  var juneUsed  = sum(june, lineUsed);
+  function sum(arr,f){ var t=0; arr.forEach(function(x){t+=f(x);}); return t; }
+  // Zendesk / Sounding Board reserve = post-bucket hours lines with no board item
+  var reserve = hours.filter(function(h){ return h.bucket==="post" && !h.feeds; });
+  var reserveAlloc = sum(reserve, function(h){return h.allocated;});
+
+  var rows = data.map(function(g){ var x = groupHours(g); x.name = g.name; return x; });
+  var juneAlloc = sum(rows, function(x){return x.jA;});
+  var juneUsed  = sum(rows, function(x){return x.jU;});
   var juneRem   = juneAlloc - juneUsed;
-  var postAlloc = sum(post, function(h){return h.allocated;});
+  var postAlloc = sum(rows, function(x){return x.pA;}) + reserveAlloc;
   var pct = juneAlloc ? Math.round(juneUsed/juneAlloc*100) : 0;
 
   var html =
-    '<div class="htop">'+
-      '<div>'+
-        '<div class="htitle">Hours against the '+CONTRACT+'h Statement of Work</div>'+
-        '<div class="hmetrics">'+
-          '<div class="hm"><div class="n">'+CONTRACT+'</div><div class="l">Contracted</div></div>'+
-          '<div class="hm"><div class="n">'+juneAlloc+'</div><div class="l">June MVP bucket</div></div>'+
-          '<div class="hm"><div class="n used">'+juneUsed+'</div><div class="l">Used (June)</div></div>'+
-          '<div class="hm"><div class="n rem">'+juneRem+'</div><div class="l">Remaining (June)</div></div>'+
-          '<div class="hm"><div class="n">'+postAlloc+'</div><div class="l">Post-June</div></div>'+
-        '</div>'+
+    '<div class="htop"><div>'+
+      '<div class="htitle">Hours against the '+CONTRACT+'h Statement of Work</div>'+
+      '<div class="hmetrics">'+
+        '<div class="hm"><div class="n">'+CONTRACT+'</div><div class="l">Contracted</div></div>'+
+        '<div class="hm"><div class="n">'+juneAlloc+'</div><div class="l">June MVP bucket</div></div>'+
+        '<div class="hm"><div class="n used">'+juneUsed+'</div><div class="l">Used (June)</div></div>'+
+        '<div class="hm"><div class="n rem">'+juneRem+'</div><div class="l">Remaining (June)</div></div>'+
+        '<div class="hm"><div class="n">'+postAlloc+'</div><div class="l">Post-June</div></div>'+
       '</div>'+
-    '</div>'+
+    '</div></div>'+
     '<div class="hbar"><span style="width:'+pct+'%"></span></div>';
 
-  function lineRows(arr){
-    var r = "";
-    arr.forEach(function(h){
-      var u = lineUsed(h), rem = h.allocated - u;
-      var toggle = !h.feeds;              // no board item: tapped directly
-      var st = lineState(h);
-      var flag = h.flag ? '<span class="hflag">'+h.flag+'</span>' : '';
-      var dotAttr = toggle ? ' data-hdefer="'+h.id+'" title="Tap to mark this line done"' : ' title="Auto from the board above"';
-      r +=
-        '<div class="hrow2">'+
-          '<div class="hstat '+st+(toggle?' tappable':'')+'"'+dotAttr+'></div>'+
-          '<div><span class="hlabel">'+h.label+'</span><span class="harea">'+h.area+'</span>'+flag+'</div>'+
-          '<div class="hnum">'+h.allocated+'h</div>'+
-          '<div class="hnum use">'+(u?u+'h':'&ndash;')+'</div>'+
-          '<div class="hnum rem">'+rem+'h</div>'+
-        '</div>';
-    });
-    return r;
-  }
-
-  var colhead =
-    '<div class="hcolhead"><span></span><span>Scope line</span>'+
-    '<span class="hnum">Alloc</span><span class="hnum">Used</span><span class="hnum">Left</span></div>';
-
-  html += '<div class="hsub">June MVP bucket &mdash; '+juneAlloc+'h <span class="hauto">used auto-rolls up as you tick tasks above</span></div>' + colhead + lineRows(june);
-  html += '<div class="hsub">Post-June phase &mdash; '+postAlloc+'h <span class="hauto">after the 28 June go-live</span></div>' + lineRows(post);
+  html += '<div class="hsub">Hours by section <span class="hauto">used auto-rolls up as you tick tasks above</span></div>';
+  html += '<div class="hsec-head"><span>Section</span><span>June (used / alloc)</span><span>Post-June</span></div>';
+  rows.forEach(function(x){
+    var jcell = x.jA > 0 ? ('<b>'+x.jU+'</b> / '+x.jA+'h') : '&ndash;';
+    var pcell = x.pA > 0 ? (x.pA+'h') : '&ndash;';
+    html += '<div class="hsec-row">'+
+              '<span class="hsec-name">'+x.name+'</span>'+
+              '<span class="hsec-june">'+jcell+'</span>'+
+              '<span class="hsec-post">'+pcell+'</span>'+
+            '</div>';
+  });
+  html += '<div class="hsec-row reserve">'+
+            '<span class="hsec-name">Zendesk / Sounding Board<span class="rnote">later phase, not on the board</span></span>'+
+            '<span class="hsec-june">&ndash;</span>'+
+            '<span class="hsec-post">'+reserveAlloc+'h</span>'+
+          '</div>';
+  html += '<div class="hsec-row total">'+
+            '<span class="hsec-name">Total</span>'+
+            '<span class="hsec-june"><b>'+juneUsed+'</b> / '+juneAlloc+'h</span>'+
+            '<span class="hsec-post">'+postAlloc+'h</span>'+
+          '</div>';
 
   document.getElementById("hours").innerHTML = html;
-  document.querySelectorAll(".hstat.tappable").forEach(function(el){
-    el.onclick = function(){ toggleDeferred(el.getAttribute("data-hdefer")); };
-  });
 }
 
 function toggleDeferred(id){
