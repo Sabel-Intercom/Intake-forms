@@ -605,7 +605,7 @@ function scheduleSave(){
 
 function doSave(){
   try{
-    fetch(API, {method:"POST", headers:{"Content-Type":"application/json"},
+    fetch(API + "?key=" + encodeURIComponent(KEY), {method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({key:KEY, data:{groups:data, hours:hours}})})
       .then(function(r){ return r.json(); })
       .then(function(){ setSave("saved"); stamp(); })
