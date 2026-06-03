@@ -38,6 +38,12 @@
     color:var(--mono); text-transform:uppercase; margin-top:5px;}
   .save{font-family:'Courier New',monospace; font-size:9px; letter-spacing:.1em; color:var(--mono);
     margin-top:8px; text-transform:uppercase;}
+  .golivechip{display:inline-flex; align-items:center; gap:5px; cursor:pointer; margin-top:8px;
+    font-family:'Courier New',monospace; font-size:10px; letter-spacing:.04em;
+    padding:2px 8px; border-radius:3px; border:1px solid var(--border); background:rgba(255,255,255,.03);
+    color:var(--body); white-space:nowrap;}
+  .golivechip:hover{border-color:var(--red);}
+  .golivechip .dlabel{color:var(--mono); font-size:8.5px; letter-spacing:.1em;}
 
   /* Summary RAG bar */
   .summary{display:flex; gap:10px; margin:22px 0 6px; flex-wrap:wrap;}
@@ -215,12 +221,13 @@
         <div class="ttl">
           <div class="kicker">June MVP Tracker</div>
           <h1>BTS USA Inc.</h1>
-          <div class="sub">BTS Core MVP · Freshdesk and FreshService · target 28 June 2026</div>
+          <div class="sub">BTS Core MVP · Freshdesk and FreshService · target <span id="subdate">28 June 2026</span></div>
         </div>
       </div>
       <div class="countdown">
         <div class="big" id="cd">—</div>
         <div class="lbl">Days to Go-Live</div>
+        <div class="golive" id="golive"></div>
         <div class="save" id="save">·</div>
       </div>
     </div>
@@ -239,7 +246,7 @@
   <div class="hours" id="hours"></div>
 
   <div class="fnote">
-    This is a focused view of the June go-live only. The Sounding Board (Zendesk) migration is
+    This is a focused view of the MVP go-live only. The Sounding Board (Zendesk) migration is
     scheduled separately for later in 2026 and is tracked on its own plan. The full detailed
     project tracker remains available for task-level delivery tracking.
   </div>
@@ -253,7 +260,8 @@
 <script>
 var API = "https://sabel-webhook.vercel.app/api/tracker";
 var KEY = "bts-usa-june-tracker-v1";
-var GO_LIVE = "2026-06-28";
+var GO_LIVE = "2026-06-28";   // default; editable in the header and persisted
+var goLive = GO_LIVE;          // mutable go-live / MVP cutover date
 var INIT = [{"name": "Foundations and Routing", "items": [{"id": "f7", "task": "Regional team assignments and SLA targets", "owner": "BTS", "date": "22 May", "iso": "2026-05-22", "hrs": 1, "status": "green", "done": true, "note": "Confirmed. Region is for cost reporting across business units, not routing"}, {"id": "f6", "task": "Translation detection", "owner": "Greg", "date": "29 May", "iso": "2026-05-29", "hrs": 1, "status": "green", "done": true, "note": "Enabled and confirmed"}, {"id": "f4", "task": "Brand assets (logos, hex codes, messenger copy)", "owner": "BTS", "dateLabel": "ASAP", "iso": "2026-06-02", "hrs": null, "status": "red", "done": false, "note": "Blocked. Needed to finish workspace branding"}, {"id": "f1", "task": "Email routing for all FD/FS addresses (around 90)", "owner": "Greg", "date": "6 Jun", "iso": "2026-06-06", "hrs": 4, "status": "amber", "done": false, "note": "Waiting on BTS IT for email domains; Kai update due"}, {"id": "f3", "task": "Inbox and team architecture", "owner": "Greg", "date": "6 Jun", "iso": "2026-06-06", "hrs": 3, "status": "amber", "done": false, "note": "Route to inbox not named person (OOO). Waiting on invites accepted"}, {"id": "f8", "task": "Portal messenger set up (single live messenger)", "owner": "Greg", "date": "6 Jun", "iso": "2026-06-06", "hrs": 1, "status": "green", "done": false, "note": "Other messengers off for June"}, {"id": "f2", "task": "Ticket types and attributes mapped to FD/FS usage", "owner": "Greg", "date": "10 Jun", "iso": "2026-06-10", "hrs": 3, "status": "amber", "done": false, "note": "Working sessions with BTS in progress"}, {"id": "f5", "task": "MVP Slack channel set up", "owner": "Greg", "date": "13 Jun", "iso": "2026-06-13", "hrs": 2, "status": "green", "done": false, "note": "One channel (global helpdesk); notify Slack, work in Intercom; relevant messages only, reversible"}]}, {"name": "Knowledge and Fin", "items": [{"id": "n1", "task": "Freshdesk knowledge base migrated to Intercom", "owner": "Richard", "date": "16 Jun", "iso": "2026-06-16", "hrs": 7, "status": "green", "done": false, "note": "Pull 172 FD KB articles fresh, ASAP. Contractor portal (44) deferred, still live"}, {"id": "n2", "task": "KB-management training so BTS can maintain it", "owner": "Greg", "date": "18 Jun", "iso": "2026-06-18", "hrs": 3, "status": "green", "done": false, "note": "Greg video on ingest + audiences; team converts client articles via Claude (Mary to confirm value)"}, {"id": "n3", "task": "Fin trained for the FD/FS audience", "owner": "Greg", "date": "19 Jun", "iso": "2026-06-19", "hrs": 8, "status": "amber", "done": false, "note": "Audiences = one per company by email domain, from Samara's mapping"}]}, {"name": "Workflows and Contacts", "items": [{"id": "w0", "task": "Core support workflows (reusable base + triage)", "owner": "Greg", "date": "5 Jun", "iso": "2026-06-05", "hrs": 8, "status": "green", "done": true, "note": "Built and tested"}, {"id": "w1", "task": "Workflows around the custom Jira integration", "owner": "Greg / BTS", "date": "Post-June", "iso": "2026-07-07", "hrs": 8, "phase": "post", "status": "amber", "done": false, "note": "MVP requirement 7, but gated on BTS's in-house integration (Samara). Sequenced after go-live"}, {"id": "w4", "task": "Additional workflows (demo, reschedule, SME escalation, FAQ)", "owner": "Greg", "date": "Post-June", "iso": "2026-07-07", "hrs": 10, "phase": "post", "status": "amber", "done": false, "note": "Wider support workflow set, beyond the MVP. Less central to a BTS help desk"}, {"id": "w2", "task": "Contacts uploaded as users + audiences (domain mapping)", "owner": "Greg", "date": "9 Jun", "iso": "2026-06-09", "hrs": 3, "status": "green", "done": false, "note": "Domain mapping (Samara) received; Greg to import and build audiences"}, {"id": "w3", "task": "Email-first contacts and companies process", "owner": "Greg / Mary", "date": "13 Jun", "iso": "2026-06-13", "hrs": 1, "status": "amber", "done": false, "note": "Leads stay as leads; domain-to-audience mapping drives Copilot/Fin. Native auto company-assign not possible; custom automation parked"}]}, {"name": "Agents and Training", "items": [{"id": "t1", "task": "FD/FS agents provisioned in the workspace", "owner": "Greg", "date": "16 Jun", "iso": "2026-06-16", "hrs": null, "status": "amber", "done": false, "note": "Covered under workspace setup; tied to invites being accepted"}, {"id": "t2", "task": "Structured training and handover", "owner": "Greg / Richard", "date": "Post-June", "iso": "2026-07-07", "hrs": 3, "phase": "post", "status": "amber", "done": false, "note": "Fuller team enablement after go-live. Light go-live orientation sits within the MVP"}]}, {"name": "Migration and Go-Live", "items": [{"id": "m0", "task": "FreshService API access with correct permissions (via Anna)", "owner": "BTS", "dateLabel": "ASAP", "iso": "2026-06-02", "hrs": null, "status": "red", "done": false, "note": "Blocking the FreshService migration"}, {"id": "m3", "task": "Migration validation sign-off (Daniel)", "owner": "BTS", "date": "26 Jun", "iso": "2026-06-26", "hrs": null, "status": "amber", "done": false, "note": "BTS dependency"}, {"id": "m1", "task": "Freshdesk migration (sample, full, delta)", "owner": "Richard", "date": "28 Jun", "iso": "2026-06-28", "hrs": 5, "status": "green", "done": false, "note": "Migr8Now"}, {"id": "m2", "task": "FreshService migration (sample, full, delta)", "owner": "Richard", "date": "28 Jun", "iso": "2026-06-28", "hrs": 3, "status": "amber", "done": false, "note": "Migr8Now; waiting on API access above"}, {"id": "g2", "task": "Cutover and MVP go-live", "owner": "Richard / Greg / Mary", "date": "28 Jun", "iso": "2026-06-28", "hrs": 1, "status": "green", "done": false, "note": ""}]}];
 var HOURS_INIT = [{"id": "h_trans", "area": "Foundations", "label": "Translation enablement", "bucket": "june", "allocated": 1, "feeds": ["f6"]}, {"id": "h_found", "area": "Foundations", "label": "Workspace, 3 brands, email, inbox, Slack, messenger", "bucket": "june", "allocated": 14, "feeds": ["f7", "f4", "f1", "f3", "f8", "f2", "f5"]}, {"id": "h_wfbase", "area": "Automation", "label": "Reusable base workflow + Workflow 1 (triage)", "bucket": "june", "allocated": 8, "feeds": ["w0"]}, {"id": "h_contacts", "area": "Automation", "label": "Contacts and companies process", "bucket": "june", "allocated": 4, "feeds": ["w2", "w3"], "flag": "MVP work in place of the SOW Smartsheet line (4h). Smartsheet parked, confirm or defer"}, {"id": "h_kb", "area": "Fin", "label": "Freshdesk KB build, transfer, tagging, and KB-management training", "bucket": "june", "allocated": 10, "feeds": ["n1", "n2"], "flag": "10h of the 14h KB line, redirected to Freshdesk for the MVP"}, {"id": "h_fin", "area": "Fin", "label": "Fin AI deployment (5 to 6 products)", "bucket": "june", "allocated": 8, "feeds": ["n3"]}, {"id": "h_migfd", "area": "Migration", "label": "Freshdesk + FreshService migration (Migr8Now)", "bucket": "june", "allocated": 9, "feeds": ["m1", "m2", "g2"]}, {"id": "h_wf25", "area": "Automation", "label": "Additional workflows (demo, reschedule, SME, FAQ)", "bucket": "post", "allocated": 10, "feeds": ["w4"]}, {"id": "h_jira", "area": "Automation", "label": "Workflows around BTS custom Jira integration", "bucket": "post", "allocated": 8, "feeds": ["w1"], "flag": "Gated on BTS's in-house integration being ready; sequenced after go-live"}, {"id": "h_train", "area": "Fin", "label": "Structured training and handover", "bucket": "post", "allocated": 3, "feeds": ["t2"]}, {"id": "h_kbsb", "area": "Fin", "label": "Zendesk / Sounding Board KB migration (~170 articles)", "bucket": "post", "allocated": 4, "done": false}, {"id": "h_migzd", "area": "Migration", "label": "Zendesk migration (Migr8Now)", "bucket": "post", "allocated": 4, "done": false}];
 var CONTRACT = 83;
@@ -275,7 +283,7 @@ function ownerClass(o){
 }
 
 function countdown(){
-  var gl = new Date(GO_LIVE+"T00:00:00");
+  var gl = new Date(goLive+"T00:00:00");
   var now = new Date();
   var diff = Math.ceil((gl - now)/(1000*60*60*24));
   document.getElementById("cd").textContent = diff >= 0 ? diff : "0";
@@ -310,6 +318,64 @@ function sortKey(it){
   return "9999-99-99"; // undated items sort last
 }
 
+// Single source of truth for "post-MVP". A task is post-MVP when its date is
+// strictly AFTER the go-live date (tasks on the go-live date itself stay in the MVP).
+// Falls back to the static phase flag only for items that have no date at all.
+function isPostItem(it){
+  if(it.iso) return it.iso > goLive;
+  return it.phase === "post";
+}
+
+var MON_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var MON_LONG  = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+function fmtIso(iso, longMonth){
+  if(!iso) return "";
+  var p = iso.split("-");
+  var mon = (longMonth ? MON_LONG : MON_SHORT)[parseInt(p[1],10)-1];
+  return parseInt(p[2],10) + " " + mon + " " + p[0];
+}
+
+// Strip ordinal suffixes (25th -> 25) and re-derive an iso date from free text.
+function parseToIso(v){
+  var clean = v.replace(/(\d+)(st|nd|rd|th)\b/gi, "$1");
+  var parsed = Date.parse(clean + " 2026");
+  if(isNaN(parsed)) parsed = Date.parse(clean);
+  if(isNaN(parsed)) return null;
+  var d = new Date(parsed);
+  return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);
+}
+
+// Refresh the header go-live chip and the subtitle date from the current goLive.
+function setGoLiveDisplays(){
+  var gl = document.getElementById("golive");
+  if(gl){
+    gl.innerHTML = '<span class="golivechip" title="Tap to change the go-live / MVP cutover date">'+
+      '<span class="dlabel">MVP GO-LIVE</span> '+fmtIso(goLive)+'</span>';
+    var chip = gl.querySelector(".golivechip");
+    if(chip) chip.onclick = function(){ editGoLive(chip); };
+  }
+  var sd = document.getElementById("subdate");
+  if(sd) sd.textContent = fmtIso(goLive, true);
+}
+
+function editGoLive(el){
+  var inp = document.createElement("input");
+  inp.type="text"; inp.value = fmtIso(goLive);
+  inp.placeholder="e.g. 28 Jun";
+  inp.style.cssText="width:130px;background:#1F1F22;color:#E2E8F0;border:1px solid rgba(225,6,0,.4);border-radius:3px;padding:3px 6px;font-size:10px;font-family:'Courier New',monospace;outline:none;letter-spacing:.05em;";
+  el.replaceWith(inp);
+  inp.focus(); inp.select();
+  function commit(){
+    var iso = parseToIso(inp.value.trim());
+    if(iso) goLive = iso;
+    countdown();
+    render();          // re-evaluates every task's post-MVP status against the new date
+    scheduleSave();
+  }
+  inp.onblur = commit;
+  inp.onkeydown = function(e){ if(e.key==="Enter"){commit();} if(e.key==="Escape"){setGoLiveDisplays();} };
+}
+
 function render(){
   var board = document.getElementById("board");
   board.innerHTML = "";
@@ -334,8 +400,8 @@ function render(){
       var dchipCls = it.done ? "datechip is-done" : "datechip";
       var hrsTxt = (typeof it.hrs === "number") ? it.hrs + "h" : "&ndash;";
       var hrsChip = '<span class="hrschip" title="Hours allocated when complete">EST<b>'+hrsTxt+'</b></span>';
-      var isPost = (it.phase === "post");
-      var postPill = isPost ? '<span class="postpill" title="Sequenced after the 28 June MVP go-live">POST-JUNE</span>' : '';
+      var isPost = isPostItem(it);
+      var postPill = isPost ? '<span class="postpill" title="Sequenced after the MVP go-live">POST-MVP</span>' : '';
       rows +=
         '<div class="item'+doneCls+(isPost?" post":"")+'">'+
           '<div class="ragdot rag-'+it.status+'" data-id="'+it.id+'" title="'+STATE_LABEL[it.status]+'"></div>'+
@@ -356,6 +422,7 @@ function render(){
   });
   renderSummary();
   renderHours();
+  setGoLiveDisplays();
   bind();
 }
 
@@ -397,7 +464,7 @@ function groupHours(g){
   var jA=0, jU=0, pA=0;
   g.items.forEach(function(it){
     var h = itemHrs(it);
-    if(it.phase === "post"){ pA += h; }
+    if(isPostItem(it)){ pA += h; }
     else { jA += h; if(it.done) jU += h; }
   });
   return {jA:jA, jU:jU, pA:pA};
@@ -429,16 +496,16 @@ function renderHours(){
       '<div class="htitle">Hours against the '+CONTRACT+'h Statement of Work</div>'+
       '<div class="hmetrics">'+
         '<div class="hm"><div class="n">'+CONTRACT+'</div><div class="l">Contracted</div></div>'+
-        '<div class="hm"><div class="n">'+juneAlloc+'</div><div class="l">June MVP bucket</div></div>'+
-        '<div class="hm"><div class="n used">'+juneUsed+'</div><div class="l">Used (June)</div></div>'+
-        '<div class="hm"><div class="n rem">'+juneRem+'</div><div class="l">Remaining (June)</div></div>'+
-        '<div class="hm"><div class="n">'+postAlloc+'</div><div class="l">Post-June</div></div>'+
+        '<div class="hm"><div class="n">'+juneAlloc+'</div><div class="l">MVP bucket</div></div>'+
+        '<div class="hm"><div class="n used">'+juneUsed+'</div><div class="l">Used (MVP)</div></div>'+
+        '<div class="hm"><div class="n rem">'+juneRem+'</div><div class="l">Remaining (MVP)</div></div>'+
+        '<div class="hm"><div class="n">'+postAlloc+'</div><div class="l">Post-MVP</div></div>'+
       '</div>'+
     '</div></div>'+
     '<div class="hbar"><span style="width:'+pct+'%"></span></div>';
 
   html += '<div class="hsub">Hours by section <span class="hauto">used auto-rolls up as you tick tasks above</span></div>';
-  html += '<div class="hsec-head"><span>Section</span><span>June (used / alloc)</span><span>Post-June</span></div>';
+  html += '<div class="hsec-head"><span>Section</span><span>MVP (used / alloc)</span><span>Post-MVP</span></div>';
   rows.forEach(function(x){
     var jcell = x.jA > 0 ? ('<b>'+x.jU+'</b> / '+x.jA+'h') : '&ndash;';
     var pcell = x.pA > 0 ? (x.pA+'h') : '&ndash;';
@@ -579,9 +646,13 @@ function editDate(id, el){
   function commit(){
     var v = inp.value.trim();
     it.date = v;
-    // best-effort: re-derive iso so chronological sorting stays correct
-    var parsed = Date.parse(v + " 2026");
-    if(isNaN(parsed)) parsed = Date.parse(v);
+    // strip ordinal suffixes (25th -> 25) so "25th June" parses
+    var clean = v.replace(/(\d+)(st|nd|rd|th)\b/gi, "$1");
+    // an explicit edit overrides any fixed label (e.g. "ASAP")
+    if(it.dateLabel) it.dateLabel = "";
+    // best-effort: re-derive iso so chronological sorting + phase stay correct
+    var parsed = Date.parse(clean + " 2026");
+    if(isNaN(parsed)) parsed = Date.parse(clean);
     if(!isNaN(parsed)){
       var d = new Date(parsed);
       var mm = ("0"+(d.getMonth()+1)).slice(-2);
@@ -605,8 +676,8 @@ function scheduleSave(){
 
 function doSave(){
   try{
-    fetch(API + "?key=" + encodeURIComponent(KEY), {method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({key:KEY, data:{groups:data, hours:hours}})})
+    fetch(API, {method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({key:KEY, data:{groups:data, hours:hours, goLive:goLive}})})
       .then(function(r){ return r.json(); })
       .then(function(){ setSave("saved"); stamp(); })
       .catch(function(){ setSave("save pending"); });
@@ -659,9 +730,10 @@ function load(){
           } else {
             if(res.data.groups) mergeGroups(res.data.groups);
             if(res.data.hours)  mergeHours(res.data.hours);
+            if(res.data.goLive) goLive = res.data.goLive;
           }
         }
-        setSave("·"); render(); stamp();
+        setSave("·"); countdown(); render(); stamp();
       })
       .catch(function(){ setSave("·"); render(); });
   }catch(e){ setSave("·"); render(); }
