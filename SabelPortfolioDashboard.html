@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sabel Portfolio Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #07070f; --surface: #0f0f1e; --card: #151525; --border: #252545;
+    --red: #e63946; --blue: #4a8fe7; --green: #2ecc71; --amber: #f39c12;
+    --purple: #9b59b6; --muted: #6a6a8a; --text: #dde1f0; --dim: #a0a4c0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; gap: 16px; }
+  .header img { height: 36px; }
+  .header-title { flex: 1; }
+  .header-title h1 { font-size: 18px; font-weight: 600; letter-spacing: 0.04em; }
+  .header-title p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .header-date { font-size: 12px; color: var(--muted); }
+  .toggle-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 32px; display: flex; align-items: center; gap: 14px; }
+  .toggle-label { font-size: 12px; color: var(--muted); }
+  .toggle-group { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .toggle-btn { padding: 6px 16px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; color: var(--muted); background: transparent; }
+  .toggle-btn.active { background: var(--blue); color: #fff; }
+  .active-count { font-size: 11px; color: var(--muted); margin-left: auto; }
+  .active-count span { color: var(--amber); font-weight: 600; }
+  .kpi-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 24px 32px 0; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+  .kpi:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.4); border-color: #3a3a65; }
+  .kpi-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .kpi-value { font-size: 36px; font-weight: 700; line-height: 1; }
+  .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .kpi-click-hint { position: absolute; bottom: 8px; right: 10px; font-size: 10px; color: var(--muted); opacity: 0; transition: opacity 0.2s; }
+  .kpi:hover .kpi-click-hint { opacity: 1; }
+  .kpi[data-status="complete"] .kpi-value { color: var(--green); }
+  .kpi[data-status="in-progress"] .kpi-value { color: var(--blue); }
+  .kpi[data-status="blocked"] .kpi-value { color: var(--red); }
+  .kpi[data-status="pending"] .kpi-value { color: var(--amber); }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .modal-overlay.active { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; width: 640px; max-width: 95vw; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 24px 80px rgba(0,0,0,0.6); }
+  .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-header h2 { font-size: 16px; font-weight: 600; }
+  .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 22px; line-height: 1; padding: 0 4px; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+  .modal-table { width: 100%; border-collapse: collapse; }
+  .modal-table th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 0 12px 10px 0; border-bottom: 1px solid var(--border); }
+  .modal-table td { padding: 12px 12px 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; vertical-align: top; }
+  .modal-table tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: rgba(46,204,113,0.15); color: var(--green); }
+  .badge-blue { background: rgba(74,143,231,0.15); color: var(--blue); }
+  .badge-red { background: rgba(230,57,70,0.15); color: var(--red); }
+  .badge-amber { background: rgba(243,156,18,0.15); color: var(--amber); }
+  .badge-gray { background: rgba(106,106,138,0.15); color: var(--muted); }
+  .charts-row { display: grid; grid-template-columns: 1fr; gap: 16px; padding: 20px 32px 0; }
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; }
+  .chart-title { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .chart-title span { color: var(--text); }
+  .chart-subtitle { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
+  .legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .section-header { padding: 28px 32px 12px; }
+  .section-header h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .client-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 32px; }
+  .client-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .client-card.live { border-left: 3px solid var(--green); }
+  .client-card.blocked { border-left: 3px solid var(--red); }
+  .client-card.near-live { border-left: 3px solid var(--amber); }
+  .client-card.in-progress { border-left: 3px solid var(--blue); }
+  .client-card.early { border-left: 3px solid var(--purple); }
+  .client-card.historical { opacity: 0.5; }
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 8px; }
+  .card-title { font-size: 14px; font-weight: 700; line-height: 1.2; }
+  .card-status { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; flex-shrink: 0; }
+  .status-live { background: rgba(46,204,113,0.15); color: var(--green); }
+  .status-blocked { background: rgba(230,57,70,0.15); color: var(--red); }
+  .status-near-live { background: rgba(243,156,18,0.15); color: var(--amber); }
+  .status-in-progress { background: rgba(74,143,231,0.15); color: var(--blue); }
+  .status-early { background: rgba(155,89,182,0.15); color: var(--purple); }
+  .status-historical { background: rgba(106,106,138,0.15); color: var(--muted); }
+  .card-tasks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
+  .task-stat { text-align: center; background: var(--surface); border-radius: 6px; padding: 8px 4px; }
+  .task-stat-val { font-size: 18px; font-weight: 700; }
+  .task-stat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+  .task-stat.green .task-stat-val { color: var(--green); }
+  .task-stat.blue .task-stat-val { color: var(--blue); }
+  .task-stat.red .task-stat-val { color: var(--red); }
+  .task-stat.amber .task-stat-val { color: var(--amber); }
+  .progress-bar-wrap { background: var(--surface); border-radius: 4px; height: 5px; overflow: hidden; margin-bottom: 12px; display: flex; }
+  .progress-bar-seg { height: 100%; }
+  .card-meta { font-size: 11px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+  .card-meta a { color: var(--blue); text-decoration: none; }
+  .card-meta a:hover { text-decoration: underline; }
+  .sow-bar { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .hours-bar { background: var(--surface); border-radius: 4px; height: 5px; overflow: hidden; margin-bottom: 12px; }
+  .hours-fill { height: 100%; border-radius: 4px; }
+  .owners-section { padding: 0 32px; margin-top: 24px; }
+  .owners-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .owners-table th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .owners-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
+  .owners-table tr:last-child td { border-bottom: none; }
+  .owner-bar { background: var(--surface); border-radius: 3px; height: 6px; margin-top: 4px; overflow: hidden; }
+  .owner-bar-fill { height: 100%; border-radius: 3px; }
+  body.active-only .completed-item { display: none !important; }
+
+  /* TRACKER LINKS BOX */
+  .trackers-box { margin: 20px 32px 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; }
+  .trackers-box-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .trackers-box-header h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .tracker-links-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .tracker-link-item { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; text-decoration: none; transition: border-color 0.2s, background 0.2s; }
+  .tracker-link-item:hover { border-color: var(--blue); background: rgba(74,143,231,0.06); }
+  .tracker-link-item.no-link { cursor: default; opacity: 0.6; }
+  .tracker-link-item.no-link:hover { border-color: var(--border); background: var(--surface); }
+  .tl-name { font-size: 12px; font-weight: 700; color: var(--text); }
+  .tl-type { font-size: 10px; color: var(--muted); }
+  .tl-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 6px; border-radius: 10px; width: fit-content; }
+
+  footer { padding: 24px 32px; border-top: 1px solid var(--border); margin-top: 28px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+  footer a { color: var(--blue); font-size: 12px; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  footer .sep { color: var(--border); }
+  .note { font-size: 11px; color: var(--muted); margin-left: auto; }
+</style>
+</head>
+<body class="active-only">
+
+<header class="header">
+  <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCADbApEDASIAAhEBAxEB/8QAHQABAAMBAQEBAQEAAAAAAAAAAAcICQYFBAMCAf/EAFkQAAEDAwECBwQSDgkEAwEAAAEAAgMEBQYRBxIIEyExQVFhInF1sgkUFhcYNTc4VFdzgZGSldHS0xUyNkJSU1ZncnSlsbPkIzNDYoKUoaLCJCW0wTR2o5P/xAAbAQEAAgMBAQAAAAAAAAAAAAAABAUDBgcCAf/EADwRAQABAgICDA0EAwEAAAAAAAABAgMEBRFxBgcSITE1UXKRobHBExQVFjIzNEFSU2GB0iKy0fAXJGLx/9oADAMBAAIRAxEAPwCmSIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiIP2o6WesqG09NGZJHcwC7a0YjSQMElefLEvS0Ehg/9lfbitoZbKBrntHlqUAyHpH933v3r977eaW0wh0ur5XfaRNPKe3sHaqLE425er8HZ/8AXWMk2MYLLcL47mejTo06J4Kfpo989+9EPrho6SBu7DSwxjqawBfpxUX4tnxQo+rMru87yYpWU7OhrGA/6nVfP5o717Pf8VvzLzGWX535mGerZ3lNqdxbt1TEckREdqSeKi/Fs+KE4qL8Wz4oUbeaO9ez3/Fb8yeaO9ez3/Fb8y++Sr3xR1vPn/lvyquin8kk8VF+LZ8UJxUX4tnxQo280d69nv8Ait+ZPNHevZ7/AIrfmTyVe+KOs8/8t+VV0U/kkniovxbPihOKi/Fs+KFG3mjvXs9/xW/MnmjvXs9/xW/Mnkq98UdZ5/5b8qrop/JJPFRfi2fFCcVF+LZ8UKNvNHevZ7/it+ZPNHevZ7/it+ZPJV74o6zz/wAt+VV0U/kkniovxbPihOKi/Fs+KFG3mjvXs9/xW/MnmjvXs9/xW/Mnkq98UdZ5/wCW/Kq6KfySTxUX4tnxQv4lpaaVu7LTwvb1OYCFHPmjvXs9/wAVvzL9qXKrxC8F87J2/gyMH7xoV8nK78b8THW9U7PMqrnc126oifpT/LpLtidBUsL6MeVZujTlYe+Oj3lxFxoam31Jp6qMseOUdTh1g9IUhY/faW7MLAOKqGjV0ZPR1g9IX65DaorrQOiIAmbqYn9R6u8V9sYy7h6/B3uDsY822N4DN8L45luiKuGNG9FX0mPdPRv8KL0X9SMdG9zHtLXNJBB6Cv5V85LMTE6JEREfBERAREQEREBTdsm4MW0zPIYrhNRR45aZAHNqrmHMfI09LIgN49GhO6D0FTbwKeD/AEENootpmaULKmsqQJ7NRTN1ZBHztqHNPO93O3oA0dzkbtvUFUMf4EWIQwgZBmd9rpdOU0MMVM3XvPEi96fgY7J5IQxlyyuJw07tlbDvH4YSP9FZFEFPMr4EFC6F0mK5zURSD7WG5UjXtd35IyNPilVr2s7G9oGzGbXJ7K4ULn7kdxpXcbSyHoG+B3JPLoHBpOnMtV1810t9DdbdUW25UkFZR1MZjngmYHskaecOB5CEGOCKfeGBsObsuyGG+48yR2K3WUtha4lxop9C4wknnaQCWk8ugIPNqYCQEREBERAVgeDvwZrjtYw2fKanJ2Y/ReWXU9K3ygal0+6Bvv8A6xga0E7o59SHc2g1gSipqitrIKOkidNUTyNiijaNS97joAO0krWvZTidPg2ziw4nT7pFtomRSOaNA+U91I//ABPLne+gq16Bj86P7A/mF/FRwGZm08jqfadHJMGExsksZY1ztOQFwnJA16dDp1FXPRBjlebdV2i8VtpuEJhrKKokp6iM87JGOLXD3iCvkVg+HphXmZ21vvlNDuUOR04rGkDuRO3Rkze/qGvPuir4gIiICIiDuthezmp2p7RKTEaa5xWwSxSTS1UkRk4tjBqdGAjePMNNR31ZL0DH50f2B/MKM+AJ64al8G1XihaMIKZ+gY/Oj+wP5hPQMfnR/YH8wrmIgpn6Bj86P7A/mF+NXwGqpsetJtLhlf1S2UsHwiZ37ldJEGeGacD/AGq2SF9RaHWnIomjXcpKgxzafoSBo94OJUB3u03Sx3Oa13m3VduroDpLTVULopGHn5WuAIWxa4HbTsmxParjzrbkFI2OsjYRRXGJo4+ld0aH75uvOw8h7DoQGUqLodo2IXjA80uWKX6JrK6gl3HOZyslaRqyRp6WuaQR08vLodQueQEREFoNkPBFqc72d2nLqrPIrUbnEZo6WO1mo3GakN1eZWcp01005OsrrPQMfnR/YH8wrAcFf1vOFeDW+M5SYgpn6Bj86P7A/mE9Ax+dH9gfzCuYiCmfoGPzo/sD+YT0DH50f2B/MK5iIKZ+gY/Oj+wP5hV64Q2yup2QZ5FjFReIrvHPQx1sFSyAwksc57NHMJdukOjdzOPJoenQaoqgHkjvq32b/wCtwf8Ak1KCsyIiArQbIeCLU53s7tOXVWeRWo3OIzR0sdrNRuM1Ibq8ys5TprppydZVX1qZwV/W84V4Nb4zkFf/AEDH50f2B/MKvPCG2X+dJnseK/Zz7Nb9DHV+WPKnlfTfc8bu7vv5tzn16eZapLPTyQz1eoPAlP8AxJUFckREBERAREQF6mKUwqr/AEsbhq1rt8/4Rr+8BeWvfwP7oG+5uWDE1TTZqmOSVpkdqm7mNiirgmqntSDI9scbpHnRrQXE9QCim61stwr5aqUnV55B+COgKTL5yWWuI9jSeKVFKrcpojRVV7287YmJr3VmxE/p35+/BHRv9IiIrlzIREQf6ASdANSVO2zjgqbVMwoI7lU0tFjlHK3ejN1kcyV7egiJrXOH+Pd/dr33kf8Asnt99rqzaTf6VlTBbajyraoJW6sM4aHPmIPId0OaG841JPO0K8aCgeS8C7aPQUb6izXuw3h7G6+VxI+CR56m7zdz4XBV3yjHr3i97nsuQ2uqtlwgOklPURlrh1EdYPQRyHoWwihvhY7J7ftL2bVtRBSsGR2iB9TbahrO7fugudAekteAQB0O0PXqGZaIiAiIgIiIP2o6mWkqo6mB27JG7eBUrUU7aqkhqWfaysDwOrUKI1JuJknHaMn8Aj/UqozaiNzTX7+B0ba7xVcYi7h9P6ZjdfeJiO/qcdnFMKe/yOaNBMwSad/kP+oK8NdRtG9NKf3H/kVy6nYOqarFMzyNU2SWqbOa36aeDdTPTv8AeIiKSpBERAREQF0uyzHW5btJxzGX73FXK5QU8xbztjc8B5HebvH3lzSk7gqTQwcIjC3zta5huIYAXad05jmtPxiOTpQaj08MVPTx09PEyKGJgZGxg0a1oGgAHQAF+Vzraa222quNbKIqWlhfPNIeZrGtLnH3gCvoXg7RrNPkWz3JMfpXhlRc7TVUcTidNHSxOYD8LkGcO3Xb1mm0y/VJbc6y1Y8HkUlrp5ixgZ0GXd/rHnnJOoGp00Ci213G4WusZW2yuqqGqjOrJqeV0b295zSCF/FwpKq3109DXU8lNVU8jopoZG7ro3tOjmkHmII0X4ILs8DPhD3rIb7Bs7zytNdVTxn7FXKT+tkc0EmKV33xLQS1x5SQQSSQrfrHrE75XYzlFryK2FgrbZVxVcG+CWl8bg4BwBGrSRoRryjVT16Mna57Gxn/ACMn1iC6HCAxGDONjuS4/LEHzSUT5qQ9LaiMb8ZHV3TQD2ErKJWIquGJtemppYWMx2Bz2FoljoXbzNRzjWQjUdoKrugIiICIiCc+BBhXmu26W+tqId+gsDDc5iW6tMjSBCNevjC13eYVpKq3eR+YV5n9kM+T1MO7WZHVGVpI0Ip4iWRj33ca7tDgrIoP5fJGxzGvka10jt1gJ0LjoToOs6AnvAr+lUzhj7XJMQ2zbPbfQTuMdhqW3e5RxnXfbITFudjuK473pQrX008NTTRVNPI2WGVgfG9p1Dmkagg9RCCA+HjhXmo2JTXqmh367HJxWsIHdGA9xM3vaFrz7ms51sdd7fSXa01lrr4RNR1kD6eeM8z43tLXN98EhZHbQcaq8Ozi9YvXame2VklOXEab7Wu7l/ec3Rw76DwkREBERBYDgCeuGpfBtV4oWjCzn4AnrhqXwbVeKFowg4zbpdLhZdjmXXe1VUlJX0dpqJqeeM91G9rCQ4doKzn8/wC2y+2Fefjt+ZaGcI/1Bc58CVP8MrKZBJzOEBtla8OG0K8ag6jVzSPgLeVdzs94XW1Gw3GI5JUUuUW7eHGw1EDIZg3p3JI2jQ/pByrwiDXrZ/llmznDrdlVgmdLb7hFxke+NHsIJa5jh0Oa4Fp7R0r3lWXyOWask2L3eOYE00d+lEBPbBCXAdmp175Ks0gpb5JPjNPHV4pmEETWzzNmt9U8DlcG6Pi+Del/0VOVejySeuhjwPFLY4jjqi6SzsGvLuxxbruTvytVF0BERBqZwV/W84V4Nb4zlJijPgr+t5wrwa3xnKTEFLuGjtf2kYNtghsuKZRUWy3utUE5hjhicC9z5AXauaTzNHT0KEvRI7bfy+rf8tT/AFa7PyQz1eoPAlP/ABJVXJBLXokdtv5fVv8Alqf6tPRI7bfy+rf8tT/VqJUQS16JHbb+X1b/AJan+rXD59m2U57eIrxl13lutdDTtpo5pI2MLYg5zg3RoA53uPvrnUQEREBamcFf1vOFeDW+M5ZZrUzgr+t5wrwa3xnIJMWenkhnq9QeBKf+JKtC1np5IZ6vUHgSn/iSoK5IiICIiAiIgL38D+6Bvubl4C9/A/ugb7m5R8X6ivUuNj3GmH50drt756SV36tJ4pUUqVr56SV36tJ4pUUqDlPoVa227YntNnmz2iIitnOhERBpDwDnwO4OVpEJYXtrKsTbvOHca48vbulvvaKd1QXgKbY7dhd6rMHyetZSWe7zCajqpX7sdPVaBpDyeRrXgNG9zAtGvISRfoEEag6goC/xxDWlziAANST0L/VAvDF2x23AMBrccttayTKbxA6nghif3dJE8aPnfp9ryEhvSXEEcjSgzquhhdc6p1Pu8SZnmPdGg3d46admi+ZFYzgl8Hip2iVkOWZbBLTYlBJrFEdWvuT2nla084iBGjnDn+1by6loeXwc+DbkG1Sk+z9zrHWHGg/djqXQ781WQe6ETSQN0coLzya8gDtDpN2S8CPFZLU4Y3mF6prgGdy64Mimhe7qIY1haD16nTtVrKGlpqGjhoqKnipqaCNscMMTA1kbGjQNaByAADTQL9kGQmfYlfMHyyuxjI6TyrcaJ+69oOrXgjVr2npa4EEHt6DyLwlbLySimoGZvidXE1gr5bdMycjnMbZAY9ffdIqmoCk3Efuco/0T4xUZKTcR+5yj/RPjFVebeqjX3S33a94wucyf3Uua2jemlP7j/wAiuXXUbRvTSn9x/wCRXLqVgfZ6VFsq43v6+6BERSmviIiAiIgL0cZu9Xj+R2y/UBAq7bVxVcBPNvxvD269moC85EGvmA5Tac1w+2ZRZJhLQ3CBsrOXUsPM5jupzXAtI6wV7izI4OG3i/7Irm+lMTrpjdXJv1duLtC13IONicftX6DlHM4c/KARoFsu2qYLtJt4qcUvsFTMGB01FIeLqYOvfjPLprybw1aeglBxu3bg54TtSqZbw8zWTIXMDTcKVoIl0Gg42M8j9ByagtdyAa6ABVB2i8Ffazib5JqG1R5NQt1ImtTt+TTo1hOj9exocO1aSogxtraWqoauSkraaamqIjuyRTMLHsPUQeUFfitds1wbD81ozS5Vjdtu7N3da6ogBkYP7j/tmHtaQVV3bBwMqSSGe57Mbq+GYauFpuMm8x392Obnb2B+up53BBStF6eT2C84xfKmx5Bbam23KlduzU87N1zeo9oI5QRyEEEaheYgIiIC9XEbFW5PlNrx23N3qu5VcVLDyagOe4N1PYNdT2ArylZnyPXCvs5tTrcuqod6kx+l/oiW8hqZgWN+BgkPYd1Be/GbPRY9jltsNtj4ujt1LHSwN6mMaGjXt0C+6V7Io3SSPaxjAXOc46BoHOSV/SiLhfZn5i9g99qIpeLrboz7F0mh0O/MCHEdojEjh2gIM9ttuXuzzavkeVb7nwVta7yrvDQiBncRDTr3Gt99X+4F2Y+a7YJZmTTcZW2UutdRqeXSLTiv/wAnRjXrBWZ6tJ5HXmP2K2kXbDqmbdgvlJx1O0nnqINToO/G6Qn9AIL6Kh3kimFfYvaBas2pYdKe9U3leqcByCohAAJ/SjLAP0Cr4qIuF5hXm22FXymhh4yvtjPsnR8mp34QS4DtMZkb3yEGYiIiAiIgsBwBPXDUvg2q8ULRhZz8AT1w1L4NqvFC0YQcBwj/AFBc58CVP8MrKiNj5JGxxtc97iA1rRqST0Bar8I/1Bc58CVP8MrMDBPu4sPhKn/itQf1Fh2XSyNjixa+SPcdGtbb5ST726u72f8AB52s5jXwwwYlXWmkeRv1l1jdSxRt/C0eA5w/RaStQUQcjsewK17Ndn1txG1PMzKVpdNUOaGuqJnHV8hHRqeYanQADU6LrJpI4YnyyyNjjY0ue9x0DQOck9AX9HkHNqs/eFnte2w3KrmxS/49WYRY5tQKRurnVrP7847mRvW1nc9B1QcpwxdqNNtM2pE2efjrDZojR0MgPczu3tZJh2OOgHW1jT0qFERAREQamcFf1vOFeDW+M5SYoz4K/recK8Gt8ZykxBQ3h54nlN623wVlmxq83KmFmp2GakoZZWbwfLqN5rSNeUcnaoA87zP/AMh8m+SZ/orXFEGR3neZ/wDkPk3yTP8ARTzvM/8AyHyb5Jn+itcUQZFVGB5zTU8lRUYZkcMMTC+SSS1zNaxoGpJJboAB0rnFrltY9SzLfAlb/AesjUBERAWpnBX9bzhXg1vjOWWa1M4K/recK8Gt8ZyCTFnp5IZ6vUHgSn/iSrQtZ6eSGer1B4Ep/wCJKgrkiIgIiICIiAvfwP7oG+5uXgL38D+6BvublHxfqK9S42PcaYfnR2u3vnpJXfq0nilRSpWvnpJXfq0nilRSoOU+hVrbbtie02ebPaL7bFablfbzSWaz0ctbcKyVsNPBENXSPcdAB8/MF8Ssd5HlQUFZt3qairYx81FZKiek3udshkijJHbuSPHeJVs507nC+BJNNaY6jL8zNJXSM1dS2+lEjYT1GRxG8evRoHUSox4QHBmynZfbHZBQVzcix9h0nqYoDHNS6nkMkeru55hvgka84bya6Pr86mCCqppaaphjmglYWSRyNDmvaRoWkHkII5NEGNalXZvwg9qmBUMVttGRuqrbCA2OiuEQqI2NHM1pPdtb2NcApC4XHB1nwSpqMzwymkmxaV+9U0zdXOtrifhMRPMfveY9BNaEE8ZJws9sl4oXUkF0ttoDwWukoKINkI7HPLi09o0KhC511bc7hPcLlWVFZWVDzJNPPIXySOPO5zjyk9pXzKxnBL4PFTtErIcsy2CWmxKCTWKI6tfcntPK1p5xECNHOHP9q3l1LQcEvg8VO0SshyzLYJabEoJNYojq19ye08rWnnEQI0c4c/2reXUt0GoaWmoaOGioqeKmpoI2xwwxMDWRsaNA1oHIAANNAlDS01DRw0VFTxU1NBG2OGGJgayNjRoGtA5AABpoF+yAuV2pZ9jmzfEKnJclq+Jpou5iiboZamUjuY429Ljp3gNSdACU2pZ9jmzfEKnJclq+Jpou5iiboZamUjuY429Ljp3gNSdACVmdtv2p5HtXy997vcnE0sWrKCgjcTFSRE8w63HQbzucnqAAAfNto2iXjahn1Zld4a2EyAQ0tMx2raaBuu5GD085JPS5zjoNdFxaIgKTcR+5yj/RPjFRkpNxH7nKP9E+MVV5t6qNfdLfdr3jC5zJ/dS5raN6aU/uP/Irl11G0b00p/cf+RXLqVgfZ6VFsq43v6+6BERSmviIiAiIgIi9vDcTyXMrs604tZay71rYjM+Kmj3ixgIBc7oA1IGp6SB0oPEX70NXVUFXFWUNTNS1MTt6OaGQsew9YcOUFSN5wO2X2vbz8Rvzrxsx2VbRMPs/2YybErla6DjGxGeZg3Q52ug5D06FB3eBcKXa9iojgqL1FkNIwj+iu0XGvI6f6UESE99x7ysfsz4Y+CX18VHmFuq8Yq3chnH/AFFKT2uaA9uva0gdJVAUQbG2e526822C52ivpa+hqG78NRTStkjkb1hzSQV9ayw2C7YMl2T5RFXW6olqbPNIPshbHPPFTs6SBzNkA5nDvHUag6h2K50d6slDebdLx1FX00dVTyfhxyNDmn3wQgi7hPbG7btXwqUQwRRZNQROfa6vmLiOXiXnpY4/FJ1HSDmRUQzU1RJT1ET4ponlkjHjRzXA6EEdBBWyiy74W1lhsPCKzCip49yKWsbWDQaAmeJkztP8T3IIrREQFpdwLMK8x2wm1Szw8XX3sm6VGo0OkgHFD/8AmGHTrcVn/sbxCXPNp+P4pG1xZX1jW1Bbrq2BvdSu5OpjXFaz08MVPTx08EbY4omBjGNGga0DQAdmiD+1RXyRnMzcM3smD00oMFppjWVQaf7eb7Vp7WxtBHuhV6lzF62d7P73c5rpecGxi5V85Bmqqu0wTSyaAAbz3NJOgAHKeYBBkcvf2dZLU4dndkyml3jJbK2KpLW/fta4bzO85urffWo3nT7LPa0wz5CpvoJ50+yz2tMM+Qqb6CDrLdWU1xt9NcKKZs1LVRNmhkbzPY4AtI7CCCv2e1r2Fj2hzXDQgjUEL8bfR0duoIKC30kFJSU8bYoIIIwyOJjRo1rWjkaAOQAcy/dBlBt7wx2AbXMhxhsZZTU9WZKPUc9PJ3cff0a4A9oK4ZXL8kgwvQ47tApYRy62uucB35ISf/1Gp/uhU0QEREFgOAJ64al8G1XihaMLOfgCeuGpfBtV4oWjCDgOEf6guc+BKn+GVllY642u9UNzbGJTSVMc4YTpvbjg7TXo10WpvCP9QXOfAlT/AAyspkFwo+HHcRI0ybOKRzNe6Dbs4EjsPFHT4F1eIcNjEK+rjgybE7pY2PdoZ6eobWMj5ed3csdp3mk9hVEkQbDYvf7LlFipb5j9yp7lbapm/DUQO3muHSOsEHkIOhBBBAK/HM8XsOY47U4/ktsguNuqW6PilbroehzTztcOhw0I6FTHyOLLrhBmt9wiSZ77bV0JuEUZOojnjexhIHRvNfy/oNV5kGXfCX2RV2yPOzbmvkqbHXh09qq3jldGDyxvPNvs1AOnOC06DXQRWtJOHLitPkWwG6V5jaayxyxV9O8jlA3gyQa9RY9x06S0LNtAREQamcFf1vOFeDW+M5SYoz4K/recK8Gt8ZykxBAW37hK0OybOWYtUYlUXZ76KOr4+OtbEAHucN3dLDzbnPr0qPfRx2r2uq35Ub9Woz8kM9XqDwJT/wASVVyQXZ9HHava6rflRv1aejjtXtdVvyo36tUmRBcXL+GbbL7id4sbMBrIHXGgnpBKbk1wYZI3M3tOL5dNddFTpEQEREBamcFf1vOFeDW+M5ZZrUzgr+t5wrwa3xnIJMWenkhnq9QeBKf+JKtC1np5IZ6vUHgSn/iSoK5IiICIiAiIgL38D+6Bvubl4C9/A/ugb7m5R8X6ivUuNj3GmH50drt756SV36tJ4pUUqVr56SV36tJ4pUUqDlPoVa227YntNnmz2i6rZPnN22c57bcuswbJPRvPGQvJDJ4nDR8buwgnl6DoehcqitnOmtGyPaLje03EIMjxyp3mO7ippnkcbSy6csbx0HqPMRyhdgsndjO0zJNlmXxZBj828x2jK2ikceKq4teVjh0HqdztPvg6ZbI9ouN7TcQgyPHKneY7uKmmeRxtLLpyxvHQeo8xHKEHWVMEFVTS01TDHNBKwskjkaHNe0jQtIPIQRyaKgXC44Os+CVNRmeGU0k2LSv3qmmbq51tcT8JiJ5j97zHoJ0BX51MEFVTS01TDHNBKwskjkaHNe0jQtIPIQRyaIMs+Dbj+EZNtbtVpz65mhtMhJYwndbVTgjcgc/7xruXl6dN0aFwI1KoaWmoaOGioqeKmpoI2xwwxMDWRsaNA1oHIAANNAqCcLjg6z4JU1GZ4ZTSTYtK/eqaZurnW1xPwmInmP3vMegnvOB7wkfLHlPZ5tDr/wCn7mG03ad/9Z0Ngmcfvuhrzz8x5dCQuKuV2pZ9jmzfEKnJclq+Jpou5iiboZamUjuY429Ljp3gNSdACU2pZ9jmzfEKnJclq+Jpou5iiboZamUjuY429Ljp3gNSdACVmdtv2p5HtXy997vcnE0sWrKCgjcTFSRE8w63HQbzucnqAAANt+1PI9q+Xvvd7k4mli1ZQUEbiYqSInmHW46Dedzk9QAA4JEQEREBSbiP3OUf6J8YqMlJuI/c5R/onxiqvNvVRr7pb7te8YXOZP7qXNbRvTSn9x/5Fcuuo2jemlP7j/yK5dSsD7PSotlXG9/X3QIiKU18REQEREBWL8j4vkdr28PtsrwBd7VPTRg9MjCyYf7Y3qui9rBsjr8QzG0ZPbD/ANXbKuOpjGugfunUsPY4atPYSg1+UZcKPDarOthuRWO3Qma4tibV0cbRq58kLg/caPwnNDmjtcuxwHKrRm2H23KLHOJqGvhErPwmHmcx3U5p1aR1he4gxoIIOhGhC/xaH7dOCpimfXWoyHHq44zeqhxkqNyHjKWpeedzmagscelzToectJJKg+TgT7ShVlseS4k6n15JHT1Afp17vEka/wCJBWBax7B7RX2HYxiFoujXsraa0U7Zo3jR0biwEsPa3Xd95Q3sR4I+OYbeqbIMtuoyS40r2y09M2HiqWKQHUOIJJkIIBGug6wVZlAWZfDSuUVz4SWUvgc10dO6nptR+EyCMP17zt4e8tDdqeaWrZ9gd0yy7yNENFCXRxF2jp5TyMib2udoOzlJ5AVk7kV2rr/f7hfLnLxtbcKmSqqHgaB0j3Fzj2DUlB8CIiC33kcOFeWLzf8AP6qHVlJGLbROI/tH6PlI7Q0MHeeVdpR1wbsJ8wGxjHrBLFxdcacVVcCNHeWJe7eD+jqGd5oUioOX2kbQcP2dWinu2ZXllrpKicU8LzDJK58m6XaBsbXO5mnl00HJy8oXA+ij2E/lz+ya36lVr8kQzIXjafbcQppt6nsFJvztB5PLE+jiD16RiL4xVYUGmXoo9hP5c/smt+pT0Uewn8uf2TW/UrM1EGpeF7fNkuZZLSY3jmXNrLpWFwp4HUFTDvlrS4jekja3XRp5zy9Ck1Y/YXfqvFsutGSUB0qbZWRVUY103ixwdunsOmh7CtdbHc6O9WWhvFvl42jrqeOpgf8AhRvaHNPwEIOS2+YY3P8AZFkWMNjD6qopDJR69FRH3cXL0auaAewlZQuBa4tcCCDoQehbLrMPhd4X5idu19pYYuLobm8XSj5NBuTElwHYJBI0dgCCI0REFgOAJ64al8G1XihaMLOfgCeuGpfBtV4oWjCDgOEf6guc+BKn+GVlMtfs6x2ly7DbvjFbPNBTXSkkpZZIdN9jXt0JbqCNeXpCrp6CXAPyryb4YPq0FDEV8/QS4B+VeTfDB9Wuixbgg7IrNVsqa1l7vpYQeLr6xojJ/RiYwkdhJ99BFHkc2CXI3+87Q6uCSK3MpHW6ic8ECeRz2ukc3rDAwNJ5tX9bTpdpfPbKGitlvgt9to6ejo6dgjhggjDI42jma1o5AOwL6EEacKWshoeD1ms8+7uutj4RvfhSERt9/VwWWSvD5IhtGpaXG6HZpb6gPra2VlbcmsOvFwMJMbHdRc/R2nUwHpCo8gIiINTOCv63nCvBrfGcpMUZ8Ff1vOFeDW+M5SYgz08kM9XqDwJT/wASVVyWlm23g4YttWzJmT3m+XmhqWUjKUR0hi3N1jnEHumk690elcN6CXAPyryb4YPq0FDEV8/QS4B+VeTfDB9WnoJcA/KvJvhg+rQUMRXz9BLgH5V5N8MH1arPwqdltn2SbQqDG7LcK6vp6m0x1zpKvc3w90szCBugDTSMfCUESIiIC1M4K/recK8Gt8ZyyzWpnBX9bzhXg1vjOQSYs9PJDPV6g8CU/wDElWhagLb9waqHaznLMpqMtqLS9lFHScRHRNlBDHOO9vF459/m06EGciK7PoHLV7Ytb8lt+sT0Dlq9sWt+S2/WIKTIrs+gctXti1vyW36xPQOWr2xa35Lb9YgpMi7bbpg0WzbaneMLguL7lHbuI0qXxCMv4yCOX7UE6ab+nP0LiUBe/gf3QN9zcvAXvYGR5oGe5u/co+L9RXqXGx7jTD86O13F89JK79Wk8UqKVK95aX2etY0al1PIB8UqKFAyn0KtbbdsWP8AZsz/AMz2iIit3OhdtsZ2mZJssy+LIMfm3mO0ZW0UjjxVXFryscOg9Tudp98HiUQa0bI9ouN7TcQgyPHKneY7uKmmeRxtLLpyxvHQeo8xHKF2Cyd2M7TMk2WZfFkGPzbzHaMraKRx4qri15WOHQep3O0++Dplsj2i43tNxCDI8cqd5ju4qaZ5HG0sunLG8dB6jzEcoQdZUwQVVNLTVMMc0ErCySORoc17SNC0g8hBHJos9+GPsHpdmtwjyzGZI243cqnihRvk/pKOYgu3G68royASOlumh6CbxbUs+xzZviFTkuS1fE00XcxRN0MtTKR3Mcbelx07wGpOgBKzO237U8j2r5e+93uTiaWLVlBQRuJipIieYdbjoN53OT1AAAPBy3M8qy2K3RZLfq66sttOKejbUSbwiZ1DrJ0GrjqToNSdAvAREBERAREQFJuI/c5R/onxioyUn4qwsx6jB5zHr8JJ/wDaq829VGtv215E+P3J/wCO+HMbRvTSn9x/5Fcuun2ikfZWnbryiDX/AHFcwpWC9npUOynje/r7oERFKa+IiICIiAiIgl7g47dcg2Q3Z8DY3XTG6uQOrbc5+ha7m42I8zX6Aa9DgND0FugGy7a3gO0iiZNjF+p5aot1koJyIqqLrBjJ1OnW3VvasoV/UT3xSNlie5j2EOa5p0LSOYg9aDZZFlZje3La7j8TYrbn974tmgaypmFS1o6gJQ4Adi6UcKfbmIDGczjLidRIbVSbw7P6rTT3kGly4bartZwXZpbn1OUXuGKp3d6GghIkqpuTk3YxygH8J2jeshZ15Ft72xX+F8Nw2gXhsb/thSObSajq/oQ3k7FHFRNNUTvnqJZJpZDvPe9xc5x6yTzlBKXCI225Dtfvsb6qP7HWKjeTQW1j94MJ5OMkd9/IR08wHIOkmKURAUncFvDmZxtyxy0VDGvooJ/L1W13M6KEb5aexxDW/wCJRivusd4u1iuUdysl0rrXXRghlTR1DoZW6jQ6OaQRqO1BsUvlvFwpLTaay618oipKKB9RPIfvI2NLnH3gCspPPY2p+2Xmfy7U/TXyXfaNtCvFumtt3zvKLhRTjdlpqq7zyxSDqc1zyCO+g+PPsjqsvza85PW6ie6VstSWl2u4HOJDAepo0aOwLw0RAREQFotwC8yGSbEIrLPNv1uO1LqNwJ7riXd3E7vaFzB7ms6V62NZNkmM1EtRjeQXayzTMDJZLfWSU7ntB10cWEEjXoKDYJVW8kXw1tywGz5tTsHliz1XlaoPNrBNpoT17sjWgD++5VD89jan7ZeZ/LtT9NedkOd5vkVB9j8gzLIrvR74f5XrrnNPHvDmO69xGo60HOoiIJ/4AhA4Q1Jqee21WnxQtGVjlaLlcbRcoblaa+qt9dA7ehqaWZ0UsZ001a5pBB0J5iuo89jan7ZeZ/LtT9NBrKiya89jan7ZeZ/LtT9NPPY2p+2Xmfy7U/TQayosmvPY2p+2Xmfy7U/TX8T7Utp1REYp9o2Xyxnna+91LgfeL0Grl3utss9E6uu9yo7dSs+2nqp2xRt77nEAKtm3Hhc4tj1HNa9nbo8hvDgW+XS0ijpz16nQynqDe5/vcmiojc7lcbnPx9yr6qtm/GVEzpHfC4kr5EH35BeLpkF6q71eq6auuNZKZaiomdq57j0n9wA5AAAORfAiICIiDUvgrkHg84Vodf8AtrfGcpNWRdhz7O8ftrbbYc1yS1ULHFzaaiuk0ETSTqSGscACT2L7/PY2p+2Xmfy7U/TQayosmvPY2p+2Xmfy7U/TTz2Nqftl5n8u1P00GsqLJrz2Nqftl5n8u1P0089jan7ZeZ/LtT9NBrKqAeSOEHbfZ+XmxuD/AMmpUM+extT9svM/l2p+muavl4u19uUlzvl0rrpXSgCSprKh00r9BoNXuJJ0AA50HwoiIC1L4K5B4POFaHX/ALa3xnLLRdJYc+zvH7a222HNcktVCxxc2morpNBE0k6khrHAAk9iDXRFk157G1P2y8z+Xan6aeextT9svM/l2p+mg1lRZNeextT9svM/l2p+mnnsbU/bLzP5dqfpoNZUWTXnsbU/bLzP5dqfpp57G1P2y8z+Xan6aDs+GyQeE7l2h1/+F/4UChlfvcKysuNdPX3Crnq6uoeZJp55C+SR5Opc5x5SSekr8EBffj9WKG801S46Ma/R56mnkP8AoV8CLzXTFdM0z72bD36sPdpu0cNMxMa4nSmHkI6CCoxyS1yWu4vi3TxLyXRO6C3q74XUYXe2VNO231LwJ4xpGSft29XfC9+vo6aupzBVRNkYeg84PWD0LXrNyvA3ppqje/u+7JmOCw+yrLqL1irRVG/H0n30z/eSeBEqLsazCtXk0lbo3obK3lHvj5l83mLr/ZdN/u+ZW8Y/DzGndOc3diOb26tz4GZ1TE97l0XR1mI1tNSTVL6mnLYo3PIGupAGvUucWe1eouxponSqcdluKwFUU4miaZng0i6XZ7nuX7P7tJdMPvtTaamVm5KYw17JWjmD2PBa7To1B0XNIsqC6jaJtCzPaFcYa/Mb/U3aaBpbCHtayOIHTXdYwBrddBroOXQarl0Xu2rGK+vpBUh0cDHfaCTXVw6+Qcyx3LtFqNNc6EvBYDE4654PD0TVPDvPCRdR5i6/2XTf7vmTzF1/sum/3fMsPj2H+Ja+aub/ACJ6v5cui6jzF1/sum/3fMnmLr/ZdN/u+ZPHsP8AEeaub/Inq/ly6LqPMXX+y6b/AHfMvopcKdvg1VcN3pEbOU++fmXycfh4j0nu3sSziurR4GY1zEd7nLLbprnXspogd3XWR2nI1vSVKUUbIomRRjdYxoa0dQC/C2W+kt0HE0kQY08rjzlx6yV5WXXxlvpnUtO/WrkboND/AFYPT3+pVGIvVY27FFEb3933Rsoy2xsXwNeIxNUTVPD3Uxy9+qHJ5dVtrL7O9h1ZHpG097n/ANdV5CIr+3RFuiKY9zj+MxVeLxFd+vhqmZ6RERe0YREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQf60lrg5pIIOoI5wuns+X1EDWxV8ZqGDk4xvI/wB/oP8AouXRYr1i3ejRXGlYZdmuLy254TDV7nl5J1xwJIgyiyyt1NS6I9T4z/65F9lDd7dXTcTS1TZZNN7dAI5PfCitdFs/9PXe4O/eFV4jLbVu3VXEzvN8yfZtjsXjLWGuUU6KpiJmInT26HaXz0krv1aTxSopUrXz0krv1aTxSopXvKfQq1sG2J7TZ5s9oiLp8Sx01hbXVzCKccrGH+07T2fvVjevU2ad1U0rLMsxGZYiLFiNMz0RHLP0MRx41bmV1azSnB1jYf7TtPZ+9dzI9kUTnvc1jGDUknQAI4sijLnFrGMGpJ5AAFH+WX91xlNLSuc2kYeXo4w9Z7OoKiiLuPu7+9EdTrNdeB2I4DRT+qurpqnuiOrXO/1vmisvs9nxXfMnmisvs9nxXfMoyRTvJNrlnq/hqf8AkLMPl0dFX5JN80Vl9ns+K75k80Vl9ns+K75lGSJ5Jtcs9X8H+Qsw+XR0Vfkk3zRWX2ez4rvmX5zZPZY26irLz1Mjcf8A1oo2RIyqzyz/AH7PlW2FmMxoi3RH2n8nWXbMZJGuit0JiB/tZNC73hzD/VcrLI+WR0kj3Pe46uc46klfyinWcPbsxoohq2ZZvjMzr3eJr06OCOCI1R/ZERFmVgiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAui2f+nrvcHfvC51dFs/9PXe4O/eFGxnqKtS72N8a4fnQ7S+ekld+rSeKVFKla+ekld+rSeKVx+I495cLa6tb/wBMD3DD/aHt7P3qty+9TZs1VVcredmWW38yzGxYsRpmaZ1RGnhn6P8AcSx01hbXVzCKccrGH+07T2fvXcuLIoy5xaxjBqSeQABHFkUZc4tYxg1JPIAAuByvIHXB5pKRxbSNPKeYyHr73Yo8Rdx93kiOpbVVYDYjgNEfqrq6ap7ojq+szvsryB1weaSkcW0jTynmMh6+92LnURX9q1Tap3NLkWYZhfzC/N+/OmqeiI5I+giIsiEIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiIC9XFa5lvvUU0p3YnAseeoHp+HReUi8XKIrpmmfekYTE14S/Rft8NMxMfZMBDJGaENexw74IQmOKIklscbG94NAUZ26/wB0oIhDDUaxjmY8bwHe6l/NzvlyuEfFVFR/RdLGDdB7/WqTyVc3WjTGh1SdsHBeB3cW6vCaODe0adeng+32ehleQOuDzSUji2kaeU8xkPX3uxc6iK6tWqbVO5pcwzDML+YX5v3501T0RHJH0ERFkQhERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERB//2Q==" alt="Sabel">
+  <div class="header-title">
+    <h1>PORTFOLIO DASHBOARD</h1>
+    <p>Internal &middot; All active &amp; recent client engagements</p>
+  </div>
+  <div class="header-date">Updated: 16 June 2026</div>
+</header>
+
+<div class="toggle-bar">
+  <span class="toggle-label">View:</span>
+  <div class="toggle-group">
+    <button class="toggle-btn active" id="btn-active" onclick="setView('active')">Active only</button>
+    <button class="toggle-btn" id="btn-all" onclick="setView('all')">All projects</button>
+  </div>
+  <span class="active-count" id="active-count"></span>
+</div>
+
+<div class="kpi-strip">
+  <div class="kpi" data-status="total" onclick="openModal('total')">
+    <div class="kpi-label">Total Tasks</div><div class="kpi-value">67</div>
+    <div class="kpi-sub">Across tracked projects</div><div class="kpi-click-hint">&#8599; breakdown</div>
+  </div>
+  <div class="kpi" data-status="complete" onclick="openModal('complete')">
+    <div class="kpi-label">Complete</div><div class="kpi-value">18</div>
+    <div class="kpi-sub">27% of tasks</div><div class="kpi-click-hint">&#8599; breakdown</div>
+  </div>
+  <div class="kpi" data-status="in-progress" onclick="openModal('in-progress')">
+    <div class="kpi-label">In Progress</div><div class="kpi-value">9</div>
+    <div class="kpi-sub">13% of tasks</div><div class="kpi-click-hint">&#8599; breakdown</div>
+  </div>
+  <div class="kpi" data-status="pending" onclick="openModal('pending')">
+    <div class="kpi-label">Pending</div><div class="kpi-value">9</div>
+    <div class="kpi-sub">13% of tasks</div><div class="kpi-click-hint">&#8599; breakdown</div>
+  </div>
+  <div class="kpi" data-status="blocked" onclick="openModal('blocked')">
+    <div class="kpi-label">Blocked</div><div class="kpi-value">31</div>
+    <div class="kpi-sub">46% &middot; &#9888; action needed</div><div class="kpi-click-hint">&#8599; breakdown</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header"><h2 id="modal-title"></h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div class="trackers-box">
+  <div class="trackers-box-header">
+    <h2>Quick Access &mdash; All Trackers</h2>
+  </div>
+  <div class="tracker-links-grid">
+
+    <a href="https://sabel-intercom.github.io/Intake-forms/RaizTracker_v2.html" target="_blank" class="tracker-link-item">
+      <div class="tl-name">Raiz Invest</div>
+      <div class="tl-type">GitHub Pages &middot; HTML</div>
+      <div class="tl-badge" style="background:rgba(243,156,18,0.15);color:var(--amber)">Near Go-Live</div>
+    </a>
+
+    <a href="https://sabel-intercom.github.io/Intake-forms/BTSUSAJuneTracker.html" target="_blank" class="tracker-link-item">
+      <div class="tl-name">BTS USA</div>
+      <div class="tl-type">GitHub Pages &middot; HTML</div>
+      <div class="tl-badge" style="background:rgba(74,143,231,0.15);color:var(--blue)">In Progress</div>
+    </a>
+
+    <a href="https://sabel-intercom.github.io/Intake-forms/FlkitOverTracker_v2.html" target="_blank" class="tracker-link-item">
+      <div class="tl-name">FlkitOver</div>
+      <div class="tl-type">GitHub Pages &middot; HTML</div>
+      <div class="tl-badge" style="background:rgba(74,143,231,0.15);color:var(--blue)">In Progress</div>
+    </a>
+
+    <a href="https://sabel-intercom.github.io/Intake-forms/HeroTolkTracker_v2.html" target="_blank" class="tracker-link-item">
+      <div class="tl-name">HeroTolk</div>
+      <div class="tl-type">GitHub Pages &middot; HTML</div>
+      <div class="tl-badge" style="background:rgba(155,89,182,0.15);color:var(--purple)">Early Stage</div>
+    </a>
+
+    <a href="https://sabel-intercom.github.io/Intake-forms/EducationPerfectTracker_v2.html" target="_blank" class="tracker-link-item">
+      <div class="tl-name">Education Perfect</div>
+      <div class="tl-type">GitHub Pages &middot; HTML</div>
+      <div class="tl-badge" style="background:rgba(46,204,113,0.15);color:var(--green)">Live &#10003;</div>
+    </a>
+
+    <div class="tracker-link-item no-link">
+      <div class="tl-name">Kashxa Ltd</div>
+      <div class="tl-type">Google Drive &middot; XLSX</div>
+      <div class="tl-badge" style="background:rgba(230,57,70,0.15);color:var(--red)">Blocked</div>
+    </div>
+
+    <div class="tracker-link-item no-link">
+      <div class="tl-name">Bulk Nutrients</div>
+      <div class="tl-type">Google Drive &middot; Sheet</div>
+      <div class="tl-badge" style="background:rgba(74,143,231,0.15);color:var(--blue)">In Progress</div>
+    </div>
+
+    <div class="tracker-link-item no-link" style="opacity:0.35;">
+      <div class="tl-name">WiseStamp</div>
+      <div class="tl-type">Google Drive &middot; XLSX</div>
+      <div class="tl-badge" style="background:rgba(106,106,138,0.15);color:var(--muted)">Historical</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="charts-row">
+
+  <!-- GO-LIVE DATES: next 3 months only -->
+  <div class="chart-card">
+    <div class="chart-title"><span>GO-LIVE DATES</span></div>
+    <div class="chart-subtitle">Upcoming go-live targets &mdash; next 3 months only &middot; sorted by urgency</div>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-dot" style="background:#e63946"></div> &lt; 2 weeks</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f39c12"></div> 2&ndash;6 weeks</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4a8fe7"></div> 6&ndash;12 weeks</div>
+    </div>
+    <div style="position:relative;height:320px;">
+      <canvas id="goLiveChart"></canvas>
+    </div>
+  </div>
+
+  <!-- PINCH POINTS: forward-looking, next 3 months -->
+  <div class="chart-card">
+    <div class="chart-title"><span>DEADLINE PINCH POINTS</span></div>
+    <div class="chart-subtitle">Estimated task clusters by week &mdash; Jun &ndash; Sep 2026 &middot; active engagements</div>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-dot" style="background:#4a8fe7"></div> Raiz / BTS / AfterShip</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#9b59b6"></div> Jul cohort (Don / GPS / Aktiia / YFood)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e63946"></div> Aug cohort (Giving / Mambu / HeroTolk)</div>
+    </div>
+    <div style="position:relative;height:240px;">
+      <canvas id="pinchChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<div class="section-header"><h2>Project Trackers &mdash; Task Data</h2></div>
+<div class="client-grid">
+
+  <div class="client-card blocked">
+    <div class="card-header"><div class="card-title">Kashxa Ltd</div><div class="card-status status-blocked">Blocked</div></div>
+    <div class="card-tasks">
+      <div class="task-stat green"><div class="task-stat-val">0</div><div class="task-stat-lbl">Done</div></div>
+      <div class="task-stat blue"><div class="task-stat-val">0</div><div class="task-stat-lbl">Active</div></div>
+      <div class="task-stat amber"><div class="task-stat-val">9</div><div class="task-stat-lbl">Pending</div></div>
+      <div class="task-stat red"><div class="task-stat-val">30</div><div class="task-stat-lbl">Blocked</div></div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-seg" style="width:23%;background:var(--amber)"></div>
+      <div class="progress-bar-seg" style="width:77%;background:var(--red)"></div>
+    </div>
+    <div class="card-meta"><span>39 tasks &middot; Target: 1 Apr 2026</span><span>Owner: Richard &middot; Google Drive XLSX</span></div>
+  </div>
+
+  <div class="client-card in-progress">
+    <div class="card-header"><div class="card-title">Bulk Nutrients</div><div class="card-status status-in-progress">In Progress</div></div>
+    <div class="card-tasks">
+      <div class="task-stat green"><div class="task-stat-val">18</div><div class="task-stat-lbl">Done</div></div>
+      <div class="task-stat blue"><div class="task-stat-val">7</div><div class="task-stat-lbl">Active</div></div>
+      <div class="task-stat amber"><div class="task-stat-val">0</div><div class="task-stat-lbl">Pending</div></div>
+      <div class="task-stat red"><div class="task-stat-val">1</div><div class="task-stat-lbl">Blocked</div></div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-seg" style="width:69%;background:var(--green)"></div>
+      <div class="progress-bar-seg" style="width:27%;background:var(--blue)"></div>
+      <div class="progress-bar-seg" style="width:4%;background:var(--red)"></div>
+    </div>
+    <div class="card-meta"><span>26 tasks &middot; Go-live: 23 Apr 2026</span><span>Owners: Greg, Chris &middot; Google Sheet</span></div>
+  </div>
+
+  <div class="client-card near-live">
+    <div class="card-header"><div class="card-title">Raiz Invest</div><div class="card-status status-near-live">Near Go-Live</div></div>
+    <div class="sow-bar"><span style="font-size:11px;color:var(--muted)">SOW Hours</span><span style="font-size:13px;font-weight:600">3 / 40h</span></div>
+    <div class="hours-bar"><div class="hours-fill" style="width:7.5%;background:var(--amber)"></div></div>
+    <div class="card-meta"><span>SOW: 19 May 2026 &middot; Est. go-live: 23 Jun</span><span>Chris: "ready to go live next week"</span><a href="https://sabel-intercom.github.io/Intake-forms/RaizTracker_v2.html" target="_blank">&rarr; Open tracker</a></div>
+  </div>
+
+  <div class="client-card in-progress">
+    <div class="card-header"><div class="card-title">BTS USA Inc.</div><div class="card-status status-in-progress">In Progress</div></div>
+    <div class="sow-bar"><span style="font-size:11px;color:var(--muted)">SOW Hours</span><span style="font-size:13px;font-weight:600">16 / 83h</span></div>
+    <div class="hours-bar"><div class="hours-fill" style="width:19%;background:var(--blue)"></div></div>
+    <div class="card-meta"><span>SOW: 29 Apr 2026 &middot; Greg leading</span><span>June/July 2026 target &middot; 67h remaining</span></div>
+  </div>
+
+  <div class="client-card live completed-item">
+    <div class="card-header"><div class="card-title">Education Perfect</div><div class="card-status status-live">Live &#10003;</div></div>
+    <div class="card-meta"><span style="color:var(--green);font-weight:600">Officially live on Intercom</span><span>Confirmed: ~May 2026</span><a href="https://sabel-intercom.github.io/Intake-forms/EducationPerfectTracker_v2.html" target="_blank">&rarr; Open tracker</a></div>
+  </div>
+
+  <div class="client-card in-progress">
+    <div class="card-header"><div class="card-title">FlkitOver</div><div class="card-status status-in-progress">In Progress</div></div>
+    <div class="card-meta"><span>Building lifecycle email series</span><span>No confirmed go-live date</span><a href="https://sabel-intercom.github.io/Intake-forms/FlkitOverTracker_v2.html" target="_blank">&rarr; Open tracker</a></div>
+  </div>
+
+  <div class="client-card early">
+    <div class="card-header"><div class="card-title">HeroTolk</div><div class="card-status status-early">Early Stage</div></div>
+    <div class="card-meta"><span>Building ticket types &amp; workflows</span><span>Est. go-live Q3 2026</span><a href="https://sabel-intercom.github.io/Intake-forms/HeroTolkTracker_v2.html" target="_blank">&rarr; Open tracker</a></div>
+  </div>
+
+  <div class="client-card historical completed-item">
+    <div class="card-header"><div class="card-title">WiseStamp</div><div class="card-status status-historical">Historical</div></div>
+    <div class="card-tasks">
+      <div class="task-stat"><div class="task-stat-val">0</div><div class="task-stat-lbl">Done</div></div>
+      <div class="task-stat blue"><div class="task-stat-val">2</div><div class="task-stat-lbl">Active</div></div>
+      <div class="task-stat"><div class="task-stat-val">0</div><div class="task-stat-lbl">Pending</div></div>
+      <div class="task-stat"><div class="task-stat-val">0</div><div class="task-stat-lbl">Blocked</div></div>
+    </div>
+    <div class="card-meta"><span>Sep 2025 &middot; ~8 months old</span></div>
+  </div>
+
+</div>
+
+<div class="section-header" style="margin-top:8px;"><h2>Active SOW Engagements &mdash; No Task Tracker</h2></div>
+<div style="padding:0 32px;">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:var(--surface);">
+        <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);">Client</th>
+        <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);">Status</th>
+        <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);">SOW Hours</th>
+        <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);">Est. Go-Live</th>
+        <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);">Notes</th>
+      </tr></thead>
+      <tbody id="eng-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section-header" style="margin-top:24px;"><h2>Owner Workload &mdash; Tracked Tasks</h2></div>
+<div class="owners-section">
+  <table class="owners-table">
+    <thead><tr><th>Owner</th><th>Tasks</th><th>Blocked</th><th>Active Projects</th><th>Load</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Richard</strong></td><td>34</td><td style="color:var(--red)">30</td><td>Kashxa, BTS USA, Raiz</td><td><div class="owner-bar"><div class="owner-bar-fill" style="width:100%;background:var(--red)"></div></div></td></tr>
+      <tr><td><strong>Greg</strong></td><td>19</td><td style="color:var(--red)">1</td><td>Bulk Nutrients, BTS USA, DonkeyRepublic</td><td><div class="owner-bar"><div class="owner-bar-fill" style="width:56%;background:var(--amber)"></div></div></td></tr>
+      <tr><td><strong>Chris</strong></td><td>11</td><td>0</td><td>Bulk Nutrients, Raiz, GPS Insight</td><td><div class="owner-bar"><div class="owner-bar-fill" style="width:32%;background:var(--blue)"></div></div></td></tr>
+      <tr><td><strong>Nikki</strong></td><td>3</td><td>0</td><td>Raiz, FlkitOver, HeroTolk</td><td><div class="owner-bar"><div class="owner-bar-fill" style="width:9%;background:var(--green)"></div></div></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<footer>
+  <a href="https://sabel-intercom.github.io/Intake-forms/RaizTracker_v2.html" target="_blank">Raiz</a><span class="sep">|</span>
+  <a href="https://sabel-intercom.github.io/Intake-forms/FlkitOverTracker_v2.html" target="_blank">FlkitOver</a><span class="sep">|</span>
+  <a href="https://sabel-intercom.github.io/Intake-forms/EducationPerfectTracker_v2.html" target="_blank">Ed Perfect</a><span class="sep">|</span>
+  <a href="https://sabel-intercom.github.io/Intake-forms/HeroTolkTracker_v2.html" target="_blank">HeroTolk</a><span class="sep">|</span>
+  <a href="https://sabel-intercom.github.io/Intake-forms/BTSUSAJuneTracker.html" target="_blank">BTS USA</a>
+  <div class="note">Internal use only &middot; Click any KPI tile for task breakdown</div>
+</footer>
+
+<script>
+// ── TOGGLE ───────────────────────────────────────────────────────────────────
+var currentView = 'active';
+function setView(v) {
+  currentView = v;
+  document.getElementById('btn-active').classList.toggle('active', v==='active');
+  document.getElementById('btn-all').classList.toggle('active', v==='all');
+  document.body.classList.toggle('active-only', v==='active');
+  updateCount();
+}
+function updateCount() {
+  var el = document.getElementById('active-count');
+  if (currentView === 'active') {
+    el.innerHTML = 'Showing <span>active projects only</span> &mdash; completed &amp; historical hidden';
+  } else {
+    el.innerHTML = 'Showing <span>all engagements</span> including completed';
+  }
+}
+updateCount();
+
+// ── MODAL ────────────────────────────────────────────────────────────────────
+var breakdownData = {
+  total: { title:'All Tasks — Project Breakdown', rows:[
+    {project:'Kashxa Ltd',count:39,detail:'0 done · 9 pending · 30 blocked',badge:'red'},
+    {project:'Bulk Nutrients',count:26,detail:'18 done · 7 active · 1 blocked',badge:'blue'},
+    {project:'WiseStamp (Historical)',count:2,detail:'2 in progress',badge:'gray'},
+  ]},
+  complete: { title:'Completed Tasks — Project Breakdown', rows:[
+    {project:'Bulk Nutrients',count:18,detail:'Phase 1 & 2 tasks complete',badge:'green'},
+    {project:'Kashxa Ltd',count:0,detail:'No tasks completed yet',badge:'gray'},
+  ]},
+  'in-progress': { title:'In Progress Tasks — Project Breakdown', rows:[
+    {project:'Bulk Nutrients',count:7,detail:'Active delivery tasks',badge:'blue'},
+    {project:'WiseStamp',count:2,detail:'Historical — marked in progress',badge:'gray'},
+    {project:'Kashxa Ltd',count:0,detail:'All tasks blocked',badge:'red'},
+  ]},
+  pending: { title:'Pending Tasks — Project Breakdown', rows:[
+    {project:'Kashxa Ltd',count:9,detail:'Waiting on unblocking',badge:'amber'},
+    {project:'Bulk Nutrients',count:0,detail:'No pending tasks',badge:'gray'},
+  ]},
+  blocked: { title:'Blocked Tasks — Project Breakdown', note:'30 of 31 blocked tasks are in Kashxa — immediate attention needed.', rows:[
+    {project:'Kashxa Ltd',count:30,detail:'All blocked — awaiting client decisions',badge:'red'},
+    {project:'Bulk Nutrients',count:1,detail:'1 task blocked — check with Greg',badge:'amber'},
+  ]}
+};
+function openModal(s) {
+  var d = breakdownData[s]; if (!d) return;
+  document.getElementById('modal-title').textContent = d.title;
+  var h = '';
+  if (d.note) h += '<div style="background:rgba(230,57,70,0.1);border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#e63946;">'+d.note+'</div>';
+  h += '<table class="modal-table"><thead><tr><th>Project</th><th style="text-align:right">Tasks</th><th>Status</th></tr></thead><tbody>';
+  var lbl = {green:'Complete',blue:'Active',red:'Blocked',amber:'Pending',gray:'N/A'};
+  d.rows.forEach(function(r){
+    h += '<tr><td><strong>'+r.project+'</strong><br><span style="font-size:11px;color:var(--muted)">'+r.detail+'</span></td>'
+       + '<td style="text-align:right;font-size:22px;font-weight:700">'+r.count+'</td>'
+       + '<td><span class="badge badge-'+r.badge+'">'+lbl[r.badge]+'</span></td></tr>';
+  });
+  h += '</tbody></table>';
+  document.getElementById('modal-body').innerHTML = h;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('active'); }
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+
+// ── ENGAGEMENT TABLE ─────────────────────────────────────────────────────────
+var engagements = [
+  {name:'OpenPoint',         status:'live',       label:'Live',         hours:'—',      golive:'Jun 2026',       notes:'Greg: "officially live"',  done:true},
+  {name:'Unyoked',           status:'live',       label:'Live',         hours:'—',      golive:'~Feb 2026',      notes:'Go-live confirmed',         done:true},
+  {name:'Huuuge',            status:'live',       label:'Live',         hours:'99/99h', golive:'Mar 20 2026',    notes:'Complete',                  done:true},
+  {name:'Spartans / Nexus',  status:'live',       label:'Complete',     hours:'40/40h', golive:'~Apr 2026',      notes:'All done',                  done:true},
+  {name:'Cirqul',            status:'live',       label:'Live',         hours:'—',      golive:'~Apr 2026',      notes:'Confirmed live',            done:true},
+  {name:'PaySauce NZ',       status:'live',       label:'Delivered',    hours:'—',      golive:'Mar 13 2026',    notes:'Target met',                done:true},
+  {name:'Re-Leased',         status:'near-live',  label:'Near Complete',hours:'—',      golive:'~Apr 2026',      notes:'Close to completion',       done:false},
+  {name:'DonkeyRepublic',    status:'early',      label:'Early Stage',  hours:'9/72h',  golive:'~Jul 2026',      notes:'SOW Apr 29 · Greg',         done:false},
+  {name:'GPS Insight',       status:'early',      label:'Early Stage',  hours:'6/50h',  golive:'~Jul 2026',      notes:'SOW Apr 17',                done:false},
+  {name:'The Giving Movement',status:'early',     label:'Early Stage',  hours:'1/60h',  golive:'~Aug 2026',      notes:'SOW Apr 29',                done:false},
+  {name:'YFood Labs',        status:'early',      label:'Early Stage',  hours:'0/60h',  golive:'Early Jul 2026', notes:'Richard: "early July"',     done:false},
+  {name:'Aktiia / Hilo',     status:'early',      label:'Early Stage',  hours:'4.5/27h',golive:'~Jul 2026',      notes:'SOW Apr 29',                done:false},
+  {name:'AfterShip',         status:'in-progress',label:'In Progress',  hours:'17/35h', golive:'~Jul 2026',      notes:'SOW May 1',                 done:false},
+  {name:'Mambu',             status:'early',      label:'Early Stage',  hours:'0/12.5h',golive:'~Aug 2026',      notes:'SOW May 18',                done:false},
+  {name:'Tulka',             status:'early',      label:'Early Stage',  hours:'0/37h',  golive:'~Sep 2026',      notes:'SOW pending start',         done:false},
+];
+var scMap = {live:'var(--green)','near-live':'var(--amber)','in-progress':'var(--blue)',early:'var(--purple)',blocked:'var(--red)'};
+var tbody = document.getElementById('eng-table');
+engagements.forEach(function(e){
+  var c = scMap[e.status]||'var(--muted)';
+  var cls = e.done ? 'completed-item' : '';
+  tbody.innerHTML += '<tr class="'+cls+'">'
+    +'<td style="font-weight:600;font-size:13px;">'+e.name+'</td>'
+    +'<td><span style="color:'+c+';font-size:12px;font-weight:600;">'+e.label+'</span></td>'
+    +'<td style="font-size:12px;color:var(--dim)">'+e.hours+'</td>'
+    +'<td style="font-size:12px;color:var(--dim)">'+e.golive+'</td>'
+    +'<td style="font-size:11px;color:var(--muted)">'+e.notes+'</td>'
+    +'</tr>';
+});
+
+// ── GO-LIVE DATE CHART ───────────────────────────────────────────────────────
+// Active clients with go-lives in next 3 months, sorted soonest first
+// today = Jun 16 2026, window = Jun 16 – Sep 16 2026
+var today = new Date('2026-06-16');
+var goLiveClients = [
+  {name:'Raiz Invest',        date:'2026-06-23', days:7},
+  {name:'BTS USA',            date:'2026-07-15', days:29},
+  {name:'AfterShip',          date:'2026-07-15', days:29},
+  {name:'DonkeyRepublic',     date:'2026-07-31', days:45},
+  {name:'GPS Insight',        date:'2026-07-31', days:45},
+  {name:'YFood Labs',         date:'2026-07-31', days:45},
+  {name:'Aktiia / Hilo',      date:'2026-07-31', days:45},
+  {name:'FlkitOver',          date:'2026-07-31', days:45},
+  {name:'The Giving Mvt.',    date:'2026-08-31', days:76},
+  {name:'Mambu',              date:'2026-08-31', days:76},
+  {name:'HeroTolk',           date:'2026-08-31', days:76},
+  {name:'Tulka',              date:'2026-09-01', days:77},
+];
+
+// Color by urgency: <2wk = red, 2-6wk = amber, 6-12wk = blue
+function urgencyColor(days) {
+  if (days <= 14) return {bg:'rgba(230,57,70,0.75)', border:'#e63946'};
+  if (days <= 42) return {bg:'rgba(243,156,18,0.75)', border:'#f39c12'};
+  return {bg:'rgba(74,143,231,0.75)', border:'#4a8fe7'};
+}
+
+// "Days to go-live" horizontal bar (bar goes from 0 to days remaining)
+// Add a "today" label marker at 0
+new Chart(document.getElementById('goLiveChart'), {
+  type: 'bar',
+  data: {
+    labels: goLiveClients.map(function(c){ return c.name; }),
+    datasets: [{
+      label: 'Days to go-live',
+      data: goLiveClients.map(function(c){ return c.days; }),
+      backgroundColor: goLiveClients.map(function(c){ return urgencyColor(c.days).bg; }),
+      borderColor: goLiveClients.map(function(c){ return urgencyColor(c.days).border; }),
+      borderWidth: 1,
+      borderRadius: 4,
+      borderSkipped: false,
+      barThickness: 18,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {display: false},
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            var d = goLiveClients[ctx.dataIndex];
+            var dt = new Date(d.date).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+            return ' Go-live: ' + dt + '  (' + d.days + ' days)';
+          }
+        },
+        backgroundColor:'#1a1a30', borderColor:'#252545', borderWidth:1,
+        titleColor:'#dde1f0', bodyColor:'#a0a4c0', padding:10,
+      }
+    },
+    scales: {
+      x: {
+        grid: {color:'rgba(255,255,255,0.05)'},
+        ticks: {
+          color:'#6a6a8a', font:{size:11},
+          callback: function(v) {
+            // Label key milestone points
+            if (v===0)  return 'Today';
+            if (v===14) return '2 wks';
+            if (v===30) return '1 mo';
+            if (v===60) return '2 mo';
+            if (v===90) return '3 mo';
+            return '';
+          }
+        },
+        min: 0, max: 92,
+      },
+      y: {
+        grid: {display:false},
+        ticks: {color:'#dde1f0', font:{size:12}}
+      }
+    }
+  }
+});
+
+// ── PINCH POINT CHART — forward-looking Jun-Sep 2026 ─────────────────────────
+// Estimated task clusters per week based on upcoming go-live dates
+// Week labels: Jun 22, Jun 29, Jul 6, Jul 13, Jul 20, Jul 27, Aug 3, Aug 10, Aug 17, Aug 24, Aug 31, Sep 7
+var pinchWeekLabels = ['Jun 22','Jun 29','Jul 6','Jul 13','Jul 20','Jul 27','Aug 3','Aug 10','Aug 17','Aug 24','Aug 31','Sep 7'];
+
+// Near-term cohort: Raiz, BTS, AfterShip
+var dataNearTerm  = [6, 4, 5, 5,  3,  2,  0,  0,  0,  0,  0, 0];
+// Jul cohort: DonkeyRepublic, GPS Insight, Aktiia/Hilo, YFood, FlkitOver
+var dataJulCohort = [0, 0, 2, 4,  8, 14,  9,  4,  3,  2,  1, 0];
+// Aug cohort: The Giving Movement, Mambu, HeroTolk, Tulka
+var dataAugCohort = [0, 0, 0, 0,  0,  0,  3,  5,  7, 10, 14, 8];
+
+// Pinch weeks = high combined total: Jul 27 (idx 5), Aug 31 (idx 10)
+var pinchPlugin = {
+  id: 'pinchHighlight',
+  beforeDraw: function(chart) {
+    var ctx = chart.ctx; var ca = chart.chartArea;
+    [5, 10].forEach(function(idx) {
+      var meta = chart.getDatasetMeta(0);
+      if (!meta.data[idx]) return;
+      var bar = meta.data[idx]; var bw = bar.width || 30;
+      ctx.save();
+      ctx.fillStyle = 'rgba(230,57,70,0.08)';
+      ctx.fillRect(bar.x - bw/2 - 4, ca.top, bw + 8, ca.bottom - ca.top);
+      ctx.restore();
+    });
+  }
+};
+
+new Chart(document.getElementById('pinchChart'), {
+  type: 'bar',
+  plugins: [pinchPlugin],
+  data: {
+    labels: pinchWeekLabels,
+    datasets: [
+      {label:'Raiz / BTS / AfterShip',    data:dataNearTerm,  backgroundColor:'rgba(74,143,231,0.7)',  borderColor:'#4a8fe7', borderWidth:1, borderRadius:3},
+      {label:'Jul cohort',                data:dataJulCohort, backgroundColor:'rgba(155,89,182,0.7)',  borderColor:'#9b59b6', borderWidth:1, borderRadius:3},
+      {label:'Aug cohort',                data:dataAugCohort, backgroundColor:'rgba(230,57,70,0.65)',  borderColor:'#e63946', borderWidth:1, borderRadius:3},
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins: {
+      legend:{display:false},
+      tooltip:{backgroundColor:'#1a1a30',borderColor:'#252545',borderWidth:1,titleColor:'#dde1f0',bodyColor:'#a0a4c0',padding:10}
+    },
+    scales: {
+      x:{stacked:true, grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#6a6a8a',font:{size:11}}},
+      y:{stacked:true, grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#6a6a8a',font:{size:11}}}
+    }
+  }
+});
+</script>
+</body>
+</html>
