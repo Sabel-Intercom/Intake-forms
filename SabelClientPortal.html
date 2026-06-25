@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Portal · Sabel</title>
+<style>
+  :root{
+    --bg:#0B0B0C; --card:#0F1113; --card2:#141618; --card3:#191C20; --card4:#1E2228;
+    --w:#FFFFFF; --red:#E10600; --redDim:rgba(225,6,0,0.15); --body:#E2E8F0;
+    --muted:#94A3B8; --border:#2A3547; --border2:#1A2232; --mono:#64748B;
+    --green:#4ADE80; --blue:#60A5FA; --amber:#FBBF24; --purple:#C084FC; --redText:#F87171;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{background:var(--bg);color:var(--body);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+  .mono{font-family:'Courier New',Courier,monospace;}
+  a{color:var(--blue);text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  input,textarea,select{font-family:inherit;}
+  input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  /* faint red centre line, Sabel signature */
+  #app{position:relative;min-height:100vh;display:flex;flex-direction:column;}
+  #app::before{content:"";position:fixed;top:0;bottom:0;left:50%;width:1px;background:linear-gradient(180deg,transparent,rgba(225,6,0,0.12),transparent);pointer-events:none;z-index:0;}
+
+  header.top{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:16px 26px;border-bottom:1px solid var(--border2);background:rgba(11,11,12,0.85);backdrop-filter:blur(6px);}
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand img{height:30px;display:block;object-fit:contain;}
+  .brand .divline{width:1px;height:26px;background:var(--border);}
+  .brand h1{font-size:13px;font-weight:700;letter-spacing:0.14em;color:var(--w);text-transform:uppercase;}
+  .brand .sub{font-size:8px;letter-spacing:0.18em;color:var(--mono);text-transform:uppercase;margin-top:2px;}
+  .save-status{font-size:8px;letter-spacing:0.06em;transition:color .3s;}
+
+  .layout{position:relative;z-index:1;display:flex;flex:1;min-height:0;}
+
+  /* sidebar */
+  aside{width:300px;flex-shrink:0;border-right:1px solid var(--border2);display:flex;flex-direction:column;background:var(--card);}
+  .side-head{padding:16px 18px 12px;border-bottom:1px solid var(--border2);}
+  .side-head .row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .side-head .lbl{font-size:8px;letter-spacing:0.14em;color:var(--mono);text-transform:uppercase;}
+  .btn-add{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:3px;background:var(--redDim);
+    border:1px solid rgba(225,6,0,0.35);color:#FCA5A5;font-size:10px;font-weight:700;letter-spacing:0.04em;transition:.15s;}
+  .btn-add:hover{background:rgba(225,6,0,0.25);color:#fff;}
+  .filter-row{display:flex;gap:5px;flex-wrap:wrap;}
+  .chip{padding:3px 9px;border-radius:20px;font-size:8px;font-weight:700;letter-spacing:0.05em;border:1px solid var(--border);color:var(--muted);background:transparent;transition:.12s;text-transform:uppercase;}
+  .chip.on{background:var(--card4);color:var(--w);border-color:var(--mono);}
+
+  .clients{flex:1;overflow-y:auto;padding:5px;}
+  .client{padding:6px 9px;border-radius:4px;border:1px solid transparent;margin-bottom:1px;cursor:pointer;transition:.12s;}
+  .client:hover{background:var(--card2);}
+  .client.sel{background:var(--card3);border-color:var(--border);}
+  .client .cname{font-size:12px;font-weight:600;color:var(--w);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .client .meta{display:flex;align-items:center;gap:6px;margin-top:3px;}
+  .stage{font-size:7px;font-weight:800;letter-spacing:0.06em;padding:1px 6px;border-radius:2px;text-transform:uppercase;white-space:nowrap;}
+  .client .meta .stage{font-size:6.5px;padding:1px 5px;}
+  .pct{font-size:8px;color:var(--mono);font-weight:700;white-space:nowrap;}
+  .client .mini-bar{flex:1;margin-top:0;height:3px;}
+  .mini-bar{display:flex;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .mini-bar > div{height:100%;transition:width .4s;}
+  .empty-side{padding:30px 18px;text-align:center;color:var(--mono);font-size:11px;line-height:1.6;}
+
+  .hide-toggle{display:flex;align-items:center;gap:8px;margin-top:11px;cursor:pointer;user-select:none;}
+  .hide-toggle .ht-lbl{font-size:9px;letter-spacing:0.06em;color:var(--muted);text-transform:uppercase;font-weight:600;}
+  .switch{position:relative;display:inline-block;width:30px;height:16px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .switch .slider{position:absolute;inset:0;background:var(--card4);border:1px solid var(--border);border-radius:20px;transition:.18s;}
+  .switch .slider:before{content:"";position:absolute;width:11px;height:11px;left:2px;top:1.5px;background:var(--mono);border-radius:50%;transition:.18s;}
+  .switch input:checked + .slider{background:var(--redDim);border-color:rgba(225,6,0,.4);}
+  .switch input:checked + .slider:before{transform:translateX(13px);background:#FCA5A5;}
+
+  /* main */
+  main{flex:1;overflow-y:auto;min-width:0;}
+  .main-inner{max-width:1180px;margin:0 auto;padding:26px 30px 80px;}
+  .placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;color:var(--mono);text-align:center;gap:10px;}
+  .placeholder .big{font-size:15px;color:var(--muted);letter-spacing:0.04em;}
+
+  .client-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px;}
+  .client-head .title h2{font-size:24px;font-weight:700;color:var(--w);letter-spacing:-0.01em;}
+  .client-head .title .csub{font-size:11px;color:var(--muted);margin-top:4px;}
+  .client-head .actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .ctrl{display:flex;align-items:center;gap:6px;padding:7px 11px;border-radius:4px;background:var(--card2);border:1px solid var(--border2);font-size:10px;}
+  .ctrl label{font-size:7px;letter-spacing:0.1em;color:var(--mono);text-transform:uppercase;}
+  select.stage-sel{background:var(--card3);border:1px solid var(--border);color:var(--w);font-size:10px;font-weight:700;padding:5px 8px;border-radius:3px;outline:none;}
+  .icon-btn{padding:7px 10px;border-radius:4px;background:var(--card2);border:1px solid var(--border2);color:var(--muted);font-size:10px;font-weight:600;transition:.12s;}
+  .icon-btn:hover{color:var(--w);border-color:var(--mono);}
+  .icon-btn.danger:hover{color:var(--redText);border-color:var(--redText);}
+
+  .tracker-bar{display:flex;align-items:center;gap:10px;margin-bottom:24px;padding:12px 15px;border-radius:6px;background:var(--card);border:1px solid var(--border2);}
+  .tracker-bar .tlbl{font-size:8px;letter-spacing:0.12em;color:var(--mono);text-transform:uppercase;white-space:nowrap;}
+  .tracker-bar input{flex:1;background:var(--card3);border:1px solid var(--border2);border-radius:3px;color:var(--body);font-size:11px;padding:7px 10px;outline:none;}
+  .tracker-bar input:focus{border-color:var(--mono);}
+  .tracker-bar a.open{padding:7px 13px;border-radius:3px;background:var(--card4);border:1px solid var(--border);color:var(--w);font-size:10px;font-weight:700;white-space:nowrap;}
+  .tracker-bar a.open.disabled{opacity:0.35;pointer-events:none;}
+
+  .meta-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .meta-field{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:4px;background:var(--card2);border:1px solid var(--border2);}
+  .meta-field label{font-size:7px;letter-spacing:0.1em;color:var(--mono);text-transform:uppercase;}
+  .meta-sel{background:var(--card3);border:1px solid var(--border);color:var(--w);font-size:10px;font-weight:700;padding:4px 7px;border-radius:3px;outline:none;}
+  .notes-box{margin-bottom:26px;padding:13px 15px;border-radius:6px;background:var(--card);border:1px solid var(--border2);}
+  .notes-box label{display:block;font-size:8px;letter-spacing:0.12em;color:var(--mono);text-transform:uppercase;margin-bottom:7px;}
+  .notes-edit{font-size:12px;line-height:1.55;color:var(--body);outline:none;min-height:18px;border-radius:3px;}
+  .notes-edit:empty:before{content:attr(data-ph);color:var(--border);}
+  .notes-edit:focus{box-shadow:0 0 0 1px var(--mono);padding:6px 8px;margin:-6px -8px;background:var(--card2);}
+
+  .overall{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:26px;}
+  .stat{flex:1;min-width:150px;padding:13px 16px;border-radius:6px;background:var(--card3);border:1px solid var(--border2);}
+  .stat .srow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+  .stat .sname{font-size:8px;letter-spacing:0.1em;color:var(--mono);text-transform:uppercase;}
+  .stat .sval{font-size:18px;font-weight:800;}
+  .stat .bar{display:flex;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .stat .bar > div{height:100%;transition:width .5s;}
+  .stat .scount{font-size:8px;color:var(--mono);margin-top:7px;}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  @media(max-width:900px){.cols{grid-template-columns:1fr;}}
+  .col{background:var(--card);border:1px solid var(--border2);border-radius:8px;overflow:hidden;}
+  .col-head{padding:14px 18px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;}
+  .col-head .ch-title{display:flex;align-items:center;gap:9px;}
+  .col-head .dot{width:8px;height:8px;border-radius:50%;}
+  .col-head h3{font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--w);text-transform:uppercase;}
+  .col-head .cpct{font-size:11px;font-weight:800;}
+  .steps{padding:8px;}
+  .step{display:flex;align-items:flex-start;gap:12px;padding:10px 11px;border-radius:5px;transition:.1s;position:relative;border-left:2px solid transparent;}
+  .step:hover{background:var(--card2);}
+  .step.s-pending{border-left-color:rgba(251,191,36,.55);}
+  .step.s-done{border-left-color:rgba(74,222,128,.4);}
+  /* traffic light */
+  .traffic{flex-shrink:0;display:flex;align-items:center;gap:5px;margin-top:2px;padding:3px 5px;border-radius:20px;background:var(--card3);border:1px solid var(--border2);}
+  .tl-dot{width:13px;height:13px;border-radius:50%;border:1px solid transparent;opacity:.28;transition:.14s;cursor:pointer;}
+  .tl-dot.red{background:#F87171;}
+  .tl-dot.amber{background:#FBBF24;}
+  .tl-dot.green{background:#4ADE80;}
+  .tl-dot:hover{opacity:.7;transform:scale(1.12);}
+  .tl-dot.on{opacity:1;}
+  .tl-dot.red.on{box-shadow:0 0 7px rgba(248,113,113,.7);}
+  .tl-dot.amber.on{box-shadow:0 0 7px rgba(251,191,36,.7);}
+  .tl-dot.green.on{box-shadow:0 0 7px rgba(74,222,128,.7);}
+  .step-body{flex:1;min-width:0;}
+  .step-label{font-size:12.5px;line-height:1.45;color:var(--body);outline:none;border-radius:3px;word-break:break-word;}
+  .step.s-done .step-label{color:var(--mono);text-decoration:line-through;text-decoration-color:rgba(148,163,184,0.5);}
+  .step-label:focus{background:var(--card4);box-shadow:0 0 0 1px var(--mono);padding:1px 4px;margin:-1px -4px;}
+  .step-note{font-size:10px;color:var(--mono);margin-top:4px;outline:none;border-radius:3px;min-height:14px;}
+  .step-note:empty:before{content:"+ note";color:var(--border);}
+  .step-note:focus{background:var(--card4);box-shadow:0 0 0 1px var(--mono);padding:1px 4px;margin:-1px -4px;color:var(--body);}
+  .step-del{flex-shrink:0;opacity:0;color:var(--mono);font-size:15px;line-height:1;padding:2px 4px;border-radius:3px;transition:.12s;}
+  .step:hover .step-del{opacity:0.6;}
+  .step-del:hover{opacity:1;color:var(--redText);background:var(--card4);}
+  .add-step{width:calc(100% - 16px);margin:4px 8px 10px;padding:9px;border-radius:5px;border:1px dashed var(--border);color:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.04em;transition:.12s;text-align:center;}
+  .add-step:hover{border-color:var(--mono);color:var(--body);background:var(--card2);}
+
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(3px);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .modal{background:var(--card2);border:1px solid var(--border);border-radius:10px;width:100%;max-width:420px;padding:24px;}
+  .modal h3{font-size:14px;font-weight:700;color:var(--w);margin-bottom:4px;letter-spacing:0.02em;}
+  .modal p{font-size:11px;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:8px;letter-spacing:0.1em;color:var(--mono);text-transform:uppercase;margin-bottom:6px;}
+  .field input{width:100%;background:var(--card3);border:1px solid var(--border);border-radius:4px;color:var(--body);font-size:13px;padding:9px 11px;outline:none;}
+  .field input:focus{border-color:var(--mono);}
+  .modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:8px;}
+  .btn{padding:9px 16px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:0.03em;transition:.12s;}
+  .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+  .btn.ghost:hover{color:var(--w);border-color:var(--mono);}
+  .btn.primary{background:var(--red);color:#fff;}
+  .btn.primary:hover{background:#c10500;}
+
+  .tmpl-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:4px;background:var(--card3);border:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:0.04em;transition:.15s;}
+  .tmpl-btn:hover{color:var(--w);border-color:var(--mono);background:var(--card4);}
+
+  /* header tabs */
+  .tabs{display:flex;gap:4px;background:var(--card3);border:1px solid var(--border2);border-radius:6px;padding:3px;}
+  .tab{padding:6px 16px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:0.03em;color:var(--muted);transition:.14s;}
+  .tab:hover{color:var(--w);}
+  .tab.on{background:var(--red);color:#fff;}
+
+  /* go-live card */
+  .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:11px;}
+  .golive-card{min-width:240px;background:linear-gradient(135deg,rgba(225,6,0,0.16),rgba(225,6,0,0.05));border:1px solid rgba(225,6,0,0.45);border-radius:9px;padding:13px 16px;box-shadow:0 0 22px rgba(225,6,0,0.10);}
+  .gl-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:5px;}
+  .gl-label{font-size:8px;font-weight:800;letter-spacing:0.14em;color:#FCA5A5;text-transform:uppercase;}
+  .gl-days{font-size:10px;font-weight:800;letter-spacing:0.04em;white-space:nowrap;}
+  .gl-input{width:100%;background:rgba(0,0,0,0.25);border:1px solid rgba(225,6,0,0.3);border-radius:5px;color:var(--w);font-size:18px;font-weight:700;padding:6px 9px;outline:none;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+  .gl-input:focus{border-color:#F87171;}
+  .gl-input::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer;}
+  .gl-sub{font-size:9px;color:var(--muted);margin-top:5px;letter-spacing:0.02em;}
+
+  /* dashboard */
+  .dashboard{position:relative;z-index:1;flex:1;overflow-y:auto;}
+  .dash-inner{max-width:1100px;margin:0 auto;padding:28px 30px 80px;}
+  .dash-head{margin-bottom:20px;}
+  .dash-head h2{font-size:22px;font-weight:700;color:var(--w);letter-spacing:-0.01em;}
+  .dash-sub{font-size:11px;color:var(--muted);}
+  .dash-table-wrap{border:1px solid var(--border2);border-radius:9px;overflow:hidden;background:var(--card);}
+  .dash-table{width:100%;border-collapse:collapse;}
+  .dash-table th{text-align:left;font-size:8px;letter-spacing:0.1em;color:var(--mono);text-transform:uppercase;font-weight:700;padding:12px 16px;border-bottom:1px solid var(--border2);background:var(--card2);}
+  .dash-table td{padding:11px 16px;border-bottom:1px solid var(--border2);font-size:12px;vertical-align:middle;}
+  .dash-table tr:last-child td{border-bottom:none;}
+  .dash-table tbody tr:hover{background:var(--card2);}
+  .dash-name{font-size:13px;font-weight:600;color:var(--w);text-align:left;}
+  .dash-name:hover{color:#FCA5A5;text-decoration:underline;}
+  .dash-owner,.dash-date{color:var(--body);}
+  .dash-days{font-weight:700;white-space:nowrap;}
+  .muted{color:var(--mono);}
+  .dash-track{font-size:10px;font-weight:700;color:var(--w);background:var(--card4);border:1px solid var(--border);padding:6px 12px;border-radius:4px;white-space:nowrap;transition:.12s;}
+  .dash-track:hover{border-color:var(--mono);background:var(--card3);}
+  .dash-track.off{color:var(--mono);background:transparent;border-color:var(--border2);cursor:default;}
+  @media(max-width:640px){.golive-card{min-width:0;}.head-right{align-items:stretch;}}
+
+  /* template editor */
+  .te-modal{max-width:860px;width:100%;max-height:88vh;display:flex;flex-direction:column;}
+  .te-modal .te-scroll{overflow-y:auto;margin:-4px -4px 0;padding:4px;}
+  .te-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:760px){.te-cols{grid-template-columns:1fr;}}
+  .te-col{background:var(--card);border:1px solid var(--border2);border-radius:7px;overflow:hidden;}
+  .te-col-head{padding:11px 15px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:9px;}
+  .te-col-head .dot{width:8px;height:8px;border-radius:50%;}
+  .te-col-head h4{font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--w);text-transform:uppercase;}
+  .te-col-head .cnt{font-size:8px;color:var(--mono);margin-left:auto;}
+  .te-list{padding:7px;}
+  .te-step{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:5px;transition:.1s;}
+  .te-step:hover{background:var(--card2);}
+  .te-num{flex-shrink:0;width:18px;font-size:9px;color:var(--mono);text-align:right;}
+  .te-input{flex:1;background:var(--card3);border:1px solid var(--border2);border-radius:3px;color:var(--body);font-size:12px;padding:6px 9px;outline:none;}
+  .te-input:focus{border-color:var(--mono);}
+  .te-mv{flex-shrink:0;color:var(--mono);font-size:11px;padding:3px 5px;border-radius:3px;}
+  .te-mv:hover{color:var(--w);background:var(--card4);}
+  .te-del{flex-shrink:0;color:var(--mono);font-size:15px;line-height:1;padding:2px 6px;border-radius:3px;}
+  .te-del:hover{color:var(--redText);background:var(--card4);}
+  .te-add{width:calc(100% - 14px);margin:3px 7px 8px;padding:8px;border-radius:5px;border:1px dashed var(--border);color:var(--mono);font-size:10px;font-weight:600;transition:.12s;}
+  .te-add:hover{border-color:var(--mono);color:var(--body);background:var(--card2);}
+  .te-note{font-size:10px;color:var(--muted);line-height:1.5;margin:14px 2px 4px;padding:10px 13px;background:var(--card3);border:1px solid var(--border2);border-radius:5px;}
+  .te-note b{color:var(--body);}
+
+  footer.foot{position:relative;z-index:1;padding:14px 26px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center;color:var(--mono);font-size:8px;letter-spacing:0.08em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand">
+      <img src="data:image/png;base64,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01T0RHJH0ERFkQhERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERB//2Q==" alt="Sabel">
+      <div class="divline"></div>
+      <div>
+        <h1>Client Portal</h1>
+        <div class="sub">Onboarding &amp; Offboarding</div>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab on" id="tabPortal" data-view="portal">Clients</button>
+      <button class="tab" id="tabDash" data-view="dashboard">Dashboard</button>
+    </nav>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="save-status mono" id="saveStatus"></span>
+      <button class="tmpl-btn" id="exportBtn" title="Download a backup file of all your data">↓ Backup</button>
+      <button class="tmpl-btn" id="importBtn" title="Restore data from a backup file">↑ Restore</button>
+      <button class="tmpl-btn" id="tmplBtn" title="Edit the standard checklist new clients start from">⚙ Standard checklist</button>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+    </div>
+  </header>
+
+  <div class="layout" id="layoutView">
+    <aside>
+      <div class="side-head">
+        <div class="row">
+          <span class="lbl" id="clientCount">Clients</span>
+          <button class="btn-add" id="addClientBtn">+ Add client</button>
+        </div>
+        <div class="filter-row" id="filterRow"></div>
+      </div>
+      <div class="clients" id="clientList"></div>
+    </aside>
+
+    <main>
+      <div class="main-inner" id="mainInner"></div>
+    </main>
+  </div>
+
+  <section class="dashboard" id="dashboardView" style="display:none;"></section>
+
+  <footer class="foot">
+    <span>Sabel Customer Success</span>
+    <span id="footRight">Live · syncs across your team</span>
+  </footer>
+</div>
+
+<script>
+/* ============================ CONFIG ============================ */
+const API = "https://sabel-webhook.vercel.app/api/tracker";
+const API_KEY = "client-portal-v1";           // must be in ALLOWED_KEYS on the backend
+const API_URL = `${API}?key=${encodeURIComponent(API_KEY)}`;
+const LS_KEY = "sabel-client-portal-v2";
+const PREF_KEY = "sabel-portal-prefs-v2";
+
+const STAGES = {
+  "Discovery":  {c:"#C084FC", bg:"rgba(192,132,252,.14)",bd:"rgba(192,132,252,.32)"},
+  "Onboarding": {c:"#60A5FA", bg:"rgba(96,165,250,.14)", bd:"rgba(96,165,250,.32)"},
+  "Active":     {c:"#4ADE80", bg:"rgba(74,222,128,.14)", bd:"rgba(74,222,128,.32)"},
+  "Offboarding":{c:"#FBBF24", bg:"rgba(251,191,36,.14)", bd:"rgba(251,191,36,.32)"},
+  "Complete":   {c:"#94A3B8", bg:"rgba(148,163,184,.12)",bd:"rgba(148,163,184,.28)"},
+};
+const STAGE_ORDER = ["Discovery","Onboarding","Active","Offboarding","Complete"];
+
+/* Default checklists — edit freely per client after creation.
+   Onboarding mirrors the 11 setup steps tracked in the Project Master Record. */
+const ONBOARDING_TEMPLATE = [
+  "Proposal created and issued",
+  "Kick off completed and form saved in client folder",
+  "Project Tracker created",
+  "Google Drive setup & client access",
+  "Create Motion workspace",
+  "Set up phases in Motion & assign tasks from kick off call",
+  "Create Slack channel and invite participants",
+  "Request new client to add Sabel to Intercom Workspace",
+  "Confirm Sabel has been added to Intercom Workspace",
+  "Pin tracker and folder for uploads to Slack channel",
+];
+const OFFBOARDING_TEMPLATE = [
+  "Confirm project complete",
+  "Offboarding document generated and issued to client",
+  "Generate handover document with screenshots (client-specific)",
+  "Issue feedback/testimonial prompt to client",
+];
+
+/* Go-live dates found in client folder docs (best effort). Applied once on load
+   to clients that don't yet have a date. Edit any date in the client view. */
+const GOLIVE = {
+  "Bulk Nutrients": "2026-04-23",  // tracker: confirmed go-live 23 Apr 2026
+  "Yfood Labs": "2026-07-01",      // SOW: Netherlands go-live beginning of July 2026 (approx)
+};
+
+/* ============================ STATE ============================ */
+let state = { clients: [], selectedId: null };
+let saveTimer = null;
+let remoteAvailable = true;
+let activeStages = null;  // Set of stages shown; null until prefs load (treated as all)
+let view = "portal";      // "portal" | "dashboard"
+
+function shownStages(){ if(!activeStages) activeStages = new Set(STAGE_ORDER); return activeStages; }
+function loadPrefs(){
+  try{
+    const p=JSON.parse(localStorage.getItem(PREF_KEY)||"{}");
+    activeStages = Array.isArray(p.activeStages) ? new Set(p.activeStages.filter(s=>STAGE_ORDER.includes(s))) : new Set(STAGE_ORDER);
+  }catch(e){ activeStages = new Set(STAGE_ORDER); }
+}
+function savePrefs(){ try{ localStorage.setItem(PREF_KEY, JSON.stringify({activeStages:[...shownStages()]})); }catch(e){} }
+
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : "id"+Date.now()+Math.random().toString(16).slice(2));
+const mkSteps = arr => arr.map(label => ({ id: uid(), label, status: "todo", note: "" }));
+
+/* The editable standard. New clients are built from state.templates;
+   falls back to the constants above on first run / older saves. */
+function defaultTemplates(){
+  return {
+    onboarding:  ONBOARDING_TEMPLATE.map((l,i)=>({ id:"to"+i, label:l })),
+    offboarding: OFFBOARDING_TEMPLATE.map((l,i)=>({ id:"tf"+i, label:l })),
+  };
+}
+function tmplSteps(key){
+  const t = (state.templates && Array.isArray(state.templates[key])) ? state.templates[key] : null;
+  const labels = t ? t.map(s=>s.label) : (key==="onboarding"?ONBOARDING_TEMPLATE:OFFBOARDING_TEMPLATE);
+  return mkSteps(labels);
+}
+
+function newClient(name, subtitle){
+  return {
+    id: uid(), name: name.trim(), subtitle: (subtitle||"").trim(),
+    stage: "Onboarding", trackerUrl: "", createdAt: new Date().toISOString(),
+    owner: "", type: "", intake: "", notes: "",
+    onboarding: tmplSteps("onboarding"),
+    offboarding: tmplSteps("offboarding"),
+  };
+}
+
+/* Seed data imported from the Project Master Record. Used only on first run
+   when there is no saved data (remote or local). After that, live state wins. */
+const SEED = [{"name": "Aftership", "stage": "Offboarding", "owner": "", "type": "Migration", "intake": "Intercom", "notes": "True offboarding", "onboarding": [{"id": "ob0-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob0-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob0-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob0-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob0-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob0-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob0-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob0-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob0-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob0-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of0-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of0-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of0-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of0-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Ainslie (Encum)", "stage": "Active", "owner": "", "type": "Project", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob1-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob1-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob1-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob1-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob1-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob1-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob1-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob1-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob1-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob1-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of1-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of1-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of1-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of1-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Betfair", "stage": "Complete", "owner": "Richard", "type": "Both", "intake": "Intercom", "notes": "Retainer opportunity, no offboarding pack", "onboarding": [{"id": "ob2-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob2-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob2-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob2-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob2-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob2-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob2-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob2-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "done", "note": ""}, {"id": "ob2-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "done", "note": ""}, {"id": "ob2-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of2-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of2-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of2-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of2-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "BetNinja (Magico)", "stage": "Active", "owner": "Richard", "type": "Migration", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob3-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob3-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob3-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob3-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob3-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob3-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob3-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob3-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob3-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob3-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of3-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of3-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of3-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of3-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Blinq", "stage": "Offboarding", "owner": "Chris", "type": "Project", "intake": "Intercom", "notes": "Hours spent advising on how to use their Intercom set up. Create pack to outline this only.", "onboarding": [{"id": "ob4-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob4-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob4-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob4-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob4-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob4-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob4-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob4-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "done", "note": ""}, {"id": "ob4-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "done", "note": ""}, {"id": "ob4-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "done", "note": ""}], "offboarding": [{"id": "of4-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of4-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of4-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of4-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Bliv", "stage": "Complete", "owner": "Richard", "type": "Project", "intake": "Sabel", "notes": "Retainer opportunity, no offboarding pack", "onboarding": [{"id": "ob5-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob5-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob5-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob5-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob5-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob5-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob5-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob5-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob5-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob5-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of5-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of5-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of5-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of5-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "BTS", "stage": "Active", "owner": "Greg", "type": "Project", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob6-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob6-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob6-2", "label": "Project Tracker created", "status": "done", "note": ""}, {"id": "ob6-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob6-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob6-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob6-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob6-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "done", "note": ""}, {"id": "ob6-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "done", "note": ""}, {"id": "ob6-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "done", "note": ""}], "offboarding": [{"id": "of6-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of6-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of6-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of6-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Bulk Nutrients", "stage": "Active", "owner": "Chris", "type": "Project", "intake": "Sabel", "notes": "", "onboarding": [{"id": "ob7-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob7-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob7-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob7-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob7-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob7-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob7-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob7-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob7-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob7-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of7-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of7-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of7-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of7-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Cannabis Clinic Renewal", "stage": "Discovery", "owner": "", "type": "Project", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob8-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob8-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob8-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob8-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob8-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob8-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob8-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob8-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob8-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob8-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of8-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of8-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of8-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of8-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Caleb & Brown", "stage": "Discovery", "owner": "", "type": "Project", "intake": "Sabel", "notes": "Follow up sales opp", "onboarding": [{"id": "ob9-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob9-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob9-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob9-3", "label": "Google Drive setup & client access", "status": "todo", "note": ""}, {"id": "ob9-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob9-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob9-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob9-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob9-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob9-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of9-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of9-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of9-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of9-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Cirqul", "stage": "Complete", "owner": "Richard", "type": "Project", "intake": "Sabel", "notes": "Richard already contacted re retainer", "onboarding": [{"id": "ob10-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob10-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob10-2", "label": "Project Tracker created", "status": "done", "note": ""}, {"id": "ob10-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob10-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob10-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob10-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob10-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob10-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob10-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of10-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of10-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of10-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of10-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Cronos (Particle Research Ltd)", "stage": "Active", "owner": "Richard", "type": "Project", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob11-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob11-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob11-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob11-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob11-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob11-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob11-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob11-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob11-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob11-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of11-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of11-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of11-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of11-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Debt Reg", "stage": "Complete", "owner": "", "type": "Project", "intake": "Sabel", "notes": "No client folder, no post sales opp", "onboarding": [{"id": "ob12-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob12-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob12-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob12-3", "label": "Google Drive setup & client access", "status": "todo", "note": ""}, {"id": "ob12-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob12-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob12-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob12-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob12-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob12-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of12-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of12-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of12-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of12-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Digital Surge", "stage": "Complete", "owner": "", "type": "Project", "intake": "Sabel", "notes": "Sales opp", "onboarding": [{"id": "ob13-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob13-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob13-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob13-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob13-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob13-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob13-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob13-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob13-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob13-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of13-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of13-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of13-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of13-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Donkey Republic", "stage": "Active", "owner": "Greg", "type": "Project", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob14-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob14-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob14-2", "label": "Project Tracker created", "status": "done", "note": ""}, {"id": "ob14-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob14-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob14-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob14-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob14-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "done", "note": ""}, {"id": "ob14-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "done", "note": ""}, {"id": "ob14-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of14-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of14-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of14-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of14-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "DudeMeds", "stage": "Complete", "owner": "", "type": "Project", "intake": "Sabel", "notes": "Sales opp", "onboarding": [{"id": "ob15-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob15-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob15-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob15-3", "label": "Google Drive setup & client access", "status": "todo", "note": ""}, {"id": "ob15-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob15-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob15-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob15-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob15-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob15-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of15-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of15-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of15-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of15-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "EB Pilot", "stage": "Complete", "owner": "", "type": "Project", "intake": "Intercom", "notes": "No client folder, no post sales opp", "onboarding": [{"id": "ob16-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob16-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob16-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob16-3", "label": "Google Drive setup & client access", "status": "todo", "note": ""}, {"id": "ob16-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob16-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob16-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob16-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob16-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob16-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of16-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of16-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of16-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of16-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Education Perfect", "stage": "Complete", "owner": "", "type": "Project", "intake": "Sabel", "notes": "True offboarding, don't ask for feedback - already provided", "onboarding": [{"id": "ob17-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob17-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob17-2", "label": "Project Tracker created", "status": "done", "note": ""}, {"id": "ob17-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob17-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob17-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob17-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob17-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob17-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob17-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of17-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of17-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of17-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of17-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Eugene Labs", "stage": "Discovery", "owner": "", "type": "Project", "intake": "Sabel", "notes": "", "onboarding": [{"id": "ob18-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob18-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob18-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob18-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob18-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob18-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob18-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob18-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob18-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob18-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of18-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of18-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of18-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of18-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "FLKItOver", "stage": "Active", "owner": "Chris", "type": "Project", "intake": "Sabel", "notes": "", "onboarding": [{"id": "ob19-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob19-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob19-2", "label": "Project Tracker created", "status": "done", "note": ""}, {"id": "ob19-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob19-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob19-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob19-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob19-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob19-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob19-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of19-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of19-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of19-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of19-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Gigi Supplements", "stage": "Discovery", "owner": "Richard", "type": "Project", "intake": "Sabel", "notes": "", "onboarding": [{"id": "ob20-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob20-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob20-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob20-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob20-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob20-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob20-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob20-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob20-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob20-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of20-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of20-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of20-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of20-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "GPS Insight", "stage": "Active", "owner": "Richard", "type": "Project", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob21-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob21-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob21-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob21-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob21-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob21-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob21-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob21-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob21-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob21-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of21-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of21-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of21-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of21-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Hatstore", "stage": "Complete", "owner": "", "type": "Project", "intake": "Intercom", "notes": "True offboarding", "onboarding": [{"id": "ob22-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob22-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob22-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob22-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob22-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob22-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob22-6", "label": "Create Slack channel and invite participants", "status": "pending", "note": ""}, {"id": "ob22-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob22-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob22-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of22-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of22-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of22-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of22-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Herotolk (Tulka)", "stage": "Active", "owner": "", "type": "Project", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob23-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob23-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob23-2", "label": "Project Tracker created", "status": "pending", "note": ""}, {"id": "ob23-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob23-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob23-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob23-6", "label": "Create Slack channel and invite participants", "status": "pending", "note": ""}, {"id": "ob23-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob23-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob23-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of23-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of23-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of23-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of23-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Hilo (Aktiia)", "stage": "Complete", "owner": "", "type": "Migration", "intake": "Intercom", "notes": "Client under different partner - no sales opp", "onboarding": [{"id": "ob24-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob24-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob24-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob24-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob24-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob24-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob24-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob24-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob24-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob24-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of24-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of24-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of24-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of24-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Hoselink", "stage": "Complete", "owner": "", "type": "Project", "intake": "Sabel", "notes": "Sales opp", "onboarding": [{"id": "ob25-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob25-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob25-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob25-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob25-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob25-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob25-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob25-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob25-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob25-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of25-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of25-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of25-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of25-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Huuuge Global", "stage": "Complete", "owner": "Chris", "type": "Project", "intake": "Sabel", "notes": "True offboarding", "onboarding": [{"id": "ob26-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob26-1", "label": "Kick off completed and form saved in client folder", "status": "pending", "note": ""}, {"id": "ob26-2", "label": "Project Tracker created", "status": "pending", "note": ""}, {"id": "ob26-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob26-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob26-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob26-6", "label": "Create Slack channel and invite participants", "status": "pending", "note": ""}, {"id": "ob26-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob26-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob26-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of26-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of26-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of26-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of26-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Mambu", "stage": "Active", "owner": "", "type": "Project", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob27-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob27-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob27-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob27-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob27-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob27-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob27-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob27-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob27-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob27-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of27-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of27-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of27-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of27-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "McDonalds Philippines", "stage": "Complete", "owner": "", "type": "Project", "intake": "Sabel", "notes": "Sales opp", "onboarding": [{"id": "ob28-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob28-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob28-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob28-3", "label": "Google Drive setup & client access", "status": "todo", "note": ""}, {"id": "ob28-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob28-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob28-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob28-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob28-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob28-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of28-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of28-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of28-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of28-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "OpenPoint", "stage": "Complete", "owner": "", "type": "Project", "intake": "Sabel", "notes": "Sales opp", "onboarding": [{"id": "ob29-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob29-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob29-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob29-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob29-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob29-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob29-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob29-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob29-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob29-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of29-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of29-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of29-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of29-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "PaySauce NZ", "stage": "Active", "owner": "", "type": "Project", "intake": "Sabel", "notes": "", "onboarding": [{"id": "ob30-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob30-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob30-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob30-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob30-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob30-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob30-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob30-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob30-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob30-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of30-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of30-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of30-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of30-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Positive Salary Packaging", "stage": "Discovery", "owner": "", "type": "Project", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob31-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob31-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob31-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob31-3", "label": "Google Drive setup & client access", "status": "todo", "note": ""}, {"id": "ob31-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob31-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob31-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob31-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob31-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob31-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of31-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of31-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of31-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of31-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Raiz", "stage": "Active", "owner": "Greg", "type": "Project", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob32-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob32-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob32-2", "label": "Project Tracker created", "status": "done", "note": ""}, {"id": "ob32-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob32-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob32-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob32-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob32-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "done", "note": ""}, {"id": "ob32-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "done", "note": ""}, {"id": "ob32-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "done", "note": ""}], "offboarding": [{"id": "of32-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of32-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of32-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of32-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Re-Leased", "stage": "Complete", "owner": "", "type": "Project", "intake": "Intercom", "notes": "Sales opp", "onboarding": [{"id": "ob33-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob33-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob33-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob33-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob33-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob33-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob33-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob33-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob33-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob33-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of33-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of33-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of33-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of33-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Setel", "stage": "Complete", "owner": "", "type": "Project", "intake": "Intercom", "notes": "No follow up", "onboarding": [{"id": "ob34-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob34-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob34-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob34-3", "label": "Google Drive setup & client access", "status": "todo", "note": ""}, {"id": "ob34-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob34-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob34-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob34-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob34-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob34-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of34-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of34-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of34-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of34-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Spartans", "stage": "Complete", "owner": "", "type": "Project", "intake": "Intercom", "notes": "No follow up", "onboarding": [{"id": "ob35-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob35-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob35-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob35-3", "label": "Google Drive setup & client access", "status": "todo", "note": ""}, {"id": "ob35-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob35-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob35-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob35-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob35-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob35-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of35-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of35-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of35-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of35-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Supercast", "stage": "Complete", "owner": "", "type": "Project", "intake": "Sabel", "notes": "Sales opp", "onboarding": [{"id": "ob36-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob36-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob36-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob36-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob36-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob36-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob36-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob36-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob36-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob36-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of36-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of36-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of36-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of36-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "The Giving Movement", "stage": "Onboarding", "owner": "Chris", "type": "Project", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob37-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob37-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob37-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob37-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob37-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob37-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob37-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob37-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob37-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob37-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of37-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of37-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of37-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of37-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Trust Wallet", "stage": "Onboarding", "owner": "Richard", "type": "Migration", "intake": "Intercom", "notes": "Intercom slack channel - Richard added, folder structure to be added", "onboarding": [{"id": "ob38-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob38-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob38-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob38-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob38-4", "label": "Create Motion workspace", "status": "done", "note": ""}, {"id": "ob38-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob38-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob38-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob38-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob38-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of38-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of38-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of38-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of38-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Tulka Oy", "stage": "Discovery", "owner": "", "type": "Migration", "intake": "Sabel", "notes": "", "onboarding": [{"id": "ob39-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob39-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob39-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob39-3", "label": "Google Drive setup & client access", "status": "todo", "note": ""}, {"id": "ob39-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob39-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob39-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob39-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob39-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob39-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of39-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of39-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of39-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of39-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "United Rentals", "stage": "Complete", "owner": "", "type": "Project", "intake": "Intercom", "notes": "Sales opp", "onboarding": [{"id": "ob40-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob40-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob40-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob40-3", "label": "Google Drive setup & client access", "status": "todo", "note": ""}, {"id": "ob40-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob40-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob40-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob40-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob40-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob40-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of40-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of40-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of40-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of40-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Unyoked", "stage": "Complete", "owner": "", "type": "Project", "intake": "Sabel", "notes": "Phase 1 complete, sales opp for phase 2 + 3", "onboarding": [{"id": "ob41-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob41-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob41-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob41-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob41-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob41-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob41-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob41-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob41-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob41-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of41-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of41-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of41-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of41-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "VistaBet", "stage": "Complete", "owner": "", "type": "Project", "intake": "Intercom", "notes": "Sales opp", "onboarding": [{"id": "ob42-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob42-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob42-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob42-3", "label": "Google Drive setup & client access", "status": "todo", "note": ""}, {"id": "ob42-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob42-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob42-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob42-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob42-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob42-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of42-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of42-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of42-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of42-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Workinitiatives", "stage": "Active", "owner": "", "type": "Project", "intake": "Sabel", "notes": "Nearly finished", "onboarding": [{"id": "ob43-0", "label": "Proposal created and issued", "status": "done", "note": ""}, {"id": "ob43-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob43-2", "label": "Project Tracker created", "status": "done", "note": ""}, {"id": "ob43-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob43-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob43-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob43-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob43-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob43-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob43-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "pending", "note": ""}], "offboarding": [{"id": "of43-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of43-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of43-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of43-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "WPT Global", "stage": "Active", "owner": "", "type": "Migration", "intake": "Intercom", "notes": "Nearly finished", "onboarding": [{"id": "ob44-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob44-1", "label": "Kick off completed and form saved in client folder", "status": "todo", "note": ""}, {"id": "ob44-2", "label": "Project Tracker created", "status": "todo", "note": ""}, {"id": "ob44-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob44-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob44-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob44-6", "label": "Create Slack channel and invite participants", "status": "todo", "note": ""}, {"id": "ob44-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob44-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "todo", "note": ""}, {"id": "ob44-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "todo", "note": ""}], "offboarding": [{"id": "of44-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of44-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of44-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of44-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}, {"name": "Yfood Labs", "stage": "Onboarding", "owner": "Chris", "type": "Project", "intake": "Intercom", "notes": "", "onboarding": [{"id": "ob45-0", "label": "Proposal created and issued", "status": "todo", "note": ""}, {"id": "ob45-1", "label": "Kick off completed and form saved in client folder", "status": "done", "note": ""}, {"id": "ob45-2", "label": "Project Tracker created", "status": "pending", "note": ""}, {"id": "ob45-3", "label": "Google Drive setup & client access", "status": "done", "note": ""}, {"id": "ob45-4", "label": "Create Motion workspace", "status": "todo", "note": ""}, {"id": "ob45-5", "label": "Set up phases in Motion & assign tasks from kick off call", "status": "todo", "note": ""}, {"id": "ob45-6", "label": "Create Slack channel and invite participants", "status": "done", "note": ""}, {"id": "ob45-7", "label": "Request new client to add Sabel to Intercom Workspace", "status": "pending", "note": ""}, {"id": "ob45-8", "label": "Confirm Sabel has been added to Intercom Workspace", "status": "pending", "note": ""}, {"id": "ob45-9", "label": "Pin tracker and folder for uploads to Slack channel", "status": "pending", "note": ""}], "offboarding": [{"id": "of45-0", "label": "Confirm project complete", "status": "todo", "note": ""}, {"id": "of45-1", "label": "Offboarding document generated and issued to client", "status": "todo", "note": ""}, {"id": "of45-2", "label": "Generate handover document with screenshots (client-specific)", "status": "todo", "note": ""}, {"id": "of45-3", "label": "Issue feedback/testimonial prompt to client", "status": "todo", "note": ""}]}];
+
+/* ============================ PERSISTENCE ============================ */
+function setSave(status){
+  const el = document.getElementById("saveStatus");
+  const map = {
+    saving:{t:"● Saving…",c:"var(--muted)"},
+    saved:{t:"✓ Saved",c:"var(--green)"},
+    error:{t:"✕ Offline — saved to this browser",c:"var(--amber)"},
+    loading:{t:"● Loading…",c:"var(--muted)"},
+    idle:{t:"",c:"var(--mono)"},
+  };
+  const cfg = map[status]||map.idle;
+  el.textContent = cfg.t; el.style.color = cfg.c;
+}
+
+function saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function readLocal(){ try{ return localStorage.getItem(LS_KEY); }catch(e){ return null; } }
+
+function scheduleSave(){
+  saveLocal();
+  setSave("saving");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(pushRemote, 1000);
+}
+
+async function pushRemote(){
+  try{
+    const r = await fetch(API_URL, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ data: state }),
+    });
+    if(!r.ok) throw new Error("bad status");
+    remoteAvailable = true;
+    setSave("saved");
+    setTimeout(()=>setSave("idle"), 1800);
+  }catch(e){
+    remoteAvailable = false;
+    setSave("error");
+    document.getElementById("footRight").textContent = "Offline · saved to this browser only";
+  }
+}
+
+async function loadRemote(){
+  setSave("loading");
+  try{
+    const r = await fetch(API_URL);
+    if(!r.ok) throw new Error("bad status");
+    const j = await r.json();
+    if(j && j.data && Array.isArray(j.data.clients)){
+      state = j.data;
+      remoteAvailable = true;
+      setSave("idle");
+      return true;
+    }
+    setSave("idle");
+    return false;
+  }catch(e){
+    remoteAvailable = false;
+    document.getElementById("footRight").textContent = "Offline · saved to this browser only";
+    const local = readLocal();
+    if(local){ try{ state = JSON.parse(local); }catch(_){} }
+    setSave("idle");
+    return false;
+  }
+}
+
+/* ============================ HELPERS ============================ */
+function cnt(steps,st){ return steps.filter(s=>s.status===st).length; }
+function pct(steps){ if(!steps.length) return 0; return Math.round(cnt(steps,"done")/steps.length*100); }
+function pendPct(steps){ if(!steps.length) return 0; return Math.round(cnt(steps,"pending")/steps.length*100); }
+function allSteps(c){ return [...c.onboarding, ...c.offboarding]; }
+function clientPct(c){ return pct(allSteps(c)); }
+function selected(){ return state.clients.find(c=>c.id===state.selectedId) || null; }
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function daysTo(dateStr){ if(!dateStr) return null; const d=new Date(dateStr+"T00:00:00"); const t=new Date(); t.setHours(0,0,0,0); return Math.round((d-t)/864e5); }
+function goLiveLabel(n){ if(n===null) return ""; if(n===0) return "Today"; if(n>0) return `in ${n} day${n===1?"":"s"}`; return `${-n} day${n===-1?"":"s"} ago`; }
+function goLiveColour(n){ if(n===null) return "var(--mono)"; if(n<0) return "var(--redText)"; if(n<=7) return "var(--amber)"; return "var(--green)"; }
+function fmtFull(dateStr){ if(!dateStr) return ""; return new Date(dateStr+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); }
+function byGoLive(a,b){ const da=a.goLiveDate||"", db=b.goLiveDate||""; if(da&&db) return da.localeCompare(db); if(da) return -1; if(db) return 1; return a.name.localeCompare(b.name); }
+
+/* ============================ RENDER: SIDEBAR ============================ */
+function renderFilters(){
+  const row = document.getElementById("filterRow");
+  const active = shownStages();
+  const allOn = STAGE_ORDER.every(s=>active.has(s));
+  let html = `<button class="chip ${allOn?'on':''}" data-filter="__all">All ${state.clients.length}</button>`;
+  html += STAGE_ORDER.map(s=>{
+    const n = state.clients.filter(c=>c.stage===s).length;
+    return `<button class="chip ${active.has(s)?'on':''}" data-filter="${s}">${s} ${n}</button>`;
+  }).join("");
+  row.innerHTML = html;
+  row.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+    const f = b.dataset.filter;
+    if(f==="__all"){ activeStages = new Set(STAGE_ORDER); }
+    else { const a=shownStages(); a.has(f) ? a.delete(f) : a.add(f); activeStages=a; }
+    savePrefs(); render();
+  });
+}
+
+function renderClients(){
+  const list = document.getElementById("clientList");
+  document.getElementById("clientCount").textContent = `Clients · ${state.clients.length}`;
+  const active = shownStages();
+  let cs = state.clients
+    .filter(c=>active.has(c.stage))
+    .sort((a,b)=> a.name.localeCompare(b.name, undefined, {sensitivity:"base"}));
+
+  if(!cs.length){
+    list.innerHTML = `<div class="empty-side">${state.clients.length? "No clients match the selected statuses." : "No clients yet.<br>Add your first client to begin."}</div>`;
+    return;
+  }
+  list.innerHTML = cs.map(c=>{
+    const st = STAGES[c.stage]; const all=allSteps(c); const p = pct(all); const pp = pendPct(all);
+    return `<div class="client ${c.id===state.selectedId?'sel':''}" data-id="${c.id}">
+      <div class="cname"><span>${esc(c.name)}</span><span class="pct">${p}%</span></div>
+      <div class="meta">
+        <span class="stage" style="color:${st.c};background:${st.bg};border:1px solid ${st.bd}">${c.stage}</span>
+        <div class="mini-bar"><div style="width:${p}%;background:var(--green)"></div><div style="width:${pp}%;background:var(--amber)"></div></div>
+      </div>
+    </div>`;
+  }).join("");
+  list.querySelectorAll(".client").forEach(el=>el.onclick=()=>{ state.selectedId=el.dataset.id; render(); });
+}
+
+/* ============================ RENDER: MAIN ============================ */
+function statBlock(name, steps, col){
+  const total=steps.length, done=cnt(steps,"done"), pend=cnt(steps,"pending"), todo=total-done-pend;
+  const p = total?Math.round(done/total*100):0;
+  const pp = total?Math.round(pend/total*100):0;
+  return `<div class="stat">
+    <div class="srow"><span class="sname">${name}</span><span class="sval" style="color:${col}">${p}%</span></div>
+    <div class="bar"><div style="width:${p}%;background:var(--green)"></div><div style="width:${pp}%;background:var(--amber)"></div></div>
+    <div class="scount"><span style="color:var(--green)">${done} done</span> · <span style="color:var(--amber)">${pend} pending</span> · ${todo} to do</div>
+  </div>`;
+}
+
+function checklistCol(c, key, title, col){
+  const steps = c[key];
+  const p = pct(steps);
+  const light = (s,st,cls,lbl)=>`<button class="tl-dot ${cls} ${s.status===st?'on':''}" data-set="${s.id}:${st}" title="${lbl}"></button>`;
+  const rows = steps.map(s=>`
+    <div class="step s-${s.status||'todo'}" data-step="${s.id}">
+      <div class="traffic" role="group" aria-label="status">
+        ${light(s,"todo","red","Not started")}
+        ${light(s,"pending","amber","Pending")}
+        ${light(s,"done","green","Complete")}
+      </div>
+      <div class="step-body">
+        <div class="step-label" contenteditable="true" data-label="${s.id}" spellcheck="false">${esc(s.label)}</div>
+        <div class="step-note" contenteditable="true" data-note="${s.id}" spellcheck="false">${esc(s.note)}</div>
+      </div>
+      <button class="step-del" data-del="${s.id}" title="Delete step">×</button>
+    </div>`).join("");
+  return `<div class="col">
+    <div class="col-head">
+      <div class="ch-title"><span class="dot" style="background:${col}"></span><h3>${title}</h3></div>
+      <span class="cpct" style="color:${col}">${p}%</span>
+    </div>
+    <div class="steps" data-list="${key}">${rows||'<div class="empty-side" style="padding:18px">No steps. Add one below.</div>'}</div>
+    <button class="add-step" data-add="${key}">+ Add step</button>
+  </div>`;
+}
+
+function renderMain(){
+  const inner = document.getElementById("mainInner");
+  const c = selected();
+  if(!c){
+    inner.innerHTML = `<div class="placeholder">
+      <div class="big">Select a client, or add a new one</div>
+      <div>Each client gets an onboarding and an offboarding checklist,<br>a tracker link, and live progress your team can see.</div>
+    </div>`;
+    return;
+  }
+
+  inner.innerHTML = `
+    <div class="client-head">
+      <div class="title">
+        <h2>${esc(c.name)}</h2>
+        <div class="csub" contenteditable="true" id="subEdit" spellcheck="false">${esc(c.subtitle)||"+ add a subtitle / company"}</div>
+      </div>
+      <div class="head-right">
+        <div class="golive-card">
+          <div class="gl-top">
+            <span class="gl-label">★ Go-Live date</span>
+            <span class="gl-days" style="color:${goLiveColour(daysTo(c.goLiveDate))}">${goLiveLabel(daysTo(c.goLiveDate))}</span>
+          </div>
+          <input type="date" id="goLiveInput" class="gl-input" value="${esc(c.goLiveDate||"")}">
+          <div class="gl-sub">${c.goLiveDate ? esc(fmtFull(c.goLiveDate)) : "Not set — add the go-live date"}</div>
+        </div>
+        <div class="actions">
+          <div class="ctrl"><label>Stage</label>
+            <select class="stage-sel" id="stageSel">
+              ${STAGE_ORDER.map(s=>`<option ${s===c.stage?'selected':''}>${s}</option>`).join("")}
+            </select>
+          </div>
+          <button class="icon-btn" id="renameBtn">Rename</button>
+          <button class="icon-btn danger" id="deleteBtn">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta-row">
+      <div class="meta-field"><label>Owner</label>
+        <select id="ownerSel" class="meta-sel">
+          ${["","Richard","Chris","Greg"].map(o=>`<option ${o===(c.owner||"")?'selected':''}>${o||"—"}</option>`).join("")}
+        </select>
+      </div>
+      <div class="meta-field"><label>Type</label>
+        <select id="typeSel" class="meta-sel">
+          ${["","Project","Migration","Both"].map(o=>`<option ${o===(c.type||"")?'selected':''}>${o||"—"}</option>`).join("")}
+        </select>
+      </div>
+      <div class="meta-field"><label>Intake</label>
+        <select id="intakeSel" class="meta-sel">
+          ${["","Intercom","Sabel"].map(o=>`<option ${o===(c.intake||"")?'selected':''}>${o||"—"}</option>`).join("")}
+        </select>
+      </div>
+    </div>
+
+    <div class="tracker-bar">
+      <span class="tlbl">Project tracker</span>
+      <input type="url" id="trackerInput" placeholder="Paste tracker URL (e.g. https://…)" value="${esc(c.trackerUrl)}">
+      <a class="open ${c.trackerUrl?'':'disabled'}" id="trackerOpen" target="_blank" rel="noopener" href="${esc(c.trackerUrl)||'#'}">Open ↗</a>
+    </div>
+
+    <div class="notes-box">
+      <label>Notes</label>
+      <div class="notes-edit" contenteditable="true" id="notesEdit" spellcheck="false" data-ph="Add notes (carried over from the master record)…">${esc(c.notes)}</div>
+    </div>
+
+    <div class="overall">
+      ${statBlock("Overall progress", allSteps(c), "#fff")}
+      ${statBlock("Onboarding", c.onboarding, "#60A5FA")}
+      ${statBlock("Offboarding", c.offboarding, "#FBBF24")}
+    </div>
+
+    <div class="cols">
+      ${checklistCol(c, "onboarding", "Onboarding", "#60A5FA")}
+      ${checklistCol(c, "offboarding", "Offboarding", "#FBBF24")}
+    </div>`;
+
+  wireMain(c);
+}
+
+/* ============================ EVENT WIRING ============================ */
+function wireMain(c){
+  document.getElementById("stageSel").onchange = e=>{ c.stage=e.target.value; scheduleSave(); render(); };
+  document.getElementById("goLiveInput").onchange = e=>{ c.goLiveDate=e.target.value; scheduleSave(); render(); };
+
+  document.getElementById("deleteBtn").onclick = ()=>{
+    openModal({
+      title:"Delete client?",
+      body:`This removes “${esc(c.name)}” and both checklists. This cannot be undone.`,
+      okLabel:"Delete", danger:true,
+      onOk:()=>{ state.clients=state.clients.filter(x=>x.id!==c.id); state.selectedId=null; scheduleSave(); render(); }
+    });
+  };
+  document.getElementById("renameBtn").onclick = ()=>{
+    openModal({
+      title:"Rename client", fields:[{key:"name",label:"Client name",value:c.name},{key:"subtitle",label:"Subtitle / company (optional)",value:c.subtitle}],
+      okLabel:"Save",
+      onOk:(v)=>{ if(v.name.trim()){ c.name=v.name.trim(); c.subtitle=v.subtitle.trim(); scheduleSave(); render(); } }
+    });
+  };
+
+  const sub = document.getElementById("subEdit");
+  sub.onfocus = ()=>{ if(!c.subtitle) sub.textContent=""; };
+  sub.onblur = ()=>{ const t=sub.textContent.trim(); c.subtitle=t; if(!t) sub.textContent="+ add a subtitle / company"; scheduleSave(); };
+
+  const norm = v => v==="—" ? "" : v;
+  document.getElementById("ownerSel").onchange  = e=>{ c.owner=norm(e.target.value); scheduleSave(); };
+  document.getElementById("typeSel").onchange   = e=>{ c.type=norm(e.target.value); scheduleSave(); };
+  document.getElementById("intakeSel").onchange = e=>{ c.intake=norm(e.target.value); scheduleSave(); };
+
+  const notes = document.getElementById("notesEdit");
+  notes.onblur = ()=>{ c.notes=notes.textContent.trim(); scheduleSave(); };
+
+  const tin = document.getElementById("trackerInput");
+  tin.oninput = ()=>{ c.trackerUrl=tin.value.trim();
+    const a=document.getElementById("trackerOpen");
+    a.href=c.trackerUrl||"#"; a.classList.toggle("disabled", !c.trackerUrl); };
+  tin.onblur = ()=>scheduleSave();
+
+  document.querySelectorAll("[data-set]").forEach(b=>b.onclick=()=>{
+    const [id,st]=b.dataset.set.split(":");
+    const s = allSteps(c).find(x=>x.id===id);
+    if(s){ s.status = (s.status===st ? "todo" : st); scheduleSave(); render(); }
+  });
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    ["onboarding","offboarding"].forEach(k=>{ c[k]=c[k].filter(x=>x.id!==b.dataset.del); });
+    scheduleSave(); render();
+  });
+  document.querySelectorAll("[data-label]").forEach(el=>{
+    el.onblur=()=>{ const s=allSteps(c).find(x=>x.id===el.dataset.label); if(s){ s.label=el.textContent.trim(); scheduleSave(); } };
+    el.onkeydown=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); el.blur(); } };
+  });
+  document.querySelectorAll("[data-note]").forEach(el=>{
+    el.onblur=()=>{ const s=allSteps(c).find(x=>x.id===el.dataset.note); if(s){ s.note=el.textContent.trim(); scheduleSave(); } };
+    el.onkeydown=(e)=>{ if(e.key==="Enter"){ e.preventDefault(); el.blur(); } };
+  });
+  document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{
+    const k=b.dataset.add; c[k].push({id:uid(),label:"New step",status:"todo",note:""}); scheduleSave(); render();
+    // focus the new label
+    const lists=document.querySelectorAll(`[data-list="${k}"] [data-label]`);
+    const last=lists[lists.length-1]; if(last){ last.focus(); document.getSelection().selectAllChildren(last); }
+  });
+}
+
+/* ============================ MODAL ============================ */
+function openModal({title, body, fields, okLabel="Save", danger=false, onOk}){
+  const bg = document.createElement("div"); bg.className="modal-bg";
+  const fieldHtml = (fields||[]).map(f=>`
+    <div class="field"><label>${f.label}</label><input data-f="${f.key}" value="${esc(f.value||'')}" ${f.key==='name'?'autofocus':''}></div>`).join("");
+  bg.innerHTML = `<div class="modal">
+    <h3>${title}</h3>
+    ${body?`<p>${body}</p>`:""}
+    ${fieldHtml}
+    <div class="modal-actions">
+      <button class="btn ghost" data-cancel>Cancel</button>
+      <button class="btn ${danger?'primary':'primary'}" data-ok>${okLabel}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(bg);
+  const close=()=>bg.remove();
+  bg.querySelector("[data-cancel]").onclick=close;
+  bg.onclick=(e)=>{ if(e.target===bg) close(); };
+  const inputs=bg.querySelectorAll("[data-f]");
+  if(inputs[0]) setTimeout(()=>inputs[0].focus(),30);
+  const submit=()=>{ const v={}; inputs.forEach(i=>v[i.dataset.f]=i.value); close(); onOk&&onOk(v); };
+  bg.querySelector("[data-ok]").onclick=submit;
+  bg.addEventListener("keydown",(e)=>{ if(e.key==="Enter"){ e.preventDefault(); submit(); } if(e.key==="Escape") close(); });
+}
+
+/* ============================ TOP-LEVEL ============================ */
+document.getElementById("addClientBtn").onclick = ()=>{
+  openModal({
+    title:"Add client", fields:[{key:"name",label:"Client name",value:""},{key:"subtitle",label:"Subtitle / company (optional)",value:""}],
+    okLabel:"Add client",
+    onOk:(v)=>{ if(!v.name.trim()) return; const c=newClient(v.name,v.subtitle); state.clients.push(c); state.selectedId=c.id; shownStages().add(c.stage); savePrefs(); scheduleSave(); render(); }
+  });
+};
+
+/* ============================ TEMPLATE EDITOR ============================ */
+function openTemplateEditor(){
+  const snap = {};
+  ["onboarding","offboarding"].forEach(k => (state.templates[k]||[]).forEach(s => snap[s.id]=s.label));
+  const work = {
+    onboarding:  (state.templates.onboarding ||[]).map(s=>({id:s.id,label:s.label})),
+    offboarding: (state.templates.offboarding||[]).map(s=>({id:s.id,label:s.label})),
+  };
+  let nid = 1;
+
+  const teCol = (key,title,col)=>`<div class="te-col">
+      <div class="te-col-head"><span class="dot" style="background:${col}"></span><h4>${title}</h4><span class="cnt" data-cnt="${key}"></span></div>
+      <div class="te-list" data-tlist="${key}"></div>
+      <button class="te-add" data-tadd="${key}">+ Add step</button>
+    </div>`;
+
+  const bg = document.createElement("div"); bg.className="modal-bg";
+  bg.innerHTML = `<div class="modal te-modal">
+    <h3>Standard checklist</h3>
+    <p>The steps every new client starts with. Onboarding mirrors the Project Master Record columns.</p>
+    <div class="te-scroll">
+      <div class="te-cols">
+        ${teCol("onboarding","Onboarding","#60A5FA")}
+        ${teCol("offboarding","Offboarding","#FBBF24")}
+      </div>
+      <div class="te-note"><b>Renaming</b> a step also corrects it on all existing clients. <b>Adding or removing</b> a step affects new clients only — existing clients are left untouched.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" data-cancel>Cancel</button>
+      <button class="btn primary" data-save>Save standard</button>
+    </div>
+  </div>`;
+  document.body.appendChild(bg);
+  const close = ()=>bg.remove();
+
+  function renderList(key){
+    const host = bg.querySelector(`[data-tlist="${key}"]`);
+    host.innerHTML = work[key].map((s,i)=>`
+      <div class="te-step">
+        <span class="te-num">${i+1}</span>
+        <input class="te-input" data-k="${key}" data-i="${i}" value="${esc(s.label)}" spellcheck="false">
+        <button class="te-mv" data-up="${key}:${i}" ${i===0?'style="opacity:.25;pointer-events:none"':''}>↑</button>
+        <button class="te-mv" data-dn="${key}:${i}" ${i===work[key].length-1?'style="opacity:.25;pointer-events:none"':''}>↓</button>
+        <button class="te-del" data-rm="${key}:${i}" title="Remove step">×</button>
+      </div>`).join("");
+    bg.querySelector(`[data-cnt="${key}"]`).textContent = work[key].length+" steps";
+    host.querySelectorAll(".te-input").forEach(inp=> inp.oninput=()=>{ work[inp.dataset.k][+inp.dataset.i].label = inp.value; });
+    host.querySelectorAll("[data-up]").forEach(b=> b.onclick=()=>{ const [k,i]=b.dataset.up.split(":"); mv(k,+i,-1); });
+    host.querySelectorAll("[data-dn]").forEach(b=> b.onclick=()=>{ const [k,i]=b.dataset.dn.split(":"); mv(k,+i,1); });
+    host.querySelectorAll("[data-rm]").forEach(b=> b.onclick=()=>{ const [k,i]=b.dataset.rm.split(":"); work[k].splice(+i,1); renderList(k); });
+  }
+  function mv(k,i,d){ const j=i+d; if(j<0||j>=work[k].length) return; const a=work[k]; [a[i],a[j]]=[a[j],a[i]]; renderList(k); }
+
+  bg.querySelectorAll("[data-tadd]").forEach(b=> b.onclick=()=>{
+    const k=b.dataset.tadd; work[k].push({id:"tn"+(nid++),label:"New step"}); renderList(k);
+    const inputs=bg.querySelectorAll(`[data-tlist="${k}"] .te-input`); const last=inputs[inputs.length-1];
+    if(last){ last.focus(); last.select(); }
+  });
+  renderList("onboarding"); renderList("offboarding");
+
+  bg.querySelector("[data-cancel]").onclick = close;
+  bg.onclick = e=>{ if(e.target===bg) close(); };
+  bg.addEventListener("keydown", e=>{ if(e.key==="Escape") close(); });
+
+  bg.querySelector("[data-save]").onclick = ()=>{
+    ["onboarding","offboarding"].forEach(k => work[k] = work[k].map(s=>({id:s.id,label:s.label.trim()})).filter(s=>s.label));
+    if(!work.onboarding.length && !work.offboarding.length){ close(); return; }
+    const renames = {};
+    ["onboarding","offboarding"].forEach(k => work[k].forEach(s=>{
+      if(snap[s.id]!==undefined && snap[s.id]!==s.label) renames[snap[s.id]] = s.label;
+    }));
+    if(Object.keys(renames).length){
+      state.clients.forEach(c => ["onboarding","offboarding"].forEach(k =>
+        (c[k]||[]).forEach(st=>{ if(renames[st.label]!==undefined) st.label = renames[st.label]; })));
+    }
+    state.templates = work;
+    scheduleSave(); close(); render();
+  };
+}
+
+document.getElementById("tmplBtn").onclick = openTemplateEditor;
+
+/* ============================ BACKUP / RESTORE ============================ */
+function normaliseLoaded(){
+  if(!state.templates) state.templates = defaultTemplates();
+  state.clients.forEach(c=>{
+    if(c.goLiveDate===undefined) c.goLiveDate = "";
+    ["onboarding","offboarding"].forEach(k=> (c[k]||[]).forEach(s=>{
+      if(!s.status) s.status = s.done ? "done" : "todo"; delete s.done; if(s.note===undefined) s.note="";
+    }));
+  });
+}
+function exportBackup(){
+  try{
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `sabel-client-portal-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    setSave("saved"); setTimeout(()=>setSave("idle"),1500);
+  }catch(e){ openModal({title:"Backup failed", body:"Couldn't create the backup file in this browser.", okLabel:"OK"}); }
+}
+function importBackup(file){
+  const r = new FileReader();
+  r.onload = ()=>{
+    let j; try{ j = JSON.parse(r.result); }catch(_){ j=null; }
+    if(!j || !Array.isArray(j.clients)){
+      openModal({title:"Couldn't read that file", body:"It doesn't look like a portal backup. Choose a .json file exported from this portal.", okLabel:"OK"});
+      return;
+    }
+    openModal({
+      title:"Restore this backup?",
+      body:`This replaces everything currently in the portal with ${j.clients.length} clients from the backup. Consider taking a Backup of the current data first.`,
+      okLabel:"Restore", danger:true,
+      onOk:()=>{ state = j; normaliseLoaded(); state.selectedId=null; scheduleSave(); setView("portal"); render(); }
+    });
+  };
+  r.readAsText(file);
+}
+document.getElementById("exportBtn").onclick = exportBackup;
+document.getElementById("importBtn").onclick = ()=>document.getElementById("importFile").click();
+document.getElementById("importFile").onchange = e=>{ const f=e.target.files[0]; if(f) importBackup(f); e.target.value=""; };
+
+/* ============================ DASHBOARD ============================ */
+function setView(v){
+  view = v;
+  document.getElementById("layoutView").style.display = v==="portal" ? "" : "none";
+  document.getElementById("dashboardView").style.display = v==="dashboard" ? "" : "none";
+  document.getElementById("tabPortal").classList.toggle("on", v==="portal");
+  document.getElementById("tabDash").classList.toggle("on", v==="dashboard");
+  render();
+}
+document.getElementById("tabPortal").onclick = ()=>setView("portal");
+document.getElementById("tabDash").onclick = ()=>setView("dashboard");
+
+function openClientFromDash(id){ state.selectedId=id; shownStages().add((state.clients.find(c=>c.id===id)||{}).stage); savePrefs(); setView("portal"); }
+
+function renderDashboard(){
+  const host = document.getElementById("dashboardView");
+  const rows = state.clients.slice().sort(byGoLive);
+  const withDate = rows.filter(c=>c.goLiveDate).length;
+  const body = rows.map(c=>{
+    const st=STAGES[c.stage]; const n=daysTo(c.goLiveDate);
+    const tracker = c.trackerUrl
+      ? `<a class="dash-track" href="${esc(c.trackerUrl)}" target="_blank" rel="noopener">Open tracker ↗</a>`
+      : `<span class="dash-track off">No tracker</span>`;
+    return `<tr>
+      <td><button class="dash-name" data-open="${c.id}">${esc(c.name)}</button></td>
+      <td><span class="stage" style="color:${st.c};background:${st.bg};border:1px solid ${st.bd}">${c.stage}</span></td>
+      <td class="dash-owner">${esc(c.owner)||"<span class='muted'>—</span>"}</td>
+      <td class="dash-date">${c.goLiveDate ? esc(fmtFull(c.goLiveDate)) : "<span class='muted'>Not set</span>"}</td>
+      <td class="dash-days" style="color:${goLiveColour(n)}">${goLiveLabel(n)}</td>
+      <td style="text-align:right">${tracker}</td>
+    </tr>`;
+  }).join("");
+  host.innerHTML = `<div class="dash-inner">
+    <div class="dash-head">
+      <h2>Go-Live Dashboard</h2>
+      <span class="dash-sub">${state.clients.length} clients · ${withDate} with a go-live date · sorted nearest first</span>
+    </div>
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <thead><tr><th>Client</th><th>Stage</th><th>Owner</th><th>Go-Live</th><th>Countdown</th><th style="text-align:right">Tracker</th></tr></thead>
+        <tbody>${body}</tbody>
+      </table>
+    </div>
+  </div>`;
+  host.querySelectorAll("[data-open]").forEach(b=> b.onclick=()=>openClientFromDash(b.dataset.open));
+}
+
+function render(){
+  if(view==="dashboard"){ renderDashboard(); return; }
+  renderFilters(); renderClients(); renderMain();
+}
+
+(async function init(){
+  await loadRemote();
+  if(!state.clients.length){
+    const local = readLocal();
+    if(local){ try{ const j=JSON.parse(local); if(j&&Array.isArray(j.clients)) state=j; }catch(_){} }
+  }
+  // First run: nothing saved anywhere -> seed from the Project Master Record.
+  if(!state.clients.length && Array.isArray(SEED) && SEED.length){
+    state = { clients: SEED.map(c=>({ ...newClient(c.name,c.subtitle||""), ...c })), selectedId: null, templates: defaultTemplates() };
+    saveLocal();
+    if(remoteAvailable) pushRemote();
+  }
+  if(!state.templates) state.templates = defaultTemplates();  // migrate older saves
+  // Normalise step model: ensure every step has a status (convert any legacy done flag).
+  state.clients.forEach(c=>{
+    if(c.goLiveDate===undefined) c.goLiveDate = GOLIVE[c.name] || "";  // prefill once from Drive
+    ["onboarding","offboarding"].forEach(k=> (c[k]||[]).forEach(s=>{
+      if(!s.status) s.status = s.done ? "done" : "todo";
+      delete s.done;
+      if(s.note===undefined) s.note="";
+    }));
+  });
+  loadPrefs();
+  if(state.selectedId && !selected()) state.selectedId=null;
+  render();
+})();
+</script>
+</body>
+</html>
