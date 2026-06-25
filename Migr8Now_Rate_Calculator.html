@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Migr8Now Rate Calculator — Sabel</title>
+<style>
+  :root {
+    --bg: #0B0B0C;
+    --card: #161618;
+    --card-2: #1E1E20;
+    --border: #2A3547;
+    --red: #E10600;
+    --white: #FFFFFF;
+    --body: #D8D8DC;
+    --muted: #8A8A92;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--body);
+    font-family: var(--sans);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+    position: relative;
+  }
+
+  /* Faint red centre line (Sabel motif) */
+  .page::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: rgba(225, 6, 0, 0.08);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page > * { position: relative; z-index: 1; }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--white);
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+
+  .brand-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+  }
+
+  h1 {
+    font-size: 28px;
+    color: var(--white);
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+  }
+
+  /* Input section */
+  .input-card {
+    background: var(--card);
+    border-left: 3px solid var(--red);
+    border-radius: 0 8px 8px 0;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 18px;
+  }
+
+  .input-row:last-child { margin-bottom: 0; }
+
+  .field label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--red);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .field input,
+  .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--white);
+    padding: 12px 14px;
+    font-size: 16px;
+    font-family: var(--sans);
+    border-radius: 4px;
+    transition: border-color 0.15s;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    outline: none;
+    border-color: var(--red);
+  }
+
+  .field-help {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-family: var(--mono);
+  }
+
+  .button-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+  #calculateBtn {
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    padding: 13px 32px;
+    font-size: 14px;
+    font-family: var(--mono);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.05s;
+  }
+
+  #calculateBtn:hover { opacity: 0.88; }
+  #calculateBtn:active { transform: translateY(1px); }
+  #calculateBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .is-hidden { display: none !important; }
+
+  /* Output section */
+  .result-card {
+    background: var(--card);
+    border-left: 3px solid var(--red);
+    border-radius: 0 8px 8px 0;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+
+  .result-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--red);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .result-price {
+    font-size: 48px;
+    color: var(--white);
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 4px;
+  }
+
+  .result-subtext {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .result-breakdown {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  .breakdown-item {
+    text-align: left;
+  }
+
+  .breakdown-item .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+
+  .breakdown-item .value {
+    font-size: 16px;
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  .breakdown-item .sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Discount section */
+  .discount-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .discount-card {
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+  }
+
+  .discount-card h3 {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--red);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .discount-card select,
+  .discount-card input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--white);
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: var(--sans);
+    border-radius: 4px;
+  }
+
+  .discount-card .help {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    font-family: var(--mono);
+  }
+
+  /* Final result */
+  .final-result {
+    background: var(--red);
+    color: var(--white);
+    padding: 24px;
+    border-radius: 6px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .final-result .label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: 0.85;
+  }
+
+  .final-result .price {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  .final-result .saved {
+    font-size: 13px;
+    opacity: 0.85;
+  }
+
+  .fx-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+  }
+
+  .fx-item {
+    text-align: center;
+  }
+
+  .fx-currency {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    opacity: 0.75;
+    margin-bottom: 4px;
+  }
+
+  .fx-value {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .fx-note {
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    opacity: 0.7;
+  }
+
+  /* Rate card reference */
+  .reference {
+    background: var(--card);
+    border-left: 3px solid var(--border);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .reference h2 {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--red);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  table.rate-card {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  table.rate-card th {
+    text-align: left;
+    padding: 10px 8px;
+    background: var(--red);
+    color: var(--white);
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  table.rate-card th:last-child,
+  table.rate-card td:last-child { text-align: right; }
+
+  table.rate-card td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--body);
+  }
+
+  table.rate-card td:not(:first-child) {
+    color: var(--red);
+    font-weight: 600;
+    font-family: var(--mono);
+  }
+
+  /* Note box */
+  .note {
+    background: var(--card);
+    border-left: 3px solid var(--red);
+    padding: 14px 18px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 24px;
+  }
+
+  .note strong { color: var(--white); }
+
+  /* Footer */
+  footer {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .input-row,
+    .discount-row,
+    .result-breakdown {
+      grid-template-columns: 1fr;
+    }
+    h1 { font-size: 22px; }
+    .result-price { font-size: 36px; }
+    .final-result .price { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="brand">
+      <span>SABEL</span>
+      <span class="brand-dot"></span>
+      <span>MIGR8NOW</span>
+    </div>
+    <h1>Partner Rate Calculator</h1>
+    <p class="subtitle">RATE CARD · 10% DELTA ALLOWANCE · $1,000 MANAGEMENT FEE</p>
+  </header>
+
+  <div class="input-card">
+    <div class="input-row">
+      <div class="field">
+        <label for="ticketVolume">Ticket Volume</label>
+        <input type="number" id="ticketVolume" placeholder="e.g. 75000" min="0" />
+        <div class="field-help">Enter the number of tickets to migrate</div>
+      </div>
+      <div class="field">
+        <label for="sourcePlatform">Source Platform</label>
+        <select id="sourcePlatform">
+          <option value="standard">Zendesk / Freshdesk / Intercom / HelpScout</option>
+          <option value="gorgias">Gorgias (from June/July 2026)</option>
+          <option value="bespoke">Salesforce / Bespoke (contact)</option>
+        </select>
+        <div class="field-help">Standard rate applies to all listed platforms</div>
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="field">
+        <label for="deliveryModel">Delivery Model</label>
+        <select id="deliveryModel">
+          <option value="sabel">Sabel-delivered (includes $1,000 management fee)</option>
+          <option value="self">Self-delivered (partner runs the migration)</option>
+        </select>
+        <div class="field-help">Sabel-delivered adds the management fee; self-delivery removes it</div>
+      </div>
+    </div>
+    <div class="button-row">
+      <button id="calculateBtn" type="button">Calculate Price</button>
+    </div>
+  </div>
+
+  <div class="final-result is-hidden" id="finalResultBox">
+    <div class="label">Migration Price (USD)</div>
+    <div class="price" id="finalPrice">$0.00</div>
+    <div class="saved" id="savedDetail">Enter ticket volume to calculate</div>
+    <div class="fx-row" id="fxRow">
+      <div class="fx-item">
+        <div class="fx-currency">AUD</div>
+        <div class="fx-value" id="fxAUD">—</div>
+      </div>
+      <div class="fx-item">
+        <div class="fx-currency">GBP</div>
+        <div class="fx-value" id="fxGBP">—</div>
+      </div>
+      <div class="fx-item">
+        <div class="fx-currency">EUR</div>
+        <div class="fx-value" id="fxEUR">—</div>
+      </div>
+    </div>
+    <div class="fx-note" id="fxNote">Estimated conversions, indicative only</div>
+  </div>
+
+  <div class="reference">
+    <h2>Standard Rate Card (anchor points)</h2>
+    <table class="rate-card">
+      <thead>
+        <tr>
+          <th>Volume Tier</th>
+          <th>Tickets</th>
+          <th>Price (USD)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Tier 1</td><td>50,000</td><td>$1,053</td></tr>
+        <tr><td>Tier 2</td><td>100,000</td><td>$1,781</td></tr>
+        <tr><td>Tier 3</td><td>500,000</td><td>$3,317</td></tr>
+        <tr><td>Tier 4</td><td>750,000</td><td>$4,050</td></tr>
+        <tr><td>Tier 5</td><td>1,000,000</td><td>$5,254</td></tr>
+        <tr><td>Above 1m</td><td>bespoke</td><td>contact</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <strong>How pricing works.</strong> All prices include a 10% delta allowance to cover ticket volume movement between scoping and cutover. Sabel-delivered migrations include a $1,000 management fee; self-delivered migrations do not. Migrations under 50,000 tickets are subject to a $1,000 base minimum before the delta and any management fee.
+  </div>
+
+  <footer>
+    PERFECT MADE POSSIBLE · sabelcustomersuccess.com
+  </footer>
+
+</div>
+
+<script>
+  // ── Tier anchor points (Standard rate card) ──────────────────────────────
+  const tiers = [
+    { limit: 50000,   totalPrice: 1053 },
+    { limit: 100000,  totalPrice: 1781 },
+    { limit: 500000,  totalPrice: 3317 },
+    { limit: 750000,  totalPrice: 4050 },
+    { limit: 1000000, totalPrice: 5254 }
+  ];
+
+  const FLOOR = 1000;
+  const DELTA_MULTIPLIER = 1.10;   // Always applied; captures per-ticket volume fluctuation to cutover
+  const MGMT_FEE = 1000;           // Flat fee, added only for Sabel-delivered migrations
+
+  // ── FX rates (USD base). Live-fetched on load, with fallbacks. ───────────
+  let fxRates = { AUD: 1.41, GBP: 0.745, EUR: 0.865 };  // fallback, approx June 2026
+  let fxLive = false;
+  let fxDate = '';
+
+  async function loadFxRates() {
+    try {
+      const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=AUD,GBP,EUR');
+      if (!res.ok) throw new Error('FX fetch failed');
+      const data = await res.json();
+      if (data && data.rates) {
+        fxRates = {
+          AUD: data.rates.AUD ?? fxRates.AUD,
+          GBP: data.rates.GBP ?? fxRates.GBP,
+          EUR: data.rates.EUR ?? fxRates.EUR
+        };
+        fxLive = true;
+        fxDate = data.date || '';
+      }
+    } catch (e) {
+      // Silent fallback to hardcoded rates
+      fxLive = false;
+    }
+    update();  // re-render with whatever rates we have
+  }
+
+  // ── Core pricing formula (matches the platform implementation) ───────────
+  function calculatePrice(ticketVolume) {
+    if (ticketVolume <= 0) return { price: 0, method: 'invalid', detail: '' };
+
+    // Below first tier: pure per-ticket pricing at Tier 1's per-ticket rate
+    if (ticketVolume <= tiers[0].limit) {
+      const perTicket = tiers[0].totalPrice / tiers[0].limit;
+      const raw = ticketVolume * perTicket;
+      const final = Math.max(raw, FLOOR);
+      return {
+        price: parseFloat(final.toFixed(2)),
+        method: final === FLOOR ? 'floor' : 'per-ticket',
+        detail: final === FLOOR
+          ? '$1,000 minimum floor applied'
+          : `at $${perTicket.toFixed(5)}/ticket`,
+        tierLabel: 'Below Tier 1 anchor',
+        tierDetail: `${ticketVolume.toLocaleString()} tickets`
+      };
+    }
+
+    // Above the top tier: bespoke quote
+    if (ticketVolume > tiers[tiers.length - 1].limit) {
+      return {
+        price: null,
+        method: 'bespoke',
+        detail: 'Contact Sabel for a bespoke quote',
+        tierLabel: 'Above Tier 5',
+        tierDetail: 'Bespoke pricing required'
+      };
+    }
+
+    // Linear interpolation between adjacent tiers
+    for (let i = 1; i < tiers.length; i++) {
+      const tierA = tiers[i - 1];
+      const tierB = tiers[i];
+
+      if (ticketVolume > tierA.limit && ticketVolume <= tierB.limit) {
+        const percentThrough = (ticketVolume - tierA.limit) / (tierB.limit - tierA.limit);
+        const priceDifference = tierB.totalPrice - tierA.totalPrice;
+        const finalPrice = tierA.totalPrice + (percentThrough * priceDifference);
+        return {
+          price: parseFloat(finalPrice.toFixed(2)),
+          method: 'interpolated',
+          detail: `${(percentThrough * 100).toFixed(0)}% between Tier ${i} and Tier ${i + 1}`,
+          tierLabel: `Between Tier ${i} and Tier ${i + 1}`,
+          tierDetail: `${tierA.limit.toLocaleString()} \u2192 ${tierB.limit.toLocaleString()} tickets`
+        };
+      }
+    }
+
+    return { price: 0, method: 'error', detail: 'Unhandled volume' };
+  }
+
+  // ── Formatting helpers ───────────────────────────────────────────────────
+  function fmtUSD(n) {
+    if (n === null || n === undefined) return '—';
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+
+  const FX_SYMBOLS = { AUD: 'A$', GBP: '£', EUR: '€' };
+
+  function setFx(usdAmount) {
+    // usdAmount: a number to convert, or null to clear
+    ['AUD', 'GBP', 'EUR'].forEach(cur => {
+      const el = document.getElementById('fx' + cur);
+      if (usdAmount === null || usdAmount === undefined) {
+        el.textContent = '—';
+      } else {
+        const converted = Math.round(usdAmount * fxRates[cur]);
+        el.textContent = FX_SYMBOLS[cur] + converted.toLocaleString('en-US');
+      }
+    });
+    const note = document.getElementById('fxNote');
+    if (fxLive && fxDate) {
+      note.textContent = `Estimated conversions, indicative only · live mid-market rate as at ${fxDate}`;
+    } else {
+      note.textContent = 'Estimated conversions, indicative only · approximate rate';
+    }
+  }
+
+  // ── Render: calculate and reveal the price ───────────────────────────────
+  // Returns the computed result object (or null for non-numeric states) so the
+  // notifier can use the same numbers shown on screen.
+  function calculate() {
+    const volume = parseInt(document.getElementById('ticketVolume').value) || 0;
+    const sourcePlatform = document.getElementById('sourcePlatform').value;
+    const deliveryModel = document.getElementById('deliveryModel').value;
+    const sabelDelivered = deliveryModel === 'sabel';
+
+    const box = document.getElementById('finalResultBox');
+    box.classList.remove('is-hidden');
+
+    // Source platform: bespoke
+    if (sourcePlatform === 'bespoke') {
+      document.getElementById('finalPrice').textContent = 'Contact';
+      document.getElementById('savedDetail').textContent = 'Bespoke source platforms are priced on a case-by-case basis';
+      setFx(null);
+      return { notifiable: false };
+    }
+
+    // No volume entered
+    if (volume === 0) {
+      document.getElementById('finalPrice').textContent = '—';
+      document.getElementById('savedDetail').textContent = 'Enter a ticket volume above, then calculate';
+      setFx(null);
+      return { notifiable: false };
+    }
+
+    const result = calculatePrice(volume);
+
+    // Above ceiling: bespoke
+    if (result.method === 'bespoke') {
+      document.getElementById('finalPrice').textContent = 'Contact';
+      document.getElementById('savedDetail').textContent = 'Above 1m tickets, contact Sabel for a bespoke quote';
+      setFx(null);
+      return { notifiable: false, volume, sourcePlatform, deliveryModel, bespoke: true };
+    }
+
+    // Apply delta multiplier (always) then management fee (Sabel-delivered only)
+    const withDelta = result.price * DELTA_MULTIPLIER;
+    const finalPrice = sabelDelivered ? withDelta + MGMT_FEE : withDelta;
+
+    document.getElementById('finalPrice').textContent = fmtUSD(finalPrice);
+
+    const deliveryLabel = sabelDelivered
+      ? 'Sabel-delivered, includes $1,000 management fee'
+      : 'Self-delivered, no management fee';
+    document.getElementById('savedDetail').textContent =
+      `${volume.toLocaleString()} tickets · ${deliveryLabel}`;
+
+    setFx(finalPrice);
+
+    return {
+      notifiable: true,
+      volume,
+      sourcePlatform,
+      deliveryModel,
+      sabelDelivered,
+      finalPrice
+    };
+  }
+
+  // ── Notify endpoint ──────────────────────────────────────────────────────
+  // Set this to your deployed Vercel endpoint URL.
+  const NOTIFY_ENDPOINT = 'https://sabel-webhook.vercel.app/api/quote-notify';
+
+  async function sendNotification(r) {
+    if (!r || !r.notifiable) return;  // don't email bespoke / empty states
+    try {
+      const deliveryLabel = r.sabelDelivered
+        ? 'Sabel-delivered (incl. $1,000 management fee)'
+        : 'Self-delivered (no management fee)';
+      await fetch(NOTIFY_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ticketVolume: r.volume,
+          sourcePlatform: r.sourcePlatform,
+          deliveryModel: deliveryLabel,
+          priceUSD: fmtUSD(r.finalPrice),
+          conversions: {
+            AUD: 'A$' + Math.round(r.finalPrice * fxRates.AUD).toLocaleString('en-US'),
+            GBP: '£' + Math.round(r.finalPrice * fxRates.GBP).toLocaleString('en-US'),
+            EUR: '€' + Math.round(r.finalPrice * fxRates.EUR).toLocaleString('en-US')
+          }
+        })
+      });
+    } catch (e) {
+      // Notification is best-effort. Never block the user's price on it.
+    }
+  }
+
+  // ── Events ───────────────────────────────────────────────────────────────
+  const calcBtn = document.getElementById('calculateBtn');
+
+  calcBtn.addEventListener('click', async () => {
+    const r = calculate();
+    // Fire-and-forget the notification; don't make the user wait on it.
+    sendNotification(r);
+  });
+
+  // If inputs change after a calculation, hide the (now stale) result until
+  // the user calculates again.
+  ['ticketVolume', 'sourcePlatform', 'deliveryModel'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      document.getElementById('finalResultBox').classList.add('is-hidden');
+    });
+    document.getElementById(id).addEventListener('change', () => {
+      document.getElementById('finalResultBox').classList.add('is-hidden');
+    });
+  });
+
+  // Fetch live FX rates on load (result stays hidden until Calculate is pressed)
+  loadFxRates();
+
+</script>
+</body>
+</html>
