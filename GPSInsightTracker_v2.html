@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sabel × GPS Insight — Project Tracker</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0F1117;color:#E2E8F0;min-height:100vh}
+.pw{display:grid;grid-template-columns:176px 1fr;min-height:100vh}
+.sb{display:flex;flex-direction:column;background:#161B26;border-right:1px solid #1E2433}
+.sb-head{padding:16px 14px 14px;border-bottom:1px solid #1E2433}
+.sb-logo{height:22px;margin-bottom:8px}
+.sb-title{font-size:13px;font-weight:600;color:#E2E8F0}
+.sb-sub{font-size:11px;color:#94A3B8;margin-top:1px}
+.si{display:block;width:100%;text-align:left;border:none;cursor:pointer;padding:10px 14px;font-family:inherit;background:transparent;border-bottom:1px solid #1E2433;transition:background .12s}
+.si:hover{background:#1E2433}
+.sb-sec{padding:5px 14px 3px;font-size:10px;font-weight:600;letter-spacing:.08em;color:#475569;text-transform:uppercase;border-bottom:1px solid #1E2433}
+.sb-footer{margin-top:auto;padding:14px;border-top:1px solid #1E2433}
+.mn{padding:1.5rem;background:#0F1117}
+.task{background:#161B26;border:1px solid #1E2433;border-radius:10px;margin-bottom:7px;overflow:visible;transition:border-color .12s;position:relative}
+.task:hover{border-color:#2A3145}
+.task-client{background:#0F1117;border:1px solid rgba(251,191,36,.28);border-radius:10px;margin-bottom:7px;overflow:visible;transition:border-color .12s;position:relative}
+.task-client:hover{border-color:rgba(251,191,36,.5)}
+.task.done,.task-client.done{opacity:.65}
+.task-inner{border-radius:10px;overflow:hidden}
+.task-head{padding:10px 12px;cursor:grab;user-select:none}
+.col-drop{border:2px dashed rgba(96,165,250,.45)!important;background:rgba(96,165,250,.04)!important;border-radius:10px!important}
+.card-dragging{opacity:.35!important}
+.add-task-btn{display:flex;align-items:center;gap:6px;width:100%;padding:8px 10px;background:transparent;border:1px dashed #1E2433;border-radius:8px;color:#475569;font-size:12px;font-family:inherit;cursor:pointer;transition:all .15s;margin-top:6px}
+.add-task-btn:hover{border-color:#3B82F6;color:#60A5FA;background:rgba(59,130,246,.05)}
+.task-expand{border-top:1px solid #1E2433;padding:12px;background:#0F1117;display:none}
+.task-expand textarea,.task-expand input{width:100%;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:7px 10px;font-family:inherit;line-height:1.5;outline:none}
+.task-expand textarea{resize:vertical}
+.task-expand textarea:focus,.task-expand input:focus{border-color:#3B82F6}
+.task-expand label{font-size:11px;font-weight:500;color:#94A3B8;display:block;margin-bottom:4px}
+.chk-btn{background:none;border:none;cursor:pointer;padding:0;flex-shrink:0;display:flex;align-items:flex-start;padding-top:1px}
+.bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.stat-bdg{display:inline-flex;align-items:center;gap:3px;border-radius:20px;padding:2px 6px 2px 8px;font-size:11px;font-weight:500;cursor:pointer;border:none;font-family:inherit;flex-shrink:0}
+.stat-bdg:hover{filter:brightness(1.15)}
+.sc{border-radius:8px;padding:10px 12px;cursor:pointer;border:1px solid transparent;transition:all .15s;user-select:none;text-align:left;font-family:inherit;width:100%}
+.sc.f-on{background:#161B26;border-color:#1E2433}.sc.f-on.active{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.4)}
+.sc.f-att{background:#161B26;border-color:#1E2433}.sc.f-att.active{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.4)}
+.sc.f-risk{background:#161B26;border-color:#1E2433}.sc.f-risk.active{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.4)}
+.col-head{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin:0 0 8px;display:flex;align-items:center;gap:5px}
+.phase-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+.ov-top{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.empty-col{font-size:12px;color:#334155;padding:20px 0;text-align:center}
+.ph-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ph-card{background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:12px;cursor:pointer;transition:border-color .12s}
+.ph-card:hover{border-color:#3B82F6}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:.5rem}
+.toast{position:fixed;bottom:20px;right:20px;background:#1E2433;border:1px solid #2A3145;border-radius:8px;padding:9px 14px;font-size:12px;color:#94A3B8;opacity:0;transition:opacity .3s;pointer-events:none;z-index:1001}
+.toast.show{opacity:1}
+.filter-hint{font-size:11px;color:#475569;display:flex;align-items:center;gap:4px;margin-top:6px}
+#status-picker{position:fixed;display:none;background:#1E2433;border:1px solid #2A3145;border-radius:9px;padding:4px;z-index:1000;min-width:158px;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+#status-picker button{display:flex;align-items:center;gap:7px;width:100%;padding:7px 10px;background:transparent;border:none;cursor:pointer;font-family:inherit;border-radius:5px;transition:background .1s}
+#status-picker button:hover{background:rgba(255,255,255,.06)}
+#tip-box{position:fixed;display:none;background:#1E2433;border:1px solid #2A3145;border-radius:8px;padding:9px 12px;font-size:12px;color:#E2E8F0;max-width:240px;line-height:1.5;z-index:1002;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+#autosave-dot{position:fixed;top:14px;right:16px;font-size:11px;color:#475569;display:flex;align-items:center;gap:5px;opacity:0;transition:opacity .4s;z-index:999}
+#autosave-dot.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="pw">
+  <div class="sb" id="sidebar"></div>
+  <div class="mn" id="main"></div>
+</div>
+<div id="status-picker"></div>
+<div id="tip-box"></div>
+<div id="autosave-dot"><i class="ti ti-cloud-check" style="font-size:13px"></i>Autosaved</div>
+<div class="toast" id="toast"></div>
+<script>
+const API='https://sabel-webhook.vercel.app/api/tracker';
+const KEY='gps-insight-tracker-v1';
+const LOGO='data:image/png;base64,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01T0RHJH0ERFkQhERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERB//2Q==';
+const TOTAL_H=50;
+const ALL_STATUSES=['Complete','In Progress','Pending','Blocked','Dependency'];
+const P=[
+  {id:'consolidate',l:'Consolidation',c:'#3B82F6',w:'Week 1',d:'Jul 6-10',h:8},
+  {id:'brands',l:'Brand & Messenger',c:'#9333EA',w:'Weeks 2-3',d:'Jul 13-24',h:12},
+  {id:'finkb',l:'Knowledge & Fin',c:'#10B981',w:'Weeks 2-3',d:'Jul 13-24',h:18},
+  {id:'golive',l:'Go-Live & Cutover',c:'#E10600',w:'Weeks 4-5',d:'Jul 27-Aug 7',h:5},
+  {id:'sfdc',l:'Salesforce Integration',c:'#F97316',w:'Weeks 6-7',d:'Aug 10-21',h:7},
+];
+const OW={
+  Chris:{c:'#60A5FA',bg:'rgba(96,165,250,.15)'},
+  Richard:{c:'#C084FC',bg:'rgba(192,132,252,.15)'},
+  Greg:{c:'#34D399',bg:'rgba(52,211,153,.15)'},
+  GPSI:{c:'#FBBF24',bg:'rgba(251,191,36,.15)'}
+};
+const SC={
+  'Complete':{c:'#4ADE80',bg:'rgba(74,222,128,.12)'},
+  'In Progress':{c:'#60A5FA',bg:'rgba(96,165,250,.12)'},
+  'Pending':{c:'#94A3B8',bg:'rgba(148,163,184,.1)'},
+  'Blocked':{c:'#F87171',bg:'rgba(248,113,113,.12)'},
+  'Dependency':{c:'#FBBF24',bg:'rgba(251,191,36,.12)'}
+};
+const FILTER_MAP={on:['Complete','In Progress'],att:['Pending','Dependency'],risk:['Blocked']};
+
+const T={
+  consolidate:{sabel:[
+    {t:'Confirm GPS Insight Fleet Management as the retained workspace',o:'Chris',s:'Complete',d:'Jul 6',notes:'Confirmed in the Phased Delivery Plan v2 as the single retained workspace.',link:''},
+    {t:'Pull agent lists from all five workspaces and map to Fleet Management',o:'Chris',s:'Pending',d:'Jul 6-8',notes:'',link:''},
+    {t:'Configure dedicated Archive inbox for historical conversation import',o:'Chris',s:'Pending',d:'Jul 7-9',notes:'',link:''},
+    {t:'Set up conversation import mapping (user-to-user, brand-to-brand)',o:'Greg',s:'Pending',d:'Jul 8-10',notes:'',link:'https://www.intercom.com/help/en/articles/177-import-your-user-data-into-intercom'},
+  ],client:[
+    {t:'Confirm historical conversation handling rule',o:'GPSI',s:'Dependency',d:'Jul 6',tip:'Decide how imported conversations should be handled: closed on import, a dedicated Archive inbox (recommended), or a split rule by channel. This shapes how we configure the import.',notes:'',link:''},
+    {t:'Name the owner for the agent invite list',o:'GPSI',s:'Dependency',d:'Jul 6',tip:'Confirm who on your side owns pulling together and inviting the full agent list across all five workspaces, so nobody is missed.',notes:'',link:''},
+    {t:'Confirm archive inbox naming convention',o:'GPSI',s:'Dependency',d:'Jul 8',tip:'Let us know what you\'d like the new Archive inbox called so historical conversations are easy to find later.',notes:'',link:''},
+  ]},
+  brands:{sabel:[
+    {t:'Configure five brands inside Fleet Management (GPS Insight, Titan/CTS, FieldAware, ServiceBridge, ClearPath)',o:'Chris',s:'Pending',d:'Jul 13-17',notes:'',link:'https://www.intercom.com/help/en/articles/3946163-configure-your-messenger-to-support-multiple-brand-styles#h_8df91c3453'},
+    {t:'Set up audience rules so each brand loads the correct Messenger styling and knowledge',o:'Chris',s:'Pending',d:'Jul 17-20',notes:'',link:'https://www.intercom.com/help/en/articles/2982784-control-who-can-see-your-articles'},
+    {t:'Generate install snippets and a verification checklist per brand',o:'Chris',s:'Pending',d:'Jul 20-22',notes:'',link:''},
+    {t:'Decommission retired workspaces once migration is verified',o:'Greg',s:'Pending',d:'Jul 22-24',notes:'',link:''},
+  ],client:[
+    {t:'Confirm the five-brand list and naming is correct',o:'GPSI',s:'Dependency',d:'Jul 13',tip:'Review the brand list (GPS Insight, Titan/CTS, FieldAware, ServiceBridge, ClearPath) and confirm names and structure before we configure them.',notes:'',link:''},
+    {t:'Confirm all product domains needing the Messenger installed',o:'GPSI',s:'Dependency',d:'Jul 17',tip:'Send us the full list of domains across all five brands so we can generate the right install snippets for each.',notes:'',link:''},
+    {t:'Coordinate snippet deployment across your five dev teams',o:'GPSI',s:'Dependency',d:'Jul 20',tip:'Once we hand over the install snippet, target page and test URL per brand, you\'ll need to coordinate your five dev teams (Matt coordinates) to deploy them.',notes:'',link:''},
+  ]},
+  finkb:{sabel:[
+    {t:'Pull existing articles from source workspaces into Fleet Management',o:'Chris',s:'Pending',d:'Jul 13-15',notes:'',link:'https://www.intercom.com/help/en/articles/9454619-sync-or-import-internal-articles-from-external-sources'},
+    {t:'Tag articles with audience rules per brand',o:'Chris',s:'Pending',d:'Jul 15-16',notes:'',link:'https://www.intercom.com/help/en/articles/2982784-control-who-can-see-your-articles'},
+    {t:'Produce a knowledge gap report per brand',o:'Chris',s:'Pending',d:'Jul 16-18',notes:'',link:''},
+    {t:'Configure Fin per brand: confidence threshold, escalation rules, fallback, tone',o:'Chris',s:'Pending',d:'Jul 18-21',notes:'',link:'https://www.intercom.com/help/en/articles/9357948-manage-knowledge-audiences-and-targeting'},
+    {t:'Run Fin in test mode per brand and tune before go-live',o:'Chris',s:'Pending',d:'Jul 21-24',notes:'',link:''},
+    {t:'Set up Zapier/Make sync from WordPress for ongoing content updates',o:'Greg',s:'Pending',d:'Jul 21-23',notes:'',link:''},
+  ],client:[
+    {t:'Confirm content authoring owner',o:'GPSI',s:'Dependency',d:'Jul 13',tip:'Name who on your team owns writing new knowledge base content, so we know who to send the gap report to.',notes:'',link:''},
+    {t:'Author new FAQ/article content for Titan, ClearPath and ServiceBridge gaps',o:'GPSI',s:'Dependency',d:'Jul 18',tip:'Once we send the knowledge gap report, you\'ll need to write new FAQ or help articles for the brands with little existing content, mainly Titan, ClearPath and ServiceBridge.',notes:'',link:''},
+    {t:'Review Fin test-mode responses per brand before go-live',o:'GPSI',s:'Dependency',d:'Jul 23',tip:'Spend some time in test mode checking Fin\'s answers per brand before we flip it live, especially for brands with less content.',notes:'',link:''},
+  ]},
+  golive:{sabel:[
+    {t:'Cut over email addresses per brand to the new workspace',o:'Chris',s:'Pending',d:'Jul 27-29',notes:'',link:''},
+    {t:'Point help centre DNS to the new Intercom help centre URL per brand',o:'Chris',s:'Pending',d:'Jul 27-29',notes:'',link:'https://developers.intercom.com/docs/guides/help-center/custom-domains'},
+    {t:'Run go-live per brand and monitor hypercare, one or two brands at a time',o:'Chris',s:'Pending',d:'Jul 29-Aug 7',notes:'',link:'https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live'},
+    {t:'Coordinate final go-live sign-off',o:'Richard',s:'Pending',d:'Aug 7',notes:'',link:''},
+  ],client:[
+    {t:'Deploy Messenger snippet on production portal per brand',o:'GPSI',s:'Dependency',d:'Jul 27',tip:'Your dev teams need to deploy the install snippet we handed over onto each brand\'s live portal before that brand can go live.',notes:'',link:''},
+    {t:'Subscribe agents to the correct inboxes per brand',o:'GPSI',s:'Dependency',d:'Jul 29',tip:'Make sure each agent is subscribed to the right brand inbox so they see the right conversations from go-live day.',notes:'',link:''},
+    {t:'Sign off each brand go-live',o:'GPSI',s:'Dependency',d:'Aug 7',tip:'Confirm each brand is working as expected (chat, email, help centre, Fin) before we call it live.',notes:'',link:''},
+  ]},
+  sfdc:{sabel:[
+    {t:'Run Salesforce mapping workshop: contact fields, case triggers, ownership rules',o:'Greg',s:'Pending',d:'Aug 10-11',notes:'',link:'https://www.intercom.com/help/en/articles/4497943-install-and-configure-the-salesforce-app'},
+    {t:'Configure the Intercom-Salesforce app: contact sync, case sync, account ownership',o:'Greg',s:'Pending',d:'Aug 11-14',notes:'',link:'https://www.intercom.com/help/en/articles/5203865-using-the-salesforce-app-in-intercom'},
+    {t:'Map attributes in the agreed direction per field',o:'Greg',s:'Pending',d:'Aug 14-17',notes:'',link:''},
+    {t:'Test the full path: Fin conversation, escalation, Salesforce case, agent reply',o:'Greg',s:'Pending',d:'Aug 17-21',notes:'',link:'https://www.intercom.com/help/en/articles/1047665-salesforce-integration-troubleshooting-and-f-a-q'},
+  ],client:[
+    {t:'Attend the Salesforce mapping workshop with Alex',o:'GPSI',s:'Dependency',d:'Aug 10',tip:'Bring your Salesforce admin (Alex) to this workshop so field mapping and case-creation rules are agreed properly.',notes:'',link:''},
+    {t:'Confirm case creation trigger rule',o:'GPSI',s:'Dependency',d:'Aug 11',tip:'Decide when Salesforce cases should be created from Intercom conversations: on open, on close, on escalation, or workflow-driven. Sabel recommends workflow-driven so Fin-resolved chats don\'t clutter Salesforce.',notes:'',link:''},
+    {t:'Provide Salesforce sandbox/API credentials',o:'GPSI',s:'Dependency',d:'Aug 10',tip:'Share Salesforce API credentials and sandbox access so we can install and test the connector.',notes:'',link:''},
+  ]},
+};
+
+let cur='overview';
+let cardNotes={};
+let cardLinks={};
+let origStatus={};
+let expandedCards=new Set();
+let activeFilters=new Set();
+let pickerCid=null;
+let saveTimer=null;
+let dragInfo=null;
+let dragOverCol=null;
+const CLIENT_LABEL='GPSI';
+
+function scheduleAutoSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>saveState(),800);
+}
+async function saveState(){
+  const payload={statuses:{},notes:cardNotes,links:cardLinks,origStatus,taskData:{}};
+  P.forEach(ph=>{
+    payload.taskData[ph.id]={sabel:[...T[ph.id].sabel],client:[...T[ph.id].client]};
+    ['sabel','client'].forEach(grp=>{
+      T[ph.id][grp].forEach((t,i)=>{ payload.statuses[ph.id+'-'+(grp==='sabel'?'s':'c')+'-'+i]=t.s; });
+    });
+  });
+  try{
+    await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:KEY,value:JSON.stringify(payload)})});
+    showAutosaved();
+  }catch(e){showToast('Save failed');}
+}
+async function loadInitial(){
+  try{
+    const r=await fetch(API+'?key='+KEY);
+    const j=await r.json();
+    if(j&&j.value){
+      const d=JSON.parse(j.value);
+      if(d.taskData){
+        P.forEach(ph=>{
+          if(d.taskData[ph.id]){
+            if(d.taskData[ph.id].sabel&&d.taskData[ph.id].sabel.length) T[ph.id].sabel=d.taskData[ph.id].sabel;
+            if(d.taskData[ph.id].client&&d.taskData[ph.id].client.length) T[ph.id].client=d.taskData[ph.id].client;
+          }
+        });
+      }
+      if(d.statuses) Object.entries(d.statuses).forEach(([k,v])=>{
+        const parts=k.split('-');
+        const idx=parseInt(parts[parts.length-1]);
+        const gs=parts[parts.length-2];
+        const phId=parts.slice(0,parts.length-2).join('-');
+        const gf=gs==='c'?'client':'sabel';
+        if(T[phId]&&T[phId][gf]&&T[phId][gf][idx]) T[phId][gf][idx].s=v;
+      });
+      if(d.notes) cardNotes=d.notes;
+      if(d.links) cardLinks=d.links;
+      if(d.origStatus) origStatus=d.origStatus;
+      render();
+    }
+  }catch(e){}
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+function showAutosaved(){
+  const d=document.getElementById('autosave-dot');
+  d.classList.add('show');
+  clearTimeout(d._t);
+  d._t=setTimeout(()=>d.classList.remove('show'),2000);
+}
+
+function openStatusPicker(e,cid){
+  e.stopPropagation();
+  if(pickerCid===cid){closeStatusPicker();return;}
+  pickerCid=cid;
+  const t=resolveTask(cid);if(!t)return;
+  const rect=e.currentTarget.getBoundingClientRect();
+  const picker=document.getElementById('status-picker');
+  picker.innerHTML=ALL_STATUSES.map(s=>{
+    const x=SC[s]||SC.Pending;
+    const active=t.s===s;
+    return`<button onclick="pickStatus('${cid}','${s}')" style="background:${active?'rgba(255,255,255,.06)':'transparent'}">
+      <span style="width:7px;height:7px;border-radius:50%;background:${x.c};flex-shrink:0;display:inline-block"></span>
+      <span style="font-size:12px;color:${active?x.c:'#94A3B8'};font-weight:${active?'500':'400'};flex:1;text-align:left">${s}</span>
+      ${active?`<i class="ti ti-check" style="font-size:11px;color:${x.c}"></i>`:''}
+    </button>`;
+  }).join('');
+  const spaceBelow=window.innerHeight-rect.bottom;
+  const pickerH=180;
+  const top=spaceBelow>pickerH+10?rect.bottom+5:rect.top-pickerH-5;
+  picker.style.left=Math.min(rect.left,window.innerWidth-170)+'px';
+  picker.style.top=top+'px';
+  picker.style.display='block';
+}
+function pickStatus(cid,val){
+  closeStatusPicker();
+  const t=resolveTask(cid);if(!t)return;
+  if(val==='Complete'&&t.s!=='Complete') origStatus[cid]=t.s;
+  if(val!=='Complete') delete origStatus[cid];
+  t.s=val;
+  render();
+  scheduleAutoSave();
+}
+function closeStatusPicker(){
+  document.getElementById('status-picker').style.display='none';
+  pickerCid=null;
+}
+document.addEventListener('click',()=>closeStatusPicker());
+
+function showTip(e,txt){
+  const d=document.getElementById('tip-box');
+  d.textContent=txt;d.style.display='block';moveTip(e);
+}
+function moveTip(e){
+  const d=document.getElementById('tip-box');
+  d.style.left=Math.min(e.clientX+14,window.innerWidth-260)+'px';
+  d.style.top=Math.max(e.clientY-48,8)+'px';
+}
+function hideTip(){document.getElementById('tip-box').style.display='none';}
+
+function toggleFilter(key){
+  if(activeFilters.has(key)) activeFilters.delete(key);
+  else activeFilters.add(key);
+  renderMain();
+}
+function taskVisible(t){
+  if(activeFilters.size===0) return true;
+  for(const k of activeFilters){ if(FILTER_MAP[k].includes(t.s)) return true; }
+  return false;
+}
+
+function globalStats(){
+  let total=0,complete=0,usedH=0,on=0,att=0,risk=0;
+  P.forEach(ph=>{
+    const tasks=[...T[ph.id].sabel,...T[ph.id].client];
+    const done=tasks.filter(t=>t.s==='Complete').length;
+    const inprog=tasks.filter(t=>t.s==='In Progress').length;
+    total+=tasks.length;complete+=done;
+    if(tasks.length>0)usedH+=((done+inprog*.5)/tasks.length)*ph.h;
+    tasks.forEach(t=>{
+      if(['Complete','In Progress'].includes(t.s))on++;
+      else if(t.s==='Blocked')risk++;
+      else att++;
+    });
+  });
+  return{total,complete,usedH:Math.round(usedH),on,att,risk};
+}
+function phaseStats(id){
+  const ph=P.find(p=>p.id===id);
+  const tasks=[...T[id].sabel,...T[id].client];
+  let on=0,att=0,risk=0,done=0,inprog=0;
+  tasks.forEach(t=>{
+    if(t.s==='Complete'){on++;done++;}
+    else if(t.s==='In Progress'){on++;inprog++;}
+    else if(t.s==='Blocked')risk++;
+    else att++;
+  });
+  const consumed=tasks.length>0?Math.round(((done+inprog*.5)/tasks.length)*ph.h):0;
+  return{on,att,risk,consumed,done,total:tasks.length};
+}
+function phaseMini(id){
+  const tasks=[...T[id].sabel,...T[id].client];
+  return{done:tasks.filter(t=>t.s==='Complete').length,total:tasks.length};
+}
+function resolveTask(cid){
+  const parts=cid.split('-');
+  const idx=parseInt(parts[parts.length-1]);
+  const gs=parts[parts.length-2];
+  const phId=parts.slice(0,parts.length-2).join('-');
+  const gf=gs==='c'?'client':'sabel';
+  return T[phId]&&T[phId][gf]&&T[phId][gf][idx];
+}
+
+function bdg(txt,c,bg){return`<span class="bdg" style="color:${c};background:${bg}">${txt}</span>`;}
+function oBdg(o){const x=OW[o]||OW.Chris;return bdg(o,x.c,x.bg);}
+function gradBar(pct,h=12){
+  return`<div style="background:#1E2433;border-radius:5px;height:${h}px;overflow:hidden">
+    <div style="width:100%;height:100%;background:linear-gradient(to right,#E10600 0%,#FBBF24 50%,#4ADE80 100%);clip-path:inset(0 ${100-Math.max(pct,0)}% 0 0)"></div>
+  </div>`;
+}
+
+function toggleComplete(e,cid){
+  e.stopPropagation();
+  const t=resolveTask(cid);if(!t)return;
+  if(t.s==='Complete'){
+    t.s=origStatus[cid]||(cid.includes('-c-')?'Dependency':'Pending');
+    delete origStatus[cid];
+  } else {
+    origStatus[cid]=t.s;t.s='Complete';
+  }
+  render();
+  scheduleAutoSave();
+}
+
+function addTask(phId,grp){
+  const isC=grp==='client';
+  const task={t:'New task',o:isC?CLIENT_LABEL:'Chris',s:isC?'Dependency':'Pending',d:'',notes:'',link:''};
+  if(isC) task.tip='';
+  T[phId][grp].push(task);
+  const gs=grp==='sabel'?'s':'c';
+  const cid=phId+'-'+gs+'-'+(T[phId][grp].length-1);
+  expandedCards.add(cid);
+  renderMain();
+  scheduleAutoSave();
+  setTimeout(()=>{const el=document.getElementById('ttl-'+cid);if(el){el.focus();el.select();}},60);
+}
+function saveTitle(cid,val){
+  const t=resolveTask(cid);if(t)t.t=val||'Untitled task';
+  scheduleAutoSave();
+}
+
+function remapCids(phId,grp,removedIdx){
+  const gs=grp==='sabel'?'s':'c';
+  const len=T[phId][grp].length+1;
+  for(let i=removedIdx+1;i<len;i++){
+    const o=phId+'-'+gs+'-'+i,n=phId+'-'+gs+'-'+(i-1);
+    if(cardNotes[o]!==undefined){cardNotes[n]=cardNotes[o];delete cardNotes[o];}
+    if(cardLinks[o]!==undefined){cardLinks[n]=cardLinks[o];delete cardLinks[o];}
+    if(origStatus[o]!==undefined){origStatus[n]=origStatus[o];delete origStatus[o];}
+    if(expandedCards.has(o)){expandedCards.delete(o);expandedCards.add(n);}
+  }
+  const rc=phId+'-'+gs+'-'+removedIdx;
+  delete cardNotes[rc];delete cardLinks[rc];delete origStatus[rc];expandedCards.delete(rc);
+}
+function clearDropHighlight(){
+  if(dragOverCol){const el=document.getElementById(dragOverCol);if(el)el.classList.remove('col-drop');dragOverCol=null;}
+}
+function onDragStart(e,phId,grp,idx){
+  dragInfo={phId,grp,idx};
+  e.dataTransfer.effectAllowed='move';
+  setTimeout(()=>{const card=e.currentTarget;if(card)card.classList.add('card-dragging');},0);
+}
+function onDragEnd(e){
+  e.currentTarget.classList.remove('card-dragging');
+  clearDropHighlight();
+}
+function onDragOver(e,colId){
+  e.preventDefault();
+  if(dragOverCol!==colId){clearDropHighlight();dragOverCol=colId;const el=document.getElementById(colId);if(el)el.classList.add('col-drop');}
+}
+function onDragLeave(e,colId){
+  if(!e.currentTarget.contains(e.relatedTarget)){const el=document.getElementById(colId);if(el)el.classList.remove('col-drop');if(dragOverCol===colId)dragOverCol=null;}
+}
+function onDrop(e,tPhId,tGrp){
+  e.preventDefault();
+  clearDropHighlight();
+  if(!dragInfo)return;
+  const{phId:sPhId,grp:sGrp,idx:sIdx}=dragInfo;dragInfo=null;
+  if(sPhId===tPhId&&sGrp===tGrp)return;
+  const task={...T[sPhId][sGrp][sIdx]};
+  if(tGrp==='client'){task.o=CLIENT_LABEL;if(!task.tip)task.tip='';}
+  else{task.o='Chris';delete task.tip;}
+  remapCids(sPhId,sGrp,sIdx);
+  T[sPhId][sGrp].splice(sIdx,1);
+  T[tPhId][tGrp].push(task);
+  render();
+  scheduleAutoSave();
+}
+
+function tog(cid){
+  if(expandedCards.has(cid)) expandedCards.delete(cid);
+  else expandedCards.add(cid);
+  renderMain();
+}
+function saveNote(cid,val){
+  cardNotes[cid]=val;
+  scheduleAutoSave();
+}
+function saveLink(cid,val){
+  cardLinks[cid]=val;
+  scheduleAutoSave();
+  renderMain();
+}
+
+function makeCard(t,cid,isClient){
+  const _p=cid.split('-');
+  const _idx=parseInt(_p[_p.length-1]);
+  const _gs=_p[_p.length-2];
+  const _ph=_p.slice(0,_p.length-2).join('-');
+  const _grp=_gs==='c'?'client':'sabel';
+  const done=t.s==='Complete';
+  const curNotes=cardNotes[cid]!==undefined?cardNotes[cid]:(t.notes||'');
+  const curLink=cardLinks[cid]!==undefined?cardLinks[cid]:(t.link||'');
+  const isOpen=expandedCards.has(cid);
+  const hasNote=curNotes.length>0;
+  const hasLink=curLink.length>0;
+  const x=SC[t.s]||SC.Pending;
+  const tipIcon=isClient&&t.tip
+    ?`<i class="ti ti-info-circle" onmouseenter="showTip(event,${JSON.stringify(t.tip)})" onmousemove="moveTip(event)" onmouseleave="hideTip()" style="font-size:13px;color:#475569;cursor:help;flex-shrink:0;margin-top:1px"></i>`:'';
+  const linkLabel=isClient?'Link to my Intercom workspace':'Link';
+  const linkEl=hasLink
+    ?`<a href="${curLink}" target="_blank" style="font-size:12px;color:#60A5FA;display:flex;align-items:center;gap:5px;text-decoration:none;word-break:break-all"><i class="ti ti-external-link" style="font-size:12px;flex-shrink:0"></i>${curLink.replace('https://','').split('/').slice(0,3).join('/')}</a>`
+    :`<input type="url" value="${curLink}" style="width:100%;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit;box-sizing:border-box" placeholder="Paste a link..." onchange="saveLink('${cid}',this.value)">`;
+  const safeTitle=t.t.replace(/"/g,'&quot;');
+  return`<div class="${isClient?'task-client':'task'}${done?' done':''}" draggable="true" ondragstart="onDragStart(event,'${_ph}','${_grp}',${_idx})" ondragend="onDragEnd(event)">
+    <div class="task-inner">
+      <div class="task-head" onclick="tog('${cid}')">
+        <div style="display:flex;align-items:flex-start;gap:8px">
+          <button class="chk-btn" onclick="toggleComplete(event,'${cid}')" title="${done?'Mark incomplete':'Mark complete'}">
+            <i class="ti ti-${done?'circle-check-filled':'circle'}" style="font-size:18px;color:${done?'#4ADE80':'#334155'}"></i>
+          </button>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:6px">
+              <div style="display:flex;align-items:flex-start;gap:5px;flex:1;min-width:0">
+                <span style="font-size:12px;line-height:1.45;color:${done?'#334155':'#E2E8F0'};${done?'text-decoration:line-through':''}">${t.t}</span>
+                ${tipIcon}
+              </div>
+              <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+                <button class="stat-bdg" style="color:${x.c};background:${x.bg}" onclick="openStatusPicker(event,'${cid}')">
+                  ${t.s}<i class="ti ti-chevron-down" style="font-size:9px;opacity:.7;margin-left:1px"></i>
+                </button>
+              </div>
+            </div>
+            <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+              ${oBdg(t.o)}
+              <span style="font-size:11px;color:#475569">${t.d}</span>
+              ${hasNote&&!done?`<span style="font-size:10px;color:#475569;background:#1E2433;padding:1px 5px;border-radius:3px">note</span>`:''}
+              ${hasLink&&!done?`<i class="ti ti-external-link" style="font-size:11px;color:#475569"></i>`:''}
+              <i class="ti ti-chevron-down" style="font-size:11px;color:#334155;margin-left:auto;${isOpen?'transform:rotate(180deg)':''}"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="task-expand" style="display:${isOpen?'block':'none'}">
+        <div style="margin-bottom:10px">
+          <label>Task title</label>
+          <input id="ttl-${cid}" type="text" value="${safeTitle}" style="width:100%;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit;box-sizing:border-box" placeholder="Task title..." onclick="event.stopPropagation()" onchange="saveTitle('${cid}',this.value)">
+        </div>
+        <div style="margin-bottom:10px">
+          <label>Notes</label>
+          <textarea rows="3" placeholder="Add notes for this action..." oninput="saveNote('${cid}',this.value)">${curNotes}</textarea>
+        </div>
+        <div>
+          <label>${linkLabel}</label>
+          ${linkEl}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function pillarBarsHTML(){
+  return P.map(p=>{
+    const m=phaseMini(p.id);
+    const pPct=m.total>0?Math.round(m.done/m.total*100):0;
+    return`<div style="display:flex;align-items:center;gap:8px">
+      <span style="width:7px;height:7px;border-radius:50%;background:${p.c};flex-shrink:0;display:inline-block"></span>
+      <span style="font-size:11px;color:#94A3B8;width:82px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l}</span>
+      <div style="flex:1;background:#1E2433;border-radius:2px;height:5px;overflow:hidden"><div style="height:100%;width:${pPct}%;background:${p.c}"></div></div>
+      <span style="font-size:11px;width:26px;text-align:right;flex-shrink:0;font-weight:${pPct>0?'500':'400'};color:${pPct===100?'#4ADE80':pPct>0?p.c:'#475569'}">${pPct}%</span>
+    </div>`;
+  }).join('');
+}
+function ovTopCards(gs){
+  const pct=gs.total>0?Math.round(gs.complete/gs.total*100):0;
+  const pctClr=pct>66?'#4ADE80':pct>33?'#FBBF24':'#E10600';
+  const usedPct=Math.round(gs.usedH/TOTAL_H*100);
+  const hClr=usedPct>80?'#F87171':usedPct>50?'#FBBF24':'#60A5FA';
+  const remaining=TOTAL_H-gs.usedH;
+  const phHours=P.map(p=>{
+    const tasks=[...T[p.id].sabel,...T[p.id].client];
+    const done=tasks.filter(t=>t.s==='Complete').length;
+    const inprog=tasks.filter(t=>t.s==='In Progress').length;
+    const consumed=tasks.length>0?Math.round(((done+inprog*.5)/tasks.length)*p.h*10)/10:0;
+    const barPct=Math.min(Math.round(consumed/p.h*100),100);
+    return`<div style="display:flex;align-items:center;gap:7px">
+      <span style="width:6px;height:6px;border-radius:50%;background:${p.c};flex-shrink:0;display:inline-block"></span>
+      <span style="font-size:10px;color:#94A3B8;width:70px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l}</span>
+      <div style="flex:1;background:#0F1117;border-radius:2px;height:4px;overflow:hidden"><div style="height:100%;width:${barPct}%;background:${p.c}"></div></div>
+      <span style="font-size:10px;color:#64748B;width:44px;text-align:right;flex-shrink:0">${consumed}/${p.h}h</span>
+    </div>`;
+  }).join('');
+  return`<div class="ov-top">
+    <div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:16px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-bottom:10px">Overall completion</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:10px">
+        <span style="font-size:36px;font-weight:700;color:${pctClr};line-height:1">${pct}%</span>
+        <span style="font-size:13px;color:#475569">${gs.complete} / ${gs.total} actions</span>
+      </div>
+      ${gradBar(pct,10)}
+      <div style="font-size:10px;font-weight:600;letter-spacing:.06em;color:#475569;text-transform:uppercase;margin:12px 0 8px">by pillar</div>
+      <div style="display:flex;flex-direction:column;gap:7px">${pillarBarsHTML()}</div>
+    </div>
+    <div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:16px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-bottom:10px">Hours budget</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px">
+        <div>
+          <span style="font-size:36px;font-weight:700;color:${hClr};line-height:1">${gs.usedH}h</span>
+          <div style="font-size:11px;color:#475569;margin-top:3px">of ${TOTAL_H}h used</div>
+        </div>
+        <div style="text-align:right">
+          <span style="font-size:24px;font-weight:600;color:#E2E8F0;line-height:1">${remaining}h</span>
+          <div style="font-size:11px;color:#475569;margin-top:3px">remaining</div>
+        </div>
+      </div>
+      ${gradBar(usedPct,10)}
+      <div style="font-size:10px;font-weight:600;letter-spacing:.06em;color:#475569;text-transform:uppercase;margin:12px 0 8px">by pillar</div>
+      <div style="display:flex;flex-direction:column;gap:7px">${phHours}</div>
+    </div>
+  </div>`;
+}
+function phaseCompletionCard(pct,done,total){
+  const clr=pct>66?'#4ADE80':pct>33?'#FBBF24':'#E10600';
+  return`<div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:14px;margin-bottom:1rem">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:12px;color:#94A3B8">Phase completion</span>
+      <div style="display:flex;align-items:baseline;gap:6px">
+        <span style="font-size:22px;font-weight:600;color:${clr}">${pct}%</span>
+        <span style="font-size:11px;color:#475569">${done} / ${total} actions</span>
+      </div>
+    </div>
+    ${gradBar(pct)}
+    <div style="font-size:10px;font-weight:600;letter-spacing:.06em;color:#475569;text-transform:uppercase;margin:12px 0 8px">project — by pillar</div>
+    <div style="display:flex;flex-direction:column;gap:8px">${pillarBarsHTML()}</div>
+  </div>`;
+}
+function filterStatCards(on,att,risk,inPhase){
+  const aOn=activeFilters.has('on'),aAtt=activeFilters.has('att'),aRisk=activeFilters.has('risk');
+  const anyActive=aOn||aAtt||aRisk;
+  const hint=inPhase?(anyActive?`<div class="filter-hint"><i class="ti ti-filter-filled" style="font-size:11px;color:#E10600"></i>Filtered view — click active card to clear</div>`:`<div class="filter-hint"><i class="ti ti-filter" style="font-size:11px"></i>Click a card to filter tasks below</div>`):'';
+  return`<div class="stat-grid">
+    <button class="sc f-on${aOn?' active':''}" onclick="${inPhase?'toggleFilter(\'on\')':''}">
+      <div style="font-size:22px;font-weight:600;color:#4ADE80">${on}</div>
+      <div style="font-size:11px;color:${aOn?'#4ADE80':'#475569'};margin-top:2px;display:flex;align-items:center;gap:4px">${aOn?'<i class="ti ti-eye" style="font-size:11px"></i>':''}On track</div>
+    </button>
+    <button class="sc f-att${aAtt?' active':''}" onclick="${inPhase?'toggleFilter(\'att\')':''}">
+      <div style="font-size:22px;font-weight:600;color:#FBBF24">${att}</div>
+      <div style="font-size:11px;color:${aAtt?'#FBBF24':'#475569'};margin-top:2px;display:flex;align-items:center;gap:4px">${aAtt?'<i class="ti ti-eye" style="font-size:11px"></i>':''}Needs attention</div>
+    </button>
+    <button class="sc f-risk${aRisk?' active':''}" onclick="${inPhase?'toggleFilter(\'risk\')':''}">
+      <div style="font-size:22px;font-weight:600;color:#F87171">${risk}</div>
+      <div style="font-size:11px;color:${aRisk?'#F87171':'#475569'};margin-top:2px;display:flex;align-items:center;gap:4px">${aRisk?'<i class="ti ti-eye" style="font-size:11px"></i>':''}At risk</div>
+    </button>
+  </div>${hint}`;
+}
+
+function renderSidebar(){
+  const gs=globalStats();
+  const pct=gs.total>0?Math.round(gs.complete/gs.total*100):0;
+  const usedPct=Math.round(gs.usedH/TOTAL_H*100);
+  const pctClr=pct>66?'#4ADE80':pct>33?'#FBBF24':'#E10600';
+  const oa=cur==='overview';
+  const ovBtn=`<button class="si" style="border-left:3px solid ${oa?'#E10600':'transparent'};${oa?'background:rgba(255,255,255,.03)':''}" onclick="setP('overview')">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+      <div><div style="font-size:12px;font-weight:500;color:${oa?'#E2E8F0':'#94A3B8'}">Overview</div>
+      <div style="font-size:10px;color:#475569;margin-top:1px">Full project snapshot</div></div>
+      <span style="font-size:12px;font-weight:600;color:${pctClr}">${pct}%</span>
+    </div>${gradBar(pct,3)}
+  </button>`;
+  const phBtns=P.map(p=>{
+    const m=phaseMini(p.id);
+    const act=p.id===cur;
+    const dPct=m.total>0?Math.round(m.done/m.total*100):0;
+    const dClr=dPct===100?'#4ADE80':dPct>0?p.c:'#475569';
+    return`<button class="si" style="border-left:3px solid ${act?p.c:'transparent'};${act?'background:rgba(255,255,255,.03)':''}" onclick="setP('${p.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:5px">
+        <div style="min-width:0;flex:1">
+          <div style="font-size:12px;font-weight:${act?'500':'400'};color:${act?'#E2E8F0':'#94A3B8'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l}</div>
+          <div style="font-size:10px;color:#475569;margin-top:1px">${p.w} · ${p.h}h</div>
+        </div>
+        <span style="font-size:11px;font-weight:${dPct>0?'600':'400'};color:${dClr};flex-shrink:0">${dPct}%</span>
+      </div>
+      <div style="background:#1E2433;border-radius:2px;height:3px;overflow:hidden"><div style="height:100%;width:${dPct}%;background:${p.c}"></div></div>
+    </button>`;
+  }).join('');
+  document.getElementById('sidebar').innerHTML=`
+    <div class="sb-head">
+      <img src="${LOGO}" class="sb-logo" alt="Sabel">
+      <div class="sb-title">GPS Insight</div>
+      <div class="sb-sub">Project tracker · Jul–Sep 2026</div>
+    </div>
+    ${ovBtn}<div class="sb-sec">Pillars</div>${phBtns}
+    <div class="sb-footer">
+      <div style="font-size:11px;color:#94A3B8;margin-bottom:4px">Hours budget</div>
+      <div style="display:flex;align-items:baseline;gap:3px;margin-bottom:6px">
+        <span style="font-size:20px;font-weight:600;color:#E2E8F0">${gs.usedH}h</span>
+        <span style="font-size:11px;color:#475569"> of ${TOTAL_H}h used</span>
+      </div>
+      ${gradBar(usedPct,4)}
+      <div style="font-size:11px;color:#475569;margin-top:4px">${TOTAL_H-gs.usedH}h remaining</div>
+    </div>`;
+}
+
+function renderMain(){
+  const gs=globalStats();
+  let html='';
+  if(cur==='overview'){
+    const totalOpen=P.reduce((n,p)=>n+T[p.id].client.filter(t=>t.s!=='Complete').length,0);
+    const allOpen=P.map(p=>{
+      const items=T[p.id].client.filter(t=>t.s!=='Complete');
+      if(!items.length)return'';
+      return`<div style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px">
+          <span style="width:6px;height:6px;border-radius:50%;background:${p.c};flex-shrink:0;display:inline-block"></span>
+          <span style="font-size:11px;font-weight:500;color:#94A3B8">${p.l} · ${items.length} open</span>
+        </div>
+        ${T[p.id].client.map((t,i)=>t.s==='Complete'?'':makeCard(t,p.id+'-c-'+i,true)).join('')}
+      </div>`;
+    }).join('');
+    const phGrid=P.map(p=>{
+      const m=phaseMini(p.id);
+      const dPct=m.total>0?Math.round(m.done/m.total*100):0;
+      const dClr=dPct===100?'#4ADE80':dPct>0?p.c:'#475569';
+      return`<div class="ph-card" onclick="setP('${p.id}')">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+          <span style="width:8px;height:8px;border-radius:50%;background:${p.c};flex-shrink:0;display:inline-block"></span>
+          <span style="font-size:12px;font-weight:500;color:#E2E8F0">${p.l}</span>
+        </div>
+        <div style="font-size:11px;color:#475569;margin-bottom:8px">${p.w} · ${p.h}h</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+          <span style="font-size:11px;color:#475569">${m.done}/${m.total}</span>
+          <span style="font-size:14px;font-weight:600;color:${dClr}">${dPct}%</span>
+        </div>
+        <div style="background:#0F1117;border-radius:2px;height:4px;overflow:hidden"><div style="height:100%;width:${dPct}%;background:${p.c}"></div></div>
+      </div>`;
+    }).join('');
+    html=`<p style="font-size:11px;color:#475569;margin-bottom:3px">Jul 2026 – Sep 2026</p>
+      <p style="font-size:18px;font-weight:600;color:#E2E8F0;margin-bottom:1.25rem">Project overview</p>
+      ${ovTopCards(gs)}
+      ${filterStatCards(gs.on,gs.att,gs.risk,false)}
+      <div style="height:1rem"></div>
+      ${totalOpen>0
+        ?`<div style="background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.22);border-radius:12px;padding:14px;margin-bottom:1rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <p style="font-size:13px;font-weight:600;color:#CA8A04;margin:0;display:flex;align-items:center;gap:6px"><i class="ti ti-alert-circle" style="font-size:14px"></i>Open client actions</p>
+              <span style="font-size:11px;color:#475569">${totalOpen} outstanding</span>
+            </div>
+            <p style="font-size:11px;color:#94A3B8;margin:0 0 12px">Hover <i class="ti ti-info-circle" style="font-size:12px;vertical-align:middle"></i> for guidance · click the status badge to update · expand to add notes or a link</p>
+            ${allOpen}
+          </div>`
+        :`<div style="background:rgba(74,222,128,.05);border:1px solid rgba(74,222,128,.2);border-radius:12px;padding:14px;margin-bottom:1rem;display:flex;align-items:center;gap:10px"><i class="ti ti-circle-check-filled" style="font-size:20px;color:#4ADE80"></i><span style="font-size:13px;color:#4ADE80;font-weight:500">All client actions complete</span></div>`}
+      <div style="font-size:10px;font-weight:600;letter-spacing:.06em;color:#475569;text-transform:uppercase;margin-bottom:8px">Pillar status — click to open</div>
+      <div class="ph-grid">${phGrid}</div>`;
+  } else {
+    const ph=P.find(p=>p.id===cur);
+    const td=T[cur];
+    const ps=phaseStats(cur);
+    const phasePct=ps.total>0?Math.round(ps.done/ps.total*100):0;
+    const visClient=td.client.filter(t=>taskVisible(t));
+    const visSabel=td.sabel.filter(t=>taskVisible(t));
+    const clientDone=td.client.filter(t=>t.s==='Complete').length;
+    const sabelDone=td.sabel.filter(t=>t.s==='Complete').length;
+    const emptyCol=`<div class="empty-col"><i class="ti ti-circle-check" style="font-size:22px;display:block;margin:0 auto 6px;color:#1E2433"></i>Nothing to show<br><span style="font-size:10px">Adjust filters above</span></div>`;
+    html=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+        <span style="width:9px;height:9px;border-radius:50%;background:${ph.c};display:inline-block;flex-shrink:0"></span>
+        <span style="font-size:18px;font-weight:600;color:#E2E8F0">${ph.l}</span>
+      </div>
+      <div style="font-size:11px;color:#475569;margin-bottom:1.25rem">${ph.d} · ${ph.h}h budget · ~${ps.consumed}h used</div>
+      ${phaseCompletionCard(phasePct,ps.done,ps.total)}
+      ${filterStatCards(ps.on,ps.att,ps.risk,true)}
+      <div style="height:1rem"></div>
+      <div class="phase-cols">
+        <div>
+          <p class="col-head" style="color:#CA8A04"><i class="ti ti-alert-circle" style="font-size:12px"></i>Your actions <span style="font-size:10px;color:#475569;font-weight:400;margin-left:4px">${clientDone}/${td.client.length}</span></p>
+          <div id="col-${cur}-c" ondragover="onDragOver(event,'col-${cur}-c')" ondragleave="onDragLeave(event,'col-${cur}-c')" ondrop="onDrop(event,'${cur}','client')" style="border-radius:10px;padding:2px;min-height:50px">
+            ${visClient.length?visClient.map(t=>{const i=td.client.indexOf(t);return makeCard(t,cur+'-c-'+i,true);}).join(''):emptyCol}
+            <button class="add-task-btn" onclick="addTask('${cur}','client')"><i class="ti ti-plus" style="font-size:13px"></i>Add client action</button>
+          </div>
+        </div>
+        <div>
+          <p class="col-head" style="color:#64748B"><i class="ti ti-tool" style="font-size:12px"></i>Sabel is handling <span style="font-size:10px;color:#475569;font-weight:400;margin-left:4px">${sabelDone}/${td.sabel.length}</span></p>
+          <div id="col-${cur}-s" ondragover="onDragOver(event,'col-${cur}-s')" ondragleave="onDragLeave(event,'col-${cur}-s')" ondrop="onDrop(event,'${cur}','sabel')" style="border-radius:10px;padding:2px;min-height:50px">
+            ${visSabel.length?visSabel.map(t=>{const i=td.sabel.indexOf(t);return makeCard(t,cur+'-s-'+i,false);}).join(''):emptyCol}
+            <button class="add-task-btn" onclick="addTask('${cur}','sabel')"><i class="ti ti-plus" style="font-size:13px"></i>Add Sabel action</button>
+          </div>
+      </div>`;
+  }
+  document.getElementById('main').innerHTML=html;
+}
+
+function render(){renderSidebar();renderMain();}
+function setP(id){cur=id;activeFilters.clear();render();}
+render();
+loadInitial();
+</script>
+</body>
+</html>
