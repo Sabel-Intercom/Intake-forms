@@ -1,0 +1,12 @@
+[
+  { "name": "Raiz",                "key": "raiz-tracker-v1",             "file": "RaizTracker_v2.html",             "sowHours": 40 },
+  { "name": "BTS",                 "key": "bts-usa-june-tracker-v1",     "file": "BTSUSATracker_v2.html",           "sowHours": 83 },
+  { "name": "Donkey Republic",     "key": "donkey-republic-tracker-v1",  "file": "DonkeyRepublicTracker_v2.html",   "sowHours": 72 },
+  { "name": "FLKItOver",           "key": "flkitover-tracker-v1",        "file": "FlkitOverTracker_v2.html",        "sowHours": null },
+  { "name": "YFood",               "key": "yfood-tracker-v1",            "file": "YFoodTracker_v2.html",            "sowHours": 60 },
+  { "name": "Cirqul",              "key": "cirqul-tracker-v1",           "file": "CirqulTracker_v2.html",           "sowHours": null },
+  { "name": "Education Perfect",   "key": "education-perfect-tracker-v1","file": "EducationPerfectTracker_v2.html", "sowHours": null },
+  { "name": "Huuuge",              "key": "huuuge-tracker-v1",           "file": "HuuugeTracker_v2.html",           "sowHours": 99 },
+  { "name": "GPS Insight",         "key": "gps-insight-tracker-v1",      "file": "GPSInsightTracker_v2.html",       "sowHours": 50 },
+  { "name": "The Giving Movement", "key": "thegivingmovement-tracker-v1","file": "TheGivingMovementTracker_v2.html","sowHours": 60 }
+]
