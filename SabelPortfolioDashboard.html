@@ -2,619 +2,983 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Sabel Portfolio Dashboard</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root {
-    --bg: #07070f; --surface: #0f0f1e; --card: #151525; --border: #252545;
-    --red: #e63946; --blue: #4a8fe7; --green: #2ecc71; --amber: #f39c12;
-    --purple: #9b59b6; --muted: #6a6a8a; --text: #dde1f0; --dim: #a0a4c0;
+  :root{
+    --bg:#0B0B0C; --surface:#0F1113; --card:#141618; --card2:#191C20; --card3:#1E2228;
+    --border:#2A3547; --border2:#1A2232; --red:#E10600; --redDim:rgba(225,6,0,.14);
+    --w:#FFFFFF; --body:#E2E8F0; --muted:#94A3B8; --mono:#64748B;
+    --green:#4ADE80; --blue:#60A5FA; --amber:#FBBF24; --purple:#C084FC; --redText:#F87171;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
-  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; gap: 16px; }
-  .header img { height: 36px; }
-  .header-title { flex: 1; }
-  .header-title h1 { font-size: 18px; font-weight: 600; letter-spacing: 0.04em; }
-  .header-title p { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .header-date { font-size: 12px; color: var(--muted); }
-  .toggle-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 32px; display: flex; align-items: center; gap: 14px; }
-  .toggle-label { font-size: 12px; color: var(--muted); }
-  .toggle-group { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-  .toggle-btn { padding: 6px 16px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; color: var(--muted); background: transparent; }
-  .toggle-btn.active { background: var(--blue); color: #fff; }
-  .active-count { font-size: 11px; color: var(--muted); margin-left: auto; }
-  .active-count span { color: var(--amber); font-weight: 600; }
-  .kpi-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 24px 32px 0; }
-  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
-  .kpi:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.4); border-color: #3a3a65; }
-  .kpi-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-  .kpi-value { font-size: 36px; font-weight: 700; line-height: 1; }
-  .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
-  .kpi-click-hint { position: absolute; bottom: 8px; right: 10px; font-size: 10px; color: var(--muted); opacity: 0; transition: opacity 0.2s; }
-  .kpi:hover .kpi-click-hint { opacity: 1; }
-  .kpi[data-status="complete"] .kpi-value { color: var(--green); }
-  .kpi[data-status="in-progress"] .kpi-value { color: var(--blue); }
-  .kpi[data-status="blocked"] .kpi-value { color: var(--red); }
-  .kpi[data-status="pending"] .kpi-value { color: var(--amber); }
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-  .modal-overlay.active { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; width: 640px; max-width: 95vw; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 24px 80px rgba(0,0,0,0.6); }
-  .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .modal-header h2 { font-size: 16px; font-weight: 600; }
-  .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 22px; line-height: 1; padding: 0 4px; }
-  .modal-close:hover { color: var(--text); }
-  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
-  .modal-table { width: 100%; border-collapse: collapse; }
-  .modal-table th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 0 12px 10px 0; border-bottom: 1px solid var(--border); }
-  .modal-table td { padding: 12px 12px 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; vertical-align: top; }
-  .modal-table tr:last-child td { border-bottom: none; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  .badge-green { background: rgba(46,204,113,0.15); color: var(--green); }
-  .badge-blue { background: rgba(74,143,231,0.15); color: var(--blue); }
-  .badge-red { background: rgba(230,57,70,0.15); color: var(--red); }
-  .badge-amber { background: rgba(243,156,18,0.15); color: var(--amber); }
-  .badge-gray { background: rgba(106,106,138,0.15); color: var(--muted); }
-  .charts-row { display: grid; grid-template-columns: 1fr; gap: 16px; padding: 20px 32px 0; }
-  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; }
-  .chart-title { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-  .chart-title span { color: var(--text); }
-  .chart-subtitle { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
-  .legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .section-header { padding: 28px 32px 12px; }
-  .section-header h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-  .client-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 32px; }
-  .client-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
-  .client-card.live { border-left: 3px solid var(--green); }
-  .client-card.blocked { border-left: 3px solid var(--red); }
-  .client-card.near-live { border-left: 3px solid var(--amber); }
-  .client-card.in-progress { border-left: 3px solid var(--blue); }
-  .client-card.early { border-left: 3px solid var(--purple); }
-  .client-card.historical { opacity: 0.5; }
-  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 8px; }
-  .card-title { font-size: 14px; font-weight: 700; line-height: 1.2; }
-  .card-status { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; flex-shrink: 0; }
-  .status-live { background: rgba(46,204,113,0.15); color: var(--green); }
-  .status-blocked { background: rgba(230,57,70,0.15); color: var(--red); }
-  .status-near-live { background: rgba(243,156,18,0.15); color: var(--amber); }
-  .status-in-progress { background: rgba(74,143,231,0.15); color: var(--blue); }
-  .status-early { background: rgba(155,89,182,0.15); color: var(--purple); }
-  .status-historical { background: rgba(106,106,138,0.15); color: var(--muted); }
-  .card-tasks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
-  .task-stat { text-align: center; background: var(--surface); border-radius: 6px; padding: 8px 4px; }
-  .task-stat-val { font-size: 18px; font-weight: 700; }
-  .task-stat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
-  .task-stat.green .task-stat-val { color: var(--green); }
-  .task-stat.blue .task-stat-val { color: var(--blue); }
-  .task-stat.red .task-stat-val { color: var(--red); }
-  .task-stat.amber .task-stat-val { color: var(--amber); }
-  .progress-bar-wrap { background: var(--surface); border-radius: 4px; height: 5px; overflow: hidden; margin-bottom: 12px; display: flex; }
-  .progress-bar-seg { height: 100%; }
-  .card-meta { font-size: 11px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
-  .card-meta a { color: var(--blue); text-decoration: none; }
-  .card-meta a:hover { text-decoration: underline; }
-  .sow-bar { display: flex; justify-content: space-between; margin-bottom: 6px; }
-  .hours-bar { background: var(--surface); border-radius: 4px; height: 5px; overflow: hidden; margin-bottom: 12px; }
-  .hours-fill { height: 100%; border-radius: 4px; }
-  .owners-section { padding: 0 32px; margin-top: 24px; }
-  .owners-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-  .owners-table th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
-  .owners-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
-  .owners-table tr:last-child td { border-bottom: none; }
-  .owner-bar { background: var(--surface); border-radius: 3px; height: 6px; margin-top: 4px; overflow: hidden; }
-  .owner-bar-fill { height: 100%; border-radius: 3px; }
-  body.active-only .completed-item { display: none !important; }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--body);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+  a{color:var(--blue);text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  ::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}::-webkit-scrollbar-track{background:transparent;}
 
-  /* TRACKER LINKS BOX */
-  .trackers-box { margin: 20px 32px 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; }
-  .trackers-box-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .trackers-box-header h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-  .tracker-links-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-  .tracker-link-item { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; text-decoration: none; transition: border-color 0.2s, background 0.2s; }
-  .tracker-link-item:hover { border-color: var(--blue); background: rgba(74,143,231,0.06); }
-  .tracker-link-item.no-link { cursor: default; opacity: 0.6; }
-  .tracker-link-item.no-link:hover { border-color: var(--border); background: var(--surface); }
-  .tl-name { font-size: 12px; font-weight: 700; color: var(--text); }
-  .tl-type { font-size: 10px; color: var(--muted); }
-  .tl-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 6px; border-radius: 10px; width: fit-content; }
+  /* header */
+  .header{position:relative;display:flex;align-items:center;gap:16px;padding:15px 28px;border-bottom:1px solid var(--border2);background:rgba(11,11,12,.9);}
+  .brand{display:flex;align-items:baseline;gap:9px;}
+  .brand .logo{font-size:16px;font-weight:800;letter-spacing:.32em;color:var(--w);text-transform:uppercase;}
+  .brand .logo .dot{color:var(--red);}
+  .brand .tag{font-size:8px;letter-spacing:.2em;color:var(--mono);text-transform:uppercase;}
+  .header h1{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--w);text-transform:uppercase;margin-left:6px;}
+  .header .right{margin-left:auto;display:flex;align-items:center;gap:14px;}
+  .live-stamp{font-size:10px;color:var(--mono);letter-spacing:.04em;}
+  .live-stamp b{color:var(--green);}
+  .refresh-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:5px;background:var(--card2);border:1px solid var(--border);color:var(--body);font-size:10px;font-weight:700;letter-spacing:.04em;transition:.14s;}
+  .refresh-btn:hover{border-color:var(--mono);color:var(--w);}
+  .refresh-btn.spin{opacity:.6;pointer-events:none;}
 
-  footer { padding: 24px 32px; border-top: 1px solid var(--border); margin-top: 28px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
-  footer a { color: var(--blue); font-size: 12px; text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
-  footer .sep { color: var(--border); }
-  .note { font-size: 11px; color: var(--muted); margin-left: auto; }
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 28px 70px;}
+
+  /* KPI strip */
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px;}
+  .kpi{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;}
+  .kpi .lbl{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mono);margin-bottom:7px;}
+  .kpi .val{font-size:27px;font-weight:800;line-height:1;color:var(--w);}
+  .kpi .sub{font-size:10px;color:var(--mono);margin-top:5px;}
+  .kpi.risk .val{color:var(--redText);}
+  .kpi.live .val{color:var(--green);}
+
+  /* section titles */
+  .sec-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;display:flex;align-items:center;gap:9px;}
+  .sec-title .count{font-size:9px;color:var(--mono);background:var(--card2);border:1px solid var(--border2);padding:1px 8px;border-radius:20px;}
+
+  /* pinch graph */
+  .pinch{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:18px 22px 14px;margin-bottom:24px;}
+  .pinch-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+  .pinch-head h2{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w);}
+  .pinch-head .legend{display:flex;gap:14px;flex-wrap:wrap;}
+  .pinch-head .li{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);}
+  .pinch-head .ld{width:9px;height:9px;border-radius:50%;}
+  .pinch-sub{font-size:10px;color:var(--mono);margin-bottom:14px;}
+  .timeline{position:relative;height:150px;margin:0 6px;}
+  .tl-axis{position:absolute;left:0;right:0;bottom:34px;height:2px;background:var(--border);}
+  .tl-month{position:absolute;bottom:8px;transform:translateX(-50%);font-size:9px;color:var(--mono);letter-spacing:.05em;text-transform:uppercase;}
+  .tl-grid{position:absolute;top:0;bottom:34px;width:1px;background:rgba(255,255,255,.04);}
+  .tl-band{position:absolute;top:0;bottom:34px;background:rgba(225,6,0,.10);border-left:1px dashed rgba(248,113,113,.4);border-right:1px dashed rgba(248,113,113,.4);border-radius:3px;}
+  .tl-mark{position:absolute;bottom:34px;transform:translate(-50%,50%);width:13px;height:13px;border-radius:50%;border:2px solid var(--bg);z-index:2;cursor:default;}
+  .tl-mark.green{background:var(--green);} .tl-mark.amber{background:var(--amber);} .tl-mark.red{background:var(--redText);box-shadow:0 0 9px rgba(248,113,113,.7);}
+  .tl-lab{position:absolute;transform:translateX(-50%);font-size:9.5px;font-weight:700;color:var(--body);white-space:nowrap;background:var(--card2);border:1px solid var(--border2);padding:2px 6px;border-radius:4px;z-index:3;}
+  .tl-empty{display:flex;align-items:center;justify-content:center;height:100px;color:var(--mono);font-size:11px;}
+
+  /* main layout */
+  .layout{display:grid;grid-template-columns:1fr 360px;gap:22px;align-items:start;}
+  @media(max-width:980px){.layout{grid-template-columns:1fr;}}
+
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:680px){.cards{grid-template-columns:1fr;}}
+  .pcard{background:var(--card);border:1px solid var(--border2);border-left-width:4px;border-radius:11px;padding:15px 16px;transition:.15s;}
+  .pcard:hover{border-color:var(--border);}
+  .pcard.green{border-left-color:var(--green);} .pcard.amber{border-left-color:var(--amber);} .pcard.red{border-left-color:var(--redText);} .pcard.gray{border-left-color:var(--mono);}
+  .pc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
+  .pc-name{font-size:15px;font-weight:700;color:var(--w);line-height:1.2;}
+  .pc-name a{color:var(--w);}
+  .pc-name a:hover{color:#FCA5A5;text-decoration:underline;}
+  .pc-open{font-size:9px;color:var(--mono);margin-top:3px;}
+  .pc-days{text-align:right;flex-shrink:0;}
+  .pc-days .d1{font-size:17px;font-weight:800;line-height:1;white-space:nowrap;}
+  .pc-days .d2{font-size:8px;color:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-top:3px;}
+  .pcard.green .d1{color:var(--green);} .pcard.amber .d1{color:var(--amber);} .pcard.red .d1{color:var(--redText);} .pcard.gray .d1{color:var(--mono);}
+  .pc-bar{display:flex;height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:9px;}
+  .pc-bar > div{height:100%;}
+  .pc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
+  .pc-stat.hrs .n{font-size:12px;}
+  .ar-chip.hrs{color:var(--body);border-color:var(--border);} .ar-chip.od{color:var(--redText);border-color:rgba(248,113,113,.3);}
+  .pc-od{font-size:10px;color:var(--redText);font-weight:700;}
+  .pc-stat{background:var(--surface);border-radius:6px;padding:7px 4px;text-align:center;}
+  .pc-stat .n{font-size:15px;font-weight:800;}
+  .pc-stat .l{font-size:7.5px;color:var(--mono);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+  .pc-stat.green .n{color:var(--green);} .pc-stat.amber .n{color:var(--amber);} .pc-stat.red .n{color:var(--redText);}
+  .pc-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted);}
+  .pc-foot .hrs{color:var(--body);} .pc-foot .hrs.na{color:var(--mono);font-style:italic;}
+  .pc-link{font-size:10px;font-weight:700;color:#FCA5A5;white-space:nowrap;}
+  .pc-link:hover{color:#fff;}
+  .pc-pending{font-size:10px;color:var(--amber);font-style:italic;margin:4px 0 8px;}
+
+  /* side column */
+  .side-box{background:var(--card);border:1px solid var(--border2);border-radius:11px;padding:16px 16px 8px;margin-bottom:18px;}
+  .side-box.offb{border-color:rgba(74,222,128,.3);}
+  .ob-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid var(--border2);}
+  .ob-row:last-child{border-bottom:none;}
+  .ob-name{font-size:12.5px;font-weight:600;color:var(--w);}
+  .ob-name a{color:var(--w);} .ob-name a:hover{color:var(--green);text-decoration:underline;}
+  .ob-meta{font-size:9px;color:var(--mono);margin-top:2px;}
+  .ob-badge{font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:rgba(74,222,128,.15);color:var(--green);white-space:nowrap;}
+  .nt-row{display:flex;align-items:center;justify-content:space-between;padding:8px 2px;border-bottom:1px solid var(--border2);}
+  .nt-row:last-child{border-bottom:none;}
+  .nt-name{font-size:12px;color:var(--body);}
+  .nt-tag{font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mono);}
+  .empty{font-size:11px;color:var(--mono);padding:8px 2px 14px;}
+
+  /* compact rows (active list, density=compact) */
+  .rows{display:flex;flex-direction:column;gap:7px;}
+  .arow{display:grid;grid-template-columns:auto 1fr auto auto auto;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border2);border-left-width:3px;border-radius:8px;padding:9px 14px;}
+  .arow.green{border-left-color:var(--green);} .arow.amber{border-left-color:var(--amber);} .arow.red{border-left-color:var(--redText);} .arow.gray{border-left-color:var(--mono);}
+  .ar-dot{width:9px;height:9px;border-radius:50%;background:var(--mono);flex-shrink:0;}
+  .arow.green .ar-dot{background:var(--green);} .arow.amber .ar-dot{background:var(--amber);} .arow.red .ar-dot{background:var(--redText);}
+  .ar-main{min-width:0;}
+  .ar-nm{font-size:13px;font-weight:700;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ar-nm a{color:var(--w);} .ar-nm a:hover{color:#FCA5A5;text-decoration:underline;}
+  .ar-gl{font-size:10px;font-weight:500;color:var(--mono);}
+  .ar-bar{display:flex;height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:5px;}
+  .ar-bar > div{height:100%;}
+  .ar-meta{display:flex;align-items:center;gap:8px;}
+  .ar-pct{font-size:12px;font-weight:800;color:var(--body);}
+  .ar-chip{font-size:9px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--border2);padding:2px 7px;border-radius:20px;white-space:nowrap;}
+  .ar-chip.risk{color:var(--redText);border-color:rgba(248,113,113,.3);}
+  .ar-days{text-align:right;min-width:52px;}
+  .ar-days .d1{font-size:14px;font-weight:800;white-space:nowrap;}
+  .ar-days .d2{font-size:7.5px;color:var(--mono);text-transform:uppercase;letter-spacing:.05em;}
+  .arow.green .d1{color:var(--green);} .arow.amber .d1{color:var(--amber);} .arow.red .d1{color:var(--redText);} .arow.gray .d1{color:var(--mono);}
+  @media(max-width:680px){.arow{grid-template-columns:auto 1fr auto;}.ar-meta{display:none;}}
+  /* no-tracker delete */
+  .nt-right{display:flex;align-items:center;gap:8px;}
+  .nt-del{color:var(--mono);font-size:15px;line-height:1;padding:1px 6px;border-radius:4px;}
+  .nt-del:hover{color:var(--redText);background:var(--surface);}
+
+  .na-line{font-size:10px;color:var(--mono);margin-top:6px;}
+  .na-line b{color:var(--body);font-weight:600;}
+  /* attention panels */
+  .attn{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:28px;}
+  @media(max-width:980px){.attn{grid-template-columns:1fr;}}
+  .task-row{padding:9px 2px;border-bottom:1px solid var(--border2);}
+  .task-row:last-child{border-bottom:none;}
+  .task-row .tx{font-size:12px;color:var(--body);line-height:1.4;}
+  .task-row .tx b{color:var(--w);font-weight:700;}
+  .task-row .meta{font-size:9px;color:var(--mono);margin-top:3px;text-transform:uppercase;letter-spacing:.04em;}
+  .own-row{display:flex;align-items:center;gap:12px;padding:9px 2px;border-bottom:1px solid var(--border2);}
+  .own-row:last-child{border-bottom:none;}
+  .own-name{font-size:12px;font-weight:700;color:var(--w);width:84px;flex-shrink:0;}
+  .own-bar{flex:1;height:6px;background:var(--surface);border-radius:3px;overflow:hidden;}
+  .own-bar > div{height:100%;}
+  .own-nums{font-size:10px;color:var(--muted);white-space:nowrap;min-width:120px;text-align:right;}
+  .own-nums b{color:var(--body);}
+
+  /* priority hero */
+  .hero{background:linear-gradient(160deg,rgba(225,6,0,.10),var(--card));border:1px solid rgba(225,6,0,.35);border-radius:13px;padding:18px 20px;margin-bottom:24px;box-shadow:0 0 26px rgba(225,6,0,.06);}
+  .hero-head{display:flex;align-items:baseline;gap:12px;margin-bottom:13px;}
+  .hero-head h2{font-size:14px;font-weight:800;letter-spacing:.03em;color:var(--w);text-transform:uppercase;}
+  .hero-sub{font-size:10px;color:var(--mono);}
+  .prio-list{display:flex;flex-direction:column;gap:7px;}
+  .prio-item{display:grid;grid-template-columns:84px 1fr auto;align-items:center;gap:14px;background:var(--card2);border:1px solid var(--border2);border-left-width:3px;border-radius:8px;padding:9px 13px;text-decoration:none;transition:border-color .14s;}
+  .prio-item:hover{border-color:var(--mono);}
+  .prio-item.red{border-left-color:var(--redText);} .prio-item.amber{border-left-color:var(--amber);}
+  .prio-tag{font-size:8px;font-weight:800;letter-spacing:.06em;padding:3px 0;border-radius:20px;white-space:nowrap;text-align:center;}
+  .prio-tag.golive{background:rgba(225,6,0,.18);color:#FCA5A5;} .prio-tag.blocked{background:rgba(248,113,113,.16);color:var(--redText);} .prio-tag.overdue{background:rgba(251,191,36,.16);color:var(--amber);}
+  .prio-text{font-size:13px;color:var(--body);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .prio-text b{color:var(--w);}
+  .prio-when{font-size:10px;color:var(--mono);white-space:nowrap;text-align:right;}
+  .prio-more{font-size:10px;color:var(--mono);margin-top:9px;text-align:center;}
+  .prio-empty{font-size:12px;color:var(--muted);padding:6px 2px;}
+  @media(max-width:640px){.prio-item{grid-template-columns:74px 1fr;}.prio-when{display:none;}}
+
+  /* needs-attention collapsible */
+  .attn-drop{background:var(--card);border:1px solid var(--border2);border-radius:11px;margin-bottom:24px;overflow:hidden;}
+  .attn-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 18px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+  .attn-drop > summary::-webkit-details-marker{display:none;}
+  .attn-drop .ad-counts{font-size:10px;font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--mono);}
+  .attn-drop .ad-chev{margin-left:auto;transition:transform .15s;color:var(--mono);font-size:12px;}
+  .attn-drop[open] .ad-chev{transform:rotate(90deg);}
+  .attn-drop .attn{margin-top:0;padding:0 18px 14px;}
+  .sec-sub{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);margin:6px 0 8px;display:flex;align-items:center;gap:8px;}
+  /* widget config panel */
+  .cfg-wrap{position:relative;}
+  .cfg-panel{display:none;position:absolute;right:0;top:34px;z-index:30;background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:11px 13px;min-width:185px;box-shadow:0 14px 34px rgba(0,0,0,.55);}
+  .cfg-panel.open{display:block;}
+  .cfg-h{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mono);margin-bottom:9px;}
+  .cfg-row{display:flex;align-items:center;gap:9px;padding:5px 2px;font-size:12px;color:var(--body);cursor:pointer;}
+  .cfg-row input{accent-color:var(--red);width:14px;height:14px;cursor:pointer;}
+
+  /* weekly plan */
+  .weekly-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px;}
+  .weekly-head h2{font-size:14px;font-weight:800;letter-spacing:.03em;color:var(--w);text-transform:uppercase;}
+  .week-nav{display:flex;align-items:center;gap:8px;}
+  .wk-btn{padding:5px 11px;border-radius:6px;background:var(--card2);border:1px solid var(--border);color:var(--body);font-size:11px;font-weight:700;}
+  .wk-btn:hover{border-color:var(--mono);color:var(--w);}
+  .wk-today{color:#FCA5A5;}
+  .wk-label{font-size:11px;font-weight:700;color:var(--body);min-width:158px;text-align:center;}
+  .weekly-sub{font-size:10px;color:var(--mono);margin-bottom:14px;}
+  .weekly-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  @media(max-width:760px){.weekly-cols{grid-template-columns:1fr;}}
+  .wk-col{background:var(--card2);border:1px solid var(--border2);border-radius:9px;padding:11px 12px;min-height:64px;}
+  .wk-col-h{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--w);text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
+  .wk-n{font-size:9px;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1px 7px;}
+  .wk-item{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border2);}
+  .wk-item:last-child{border-bottom:none;}
+  .wk-item.done .wk-tx{opacity:.55;} .wk-item.done .wk-tx b{text-decoration:line-through;}
+  .wk-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+  .wk-tx{font-size:11.5px;color:var(--body);line-height:1.35;min-width:0;}
+  .wk-tx b{color:var(--w);font-weight:700;}
+  .wk-empty{font-size:11px;color:var(--mono);padding:4px 0;}
+  /* offboarding close-out button */
+  .ob-btn{font-size:10px;font-weight:700;letter-spacing:.03em;color:var(--green);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);padding:6px 11px;border-radius:6px;white-space:nowrap;cursor:pointer;}
+  .ob-btn:hover{background:rgba(74,222,128,.22);color:#fff;}
+
+  footer{margin-top:30px;padding:16px 0 0;border-top:1px solid var(--border2);font-size:9px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 </style>
 </head>
-<body class="active-only">
+<body>
 
 <header class="header">
-  <img src="data:image/png;base64,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01T0RHJH0ERFkQhERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERB//2Q==" alt="Sabel">
-  <div class="header-title">
-    <h1>PORTFOLIO DASHBOARD</h1>
-    <p>Internal &middot; All active &amp; recent client engagements</p>
+  <div class="brand"><span class="logo">SABEL<span class="dot">.</span></span><span class="tag">Ops</span></div>
+  <h1>Project Tracker Dashboard</h1>
+  <div class="right">
+    <span class="live-stamp" id="stamp">Loading live data…</span>
+    <button class="refresh-btn" id="densityBtn" onclick="toggleDensity()">&#9636; Compact</button>
+    <button class="refresh-btn" id="refreshBtn" onclick="loadLive(true)">&#8635; Refresh</button>
+    <div class="cfg-wrap">
+      <button class="refresh-btn" id="cfgBtn" onclick="toggleConfig()">&#9881; Widgets</button>
+      <div class="cfg-panel" id="cfgPanel"></div>
+    </div>
   </div>
-  <div class="header-date">Updated: 16 June 2026</div>
 </header>
 
-<div class="toggle-bar">
-  <span class="toggle-label">View:</span>
-  <div class="toggle-group">
-    <button class="toggle-btn active" id="btn-active" onclick="setView('active')">Active only</button>
-    <button class="toggle-btn" id="btn-all" onclick="setView('all')">All projects</button>
+<div class="wrap">
+
+  <div id="w-weekly">
+    <div class="hero">
+      <div class="weekly-head">
+        <h2>&#128197; This week's plan</h2>
+        <div class="week-nav">
+          <button class="wk-btn" onclick="shiftWeek(-1)" title="Previous week">&#8592;</button>
+          <span class="wk-label" id="wkLabel"></span>
+          <button class="wk-btn" onclick="shiftWeek(1)" title="Next week">&#8594;</button>
+          <button class="wk-btn wk-today" onclick="shiftWeek(0,true)">This week</button>
+        </div>
+      </div>
+      <div class="weekly-sub">What each of Chris, Richard and Greg is scheduled to deliver this week, pulled live from the trackers.</div>
+      <div class="weekly-cols" id="weeklyCols"></div>
+    </div>
   </div>
-  <span class="active-count" id="active-count"></span>
+
+  <div id="w-kpis"><div class="kpis" id="kpis"></div></div>
+
+  <div class="pinch" id="w-timeline">
+    <div class="pinch-head">
+      <h2>Go-Live Timeline &mdash; pinch points at a glance</h2>
+      <div class="legend">
+        <div class="li"><span class="ld" style="background:var(--green)"></span>Comfortable</div>
+        <div class="li"><span class="ld" style="background:var(--amber)"></span>Tight</div>
+        <div class="li"><span class="ld" style="background:var(--redText)"></span>Pinch (clustered)</div>
+      </div>
+    </div>
+    <div class="pinch-sub">Each marker is an active project's planned go-live. Red bands = weeks where two or more land together.</div>
+    <div class="timeline" id="timeline"></div>
+  </div>
+
+  <div id="w-attn">
+    <details class="attn-drop">
+      <summary><span class="ad-title">Needs attention</span><span class="ad-counts" id="attnCounts"></span><span class="ad-chev">&#9656;</span></summary>
+      <div class="attn">
+        <div>
+          <div class="sec-sub">&#128681; Blocked &amp; at risk <span class="count" id="blkCount">0</span></div>
+          <div class="side-box" id="blkBox"></div>
+        </div>
+        <div>
+          <div class="sec-sub">&#9888; Overdue / slipping <span class="count" id="ovdCount">0</span></div>
+          <div class="side-box" id="ovdBox"></div>
+        </div>
+        <div>
+          <div class="sec-sub">&#8987; Waiting on client <span class="count" id="waitCount">0</span></div>
+          <div class="side-box" id="waitBox"></div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div class="layout">
+    <div id="w-active">
+      <div class="sec-title">Active Projects <span class="count" id="activeCount">0</span></div>
+      <div class="cards" id="activeCards"></div>
+    </div>
+    <div>
+      <div id="w-offb">
+        <div class="sec-title">Offboarding &mdash; ready for close-out <span class="count" id="offbCount">0</span></div>
+        <div class="side-box offb" id="offbBox"></div>
+      </div>
+      <div id="w-nt">
+        <div class="sec-title">No tracker yet <span class="count" id="ntCount">0</span></div>
+        <div class="side-box" id="ntBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="w-contracts">
+    <div class="sec-title" style="margin-top:8px;">&#9203; Contract expiry &mdash; final 3 months <span class="count" id="conCount">0</span></div>
+    <div class="side-box" id="conBox"></div>
+  </div>
+
+  <footer>
+    <span>Internal use only &middot; live from GitHub trackers via Sabel webhook</span>
+    <span id="foot-note"></span>
+  </footer>
 </div>
-
-<div class="kpi-strip">
-  <div class="kpi" data-status="total" onclick="openModal('total')">
-    <div class="kpi-label">Total Tasks</div><div class="kpi-value">67</div>
-    <div class="kpi-sub">Across tracked projects</div><div class="kpi-click-hint">&#8599; breakdown</div>
-  </div>
-  <div class="kpi" data-status="complete" onclick="openModal('complete')">
-    <div class="kpi-label">Complete</div><div class="kpi-value">18</div>
-    <div class="kpi-sub">27% of tasks</div><div class="kpi-click-hint">&#8599; breakdown</div>
-  </div>
-  <div class="kpi" data-status="in-progress" onclick="openModal('in-progress')">
-    <div class="kpi-label">In Progress</div><div class="kpi-value">9</div>
-    <div class="kpi-sub">13% of tasks</div><div class="kpi-click-hint">&#8599; breakdown</div>
-  </div>
-  <div class="kpi" data-status="pending" onclick="openModal('pending')">
-    <div class="kpi-label">Pending</div><div class="kpi-value">9</div>
-    <div class="kpi-sub">13% of tasks</div><div class="kpi-click-hint">&#8599; breakdown</div>
-  </div>
-  <div class="kpi" data-status="blocked" onclick="openModal('blocked')">
-    <div class="kpi-label">Blocked</div><div class="kpi-value">31</div>
-    <div class="kpi-sub">46% &middot; &#9888; action needed</div><div class="kpi-click-hint">&#8599; breakdown</div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-header"><h2 id="modal-title"></h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
-    <div class="modal-body" id="modal-body"></div>
-  </div>
-</div>
-
-<div class="trackers-box">
-  <div class="trackers-box-header">
-    <h2>Quick Access &mdash; All Trackers</h2>
-  </div>
-  <div class="tracker-links-grid">
-
-    <a href="https://sabel-intercom.github.io/Intake-forms/RaizTracker_v2.html" target="_blank" class="tracker-link-item">
-      <div class="tl-name">Raiz Invest</div>
-      <div class="tl-type">GitHub Pages &middot; HTML</div>
-      <div class="tl-badge" style="background:rgba(243,156,18,0.15);color:var(--amber)">Near Go-Live</div>
-    </a>
-
-    <a href="https://sabel-intercom.github.io/Intake-forms/BTSUSAJuneTracker.html" target="_blank" class="tracker-link-item">
-      <div class="tl-name">BTS USA</div>
-      <div class="tl-type">GitHub Pages &middot; HTML</div>
-      <div class="tl-badge" style="background:rgba(74,143,231,0.15);color:var(--blue)">In Progress</div>
-    </a>
-
-    <a href="https://sabel-intercom.github.io/Intake-forms/FlkitOverTracker_v2.html" target="_blank" class="tracker-link-item">
-      <div class="tl-name">FlkitOver</div>
-      <div class="tl-type">GitHub Pages &middot; HTML</div>
-      <div class="tl-badge" style="background:rgba(74,143,231,0.15);color:var(--blue)">In Progress</div>
-    </a>
-
-    <a href="https://sabel-intercom.github.io/Intake-forms/HeroTolkTracker_v2.html" target="_blank" class="tracker-link-item">
-      <div class="tl-name">HeroTolk</div>
-      <div class="tl-type">GitHub Pages &middot; HTML</div>
-      <div class="tl-badge" style="background:rgba(155,89,182,0.15);color:var(--purple)">Early Stage</div>
-    </a>
-
-    <a href="https://sabel-intercom.github.io/Intake-forms/EducationPerfectTracker_v2.html" target="_blank" class="tracker-link-item">
-      <div class="tl-name">Education Perfect</div>
-      <div class="tl-type">GitHub Pages &middot; HTML</div>
-      <div class="tl-badge" style="background:rgba(46,204,113,0.15);color:var(--green)">Live &#10003;</div>
-    </a>
-
-    <div class="tracker-link-item no-link">
-      <div class="tl-name">Kashxa Ltd</div>
-      <div class="tl-type">Google Drive &middot; XLSX</div>
-      <div class="tl-badge" style="background:rgba(230,57,70,0.15);color:var(--red)">Blocked</div>
-    </div>
-
-    <div class="tracker-link-item no-link">
-      <div class="tl-name">Bulk Nutrients</div>
-      <div class="tl-type">Google Drive &middot; Sheet</div>
-      <div class="tl-badge" style="background:rgba(74,143,231,0.15);color:var(--blue)">In Progress</div>
-    </div>
-
-    <div class="tracker-link-item no-link" style="opacity:0.35;">
-      <div class="tl-name">WiseStamp</div>
-      <div class="tl-type">Google Drive &middot; XLSX</div>
-      <div class="tl-badge" style="background:rgba(106,106,138,0.15);color:var(--muted)">Historical</div>
-    </div>
-
-  </div>
-</div>
-
-<div class="charts-row">
-
-  <!-- GO-LIVE DATES: next 3 months only -->
-  <div class="chart-card">
-    <div class="chart-title"><span>GO-LIVE DATES</span></div>
-    <div class="chart-subtitle">Upcoming go-live targets &mdash; next 3 months only &middot; sorted by urgency</div>
-    <div class="legend-row">
-      <div class="legend-item"><div class="legend-dot" style="background:#e63946"></div> &lt; 2 weeks</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#f39c12"></div> 2&ndash;6 weeks</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#4a8fe7"></div> 6&ndash;12 weeks</div>
-    </div>
-    <div style="position:relative;height:320px;">
-      <canvas id="goLiveChart"></canvas>
-    </div>
-  </div>
-
-  <!-- PINCH POINTS: forward-looking, next 3 months -->
-  <div class="chart-card">
-    <div class="chart-title"><span>DEADLINE PINCH POINTS</span></div>
-    <div class="chart-subtitle">Estimated task clusters by week &mdash; Jun &ndash; Sep 2026 &middot; active engagements</div>
-    <div class="legend-row">
-      <div class="legend-item"><div class="legend-dot" style="background:#4a8fe7"></div> Raiz / BTS / AfterShip</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#9b59b6"></div> Jul cohort (Don / GPS / Aktiia / YFood)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e63946"></div> Aug cohort (Giving / Mambu / HeroTolk)</div>
-    </div>
-    <div style="position:relative;height:240px;">
-      <canvas id="pinchChart"></canvas>
-    </div>
-  </div>
-
-</div>
-
-<div class="section-header"><h2>Project Trackers &mdash; Task Data</h2></div>
-<div class="client-grid">
-
-  <div class="client-card blocked">
-    <div class="card-header"><div class="card-title">Kashxa Ltd</div><div class="card-status status-blocked">Blocked</div></div>
-    <div class="card-tasks">
-      <div class="task-stat green"><div class="task-stat-val">0</div><div class="task-stat-lbl">Done</div></div>
-      <div class="task-stat blue"><div class="task-stat-val">0</div><div class="task-stat-lbl">Active</div></div>
-      <div class="task-stat amber"><div class="task-stat-val">9</div><div class="task-stat-lbl">Pending</div></div>
-      <div class="task-stat red"><div class="task-stat-val">30</div><div class="task-stat-lbl">Blocked</div></div>
-    </div>
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-seg" style="width:23%;background:var(--amber)"></div>
-      <div class="progress-bar-seg" style="width:77%;background:var(--red)"></div>
-    </div>
-    <div class="card-meta"><span>39 tasks &middot; Target: 1 Apr 2026</span><span>Owner: Richard &middot; Google Drive XLSX</span></div>
-  </div>
-
-  <div class="client-card in-progress">
-    <div class="card-header"><div class="card-title">Bulk Nutrients</div><div class="card-status status-in-progress">In Progress</div></div>
-    <div class="card-tasks">
-      <div class="task-stat green"><div class="task-stat-val">18</div><div class="task-stat-lbl">Done</div></div>
-      <div class="task-stat blue"><div class="task-stat-val">7</div><div class="task-stat-lbl">Active</div></div>
-      <div class="task-stat amber"><div class="task-stat-val">0</div><div class="task-stat-lbl">Pending</div></div>
-      <div class="task-stat red"><div class="task-stat-val">1</div><div class="task-stat-lbl">Blocked</div></div>
-    </div>
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-seg" style="width:69%;background:var(--green)"></div>
-      <div class="progress-bar-seg" style="width:27%;background:var(--blue)"></div>
-      <div class="progress-bar-seg" style="width:4%;background:var(--red)"></div>
-    </div>
-    <div class="card-meta"><span>26 tasks &middot; Go-live: 23 Apr 2026</span><span>Owners: Greg, Chris &middot; Google Sheet</span></div>
-  </div>
-
-  <div class="client-card near-live">
-    <div class="card-header"><div class="card-title">Raiz Invest</div><div class="card-status status-near-live">Near Go-Live</div></div>
-    <div class="sow-bar"><span style="font-size:11px;color:var(--muted)">SOW Hours</span><span style="font-size:13px;font-weight:600">3 / 40h</span></div>
-    <div class="hours-bar"><div class="hours-fill" style="width:7.5%;background:var(--amber)"></div></div>
-    <div class="card-meta"><span>SOW: 19 May 2026 &middot; Est. go-live: 23 Jun</span><span>Chris: "ready to go live next week"</span><a href="https://sabel-intercom.github.io/Intake-forms/RaizTracker_v2.html" target="_blank">&rarr; Open tracker</a></div>
-  </div>
-
-  <div class="client-card in-progress">
-    <div class="card-header"><div class="card-title">BTS USA Inc.</div><div class="card-status status-in-progress">In Progress</div></div>
-    <div class="sow-bar"><span style="font-size:11px;color:var(--muted)">SOW Hours</span><span style="font-size:13px;font-weight:600">16 / 83h</span></div>
-    <div class="hours-bar"><div class="hours-fill" style="width:19%;background:var(--blue)"></div></div>
-    <div class="card-meta"><span>SOW: 29 Apr 2026 &middot; Greg leading</span><span>June/July 2026 target &middot; 67h remaining</span></div>
-  </div>
-
-  <div class="client-card live completed-item">
-    <div class="card-header"><div class="card-title">Education Perfect</div><div class="card-status status-live">Live &#10003;</div></div>
-    <div class="card-meta"><span style="color:var(--green);font-weight:600">Officially live on Intercom</span><span>Confirmed: ~May 2026</span><a href="https://sabel-intercom.github.io/Intake-forms/EducationPerfectTracker_v2.html" target="_blank">&rarr; Open tracker</a></div>
-  </div>
-
-  <div class="client-card in-progress">
-    <div class="card-header"><div class="card-title">FlkitOver</div><div class="card-status status-in-progress">In Progress</div></div>
-    <div class="card-meta"><span>Building lifecycle email series</span><span>No confirmed go-live date</span><a href="https://sabel-intercom.github.io/Intake-forms/FlkitOverTracker_v2.html" target="_blank">&rarr; Open tracker</a></div>
-  </div>
-
-  <div class="client-card early">
-    <div class="card-header"><div class="card-title">HeroTolk</div><div class="card-status status-early">Early Stage</div></div>
-    <div class="card-meta"><span>Building ticket types &amp; workflows</span><span>Est. go-live Q3 2026</span><a href="https://sabel-intercom.github.io/Intake-forms/HeroTolkTracker_v2.html" target="_blank">&rarr; Open tracker</a></div>
-  </div>
-
-  <div class="client-card historical completed-item">
-    <div class="card-header"><div class="card-title">WiseStamp</div><div class="card-status status-historical">Historical</div></div>
-    <div class="card-tasks">
-      <div class="task-stat"><div class="task-stat-val">0</div><div class="task-stat-lbl">Done</div></div>
-      <div class="task-stat blue"><div class="task-stat-val">2</div><div class="task-stat-lbl">Active</div></div>
-      <div class="task-stat"><div class="task-stat-val">0</div><div class="task-stat-lbl">Pending</div></div>
-      <div class="task-stat"><div class="task-stat-val">0</div><div class="task-stat-lbl">Blocked</div></div>
-    </div>
-    <div class="card-meta"><span>Sep 2025 &middot; ~8 months old</span></div>
-  </div>
-
-</div>
-
-<div class="section-header" style="margin-top:8px;"><h2>Active SOW Engagements &mdash; No Task Tracker</h2></div>
-<div style="padding:0 32px;">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-    <table style="width:100%;border-collapse:collapse;">
-      <thead><tr style="background:var(--surface);">
-        <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);">Client</th>
-        <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);">Status</th>
-        <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);">SOW Hours</th>
-        <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);">Est. Go-Live</th>
-        <th style="text-align:left;padding:12px 16px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);">Notes</th>
-      </tr></thead>
-      <tbody id="eng-table"></tbody>
-    </table>
-  </div>
-</div>
-
-<div class="section-header" style="margin-top:24px;"><h2>Owner Workload &mdash; Tracked Tasks</h2></div>
-<div class="owners-section">
-  <table class="owners-table">
-    <thead><tr><th>Owner</th><th>Tasks</th><th>Blocked</th><th>Active Projects</th><th>Load</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Richard</strong></td><td>34</td><td style="color:var(--red)">30</td><td>Kashxa, BTS USA, Raiz</td><td><div class="owner-bar"><div class="owner-bar-fill" style="width:100%;background:var(--red)"></div></div></td></tr>
-      <tr><td><strong>Greg</strong></td><td>19</td><td style="color:var(--red)">1</td><td>Bulk Nutrients, BTS USA, DonkeyRepublic</td><td><div class="owner-bar"><div class="owner-bar-fill" style="width:56%;background:var(--amber)"></div></div></td></tr>
-      <tr><td><strong>Chris</strong></td><td>11</td><td>0</td><td>Bulk Nutrients, Raiz, GPS Insight</td><td><div class="owner-bar"><div class="owner-bar-fill" style="width:32%;background:var(--blue)"></div></div></td></tr>
-      <tr><td><strong>Nikki</strong></td><td>3</td><td>0</td><td>Raiz, FlkitOver, HeroTolk</td><td><div class="owner-bar"><div class="owner-bar-fill" style="width:9%;background:var(--green)"></div></div></td></tr>
-    </tbody>
-  </table>
-</div>
-
-<footer>
-  <a href="https://sabel-intercom.github.io/Intake-forms/RaizTracker_v2.html" target="_blank">Raiz</a><span class="sep">|</span>
-  <a href="https://sabel-intercom.github.io/Intake-forms/FlkitOverTracker_v2.html" target="_blank">FlkitOver</a><span class="sep">|</span>
-  <a href="https://sabel-intercom.github.io/Intake-forms/EducationPerfectTracker_v2.html" target="_blank">Ed Perfect</a><span class="sep">|</span>
-  <a href="https://sabel-intercom.github.io/Intake-forms/HeroTolkTracker_v2.html" target="_blank">HeroTolk</a><span class="sep">|</span>
-  <a href="https://sabel-intercom.github.io/Intake-forms/BTSUSAJuneTracker.html" target="_blank">BTS USA</a>
-  <div class="note">Internal use only &middot; Click any KPI tile for task breakdown</div>
-</footer>
 
 <script>
-// ── TOGGLE ───────────────────────────────────────────────────────────────────
-var currentView = 'active';
-function setView(v) {
-  currentView = v;
-  document.getElementById('btn-active').classList.toggle('active', v==='active');
-  document.getElementById('btn-all').classList.toggle('active', v==='all');
-  document.body.classList.toggle('active-only', v==='active');
-  updateCount();
-}
-function updateCount() {
-  var el = document.getElementById('active-count');
-  if (currentView === 'active') {
-    el.innerHTML = 'Showing <span>active projects only</span> &mdash; completed &amp; historical hidden';
-  } else {
-    el.innerHTML = 'Showing <span>all engagements</span> including completed';
-  }
-}
-updateCount();
+// ──────────────────────────────────────────────────────────────
+// CONFIG
+// ──────────────────────────────────────────────────────────────
+var API = 'https://sabel-webhook.vercel.app/api/tracker';
+var BASE = 'https://sabel-intercom.github.io/Intake-forms/';
+var REFRESH_MS = 5 * 60 * 1000; // auto-refresh every 5 minutes
 
-// ── MODAL ────────────────────────────────────────────────────────────────────
-var breakdownData = {
-  total: { title:'All Tasks — Project Breakdown', rows:[
-    {project:'Kashxa Ltd',count:39,detail:'0 done · 9 pending · 30 blocked',badge:'red'},
-    {project:'Bulk Nutrients',count:26,detail:'18 done · 7 active · 1 blocked',badge:'blue'},
-    {project:'WiseStamp (Historical)',count:2,detail:'2 in progress',badge:'gray'},
-  ]},
-  complete: { title:'Completed Tasks — Project Breakdown', rows:[
-    {project:'Bulk Nutrients',count:18,detail:'Phase 1 & 2 tasks complete',badge:'green'},
-    {project:'Kashxa Ltd',count:0,detail:'No tasks completed yet',badge:'gray'},
-  ]},
-  'in-progress': { title:'In Progress Tasks — Project Breakdown', rows:[
-    {project:'Bulk Nutrients',count:7,detail:'Active delivery tasks',badge:'blue'},
-    {project:'WiseStamp',count:2,detail:'Historical — marked in progress',badge:'gray'},
-    {project:'Kashxa Ltd',count:0,detail:'All tasks blocked',badge:'red'},
-  ]},
-  pending: { title:'Pending Tasks — Project Breakdown', rows:[
-    {project:'Kashxa Ltd',count:9,detail:'Waiting on unblocking',badge:'amber'},
-    {project:'Bulk Nutrients',count:0,detail:'No pending tasks',badge:'gray'},
-  ]},
-  blocked: { title:'Blocked Tasks — Project Breakdown', note:'30 of 31 blocked tasks are in Kashxa — immediate attention needed.', rows:[
-    {project:'Kashxa Ltd',count:30,detail:'All blocked — awaiting client decisions',badge:'red'},
-    {project:'Bulk Nutrients',count:1,detail:'1 task blocked — check with Greg',badge:'amber'},
-  ]}
-};
-function openModal(s) {
-  var d = breakdownData[s]; if (!d) return;
-  document.getElementById('modal-title').textContent = d.title;
-  var h = '';
-  if (d.note) h += '<div style="background:rgba(230,57,70,0.1);border:1px solid rgba(230,57,70,0.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#e63946;">'+d.note+'</div>';
-  h += '<table class="modal-table"><thead><tr><th>Project</th><th style="text-align:right">Tasks</th><th>Status</th></tr></thead><tbody>';
-  var lbl = {green:'Complete',blue:'Active',red:'Blocked',amber:'Pending',gray:'N/A'};
-  d.rows.forEach(function(r){
-    h += '<tr><td><strong>'+r.project+'</strong><br><span style="font-size:11px;color:var(--muted)">'+r.detail+'</span></td>'
-       + '<td style="text-align:right;font-size:22px;font-weight:700">'+r.count+'</td>'
-       + '<td><span class="badge badge-'+r.badge+'">'+lbl[r.badge]+'</span></td></tr>';
-  });
-  h += '</tbody></table>';
-  document.getElementById('modal-body').innerHTML = h;
-  document.getElementById('modal-overlay').classList.add('active');
-}
-function closeModal() { document.getElementById('modal-overlay').classList.remove('active'); }
-document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
-
-// ── ENGAGEMENT TABLE ─────────────────────────────────────────────────────────
-var engagements = [
-  {name:'OpenPoint',         status:'live',       label:'Live',         hours:'—',      golive:'Jun 2026',       notes:'Greg: "officially live"',  done:true},
-  {name:'Unyoked',           status:'live',       label:'Live',         hours:'—',      golive:'~Feb 2026',      notes:'Go-live confirmed',         done:true},
-  {name:'Huuuge',            status:'live',       label:'Live',         hours:'99/99h', golive:'Mar 20 2026',    notes:'Complete',                  done:true},
-  {name:'Spartans / Nexus',  status:'live',       label:'Complete',     hours:'40/40h', golive:'~Apr 2026',      notes:'All done',                  done:true},
-  {name:'Cirqul',            status:'live',       label:'Live',         hours:'—',      golive:'~Apr 2026',      notes:'Confirmed live',            done:true},
-  {name:'PaySauce NZ',       status:'live',       label:'Delivered',    hours:'—',      golive:'Mar 13 2026',    notes:'Target met',                done:true},
-  {name:'Re-Leased',         status:'near-live',  label:'Near Complete',hours:'—',      golive:'~Apr 2026',      notes:'Close to completion',       done:false},
-  {name:'DonkeyRepublic',    status:'early',      label:'Early Stage',  hours:'9/72h',  golive:'~Jul 2026',      notes:'SOW Apr 29 · Greg',         done:false},
-  {name:'GPS Insight',       status:'early',      label:'Early Stage',  hours:'6/50h',  golive:'~Jul 2026',      notes:'SOW Apr 17',                done:false},
-  {name:'The Giving Movement',status:'early',     label:'Early Stage',  hours:'1/60h',  golive:'~Aug 2026',      notes:'SOW Apr 29',                done:false},
-  {name:'YFood Labs',        status:'early',      label:'Early Stage',  hours:'0/60h',  golive:'Early Jul 2026', notes:'Richard: "early July"',     done:false},
-  {name:'Aktiia / Hilo',     status:'early',      label:'Early Stage',  hours:'4.5/27h',golive:'~Jul 2026',      notes:'SOW Apr 29',                done:false},
-  {name:'AfterShip',         status:'in-progress',label:'In Progress',  hours:'17/35h', golive:'~Jul 2026',      notes:'SOW May 1',                 done:false},
-  {name:'Mambu',             status:'early',      label:'Early Stage',  hours:'0/12.5h',golive:'~Aug 2026',      notes:'SOW May 18',                done:false},
-  {name:'Tulka',             status:'early',      label:'Early Stage',  hours:'0/37h',  golive:'~Sep 2026',      notes:'SOW pending start',         done:false},
-];
-var scMap = {live:'var(--green)','near-live':'var(--amber)','in-progress':'var(--blue)',early:'var(--purple)',blocked:'var(--red)'};
-var tbody = document.getElementById('eng-table');
-engagements.forEach(function(e){
-  var c = scMap[e.status]||'var(--muted)';
-  var cls = e.done ? 'completed-item' : '';
-  tbody.innerHTML += '<tr class="'+cls+'">'
-    +'<td style="font-weight:600;font-size:13px;">'+e.name+'</td>'
-    +'<td><span style="color:'+c+';font-size:12px;font-weight:600;">'+e.label+'</span></td>'
-    +'<td style="font-size:12px;color:var(--dim)">'+e.hours+'</td>'
-    +'<td style="font-size:12px;color:var(--dim)">'+e.golive+'</td>'
-    +'<td style="font-size:11px;color:var(--muted)">'+e.notes+'</td>'
-    +'</tr>';
-});
-
-// ── GO-LIVE DATE CHART ───────────────────────────────────────────────────────
-// Active clients with go-lives in next 3 months, sorted soonest first
-// today = Jun 16 2026, window = Jun 16 – Sep 16 2026
-var today = new Date('2026-06-16');
-var goLiveClients = [
-  {name:'Raiz Invest',        date:'2026-06-23', days:7},
-  {name:'BTS USA',            date:'2026-07-15', days:29},
-  {name:'AfterShip',          date:'2026-07-15', days:29},
-  {name:'DonkeyRepublic',     date:'2026-07-31', days:45},
-  {name:'GPS Insight',        date:'2026-07-31', days:45},
-  {name:'YFood Labs',         date:'2026-07-31', days:45},
-  {name:'Aktiia / Hilo',      date:'2026-07-31', days:45},
-  {name:'FlkitOver',          date:'2026-07-31', days:45},
-  {name:'The Giving Mvt.',    date:'2026-08-31', days:76},
-  {name:'Mambu',              date:'2026-08-31', days:76},
-  {name:'HeroTolk',           date:'2026-08-31', days:76},
-  {name:'Tulka',              date:'2026-09-01', days:77},
+// Each tracker Nikki has deployed. key = Upstash key (null if unknown).
+// sowHours = total engagement hours from SOW (null => "Data not available").
+var TRACKERS = [
+  {name:'Raiz',                key:'raiz-tracker-v1',            file:'RaizTracker_v2.html',            sowHours:40},
+  {name:'BTS',                 key:'bts-usa-june-tracker-v1',    file:'BTSUSATracker_v2.html',          sowHours:83},
+  {name:'Donkey Republic',     key:'donkey-republic-tracker-v1', file:'DonkeyRepublicTracker_v2.html',  sowHours:72},
+  {name:'FLKItOver',           key:'flkitover-tracker-v1',       file:'FlkitOverTracker_v2.html',       sowHours:null},
+  {name:'YFood',               key:'yfood-tracker-v1',           file:'YFoodTracker_v2.html',           sowHours:60},
+  {name:'Cirqul',              key:'cirqul-tracker-v1',          file:'CirqulTracker_v2.html',          sowHours:null},
+  {name:'Education Perfect',   key:'education-perfect-tracker-v1',file:'EducationPerfectTracker_v2.html',sowHours:null},
+  {name:'Huuuge',              key:'huuuge-tracker-v1',          file:'HuuugeTracker_v2.html',          sowHours:99},
+  {name:'The Giving Movement', key:'thegivingmovement-tracker-v1', file:'TheGivingMovementTracker_v2.html',sowHours:60}
 ];
 
-// Color by urgency: <2wk = red, 2-6wk = amber, 6-12wk = blue
-function urgencyColor(days) {
-  if (days <= 14) return {bg:'rgba(230,57,70,0.75)', border:'#e63946'};
-  if (days <= 42) return {bg:'rgba(243,156,18,0.75)', border:'#f39c12'};
-  return {bg:'rgba(74,143,231,0.75)', border:'#4a8fe7'};
-}
+// Active clients without a live tracker yet (shown for coverage).
+var NO_TRACKER = ['Ainslie (Encum)','BetNinja (Magico)','Cronos (Particle Research)','GPS Insight','Mambu','PaySauce NZ','Workinitiatives','WPT Global'];
 
-// "Days to go-live" horizontal bar (bar goes from 0 to days remaining)
-// Add a "today" label marker at 0
-new Chart(document.getElementById('goLiveChart'), {
-  type: 'bar',
-  data: {
-    labels: goLiveClients.map(function(c){ return c.name; }),
-    datasets: [{
-      label: 'Days to go-live',
-      data: goLiveClients.map(function(c){ return c.days; }),
-      backgroundColor: goLiveClients.map(function(c){ return urgencyColor(c.days).bg; }),
-      borderColor: goLiveClients.map(function(c){ return urgencyColor(c.days).border; }),
-      borderWidth: 1,
-      borderRadius: 4,
-      borderSkipped: false,
-      barThickness: 18,
-    }]
-  },
-  options: {
-    indexAxis: 'y',
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {display: false},
-      tooltip: {
-        callbacks: {
-          label: function(ctx) {
-            var d = goLiveClients[ctx.dataIndex];
-            var dt = new Date(d.date).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
-            return ' Go-live: ' + dt + '  (' + d.days + ' days)';
-          }
-        },
-        backgroundColor:'#1a1a30', borderColor:'#252545', borderWidth:1,
-        titleColor:'#dde1f0', bodyColor:'#a0a4c0', padding:10,
-      }
-    },
-    scales: {
-      x: {
-        grid: {color:'rgba(255,255,255,0.05)'},
-        ticks: {
-          color:'#6a6a8a', font:{size:11},
-          callback: function(v) {
-            // Label key milestone points
-            if (v===0)  return 'Today';
-            if (v===14) return '2 wks';
-            if (v===30) return '1 mo';
-            if (v===60) return '2 mo';
-            if (v===90) return '3 mo';
-            return '';
-          }
-        },
-        min: 0, max: 92,
-      },
-      y: {
-        grid: {display:false},
-        ticks: {color:'#dde1f0', font:{size:12}}
-      }
-    }
-  }
-});
+// Sabel delivery team — only these appear in the workload widget.
+var SABEL_TEAM = ['Chris','Greg','Richard'];
 
-// ── PINCH POINT CHART — forward-looking Jun-Sep 2026 ─────────────────────────
-// Estimated task clusters per week based on upcoming go-live dates
-// Week labels: Jun 22, Jun 29, Jul 6, Jul 13, Jul 20, Jul 27, Aug 3, Aug 10, Aug 17, Aug 24, Aug 31, Sep 7
-var pinchWeekLabels = ['Jun 22','Jun 29','Jul 6','Jul 13','Jul 20','Jul 27','Aug 3','Aug 10','Aug 17','Aug 24','Aug 31','Sep 7'];
+// Configurable widgets (toggle from the header ⚙ Widgets menu).
+var WIDGETS = [
+  {id:'w-weekly',   label:"This week's plan"},
+  {id:'w-kpis',     label:'KPI summary'},
+  {id:'w-timeline', label:'Go-live timeline'},
+  {id:'w-attn',     label:'Needs attention'},
+  {id:'w-active',   label:'Active projects'},
+  {id:'w-offb',     label:'Offboarding'},
+  {id:'w-nt',       label:'No tracker yet'},
+  {id:'w-contracts',label:'Contract expiry'}
+];
 
-// Near-term cohort: Raiz, BTS, AfterShip
-var dataNearTerm  = [6, 4, 5, 5,  3,  2,  0,  0,  0,  0,  0, 0];
-// Jul cohort: DonkeyRepublic, GPS Insight, Aktiia/Hilo, YFood, FlkitOver
-var dataJulCohort = [0, 0, 2, 4,  8, 14,  9,  4,  3,  2,  1, 0];
-// Aug cohort: The Giving Movement, Mambu, HeroTolk, Tulka
-var dataAugCohort = [0, 0, 0, 0,  0,  0,  3,  5,  7, 10, 14, 8];
+// UI state (persisted)
+var NT_REMOVED = JSON.parse(localStorage.getItem('sabel_nt_removed')||'[]');
+var DENSITY = localStorage.getItem('sabel_density')||'compact';
+var WIDGET_HIDDEN = JSON.parse(localStorage.getItem('sabel_widgets_hidden')||'[]');
+var OFFB_CLOSED = JSON.parse(localStorage.getItem('sabel_offb_closed')||'[]');
+var CONTRACT_REMOVED = JSON.parse(localStorage.getItem('sabel_contract_removed')||'[]');
+var WEEK_OFFSET = 0;
 
-// Pinch weeks = high combined total: Jul 27 (idx 5), Aug 31 (idx 10)
-var pinchPlugin = {
-  id: 'pinchHighlight',
-  beforeDraw: function(chart) {
-    var ctx = chart.ctx; var ca = chart.chartArea;
-    [5, 10].forEach(function(idx) {
-      var meta = chart.getDatasetMeta(0);
-      if (!meta.data[idx]) return;
-      var bar = meta.data[idx]; var bw = bar.width || 30;
-      ctx.save();
-      ctx.fillStyle = 'rgba(230,57,70,0.08)';
-      ctx.fillRect(bar.x - bw/2 - 4, ca.top, bw + 8, ca.bottom - ca.top);
-      ctx.restore();
+// ─────────────────────────────────────────────────────────────
+// CONTRACT DATES — each client has 12 months from kick-off / contract
+// start to use their contracted hours. Fill in "start" (YYYY-MM-DD) to
+// activate the expiry watch; the section shows only clients within the
+// final 3 months of their 12-month term.
+// ─────────────────────────────────────────────────────────────
+var CONTRACTS = [
+  {name:'Raiz',                       start:''},
+  {name:'BTS',                        start:''},
+  {name:'Donkey Republic',            start:''},
+  {name:'FLKItOver',                  start:''},
+  {name:'YFood',                      start:''},
+  {name:'Cirqul',                     start:''},
+  {name:'Education Perfect',          start:''},
+  {name:'Huuuge',                     start:''},
+  {name:'The Giving Movement',        start:''},
+  {name:'Ainslie (Encum)',            start:''},
+  {name:'BetNinja (Magico)',          start:''},
+  {name:'Cronos (Particle Research)', start:''},
+  {name:'GPS Insight',                start:''},
+  {name:'Mambu',                      start:''},
+  {name:'PaySauce NZ',                start:''},
+  {name:'Workinitiatives',            start:''},
+  {name:'WPT Global',                 start:''}
+];
+
+// ──────────────────────────────────────────────────────────────
+// DATA HELPERS
+// ──────────────────────────────────────────────────────────────
+// Trackers save in two shapes: an array of phases, or {phases:[...]}. Normalise.
+function normalisePhases(data){
+  if (!data) return null;
+  // Newer formats: array of phases, or { phases: [...] }
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data.phases)) return data.phases;
+  // Older "groups" board format (e.g. BTS): { groups:[{items:[...]}], hours, goLive }
+  // Map it onto the standard {tasks:[{task,owner,status,end,dep}]} shape.
+  if (Array.isArray(data.groups)){
+    return data.groups.map(function(g){
+      return { tasks: (g.items||[]).map(function(it){
+        var st = it.done ? 'Complete'
+               : it.status==='red'   ? 'Blocked'
+               : it.status==='amber' ? 'In Progress'
+               : 'In Progress';
+        return { task: it.task, owner: it.owner, end: it.iso||it.date||'', status: st, dep: it.owner==='BTS' };
+      })};
     });
   }
-};
+  return null;
+}
+function tally(phases){
+  var t={done:0,inprog:0,pending:0,blocked:0,dep:0,other:0,total:0};
+  phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+    var s=(k.status||'').toLowerCase(); t.total++;
+    if(s==='complete'||s==='done') t.done++;
+    else if(s==='in progress'||s==='active') t.inprog++;
+    else if(s==='blocked') t.blocked++;
+    else if(s==='pending') t.pending++;
+    else if(s==='dependency') t.dep++;
+    else t.other++;
+  });});
+  return t;
+}
+// Derive go-live date: latest task whose title mentions "go-live"; else latest end date.
+function deriveGoLive(phases){
+  var gl=[], all=[];
+  phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+    var end=k.end||k.start; if(!end) return; all.push(end);
+    if(/go[\s-]?live/i.test(k.task||'')) gl.push(end);
+  });});
+  if(gl.length) return gl.sort().pop();
+  if(all.length) return all.sort().pop();
+  return null;
+}
+function daysBetween(iso){
+  if(!iso) return null;
+  var d=new Date(iso+'T00:00:00'); d.setHours(0,0,0,0);
+  var t=new Date(); t.setHours(0,0,0,0);
+  return Math.round((d-t)/86400000);
+}
+function lightFor(days){
+  if(days===null) return 'gray';
+  if(days<=7) return 'red';
+  if(days<=21) return 'amber';
+  return 'green';
+}
+function fmtDate(iso){
+  if(!iso) return 'TBC';
+  var d=new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
 
-new Chart(document.getElementById('pinchChart'), {
-  type: 'bar',
-  plugins: [pinchPlugin],
-  data: {
-    labels: pinchWeekLabels,
-    datasets: [
-      {label:'Raiz / BTS / AfterShip',    data:dataNearTerm,  backgroundColor:'rgba(74,143,231,0.7)',  borderColor:'#4a8fe7', borderWidth:1, borderRadius:3},
-      {label:'Jul cohort',                data:dataJulCohort, backgroundColor:'rgba(155,89,182,0.7)',  borderColor:'#9b59b6', borderWidth:1, borderRadius:3},
-      {label:'Aug cohort',                data:dataAugCohort, backgroundColor:'rgba(230,57,70,0.65)',  borderColor:'#e63946', borderWidth:1, borderRadius:3},
-    ]
-  },
-  options: {
-    responsive:true, maintainAspectRatio:false,
-    plugins: {
-      legend:{display:false},
-      tooltip:{backgroundColor:'#1a1a30',borderColor:'#252545',borderWidth:1,titleColor:'#dde1f0',bodyColor:'#a0a4c0',padding:10}
-    },
-    scales: {
-      x:{stacked:true, grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#6a6a8a',font:{size:11}}},
-      y:{stacked:true, grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#6a6a8a',font:{size:11}}}
+// ──────────────────────────────────────────────────────────────
+// LIVE FETCH
+// ──────────────────────────────────────────────────────────────
+// ── "Skill format" trackers: task data lives in the HTML as const P (phases)
+//    and const T (tasks by phase, grouped sabel/client). The API only stores
+//    status overrides. Extract P/T from the file and overlay saved statuses. ──
+var SKILL_MONTHS={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function skillDate(d){
+  // human date strings like "May 14-15" → ISO of the last date. Year assumed 2026.
+  if(!d) return '';
+  var ms=String(d).match(/([A-Z][a-z]{2})\s*(\d{1,2})/g);
+  if(!ms) return '';
+  var m=ms[ms.length-1].match(/([A-Z][a-z]{2})\s*(\d{1,2})/);
+  var mo=SKILL_MONTHS[m[1]]; if(mo==null) return '';
+  return '2026-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
+}
+function parseSkillHtml(html, saved){
+  function extractLiteral(src, startIdx){
+    var open=src[startIdx], close=open==='['?']':'}', depth=0, inStr=false;
+    for(var i=startIdx;i<src.length;i++){
+      var ch=src[i];
+      if(inStr){ if(ch==='\\'){ i++; continue; } if(ch==="'"){ inStr=false; } continue; }
+      if(ch==="'"){ inStr=true; continue; }
+      if(ch===open) depth++;
+      else if(ch===close){ depth--; if(depth===0) return src.slice(startIdx, i+1); }
     }
+    return null;
   }
+  function grab(name, kind){
+    var m=html.indexOf('const '+name+'='); if(m<0) return null;
+    var br=html.indexOf(kind, m); if(br<0) return null;
+    try { return Function('return ('+extractLiteral(html, br)+')')(); } catch(e){ return null; }
+  }
+  var P=grab('P','['), T=grab('T','{');
+  if(!P || !T) return null;
+  var totalH=(html.match(/const TOTAL_H=(\d+)/)||[])[1];
+  var st=(saved && saved.statuses) ? saved.statuses : {};   // saved status overrides
+  var phases=P.map(function(ph){
+    var grp=T[ph.id]||{}, tasks=[];
+    (grp.sabel||[]).forEach(function(t,i){ tasks.push({task:t.t, owner:t.o, status: st[ph.id+'-s-'+i]||t.s, end:skillDate(t.d), dep:false}); });
+    (grp.client||[]).forEach(function(t,i){ tasks.push({task:t.t, owner:t.o, status: st[ph.id+'-c-'+i]||t.s, end:skillDate(t.d), dep:true}); });
+    return {id:ph.id, tasks:tasks};
+  });
+  return {phases:phases, totalHours: totalH ? +totalH : null};
+}
+
+function fetchOne(key){
+  return fetch(API+'?key='+encodeURIComponent(key))
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ return (j&&j.ok) ? j.data : null; })
+    .catch(function(){ return null; });
+}
+function loadLive(manual){
+  var btn=document.getElementById('refreshBtn'); if(btn) btn.classList.add('spin');
+  var live=0;
+  return Promise.all(TRACKERS.map(function(tr){
+    if(!tr.key){ tr.live=false; return Promise.resolve(); }
+    return fetchOne(tr.key).then(function(data){
+      var phases=normalisePhases(data);
+      if(phases){ tr.phases=phases; tr.t=tally(phases); tr.golive=deriveGoLive(phases); tr.live=true; live++; return; }
+      // Fallback: "skill format" trackers keep their task data inside the HTML
+      // (the API only holds status overrides). Fetch the file and read P / T.
+      return fetch(BASE+tr.file).then(function(r){ return r.ok ? r.text() : null; }).then(function(txt){
+        var parsed = txt ? parseSkillHtml(txt, data) : null;
+        if(parsed && parsed.phases.length){
+          tr.phases=parsed.phases; tr.t=tally(parsed.phases); tr.golive=deriveGoLive(parsed.phases);
+          if(parsed.totalHours!=null && tr.sowHours==null) tr.sowHours=parsed.totalHours;
+          tr.live=true; live++;
+        } else { tr.live=false; }
+      }).catch(function(){ tr.live=false; });
+    });
+  })).then(function(){
+    render();
+    var s=document.getElementById('stamp');
+    var now=new Date();
+    s.innerHTML='<b>&#9679; Live</b> &middot; '+live+'/'+TRACKERS.filter(function(t){return t.key;}).length+' trackers &middot; '+
+      now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    if(btn) btn.classList.remove('spin');
+  });
+}
+
+// ──────────────────────────────────────────────────────────────
+// RENDER
+// ──────────────────────────────────────────────────────────────
+function classify(){
+  var active=[], offb=[];
+  TRACKERS.forEach(function(tr){
+    if(tr.live && tr.t && tr.t.total>0 && tr.t.done===tr.t.total){ offb.push(tr); }
+    else { active.push(tr); }
+  });
+  // active sorted by go-live (TBC last)
+  active.sort(function(a,b){
+    var ak=a.golive||'9999-12-31', bk=b.golive||'9999-12-31';
+    return ak<bk?-1:ak>bk?1:0;
+  });
+  return {active:active, offb:offb};
+}
+
+function render(){
+  var g=classify();
+  renderWeekly();
+  renderKPIs(g);
+  renderActive(g.active);
+  renderOffboarding(g.offb);
+  renderNoTracker();
+  renderTimeline(g.active);
+  renderAttention();
+  renderContracts();
+}
+
+// strip the ■/★ markers used in tracker task titles
+function cleanTitle(t){ return (t||'').replace(/^[■★]\s*/,'').trim(); }
+
+// next Sabel-actionable task for a project (earliest dated incomplete, non-client task)
+function nextAction(tr){
+  if(!tr.phases) return null;
+  var cand=[];
+  tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+    var s=(k.status||'').toLowerCase();
+    if(s==='complete'||s==='done'||k.dep) return;
+    cand.push(k);
+  });});
+  if(!cand.length) return null;
+  cand.sort(function(a,b){ var ak=a.end||a.start||'9999',bk=b.end||b.start||'9999'; return ak<bk?-1:ak>bk?1:0; });
+  return cand[0];
+}
+function naLine(tr){
+  var n=nextAction(tr); if(!n) return '';
+  return '<div class="na-line">Next: <b>'+cleanTitle(n.task)+'</b>'+(n.owner?' &middot; '+n.owner:'')+(n.end?' &middot; '+fmtDate(n.end):'')+'</div>';
+}
+// "Stale / slipping" proxy: Sabel-owned, incomplete tasks whose end date has already passed.
+function overdueTasks(tr){
+  if(!tr.phases) return [];
+  var today=new Date(); today.setHours(0,0,0,0); var out=[];
+  tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+    var s=(k.status||'').toLowerCase();
+    if(s==='complete'||s==='done'||k.dep) return;
+    var e=k.end||k.start; if(!e) return;
+    var d=new Date(e+'T00:00:00'); d.setHours(0,0,0,0);
+    if(d<today) out.push({client:tr.name, task:k.task, who:k.owner||'—', late:Math.round((today-d)/86400000)});
+  });});
+  return out;
+}
+// Hours spent / committed (estimate from SOW total × completion). null when unknown.
+function hoursTxt(tr){
+  if(tr.sowHours==null || !tr.t || !tr.t.total) return null;
+  return Math.round(tr.sowHours*tr.t.done/tr.t.total)+'/'+tr.sowHours+'h';
+}
+
+// WEEKLY PLAN — what Chris / Richard / Greg are scheduled to deliver in the
+// selected calendar week, pulled from tracker task dates. Side-by-side columns.
+var WEEK_TEAM = ['Chris','Richard','Greg'];
+function weekStart(offset){
+  var d=new Date(); d.setHours(0,0,0,0);
+  var day=(d.getDay()+6)%7;            // Monday = 0
+  d.setDate(d.getDate()-day + offset*7);
+  return d;
+}
+function shiftWeek(delta, reset){
+  WEEK_OFFSET = reset ? 0 : WEEK_OFFSET + delta;
+  renderWeekly();
+}
+function statusColour(s){
+  s=(s||'').toLowerCase();
+  return s==='complete'?'var(--green)':s==='blocked'?'var(--redText)':s==='in progress'?'var(--blue)':s==='dependency'?'var(--amber)':'var(--mono)';
+}
+function renderWeekly(){
+  var el=document.getElementById('weeklyCols'); if(!el) return;
+  var ws=weekStart(WEEK_OFFSET), we=new Date(ws); we.setDate(ws.getDate()+7);
+  var lbl=document.getElementById('wkLabel');
+  if(lbl){
+    var last=new Date(we.getTime()-1);
+    lbl.textContent = ws.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' – '+last.toLocaleDateString('en-GB',{day:'numeric',month:'short'})
+      + (WEEK_OFFSET===0?' · this week':WEEK_OFFSET===1?' · next week':WEEK_OFFSET===-1?' · last week':'');
+  }
+  var cols={Chris:[],Richard:[],Greg:[]};
+  TRACKERS.forEach(function(tr){
+    if(!tr.live || !tr.phases) return;
+    tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+      var e=k.end||k.start; if(!e) return;
+      var d=new Date(e+'T00:00:00'); d.setHours(0,0,0,0);
+      if(d<ws || d>=we) return;
+      var owner=k.owner||'';
+      WEEK_TEAM.forEach(function(p){ if(owner.indexOf(p)!==-1)
+        cols[p].push({client:tr.name, task:cleanTitle(k.task), status:k.status, date:d, done:(k.status||'').toLowerCase()==='complete'}); });
+    });});
+  });
+  el.innerHTML = WEEK_TEAM.map(function(p){
+    var items=cols[p].sort(function(a,b){ return a.date-b.date; });
+    var body = items.length ? items.map(function(x){
+      return '<div class="wk-item'+(x.done?' done':'')+'"><span class="wk-dot" style="background:'+statusColour(x.status)+'"></span>'
+        + '<div class="wk-tx"><b>'+x.client+'</b> '+x.task+'</div></div>';
+    }).join('') : '<div class="wk-empty">Nothing scheduled</div>';
+    return '<div class="wk-col"><div class="wk-col-h">'+p+' <span class="wk-n">'+items.length+'</span></div>'+body+'</div>';
+  }).join('');
+}
+
+// CONTRACT EXPIRY — clients within the final 3 months of their 12-month term.
+function renderContracts(){
+  var box=document.getElementById('conBox'); if(!box) return;
+  var today=new Date(); today.setHours(0,0,0,0);
+  var rows=[];
+  CONTRACTS.forEach(function(c){
+    if(!c.start || CONTRACT_REMOVED.indexOf(c.name)!==-1) return;
+    var exp=new Date(c.start+'T00:00:00'); exp.setFullYear(exp.getFullYear()+1); exp.setHours(0,0,0,0);
+    var days=Math.round((exp-today)/86400000);
+    if(days>92) return;                 // only within final ~3 months
+    rows.push({name:c.name, exp:exp, days:days});
+  });
+  rows.sort(function(a,b){ return a.days-b.days; });
+  document.getElementById('conCount').textContent=rows.length;
+  if(!rows.length){ box.innerHTML='<div class="empty">No contracts within 3 months of expiry. (Add each client\'s contract start date to activate this watch — just send them to me.)</div>'; return; }
+  box.innerHTML=rows.map(function(r){
+    var when = r.days<0 ? ('expired '+Math.abs(r.days)+'d ago') : r.days===0 ? 'expires today' : ('~'+Math.round(r.days/7)+' wks left');
+    var tone = r.days<=30 ? 'var(--redText)' : 'var(--amber)';
+    var arg=JSON.stringify(r.name).replace(/"/g,'&quot;');
+    return '<div class="nt-row"><div><div class="ob-name">'+r.name+'</div>'
+      + '<div class="ob-meta">12-mo term ends '+fmtDate(r.exp.toISOString().slice(0,10))+'</div></div>'
+      + '<span class="nt-right"><span class="nt-tag" style="color:'+tone+'">'+when+'</span>'
+      + '<button class="nt-del" title="Remove from list" onclick="removeContract('+arg+')">&times;</button></span></div>';
+  }).join('');
+}
+function removeContract(n){
+  if(CONTRACT_REMOVED.indexOf(n)===-1) CONTRACT_REMOVED.push(n);
+  localStorage.setItem('sabel_contract_removed', JSON.stringify(CONTRACT_REMOVED));
+  renderContracts();
+}
+// Mark an offboarding project as closed out (persists locally, drops it off the list)
+function closeOffb(n){
+  if(OFFB_CLOSED.indexOf(n)===-1) OFFB_CLOSED.push(n);
+  localStorage.setItem('sabel_offb_closed', JSON.stringify(OFFB_CLOSED));
+  render();
+}
+
+// Blocked digest + client-waiting list (across all live trackers)
+function renderAttention(){
+  var blocked=[], waiting=[];
+  TRACKERS.forEach(function(tr){
+    if(!tr.live||!tr.phases) return;
+    tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+      var s=(k.status||'').toLowerCase();
+      if(s==='blocked') blocked.push({client:tr.name,task:k.task,who:k.owner||'—'});
+      if(k.dep && s!=='complete' && s!=='done') waiting.push({client:tr.name,task:k.task,who:k.owner||'Client'});
+    });});
+  });
+  var overdue=[];
+  TRACKERS.forEach(function(tr){ if(tr.live) overdue=overdue.concat(overdueTasks(tr)); });
+  overdue.sort(function(a,b){ return b.late-a.late; });
+  fillTasks('blkBox','blkCount',blocked,'Nothing blocked right now.');
+  fillTasks('waitBox','waitCount',waiting,'No open client dependencies.');
+  fillTasks('ovdBox','ovdCount',overdue.map(function(x){ return {client:x.client, task:x.task+' &nbsp;<span style="color:var(--redText)">('+x.late+'d late)</span>', who:x.who}; }),'Nothing overdue. 🎉');
+  var ac=document.getElementById('attnCounts');
+  if(ac) ac.innerHTML='&#128681; '+blocked.length+' blocked &middot; &#8987; '+waiting.length+' waiting &middot; &#9888; '+overdue.length+' overdue';
+}
+function fillTasks(boxId,countId,arr,emptyMsg){
+  document.getElementById(countId).textContent=arr.length;
+  var box=document.getElementById(boxId);
+  if(!arr.length){ box.innerHTML='<div class="empty">'+emptyMsg+'</div>'; return; }
+  box.innerHTML=arr.map(function(x){
+    return '<div class="task-row"><div class="tx"><b>'+x.client+'</b> &mdash; '+cleanTitle(x.task)+'</div>'
+      + '<div class="meta">'+x.who+'</div></div>';
+  }).join('');
+}
+// Live owner workload — open Sabel-owned tasks per person
+function renderOwners(){
+  var stat={};
+  TRACKERS.forEach(function(tr){
+    if(!tr.live||!tr.phases) return;
+    tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+      if(k.dep) return; // Sabel-owned only
+      var s=(k.status||'').toLowerCase();
+      if(s==='complete'||s==='done') return;
+      var o=k.owner||'Unassigned';
+      if(SABEL_TEAM.indexOf(o)===-1) return; // only Chris / Greg / Richard
+      if(!stat[o]) stat[o]={open:0,blocked:0};
+      stat[o].open++; if(s==='blocked') stat[o].blocked++;
+    });});
+  });
+  var rows=Object.keys(stat).map(function(o){ return {o:o,open:stat[o].open,blocked:stat[o].blocked}; });
+  rows.sort(function(a,b){ return b.open-a.open; });
+  var box=document.getElementById('ownBox');
+  if(!rows.length){ box.innerHTML='<div class="empty">No open tasks.</div>'; return; }
+  var max=rows[0].open||1;
+  box.innerHTML=rows.map(function(r){
+    return '<div class="own-row"><span class="own-name">'+r.o+'</span>'
+      + '<div class="own-bar"><div style="width:'+(r.open/max*100)+'%;background:'+(r.blocked?'var(--redText)':'var(--blue)')+'"></div></div>'
+      + '<span class="own-nums"><b>'+r.open+'</b> open'+(r.blocked?' &middot; <span style="color:var(--redText)">'+r.blocked+' blocked</span>':'')+'</span></div>';
+  }).join('');
+}
+
+function renderKPIs(g){
+  var openTotal=0, riskTotal=0, doneSum=0, totSum=0;
+  g.active.concat(g.offb).forEach(function(tr){
+    if(!tr.t) return;
+    openTotal += (tr.t.total - tr.t.done);
+    riskTotal += tr.t.blocked + tr.t.dep;
+    doneSum += tr.t.done; totSum += tr.t.total;
+  });
+  var pct = totSum ? Math.round(doneSum/totSum*100) : 0;
+  var k=[
+    {lbl:'Active Projects', val:g.active.length, sub:'in delivery', cls:''},
+    {lbl:'Offboarding', val:g.offb.length, sub:'ready to close', cls:'live'},
+    {lbl:'Open Actions', val:openTotal, sub:'across active', cls:''},
+    {lbl:'At Risk', val:riskTotal, sub:'blocked + dependency', cls:'risk'},
+    {lbl:'Avg Progress', val:pct+'%', sub:'tasks complete', cls:''}
+  ];
+  document.getElementById('kpis').innerHTML = k.map(function(x){
+    return '<div class="kpi '+x.cls+'"><div class="lbl">'+x.lbl+'</div><div class="val">'+x.val+'</div><div class="sub">'+x.sub+'</div></div>';
+  }).join('');
+}
+
+function renderActive(list){
+  document.getElementById('activeCount').textContent=list.length;
+  var el=document.getElementById('activeCards');
+  el.className = DENSITY==='compact' ? 'rows' : 'cards';
+  if(!list.length){ el.innerHTML='<div class="empty">No active projects.</div>'; return; }
+  el.innerHTML = list.map(function(tr){ return DENSITY==='compact' ? activeRow(tr) : activeCard(tr); }).join('');
+}
+
+// Compact stacked row (default)
+function activeRow(tr){
+  var url=BASE+tr.file;
+  var nm='<a href="'+url+'" target="_blank" rel="noopener">'+tr.name+'</a>';
+  if(!tr.live || !tr.t){
+    return '<div class="arow gray"><span class="ar-dot"></span>'
+      + '<div class="ar-main"><div class="ar-nm">'+nm+' <span class="ar-gl">'+(tr.keyPending?'· live key pending':'· no live data yet')+'</span></div></div>'
+      + '<div class="ar-meta"></div><div class="ar-days"><div class="d1">—</div></div>'
+      + '<a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open &rarr;</a></div>';
+  }
+  var t=tr.t, total=t.total||1, days=daysBetween(tr.golive), light=lightFor(days);
+  var dtxt = days===null?'TBC':days<0?Math.abs(days)+'d':days===0?'Today':days+'d';
+  var dlbl = days===null?'tbc':days<0?'overdue':'go-live';
+  var open=t.total-t.done, risk=t.blocked+t.dep, pct=Math.round(t.done/total*100);
+  var seg=function(n,c){ return n?'<div style="width:'+(n/total*100)+'%;background:'+c+'"></div>':''; };
+  return '<div class="arow '+light+'">'
+    + '<span class="ar-dot"></span>'
+    + '<div class="ar-main"><div class="ar-nm">'+nm+' <span class="ar-gl">· go-live '+fmtDate(tr.golive)+'</span></div>'
+    +   '<div class="ar-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+'</div>'+naLine(tr)+'</div>'
+    + '<div class="ar-meta"><span class="ar-pct">'+pct+'%</span>'+(hoursTxt(tr)?'<span class="ar-chip hrs">'+hoursTxt(tr)+'</span>':'')+'<span class="ar-chip">'+open+' open</span>'+(risk?'<span class="ar-chip risk">'+risk+' risk</span>':'')+(overdueTasks(tr).length?'<span class="ar-chip od">⚠ '+overdueTasks(tr).length+'</span>':'')+'</div>'
+    + '<div class="ar-days"><div class="d1">'+dtxt+'</div><div class="d2">'+dlbl+'</div></div>'
+    + '<a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open &rarr;</a>'
+    + '</div>';
+}
+
+// Detailed card (density=detailed)
+function activeCard(tr){
+  var url=BASE+tr.file;
+  var link='<a href="'+url+'" target="_blank" rel="noopener">'+tr.name+'</a>';
+  if(!tr.live || !tr.t){
+    return '<div class="pcard gray"><div class="pc-top"><div><div class="pc-name">'+link+'</div></div></div>'
+      + '<div class="pc-pending">'+(tr.keyPending?'Live data pending — key not confirmed':'No live data returned yet')+'</div>'
+      + '<div class="pc-foot"><span class="hrs na">Data not available</span><a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open tracker &rarr;</a></div></div>';
+  }
+  var t=tr.t, total=t.total||1;
+  var days=daysBetween(tr.golive), light=lightFor(days);
+  var dtxt = days===null ? 'TBC' : days<0 ? Math.abs(days)+'d' : days===0 ? 'Today' : days+'d';
+  var dlbl = days===null ? 'date TBC' : days<0 ? 'overdue' : 'to go-live';
+  var open=t.total-t.done, risk=t.blocked+t.dep, pct=Math.round(t.done/total*100);
+  var seg=function(n,c){ return n? '<div style="width:'+(n/total*100)+'%;background:'+c+'"></div>':''; };
+  var ov=overdueTasks(tr).length, ht=hoursTxt(tr);
+  return '<div class="pcard '+light+'">'
+    + '<div class="pc-top"><div><div class="pc-name">'+link+'</div><div class="pc-open">'+pct+'% complete &middot; go-live '+fmtDate(tr.golive)+'</div></div>'
+    +   '<div class="pc-days"><div class="d1">'+dtxt+'</div><div class="d2">'+dlbl+'</div></div></div>'
+    + '<div class="pc-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+'</div>'
+    + '<div class="pc-stats">'
+    +   '<div class="pc-stat"><div class="n">'+open+'</div><div class="l">Open</div></div>'
+    +   '<div class="pc-stat red"><div class="n">'+risk+'</div><div class="l">At risk</div></div>'
+    +   '<div class="pc-stat amber"><div class="n">'+ov+'</div><div class="l">Overdue</div></div>'
+    +   '<div class="pc-stat hrs"><div class="n">'+(ht||'—')+'</div><div class="l">Hours</div></div>'
+    + '</div>'
+    + naLine(tr)
+    + '<div class="pc-foot"><span class="pc-od">'+(ov?('⚠ '+ov+' overdue'):'')+'</span><a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open tracker &rarr;</a></div>'
+    + '</div>';
+}
+
+function toggleDensity(){
+  DENSITY = DENSITY==='compact' ? 'detailed' : 'compact';
+  localStorage.setItem('sabel_density', DENSITY);
+  updateDensityBtn();
+  render();
+}
+function updateDensityBtn(){
+  var b=document.getElementById('densityBtn');
+  if(b) b.innerHTML = DENSITY==='compact' ? '&#9783; Detailed view' : '&#9636; Compact view';
+}
+
+// ── Widget visibility config ──
+function applyWidgets(){
+  WIDGETS.forEach(function(w){
+    var el=document.getElementById(w.id);
+    if(el) el.style.display = WIDGET_HIDDEN.indexOf(w.id)===-1 ? '' : 'none';
+  });
+}
+function setWidget(id,show){
+  var i=WIDGET_HIDDEN.indexOf(id);
+  if(show && i!==-1) WIDGET_HIDDEN.splice(i,1);
+  else if(!show && i===-1) WIDGET_HIDDEN.push(id);
+  localStorage.setItem('sabel_widgets_hidden', JSON.stringify(WIDGET_HIDDEN));
+  applyWidgets();
+}
+function buildConfigPanel(){
+  var p=document.getElementById('cfgPanel'); if(!p) return;
+  p.innerHTML='<div class="cfg-h">Show widgets</div>'+WIDGETS.map(function(w){
+    var on=WIDGET_HIDDEN.indexOf(w.id)===-1;
+    return '<label class="cfg-row"><input type="checkbox" '+(on?'checked':'')+' onchange="setWidget(\''+w.id+'\',this.checked)"> '+w.label+'</label>';
+  }).join('');
+}
+function toggleConfig(){ var p=document.getElementById('cfgPanel'); if(p) p.classList.toggle('open'); }
+document.addEventListener('click',function(e){
+  var w=document.querySelector('.cfg-wrap'), p=document.getElementById('cfgPanel');
+  if(p && p.classList.contains('open') && w && !w.contains(e.target)) p.classList.remove('open');
 });
+
+function renderOffboarding(list){
+  var visible=list.filter(function(tr){ return OFFB_CLOSED.indexOf(tr.name)===-1; });
+  document.getElementById('offbCount').textContent=visible.length;
+  var el=document.getElementById('offbBox');
+  if(!visible.length){ el.innerHTML='<div class="empty">Nothing awaiting close-out. Projects appear here when every task in their tracker is complete.</div>'; return; }
+  el.innerHTML=visible.map(function(tr){
+    var url=BASE+tr.file;
+    var arg=JSON.stringify(tr.name).replace(/"/g,'&quot;');
+    return '<div class="ob-row"><div><div class="ob-name"><a href="'+url+'" target="_blank" rel="noopener">'+tr.name+'</a></div>'
+      + '<div class="ob-meta">All '+tr.t.total+' tasks complete &middot; go-live '+fmtDate(tr.golive)+'</div></div>'
+      + '<button class="ob-btn" title="Mark closed out — offboarding pack sent" onclick="closeOffb('+arg+')">&#10003; Mark closed out</button></div>';
+  }).join('');
+}
+
+function renderNoTracker(){
+  var list = NO_TRACKER.filter(function(n){ return NT_REMOVED.indexOf(n)===-1; });
+  document.getElementById('ntCount').textContent=list.length;
+  var box=document.getElementById('ntBox');
+  if(!list.length){ box.innerHTML='<div class="empty">All clear — every client here now has a tracker or has been closed out.</div>'; return; }
+  box.innerHTML = list.map(function(n){
+    var arg = JSON.stringify(n).replace(/"/g,'&quot;');
+    return '<div class="nt-row"><span class="nt-name">'+n+'</span>'
+      + '<span class="nt-right"><span class="nt-tag">no live tracker</span>'
+      + '<button class="nt-del" title="Remove from list" onclick="removeNT('+arg+')">&times;</button></span></div>';
+  }).join('');
+}
+function removeNT(n){
+  if(NT_REMOVED.indexOf(n)===-1) NT_REMOVED.push(n);
+  localStorage.setItem('sabel_nt_removed', JSON.stringify(NT_REMOVED));
+  renderNoTracker();
+}
+
+// ──────────────────────────────────────────────────────────────
+// PINCH-POINT TIMELINE
+// ──────────────────────────────────────────────────────────────
+function isoWeek(iso){
+  var d=new Date(iso+'T00:00:00'); var day=(d.getDay()+6)%7; d.setDate(d.getDate()-day);
+  return d.getFullYear()+'-'+d.getTime();
+}
+function renderTimeline(active){
+  var el=document.getElementById('timeline');
+  var pts=active.filter(function(t){ return t.golive; }).map(function(t){ return {name:t.name, date:t.golive}; });
+  if(pts.length<1){ el.innerHTML='<div class="tl-empty">No dated go-lives to plot yet.</div>'; return; }
+  pts.sort(function(a,b){ return a.date<b.date?-1:1; });
+  // range: first of earliest month → first of latest month + 1
+  var min=new Date(pts[0].date+'T00:00:00'), max=new Date(pts[pts.length-1].date+'T00:00:00');
+  var start=new Date(min.getFullYear(),min.getMonth(),1);
+  var end=new Date(max.getFullYear(),max.getMonth()+1,1);
+  var span=end-start || 1;
+  var pos=function(iso){ return ((new Date(iso+'T00:00:00')-start)/span)*100; };
+
+  // pinch detection: count per ISO week
+  var weekCount={}; pts.forEach(function(p){ var w=isoWeek(p.date); weekCount[w]=(weekCount[w]||0)+1; });
+
+  var html='';
+  // month gridlines + labels
+  var m=new Date(start);
+  while(m<end){
+    var x=((m-start)/span)*100;
+    html+='<div class="tl-grid" style="left:'+x+'%"></div>';
+    html+='<div class="tl-month" style="left:'+(((new Date(m.getFullYear(),m.getMonth()+1,1))-start)/span*100 + x)/2+'%">'+m.toLocaleDateString('en-GB',{month:'short'})+'</div>';
+    m=new Date(m.getFullYear(),m.getMonth()+1,1);
+  }
+  html+='<div class="tl-axis"></div>';
+  // pinch bands (weeks with >=2)
+  pts.forEach(function(p){
+    var w=isoWeek(p.date);
+    if(weekCount[w]>=2){
+      var d=new Date(p.date+'T00:00:00'); var day=(d.getDay()+6)%7;
+      var ws=new Date(d); ws.setDate(d.getDate()-day);
+      var we=new Date(ws); we.setDate(ws.getDate()+7);
+      var x1=((ws-start)/span)*100, x2=((we-start)/span)*100;
+      html+='<div class="tl-band" style="left:'+x1+'%;width:'+(x2-x1)+'%"></div>';
+    }
+  });
+  // markers + labels (stagger labels to reduce overlap)
+  pts.forEach(function(p,i){
+    var w=isoWeek(p.date), days=daysBetween(p.date);
+    var cls = weekCount[w]>=2 ? 'red' : (days!==null&&days<=21?'amber':'green');
+    var x=pos(p.date);
+    var top = 6 + (i%3)*30; // 3-row stagger
+    html+='<div class="tl-mark '+cls+'" style="left:'+x+'%" title="'+p.name+' · '+fmtDate(p.date)+'"></div>';
+    html+='<div class="tl-lab" style="left:'+x+'%;top:'+top+'px">'+p.name+'</div>';
+  });
+  el.innerHTML=html;
+}
+
+// ──────────────────────────────────────────────────────────────
+// AUTO-PICKUP: optional registry file so new trackers can be added
+// in ONE place (Intake-forms/trackers.json) without editing this file.
+// If trackers.json is present it replaces the built-in list; otherwise
+// the built-in TRACKERS list above is used. Either way it just works.
+// ──────────────────────────────────────────────────────────────
+function loadConfig(){
+  return fetch(BASE+'trackers.json',{cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ if(Array.isArray(j) && j.length){ TRACKERS = j; } })
+    .catch(function(){ /* no registry — keep built-in list */ });
+}
+
+// ──────────────────────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────────────────────
+updateDensityBtn();
+buildConfigPanel();
+render();                                   // paint shell immediately
+applyWidgets();                             // honour saved widget visibility
+loadConfig().then(function(){ loadLive(false); }); // registry (if any) → live data
+setInterval(function(){ loadLive(false); }, REFRESH_MS); // keep it live
 </script>
 </body>
 </html>
