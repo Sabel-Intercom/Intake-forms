@@ -217,6 +217,36 @@
   .ob-btn{font-size:10px;font-weight:700;letter-spacing:.03em;color:var(--green);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);padding:6px 11px;border-radius:6px;white-space:nowrap;cursor:pointer;}
   .ob-btn:hover{background:rgba(74,222,128,.22);color:#fff;}
 
+  /* weekly plan — collapsible, grouped by client */
+  .wk-drop{background:var(--card);border:1px solid var(--border2);border-radius:12px;margin-bottom:24px;overflow:hidden;}
+  .wk-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:15px 20px;}
+  .wk-drop > summary::-webkit-details-marker{display:none;}
+  .wk-title{font-size:14px;font-weight:800;letter-spacing:.03em;color:var(--w);text-transform:uppercase;}
+  .wk-summary-count{font-size:10px;color:var(--mono);}
+  .wk-drop > summary .ad-chev{margin-left:auto;color:var(--mono);transition:transform .15s;font-size:12px;}
+  .wk-drop[open] > summary .ad-chev{transform:rotate(90deg);}
+  .wk-body{padding:0 20px 16px;}
+  .week-nav{display:flex;align-items:center;gap:8px;margin:10px 0 14px;}
+  .weekly-clients{display:flex;flex-direction:column;gap:8px;}
+  .wkc{background:var(--card2);border:1px solid var(--border2);border-radius:9px;overflow:hidden;}
+  .wkc > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 14px;}
+  .wkc > summary::-webkit-details-marker{display:none;}
+  .wkc-name{font-size:13px;font-weight:700;color:var(--w);}
+  .wkc-gl{font-size:9px;font-weight:700;letter-spacing:.03em;padding:2px 8px;border-radius:20px;background:var(--surface);border:1px solid var(--border2);color:var(--mono);white-space:nowrap;}
+  .wkc-gl.red{color:var(--redText);border-color:rgba(248,113,113,.3);} .wkc-gl.amber{color:var(--amber);border-color:rgba(251,191,36,.3);} .wkc-gl.green{color:var(--green);border-color:rgba(74,222,128,.3);}
+  .wkc-n{font-size:9px;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1px 8px;}
+  .wkc > summary .ad-chev{margin-left:auto;color:var(--mono);transition:transform .15s;font-size:12px;}
+  .wkc[open] > summary .ad-chev{transform:rotate(90deg);}
+  .wkc-body{padding:2px 14px 10px;}
+  .wk-item{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--border2);}
+  .wk-item:last-child{border-bottom:none;}
+  .wk-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+  .wk-tx{flex:1;font-size:12px;color:var(--body);line-height:1.4;min-width:0;}
+  .wk-owners{display:flex;gap:4px;flex-shrink:0;}
+  .own-chip{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#0B0B0C;}
+  .own-chip.client{width:auto;padding:0 7px;height:20px;border-radius:20px;background:var(--card4);color:var(--muted);border:1px solid var(--border);font-size:8.5px;}
+  .wk-empty{font-size:11px;color:var(--mono);padding:6px 0;}
+
   footer{margin-top:30px;padding:16px 0 0;border-top:1px solid var(--border2);font-size:9px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 </style>
 </head>
@@ -239,19 +269,22 @@
 <div class="wrap">
 
   <div id="w-weekly">
-    <div class="hero">
-      <div class="weekly-head">
-        <h2>&#128197; This week's plan</h2>
+    <details class="wk-drop">
+      <summary>
+        <span class="wk-title">&#128197; This week's plan</span>
+        <span class="wk-summary-count" id="wkSummary"></span>
+        <span class="ad-chev">&#9656;</span>
+      </summary>
+      <div class="wk-body">
         <div class="week-nav">
           <button class="wk-btn" onclick="shiftWeek(-1)" title="Previous week">&#8592;</button>
           <span class="wk-label" id="wkLabel"></span>
           <button class="wk-btn" onclick="shiftWeek(1)" title="Next week">&#8594;</button>
           <button class="wk-btn wk-today" onclick="shiftWeek(0,true)">This week</button>
         </div>
+        <div class="weekly-clients" id="weeklyClients"></div>
       </div>
-      <div class="weekly-sub">What each of Chris, Richard and Greg is scheduled to deliver this week, pulled live from the trackers.</div>
-      <div class="weekly-cols" id="weeklyCols"></div>
-    </div>
+    </details>
   </div>
 
   <div id="w-kpis"><div class="kpis" id="kpis"></div></div>
@@ -336,11 +369,12 @@ var TRACKERS = [
   {name:'Cirqul',              key:'cirqul-tracker-v1',          file:'CirqulTracker_v2.html',          sowHours:null},
   {name:'Education Perfect',   key:'education-perfect-tracker-v1',file:'EducationPerfectTracker_v2.html',sowHours:null},
   {name:'Huuuge',              key:'huuuge-tracker-v1',          file:'HuuugeTracker_v2.html',          sowHours:99},
+  {name:'GPS Insight',         key:'gps-insight-tracker-v1',     file:'GPSInsightTracker_v2.html',      sowHours:50},
   {name:'The Giving Movement', key:'thegivingmovement-tracker-v1', file:'TheGivingMovementTracker_v2.html',sowHours:60}
 ];
 
 // Active clients without a live tracker yet (shown for coverage).
-var NO_TRACKER = ['Ainslie (Encum)','BetNinja (Magico)','Cronos (Particle Research)','GPS Insight','Mambu','PaySauce NZ','Workinitiatives','WPT Global'];
+var NO_TRACKER = ['Ainslie (Encum)','BetNinja (Magico)','Cronos (Particle Research)','Mambu','PaySauce NZ','Workinitiatives','WPT Global'];
 
 // Sabel delivery team — only these appear in the workload widget.
 var SABEL_TEAM = ['Chris','Greg','Richard'];
@@ -606,9 +640,9 @@ function hoursTxt(tr){
   return Math.round(tr.sowHours*tr.t.done/tr.t.total)+'/'+tr.sowHours+'h';
 }
 
-// WEEKLY PLAN — what Chris / Richard / Greg are scheduled to deliver in the
-// selected calendar week, pulled from tracker task dates. Side-by-side columns.
-var WEEK_TEAM = ['Chris','Richard','Greg'];
+// WEEKLY PLAN — tasks scheduled in the selected week, grouped by CLIENT in
+// expandable dropdowns, ordered by go-live urgency. Each task shows an owner chip.
+// Built for the Monday standup: expand a client, walk the team through the week.
 function weekStart(offset){
   var d=new Date(); d.setHours(0,0,0,0);
   var day=(d.getDay()+6)%7;            // Monday = 0
@@ -623,8 +657,20 @@ function statusColour(s){
   s=(s||'').toLowerCase();
   return s==='complete'?'var(--green)':s==='blocked'?'var(--redText)':s==='in progress'?'var(--blue)':s==='dependency'?'var(--amber)':'var(--mono)';
 }
+var WK_OWNER_COLOURS={Chris:'#60A5FA',Richard:'#C084FC',Greg:'#34D399'};
+function ownerChips(owner){
+  var out='', matched=false;
+  ['Chris','Richard','Greg'].forEach(function(p){
+    if((owner||'').indexOf(p)!==-1){ matched=true;
+      out+='<span class="own-chip" style="background:'+WK_OWNER_COLOURS[p]+'" title="'+p+'">'+p.charAt(0)+'</span>'; }
+  });
+  if(!matched && owner){
+    out+='<span class="own-chip client" title="'+owner+'">'+owner.replace(/[^A-Za-z0-9]/g,'').slice(0,3).toUpperCase()+'</span>';
+  }
+  return out;
+}
 function renderWeekly(){
-  var el=document.getElementById('weeklyCols'); if(!el) return;
+  var host=document.getElementById('weeklyClients'); if(!host) return;
   var ws=weekStart(WEEK_OFFSET), we=new Date(ws); we.setDate(ws.getDate()+7);
   var lbl=document.getElementById('wkLabel');
   if(lbl){
@@ -632,25 +678,39 @@ function renderWeekly(){
     lbl.textContent = ws.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' – '+last.toLocaleDateString('en-GB',{day:'numeric',month:'short'})
       + (WEEK_OFFSET===0?' · this week':WEEK_OFFSET===1?' · next week':WEEK_OFFSET===-1?' · last week':'');
   }
-  var cols={Chris:[],Richard:[],Greg:[]};
+  // group this week's tasks by client
+  var byClient={};
   TRACKERS.forEach(function(tr){
     if(!tr.live || !tr.phases) return;
     tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
       var e=k.end||k.start; if(!e) return;
       var d=new Date(e+'T00:00:00'); d.setHours(0,0,0,0);
       if(d<ws || d>=we) return;
-      var owner=k.owner||'';
-      WEEK_TEAM.forEach(function(p){ if(owner.indexOf(p)!==-1)
-        cols[p].push({client:tr.name, task:cleanTitle(k.task), status:k.status, date:d, done:(k.status||'').toLowerCase()==='complete'}); });
+      if(!byClient[tr.name]) byClient[tr.name]={golive:tr.golive, tasks:[]};
+      byClient[tr.name].tasks.push({task:cleanTitle(k.task), owner:k.owner||'', status:k.status, date:d});
     });});
   });
-  el.innerHTML = WEEK_TEAM.map(function(p){
-    var items=cols[p].sort(function(a,b){ return a.date-b.date; });
-    var body = items.length ? items.map(function(x){
-      return '<div class="wk-item'+(x.done?' done':'')+'"><span class="wk-dot" style="background:'+statusColour(x.status)+'"></span>'
-        + '<div class="wk-tx"><b>'+x.client+'</b> '+x.task+'</div></div>';
-    }).join('') : '<div class="wk-empty">Nothing scheduled</div>';
-    return '<div class="wk-col"><div class="wk-col-h">'+p+' <span class="wk-n">'+items.length+'</span></div>'+body+'</div>';
+  var names=Object.keys(byClient);
+  var total=names.reduce(function(a,n){ return a+byClient[n].tasks.length; },0);
+  var sum=document.getElementById('wkSummary');
+  if(sum) sum.textContent = total ? (total+' task'+(total>1?'s':'')+' · '+names.length+' client'+(names.length>1?'s':'')) : 'nothing scheduled';
+  if(!names.length){ host.innerHTML='<div class="wk-empty">Nothing scheduled for this week.</div>'; return; }
+  // order clients by go-live urgency (soonest known first, unknown last)
+  names.sort(function(a,b){ var ak=byClient[a].golive||'9999-12-31', bk=byClient[b].golive||'9999-12-31'; return ak<bk?-1:ak>bk?1:0; });
+  host.innerHTML = names.map(function(n){
+    var c=byClient[n], days=daysBetween(c.golive);
+    var badge = days===null ? '<span class="wkc-gl">go-live TBC</span>'
+      : '<span class="wkc-gl '+(days<=7?'red':days<=21?'amber':'green')+'">'
+        + (days<0?Math.abs(days)+'d overdue':days===0?'go-live today':days+'d to go-live')+'</span>';
+    var rows=c.tasks.sort(function(a,b){ return a.date-b.date; }).map(function(t){
+      return '<div class="wk-item"><span class="wk-dot" style="background:'+statusColour(t.status)+'" title="'+(t.status||'')+'"></span>'
+        + '<div class="wk-tx">'+t.task+'</div>'
+        + '<span class="wk-owners">'+ownerChips(t.owner)+'</span></div>';
+    }).join('');
+    return '<details class="wkc"><summary>'
+      + '<span class="wkc-name">'+n+'</span>'+badge
+      + '<span class="wkc-n">'+c.tasks.length+'</span><span class="ad-chev">&#9656;</span></summary>'
+      + '<div class="wkc-body">'+rows+'</div></details>';
   }).join('');
 }
 
