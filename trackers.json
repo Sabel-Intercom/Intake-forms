@@ -8,6 +8,6 @@
   { "name": "Education Perfect",   "key": "education-perfect-tracker-v1","file": "EducationPerfectTracker_v2.html", "sowHours": null },
   { "name": "Huuuge",              "key": "huuuge-tracker-v1",           "file": "HuuugeTracker_v2.html",           "sowHours": 99 },
   { "name": "GPS Insight",         "key": "gps-insight-tracker-v1",      "file": "GPSInsightTracker_v2.html",       "sowHours": 50 },
-  { "name": "The Giving Movement", "key": "thegivingmovement-tracker-v1","file": "TheGivingMovementTracker_v2.html","sowHours": 60 }
-  { "name": "Cronos", "key": "cronos-tracker-v1", "file": "CronosTracker_v2.html", "sowHours": 20 }
+{ "name": "The Giving Movement", "key": "thegivingmovement-tracker-v1","file": "TheGivingMovementTracker_v2.html","sowHours": 60 },
+  { "name": "Cronos", "key": "cronos-tracker-v1", "file": "CronosTracker_v2.html", "sowHours": 20 },
 ]
