@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sabel — Client Feedback</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0F1117;color:#E2E8F0;min-height:100vh;padding:40px 16px 80px}
+.wrap{max-width:660px;margin:0 auto}
+.head{text-align:center;margin-bottom:28px}
+.head img{height:34px;margin-bottom:18px}
+.head .rule{width:64px;height:2px;background:rgba(225,6,0,.55);margin:0 auto 18px;border-radius:2px}
+h1{font-size:24px;font-weight:600;letter-spacing:-.01em}
+.sub{font-size:14px;color:#94A3B8;margin-top:8px;line-height:1.6}
+.card{background:#161B26;border:1px solid #1E2433;border-radius:12px;padding:22px;margin-bottom:16px}
+.sec-eyebrow{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#E10600;margin-bottom:4px}
+.sec-title{font-size:16px;font-weight:600;margin-bottom:14px}
+label{font-size:12px;font-weight:500;color:#94A3B8;display:block;margin:14px 0 6px}
+label:first-of-type{margin-top:0}
+.req{color:#E10600}
+input[type=text],input[type=email],textarea{width:100%;font-size:14px;color:#E2E8F0;background:#0F1117;border:1px solid #2A3145;border-radius:8px;padding:10px 12px;font-family:inherit;line-height:1.5;outline:none;transition:border-color .15s}
+textarea{resize:vertical;min-height:88px}
+input:focus,textarea:focus{border-color:#3B82F6}
+.hint{font-size:11.5px;color:#64748B;margin-top:5px;line-height:1.5}
+.rate-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #1E2433;flex-wrap:wrap}
+.rate-row:last-child{border-bottom:none}
+.rate-label{font-size:13.5px;line-height:1.45;flex:1;min-width:200px}
+.rate-label .small{font-size:11.5px;color:#64748B;display:block;margin-top:1px}
+.stars{display:flex;gap:4px}
+.star{background:none;border:none;cursor:pointer;font-size:22px;color:#2A3145;padding:2px;transition:color .1s,transform .1s;line-height:1}
+.star.on{color:#FBBF24}
+.star:hover{transform:scale(1.15)}
+.nps{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.nps button{width:42px;height:40px;border-radius:8px;border:1px solid #2A3145;background:#0F1117;color:#94A3B8;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s}
+.nps button:hover{border-color:#3B82F6;color:#E2E8F0}
+.nps button.on{background:rgba(225,6,0,.14);border-color:#E10600;color:#fff}
+.nps-ends{display:flex;justify-content:space-between;font-size:11px;color:#475569;margin-top:6px}
+.consent-item{display:flex;gap:11px;align-items:flex-start;padding:12px;border:1px solid #1E2433;border-radius:10px;margin-bottom:8px;cursor:pointer;transition:border-color .12s,background .12s}
+.consent-item:hover{border-color:#2A3145}
+.consent-item.on{border-color:rgba(225,6,0,.5);background:rgba(225,6,0,.05)}
+.consent-item input{margin-top:2px;accent-color:#E10600;width:16px;height:16px;flex-shrink:0;cursor:pointer}
+.consent-item .ct{display:block;font-size:13px;font-weight:500;line-height:1.4}
+.consent-item .cd{display:block;font-size:11.5px;color:#94A3B8;line-height:1.5;margin-top:3px}
+.privnote{font-size:11.5px;color:#64748B;line-height:1.6;margin-top:12px;padding:11px 13px;background:#0F1117;border:1px solid #1E2433;border-radius:8px}
+.privnote strong{color:#94A3B8;font-weight:600}
+.internal-flag{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#34D399;background:rgba(52,211,153,.1);border-radius:20px;padding:2px 9px;margin-left:6px;vertical-align:1px}
+.draft-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:rgba(225,6,0,.1);border:1px solid rgba(225,6,0,.45);border-radius:8px;color:#FCA5A5;font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;margin:2px 0 8px;transition:all .15s}
+.draft-btn:hover{background:rgba(225,6,0,.18);color:#fff}
+.submit-btn{width:100%;padding:14px;background:#E10600;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:filter .15s,opacity .15s;margin-top:4px}
+.submit-btn:hover{filter:brightness(1.12)}
+.submit-btn:disabled{opacity:.55;cursor:default}
+.err{font-size:12.5px;color:#F87171;margin-top:10px;display:none;text-align:center}
+.footer{text-align:center;font-size:11px;color:#475569;margin-top:26px;line-height:1.7}
+#thanks{display:none;text-align:center;padding:56px 24px}
+#thanks .tick{width:58px;height:58px;border-radius:50%;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.4);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:26px;color:#4ADE80}
+#thanks h2{font-size:21px;font-weight:600;margin-bottom:10px}
+#thanks p{font-size:14px;color:#94A3B8;line-height:1.7;max-width:420px;margin:0 auto}
+@media(max-width:560px){.nps button{width:calc((100% - 50px)/11);min-width:26px;font-size:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <img src="data:image/png;base64,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01T0RHJH0ERFkQhERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERB//2Q==" alt="Sabel">
+    <div class="rule"></div>
+    <h1>How did we do?</h1>
+    <p class="sub">Your project with Sabel is complete. We would love a few minutes of your time,<br>your feedback shapes how we work and helps other teams find us.</p>
+  </div>
+
+  <form id="fbform" onsubmit="return false;">
+
+  <div class="card">
+    <div class="sec-eyebrow">Section 1</div>
+    <div class="sec-title">About you</div>
+    <label>Your name <span class="req">*</span></label>
+    <input type="text" id="f_name" placeholder="e.g. Jane Smith">
+    <label>Your role</label>
+    <input type="text" id="f_role" placeholder="e.g. Head of Customer Support">
+    <label>Company <span class="req">*</span></label>
+    <input type="text" id="f_company" placeholder="Your company name">
+    <label>Email</label>
+    <input type="email" id="f_email" placeholder="Optional, only so we can follow up or confirm attribution">
+  </div>
+
+  <div class="card">
+    <div class="sec-eyebrow">Section 2</div>
+    <div class="sec-title">Rate the engagement</div>
+    <div class="rate-row"><div class="rate-label">Communication and responsiveness<span class="small">How easy we were to reach and how clearly we kept you informed</span></div><div class="stars" data-k="r_comms"></div></div>
+    <div class="rate-row"><div class="rate-label">Quality of the delivered setup<span class="small">Your Intercom workspace, Fin configuration, workflows and Help Centre</span></div><div class="stars" data-k="r_quality"></div></div>
+    <div class="rate-row"><div class="rate-label">Handover and enablement<span class="small">How confident your team feels running things day to day</span></div><div class="stars" data-k="r_handover"></div></div>
+    <div class="rate-row"><div class="rate-label">Overall experience<span class="small">The engagement as a whole, start to finish</span></div><div class="stars" data-k="r_overall"></div></div>
+    <label style="margin-top:18px">How likely are you to recommend Sabel to a peer? <span class="req">*</span></label>
+    <div class="nps" id="nps"></div>
+    <div class="nps-ends"><span>0 · Not likely</span><span>10 · Extremely likely</span></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-eyebrow">Section 3</div>
+    <div class="sec-title">In your words</div>
+    <label>What challenge were you trying to solve when you engaged Sabel?</label>
+    <textarea id="f_challenge" placeholder="e.g. rising ticket volumes, no self-serve support, moving off an old platform..."></textarea>
+    <label>What results have you seen since go-live?</label>
+    <textarea id="f_results" placeholder="e.g. Fin resolution rate, faster response times, reduced team workload, happier customers..."></textarea>
+    <div class="hint">Numbers are brilliant if you have them, but a general sense is just as welcome.</div>
+    <label>What did you value most about working with us?</label>
+    <textarea id="f_valued"></textarea>
+    <label>Your testimonial</label>
+    <button type="button" class="draft-btn" id="draftbtn">&#10024; Draft it for me from my answers above</button>
+    <div class="hint" id="drafthint" style="margin:0 0 8px">One click turns your three answers above into a draft you can edit, no need to write from scratch.</div>
+    <textarea id="f_testimonial" placeholder="If a peer asked you what it was like to work with Sabel, what would you tell them?"></textarea>
+    <label>What could we have done better? <span class="internal-flag">Internal only</span></label>
+    <textarea id="f_improve" placeholder="Be candid, this goes to the Sabel team only and is never published."></textarea>
+  </div>
+
+  <div class="card">
+    <div class="sec-eyebrow">Section 4</div>
+    <div class="sec-title">Know someone we could help?</div>
+    <div class="hint" style="margin:0 0 4px">Entirely optional. If a business or contact comes to mind who could benefit from better customer support with Intercom and Fin, we would love an introduction, even just a name.</div>
+    <label>Business or contact name</label>
+    <input type="text" id="f_ref_name" placeholder="e.g. Acme Retail, or Sam Jones at Acme Retail">
+    <label>How can we reach them?</label>
+    <input type="text" id="f_ref_contact" placeholder="Email, LinkedIn or phone, if you have it">
+    <label class="consent-item" id="ci_refmention" style="margin-top:14px"><input type="checkbox" data-k="c_refmention"><span><span class="ct">You may mention my name when you contact them</span><span class="cd">A warm introduction lands better, but we will keep you out of it if you prefer.</span></span></label>
+  </div>
+
+  <div class="card">
+    <div class="sec-eyebrow">Section 5</div>
+    <div class="sec-title">How we may use your feedback</div>
+    <div class="hint" style="margin:0 0 12px">Tick any you are comfortable with. Everything is optional, and your answers above are valuable to us either way.</div>
+
+    <label class="consent-item" id="ci_intercom"><input type="checkbox" data-k="c_intercom"><span><span class="ct">Share with Intercom and the Fin team</span><span class="cd">Sabel may share my feedback with Intercom as part of partner references and Fin case studies.</span></span></label>
+    <label class="consent-item" id="ci_marketing"><input type="checkbox" data-k="c_marketing"><span><span class="ct">Sabel website and marketing materials</span><span class="cd">Sabel may quote my feedback on its website and in proposals, decks and other marketing.</span></span></label>
+    <label class="consent-item" id="ci_social"><input type="checkbox" data-k="c_social"><span><span class="ct">LinkedIn and social media</span><span class="cd">Sabel may publish my feedback on LinkedIn and other social channels, attributed to me and my company.</span></span></label>
+    <label class="consent-item" id="ci_anon"><input type="checkbox" data-k="c_anonymise"><span><span class="ct">Anonymise my feedback</span><span class="cd">Use my words, but do not name me or my company anywhere it is shared.</span></span></label>
+    <label class="consent-item" id="ci_casestudy"><input type="checkbox" data-k="c_casestudy"><span><span class="ct">Contact me about a fuller case study</span><span class="cd">Sabel may get in touch about featuring this project as a written or video case study.</span></span></label>
+
+    <label>How should we attribute you?</label>
+    <input type="text" id="f_attribution" placeholder="e.g. Jane Smith, Head of Customer Support, Acme Ltd">
+    <div class="privnote"><strong>Your feedback, your call.</strong> We will only ever use your exact words, shortened where needed but never changed in meaning. You can update or withdraw permission at any time by emailing <strong>admin@sabelcustomersuccess.com</strong>. Anything marked internal only stays with the Sabel team.</div>
+  </div>
+
+  <button class="submit-btn" id="submit">Send feedback</button>
+  <div class="err" id="err"></div>
+  </form>
+
+  <div id="thanks" class="card">
+    <div class="tick">&#10003;</div>
+    <h2>Thank you</h2>
+    <p>Your feedback has been sent to the Sabel team. We read every word, and it means a great deal. Thank you for working with us.</p>
+  </div>
+
+  <div class="footer">Sabel Customer Success · admin@sabelcustomersuccess.com<br>This form collects only what you enter above, used solely per the permissions you selected.</div>
+</div>
+
+<script>
+const API='https://sabel-webhook.vercel.app/api/feedback';
+const API_DRAFT='https://sabel-webhook.vercel.app/api/testimonial';
+const KEY='sabel-feedback-v1';
+const S={ratings:{},nps:null,consent:{}};
+const params=new URLSearchParams(location.search);
+if(params.get('client')) document.getElementById('f_company').value=params.get('client');
+
+// star widgets
+document.querySelectorAll('.stars').forEach(w=>{
+  const k=w.dataset.k;
+  for(let i=1;i<=5;i++){
+    const b=document.createElement('button');b.type='button';b.className='star';b.innerHTML='&#9733;';
+    b.onclick=()=>{S.ratings[k]=i;[...w.children].forEach((c,j)=>c.classList.toggle('on',j<i));};
+    w.appendChild(b);
+  }
+});
+// nps
+const nps=document.getElementById('nps');
+for(let i=0;i<=10;i++){
+  const b=document.createElement('button');b.type='button';b.textContent=i;
+  b.onclick=()=>{S.nps=i;[...nps.children].forEach(c=>c.classList.toggle('on',+c.textContent===i));};
+  nps.appendChild(b);
+}
+// consent highlight
+document.querySelectorAll('.consent-item input').forEach(c=>{
+  c.addEventListener('change',()=>{S.consent[c.dataset.k]=c.checked;c.closest('.consent-item').classList.toggle('on',c.checked);});
+});
+
+function v(id){return document.getElementById(id).value.trim();}
+
+// testimonial draft builder, grammar-aware so full sentences read naturally
+function clean(s){s=s.trim();if(s&&!/[.!?]$/.test(s))s+='.';return s;}
+function smartLc(s){
+  // only lowercase the first word when it is a common starter, so proper nouns like Fin keep their capital
+  if(/^(We|Our|I|My|The|They|It|You|A|An|There)\b/.test(s)) return s.charAt(0).toLowerCase()+s.slice(1);
+  return s;
+}
+function pastTense(s){
+  // shift common present-tense openers to past, since the challenge is being described after the fact
+  return s.replace(/^(we|i)\s+want\b/i,'$1 wanted').replace(/^(we|i)\s+need\b/i,'$1 needed')
+          .replace(/^(we|i)\s+hope\b/i,'$1 hoped').replace(/^(we|i)\s+aim\b/i,'$1 aimed')
+          .replace(/^(we|i)('re|\s+are)\b/i,'$1 were').replace(/^(we|i)\s+don't\b/i,'$1 did not');
+}
+function isSentence(s){
+  // full sentence if it opens with a subject, or subject-plus-verb like "The team brought..."
+  return /^(we|our|i|my|they|it|you)\b/i.test(s)||/^(the|our|their|sabel|chris|richard|greg)\b[^.]*\b(was|were|is|are|brought|helped|made|gave|kept|had|did|felt|worked|delivered|took|knew|showed|guided)\b/i.test(s);
+}
+function localDraft(){
+  const parts=[];
+  let ch=v('f_challenge');
+  if(ch){ch=clean(ch);
+    if(isSentence(ch)) parts.push('When we engaged Sabel, '+smartLc(pastTense(ch)));
+    else parts.push('We came to Sabel with '+smartLc(ch));}
+  let rs=v('f_results');
+  if(rs){rs=clean(rs);
+    if(!isSentence(rs)&&/^\S+\s+\w+ing\b/.test(rs)) parts.push('Since go-live, we have seen '+smartLc(rs));
+    else parts.push('Since go-live, '+smartLc(rs));}
+  let vl=v('f_valued');
+  if(vl){vl=clean(vl);
+    if(isSentence(vl)) parts.push(vl.charAt(0).toUpperCase()+vl.slice(1));
+    else parts.push('What we valued most was '+smartLc(vl));}
+  if(!parts.length) return '';
+  if(S.nps!==null&&S.nps>=9) parts.push('We would recommend Sabel without hesitation.');
+  else if(S.nps!==null&&S.nps>=7) parts.push('We would happily recommend them.');
+  return parts.join(' ');
+}
+document.getElementById('draftbtn').onclick=async()=>{
+  const hint=document.getElementById('drafthint');
+  if(!v('f_challenge')&&!v('f_results')&&!v('f_valued')){
+    hint.textContent='Fill in the questions above first, then I can draft it from your answers.';return;
+  }
+  const box=document.getElementById('f_testimonial');
+  if(box.value.trim()&&!confirm('Replace what is already in the testimonial box with a fresh draft?')) return;
+  const btn=document.getElementById('draftbtn');
+  const orig=btn.innerHTML;
+  btn.disabled=true;btn.innerHTML='Writing your draft...';
+  let draft='';
+  try{
+    const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),15000);
+    const r=await fetch(API_DRAFT,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({challenge:v('f_challenge'),results:v('f_results'),valued:v('f_valued'),nps:S.nps}),signal:ctrl.signal});
+    clearTimeout(t);
+    if(r.ok){const d=await r.json();if(d.ok&&d.draft)draft=d.draft.trim();}
+  }catch(e){}
+  if(!draft) draft=localDraft();
+  btn.disabled=false;btn.innerHTML=orig;
+  box.value=draft;
+  box.style.minHeight='110px';
+  hint.textContent='Draft added below. Edit it freely, these are your words and you have the final say.';
+};
+document.getElementById('submit').onclick=async()=>{
+  const err=document.getElementById('err');err.style.display='none';
+  if(!v('f_name')||!v('f_company')){err.textContent='Please add your name and company.';err.style.display='block';return;}
+  if(S.nps===null){err.textContent='Please pick a 0-10 recommendation score.';err.style.display='block';return;}
+  const btn=document.getElementById('submit');btn.disabled=true;btn.textContent='Sending...';
+  const entry={
+    ts:new Date().toISOString(),
+    name:v('f_name'),role:v('f_role'),company:v('f_company'),email:v('f_email'),
+    project:params.get('project')||'',
+    ratings:S.ratings,nps:S.nps,
+    challenge:v('f_challenge'),results:v('f_results'),valued:v('f_valued'),
+    testimonial:v('f_testimonial'),improve_internal_only:v('f_improve'),
+    referral:{name:v('f_ref_name'),contact:v('f_ref_contact'),mention_ok:!!S.consent.c_refmention},
+    consent:{intercom:!!S.consent.c_intercom,marketing:!!S.consent.c_marketing,social:!!S.consent.c_social,anonymise:!!S.consent.c_anonymise,casestudy:!!S.consent.c_casestudy},
+    attribution:v('f_attribution')
+  };
+  try{
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:KEY,entry})});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    document.getElementById('fbform').style.display='none';
+    document.getElementById('thanks').style.display='block';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){
+    btn.disabled=false;btn.textContent='Send feedback';
+    err.textContent='Something went wrong sending your feedback. Please try again, or email us at admin@sabelcustomersuccess.com.';
+    err.style.display='block';
+  }
+};
+</script>
+</body>
+</html>
