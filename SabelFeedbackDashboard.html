@@ -104,24 +104,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <script>
-// ==== SETTINGS (edit these two lines) ====
-const PASSCODE='Sabel2026';       // change this, then re-upload the file
-const HUB_URL='';                 // paste your Ops Hub URL here to show the back button
-// =========================================
+// ==== SETTINGS ====
+const HUB_URL='';   // paste your Ops Hub URL here to show the back button
+// The passcode is NOT stored in this file. It is checked by the server:
+// it must match the FEEDBACK_READ_TOKEN environment variable in Vercel.
+// To change the passcode, change that variable and redeploy.
+// ==================
 const API='https://sabel-webhook.vercel.app/api/feedback?key=sabel-feedback-v1';
-let ENTRIES=[],FILTERS={},Q='';
+let ENTRIES=[],FILTERS={},Q='',TOKEN=sessionStorage.getItem('sfd_tok')||'';
 const SELECTED=new Set();
 
-function checkPw(){
-  if(document.getElementById('pw').value===PASSCODE){
-    sessionStorage.setItem('sfd_ok','1');
-    document.getElementById('gate').style.display='none';
-    document.getElementById('app').style.display='block';
-  } else document.getElementById('ge').style.display='block';
+function showApp(){document.getElementById('gate').style.display='none';document.getElementById('app').style.display='block';}
+function showGate(msg){
+  document.getElementById('gate').style.display='flex';
+  document.getElementById('app').style.display='none';
+  const g=document.getElementById('ge');
+  if(msg){g.textContent=msg;g.style.display='block';} else g.style.display='none';
 }
-if(sessionStorage.getItem('sfd_ok')==='1'){
-  document.getElementById('gate').style.display='none';
-  document.getElementById('app').style.display='block';
+async function checkPw(){
+  TOKEN=document.getElementById('pw').value.trim();
+  await load();
 }
 if(HUB_URL){const h=document.getElementById('hublink');h.href=HUB_URL;h.style.display='inline-block';}
 
@@ -245,15 +247,21 @@ document.getElementById('xlsx').onclick=()=>{
 
 async function load(){
   try{
-    const r=await fetch(API);
+    const r=await fetch(API+'&token='+encodeURIComponent(TOKEN));
+    if(r.status===401){sessionStorage.removeItem('sfd_tok');showGate('Not quite, try again.');return;}
     const data=await r.json();
+    if(data.ok===false){sessionStorage.removeItem('sfd_tok');showGate('Not quite, try again.');return;}
+    sessionStorage.setItem('sfd_tok',TOKEN);
+    showApp();
     ENTRIES=(data.entries||[]).slice().sort((a,b)=>(b.ts||'').localeCompare(a.ts||''));
     render();
   }catch(e){
-    document.getElementById('list').innerHTML='<div class="state"><strong>Could not load feedback data.</strong><br>Check that api/feedback.js is deployed to sabel-webhook, then press Refresh.</div>';
+    if(document.getElementById('app').style.display==='block'){
+      document.getElementById('list').innerHTML='<div class="state"><strong>Could not load feedback data.</strong><br>Check that api/feedback.js is deployed to sabel-webhook, then press Refresh.</div>';
+    } else showGate('Could not reach the server. Check the backend is deployed, then try again.');
   }
 }
-load();
+if(TOKEN) load();
 </script>
 </body>
 </html>
