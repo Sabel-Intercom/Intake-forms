@@ -25,7 +25,7 @@
   .brand .logo{font-size:17px;font-weight:800;letter-spacing:0.34em;color:var(--w);text-transform:uppercase;}
   .brand .logo .dot{color:var(--red);}
   .brand .tag{font-size:8px;letter-spacing:0.22em;color:var(--mono);text-transform:uppercase;}
-  nav.tabs{display:flex;gap:4px;margin-left:6px;}
+  nav.tabs{display:flex;gap:4px;margin-left:6px;flex-wrap:wrap;}
   .tab{padding:7px 15px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:0.03em;color:var(--muted);background:transparent;border:1px solid transparent;cursor:pointer;transition:.14s;}
   .tab:hover{color:var(--w);}
   .tab.on{background:var(--red);color:#fff;}
@@ -38,14 +38,13 @@
 
   /* home */
   #home{overflow-y:auto;}
-  .home-inner{max-width:980px;margin:0 auto;padding:64px 30px 80px;width:100%;}
+  .home-inner{max-width:1080px;margin:0 auto;padding:64px 30px 80px;width:100%;}
   .home-head{text-align:center;margin-bottom:48px;}
   .home-head h1{font-size:30px;font-weight:800;letter-spacing:-0.01em;color:var(--w);}
   .home-head p{font-size:13px;color:var(--muted);margin-top:10px;letter-spacing:0.02em;}
   .home-head .line{width:46px;height:2px;background:var(--red);margin:20px auto 0;border-radius:2px;box-shadow:0 0 14px rgba(225,6,0,0.5);}
 
-  .cards{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
-  @media(max-width:760px){.cards{grid-template-columns:1fr;}}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;}
   .pillar{position:relative;text-align:left;background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--border2);border-radius:14px;padding:30px 28px 26px;cursor:pointer;transition:.18s;overflow:hidden;}
   .pillar:hover{border-color:var(--red);transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,0.45),0 0 26px rgba(225,6,0,0.08);}
   .pillar .ico{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--redDim);border:1px solid rgba(225,6,0,0.35);margin-bottom:20px;}
@@ -74,6 +73,7 @@
       <button class="tab on" id="t-home"      onclick="show('home')">Home</button>
       <button class="tab"    id="t-portal"    onclick="show('portal')">Onboarding / Offboarding</button>
       <button class="tab"    id="t-dashboard" onclick="show('dashboard')">Project Dashboard</button>
+      <button class="tab"    id="t-feedback"  onclick="show('feedback')">Feedback Dashboard</button>
     </nav>
     <div class="nav-right">Internal use only</div>
   </header>
@@ -83,7 +83,7 @@
     <div class="home-inner">
       <div class="home-head">
         <h1>Sabel Ops Hub</h1>
-        <p>Your two internal tools, one place. Pick where you're headed.</p>
+        <p>Your internal tools, one place. Pick where you're headed.</p>
         <div class="line"></div>
       </div>
       <div class="cards">
@@ -103,11 +103,20 @@
           <p>A single team view across all client project trackers: live task progress, blockers, go-live timeline and owner workload — pulled straight from the trackers themselves.</p>
           <span class="go">Open dashboard <span class="arrow">&rarr;</span></span>
         </button>
+        <button class="pillar" onclick="show('feedback')">
+          <span class="badge internal">Internal</span>
+          <div class="ico">&#128172;</div>
+          <h2>Feedback Dashboard</h2>
+          <div class="sub">What clients are telling us — live</div>
+          <p>Every piece of client feedback in one board: Intercom/Fin results, scores, referrals and case-study opportunities — with export and internal-only improvement notes.</p>
+          <span class="go">Open feedback <span class="arrow">&rarr;</span></span>
+        </button>
       </div>
       <div class="foot-note">
         <b>Onboarding / Offboarding Portal</b> &mdash; your checklists to set clients up and close them out.<br>
         <b>Project Tracker Dashboard</b> &mdash; the team view of where all the client trackers stand.<br>
-        The individual <b>client project trackers</b> (shared with each client) feed this dashboard automatically.
+        <b>Feedback Dashboard</b> &mdash; what clients are telling us, pulled live from the feedback webhook.<br>
+        The individual <b>client project trackers</b> (shared with each client) feed the Project Dashboard automatically.
       </div>
     </div>
   </section>
@@ -121,17 +130,23 @@
   <section class="view" id="dashboard">
     <iframe id="frame-dashboard" data-src="SabelPortfolioDashboard.html" title="Project Tracker Dashboard"></iframe>
   </section>
+
+  <!-- FEEDBACK -->
+  <section class="view" id="feedback">
+    <iframe id="frame-feedback" data-src="SabelFeedbackDashboard.html" title="Feedback Dashboard"></iframe>
+  </section>
 </div>
 
 <script>
+  var VIEWS = ['home','portal','dashboard','feedback'];
   function show(view){
-    ['home','portal','dashboard'].forEach(function(v){
+    VIEWS.forEach(function(v){
       document.getElementById(v).classList.toggle('on', v===view);
       var tab = document.getElementById('t-'+v);
       if (tab) tab.classList.toggle('on', v===view);
     });
-    // Lazy-load iframes on first open (keeps startup fast; dashboard only goes live when viewed)
-    if (view==='portal' || view==='dashboard'){
+    // Lazy-load iframes on first open (keeps startup fast; each tool only goes live when viewed)
+    if (view==='portal' || view==='dashboard' || view==='feedback'){
       var f = document.getElementById('frame-'+view);
       if (f && !f.src){ f.src = f.getAttribute('data-src'); }
     }
@@ -141,7 +156,7 @@
   }
   // Honour a deep link (e.g. SabelOpsHub.html#dashboard)
   var start = (window.location.hash || '#home').replace('#','');
-  show(['home','portal','dashboard'].indexOf(start) > -1 ? start : 'home');
+  show(VIEWS.indexOf(start) > -1 ? start : 'home');
 </script>
 </body>
 </html>
