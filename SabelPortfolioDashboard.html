@@ -127,7 +127,24 @@
   .ar-main{min-width:0;}
   .ar-nm{font-size:13px;font-weight:700;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .ar-nm a{color:var(--w);} .ar-nm a:hover{color:#FCA5A5;text-decoration:underline;}
-  .ar-gl{font-size:10px;font-weight:500;color:var(--mono);}
+  .ar-gl{font-size:11.5px;font-weight:600;color:var(--body);}
+  .gl-src{font-size:8.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:1px 6px;border-radius:3px;margin-left:4px;vertical-align:middle;}
+  .gl-src.manual{background:rgba(96,165,250,.16);color:var(--blue);}
+  .gl-src.tracker{background:rgba(74,222,128,.16);color:var(--green);}
+  .gl-src.estimated{background:rgba(251,191,36,.16);color:var(--amber);}
+  .gl-edit{margin-left:5px;font-size:13px;color:var(--mono);background:none;border:none;cursor:pointer;padding:0 3px;vertical-align:middle;}
+  .gl-edit:hover{color:var(--w);}
+  /* go-live date-picker popover */
+  .gl-pop{position:absolute;z-index:60;background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:12px;box-shadow:0 14px 34px rgba(0,0,0,.55);min-width:230px;}
+  .gl-pop-h{font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--muted);margin-bottom:9px;}
+  .gl-pop-date{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--w);font-size:14px;padding:8px 10px;outline:none;font-family:inherit;}
+  .gl-pop-date:focus{border-color:var(--blue);}
+  .gl-pop-date::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer;}
+  .gl-pop-actions{display:flex;justify-content:space-between;gap:8px;margin-top:10px;}
+  .gl-pop-clear{font-size:10px;font-weight:700;color:var(--redText);background:none;border:1px solid rgba(248,113,113,.3);border-radius:5px;padding:5px 9px;cursor:pointer;}
+  .gl-pop-clear:hover{background:rgba(248,113,113,.12);color:#fff;}
+  .gl-pop-close{font-size:10px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:5px 9px;cursor:pointer;}
+  .gl-pop-close:hover{color:var(--w);}
   .ar-bar{display:flex;height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:5px;}
   .ar-bar > div{height:100%;}
   .ar-meta{display:flex;align-items:center;gap:8px;}
@@ -402,6 +419,12 @@ var NOTE_EDITING = false;
 // also be added to ALLOWED_KEYS in the sabel-webhook api/tracker.js, or reads and
 // writes 404. localStorage is kept as an offline fallback / instant first paint.
 var NOTES_KEY = 'sabel-weekly-notes-v1';
+// Shared go-live overrides (client name -> "YYYY-MM-DD"), stored in the same
+// webhook. IMPORTANT: add 'sabel-golive-overrides-v1' to ALLOWED_KEYS in the
+// webhook, or reads/writes 404. Manual override wins over the tracker's own
+// go-live field and over the estimate.
+var OVERRIDES_KEY = 'sabel-golive-overrides-v1';
+var GOLIVE_OVERRIDES = JSON.parse(localStorage.getItem('sabel_golive_overrides')||'{}');
 
 // ─────────────────────────────────────────────────────────────
 // CONTRACT DATES — each client has 12 months from kick-off / contract
@@ -542,7 +565,7 @@ function parseSkillHtml(html, saved){
 }
 
 function fetchOne(key){
-  return fetch(API+'?key='+encodeURIComponent(key))
+  return fetch(API+'?key='+encodeURIComponent(key)+'&_t='+Date.now(), {cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(j){ return (j&&j.ok) ? j.data : null; })
     .catch(function(){ return null; });
@@ -554,13 +577,13 @@ function loadLive(manual){
     if(!tr.key){ tr.live=false; return Promise.resolve(); }
     return fetchOne(tr.key).then(function(data){
       var phases=normalisePhases(data);
-      if(phases){ tr.phases=phases; tr.t=tally(phases); tr.golive=deriveGoLive(phases); tr.live=true; live++; return; }
+      if(phases){ tr.phases=phases; tr.t=tally(phases); tr.goliveAuto=deriveGoLive(phases); tr.goliveField=(data && !Array.isArray(data) && data.goLive)?data.goLive:null; tr.live=true; live++; return; }
       // Fallback: "skill format" trackers keep their task data inside the HTML
       // (the API only holds status overrides). Fetch the file and read P / T.
-      return fetch(BASE+tr.file).then(function(r){ return r.ok ? r.text() : null; }).then(function(txt){
+      return fetch(BASE+tr.file, {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : null; }).then(function(txt){
         var parsed = txt ? parseSkillHtml(txt, data) : null;
         if(parsed && parsed.phases.length){
-          tr.phases=parsed.phases; tr.t=tally(parsed.phases); tr.golive=deriveGoLive(parsed.phases);
+          tr.phases=parsed.phases; tr.t=tally(parsed.phases); tr.goliveAuto=deriveGoLive(parsed.phases); tr.goliveField=parsed.goLive||null;
           if(parsed.totalHours!=null && tr.sowHours==null) tr.sowHours=parsed.totalHours;
           tr.live=true; live++;
         } else { tr.live=false; }
@@ -593,7 +616,74 @@ function classify(){
   return {active:active, offb:offb};
 }
 
+// ── GO-LIVE resolution: manual override > tracker's own field > estimate ──
+function resolveGoLive(tr){
+  var ov = GOLIVE_OVERRIDES[tr.name];
+  if(ov){ tr.golive=ov; tr.goliveSource='manual'; return; }
+  if(tr.goliveField){ tr.golive=tr.goliveField; tr.goliveSource='tracker'; return; }
+  if(tr.goliveAuto){ tr.golive=tr.goliveAuto; tr.goliveSource='estimated'; return; }
+  tr.golive=null; tr.goliveSource=null;
+}
+function glSrcChip(tr){
+  if(!tr.golive || !tr.goliveSource) return '';
+  var lbl={manual:'manual',tracker:'tracker',estimated:'est.'}[tr.goliveSource];
+  return '<span class="gl-src '+tr.goliveSource+'" title="Go-live source: '+tr.goliveSource+'">'+lbl+'</span>';
+}
+function glEdit(tr){
+  return '<button class="gl-edit" title="Set or clear the go-live date" onclick="editGoLive(\''+encodeURIComponent(tr.name)+'\',this);event.stopPropagation();return false;">&#9998;</button>';
+}
+// Save go-live overrides to the shared webhook (full set, so clears propagate too).
+function saveOverrides(){
+  localStorage.setItem('sabel_golive_overrides', JSON.stringify(GOLIVE_OVERRIDES));
+  return fetch(API+'?key='+encodeURIComponent(OVERRIDES_KEY)+'&_t='+Date.now(), {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ data: GOLIVE_OVERRIDES })
+  }).catch(function(){ /* offline — localStorage keeps it */ });
+}
+function loadOverrides(){
+  return fetch(API+'?key='+encodeURIComponent(OVERRIDES_KEY)+'&_t='+Date.now(), {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if(j && j.ok && j.data && typeof j.data==='object'){
+        GOLIVE_OVERRIDES = j.data;
+        localStorage.setItem('sabel_golive_overrides', JSON.stringify(GOLIVE_OVERRIDES));
+        render();
+      }
+    }).catch(function(){ /* offline — keep localStorage copy */ });
+}
+function closeGlPop(){ var p=document.getElementById('glPop'); if(p) p.remove(); }
+function editGoLive(encName, btn){
+  var name=decodeURIComponent(encName);
+  closeGlPop();
+  var tr=null; for(var i=0;i<TRACKERS.length;i++){ if(TRACKERS[i].name===name){ tr=TRACKERS[i]; break; } }
+  var cur=GOLIVE_OVERRIDES[name] || (tr && tr.golive) || '';
+  var pop=document.createElement('div');
+  pop.className='gl-pop'; pop.id='glPop';
+  pop.innerHTML='<div class="gl-pop-h">Go-live date &middot; '+name+'</div>'
+    + '<input type="date" class="gl-pop-date" value="'+cur+'">'
+    + '<div class="gl-pop-actions"><button class="gl-pop-clear">Clear override</button><button class="gl-pop-close">Close</button></div>';
+  document.body.appendChild(pop);
+  var r=btn.getBoundingClientRect();
+  pop.style.top=(window.scrollY + r.bottom + 6)+'px';
+  pop.style.left=(window.scrollX + Math.max(8, Math.min(r.left, window.innerWidth - 250)))+'px';
+  var input=pop.querySelector('.gl-pop-date');
+  input.addEventListener('change', function(){
+    var v=input.value;
+    if(v) GOLIVE_OVERRIDES[name]=v; else delete GOLIVE_OVERRIDES[name];
+    saveOverrides(); closeGlPop(); render();
+  });
+  pop.querySelector('.gl-pop-clear').onclick=function(){ delete GOLIVE_OVERRIDES[name]; saveOverrides(); closeGlPop(); render(); };
+  pop.querySelector('.gl-pop-close').onclick=closeGlPop;
+  try{ input.focus(); if(input.showPicker) input.showPicker(); }catch(e){}
+}
+// close the picker on any outside click
+document.addEventListener('click', function(e){
+  var p=document.getElementById('glPop');
+  if(p && !p.contains(e.target) && !(e.target.classList && e.target.classList.contains('gl-edit'))) closeGlPop();
+});
+
 function render(){
+  TRACKERS.forEach(resolveGoLive);           // set tr.golive + tr.goliveSource first
   var g=classify();
   renderWeekly();
   renderKPIs(g);
@@ -668,7 +758,7 @@ function noteKey(client, task){ return client+' || '+cleanTitle(task); }
 function saveNotes(){ localStorage.setItem('sabel_week_notes', JSON.stringify(WEEK_NOTES)); }
 // pull the team's shared notes from the webhook
 function loadNotes(){
-  return fetch(API+'?key='+encodeURIComponent(NOTES_KEY))
+  return fetch(API+'?key='+encodeURIComponent(NOTES_KEY)+'&_t='+Date.now(), {cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(j){
       if(j && j.ok && j.data && typeof j.data==='object'){
@@ -683,7 +773,7 @@ function loadNotes(){
 // save notes for the whole team: merge with the latest remote first so a
 // teammate's note added elsewhere isn't overwritten, then POST the result.
 function pushNotes(){
-  return fetch(API+'?key='+encodeURIComponent(NOTES_KEY))
+  return fetch(API+'?key='+encodeURIComponent(NOTES_KEY)+'&_t='+Date.now(), {cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(j){
       var remote = (j && j.ok && j.data && typeof j.data==='object') ? j.data : {};
@@ -934,7 +1024,7 @@ function activeRow(tr){
   var seg=function(n,c){ return n?'<div style="width:'+(n/total*100)+'%;background:'+c+'"></div>':''; };
   return '<div class="arow '+light+'">'
     + '<span class="ar-dot"></span>'
-    + '<div class="ar-main"><div class="ar-nm">'+nm+' <span class="ar-gl">· go-live '+fmtDate(tr.golive)+'</span></div>'
+    + '<div class="ar-main"><div class="ar-nm">'+nm+' <span class="ar-gl">· go-live '+fmtDate(tr.golive)+'</span>'+glSrcChip(tr)+glEdit(tr)+'</div>'
     +   '<div class="ar-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+'</div>'+naLine(tr)+'</div>'
     + '<div class="ar-meta"><span class="ar-pct">'+pct+'%</span>'+(hoursTxt(tr)?'<span class="ar-chip hrs">'+hoursTxt(tr)+'</span>':'')+'<span class="ar-chip">'+open+' open</span>'+(risk?'<span class="ar-chip risk">'+risk+' risk</span>':'')+(overdueTasks(tr).length?'<span class="ar-chip od">⚠ '+overdueTasks(tr).length+'</span>':'')+'</div>'
     + '<div class="ar-days"><div class="d1">'+dtxt+'</div><div class="d2">'+dlbl+'</div></div>'
@@ -959,7 +1049,7 @@ function activeCard(tr){
   var seg=function(n,c){ return n? '<div style="width:'+(n/total*100)+'%;background:'+c+'"></div>':''; };
   var ov=overdueTasks(tr).length, ht=hoursTxt(tr);
   return '<div class="pcard '+light+'">'
-    + '<div class="pc-top"><div><div class="pc-name">'+link+'</div><div class="pc-open">'+pct+'% complete &middot; go-live '+fmtDate(tr.golive)+'</div></div>'
+    + '<div class="pc-top"><div><div class="pc-name">'+link+'</div><div class="pc-open">'+pct+'% complete &middot; go-live '+fmtDate(tr.golive)+' '+glSrcChip(tr)+glEdit(tr)+'</div></div>'
     +   '<div class="pc-days"><div class="d1">'+dtxt+'</div><div class="d2">'+dlbl+'</div></div></div>'
     + '<div class="pc-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+'</div>'
     + '<div class="pc-stats">'
@@ -1134,8 +1224,9 @@ buildConfigPanel();
 render();                                   // paint shell immediately
 applyWidgets();                             // honour saved widget visibility
 loadNotes();                                // pull the team's shared notes
+loadOverrides();                            // pull shared go-live overrides
 loadConfig().then(function(){ loadLive(false); }); // registry (if any) → live data
-setInterval(function(){ loadLive(false); loadNotes(); }, REFRESH_MS); // keep it live
+setInterval(function(){ loadLive(false); loadNotes(); loadOverrides(); }, REFRESH_MS); // keep it live
 </script>
 </body>
 </html>
