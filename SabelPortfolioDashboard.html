@@ -59,10 +59,15 @@
   .tl-month{position:absolute;bottom:8px;transform:translateX(-50%);font-size:9px;color:var(--mono);letter-spacing:.05em;text-transform:uppercase;}
   .tl-grid{position:absolute;top:0;bottom:34px;width:1px;background:rgba(255,255,255,.04);}
   .tl-band{position:absolute;top:0;bottom:34px;background:rgba(225,6,0,.10);border-left:1px dashed rgba(248,113,113,.4);border-right:1px dashed rgba(248,113,113,.4);border-radius:3px;}
-  .tl-mark{position:absolute;bottom:34px;transform:translate(-50%,50%);width:13px;height:13px;border-radius:50%;border:2px solid var(--bg);z-index:2;cursor:default;}
+  .tl-mark{position:absolute;bottom:34px;transform:translate(-50%,50%);width:13px;height:13px;border-radius:50%;border:2px solid var(--bg);z-index:2;cursor:pointer;transition:transform .12s,box-shadow .12s;}
+  .tl-mark:hover{transform:translate(-50%,50%) scale(1.35);}
   .tl-mark.green{background:var(--green);} .tl-mark.amber{background:var(--amber);} .tl-mark.red{background:var(--redText);box-shadow:0 0 9px rgba(248,113,113,.7);}
-  .tl-lab{position:absolute;transform:translateX(-50%);font-size:9.5px;font-weight:700;color:var(--body);white-space:nowrap;background:var(--card2);border:1px solid var(--border2);padding:2px 6px;border-radius:4px;z-index:3;}
+  .tl-lab{position:absolute;transform:translateX(-50%);font-size:9.5px;font-weight:700;color:var(--body);white-space:nowrap;background:var(--card2);border:1px solid var(--border2);padding:2px 6px;border-radius:4px;z-index:3;cursor:pointer;transition:border-color .12s,color .12s;}
+  .tl-lab:hover{border-color:var(--redText);color:var(--w);}
   .tl-empty{display:flex;align-items:center;justify-content:center;height:100px;color:var(--mono);font-size:11px;}
+  /* go-live hover tooltip */
+  .tl-tip{position:absolute;z-index:9;pointer-events:none;background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:10.5px;font-weight:600;color:var(--w);white-space:nowrap;box-shadow:0 8px 22px rgba(0,0,0,.55);opacity:0;transform:translate(-50%,-100%);transition:opacity .12s;}
+  .tl-tip b{color:#FCA5A5;} .tl-tip .d{color:var(--muted);font-weight:500;}
 
   /* main layout */
   .layout{display:grid;grid-template-columns:1fr 360px;gap:22px;align-items:start;}
@@ -206,46 +211,60 @@
   .wk-col{background:var(--card2);border:1px solid var(--border2);border-radius:9px;padding:11px 12px;min-height:64px;}
   .wk-col-h{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--w);text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
   .wk-n{font-size:9px;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1px 7px;}
-  .wk-item{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border2);}
+  .wk-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border2);}
   .wk-item:last-child{border-bottom:none;}
   .wk-item.done .wk-tx{opacity:.55;} .wk-item.done .wk-tx b{text-decoration:line-through;}
   .wk-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+  .wk-body{min-width:0;flex:1;}
   .wk-tx{font-size:11.5px;color:var(--body);line-height:1.35;min-width:0;}
   .wk-tx b{color:var(--w);font-weight:700;}
   .wk-empty{font-size:11px;color:var(--mono);padding:4px 0;}
+  /* weekly plan — per-task actions + notes */
+  .wk-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:5px;}
+  .wk-tracker{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#FCA5A5;white-space:nowrap;}
+  .wk-tracker:hover{color:#fff;text-decoration:underline;}
+  .wk-note-btn{font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:2px 8px;transition:.12s;}
+  .wk-note-btn:hover{border-color:var(--mono);color:var(--w);}
+  .wk-note-btn.has{color:var(--amber);border-color:rgba(251,191,36,.35);}
+  .wk-note{font-size:10.5px;color:var(--body);background:var(--surface);border:1px solid var(--border2);border-left:2px solid var(--amber);border-radius:5px;padding:5px 8px;margin-top:6px;white-space:pre-wrap;line-height:1.4;word-break:break-word;}
+  .wk-note-edit{width:100%;margin-top:6px;background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--body);font-family:inherit;font-size:11px;line-height:1.4;padding:6px 8px;resize:vertical;min-height:52px;}
+  .wk-note-edit:focus{outline:none;border-color:var(--amber);}
+  .wk-note-hint{font-size:8.5px;color:var(--mono);margin-top:3px;}
+  /* weekly plan — collapsible, grouped by client */
+  .wk-drop{background:linear-gradient(160deg,rgba(225,6,0,.08),var(--card));border:1px solid rgba(225,6,0,.30);border-radius:12px;margin-bottom:24px;overflow:hidden;box-shadow:0 0 22px rgba(225,6,0,.05);}
+  .wk-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 18px;font-size:14px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--w);}
+  .wk-drop > summary::-webkit-details-marker{display:none;}
+  .wk-drop .wk-sum{font-size:10px;font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--mono);}
+  .wk-drop .ad-chev{margin-left:auto;transition:transform .15s;color:var(--mono);font-size:12px;}
+  .wk-drop[open] .ad-chev{transform:rotate(90deg);}
+  .wk-inner{padding:0 18px 16px;}
+  .wk-client{border-top:1px solid var(--border2);padding:11px 0;}
+  .wk-client:first-child{border-top:none;}
+  .wk-client-h{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+  .wk-client-nm{font-size:12.5px;font-weight:800;color:var(--w);letter-spacing:.02em;}
+  .wk-client-n{font-size:9px;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1px 7px;}
+  .wk-client-h .wk-tracker{margin-left:auto;}
+  .wk-owner{font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1px 7px;white-space:nowrap;}
+  /* weekly plan — collapsible client + side-by-side Sabel/Client split */
+  .wk-client-drop{border-top:1px solid var(--border2);}
+  .wk-client-drop:first-child{border-top:none;}
+  .wk-client-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 2px;}
+  .wk-client-drop > summary::-webkit-details-marker{display:none;}
+  .wk-client-drop .ad-chev{color:var(--mono);font-size:11px;transition:transform .15s;}
+  .wk-client-drop[open] > summary .ad-chev{transform:rotate(90deg);}
+  .wk-cd-nm{font-size:12.5px;font-weight:800;color:var(--w);letter-spacing:.02em;}
+  .wk-cd-meta{font-size:9px;color:var(--mono);}
+  .wk-cd-h-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .wk-split{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:2px 0 12px 16px;}
+  @media(max-width:640px){.wk-split{grid-template-columns:1fr;}}
+  .wk-side{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;}
+  .wk-side-h{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+  .wk-side.sabel .wk-side-h{color:#FCA5A5;}
+  .wk-side.client .wk-side-h{color:var(--amber);}
+  .wk-side-n{font-size:8px;color:var(--mono);background:var(--card2);border:1px solid var(--border2);border-radius:20px;padding:1px 6px;}
   /* offboarding close-out button */
   .ob-btn{font-size:10px;font-weight:700;letter-spacing:.03em;color:var(--green);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);padding:6px 11px;border-radius:6px;white-space:nowrap;cursor:pointer;}
   .ob-btn:hover{background:rgba(74,222,128,.22);color:#fff;}
-
-  /* weekly plan — collapsible, grouped by client */
-  .wk-drop{background:var(--card);border:1px solid var(--border2);border-radius:12px;margin-bottom:24px;overflow:hidden;}
-  .wk-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:15px 20px;}
-  .wk-drop > summary::-webkit-details-marker{display:none;}
-  .wk-title{font-size:14px;font-weight:800;letter-spacing:.03em;color:var(--w);text-transform:uppercase;}
-  .wk-summary-count{font-size:10px;color:var(--mono);}
-  .wk-drop > summary .ad-chev{margin-left:auto;color:var(--mono);transition:transform .15s;font-size:12px;}
-  .wk-drop[open] > summary .ad-chev{transform:rotate(90deg);}
-  .wk-body{padding:0 20px 16px;}
-  .week-nav{display:flex;align-items:center;gap:8px;margin:10px 0 14px;}
-  .weekly-clients{display:flex;flex-direction:column;gap:8px;}
-  .wkc{background:var(--card2);border:1px solid var(--border2);border-radius:9px;overflow:hidden;}
-  .wkc > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 14px;}
-  .wkc > summary::-webkit-details-marker{display:none;}
-  .wkc-name{font-size:13px;font-weight:700;color:var(--w);}
-  .wkc-gl{font-size:9px;font-weight:700;letter-spacing:.03em;padding:2px 8px;border-radius:20px;background:var(--surface);border:1px solid var(--border2);color:var(--mono);white-space:nowrap;}
-  .wkc-gl.red{color:var(--redText);border-color:rgba(248,113,113,.3);} .wkc-gl.amber{color:var(--amber);border-color:rgba(251,191,36,.3);} .wkc-gl.green{color:var(--green);border-color:rgba(74,222,128,.3);}
-  .wkc-n{font-size:9px;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1px 8px;}
-  .wkc > summary .ad-chev{margin-left:auto;color:var(--mono);transition:transform .15s;font-size:12px;}
-  .wkc[open] > summary .ad-chev{transform:rotate(90deg);}
-  .wkc-body{padding:2px 14px 10px;}
-  .wk-item{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--border2);}
-  .wk-item:last-child{border-bottom:none;}
-  .wk-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
-  .wk-tx{flex:1;font-size:12px;color:var(--body);line-height:1.4;min-width:0;}
-  .wk-owners{display:flex;gap:4px;flex-shrink:0;}
-  .own-chip{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#0B0B0C;}
-  .own-chip.client{width:auto;padding:0 7px;height:20px;border-radius:20px;background:var(--card4);color:var(--muted);border:1px solid var(--border);font-size:8.5px;}
-  .wk-empty{font-size:11px;color:var(--mono);padding:6px 0;}
 
   footer{margin-top:30px;padding:16px 0 0;border-top:1px solid var(--border2);font-size:9px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 </style>
@@ -270,19 +289,18 @@
 
   <div id="w-weekly">
     <details class="wk-drop">
-      <summary>
-        <span class="wk-title">&#128197; This week's plan</span>
-        <span class="wk-summary-count" id="wkSummary"></span>
-        <span class="ad-chev">&#9656;</span>
-      </summary>
-      <div class="wk-body">
-        <div class="week-nav">
-          <button class="wk-btn" onclick="shiftWeek(-1)" title="Previous week">&#8592;</button>
-          <span class="wk-label" id="wkLabel"></span>
-          <button class="wk-btn" onclick="shiftWeek(1)" title="Next week">&#8594;</button>
-          <button class="wk-btn wk-today" onclick="shiftWeek(0,true)">This week</button>
+      <summary>&#128197; This week's plan <span class="wk-sum" id="wkSummary"></span><span class="ad-chev">&#9656;</span></summary>
+      <div class="wk-inner">
+        <div class="weekly-head" style="margin-top:6px;">
+          <div class="week-nav">
+            <button class="wk-btn" onclick="shiftWeek(-1)" title="Previous week">&#8592;</button>
+            <span class="wk-label" id="wkLabel"></span>
+            <button class="wk-btn" onclick="shiftWeek(1)" title="Next week">&#8594;</button>
+            <button class="wk-btn wk-today" onclick="shiftWeek(0,true)">This week</button>
+          </div>
         </div>
-        <div class="weekly-clients" id="weeklyClients"></div>
+        <div class="weekly-sub">Every client's scheduled deliverables for the week, grouped by client and pulled live from the trackers. Open a client's tracker with its link, and add your own notes per task.</div>
+        <div class="weekly-body" id="weeklyBody"></div>
       </div>
     </details>
   </div>
@@ -298,28 +316,8 @@
         <div class="li"><span class="ld" style="background:var(--redText)"></span>Pinch (clustered)</div>
       </div>
     </div>
-    <div class="pinch-sub">Each marker is an active project's planned go-live. Red bands = weeks where two or more land together.</div>
+    <div class="pinch-sub">Each marker is an active project's planned go-live. Hover a client name or dot for its go-live date. Red bands = weeks where two or more land together.</div>
     <div class="timeline" id="timeline"></div>
-  </div>
-
-  <div id="w-attn">
-    <details class="attn-drop">
-      <summary><span class="ad-title">Needs attention</span><span class="ad-counts" id="attnCounts"></span><span class="ad-chev">&#9656;</span></summary>
-      <div class="attn">
-        <div>
-          <div class="sec-sub">&#128681; Blocked &amp; at risk <span class="count" id="blkCount">0</span></div>
-          <div class="side-box" id="blkBox"></div>
-        </div>
-        <div>
-          <div class="sec-sub">&#9888; Overdue / slipping <span class="count" id="ovdCount">0</span></div>
-          <div class="side-box" id="ovdBox"></div>
-        </div>
-        <div>
-          <div class="sec-sub">&#8987; Waiting on client <span class="count" id="waitCount">0</span></div>
-          <div class="side-box" id="waitBox"></div>
-        </div>
-      </div>
-    </details>
   </div>
 
   <div class="layout">
@@ -331,10 +329,6 @@
       <div id="w-offb">
         <div class="sec-title">Offboarding &mdash; ready for close-out <span class="count" id="offbCount">0</span></div>
         <div class="side-box offb" id="offbBox"></div>
-      </div>
-      <div id="w-nt">
-        <div class="sec-title">No tracker yet <span class="count" id="ntCount">0</span></div>
-        <div class="side-box" id="ntBox"></div>
       </div>
     </div>
   </div>
@@ -369,12 +363,11 @@ var TRACKERS = [
   {name:'Cirqul',              key:'cirqul-tracker-v1',          file:'CirqulTracker_v2.html',          sowHours:null},
   {name:'Education Perfect',   key:'education-perfect-tracker-v1',file:'EducationPerfectTracker_v2.html',sowHours:null},
   {name:'Huuuge',              key:'huuuge-tracker-v1',          file:'HuuugeTracker_v2.html',          sowHours:99},
-  {name:'GPS Insight',         key:'gps-insight-tracker-v1',     file:'GPSInsightTracker_v2.html',      sowHours:50},
   {name:'The Giving Movement', key:'thegivingmovement-tracker-v1', file:'TheGivingMovementTracker_v2.html',sowHours:60}
 ];
 
 // Active clients without a live tracker yet (shown for coverage).
-var NO_TRACKER = ['Ainslie (Encum)','BetNinja (Magico)','Cronos (Particle Research)','Mambu','PaySauce NZ','Workinitiatives','WPT Global'];
+var NO_TRACKER = ['Ainslie (Encum)','BetNinja (Magico)','Cronos (Particle Research)','GPS Insight','Mambu','PaySauce NZ','Workinitiatives','WPT Global'];
 
 // Sabel delivery team — only these appear in the workload widget.
 var SABEL_TEAM = ['Chris','Greg','Richard'];
@@ -384,10 +377,8 @@ var WIDGETS = [
   {id:'w-weekly',   label:"This week's plan"},
   {id:'w-kpis',     label:'KPI summary'},
   {id:'w-timeline', label:'Go-live timeline'},
-  {id:'w-attn',     label:'Needs attention'},
   {id:'w-active',   label:'Active projects'},
   {id:'w-offb',     label:'Offboarding'},
-  {id:'w-nt',       label:'No tracker yet'},
   {id:'w-contracts',label:'Contract expiry'}
 ];
 
@@ -396,8 +387,21 @@ var NT_REMOVED = JSON.parse(localStorage.getItem('sabel_nt_removed')||'[]');
 var DENSITY = localStorage.getItem('sabel_density')||'compact';
 var WIDGET_HIDDEN = JSON.parse(localStorage.getItem('sabel_widgets_hidden')||'[]');
 var OFFB_CLOSED = JSON.parse(localStorage.getItem('sabel_offb_closed')||'[]');
+// Clients already closed out — baked in so it holds for the whole team, not just
+// one browser's local storage.
+['Huuuge'].forEach(function(n){ if(OFFB_CLOSED.indexOf(n)===-1) OFFB_CLOSED.push(n); });
 var CONTRACT_REMOVED = JSON.parse(localStorage.getItem('sabel_contract_removed')||'[]');
 var WEEK_OFFSET = 0;
+
+// Weekly-plan notes (persisted, keyed by client + task so a note follows its task
+// week to week). NOTE_EDITING pauses the weekly re-render so an open note editor
+// is never wiped by the 5-minute auto-refresh.
+var WEEK_NOTES = JSON.parse(localStorage.getItem('sabel_week_notes')||'{}');
+var NOTE_EDITING = false;
+// Shared notes live in the same webhook under this key. IMPORTANT: this key must
+// also be added to ALLOWED_KEYS in the sabel-webhook api/tracker.js, or reads and
+// writes 404. localStorage is kept as an offline fallback / instant first paint.
+var NOTES_KEY = 'sabel-weekly-notes-v1';
 
 // ─────────────────────────────────────────────────────────────
 // CONTRACT DATES — each client has 12 months from kick-off / contract
@@ -595,14 +599,15 @@ function render(){
   renderKPIs(g);
   renderActive(g.active);
   renderOffboarding(g.offb);
-  renderNoTracker();
   renderTimeline(g.active);
-  renderAttention();
   renderContracts();
 }
 
 // strip the ■/★ markers used in tracker task titles
 function cleanTitle(t){ return (t||'').replace(/^[■★]\s*/,'').trim(); }
+
+// escape text for safe insertion into HTML
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // next Sabel-actionable task for a project (earliest dated incomplete, non-client task)
 function nextAction(tr){
@@ -640,9 +645,10 @@ function hoursTxt(tr){
   return Math.round(tr.sowHours*tr.t.done/tr.t.total)+'/'+tr.sowHours+'h';
 }
 
-// WEEKLY PLAN — tasks scheduled in the selected week, grouped by CLIENT in
-// expandable dropdowns, ordered by go-live urgency. Each task shows an owner chip.
-// Built for the Monday standup: expand a client, walk the team through the week.
+// WEEKLY PLAN — what Chris / Richard / Greg are scheduled to deliver in the
+// selected calendar week, pulled from tracker task dates. Side-by-side columns.
+// Each task also carries a link to its client tracker and an editable note.
+var WEEK_TEAM = ['Chris','Richard','Greg'];
 function weekStart(offset){
   var d=new Date(); d.setHours(0,0,0,0);
   var day=(d.getDay()+6)%7;            // Monday = 0
@@ -657,20 +663,86 @@ function statusColour(s){
   s=(s||'').toLowerCase();
   return s==='complete'?'var(--green)':s==='blocked'?'var(--redText)':s==='in progress'?'var(--blue)':s==='dependency'?'var(--amber)':'var(--mono)';
 }
-var WK_OWNER_COLOURS={Chris:'#60A5FA',Richard:'#C084FC',Greg:'#34D399'};
-function ownerChips(owner){
-  var out='', matched=false;
-  ['Chris','Richard','Greg'].forEach(function(p){
-    if((owner||'').indexOf(p)!==-1){ matched=true;
-      out+='<span class="own-chip" style="background:'+WK_OWNER_COLOURS[p]+'" title="'+p+'">'+p.charAt(0)+'</span>'; }
+// stable note key: a note follows its client + task across weeks
+function noteKey(client, task){ return client+' || '+cleanTitle(task); }
+function saveNotes(){ localStorage.setItem('sabel_week_notes', JSON.stringify(WEEK_NOTES)); }
+// pull the team's shared notes from the webhook
+function loadNotes(){
+  return fetch(API+'?key='+encodeURIComponent(NOTES_KEY))
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if(j && j.ok && j.data && typeof j.data==='object'){
+        if(NOTE_EDITING) return;            // never clobber a note being typed
+        WEEK_NOTES = j.data;
+        saveNotes();
+        renderWeekly();
+      }
+    })
+    .catch(function(){ /* offline — keep localStorage copy */ });
+}
+// save notes for the whole team: merge with the latest remote first so a
+// teammate's note added elsewhere isn't overwritten, then POST the result.
+function pushNotes(){
+  return fetch(API+'?key='+encodeURIComponent(NOTES_KEY))
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      var remote = (j && j.ok && j.data && typeof j.data==='object') ? j.data : {};
+      var merged = Object.assign({}, remote, WEEK_NOTES);   // local edits win
+      WEEK_NOTES = merged; saveNotes();
+      return fetch(API+'?key='+encodeURIComponent(NOTES_KEY), {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ data: merged })
+      });
+    })
+    .catch(function(){ /* offline — localStorage still holds the note */ });
+}
+// open an inline editor for a task note (edit-safe: pauses weekly auto re-render)
+function editNote(encKey, btn){
+  var key=decodeURIComponent(encKey);
+  var body=btn.closest('.wk-body'); if(!body) return;
+  if(body.querySelector('.wk-note-edit')) return;         // already editing
+  NOTE_EDITING=true;
+  var noteDiv=body.querySelector('.wk-note'); if(noteDiv) noteDiv.style.display='none';
+  var ta=document.createElement('textarea');
+  ta.className='wk-note-edit';
+  ta.value=WEEK_NOTES[key]||'';
+  ta.placeholder='Add a note for this task…';
+  var hint=document.createElement('div');
+  hint.className='wk-note-hint'; hint.textContent='Saves for the whole team when you click away.';
+  body.appendChild(ta); body.appendChild(hint); ta.focus();
+  ta.addEventListener('blur', function(){
+    var val=ta.value.trim();
+    if(val) WEEK_NOTES[key]=val; else delete WEEK_NOTES[key];
+    saveNotes();
+    // update just this task in place so the open client stays open
+    body.removeChild(ta); body.removeChild(hint);
+    var existing=body.querySelector('.wk-note');
+    if(val){
+      if(existing){ existing.textContent=val; existing.style.display=''; }
+      else { var nd=document.createElement('div'); nd.className='wk-note'; nd.textContent=val; body.appendChild(nd); }
+    } else if(existing){ body.removeChild(existing); }
+    btn.classList.toggle('has', !!val);
+    btn.innerHTML = val ? '✎ Edit note' : '+ Note';
+    NOTE_EDITING=false;
+    pushNotes();                                    // sync to the team
   });
-  if(!matched && owner){
-    out+='<span class="own-chip client" title="'+owner+'">'+owner.replace(/[^A-Za-z0-9]/g,'').slice(0,3).toUpperCase()+'</span>';
-  }
-  return out;
+}
+function byDateAsc(a,b){ return a.date-b.date; }
+// one task line inside a Sabel/Client column, with its shared note control
+function weekTaskRow(clientName, x){
+  var key=noteKey(clientName,x.task), note=WEEK_NOTES[key], encKey=encodeURIComponent(key);
+  var noteHtml = note ? '<div class="wk-note">'+esc(note)+'</div>' : '';
+  var owner = x.owner ? '<span class="wk-owner">'+esc(x.owner)+'</span>' : '';
+  return '<div class="wk-item'+(x.done?' done':'')+'"><span class="wk-dot" style="background:'+statusColour(x.status)+'"></span>'
+    + '<div class="wk-body">'
+    +   '<div class="wk-tx">'+esc(x.task)+' '+owner+'</div>'
+    +   '<div class="wk-actions"><button class="wk-note-btn'+(note?' has':'')+'" onclick="editNote(\''+encKey+'\',this)">'+(note?'&#9998; Edit note':'&#43; Note')+'</button></div>'
+    +   noteHtml
+    + '</div></div>';
 }
 function renderWeekly(){
-  var host=document.getElementById('weeklyClients'); if(!host) return;
+  if(NOTE_EDITING) return;   // don't wipe an open note editor on auto-refresh
+  var el=document.getElementById('weeklyBody'); if(!el) return;
   var ws=weekStart(WEEK_OFFSET), we=new Date(ws); we.setDate(ws.getDate()+7);
   var lbl=document.getElementById('wkLabel');
   if(lbl){
@@ -678,39 +750,46 @@ function renderWeekly(){
     lbl.textContent = ws.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' – '+last.toLocaleDateString('en-GB',{day:'numeric',month:'short'})
       + (WEEK_OFFSET===0?' · this week':WEEK_OFFSET===1?' · next week':WEEK_OFFSET===-1?' · last week':'');
   }
-  // group this week's tasks by client
-  var byClient={};
+  // remember which clients are expanded so a refresh doesn't collapse them
+  var openSet={}; el.querySelectorAll('.wk-client-drop[open]').forEach(function(d){ openSet[d.getAttribute('data-client')]=1; });
+  // group scheduled tasks by client, split into Sabel-side vs client-side (k.dep)
+  var groups=[], total=0;
   TRACKERS.forEach(function(tr){
     if(!tr.live || !tr.phases) return;
+    var sabel=[], client=[];
     tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
       var e=k.end||k.start; if(!e) return;
       var d=new Date(e+'T00:00:00'); d.setHours(0,0,0,0);
       if(d<ws || d>=we) return;
-      if(!byClient[tr.name]) byClient[tr.name]={golive:tr.golive, tasks:[]};
-      byClient[tr.name].tasks.push({task:cleanTitle(k.task), owner:k.owner||'', status:k.status, date:d});
+      var item={task:cleanTitle(k.task), owner:k.owner||'', status:k.status, date:d, done:(k.status||'').toLowerCase()==='complete'};
+      (k.dep?client:sabel).push(item);
     });});
+    var n=sabel.length+client.length;
+    if(n){
+      sabel.sort(byDateAsc); client.sort(byDateAsc);
+      var first=Math.min(sabel.length?sabel[0].date:Infinity, client.length?client[0].date:Infinity);
+      groups.push({name:tr.name, file:tr.file, sabel:sabel, client:client, n:n, first:first});
+      total+=n;
+    }
   });
-  var names=Object.keys(byClient);
-  var total=names.reduce(function(a,n){ return a+byClient[n].tasks.length; },0);
+  groups.sort(function(a,b){ return a.first-b.first; });
   var sum=document.getElementById('wkSummary');
-  if(sum) sum.textContent = total ? (total+' task'+(total>1?'s':'')+' · '+names.length+' client'+(names.length>1?'s':'')) : 'nothing scheduled';
-  if(!names.length){ host.innerHTML='<div class="wk-empty">Nothing scheduled for this week.</div>'; return; }
-  // order clients by go-live urgency (soonest known first, unknown last)
-  names.sort(function(a,b){ var ak=byClient[a].golive||'9999-12-31', bk=byClient[b].golive||'9999-12-31'; return ak<bk?-1:ak>bk?1:0; });
-  host.innerHTML = names.map(function(n){
-    var c=byClient[n], days=daysBetween(c.golive);
-    var badge = days===null ? '<span class="wkc-gl">go-live TBC</span>'
-      : '<span class="wkc-gl '+(days<=7?'red':days<=21?'amber':'green')+'">'
-        + (days<0?Math.abs(days)+'d overdue':days===0?'go-live today':days+'d to go-live')+'</span>';
-    var rows=c.tasks.sort(function(a,b){ return a.date-b.date; }).map(function(t){
-      return '<div class="wk-item"><span class="wk-dot" style="background:'+statusColour(t.status)+'" title="'+(t.status||'')+'"></span>'
-        + '<div class="wk-tx">'+t.task+'</div>'
-        + '<span class="wk-owners">'+ownerChips(t.owner)+'</span></div>';
-    }).join('');
-    return '<details class="wkc"><summary>'
-      + '<span class="wkc-name">'+n+'</span>'+badge
-      + '<span class="wkc-n">'+c.tasks.length+'</span><span class="ad-chev">&#9656;</span></summary>'
-      + '<div class="wkc-body">'+rows+'</div></details>';
+  if(sum) sum.textContent = total ? (total+' task'+(total===1?'':'s')+' across '+groups.length+' client'+(groups.length===1?'':'s')) : 'Nothing scheduled';
+  if(!groups.length){ el.innerHTML='<div class="wk-empty">Nothing scheduled for this week.</div>'; return; }
+  el.innerHTML = groups.map(function(g){
+    var url=BASE+g.file;
+    var sideHtml=function(list,cls,label){
+      var rows = list.length ? list.map(function(x){ return weekTaskRow(g.name,x); }).join('') : '<div class="wk-empty">Nothing this week</div>';
+      return '<div class="wk-side '+cls+'"><div class="wk-side-h">'+label+' <span class="wk-side-n">'+list.length+'</span></div>'+rows+'</div>';
+    };
+    return '<details class="wk-client-drop" data-client="'+esc(g.name)+'"'+(openSet[g.name]?' open':'')+'>'
+      + '<summary><span class="ad-chev">&#9656;</span>'
+      +   '<span class="wk-cd-nm">'+esc(g.name)+'</span>'
+      +   '<span class="wk-cd-meta">'+g.sabel.length+' from Sabel · '+g.client.length+' from client</span>'
+      +   '<span class="wk-cd-h-right"><a class="wk-tracker" href="'+url+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Tracker &#8599;</a></span>'
+      + '</summary>'
+      + '<div class="wk-split">'+sideHtml(g.sabel,'sabel','Due from Sabel')+sideHtml(g.client,'client','Due from client')+'</div>'
+      + '</details>';
   }).join('');
 }
 
@@ -1005,16 +1084,31 @@ function renderTimeline(active){
       html+='<div class="tl-band" style="left:'+x1+'%;width:'+(x2-x1)+'%"></div>';
     }
   });
-  // markers + labels (stagger labels to reduce overlap)
+  // markers + labels (stagger labels to reduce overlap). data-name / data-date
+  // feed the hover tooltip; the go-live date reflects whatever is live now.
   pts.forEach(function(p,i){
     var w=isoWeek(p.date), days=daysBetween(p.date);
     var cls = weekCount[w]>=2 ? 'red' : (days!==null&&days<=21?'amber':'green');
     var x=pos(p.date);
     var top = 6 + (i%3)*30; // 3-row stagger
-    html+='<div class="tl-mark '+cls+'" style="left:'+x+'%" title="'+p.name+' · '+fmtDate(p.date)+'"></div>';
-    html+='<div class="tl-lab" style="left:'+x+'%;top:'+top+'px">'+p.name+'</div>';
+    var dn=esc(p.name), dd=esc(fmtDate(p.date));
+    html+='<div class="tl-mark '+cls+'" data-name="'+dn+'" data-date="'+dd+'" style="left:'+x+'%"></div>';
+    html+='<div class="tl-lab" data-name="'+dn+'" data-date="'+dd+'" style="left:'+x+'%;top:'+top+'px">'+dn+'</div>';
   });
+  html+='<div class="tl-tip" id="tlTip"></div>';
   el.innerHTML=html;
+
+  // hover tooltip: show the client's go-live date over its dot or label
+  var tip=document.getElementById('tlTip');
+  el.querySelectorAll('.tl-mark,.tl-lab').forEach(function(node){
+    node.addEventListener('mouseenter', function(){
+      tip.innerHTML='<b>'+node.dataset.name+'</b> · go-live <span class="d">'+node.dataset.date+'</span>';
+      tip.style.left=(node.offsetLeft+node.offsetWidth/2)+'px';
+      tip.style.top=(node.offsetTop-8)+'px';
+      tip.style.opacity='1';
+    });
+    node.addEventListener('mouseleave', function(){ tip.style.opacity='0'; });
+  });
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -1037,8 +1131,9 @@ updateDensityBtn();
 buildConfigPanel();
 render();                                   // paint shell immediately
 applyWidgets();                             // honour saved widget visibility
+loadNotes();                                // pull the team's shared notes
 loadConfig().then(function(){ loadLive(false); }); // registry (if any) → live data
-setInterval(function(){ loadLive(false); }, REFRESH_MS); // keep it live
+setInterval(function(){ loadLive(false); loadNotes(); }, REFRESH_MS); // keep it live
 </script>
 </body>
 </html>
