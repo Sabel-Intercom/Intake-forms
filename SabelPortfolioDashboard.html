@@ -758,10 +758,12 @@ function renderWeekly(){
     if(!tr.live || !tr.phases) return;
     var sabel=[], client=[];
     tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+      var st=(k.status||'').toLowerCase();
+      if(st==='complete'||st==='done') return;   // the plan shows outstanding work only
       var e=k.end||k.start; if(!e) return;
       var d=new Date(e+'T00:00:00'); d.setHours(0,0,0,0);
       if(d<ws || d>=we) return;
-      var item={task:cleanTitle(k.task), owner:k.owner||'', status:k.status, date:d, done:(k.status||'').toLowerCase()==='complete'};
+      var item={task:cleanTitle(k.task), owner:k.owner||'', status:k.status, date:d, done:false};
       (k.dep?client:sabel).push(item);
     });});
     var n=sabel.length+client.length;
