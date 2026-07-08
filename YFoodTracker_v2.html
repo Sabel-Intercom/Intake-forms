@@ -537,24 +537,7 @@ function pillarBarsHTML(){
 function ovTopCards(gs){
   const pct=gs.total>0?Math.round(gs.complete/gs.total*100):0;
   const pctClr=pct>66?'#4ADE80':pct>33?'#FBBF24':'#E10600';
-  const usedPct=Math.round(gs.usedH/TOTAL_H*100);
-  const hClr=usedPct>80?'#F87171':usedPct>50?'#FBBF24':'#60A5FA';
-  const remaining=TOTAL_H-gs.usedH;
-  const phHours=P.map(p=>{
-    const tasks=[...T[p.id].sabel,...T[p.id].client];
-    const done=tasks.filter(t=>t.s==='Complete').length;
-    const inprog=tasks.filter(t=>t.s==='In Progress').length;
-    const consumed=tasks.length>0?Math.round(((done+inprog*.5)/tasks.length)*p.h*10)/10:0;
-    const barPct=Math.min(Math.round(consumed/p.h*100),100);
-    return`<div style="display:flex;align-items:center;gap:7px">
-      <span style="width:6px;height:6px;border-radius:50%;background:${p.c};flex-shrink:0;display:inline-block"></span>
-      <span style="font-size:10px;color:#94A3B8;width:70px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l}</span>
-      <div style="flex:1;background:#0F1117;border-radius:2px;height:4px;overflow:hidden"><div style="height:100%;width:${barPct}%;background:${p.c}"></div></div>
-      <span style="font-size:10px;color:#64748B;width:44px;text-align:right;flex-shrink:0">${consumed}/${p.h}h</span>
-    </div>`;
-  }).join('');
-  return`<div class="ov-top">
-    <div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:16px">
+  return`<div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:16px;margin-bottom:1rem">
       <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-bottom:10px">Overall completion</div>
       <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:10px">
         <span style="font-size:36px;font-weight:700;color:${pctClr};line-height:1">${pct}%</span>
@@ -563,24 +546,7 @@ function ovTopCards(gs){
       ${gradBar(pct,10)}
       <div style="font-size:10px;font-weight:600;letter-spacing:.06em;color:#475569;text-transform:uppercase;margin:12px 0 8px">by pillar</div>
       <div style="display:flex;flex-direction:column;gap:7px">${pillarBarsHTML()}</div>
-    </div>
-    <div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:16px">
-      <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-bottom:10px">Hours budget</div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px">
-        <div>
-          <span style="font-size:36px;font-weight:700;color:${hClr};line-height:1">${gs.usedH}h</span>
-          <div style="font-size:11px;color:#475569;margin-top:3px">of ${TOTAL_H}h used</div>
-        </div>
-        <div style="text-align:right">
-          <span style="font-size:24px;font-weight:600;color:#E2E8F0;line-height:1">${remaining}h</span>
-          <div style="font-size:11px;color:#475569;margin-top:3px">remaining</div>
-        </div>
-      </div>
-      ${gradBar(usedPct,10)}
-      <div style="font-size:10px;font-weight:600;letter-spacing:.06em;color:#475569;text-transform:uppercase;margin:12px 0 8px">by pillar</div>
-      <div style="display:flex;flex-direction:column;gap:7px">${phHours}</div>
-    </div>
-  </div>`;
+    </div>`;
 }
 function phaseCompletionCard(pct,done,total){
   const clr=pct>66?'#4ADE80':pct>33?'#FBBF24':'#E10600';
@@ -640,7 +606,7 @@ function renderSidebar(){
       <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:5px">
         <div style="min-width:0;flex:1">
           <div style="font-size:12px;font-weight:${act?'500':'400'};color:${act?'#E2E8F0':'#94A3B8'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l}</div>
-          <div style="font-size:10px;color:#475569;margin-top:1px">${p.w} · ${p.h}h</div>
+          <div style="font-size:10px;color:#475569;margin-top:1px">${p.w}</div>
         </div>
         <span style="font-size:11px;font-weight:${dPct>0?'600':'400'};color:${dClr};flex-shrink:0">${dPct}%</span>
       </div>
@@ -653,16 +619,7 @@ function renderSidebar(){
       <div class="sb-title">YFood Labs</div>
       <div class="sb-sub">Project tracker · Jul–Oct 2026</div>
     </div>
-    ${ovBtn}<div class="sb-sec">Pillars</div>${phBtns}
-    <div class="sb-footer">
-      <div style="font-size:11px;color:#94A3B8;margin-bottom:4px">Hours budget</div>
-      <div style="display:flex;align-items:baseline;gap:3px;margin-bottom:6px">
-        <span style="font-size:20px;font-weight:600;color:#E2E8F0">${gs.usedH}h</span>
-        <span style="font-size:11px;color:#475569"> of ${TOTAL_H}h used</span>
-      </div>
-      ${gradBar(usedPct,4)}
-      <div style="font-size:11px;color:#475569;margin-top:4px">${TOTAL_H-gs.usedH}h remaining</div>
-    </div>`;
+    ${ovBtn}<div class="sb-sec">Pillars</div>${phBtns}`;
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -691,7 +648,7 @@ function renderMain(){
           <span style="width:8px;height:8px;border-radius:50%;background:${p.c};flex-shrink:0;display:inline-block"></span>
           <span style="font-size:12px;font-weight:500;color:#E2E8F0">${p.l}</span>
         </div>
-        <div style="font-size:11px;color:#475569;margin-bottom:8px">${p.w} · ${p.h}h</div>
+        <div style="font-size:11px;color:#475569;margin-bottom:8px">${p.w}</div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
           <span style="font-size:11px;color:#475569">${m.done}/${m.total}</span>
           <span style="font-size:14px;font-weight:600;color:${dClr}">${dPct}%</span>
@@ -730,7 +687,7 @@ function renderMain(){
         <span style="width:9px;height:9px;border-radius:50%;background:${ph.c};display:inline-block;flex-shrink:0"></span>
         <span style="font-size:18px;font-weight:600;color:#E2E8F0">${ph.l}</span>
       </div>
-      <div style="font-size:11px;color:#475569;margin-bottom:1.25rem">${ph.d} · ${ph.h}h budget · ~${ps.consumed}h used</div>
+      <div style="font-size:11px;color:#475569;margin-bottom:1.25rem">${ph.d}</div>
       ${phaseCompletionCard(phasePct,ps.done,ps.total)}
       ${filterStatCards(ps.on,ps.att,ps.risk,true)}
       <div style="height:1rem"></div>
