@@ -14,6 +14,7 @@
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg);color:var(--body);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  select{font-family:inherit;}
   ::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}::-webkit-scrollbar-track{background:transparent;}
 
   .header{display:flex;align-items:center;gap:16px;padding:15px 28px;border-bottom:1px solid var(--border2);background:rgba(11,11,12,.9);flex-wrap:wrap;}
@@ -47,32 +48,62 @@
 
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
   @media(max-width:920px){.cols{grid-template-columns:1fr;}}
-  .col-h{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;}
+  .col-h{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;flex-wrap:wrap;}
   .col-h h2{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--w);}
-  .col-h .sub{font-size:10px;color:var(--mono);}
   .col-h .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;position:relative;top:-1px;}
+  .col-prog{font-size:10px;color:var(--muted);margin-bottom:12px;}
+  .col-prog b{color:var(--w);}
 
-  .dcard{background:var(--card);border:1px solid var(--border2);border-radius:11px;padding:14px 16px;margin-bottom:12px;}
-  .d-top{display:flex;align-items:center;gap:10px;margin-bottom:9px;flex-wrap:wrap;}
+  /* draft cards */
+  .dcard{background:var(--card);border:1px solid var(--border2);border-left-width:3px;border-radius:11px;padding:13px 16px;margin-bottom:12px;}
+  .dcard.st-draft{border-left-color:var(--amber);}
+  .dcard.st-reviewed{border-left-color:var(--blue);}
+  .dcard.st-sent{border-left-color:var(--green);}
+  .d-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .d-name{font-size:14px;font-weight:800;color:var(--w);}
-  .d-status{font-size:8.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:20px;cursor:pointer;border:1px solid transparent;transition:.12s;}
-  .d-status.draft{background:var(--card2);color:var(--muted);border-color:var(--border);}
+  .d-status{font-size:8.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:20px;cursor:pointer;border:1px solid transparent;}
+  .d-status.draft{background:rgba(251,191,36,.12);color:var(--amber);border-color:rgba(251,191,36,.3);}
   .d-status.reviewed{background:rgba(96,165,250,.14);color:var(--blue);border-color:rgba(96,165,250,.35);}
   .d-status.sent{background:rgba(74,222,128,.14);color:var(--green);border-color:rgba(74,222,128,.35);}
-  .d-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
-  .copy-btn{font-size:9.5px;font-weight:700;letter-spacing:.03em;color:var(--muted);background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:4px 10px;transition:.12s;}
-  .copy-btn:hover{border-color:var(--mono);color:var(--w);}
-  .copy-btn.ok{color:var(--green);border-color:rgba(74,222,128,.4);}
-  .d-text{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:7px;color:var(--body);font-family:inherit;font-size:12.5px;line-height:1.55;padding:10px 12px;resize:vertical;min-height:96px;transition:border-color .12s;}
-  .d-text:focus{outline:none;border-color:var(--blue);}
-  .d-text::placeholder{color:var(--mono);}
-  .d-meta{font-size:9px;color:var(--mono);margin-top:6px;letter-spacing:.03em;}
+  .d-rev{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--mono);margin-left:auto;}
+  .d-rev select{background:var(--card2);border:1px solid var(--border);border-radius:5px;color:var(--body);font-size:10px;padding:3px 6px;outline:none;cursor:pointer;}
+  .d-rev select:focus{border-color:var(--blue);}
+
+  /* message preview */
+  .d-msg{background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:11px 14px;margin-top:10px;font-size:12.5px;line-height:1.6;color:var(--body);white-space:pre-wrap;word-break:break-word;}
+  .d-msg.empty-msg{color:var(--mono);font-style:italic;}
+  .d-text{display:none;width:100%;background:var(--surface);border:1px solid var(--blue);border-radius:9px;color:var(--body);font-family:inherit;font-size:12.5px;line-height:1.6;padding:11px 14px;resize:vertical;min-height:110px;margin-top:10px;}
+  .d-text:focus{outline:none;}
+  .dcard.editing .d-msg{display:none;}
+  .dcard.editing .d-text{display:block;}
+
+  .d-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px;}
+  .abtn{font-size:9.5px;font-weight:700;letter-spacing:.03em;color:var(--muted);background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:4px 11px;transition:.12s;}
+  .abtn:hover{border-color:var(--mono);color:var(--w);}
+  .abtn.approve{color:var(--blue);border-color:rgba(96,165,250,.35);}
+  .abtn.approve:hover{background:rgba(96,165,250,.12);color:#fff;}
+  .abtn.ok{color:var(--green);border-color:rgba(74,222,128,.4);}
+  .d-meta{font-size:9px;color:var(--mono);margin-left:auto;letter-spacing:.03em;text-align:right;}
   .d-meta b{color:var(--muted);font-weight:600;}
+
+  /* comments */
+  .d-comments{margin-top:8px;}
+  .cm{border-left:2px solid var(--blue);background:var(--surface);border-radius:0 6px 6px 0;padding:6px 10px;margin-top:6px;font-size:11px;line-height:1.5;color:var(--body);}
+  .cm .cm-by{font-size:9px;color:var(--mono);margin-top:2px;}
+  .cm-add{display:none;gap:8px;align-items:flex-start;margin-top:8px;}
+  .cm-add.show{display:flex;}
+  .cm-add input{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--body);font-family:inherit;font-size:11.5px;padding:7px 10px;outline:none;}
+  .cm-add input:focus{border-color:var(--blue);}
+  .cm-add button{font-size:10px;font-weight:700;color:var(--blue);background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.35);border-radius:6px;padding:7px 12px;white-space:nowrap;}
+
+  /* no-draft rows */
+  .nd-h{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);margin:14px 0 8px;}
+  .nd-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:8px 14px;margin-bottom:7px;}
+  .nd-name{font-size:12px;font-weight:600;color:var(--muted);}
   .empty{font-size:11.5px;color:var(--mono);padding:12px 2px;line-height:1.6;}
 
   /* call notes */
   .notes-sec{margin-top:30px;}
-  .notes-sec .col-h{margin-bottom:4px;}
   .notes-sub{font-size:10.5px;color:var(--mono);margin-bottom:14px;line-height:1.6;}
   .ncard{background:var(--card);border:1px solid var(--border2);border-radius:11px;margin-bottom:10px;overflow:hidden;}
   .ncard > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 16px;}
@@ -95,7 +126,7 @@
 
   footer{margin-top:34px;padding:16px 0 0;border-top:1px solid var(--border2);font-size:9px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 
-  /* import modal */
+  /* modals */
   .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;}
   .modal{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:640px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.6);}
   .modal h3{font-size:13px;font-weight:800;color:var(--w);letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;}
@@ -106,6 +137,9 @@
   .modal .m-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px;}
   .modal .m-go{font-size:11px;font-weight:700;color:#fff;background:var(--red);border-radius:6px;padding:8px 16px;}
   .modal .m-cancel{font-size:11px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:8px 14px;}
+  .rr-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:10px 13px;margin-bottom:8px;}
+  .rr-who{font-size:12px;font-weight:700;color:var(--w);}
+  .rr-list{font-size:10px;color:var(--muted);margin-top:2px;}
 </style>
 </head>
 <body>
@@ -116,6 +150,7 @@
   <div class="right">
     <span class="who">You are: <input id="whoInput" placeholder="e.g. Nikki" maxlength="12"></span>
     <span class="stamp" id="stamp">Loading&hellip;</span>
+    <button class="hbtn" onclick="openRequest()">&#128276; Request reviews</button>
     <button class="hbtn" onclick="openImport()">&#8681; Import drafts</button>
     <button class="hbtn" onclick="loadAll(true)">&#8635; Refresh</button>
   </div>
@@ -124,9 +159,8 @@
 <div class="wrap">
 
   <div class="banner" id="storeBanner">
-    <b>Shared store not reachable.</b> Drafts are saving to this browser only. If this is the first time using this page,
-    the key <b>sabel-weekly-updates-v1</b> must be added to ALLOWED_KEYS in the sabel-webhook <b>api/tracker.js</b>
-    (same one-line change made for the weekly notes and go-live overrides keys). Then press Refresh.
+    <b>Shared store not reachable.</b> Everything is saving to this browser only and will sync automatically once
+    <b>sabel-weekly-updates-v1</b> is live in the webhook's ALLOWED_KEYS (check the Vercel deployment succeeded), then press Refresh.
   </div>
 
   <div class="weekbar">
@@ -137,18 +171,22 @@
       <button class="wk-btn wk-today" onclick="shiftWeek(0,true)">This week</button>
     </div>
     <div class="legend">
-      Drafts are written by the Monday and Friday automations, then reviewed here before Nikki sends them.<br>
-      Click a status pill to move it along: <b>Draft &rarr; Reviewed &rarr; Sent</b>. Edits save for the whole team when you click away.
+      Read each message, then <b>&#10003; Looks good</b> to approve, or leave a comment.<br>
+      Copying a message offers to mark it Sent, so the board stays honest.
     </div>
   </div>
 
   <div class="cols">
     <div>
-      <div class="col-h"><span class="dot" style="background:var(--blue)"></span><h2>Monday &mdash; coming up this week</h2><span class="sub">what we are doing + what we need from the client</span></div>
+      <div class="col-h"><span class="dot" style="background:var(--blue)"></span><h2>Monday &mdash; coming up this week</h2>
+        <button class="hbtn" style="margin-left:auto;" onclick="generate('monday',this)">&#9889; Generate Monday drafts</button></div>
+      <div class="col-prog" id="mondayProg"></div>
       <div id="mondayCol"></div>
     </div>
     <div>
-      <div class="col-h"><span class="dot" style="background:var(--green)"></span><h2>Friday &mdash; week wrap-up</h2><span class="sub">what got done + what is coming next</span></div>
+      <div class="col-h"><span class="dot" style="background:var(--green)"></span><h2>Friday &mdash; week wrap-up</h2>
+        <button class="hbtn" style="margin-left:auto;" onclick="generate('friday',this)">&#9889; Generate Friday drafts</button></div>
+      <div class="col-prog" id="fridayProg"></div>
       <div id="fridayCol"></div>
     </div>
   </div>
@@ -176,14 +214,16 @@ var API = 'https://sabel-webhook.vercel.app/api/tracker';
 var BASE = 'https://sabel-intercom.github.io/Intake-forms/';
 var STORE_KEY = 'sabel-weekly-updates-v1';       // must be in ALLOWED_KEYS on the backend
 var REFRESH_MS = 5 * 60 * 1000;
+var TEAM = ['Chris','Greg','Richard','Nikki'];
 
 // Store shape:
-// { weeks: { '2026-07-13': { monday:{Client:{text,status,by,at}}, friday:{...} } },
-//   callNotes: { Client: [ {at, by, text} ] } }
-var STORE = JSON.parse(localStorage.getItem('sabel_weekly_updates')||'{"weeks":{},"callNotes":{}}');
-var CLIENTS = [];                                 // active client names from trackers.json
+// { weeks: { '2026-07-13': { monday:{Client:{text,status,by,at,comments:[{at,by,text}]}}, friday:{...} } },
+//   callNotes: { Client: [ {at, by, text} ] },
+//   reviewers: { Client: 'Chris' } }          // persistent default reviewer per client
+var STORE = JSON.parse(localStorage.getItem('sabel_weekly_updates')||'{"weeks":{},"callNotes":{},"reviewers":{}}');
+var CLIENTS = [];
 var WEEK_OFFSET = 0;
-var EDITING = false;                              // pause re-render while typing
+var EDITING = false;
 var REMOTE_OK = false;
 var WHO = localStorage.getItem('sabel_who')||'';
 
@@ -205,6 +245,7 @@ function fmtStamp(iso){
 function ensure(){
   if(!STORE.weeks) STORE.weeks={};
   if(!STORE.callNotes) STORE.callNotes={};
+  if(!STORE.reviewers) STORE.reviewers={};
   var wk=weekKey(WEEK_OFFSET);
   if(!STORE.weeks[wk]) STORE.weeks[wk]={monday:{},friday:{}};
   if(!STORE.weeks[wk].monday) STORE.weeks[wk].monday={};
@@ -219,10 +260,35 @@ function saveLocal(){ localStorage.setItem('sabel_weekly_updates', JSON.stringif
 function fetchStore(){
   return fetch(API+'?key='+encodeURIComponent(STORE_KEY)+'&_t='+Date.now(),{cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(j){ return (j&&j.ok&&j.data&&typeof j.data==='object') ? j.data : null; });
+    .then(function(j){ return (j&&j.ok) ? {ok:true, data:(j.data&&typeof j.data==='object')?j.data:null} : null; });
+}
+function unionByAtText(a,b){
+  var seen={}, out=[];
+  (a||[]).concat(b||[]).forEach(function(x){
+    if(!x) return;
+    var id=(x.at||'')+'|'+(x.text||''); if(seen[id]) return; seen[id]=1;
+    out.push(x);
+  });
+  out.sort(function(x,y){ return (x.at||'')<(y.at||'')?-1:1; });
+  return out;
+}
+function mergeEntry(re,le){
+  if(re&&le){
+    var win = ((le.at||'')>=(re.at||'')) ? Object.assign({},le) : Object.assign({},re);
+    win.comments = unionByAtText(re.comments, le.comments);
+    return win;
+  }
+  return le||re;
 }
 function mergeStores(remote, local){
-  var out={weeks:{},callNotes:{}};
+  remote=remote||{}; local=local||{};
+  var out={weeks:{},callNotes:{},reviewers:Object.assign({},remote.reviewers||{},local.reviewers||{}),snapshots:{}};
+  // snapshots: newest wins per client
+  var snNames={}; Object.keys(remote.snapshots||{}).concat(Object.keys(local.snapshots||{})).forEach(function(n){ snNames[n]=1; });
+  Object.keys(snNames).forEach(function(n){
+    var rs=(remote.snapshots||{})[n], ls=(local.snapshots||{})[n];
+    out.snapshots[n] = (rs&&ls) ? (((ls.at||'')>=(rs.at||''))?ls:rs) : (ls||rs);
+  });
   var wkKeys={}; [remote,local].forEach(function(s){ Object.keys((s&&s.weeks)||{}).forEach(function(k){ wkKeys[k]=1; }); });
   Object.keys(wkKeys).forEach(function(k){
     var r=(remote.weeks||{})[k]||{}, l=(local.weeks||{})[k]||{};
@@ -230,32 +296,23 @@ function mergeStores(remote, local){
     ['monday','friday'].forEach(function(sec){
       var names={}; Object.keys(r[sec]||{}).concat(Object.keys(l[sec]||{})).forEach(function(n){ names[n]=1; });
       Object.keys(names).forEach(function(n){
-        var re=(r[sec]||{})[n], le=(l[sec]||{})[n];
-        if(re&&le) out.weeks[k][sec][n] = ((le.at||'')>=(re.at||'')) ? le : re;   // newer edit wins
-        else out.weeks[k][sec][n] = le||re;
+        out.weeks[k][sec][n] = mergeEntry((r[sec]||{})[n], (l[sec]||{})[n]);
       });
     });
   });
-  // call notes: union by timestamp+text
+  // call notes: union, honouring delete tombstones
   var names={}; Object.keys(remote.callNotes||{}).concat(Object.keys(local.callNotes||{})).forEach(function(n){ names[n]=1; });
   Object.keys(names).forEach(function(n){
-    var seen={}, arr=[];
-    ((remote.callNotes||{})[n]||[]).concat(((local.callNotes||{})[n]||[])).forEach(function(x){
-      var id=(x.at||'')+'|'+(x.text||''); if(seen[id]) return; seen[id]=1;
-      if(!x.deleted) arr.push(x); else seen[id]='del';
-    });
-    // apply deletions (a deleted marker removes the matching note)
+    var all=unionByAtText((remote.callNotes||{})[n], (local.callNotes||{})[n]);
     var dels={};
-    ((remote.callNotes||{})[n]||[]).concat(((local.callNotes||{})[n]||[])).forEach(function(x){ if(x.deleted) dels[(x.at||'')+'|'+(x.text||'')]=1; });
-    arr=arr.filter(function(x){ return !dels[(x.at||'')+'|'+(x.text||'')]; });
-    arr.sort(function(a,b){ return (a.at||'')<(b.at||'')?-1:1; });
-    out.callNotes[n]=arr;
+    ((remote.callNotes||{})[n]||[]).concat(((local.callNotes||{})[n]||[])).forEach(function(x){ if(x&&x.deleted) dels[(x.at||'')+'|'+(x.text||'')]=1; });
+    out.callNotes[n]=all.filter(function(x){ return !x.deleted && !dels[(x.at||'')+'|'+(x.text||'')]; });
   });
   return out;
 }
 function pushStore(){
-  return fetchStore().then(function(remote){
-    STORE = mergeStores(remote||{weeks:{},callNotes:{}}, STORE);
+  return fetchStore().then(function(res){
+    STORE = mergeStores(res?res.data:null, STORE);
     saveLocal();
     return fetch(API+'?key='+encodeURIComponent(STORE_KEY),{
       method:'POST',headers:{'Content-Type':'application/json'},
@@ -279,38 +336,49 @@ function loadClients(){
   return fetch(BASE+'trackers.json',{cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(j){
-      if(Array.isArray(j)) CLIENTS=j.filter(function(t){ return t.active!==false; }).map(function(t){ return t.name; });
+      if(Array.isArray(j)) CLIENTS=j.filter(function(t){ return t.active!==false; });
     }).catch(function(){});
 }
+function clientNames(){ return CLIENTS.map(function(c){ return c.name; }); }
 
 // ─────────────────────────────────────────────────────────────
 // RENDER
 // ─────────────────────────────────────────────────────────────
 function shiftWeek(delta,reset){ WEEK_OFFSET = reset?0:WEEK_OFFSET+delta; render(); }
-function statusNext(s){ return s==='draft'?'reviewed':s==='reviewed'?'sent':'draft'; }
 function statusLbl(s){ return s==='reviewed'?'Reviewed':s==='sent'?'Sent':'Draft'; }
+function statusOrder(s){ return s==='sent'?2:s==='reviewed'?1:0; }
 
-function allClientNames(sec){
-  // union of registry clients and any client that already has a draft this week
-  var wk=ensure(), names={};
-  CLIENTS.forEach(function(n){ names[n]=1; });
-  Object.keys(wk[sec]||{}).forEach(function(n){ names[n]=1; });
-  return Object.keys(names).sort();
-}
-
-function draftCard(sec, name){
-  var wk=ensure();
-  var e=wk[sec][name]||{text:'',status:'draft'};
+function draftCard(sec, name, e){
   var st=e.status||'draft';
-  var meta = e.at ? ('Last edited '+(e.by?'by <b>'+esc(e.by)+'</b> ':'')+fmtStamp(e.at)) : 'No draft yet - the '+(sec==='monday'?'Monday':'Friday')+' automation fills this in, or write one now.';
-  return '<div class="dcard" data-sec="'+sec+'" data-name="'+esc(name)+'">'
+  var enc=encodeURIComponent(sec+'||'+name);
+  var meta='';
+  if(st==='reviewed'&&e.by) meta='Approved by <b>'+esc(e.by)+'</b> '+fmtStamp(e.at);
+  else if(st==='sent'&&e.by) meta='Sent &middot; <b>'+esc(e.by)+'</b> '+fmtStamp(e.at);
+  else if(e.at) meta=(e.by?'By <b>'+esc(e.by)+'</b> ':'')+fmtStamp(e.at);
+  var comments=(e.comments||[]).map(function(c){
+    return '<div class="cm">'+esc(c.text)+'<div class="cm-by">'+esc(c.by||'')+' &middot; '+fmtStamp(c.at)+'</div></div>';
+  }).join('');
+  var revOpts='<option value="">reviewer&hellip;</option>'+TEAM.map(function(t){
+    return '<option value="'+t+'"'+((STORE.reviewers||{})[name]===t?' selected':'')+'>'+t+'</option>';
+  }).join('');
+  return '<div class="dcard st-'+st+'" data-key="'+enc+'">'
     + '<div class="d-top"><span class="d-name">'+esc(name)+'</span>'
-    +   '<button class="d-status '+st+'" onclick="cycleStatus(this)" title="Click to change: Draft / Reviewed / Sent">'+statusLbl(st)+'</button>'
-    +   '<span class="d-right"><button class="copy-btn" onclick="copyDraft(this)">&#10697; Copy for Slack</button></span></div>'
-    + '<textarea class="d-text" placeholder="Write or paste the '+(sec==='monday'?'Monday heads-up':'Friday wrap-up')+' for '+esc(name)+'&hellip;" '
-    +   'onfocus="EDITING=true" onblur="saveDraft(this)">'+esc(e.text||'')+'</textarea>'
-    + '<div class="d-meta">'+meta+'</div>'
-    + '</div>';
+    +   '<span class="d-status '+st+'" onclick="cycleStatus(\''+enc+'\',this)" title="Click to cycle status manually">'+statusLbl(st)+'</span>'
+    +   '<span class="d-rev">&#128100; <select onchange="setReviewer(\''+encodeURIComponent(name)+'\',this.value)">'+revOpts+'</select></span></div>'
+    + (e.text
+        ? '<div class="d-msg" onclick="startEdit(\''+enc+'\')" title="Click to edit">'+esc(e.text)+'</div>'
+        : '<div class="d-msg empty-msg" onclick="startEdit(\''+enc+'\')">Nothing written yet. Click here to write it.</div>')
+    + '<textarea class="d-text" onfocus="EDITING=true" onblur="saveDraft(\''+enc+'\',this)">'+esc(e.text||'')+'</textarea>'
+    + '<div class="d-comments">'+comments
+    +   '<div class="cm-add" id="cmadd-'+enc+'"><input placeholder="Suggest a change without rewriting&hellip;" onfocus="EDITING=true" onblur="EDITING=false" onkeydown="if(event.key===\'Enter\')addComment(\''+enc+'\',this)"><button onclick="addComment(\''+enc+'\',this.parentNode.querySelector(\'input\'))">Comment</button></div>'
+    + '</div>'
+    + '<div class="d-actions">'
+    +   (st==='draft'?'<button class="abtn approve" onclick="approve(\''+enc+'\')">&#10003; Looks good</button>':'')
+    +   '<button class="abtn" onclick="startEdit(\''+enc+'\')">&#9998; Edit</button>'
+    +   '<button class="abtn" onclick="toggleComment(\''+enc+'\')">&#128172; Comment</button>'
+    +   '<button class="abtn" onclick="copyDraft(\''+enc+'\',this)">&#10697; Copy for Slack</button>'
+    +   '<span class="d-meta">'+meta+'</span>'
+    + '</div></div>';
 }
 
 function render(){
@@ -318,12 +386,34 @@ function render(){
   var ws=weekStart(WEEK_OFFSET), we=new Date(ws); we.setDate(ws.getDate()+4);
   document.getElementById('wkLabel').textContent =
     fmtD(ws)+' – '+fmtD(we)+(WEEK_OFFSET===0?' · this week':WEEK_OFFSET===1?' · next week':WEEK_OFFSET===-1?' · last week':'');
+  var wk=ensure();
   ['monday','friday'].forEach(function(sec){
     var col=document.getElementById(sec+'Col');
-    var names=allClientNames(sec);
-    col.innerHTML = names.length
-      ? names.map(function(n){ return draftCard(sec,n); }).join('')
-      : '<div class="empty">No active clients found in the tracker registry yet.</div>';
+    var withDraft=[], without=[];
+    var names={}; clientNames().forEach(function(n){ names[n]=1; });
+    Object.keys(wk[sec]||{}).forEach(function(n){ names[n]=1; });
+    Object.keys(names).forEach(function(n){
+      var e=(wk[sec]||{})[n];
+      if(e) withDraft.push({name:n, e:e}); else without.push(n);
+    });
+    withDraft.sort(function(a,b){
+      var d=statusOrder(a.e.status)-statusOrder(b.e.status);
+      return d!==0?d:(a.name<b.name?-1:1);
+    });
+    var approved=withDraft.filter(function(x){ return x.e.status==='reviewed'; }).length;
+    var sent=withDraft.filter(function(x){ return x.e.status==='sent'; }).length;
+    var waiting=withDraft.length-approved-sent;
+    document.getElementById(sec+'Prog').innerHTML = withDraft.length
+      ? '<b>'+waiting+'</b> waiting review &middot; <b>'+approved+'</b> approved &middot; <b>'+sent+'</b> sent'
+      : 'No drafts yet this week. The automation fills these in, or use Import drafts.';
+    var html=withDraft.map(function(x){ return draftCard(sec,x.name,x.e); }).join('');
+    if(without.length){
+      html+='<div class="nd-h">No draft yet</div>'+without.sort().map(function(n){
+        return '<div class="nd-row"><span class="nd-name">'+esc(n)+'</span>'
+          + '<button class="abtn" onclick="writeNew(\''+encodeURIComponent(sec+'||'+n)+'\')">&#43; Write draft</button></div>';
+      }).join('');
+    }
+    col.innerHTML = html || '<div class="empty">No active clients found in the tracker registry yet.</div>';
   });
   renderNotes();
   document.getElementById('footNote').textContent='Week key '+weekKey(WEEK_OFFSET);
@@ -331,7 +421,7 @@ function render(){
 
 function renderNotes(){
   var col=document.getElementById('notesCol');
-  var names={}; CLIENTS.forEach(function(n){ names[n]=1; });
+  var names={}; clientNames().forEach(function(n){ names[n]=1; });
   Object.keys(STORE.callNotes||{}).forEach(function(n){ if((STORE.callNotes[n]||[]).length) names[n]=1; });
   var list=Object.keys(names).sort();
   if(!list.length){ col.innerHTML='<div class="empty">No active clients found yet.</div>'; return; }
@@ -353,39 +443,91 @@ function renderNotes(){
 }
 
 // ─────────────────────────────────────────────────────────────
-// ACTIONS
+// DRAFT ACTIONS
 // ─────────────────────────────────────────────────────────────
 function whoAmI(){
   var v=document.getElementById('whoInput').value.trim();
   if(v){ WHO=v; localStorage.setItem('sabel_who',v); }
   return WHO;
 }
-function saveDraft(ta){
+function needName(){
+  if(whoAmI()) return false;
+  alert('Pop your name in the "You are" box (top right) first, so approvals and comments carry your name.');
+  document.getElementById('whoInput').focus();
+  return true;
+}
+function keyParts(enc){ var p=decodeURIComponent(enc).split('||'); return {sec:p[0], name:p[1]}; }
+function getEntry(enc){
+  var k=keyParts(enc), wk=ensure();
+  if(!wk[k.sec][k.name]) wk[k.sec][k.name]={text:'',status:'draft',comments:[]};
+  return wk[k.sec][k.name];
+}
+function startEdit(enc){
+  var card=document.querySelector('.dcard[data-key="'+enc+'"]'); if(!card) return;
+  card.classList.add('editing'); EDITING=true;
+  var ta=card.querySelector('.d-text'); ta.focus();
+}
+function saveDraft(enc, ta){
   EDITING=false;
-  var card=ta.closest('.dcard'), sec=card.getAttribute('data-sec'), name=card.getAttribute('data-name');
-  var wk=ensure();
-  var prev=wk[sec][name]||{status:'draft'};
-  var text=ta.value;
-  if(text===(prev.text||'')) { render(); return; }   // nothing changed
-  wk[sec][name]={text:text, status:prev.status||'draft', by:whoAmI()||prev.by||'', at:nowStamp()};
+  var e=getEntry(enc);
+  if(ta.value!==(e.text||'')){
+    e.text=ta.value; e.by=whoAmI()||e.by||''; e.at=nowStamp();
+    if(e.status==='sent') e.status='reviewed';   // edited after sending? needs another look
+    saveLocal(); pushStore().then(render); return;
+  }
+  render();
+}
+function writeNew(enc){
+  getEntry(enc); saveLocal(); render();
+  startEdit(enc);
+}
+function approve(enc){
+  if(needName()) return;
+  var e=getEntry(enc);
+  e.status='reviewed'; e.by=whoAmI(); e.at=nowStamp();
   saveLocal(); pushStore().then(render);
 }
-function cycleStatus(btn){
-  var card=btn.closest('.dcard'), sec=card.getAttribute('data-sec'), name=card.getAttribute('data-name');
-  var wk=ensure();
-  var e=wk[sec][name]||{text:'',status:'draft'};
-  e.status=statusNext(e.status||'draft'); e.by=whoAmI()||e.by||''; e.at=nowStamp();
-  wk[sec][name]=e;
-  btn.className='d-status '+e.status; btn.textContent=statusLbl(e.status);
-  saveLocal(); pushStore();
+function cycleStatus(enc, el){
+  var e=getEntry(enc);
+  e.status = e.status==='draft'?'reviewed':e.status==='reviewed'?'sent':'draft';
+  e.by=whoAmI()||e.by||''; e.at=nowStamp();
+  saveLocal(); pushStore().then(render);
 }
-function copyDraft(btn){
-  var ta=btn.closest('.dcard').querySelector('.d-text');
-  navigator.clipboard.writeText(ta.value).then(function(){
+function toggleComment(enc){
+  var box=document.getElementById('cmadd-'+enc); if(!box) return;
+  box.classList.toggle('show');
+  if(box.classList.contains('show')) box.querySelector('input').focus();
+}
+function addComment(enc, input){
+  if(needName()) return;
+  var text=input.value.trim(); if(!text) return;
+  var e=getEntry(enc);
+  if(!e.comments) e.comments=[];
+  e.comments.push({at:nowStamp(), by:whoAmI(), text:text});
+  input.value=''; EDITING=false;
+  saveLocal(); pushStore().then(render);
+}
+function copyDraft(enc, btn){
+  var e=getEntry(enc);
+  navigator.clipboard.writeText(e.text||'').then(function(){
     btn.classList.add('ok'); btn.innerHTML='&#10003; Copied';
     setTimeout(function(){ btn.classList.remove('ok'); btn.innerHTML='&#10697; Copy for Slack'; },1600);
+    if(e.status!=='sent' && confirm('Copied. Mark this one as Sent?')){
+      e.status='sent'; e.by=whoAmI()||e.by||''; e.at=nowStamp();
+      saveLocal(); pushStore().then(render);
+    }
   });
 }
+function setReviewer(encName, val){
+  var name=decodeURIComponent(encName);
+  if(!STORE.reviewers) STORE.reviewers={};
+  if(val) STORE.reviewers[name]=val; else delete STORE.reviewers[name];
+  saveLocal(); pushStore();
+}
+
+// ─────────────────────────────────────────────────────────────
+// CALL NOTES
+// ─────────────────────────────────────────────────────────────
 function addNote(encName, btn){
   var name=decodeURIComponent(encName);
   var ta=btn.parentNode.querySelector('textarea');
@@ -399,13 +541,196 @@ function delNote(encName, idx){
   var name=decodeURIComponent(encName);
   var arr=STORE.callNotes[name]||[];
   var x=arr[idx]; if(!x) return;
-  x.deleted=true;                       // tombstone so the merge removes it everywhere
-  STORE.callNotes[name]=arr.filter(function(y){ return !y.deleted || y===x; });
+  x.deleted=true;
   saveLocal();
   pushStore().then(function(){
     STORE.callNotes[name]=(STORE.callNotes[name]||[]).filter(function(y){ return !y.deleted; });
     saveLocal(); render();
   });
+}
+
+// ─────────────────────────────────────────────────────────────
+// GENERATE — read every tracker, diff against the last snapshot,
+// and write Slack-ready drafts for all clients in one click.
+// ─────────────────────────────────────────────────────────────
+var GEN_MONTHS={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function humanDateISO(d){
+  if(!d) return '';
+  var ms=String(d).match(/([A-Z][a-z]{2})\s*(\d{1,2})/g); if(!ms) return '';
+  var m=ms[ms.length-1].match(/([A-Z][a-z]{2})\s*(\d{1,2})/);
+  var mo=GEN_MONTHS[m[1]]; if(mo==null) return '';
+  return new Date().getFullYear()+'-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
+}
+function stripMark(t){ return (t||'').replace(/^[■★]\s*/,'').trim(); }
+// Normalise any tracker shape to [{title, owner, client(bool), status, date(ISO)}]
+function normaliseTracker(data){
+  if(!data) return null;
+  var out=[];
+  var phases = Array.isArray(data) ? data : (Array.isArray(data.phases) ? data.phases : null);
+  if(phases){
+    phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+      out.push({title:stripMark(k.task), owner:k.owner||'', client:!!k.dep, status:k.status||'', date:k.end||k.start||''});
+    });});
+    return out;
+  }
+  if(data.taskData){
+    var st=data.statuses||{};
+    Object.keys(data.taskData).forEach(function(pid){
+      var g=data.taskData[pid]||{};
+      (g.sabel||[]).forEach(function(t,i){ out.push({title:stripMark(t.t), owner:t.o||'', client:false, status:st[pid+'-s-'+i]||t.s||'', date:humanDateISO(t.d)}); });
+      (g.client||[]).forEach(function(t,i){ out.push({title:stripMark(t.t), owner:t.o||'', client:true, status:st[pid+'-c-'+i]||t.s||'', date:humanDateISO(t.d)}); });
+    });
+    return out;
+  }
+  return null;
+}
+function isDone(s){ s=(s||'').toLowerCase(); return s==='complete'||s==='done'; }
+function isOutstanding(s){ s=(s||'').toLowerCase(); return s==='pending'||s==='dependency'||s==='blocked'; }
+function dISO(iso){ if(!iso) return null; var d=new Date(iso+'T00:00:00'); d.setHours(0,0,0,0); return d; }
+function niceDay(iso){
+  var d=dISO(iso); if(!d) return '';
+  return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+}
+function pick(arr, seed){ return arr[seed % arr.length]; }
+function seedFor(name){ var s=0; for(var i=0;i<name.length;i++) s+=name.charCodeAt(i); s+=weekStart(0).getDate(); return s; }
+
+function buildMonday(name, tasks){
+  var today=new Date(); today.setHours(0,0,0,0);
+  var ws=weekStart(0), we=new Date(ws); we.setDate(ws.getDate()+7);
+  var soon=new Date(today); soon.setDate(today.getDate()+3);
+  var wk7=new Date(today); wk7.setDate(today.getDate()+7);
+  var ours=tasks.filter(function(t){ var d=dISO(t.date); return !t.client && !isDone(t.status) && d && d<we; })
+    .sort(function(a,b){ return a.date<b.date?-1:1; });
+  var needNow=tasks.filter(function(t){ var d=dISO(t.date); return t.client && isOutstanding(t.status) && d && d<=soon; })
+    .sort(function(a,b){ return a.date<b.date?-1:1; });
+  var needWeek=tasks.filter(function(t){ var d=dISO(t.date); return t.client && isOutstanding(t.status) && d && d>soon && d<=wk7; })
+    .sort(function(a,b){ return a.date<b.date?-1:1; });
+  if(!ours.length && !needNow.length && !needWeek.length) return null;
+  var s=seedFor(name);
+  var msg=pick(['Morning! Quick look at the week ahead.','Happy Monday! Here is what this week looks like.','Morning all! A quick heads-up on the week.','Hi team! Here is the plan for the week.'],s);
+  if(ours.length){
+    msg+='\n\nOn our side this week:\n'+ours.slice(0,4).map(function(t){
+      return '• '+t.title+(t.date?' ('+niceDay(t.date)+')':'');
+    }).join('\n');
+  }
+  var asks=needNow.concat(needWeek);
+  if(asks.length){
+    msg+='\n\n'+pick(['To keep things moving, we would love a hand with:','A couple of things we need from your side:','From your side, when you get a chance:'],s)+'\n'
+      + asks.slice(0,4).map(function(t){
+          var d=dISO(t.date), late=d&&d<today;
+          return '• '+t.title+(t.date?(late?' (was due '+niceDay(t.date)+')':' (by '+niceDay(t.date)+')'):'');
+        }).join('\n');
+    if(needNow.length) msg+='\n\nThe first '+(needNow.length===1?'one is':'couple are')+' holding up our build, so '+(needNow.length===1?'that one':'those')+' first if you can.';
+  }
+  msg+='\n\n'+pick(['Give me a shout if anything needs juggling.','Any questions, just ping me here.','Shout if you need anything from us first.'],s+1);
+  return msg;
+}
+function buildFriday(name, tasks, snap){
+  var today=new Date(); today.setHours(0,0,0,0);
+  var ws=weekStart(0);
+  var soon=new Date(today); soon.setDate(today.getDate()+3);
+  var wk7=new Date(today); wk7.setDate(today.getDate()+7);
+  var done=tasks.filter(function(t){
+    if(!isDone(t.status)) return false;
+    if(snap && snap.statuses){ return !isDone(snap.statuses[t.title]); }   // newly ticked since last generate
+    var d=dISO(t.date); return d && d>=ws && d<=today;                      // no snapshot: fall back to dates
+  });
+  var coming=tasks.filter(function(t){ var d=dISO(t.date); return !isDone(t.status) && !t.client && d && d>today && d<=wk7; })
+    .sort(function(a,b){ return a.date<b.date?-1:1; });
+  var need=tasks.filter(function(t){ var d=dISO(t.date); return t.client && isOutstanding(t.status) && d && d<=soon; })
+    .sort(function(a,b){ return a.date<b.date?-1:1; });
+  if(!done.length && !coming.length && !need.length) return null;
+  var s=seedFor(name)+3;
+  var msg=pick(['Happy Friday! Quick rundown of the week.','That is a wrap on the week. Here is where things landed.','Friday check-in! Here is how the week went.'],s);
+  if(done.length){
+    msg+='\n\nThis week we:\n'+done.slice(0,5).map(function(t){ return '• '+t.title; }).join('\n');
+  } else {
+    msg+='\n\nA quieter week on visible changes, but things are moving along in the background.';
+  }
+  if(coming.length){
+    msg+='\n\nComing up next week:\n'+coming.slice(0,3).map(function(t){ return '• '+t.title+(t.date?' ('+niceDay(t.date)+')':''); }).join('\n');
+  }
+  if(need.length){
+    msg+='\n\nTo keep things moving, could you get us '+(need.length===1
+      ? need[0].title.charAt(0).toLowerCase()+need[0].title.slice(1)
+      : 'these when you get a chance:\n'+need.slice(0,3).map(function(t){ return '• '+t.title; }).join('\n'));
+    if(need.length===1) msg+=' when you get a chance?';
+  }
+  msg+='\n\n'+pick(['Have a lovely weekend!','Enjoy the weekend, speak Monday!','Have a good one, back at it Monday!'],s+1);
+  return msg;
+}
+function generate(sec, btn){
+  if(!CLIENTS.length){ alert('Client list has not loaded yet. Press Refresh and try again.'); return; }
+  if(!confirm('Generate '+(sec==='monday'?'Monday':'Friday')+' drafts for all clients from the live trackers?\n\nDrafts already marked Reviewed or Sent are left alone. Anything still in Draft gets rewritten.')) return;
+  var orig=btn.innerHTML; btn.innerHTML='&#8987; Reading trackers&hellip;'; btn.disabled=true;
+  if(!STORE.snapshots) STORE.snapshots={};
+  var wk=ensure(), made=0, skipped=0, noData=[];
+  Promise.all(CLIENTS.map(function(c){
+    return fetch(API+'?key='+encodeURIComponent(c.key)+'&_t='+Date.now(),{cache:'no-store'})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        var tasks=normaliseTracker(j&&j.ok?j.data:null);
+        if(!tasks || !tasks.length){ noData.push(c.name); return; }
+        var cur=wk[sec][c.name];
+        if(cur && (cur.status==='reviewed'||cur.status==='sent')){ skipped++; }
+        else {
+          var text = sec==='monday' ? buildMonday(c.name,tasks) : buildFriday(c.name,tasks,STORE.snapshots[c.name]);
+          if(text){
+            wk[sec][c.name]={text:text,status:'draft',by:'Generated',at:nowStamp(),comments:(cur&&cur.comments)||[]};
+            made++;
+          }
+        }
+        // refresh the snapshot so the next Friday diff knows what was already done
+        var snap={}; tasks.forEach(function(t){ snap[t.title]=t.status; });
+        STORE.snapshots[c.name]={statuses:snap, at:nowStamp()};
+      }).catch(function(){ noData.push(c.name); });
+  })).then(function(){
+    saveLocal();
+    return pushStore();
+  }).then(function(){
+    btn.innerHTML=orig; btn.disabled=false;
+    render();
+    var m='Generated '+made+' draft'+(made===1?'':'s')+'.';
+    if(skipped) m+=' '+skipped+' left alone (already reviewed or sent).';
+    if(noData.length) m+='\n\nNo tracker data for: '+noData.join(', ')+'. Open their tracker once in a browser to initialise it.';
+    alert(m);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// REQUEST REVIEWS — one ready-to-paste Slack nudge per reviewer
+// ─────────────────────────────────────────────────────────────
+function openRequest(){
+  var wk=ensure();
+  var byRev={};
+  ['monday','friday'].forEach(function(sec){
+    Object.keys(wk[sec]||{}).forEach(function(n){
+      var e=wk[sec][n];
+      if(!e || !e.text || e.status!=='draft') return;
+      var rev=(STORE.reviewers||{})[n]||'(no reviewer set)';
+      if(!byRev[rev]) byRev[rev]={};
+      if(!byRev[rev][n]) byRev[rev][n]=[];
+      byRev[rev][n].push(sec==='monday'?'Mon':'Fri');
+    });
+  });
+  var revs=Object.keys(byRev).sort();
+  var bg=document.createElement('div'); bg.className='modal-bg'; bg.id='reqModal';
+  var rows = revs.length ? revs.map(function(r){
+    var clients=Object.keys(byRev[r]).map(function(n){ return n+' ('+byRev[r][n].join(' + ')+')'; }).join(', ');
+    var msg='Hi '+(r==='(no reviewer set)'?'team':r)+', client update drafts are ready for review: '+clients
+      + '. Could you open the Ops Hub, Weekly Updates tab, and hit Looks good or leave a comment? Thanks!';
+    return '<div class="rr-row"><div><div class="rr-who">'+esc(r)+'</div><div class="rr-list">'+esc(clients)+'</div></div>'
+      + '<button class="m-go" onclick=\'copyReq(this,'+JSON.stringify(msg).replace(/'/g,"&#39;")+')\'>Copy message</button></div>';
+  }).join('') : '<p>No drafts are waiting for review this week. Anything already approved or sent is not nudged.</p>';
+  bg.innerHTML='<div class="modal"><h3>Request reviews</h3>'
+    + '<p>One message per reviewer, based on the reviewer set on each client\'s draft. Copy it and paste into their Slack DM.</p>'
+    + rows
+    + '<div class="m-actions"><button class="m-cancel" onclick="document.getElementById(\'reqModal\').remove()">Close</button></div></div>';
+  bg.addEventListener('click',function(e){ if(e.target===bg) bg.remove(); });
+  document.body.appendChild(bg);
+}
+function copyReq(btn,msg){
+  navigator.clipboard.writeText(msg).then(function(){ btn.textContent='Copied!'; setTimeout(function(){ btn.textContent='Copy message'; },1500); });
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -427,7 +752,6 @@ function closeImport(){ var m=document.getElementById('importModal'); if(m) m.re
 function runImport(){
   var err=document.getElementById('impErr');
   var raw=document.getElementById('impTa').value.trim();
-  // tolerate a pasted fenced code block
   raw=raw.replace(/^```[a-z]*\s*/i,'').replace(/```\s*$/,'').trim();
   var obj;
   try{ obj=JSON.parse(raw); }catch(e){ err.textContent='That does not parse as JSON. Paste the whole block, including the outer { }.'; return; }
@@ -440,7 +764,7 @@ function runImport(){
   Object.keys(obj.drafts).forEach(function(name){
     var cur=target[name];
     if(cur && (cur.status==='reviewed'||cur.status==='sent')){ skipped++; return; }
-    target[name]={text:String(obj.drafts[name]||''), status:'draft', by:'Automation', at:nowStamp()};
+    target[name]={text:String(obj.drafts[name]||''), status:'draft', by:'Automation', at:nowStamp(), comments:(cur&&cur.comments)||[]};
     added++;
   });
   saveLocal();
@@ -454,8 +778,8 @@ function runImport(){
 // INIT
 // ─────────────────────────────────────────────────────────────
 function loadAll(manual){
-  return Promise.all([loadClients(), fetchStore().then(function(remote){
-    if(remote){ STORE=mergeStores(remote,STORE); saveLocal(); setRemote(true); }
+  return Promise.all([loadClients(), fetchStore().then(function(res){
+    if(res){ STORE=mergeStores(res.data,STORE); saveLocal(); setRemote(true); }
     else setRemote(false);
   }).catch(function(){ setRemote(false); })]).then(render);
 }
