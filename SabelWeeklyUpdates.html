@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sabel Weekly Updates</title>
+<style>
+  :root{
+    --bg:#0B0B0C; --surface:#0F1113; --card:#141618; --card2:#191C20;
+    --border:#2A3547; --border2:#1A2232; --red:#E10600; --redDim:rgba(225,6,0,.14);
+    --w:#FFFFFF; --body:#E2E8F0; --muted:#94A3B8; --mono:#64748B;
+    --green:#4ADE80; --blue:#60A5FA; --amber:#FBBF24; --redText:#F87171;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--body);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  ::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}::-webkit-scrollbar-track{background:transparent;}
+
+  .header{display:flex;align-items:center;gap:16px;padding:15px 28px;border-bottom:1px solid var(--border2);background:rgba(11,11,12,.9);flex-wrap:wrap;}
+  .brand{display:flex;align-items:baseline;gap:9px;}
+  .brand .logo{font-size:16px;font-weight:800;letter-spacing:.32em;color:var(--w);text-transform:uppercase;}
+  .brand .logo .dot{color:var(--red);}
+  .brand .tag{font-size:8px;letter-spacing:.2em;color:var(--mono);text-transform:uppercase;}
+  .header h1{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--w);text-transform:uppercase;margin-left:6px;}
+  .header .right{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .stamp{font-size:10px;color:var(--mono);letter-spacing:.04em;}
+  .stamp b{color:var(--green);}
+  .stamp b.off{color:var(--amber);}
+  .who{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--mono);}
+  .who input{width:74px;background:var(--card2);border:1px solid var(--border);border-radius:5px;color:var(--w);font-size:11px;padding:5px 8px;outline:none;font-family:inherit;}
+  .who input:focus{border-color:var(--blue);}
+  .hbtn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:5px;background:var(--card2);border:1px solid var(--border);color:var(--body);font-size:10px;font-weight:700;letter-spacing:.04em;transition:.14s;}
+  .hbtn:hover{border-color:var(--mono);color:var(--w);}
+
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 28px 70px;}
+
+  .banner{display:none;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.35);border-radius:9px;padding:11px 15px;font-size:11.5px;color:var(--amber);line-height:1.5;margin-bottom:18px;}
+  .banner.show{display:block;}
+
+  .weekbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+  .week-nav{display:flex;align-items:center;gap:8px;}
+  .wk-btn{padding:6px 12px;border-radius:6px;background:var(--card2);border:1px solid var(--border);color:var(--body);font-size:11px;font-weight:700;}
+  .wk-btn:hover{border-color:var(--mono);color:var(--w);}
+  .wk-today{color:#FCA5A5;}
+  .wk-label{font-size:12px;font-weight:800;color:var(--w);min-width:180px;text-align:center;letter-spacing:.02em;}
+  .legend{font-size:10px;color:var(--mono);line-height:1.5;}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+  @media(max-width:920px){.cols{grid-template-columns:1fr;}}
+  .col-h{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;}
+  .col-h h2{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--w);}
+  .col-h .sub{font-size:10px;color:var(--mono);}
+  .col-h .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;position:relative;top:-1px;}
+
+  .dcard{background:var(--card);border:1px solid var(--border2);border-radius:11px;padding:14px 16px;margin-bottom:12px;}
+  .d-top{display:flex;align-items:center;gap:10px;margin-bottom:9px;flex-wrap:wrap;}
+  .d-name{font-size:14px;font-weight:800;color:var(--w);}
+  .d-status{font-size:8.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:20px;cursor:pointer;border:1px solid transparent;transition:.12s;}
+  .d-status.draft{background:var(--card2);color:var(--muted);border-color:var(--border);}
+  .d-status.reviewed{background:rgba(96,165,250,.14);color:var(--blue);border-color:rgba(96,165,250,.35);}
+  .d-status.sent{background:rgba(74,222,128,.14);color:var(--green);border-color:rgba(74,222,128,.35);}
+  .d-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .copy-btn{font-size:9.5px;font-weight:700;letter-spacing:.03em;color:var(--muted);background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:4px 10px;transition:.12s;}
+  .copy-btn:hover{border-color:var(--mono);color:var(--w);}
+  .copy-btn.ok{color:var(--green);border-color:rgba(74,222,128,.4);}
+  .d-text{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:7px;color:var(--body);font-family:inherit;font-size:12.5px;line-height:1.55;padding:10px 12px;resize:vertical;min-height:96px;transition:border-color .12s;}
+  .d-text:focus{outline:none;border-color:var(--blue);}
+  .d-text::placeholder{color:var(--mono);}
+  .d-meta{font-size:9px;color:var(--mono);margin-top:6px;letter-spacing:.03em;}
+  .d-meta b{color:var(--muted);font-weight:600;}
+  .empty{font-size:11.5px;color:var(--mono);padding:12px 2px;line-height:1.6;}
+
+  /* call notes */
+  .notes-sec{margin-top:30px;}
+  .notes-sec .col-h{margin-bottom:4px;}
+  .notes-sub{font-size:10.5px;color:var(--mono);margin-bottom:14px;line-height:1.6;}
+  .ncard{background:var(--card);border:1px solid var(--border2);border-radius:11px;margin-bottom:10px;overflow:hidden;}
+  .ncard > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 16px;}
+  .ncard > summary::-webkit-details-marker{display:none;}
+  .n-chev{color:var(--mono);font-size:11px;transition:transform .15s;}
+  .ncard[open] .n-chev{transform:rotate(90deg);}
+  .n-name{font-size:13px;font-weight:800;color:var(--w);}
+  .n-count{font-size:9px;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1px 8px;}
+  .n-inner{padding:2px 16px 14px;}
+  .n-item{border-left:2px solid var(--amber);background:var(--surface);border-radius:0 6px 6px 0;padding:8px 11px;margin-bottom:8px;}
+  .n-item .n-tx{font-size:12px;line-height:1.5;color:var(--body);white-space:pre-wrap;word-break:break-word;}
+  .n-item .n-meta{font-size:9px;color:var(--mono);margin-top:4px;}
+  .n-del{float:right;color:var(--mono);font-size:13px;padding:0 4px;line-height:1;}
+  .n-del:hover{color:var(--redText);}
+  .n-add{display:flex;gap:8px;align-items:flex-start;margin-top:4px;}
+  .n-add textarea{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--body);font-family:inherit;font-size:12px;line-height:1.5;padding:8px 10px;resize:vertical;min-height:44px;}
+  .n-add textarea:focus{outline:none;border-color:var(--amber);}
+  .n-add button{font-size:10px;font-weight:700;color:var(--amber);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35);border-radius:6px;padding:8px 13px;white-space:nowrap;}
+  .n-add button:hover{background:rgba(251,191,36,.2);color:#fff;}
+
+  footer{margin-top:34px;padding:16px 0 0;border-top:1px solid var(--border2);font-size:9px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+
+  /* import modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .modal{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:640px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.6);}
+  .modal h3{font-size:13px;font-weight:800;color:var(--w);letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;}
+  .modal p{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+  .modal textarea{width:100%;min-height:180px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--body);font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.5;padding:10px 12px;resize:vertical;}
+  .modal textarea:focus{outline:none;border-color:var(--blue);}
+  .modal .m-err{font-size:11px;color:var(--redText);margin-top:8px;min-height:16px;}
+  .modal .m-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px;}
+  .modal .m-go{font-size:11px;font-weight:700;color:#fff;background:var(--red);border-radius:6px;padding:8px 16px;}
+  .modal .m-cancel{font-size:11px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:8px 14px;}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="brand"><span class="logo">SABEL<span class="dot">.</span></span><span class="tag">Ops</span></div>
+  <h1>Weekly Client Updates</h1>
+  <div class="right">
+    <span class="who">You are: <input id="whoInput" placeholder="e.g. Nikki" maxlength="12"></span>
+    <span class="stamp" id="stamp">Loading&hellip;</span>
+    <button class="hbtn" onclick="openImport()">&#8681; Import drafts</button>
+    <button class="hbtn" onclick="loadAll(true)">&#8635; Refresh</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="banner" id="storeBanner">
+    <b>Shared store not reachable.</b> Drafts are saving to this browser only. If this is the first time using this page,
+    the key <b>sabel-weekly-updates-v1</b> must be added to ALLOWED_KEYS in the sabel-webhook <b>api/tracker.js</b>
+    (same one-line change made for the weekly notes and go-live overrides keys). Then press Refresh.
+  </div>
+
+  <div class="weekbar">
+    <div class="week-nav">
+      <button class="wk-btn" onclick="shiftWeek(-1)" title="Previous week">&#8592;</button>
+      <span class="wk-label" id="wkLabel"></span>
+      <button class="wk-btn" onclick="shiftWeek(1)" title="Next week">&#8594;</button>
+      <button class="wk-btn wk-today" onclick="shiftWeek(0,true)">This week</button>
+    </div>
+    <div class="legend">
+      Drafts are written by the Monday and Friday automations, then reviewed here before Nikki sends them.<br>
+      Click a status pill to move it along: <b>Draft &rarr; Reviewed &rarr; Sent</b>. Edits save for the whole team when you click away.
+    </div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <div class="col-h"><span class="dot" style="background:var(--blue)"></span><h2>Monday &mdash; coming up this week</h2><span class="sub">what we are doing + what we need from the client</span></div>
+      <div id="mondayCol"></div>
+    </div>
+    <div>
+      <div class="col-h"><span class="dot" style="background:var(--green)"></span><h2>Friday &mdash; week wrap-up</h2><span class="sub">what got done + what is coming next</span></div>
+      <div id="fridayCol"></div>
+    </div>
+  </div>
+
+  <div class="notes-sec">
+    <div class="col-h"><span class="dot" style="background:var(--amber)"></span><h2>Call notes &amp; actions</h2></div>
+    <div class="notes-sub">
+      Had a client call? Drop the actions here straight away (and add them to Motion as usual).
+      The Friday wrap-up reads this list, so anything noted here makes it into the client summary without relying on memory.
+    </div>
+    <div id="notesCol"></div>
+  </div>
+
+  <footer>
+    <span>Internal use only &middot; shared via Sabel webhook &middot; key sabel-weekly-updates-v1</span>
+    <span id="footNote"></span>
+  </footer>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────────
+var API = 'https://sabel-webhook.vercel.app/api/tracker';
+var BASE = 'https://sabel-intercom.github.io/Intake-forms/';
+var STORE_KEY = 'sabel-weekly-updates-v1';       // must be in ALLOWED_KEYS on the backend
+var REFRESH_MS = 5 * 60 * 1000;
+
+// Store shape:
+// { weeks: { '2026-07-13': { monday:{Client:{text,status,by,at}}, friday:{...} } },
+//   callNotes: { Client: [ {at, by, text} ] } }
+var STORE = JSON.parse(localStorage.getItem('sabel_weekly_updates')||'{"weeks":{},"callNotes":{}}');
+var CLIENTS = [];                                 // active client names from trackers.json
+var WEEK_OFFSET = 0;
+var EDITING = false;                              // pause re-render while typing
+var REMOTE_OK = false;
+var WHO = localStorage.getItem('sabel_who')||'';
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function weekStart(offset){
+  var d=new Date(); d.setHours(0,0,0,0);
+  var day=(d.getDay()+6)%7;                       // Monday = 0
+  d.setDate(d.getDate()-day + (offset||0)*7);
+  return d;
+}
+function weekKey(offset){ return weekStart(offset).toISOString().slice(0,10); }
+function fmtD(d){ return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}); }
+function nowStamp(){ return new Date().toISOString(); }
+function fmtStamp(iso){
+  if(!iso) return '';
+  var d=new Date(iso);
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+function ensure(){
+  if(!STORE.weeks) STORE.weeks={};
+  if(!STORE.callNotes) STORE.callNotes={};
+  var wk=weekKey(WEEK_OFFSET);
+  if(!STORE.weeks[wk]) STORE.weeks[wk]={monday:{},friday:{}};
+  if(!STORE.weeks[wk].monday) STORE.weeks[wk].monday={};
+  if(!STORE.weeks[wk].friday) STORE.weeks[wk].friday={};
+  return STORE.weeks[wk];
+}
+function saveLocal(){ localStorage.setItem('sabel_weekly_updates', JSON.stringify(STORE)); }
+
+// ─────────────────────────────────────────────────────────────
+// SHARED STORE — merge-safe: pull remote, overlay local edits, push
+// ─────────────────────────────────────────────────────────────
+function fetchStore(){
+  return fetch(API+'?key='+encodeURIComponent(STORE_KEY)+'&_t='+Date.now(),{cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ return (j&&j.ok&&j.data&&typeof j.data==='object') ? j.data : null; });
+}
+function mergeStores(remote, local){
+  var out={weeks:{},callNotes:{}};
+  var wkKeys={}; [remote,local].forEach(function(s){ Object.keys((s&&s.weeks)||{}).forEach(function(k){ wkKeys[k]=1; }); });
+  Object.keys(wkKeys).forEach(function(k){
+    var r=(remote.weeks||{})[k]||{}, l=(local.weeks||{})[k]||{};
+    out.weeks[k]={monday:{},friday:{}};
+    ['monday','friday'].forEach(function(sec){
+      var names={}; Object.keys(r[sec]||{}).concat(Object.keys(l[sec]||{})).forEach(function(n){ names[n]=1; });
+      Object.keys(names).forEach(function(n){
+        var re=(r[sec]||{})[n], le=(l[sec]||{})[n];
+        if(re&&le) out.weeks[k][sec][n] = ((le.at||'')>=(re.at||'')) ? le : re;   // newer edit wins
+        else out.weeks[k][sec][n] = le||re;
+      });
+    });
+  });
+  // call notes: union by timestamp+text
+  var names={}; Object.keys(remote.callNotes||{}).concat(Object.keys(local.callNotes||{})).forEach(function(n){ names[n]=1; });
+  Object.keys(names).forEach(function(n){
+    var seen={}, arr=[];
+    ((remote.callNotes||{})[n]||[]).concat(((local.callNotes||{})[n]||[])).forEach(function(x){
+      var id=(x.at||'')+'|'+(x.text||''); if(seen[id]) return; seen[id]=1;
+      if(!x.deleted) arr.push(x); else seen[id]='del';
+    });
+    // apply deletions (a deleted marker removes the matching note)
+    var dels={};
+    ((remote.callNotes||{})[n]||[]).concat(((local.callNotes||{})[n]||[])).forEach(function(x){ if(x.deleted) dels[(x.at||'')+'|'+(x.text||'')]=1; });
+    arr=arr.filter(function(x){ return !dels[(x.at||'')+'|'+(x.text||'')]; });
+    arr.sort(function(a,b){ return (a.at||'')<(b.at||'')?-1:1; });
+    out.callNotes[n]=arr;
+  });
+  return out;
+}
+function pushStore(){
+  return fetchStore().then(function(remote){
+    STORE = mergeStores(remote||{weeks:{},callNotes:{}}, STORE);
+    saveLocal();
+    return fetch(API+'?key='+encodeURIComponent(STORE_KEY),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({data:STORE})
+    });
+  }).then(function(r){ setRemote(!!(r&&r.ok)); })
+    .catch(function(){ setRemote(false); });
+}
+function setRemote(ok){
+  REMOTE_OK=ok;
+  var s=document.getElementById('stamp');
+  var t=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  s.innerHTML = ok ? '<b>&#9679; Shared</b> &middot; synced '+t : '<b class="off">&#9679; Local only</b> &middot; '+t;
+  document.getElementById('storeBanner').classList.toggle('show', !ok);
+}
+
+// ─────────────────────────────────────────────────────────────
+// CLIENT LIST — live from the tracker registry
+// ─────────────────────────────────────────────────────────────
+function loadClients(){
+  return fetch(BASE+'trackers.json',{cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if(Array.isArray(j)) CLIENTS=j.filter(function(t){ return t.active!==false; }).map(function(t){ return t.name; });
+    }).catch(function(){});
+}
+
+// ─────────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────────
+function shiftWeek(delta,reset){ WEEK_OFFSET = reset?0:WEEK_OFFSET+delta; render(); }
+function statusNext(s){ return s==='draft'?'reviewed':s==='reviewed'?'sent':'draft'; }
+function statusLbl(s){ return s==='reviewed'?'Reviewed':s==='sent'?'Sent':'Draft'; }
+
+function allClientNames(sec){
+  // union of registry clients and any client that already has a draft this week
+  var wk=ensure(), names={};
+  CLIENTS.forEach(function(n){ names[n]=1; });
+  Object.keys(wk[sec]||{}).forEach(function(n){ names[n]=1; });
+  return Object.keys(names).sort();
+}
+
+function draftCard(sec, name){
+  var wk=ensure();
+  var e=wk[sec][name]||{text:'',status:'draft'};
+  var st=e.status||'draft';
+  var meta = e.at ? ('Last edited '+(e.by?'by <b>'+esc(e.by)+'</b> ':'')+fmtStamp(e.at)) : 'No draft yet - the '+(sec==='monday'?'Monday':'Friday')+' automation fills this in, or write one now.';
+  return '<div class="dcard" data-sec="'+sec+'" data-name="'+esc(name)+'">'
+    + '<div class="d-top"><span class="d-name">'+esc(name)+'</span>'
+    +   '<button class="d-status '+st+'" onclick="cycleStatus(this)" title="Click to change: Draft / Reviewed / Sent">'+statusLbl(st)+'</button>'
+    +   '<span class="d-right"><button class="copy-btn" onclick="copyDraft(this)">&#10697; Copy for Slack</button></span></div>'
+    + '<textarea class="d-text" placeholder="Write or paste the '+(sec==='monday'?'Monday heads-up':'Friday wrap-up')+' for '+esc(name)+'&hellip;" '
+    +   'onfocus="EDITING=true" onblur="saveDraft(this)">'+esc(e.text||'')+'</textarea>'
+    + '<div class="d-meta">'+meta+'</div>'
+    + '</div>';
+}
+
+function render(){
+  if(EDITING) return;
+  var ws=weekStart(WEEK_OFFSET), we=new Date(ws); we.setDate(ws.getDate()+4);
+  document.getElementById('wkLabel').textContent =
+    fmtD(ws)+' – '+fmtD(we)+(WEEK_OFFSET===0?' · this week':WEEK_OFFSET===1?' · next week':WEEK_OFFSET===-1?' · last week':'');
+  ['monday','friday'].forEach(function(sec){
+    var col=document.getElementById(sec+'Col');
+    var names=allClientNames(sec);
+    col.innerHTML = names.length
+      ? names.map(function(n){ return draftCard(sec,n); }).join('')
+      : '<div class="empty">No active clients found in the tracker registry yet.</div>';
+  });
+  renderNotes();
+  document.getElementById('footNote').textContent='Week key '+weekKey(WEEK_OFFSET);
+}
+
+function renderNotes(){
+  var col=document.getElementById('notesCol');
+  var names={}; CLIENTS.forEach(function(n){ names[n]=1; });
+  Object.keys(STORE.callNotes||{}).forEach(function(n){ if((STORE.callNotes[n]||[]).length) names[n]=1; });
+  var list=Object.keys(names).sort();
+  if(!list.length){ col.innerHTML='<div class="empty">No active clients found yet.</div>'; return; }
+  var openSet={}; col.querySelectorAll('.ncard[open]').forEach(function(d){ openSet[d.getAttribute('data-name')]=1; });
+  col.innerHTML=list.map(function(n){
+    var notes=(STORE.callNotes||{})[n]||[];
+    var rows=notes.map(function(x,i){
+      return '<div class="n-item"><button class="n-del" title="Remove" onclick="delNote(\''+encodeURIComponent(n)+'\','+i+')">&times;</button>'
+        + '<div class="n-tx">'+esc(x.text)+'</div>'
+        + '<div class="n-meta">'+(x.by?esc(x.by)+' &middot; ':'')+fmtStamp(x.at)+'</div></div>';
+    }).join('');
+    return '<details class="ncard" data-name="'+esc(n)+'"'+(openSet[n]?' open':'')+'>'
+      + '<summary><span class="n-chev">&#9656;</span><span class="n-name">'+esc(n)+'</span><span class="n-count">'+notes.length+' note'+(notes.length===1?'':'s')+'</span></summary>'
+      + '<div class="n-inner">'+rows
+      +   '<div class="n-add"><textarea placeholder="e.g. Call with '+esc(n)+' today: they will send the agent list by Wed; we owe them the routing doc&hellip;" onfocus="EDITING=true" onblur="EDITING=false"></textarea>'
+      +   '<button onclick="addNote(\''+encodeURIComponent(n)+'\',this)">Add note</button></div>'
+      + '</div></details>';
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────
+// ACTIONS
+// ─────────────────────────────────────────────────────────────
+function whoAmI(){
+  var v=document.getElementById('whoInput').value.trim();
+  if(v){ WHO=v; localStorage.setItem('sabel_who',v); }
+  return WHO;
+}
+function saveDraft(ta){
+  EDITING=false;
+  var card=ta.closest('.dcard'), sec=card.getAttribute('data-sec'), name=card.getAttribute('data-name');
+  var wk=ensure();
+  var prev=wk[sec][name]||{status:'draft'};
+  var text=ta.value;
+  if(text===(prev.text||'')) { render(); return; }   // nothing changed
+  wk[sec][name]={text:text, status:prev.status||'draft', by:whoAmI()||prev.by||'', at:nowStamp()};
+  saveLocal(); pushStore().then(render);
+}
+function cycleStatus(btn){
+  var card=btn.closest('.dcard'), sec=card.getAttribute('data-sec'), name=card.getAttribute('data-name');
+  var wk=ensure();
+  var e=wk[sec][name]||{text:'',status:'draft'};
+  e.status=statusNext(e.status||'draft'); e.by=whoAmI()||e.by||''; e.at=nowStamp();
+  wk[sec][name]=e;
+  btn.className='d-status '+e.status; btn.textContent=statusLbl(e.status);
+  saveLocal(); pushStore();
+}
+function copyDraft(btn){
+  var ta=btn.closest('.dcard').querySelector('.d-text');
+  navigator.clipboard.writeText(ta.value).then(function(){
+    btn.classList.add('ok'); btn.innerHTML='&#10003; Copied';
+    setTimeout(function(){ btn.classList.remove('ok'); btn.innerHTML='&#10697; Copy for Slack'; },1600);
+  });
+}
+function addNote(encName, btn){
+  var name=decodeURIComponent(encName);
+  var ta=btn.parentNode.querySelector('textarea');
+  var text=ta.value.trim(); if(!text) return;
+  if(!STORE.callNotes[name]) STORE.callNotes[name]=[];
+  STORE.callNotes[name].push({at:nowStamp(), by:whoAmI(), text:text});
+  ta.value=''; EDITING=false;
+  saveLocal(); pushStore().then(render);
+}
+function delNote(encName, idx){
+  var name=decodeURIComponent(encName);
+  var arr=STORE.callNotes[name]||[];
+  var x=arr[idx]; if(!x) return;
+  x.deleted=true;                       // tombstone so the merge removes it everywhere
+  STORE.callNotes[name]=arr.filter(function(y){ return !y.deleted || y===x; });
+  saveLocal();
+  pushStore().then(function(){
+    STORE.callNotes[name]=(STORE.callNotes[name]||[]).filter(function(y){ return !y.deleted; });
+    saveLocal(); render();
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// IMPORT — paste the automation's draft block, fills all clients at once
+// Accepted: {"week":"YYYY-MM-DD","section":"monday"|"friday","drafts":{"Client":"text",...}}
+// ─────────────────────────────────────────────────────────────
+function openImport(){
+  var bg=document.createElement('div'); bg.className='modal-bg'; bg.id='importModal';
+  bg.innerHTML='<div class="modal"><h3>Import drafts</h3>'
+    + '<p>Paste the draft block from the Monday or Friday automation. It fills every client\'s draft for that week in one go. Anything already marked Reviewed or Sent is left alone.</p>'
+    + '<textarea id="impTa" placeholder=\'{"week":"2026-07-13","section":"monday","drafts":{"Raiz":"Morning! ..."}}\'></textarea>'
+    + '<div class="m-err" id="impErr"></div>'
+    + '<div class="m-actions"><button class="m-cancel" onclick="closeImport()">Cancel</button><button class="m-go" onclick="runImport()">Import</button></div></div>';
+  bg.addEventListener('click',function(e){ if(e.target===bg) closeImport(); });
+  document.body.appendChild(bg);
+  document.getElementById('impTa').focus();
+}
+function closeImport(){ var m=document.getElementById('importModal'); if(m) m.remove(); }
+function runImport(){
+  var err=document.getElementById('impErr');
+  var raw=document.getElementById('impTa').value.trim();
+  // tolerate a pasted fenced code block
+  raw=raw.replace(/^```[a-z]*\s*/i,'').replace(/```\s*$/,'').trim();
+  var obj;
+  try{ obj=JSON.parse(raw); }catch(e){ err.textContent='That does not parse as JSON. Paste the whole block, including the outer { }.'; return; }
+  if(!obj || !obj.week || !obj.section || typeof obj.drafts!=='object'){ err.textContent='Expected {"week","section","drafts"}. Check you copied the full block.'; return; }
+  if(obj.section!=='monday'&&obj.section!=='friday'){ err.textContent='section must be "monday" or "friday".'; return; }
+  if(!STORE.weeks[obj.week]) STORE.weeks[obj.week]={monday:{},friday:{}};
+  if(!STORE.weeks[obj.week][obj.section]) STORE.weeks[obj.week][obj.section]={};
+  var target=STORE.weeks[obj.week][obj.section];
+  var added=0, skipped=0;
+  Object.keys(obj.drafts).forEach(function(name){
+    var cur=target[name];
+    if(cur && (cur.status==='reviewed'||cur.status==='sent')){ skipped++; return; }
+    target[name]={text:String(obj.drafts[name]||''), status:'draft', by:'Automation', at:nowStamp()};
+    added++;
+  });
+  saveLocal();
+  pushStore().then(function(){
+    closeImport(); render();
+    alert('Imported '+added+' draft'+(added===1?'':'s')+(skipped?' ('+skipped+' skipped - already reviewed or sent)':'')+'.');
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────
+function loadAll(manual){
+  return Promise.all([loadClients(), fetchStore().then(function(remote){
+    if(remote){ STORE=mergeStores(remote,STORE); saveLocal(); setRemote(true); }
+    else setRemote(false);
+  }).catch(function(){ setRemote(false); })]).then(render);
+}
+document.getElementById('whoInput').value=WHO;
+document.getElementById('whoInput').addEventListener('blur', whoAmI);
+render();
+loadAll(false);
+setInterval(function(){ if(!EDITING) loadAll(false); }, REFRESH_MS);
+</script>
+</body>
+</html>

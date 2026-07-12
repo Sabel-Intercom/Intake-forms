@@ -44,7 +44,7 @@
 
   /* section titles */
   .sec-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;display:flex;align-items:center;gap:9px;}
-  .sec-title .count{font-size:9px;color:var(--mono);background:var(--card2);border:1px solid var(--border2);padding:1px 8px;border-radius:20px;}
+  .sec-title .count,.sec-sub .count{font-size:9px;color:var(--mono);background:var(--card2);border:1px solid var(--border2);padding:1px 8px;border-radius:20px;}
 
   /* pinch graph */
   .pinch{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:18px 22px 14px;margin-bottom:24px;}
@@ -292,6 +292,7 @@
   <div class="brand"><span class="logo">SABEL<span class="dot">.</span></span><span class="tag">Ops</span></div>
   <h1>Project Tracker Dashboard</h1>
   <div class="right">
+    <a class="refresh-btn" href="SabelWeeklyUpdates.html" style="text-decoration:none;">&#9993; Weekly updates</a>
     <span class="live-stamp" id="stamp">Loading live data…</span>
     <button class="refresh-btn" id="densityBtn" onclick="toggleDensity()">&#9636; Compact</button>
     <button class="refresh-btn" id="refreshBtn" onclick="loadLive(true)">&#8635; Refresh</button>
@@ -337,6 +338,12 @@
     <div class="timeline" id="timeline"></div>
   </div>
 
+  <div id="w-updates">
+    <div class="sec-title">&#9993; This week's client comms <span class="count" id="updCount"></span>
+      <a class="pc-link" href="SabelWeeklyUpdates.html" style="margin-left:auto;">Open Weekly Updates &rarr;</a></div>
+    <div class="side-box" style="margin-bottom:24px;" id="updBox"></div>
+  </div>
+
   <div class="layout">
     <div id="w-active">
       <div class="sec-title">Active Projects <span class="count" id="activeCount">0</span></div>
@@ -346,6 +353,10 @@
       <div id="w-offb">
         <div class="sec-title">Offboarding &mdash; ready for close-out <span class="count" id="offbCount">0</span></div>
         <div class="side-box offb" id="offbBox"></div>
+      </div>
+      <div id="w-miles">
+        <div class="sec-title">&#127937; Milestone watch <span class="count" id="mlCount">0</span></div>
+        <div class="side-box" id="mlBox"></div>
       </div>
     </div>
   </div>
@@ -394,8 +405,10 @@ var WIDGETS = [
   {id:'w-weekly',   label:"This week's plan"},
   {id:'w-kpis',     label:'KPI summary'},
   {id:'w-timeline', label:'Go-live timeline'},
+  {id:'w-updates',  label:"This week's client comms"},
   {id:'w-active',   label:'Active projects'},
   {id:'w-offb',     label:'Offboarding'},
+  {id:'w-miles',    label:'Milestone watch'},
   {id:'w-contracts',label:'Contract expiry'}
 ];
 
@@ -526,13 +539,15 @@ function fmtDate(iso){
 //    status overrides. Extract P/T from the file and overlay saved statuses. ──
 var SKILL_MONTHS={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
 function skillDate(d){
-  // human date strings like "May 14-15" → ISO of the last date. Year assumed 2026.
+  // human date strings like "May 14-15" → ISO of the last date. No year in the
+  // source, so assume the current year (was hardcoded 2026, which would have
+  // silently broken every skill-format tracker in January).
   if(!d) return '';
   var ms=String(d).match(/([A-Z][a-z]{2})\s*(\d{1,2})/g);
   if(!ms) return '';
   var m=ms[ms.length-1].match(/([A-Z][a-z]{2})\s*(\d{1,2})/);
   var mo=SKILL_MONTHS[m[1]]; if(mo==null) return '';
-  return '2026-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
+  return new Date().getFullYear()+'-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
 }
 function parseSkillHtml(html, saved){
   function extractLiteral(src, startIdx){
@@ -577,7 +592,7 @@ function loadLive(manual){
     if(!tr.key){ tr.live=false; return Promise.resolve(); }
     return fetchOne(tr.key).then(function(data){
       var phases=normalisePhases(data);
-      if(phases){ tr.phases=phases; tr.t=tally(phases); tr.goliveAuto=deriveGoLive(phases); tr.goliveField=(data && !Array.isArray(data) && data.goLive)?data.goLive:null; tr.live=true; live++; return; }
+      if(phases){ tr.phases=phases; tr.t=tally(phases); tr.goliveAuto=deriveGoLive(phases); tr.goliveField=(data && !Array.isArray(data) && data.goLive)?data.goLive:null; tr.milestones=(data && !Array.isArray(data) && Array.isArray(data.milestones))?data.milestones:null; tr.live=true; live++; return; }
       // Fallback: "skill format" trackers keep their task data inside the HTML
       // (the API only holds status overrides). Fetch the file and read P / T.
       return fetch(BASE+tr.file, {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : null; }).then(function(txt){
@@ -690,6 +705,8 @@ function render(){
   renderActive(g.active);
   renderOffboarding(g.offb);
   renderTimeline(g.active);
+  renderMilestones();
+  renderUpdatesBoard();
   renderContracts();
 }
 
@@ -922,60 +939,76 @@ function closeOffb(n){
   render();
 }
 
-// Blocked digest + client-waiting list (across all live trackers)
-function renderAttention(){
-  var blocked=[], waiting=[];
+// MILESTONE WATCH — each tracker's own milestones (where it defines them),
+// showing the next pending milestone per client plus anything overdue.
+function renderMilestones(){
+  var box=document.getElementById('mlBox'); if(!box) return;
+  var today=new Date(); today.setHours(0,0,0,0);
+  var rows=[];
   TRACKERS.forEach(function(tr){
-    if(!tr.live||!tr.phases) return;
-    tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
-      var s=(k.status||'').toLowerCase();
-      if(s==='blocked') blocked.push({client:tr.name,task:k.task,who:k.owner||'—'});
-      if(k.dep && s!=='complete' && s!=='done') waiting.push({client:tr.name,task:k.task,who:k.owner||'Client'});
-    });});
+    if(!tr.live || !Array.isArray(tr.milestones)) return;
+    var pend=tr.milestones.filter(function(m){ return m.status!=='done' && m.target; });
+    pend.sort(function(a,b){ return a.target<b.target?-1:1; });
+    pend.slice(0,2).forEach(function(m,i){
+      var d=new Date(m.target+'T00:00:00'); d.setHours(0,0,0,0);
+      var days=Math.round((d-today)/86400000);
+      rows.push({client:tr.name, label:m.full||m.short, target:m.target, days:days, next:i===0});
+    });
   });
-  var overdue=[];
-  TRACKERS.forEach(function(tr){ if(tr.live) overdue=overdue.concat(overdueTasks(tr)); });
-  overdue.sort(function(a,b){ return b.late-a.late; });
-  fillTasks('blkBox','blkCount',blocked,'Nothing blocked right now.');
-  fillTasks('waitBox','waitCount',waiting,'No open client dependencies.');
-  fillTasks('ovdBox','ovdCount',overdue.map(function(x){ return {client:x.client, task:x.task+' &nbsp;<span style="color:var(--redText)">('+x.late+'d late)</span>', who:x.who}; }),'Nothing overdue. 🎉');
-  var ac=document.getElementById('attnCounts');
-  if(ac) ac.innerHTML='&#128681; '+blocked.length+' blocked &middot; &#8987; '+waiting.length+' waiting &middot; &#9888; '+overdue.length+' overdue';
-}
-function fillTasks(boxId,countId,arr,emptyMsg){
-  document.getElementById(countId).textContent=arr.length;
-  var box=document.getElementById(boxId);
-  if(!arr.length){ box.innerHTML='<div class="empty">'+emptyMsg+'</div>'; return; }
-  box.innerHTML=arr.map(function(x){
-    return '<div class="task-row"><div class="tx"><b>'+x.client+'</b> &mdash; '+cleanTitle(x.task)+'</div>'
-      + '<div class="meta">'+x.who+'</div></div>';
-  }).join('');
-}
-// Live owner workload — open Sabel-owned tasks per person
-function renderOwners(){
-  var stat={};
-  TRACKERS.forEach(function(tr){
-    if(!tr.live||!tr.phases) return;
-    tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
-      if(k.dep) return; // Sabel-owned only
-      var s=(k.status||'').toLowerCase();
-      if(s==='complete'||s==='done') return;
-      var o=k.owner||'Unassigned';
-      if(SABEL_TEAM.indexOf(o)===-1) return; // only Chris / Greg / Richard
-      if(!stat[o]) stat[o]={open:0,blocked:0};
-      stat[o].open++; if(s==='blocked') stat[o].blocked++;
-    });});
-  });
-  var rows=Object.keys(stat).map(function(o){ return {o:o,open:stat[o].open,blocked:stat[o].blocked}; });
-  rows.sort(function(a,b){ return b.open-a.open; });
-  var box=document.getElementById('ownBox');
-  if(!rows.length){ box.innerHTML='<div class="empty">No open tasks.</div>'; return; }
-  var max=rows[0].open||1;
+  rows.sort(function(a,b){ return a.target<b.target?-1:1; });
+  document.getElementById('mlCount').textContent=rows.length;
+  if(!rows.length){ box.innerHTML='<div class="empty">No pending milestones found. Trackers without a milestone list will not appear here.</div>'; return; }
   box.innerHTML=rows.map(function(r){
-    return '<div class="own-row"><span class="own-name">'+r.o+'</span>'
-      + '<div class="own-bar"><div style="width:'+(r.open/max*100)+'%;background:'+(r.blocked?'var(--redText)':'var(--blue)')+'"></div></div>'
-      + '<span class="own-nums"><b>'+r.open+'</b> open'+(r.blocked?' &middot; <span style="color:var(--redText)">'+r.blocked+' blocked</span>':'')+'</span></div>';
+    var tone = r.days<0 ? 'var(--redText)' : r.days<=7 ? 'var(--amber)' : 'var(--green)';
+    var when = r.days<0 ? Math.abs(r.days)+'d overdue' : r.days===0 ? 'today' : 'in '+r.days+'d';
+    return '<div class="nt-row"><div><div class="ob-name">'+esc(r.client)+' &middot; '+esc(r.label)+'</div>'
+      + '<div class="ob-meta">target '+fmtDate(r.target)+'</div></div>'
+      + '<span class="nt-tag" style="color:'+tone+'">'+when+'</span></div>';
   }).join('');
+}
+
+// THIS WEEK'S CLIENT COMMS — Monday / Friday draft status per client, read
+// from the shared Weekly Updates store. Gives a send-checklist at a glance.
+var UPDATES_KEY='sabel-weekly-updates-v1';
+var UPDATES_STORE=null, UPDATES_OK=false;
+function thisMondayISO(){
+  var d=new Date(); d.setHours(0,0,0,0);
+  d.setDate(d.getDate()-((d.getDay()+6)%7));
+  return d.toISOString().slice(0,10);
+}
+function loadUpdates(){
+  return fetch(API+'?key='+encodeURIComponent(UPDATES_KEY)+'&_t='+Date.now(),{cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      UPDATES_OK = !!(j && j.ok);
+      UPDATES_STORE = (UPDATES_OK && j.data && typeof j.data==='object') ? j.data : null;
+      renderUpdatesBoard();
+    }).catch(function(){ UPDATES_OK=false; renderUpdatesBoard(); });
+}
+function updPill(e){
+  if(!e || !e.text) return '<span class="nt-tag" style="color:var(--mono)">&mdash;</span>';
+  var col = e.status==='sent' ? 'var(--green)' : e.status==='reviewed' ? 'var(--blue)' : 'var(--amber)';
+  var lbl = e.status==='sent' ? 'Sent' : e.status==='reviewed' ? 'Reviewed' : 'Draft';
+  return '<span class="nt-tag" style="color:'+col+'">'+lbl+'</span>';
+}
+function renderUpdatesBoard(){
+  var box=document.getElementById('updBox'); if(!box) return;
+  if(!UPDATES_OK){
+    box.innerHTML='<div class="empty">Weekly Updates store not reachable yet. Add <b>sabel-weekly-updates-v1</b> to ALLOWED_KEYS in the webhook, then this shows each client\'s Monday and Friday message status for the week.</div>';
+    document.getElementById('updCount').textContent='';
+    return;
+  }
+  var wk=(UPDATES_STORE && UPDATES_STORE.weeks && UPDATES_STORE.weeks[thisMondayISO()]) || {monday:{},friday:{}};
+  var names=TRACKERS.map(function(t){ return t.name; });
+  var sent=0, total=0;
+  var html=names.map(function(n){
+    var m=(wk.monday||{})[n], f=(wk.friday||{})[n];
+    total+=2; if(m&&m.status==='sent')sent++; if(f&&f.status==='sent')sent++;
+    return '<div class="nt-row"><span class="nt-name" style="font-weight:600;color:var(--w)">'+esc(n)+'</span>'
+      + '<span class="nt-right">Mon '+updPill(m)+' &nbsp; Fri '+updPill(f)+'</span></div>';
+  }).join('');
+  document.getElementById('updCount').textContent=sent+'/'+total+' sent';
+  box.innerHTML=html || '<div class="empty">No active clients.</div>';
 }
 
 function renderKPIs(g){
@@ -1212,7 +1245,11 @@ function renderTimeline(active){
 function loadConfig(){
   return fetch(BASE+'trackers.json',{cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(j){ if(Array.isArray(j) && j.length){ TRACKERS = j; } })
+    .then(function(j){ if(Array.isArray(j) && j.length){
+      // honour the registry's active flag: inactive clients are done and
+      // dusted, so keep them off the live board entirely.
+      TRACKERS = j.filter(function(t){ return t.active!==false; });
+    } })
     .catch(function(){ /* no registry — keep built-in list */ });
 }
 
@@ -1225,8 +1262,8 @@ render();                                   // paint shell immediately
 applyWidgets();                             // honour saved widget visibility
 loadNotes();                                // pull the team's shared notes
 loadOverrides();                            // pull shared go-live overrides
-loadConfig().then(function(){ loadLive(false); }); // registry (if any) → live data
-setInterval(function(){ loadLive(false); loadNotes(); loadOverrides(); }, REFRESH_MS); // keep it live
+loadConfig().then(function(){ loadLive(false); loadUpdates(); }); // registry (if any) → live data
+setInterval(function(){ loadLive(false); loadNotes(); loadOverrides(); loadUpdates(); }, REFRESH_MS); // keep it live
 </script>
 </body>
 </html>

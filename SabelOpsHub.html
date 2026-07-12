@@ -73,6 +73,7 @@
       <button class="tab on" id="t-home"      onclick="show('home')">Home</button>
       <button class="tab"    id="t-portal"    onclick="show('portal')">Onboarding / Offboarding</button>
       <button class="tab"    id="t-dashboard" onclick="show('dashboard')">Project Dashboard</button>
+      <button class="tab"    id="t-weekly"    onclick="show('weekly')">Weekly Updates</button>
       <button class="tab"    id="t-feedback"  onclick="show('feedback')">Feedback Dashboard</button>
     </nav>
     <div class="nav-right">Internal use only</div>
@@ -103,6 +104,14 @@
           <p>A single team view across all client project trackers: live task progress, blockers, go-live timeline and owner workload — pulled straight from the trackers themselves.</p>
           <span class="go">Open dashboard <span class="arrow">&rarr;</span></span>
         </button>
+        <button class="pillar" onclick="show('weekly')">
+          <span class="badge internal">Internal</span>
+          <div class="ico">&#9993;</div>
+          <h2>Weekly Client Updates</h2>
+          <div class="sub">Monday &amp; Friday Slack drafts &mdash; review before sending</div>
+          <p>Every client's Monday heads-up and Friday wrap-up in one place. Drafted automatically, edited and approved by the team here, then copied into each client's Slack. Plus call notes so nothing from client calls gets lost.</p>
+          <span class="go">Open weekly updates <span class="arrow">&rarr;</span></span>
+        </button>
         <button class="pillar" onclick="show('feedback')">
           <span class="badge internal">Internal</span>
           <div class="ico">&#128172;</div>
@@ -115,6 +124,7 @@
       <div class="foot-note">
         <b>Onboarding / Offboarding Portal</b> &mdash; your checklists to set clients up and close them out.<br>
         <b>Project Tracker Dashboard</b> &mdash; the team view of where all the client trackers stand.<br>
+        <b>Weekly Client Updates</b> &mdash; Monday and Friday Slack drafts for review before Nikki sends them, plus call notes.<br>
         <b>Feedback Dashboard</b> &mdash; what clients are telling us, pulled live from the feedback webhook.<br>
         The individual <b>client project trackers</b> (shared with each client) feed the Project Dashboard automatically.
       </div>
@@ -131,6 +141,11 @@
     <iframe id="frame-dashboard" data-src="SabelPortfolioDashboard.html" title="Project Tracker Dashboard"></iframe>
   </section>
 
+  <!-- WEEKLY UPDATES -->
+  <section class="view" id="weekly">
+    <iframe id="frame-weekly" data-src="SabelWeeklyUpdates.html" title="Weekly Client Updates"></iframe>
+  </section>
+
   <!-- FEEDBACK -->
   <section class="view" id="feedback">
     <iframe id="frame-feedback" data-src="SabelFeedbackDashboard.html" title="Feedback Dashboard"></iframe>
@@ -138,7 +153,7 @@
 </div>
 
 <script>
-  var VIEWS = ['home','portal','dashboard','feedback'];
+  var VIEWS = ['home','portal','dashboard','weekly','feedback'];
   function show(view){
     VIEWS.forEach(function(v){
       document.getElementById(v).classList.toggle('on', v===view);
@@ -146,7 +161,7 @@
       if (tab) tab.classList.toggle('on', v===view);
     });
     // Lazy-load iframes on first open (keeps startup fast; each tool only goes live when viewed)
-    if (view==='portal' || view==='dashboard' || view==='feedback'){
+    if (view==='portal' || view==='dashboard' || view==='weekly' || view==='feedback'){
       var f = document.getElementById('frame-'+view);
       if (f && !f.src){ f.src = f.getAttribute('data-src'); }
     }
