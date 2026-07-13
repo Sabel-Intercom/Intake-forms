@@ -89,5 +89,12 @@
   "file": "PositiveSalaryPackagingTracker_v2.html",
   "sowHours": 10,
   "active": true
+},
+  {
+  "name": "Sounding Board",
+  "key": "soundingboard-tracker-v1",
+  "file": "SoundingBoardTracker_v2.html",
+  "sowHours": 30,
+  "active": true
 }
 ]
