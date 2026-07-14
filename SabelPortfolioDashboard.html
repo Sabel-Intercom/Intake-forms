@@ -18,7 +18,7 @@
   ::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}::-webkit-scrollbar-track{background:transparent;}
 
   /* header */
-  .header{position:relative;display:flex;align-items:center;gap:16px;padding:15px 28px;border-bottom:1px solid var(--border2);background:rgba(11,11,12,.9);}
+  .header{position:relative;display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--border2);background:rgba(11,11,12,.9);}
   .brand{display:flex;align-items:baseline;gap:9px;}
   .brand .logo{font-size:16px;font-weight:800;letter-spacing:.32em;color:var(--w);text-transform:uppercase;}
   .brand .logo .dot{color:var(--red);}
@@ -31,23 +31,23 @@
   .refresh-btn:hover{border-color:var(--mono);color:var(--w);}
   .refresh-btn.spin{opacity:.6;pointer-events:none;}
 
-  .wrap{max-width:1240px;margin:0 auto;padding:22px 28px 70px;}
+  .wrap{max-width:1160px;margin:0 auto;padding:12px 20px 44px;}
 
   /* KPI strip */
-  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px;}
-  .kpi{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;}
+  .kpi{background:var(--card);border:1px solid var(--border2);border-radius:9px;padding:8px 12px;}
   .kpi .lbl{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mono);margin-bottom:7px;}
-  .kpi .val{font-size:27px;font-weight:800;line-height:1;color:var(--w);}
+  .kpi .val{font-size:20px;font-weight:800;line-height:1;color:var(--w);}
   .kpi .sub{font-size:10px;color:var(--mono);margin-top:5px;}
   .kpi.risk .val{color:var(--redText);}
   .kpi.live .val{color:var(--green);}
 
   /* section titles */
-  .sec-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;display:flex;align-items:center;gap:9px;}
-  .sec-title .count,.sec-sub .count{font-size:9px;color:var(--mono);background:var(--card2);border:1px solid var(--border2);padding:1px 8px;border-radius:20px;}
+  .sec-title{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;display:flex;align-items:center;gap:8px;}
+  .sec-title .count{font-size:9px;color:var(--mono);background:var(--card2);border:1px solid var(--border2);padding:1px 8px;border-radius:20px;}
 
   /* pinch graph */
-  .pinch{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:18px 22px 14px;margin-bottom:24px;}
+  .pinch{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:12px 16px 8px;margin-bottom:14px;}
   .pinch-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
   .pinch-head h2{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w);}
   .pinch-head .legend{display:flex;gap:14px;flex-wrap:wrap;}
@@ -70,7 +70,7 @@
   .tl-tip b{color:#FCA5A5;} .tl-tip .d{color:var(--muted);font-weight:500;}
 
   /* main layout */
-  .layout{display:grid;grid-template-columns:1fr 360px;gap:22px;align-items:start;}
+  .layout{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;}
   @media(max-width:980px){.layout{grid-template-columns:1fr;}}
 
   .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
@@ -104,23 +104,23 @@
   .pc-pending{font-size:10px;color:var(--amber);font-style:italic;margin:4px 0 8px;}
 
   /* side column */
-  .side-box{background:var(--card);border:1px solid var(--border2);border-radius:11px;padding:16px 16px 8px;margin-bottom:18px;}
+  .side-box{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:11px 13px 5px;margin-bottom:14px;}
   .side-box.offb{border-color:rgba(74,222,128,.3);}
-  .ob-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid var(--border2);}
+  .ob-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid var(--border2);}
   .ob-row:last-child{border-bottom:none;}
   .ob-name{font-size:12.5px;font-weight:600;color:var(--w);}
   .ob-name a{color:var(--w);} .ob-name a:hover{color:var(--green);text-decoration:underline;}
   .ob-meta{font-size:9px;color:var(--mono);margin-top:2px;}
   .ob-badge{font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:rgba(74,222,128,.15);color:var(--green);white-space:nowrap;}
-  .nt-row{display:flex;align-items:center;justify-content:space-between;padding:8px 2px;border-bottom:1px solid var(--border2);}
+  .nt-row{display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px solid var(--border2);}
   .nt-row:last-child{border-bottom:none;}
   .nt-name{font-size:12px;color:var(--body);}
   .nt-tag{font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mono);}
   .empty{font-size:11px;color:var(--mono);padding:8px 2px 14px;}
 
   /* compact rows (active list, density=compact) */
-  .rows{display:flex;flex-direction:column;gap:7px;}
-  .arow{display:grid;grid-template-columns:auto 1fr auto auto auto;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border2);border-left-width:3px;border-radius:8px;padding:9px 14px;}
+  .rows{display:flex;flex-direction:column;gap:5px;}
+  .arow{display:grid;grid-template-columns:auto 1fr auto auto auto;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border2);border-left-width:3px;border-radius:8px;padding:6px 12px;}
   .arow.green{border-left-color:var(--green);} .arow.amber{border-left-color:var(--amber);} .arow.red{border-left-color:var(--redText);} .arow.gray{border-left-color:var(--mono);}
   .ar-dot{width:9px;height:9px;border-radius:50%;background:var(--mono);flex-shrink:0;}
   .arow.green .ar-dot{background:var(--green);} .arow.amber .ar-dot{background:var(--amber);} .arow.red .ar-dot{background:var(--redText);}
@@ -151,6 +151,14 @@
   .ar-pct{font-size:12px;font-weight:800;color:var(--body);}
   .ar-chip{font-size:9px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--border2);padding:2px 7px;border-radius:20px;white-space:nowrap;}
   .ar-chip.risk{color:var(--redText);border-color:rgba(248,113,113,.3);}
+  .ar-chip.hl{font-weight:800;}
+  .ar-chip.hl.green{color:var(--green);border-color:rgba(74,222,128,.35);}
+  .ar-chip.hl.amber{color:var(--amber);border-color:rgba(251,191,36,.35);}
+  .ar-chip.hl.red{color:var(--redText);border-color:rgba(248,113,113,.35);}
+  .ar-chip.hl.gray{color:var(--mono);}
+  .pc-health{font-weight:800;} .pc-health.green{color:var(--green);} .pc-health.amber{color:var(--amber);} .pc-health.red{color:var(--redText);} .pc-health.gray{color:var(--mono);}
+  .ap-legend{font-size:9.5px;color:var(--mono);margin:-2px 0 8px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .ap-legend .ld{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:-1px;}
   .ar-days{text-align:right;min-width:52px;}
   .ar-days .d1{font-size:14px;font-weight:800;white-space:nowrap;}
   .ar-days .d2{font-size:7.5px;color:var(--mono);text-transform:uppercase;letter-spacing:.05em;}
@@ -163,21 +171,35 @@
 
   .na-line{font-size:10px;color:var(--mono);margin-top:6px;}
   .na-line b{color:var(--body);font-weight:600;}
-  /* attention panels */
-  .attn{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:28px;}
-  @media(max-width:980px){.attn{grid-template-columns:1fr;}}
-  .task-row{padding:9px 2px;border-bottom:1px solid var(--border2);}
-  .task-row:last-child{border-bottom:none;}
-  .task-row .tx{font-size:12px;color:var(--body);line-height:1.4;}
-  .task-row .tx b{color:var(--w);font-weight:700;}
-  .task-row .meta{font-size:9px;color:var(--mono);margin-top:3px;text-transform:uppercase;letter-spacing:.04em;}
-  .own-row{display:flex;align-items:center;gap:12px;padding:9px 2px;border-bottom:1px solid var(--border2);}
-  .own-row:last-child{border-bottom:none;}
-  .own-name{font-size:12px;font-weight:700;color:var(--w);width:84px;flex-shrink:0;}
-  .own-bar{flex:1;height:6px;background:var(--surface);border-radius:3px;overflow:hidden;}
+  /* needs-attention: per-client accordion (one open at a time) */
+  .attn-inner{padding:0 14px 12px;}
+  .own-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 10px;}
+  @media(max-width:680px){.own-strip{grid-template-columns:1fr;}}
+  .own-cell{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border2);border-radius:7px;padding:6px 10px;}
+  .own-cell .nm{font-size:10px;font-weight:800;color:var(--w);width:52px;flex-shrink:0;}
+  .own-cell .own-n{font-size:9.5px;color:var(--muted);white-space:nowrap;}
+  .own-cell .own-n b{color:var(--body);}
+  .own-bar{flex:1;height:5px;background:var(--surface);border-radius:3px;overflow:hidden;}
   .own-bar > div{height:100%;}
-  .own-nums{font-size:10px;color:var(--muted);white-space:nowrap;min-width:120px;text-align:right;}
-  .own-nums b{color:var(--body);}
+  .ac{border:1px solid var(--border2);border-radius:8px;background:var(--card2);margin-bottom:5px;overflow:hidden;}
+  .ac > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:7px 11px;}
+  .ac > summary::-webkit-details-marker{display:none;}
+  .ac > summary .ad-chev{font-size:10px;color:var(--mono);transition:transform .15s;}
+  .ac[open] > summary .ad-chev{transform:rotate(90deg);}
+  .ac .nm{font-size:12px;font-weight:800;color:var(--w);}
+  .ac .chips{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
+  .a-chip{font-size:8px;font-weight:800;letter-spacing:.03em;padding:2px 7px;border-radius:20px;white-space:nowrap;}
+  .a-chip.b{background:rgba(248,113,113,.14);color:var(--redText);}
+  .a-chip.w{background:rgba(251,191,36,.13);color:var(--amber);}
+  .a-chip.o{background:rgba(192,132,252,.13);color:var(--purple);}
+  .ac-body{padding:1px 11px 8px;border-top:1px solid var(--border2);}
+  .ac-row{display:flex;align-items:flex-start;gap:8px;padding:4px 0;border-bottom:1px solid var(--border2);font-size:11px;color:var(--body);line-height:1.35;}
+  .ac-row:last-child{border-bottom:none;}
+  .ac-tag{flex-shrink:0;font-size:7px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:3px;margin-top:1px;}
+  .ac-tag.b{background:rgba(248,113,113,.15);color:var(--redText);}
+  .ac-tag.w{background:rgba(251,191,36,.14);color:var(--amber);}
+  .ac-tag.o{background:rgba(192,132,252,.14);color:var(--purple);}
+  .ac-meta{color:var(--mono);font-size:9px;margin-left:auto;white-space:nowrap;padding-top:2px;flex-shrink:0;}
 
   /* priority hero */
   .hero{background:linear-gradient(160deg,rgba(225,6,0,.10),var(--card));border:1px solid rgba(225,6,0,.35);border-radius:13px;padding:18px 20px;margin-bottom:24px;box-shadow:0 0 26px rgba(225,6,0,.06);}
@@ -198,13 +220,12 @@
   @media(max-width:640px){.prio-item{grid-template-columns:74px 1fr;}.prio-when{display:none;}}
 
   /* needs-attention collapsible */
-  .attn-drop{background:var(--card);border:1px solid var(--border2);border-radius:11px;margin-bottom:24px;overflow:hidden;}
-  .attn-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 18px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+  .attn-drop{background:var(--card);border:1px solid var(--border2);border-radius:10px;margin:14px 0 0;overflow:hidden;}
+  .attn-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
   .attn-drop > summary::-webkit-details-marker{display:none;}
   .attn-drop .ad-counts{font-size:10px;font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--mono);}
   .attn-drop .ad-chev{margin-left:auto;transition:transform .15s;color:var(--mono);font-size:12px;}
   .attn-drop[open] .ad-chev{transform:rotate(90deg);}
-  .attn-drop .attn{margin-top:0;padding:0 18px 14px;}
   .sec-sub{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);margin:6px 0 8px;display:flex;align-items:center;gap:8px;}
   /* widget config panel */
   .cfg-wrap{position:relative;}
@@ -218,29 +239,29 @@
   .weekly-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px;}
   .weekly-head h2{font-size:14px;font-weight:800;letter-spacing:.03em;color:var(--w);text-transform:uppercase;}
   .week-nav{display:flex;align-items:center;gap:8px;}
-  .wk-btn{padding:5px 11px;border-radius:6px;background:var(--card2);border:1px solid var(--border);color:var(--body);font-size:11px;font-weight:700;}
+  .wk-btn{padding:3px 9px;border-radius:5px;background:var(--card2);border:1px solid var(--border);color:var(--body);font-size:10px;font-weight:700;}
   .wk-btn:hover{border-color:var(--mono);color:var(--w);}
   .wk-today{color:#FCA5A5;}
-  .wk-label{font-size:11px;font-weight:700;color:var(--body);min-width:158px;text-align:center;}
-  .weekly-sub{font-size:10px;color:var(--mono);margin-bottom:14px;}
+  .wk-label{font-size:10.5px;font-weight:700;color:var(--body);min-width:145px;text-align:center;}
+  .weekly-sub{font-size:9.5px;color:var(--mono);margin-bottom:8px;}
   .weekly-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
   @media(max-width:760px){.weekly-cols{grid-template-columns:1fr;}}
   .wk-col{background:var(--card2);border:1px solid var(--border2);border-radius:9px;padding:11px 12px;min-height:64px;}
   .wk-col-h{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--w);text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
   .wk-n{font-size:9px;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1px 7px;}
-  .wk-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border2);}
+  .wk-item{display:flex;align-items:flex-start;gap:7px;padding:4px 0;border-bottom:1px solid var(--border2);}
   .wk-item:last-child{border-bottom:none;}
   .wk-item.done .wk-tx{opacity:.55;} .wk-item.done .wk-tx b{text-decoration:line-through;}
-  .wk-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+  .wk-dot{width:7px;height:7px;border-radius:50%;margin-top:3px;flex-shrink:0;}
   .wk-body{min-width:0;flex:1;}
-  .wk-tx{font-size:11.5px;color:var(--body);line-height:1.35;min-width:0;}
+  .wk-tx{font-size:10.5px;color:var(--body);line-height:1.3;min-width:0;}
   .wk-tx b{color:var(--w);font-weight:700;}
   .wk-empty{font-size:11px;color:var(--mono);padding:4px 0;}
   /* weekly plan — per-task actions + notes */
-  .wk-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:5px;}
+  .wk-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:3px;}
   .wk-tracker{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#FCA5A5;white-space:nowrap;}
   .wk-tracker:hover{color:#fff;text-decoration:underline;}
-  .wk-note-btn{font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:2px 8px;transition:.12s;}
+  .wk-note-btn{font-size:8px;font-weight:700;letter-spacing:.03em;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:1px 7px;transition:.12s;}
   .wk-note-btn:hover{border-color:var(--mono);color:var(--w);}
   .wk-note-btn.has{color:var(--amber);border-color:rgba(251,191,36,.35);}
   .wk-note{font-size:10.5px;color:var(--body);background:var(--surface);border:1px solid var(--border2);border-left:2px solid var(--amber);border-radius:5px;padding:5px 8px;margin-top:6px;white-space:pre-wrap;line-height:1.4;word-break:break-word;}
@@ -248,13 +269,13 @@
   .wk-note-edit:focus{outline:none;border-color:var(--amber);}
   .wk-note-hint{font-size:8.5px;color:var(--mono);margin-top:3px;}
   /* weekly plan — collapsible, grouped by client */
-  .wk-drop{background:linear-gradient(160deg,rgba(225,6,0,.08),var(--card));border:1px solid rgba(225,6,0,.30);border-radius:12px;margin-bottom:24px;overflow:hidden;box-shadow:0 0 22px rgba(225,6,0,.05);}
-  .wk-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 18px;font-size:14px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--w);}
+  .wk-drop{background:linear-gradient(160deg,rgba(225,6,0,.08),var(--card));border:1px solid rgba(225,6,0,.30);border-radius:10px;margin-bottom:14px;overflow:hidden;}
+  .wk-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--w);}
   .wk-drop > summary::-webkit-details-marker{display:none;}
   .wk-drop .wk-sum{font-size:10px;font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--mono);}
   .wk-drop .ad-chev{margin-left:auto;transition:transform .15s;color:var(--mono);font-size:12px;}
   .wk-drop[open] .ad-chev{transform:rotate(90deg);}
-  .wk-inner{padding:0 18px 16px;}
+  .wk-inner{padding:0 14px 10px;}
   .wk-client{border-top:1px solid var(--border2);padding:11px 0;}
   .wk-client:first-child{border-top:none;}
   .wk-client-h{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
@@ -265,16 +286,16 @@
   /* weekly plan — collapsible client + side-by-side Sabel/Client split */
   .wk-client-drop{border-top:1px solid var(--border2);}
   .wk-client-drop:first-child{border-top:none;}
-  .wk-client-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 2px;}
+  .wk-client-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;padding:6px 2px;}
   .wk-client-drop > summary::-webkit-details-marker{display:none;}
   .wk-client-drop .ad-chev{color:var(--mono);font-size:11px;transition:transform .15s;}
   .wk-client-drop[open] > summary .ad-chev{transform:rotate(90deg);}
-  .wk-cd-nm{font-size:12.5px;font-weight:800;color:var(--w);letter-spacing:.02em;}
+  .wk-cd-nm{font-size:11.5px;font-weight:800;color:var(--w);letter-spacing:.02em;}
   .wk-cd-meta{font-size:9px;color:var(--mono);}
-  .wk-cd-h-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
-  .wk-split{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:2px 0 12px 16px;}
+  .wk-cd-h-right{margin-left:auto;display:flex;align-items:center;gap:10px;text-align:right;}
+  .wk-split{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 0 8px 14px;}
   @media(max-width:640px){.wk-split{grid-template-columns:1fr;}}
-  .wk-side{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;}
+  .wk-side{background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:6px 9px;}
   .wk-side-h{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
   .wk-side.sabel .wk-side-h{color:#FCA5A5;}
   .wk-side.client .wk-side-h{color:var(--amber);}
@@ -292,7 +313,6 @@
   <div class="brand"><span class="logo">SABEL<span class="dot">.</span></span><span class="tag">Ops</span></div>
   <h1>Project Tracker Dashboard</h1>
   <div class="right">
-    <a class="refresh-btn" href="SabelWeeklyUpdates.html" style="text-decoration:none;">&#9993; Weekly updates</a>
     <span class="live-stamp" id="stamp">Loading live data…</span>
     <button class="refresh-btn" id="densityBtn" onclick="toggleDensity()">&#9636; Compact</button>
     <button class="refresh-btn" id="refreshBtn" onclick="loadLive(true)">&#8635; Refresh</button>
@@ -317,7 +337,7 @@
             <button class="wk-btn wk-today" onclick="shiftWeek(0,true)">This week</button>
           </div>
         </div>
-        <div class="weekly-sub">Every client's scheduled deliverables for the week, grouped by client and pulled live from the trackers. Open a client's tracker with its link, and add your own notes per task.</div>
+        <div class="weekly-sub">Outstanding deliverables this week, live from the trackers. Click a client to expand; add per-task notes.</div>
         <div class="weekly-body" id="weeklyBody"></div>
       </div>
     </details>
@@ -338,32 +358,48 @@
     <div class="timeline" id="timeline"></div>
   </div>
 
-  <div id="w-updates">
-    <div class="sec-title">&#9993; This week's client comms <span class="count" id="updCount"></span>
-      <a class="pc-link" href="SabelWeeklyUpdates.html" style="margin-left:auto;">Open Weekly Updates &rarr;</a></div>
-    <div class="side-box" style="margin-bottom:24px;" id="updBox"></div>
-  </div>
-
   <div class="layout">
-    <div id="w-active">
-      <div class="sec-title">Active Projects <span class="count" id="activeCount">0</span></div>
-      <div class="cards" id="activeCards"></div>
+    <div>
+      <div id="w-active">
+        <div class="sec-title">Active Projects <span class="count" id="activeCount">0</span></div>
+        <div class="ap-legend">
+          <span><b style="color:var(--body)">Edge colour = health:</b></span>
+          <span><span class="ld" style="background:var(--green)"></span>On track</span>
+          <span><span class="ld" style="background:var(--amber)"></span>Watch (overdue / tight)</span>
+          <span><span class="ld" style="background:var(--redText)"></span>At risk (blocked / late)</span>
+          <span style="margin-left:auto"><b style="color:var(--body)">Bar = task mix:</b></span>
+          <span><span class="ld" style="background:var(--green)"></span>Done</span>
+          <span><span class="ld" style="background:var(--blue)"></span>In progress</span>
+          <span><span class="ld" style="background:var(--amber)"></span>Pending</span>
+          <span><span class="ld" style="background:var(--purple)"></span>Waiting on client</span>
+          <span><span class="ld" style="background:var(--redText)"></span>Blocked</span>
+        </div>
+        <div class="cards" id="activeCards"></div>
+      </div>
+      <div id="w-attn">
+        <details class="attn-drop">
+          <summary>&#9888; Needs attention <span class="ad-counts" id="attnCounts"></span><span class="ad-chev">&#9656;</span></summary>
+          <div class="attn-inner">
+            <div class="own-strip" id="ownBox"></div>
+            <div id="attnBody"></div>
+          </div>
+        </details>
+      </div>
     </div>
     <div>
       <div id="w-offb">
         <div class="sec-title">Offboarding &mdash; ready for close-out <span class="count" id="offbCount">0</span></div>
         <div class="side-box offb" id="offbBox"></div>
       </div>
-      <div id="w-miles">
-        <div class="sec-title">&#127937; Milestone watch <span class="count" id="mlCount">0</span></div>
-        <div class="side-box" id="mlBox"></div>
+      <div id="w-notracker">
+        <div class="sec-title">Clients with no tracker <span class="count" id="ntCount">0</span></div>
+        <div class="side-box" id="ntBox"></div>
+      </div>
+      <div id="w-contracts">
+        <div class="sec-title" style="margin-top:8px;">&#9203; Contract expiry &mdash; final 3 months <span class="count" id="conCount">0</span></div>
+        <div class="side-box" id="conBox"></div>
       </div>
     </div>
-  </div>
-
-  <div id="w-contracts">
-    <div class="sec-title" style="margin-top:8px;">&#9203; Contract expiry &mdash; final 3 months <span class="count" id="conCount">0</span></div>
-    <div class="side-box" id="conBox"></div>
   </div>
 
   <footer>
@@ -405,29 +441,72 @@ var WIDGETS = [
   {id:'w-weekly',   label:"This week's plan"},
   {id:'w-kpis',     label:'KPI summary'},
   {id:'w-timeline', label:'Go-live timeline'},
-  {id:'w-updates',  label:"This week's client comms"},
   {id:'w-active',   label:'Active projects'},
+  {id:'w-attn',     label:'Needs attention'},
   {id:'w-offb',     label:'Offboarding'},
-  {id:'w-miles',    label:'Milestone watch'},
+  {id:'w-notracker',label:'Clients with no tracker'},
   {id:'w-contracts',label:'Contract expiry'}
 ];
 
-// UI state (persisted)
-var NT_REMOVED = JSON.parse(localStorage.getItem('sabel_nt_removed')||'[]');
+// UI state — per-browser preferences only (view density, hidden widgets).
 var DENSITY = localStorage.getItem('sabel_density')||'compact';
 var WIDGET_HIDDEN = JSON.parse(localStorage.getItem('sabel_widgets_hidden')||'[]');
-var OFFB_CLOSED = JSON.parse(localStorage.getItem('sabel_offb_closed')||'[]');
-// Clients already closed out — baked in so it holds for the whole team, not just
-// one browser's local storage.
-['Huuuge'].forEach(function(n){ if(OFFB_CLOSED.indexOf(n)===-1) OFFB_CLOSED.push(n); });
-var CONTRACT_REMOVED = JSON.parse(localStorage.getItem('sabel_contract_removed')||'[]');
 var WEEK_OFFSET = 0;
+
+// SHARED team state — close-outs and removals live in the webhook under
+// STATE_KEY so they hold for the whole team, not just one browser.
+// IMPORTANT: add 'sabel-dashboard-state-v1' to ALLOWED_KEYS in the webhook.
+// localStorage keeps an offline copy / instant first paint. Merging is by
+// UNION (a removal made anywhere sticks) so simultaneous edits can't clobber.
+var STATE_KEY = 'sabel-dashboard-state-v1';
+var SHARED = (function(){
+  try{ var s=JSON.parse(localStorage.getItem('sabel_shared_state')||'{}');
+    return { offbClosed: s.offbClosed||[], ntRemoved: s.ntRemoved||[], contractRemoved: s.contractRemoved||[] };
+  }catch(e){ return { offbClosed:[], ntRemoved:[], contractRemoved:[] }; }
+})();
+function saveSharedLocal(){ localStorage.setItem('sabel_shared_state', JSON.stringify(SHARED)); }
+function unionInto(target, extra){ (extra||[]).forEach(function(n){ if(target.indexOf(n)===-1) target.push(n); }); }
+function loadShared(){
+  return fetch(API+'?key='+encodeURIComponent(STATE_KEY)+'&_t='+Date.now(), {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if(j && j.ok && j.data && typeof j.data==='object'){
+        unionInto(SHARED.offbClosed, j.data.offbClosed);
+        unionInto(SHARED.ntRemoved, j.data.ntRemoved);
+        unionInto(SHARED.contractRemoved, j.data.contractRemoved);
+        saveSharedLocal(); render();
+      }
+    }).catch(function(){ /* offline — keep local copy */ });
+}
+function pushShared(){
+  saveSharedLocal();
+  // merge-before-push: pull the latest remote copy first so a teammate's
+  // removal made moments ago isn't overwritten (avoids last-write-wins).
+  return fetch(API+'?key='+encodeURIComponent(STATE_KEY)+'&_t='+Date.now(), {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if(j && j.ok && j.data && typeof j.data==='object'){
+        unionInto(SHARED.offbClosed, j.data.offbClosed);
+        unionInto(SHARED.ntRemoved, j.data.ntRemoved);
+        unionInto(SHARED.contractRemoved, j.data.contractRemoved);
+      }
+      saveSharedLocal();
+      return fetch(API+'?key='+encodeURIComponent(STATE_KEY), {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ data: SHARED })
+      });
+    }).catch(function(){ /* offline — local copy still holds it */ });
+}
 
 // Weekly-plan notes (persisted, keyed by client + task so a note follows its task
 // week to week). NOTE_EDITING pauses the weekly re-render so an open note editor
 // is never wiped by the 5-minute auto-refresh.
 var WEEK_NOTES = JSON.parse(localStorage.getItem('sabel_week_notes')||'{}');
 var NOTE_EDITING = false;
+// deleted-note tombstones: a deletion must survive the merge-with-remote in
+// pushNotes/loadNotes, otherwise the remote copy resurrects the note on sync.
+var NOTE_TOMBSTONES = JSON.parse(localStorage.getItem('sabel_note_tombstones')||'[]');
+function saveTombstones(){ localStorage.setItem('sabel_note_tombstones', JSON.stringify(NOTE_TOMBSTONES)); }
 // Shared notes live in the same webhook under this key. IMPORTANT: this key must
 // also be added to ALLOWED_KEYS in the sabel-webhook api/tracker.js, or reads and
 // writes 404. localStorage is kept as an offline fallback / instant first paint.
@@ -441,29 +520,12 @@ var GOLIVE_OVERRIDES = JSON.parse(localStorage.getItem('sabel_golive_overrides')
 
 // ─────────────────────────────────────────────────────────────
 // CONTRACT DATES — each client has 12 months from kick-off / contract
-// start to use their contracted hours. Fill in "start" (YYYY-MM-DD) to
-// activate the expiry watch; the section shows only clients within the
-// final 3 months of their 12-month term.
+// start to use their contracted hours. These are now driven from the
+// trackers.json registry (add "contractStart":"YYYY-MM-DD" to an entry)
+// so there is ONE place to maintain them. Entries can also be supplied
+// under a top-level "contracts" list for clients without a tracker.
 // ─────────────────────────────────────────────────────────────
-var CONTRACTS = [
-  {name:'Raiz',                       start:''},
-  {name:'BTS',                        start:''},
-  {name:'Donkey Republic',            start:''},
-  {name:'FLKItOver',                  start:''},
-  {name:'YFood',                      start:''},
-  {name:'Cirqul',                     start:''},
-  {name:'Education Perfect',          start:''},
-  {name:'Huuuge',                     start:''},
-  {name:'The Giving Movement',        start:''},
-  {name:'Ainslie (Encum)',            start:''},
-  {name:'BetNinja (Magico)',          start:''},
-  {name:'Cronos (Particle Research)', start:''},
-  {name:'GPS Insight',                start:''},
-  {name:'Mambu',                      start:''},
-  {name:'PaySauce NZ',                start:''},
-  {name:'Workinitiatives',            start:''},
-  {name:'WPT Global',                 start:''}
-];
+var CONTRACTS = [];
 
 // ──────────────────────────────────────────────────────────────
 // DATA HELPERS
@@ -539,15 +601,20 @@ function fmtDate(iso){
 //    status overrides. Extract P/T from the file and overlay saved statuses. ──
 var SKILL_MONTHS={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
 function skillDate(d){
-  // human date strings like "May 14-15" → ISO of the last date. No year in the
-  // source, so assume the current year (was hardcoded 2026, which would have
-  // silently broken every skill-format tracker in January).
+  // human date strings like "May 14-15" → ISO of the last date. The year is
+  // INFERRED, not hardcoded: dates up to ~4 months in the past keep the
+  // current year; anything older rolls forward to the next year. This keeps
+  // active-project dates correct across the Dec→Jan boundary.
   if(!d) return '';
   var ms=String(d).match(/([A-Z][a-z]{2})\s*(\d{1,2})/g);
   if(!ms) return '';
   var m=ms[ms.length-1].match(/([A-Z][a-z]{2})\s*(\d{1,2})/);
   var mo=SKILL_MONTHS[m[1]]; if(mo==null) return '';
-  return new Date().getFullYear()+'-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
+  var now=new Date(); now.setHours(0,0,0,0);
+  var cutoff=new Date(now); cutoff.setDate(cutoff.getDate()-120); // 4-month look-back
+  var y=now.getFullYear()-1, cand;
+  for(var i=0;i<3;i++){ cand=new Date(y+i, mo, +m[2]); if(cand>=cutoff){ y=y+i; break; } }
+  return y+'-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
 }
 function parseSkillHtml(html, saved){
   function extractLiteral(src, startIdx){
@@ -592,7 +659,7 @@ function loadLive(manual){
     if(!tr.key){ tr.live=false; return Promise.resolve(); }
     return fetchOne(tr.key).then(function(data){
       var phases=normalisePhases(data);
-      if(phases){ tr.phases=phases; tr.t=tally(phases); tr.goliveAuto=deriveGoLive(phases); tr.goliveField=(data && !Array.isArray(data) && data.goLive)?data.goLive:null; tr.milestones=(data && !Array.isArray(data) && Array.isArray(data.milestones))?data.milestones:null; tr.live=true; live++; return; }
+      if(phases){ tr.phases=phases; tr.t=tally(phases); tr.goliveAuto=deriveGoLive(phases); tr.goliveField=(data && !Array.isArray(data) && data.goLive)?data.goLive:null; tr.live=true; live++; return; }
       // Fallback: "skill format" trackers keep their task data inside the HTML
       // (the API only holds status overrides). Fetch the file and read P / T.
       return fetch(BASE+tr.file, {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : null; }).then(function(txt){
@@ -703,10 +770,11 @@ function render(){
   renderWeekly();
   renderKPIs(g);
   renderActive(g.active);
+  renderAttention();
+  renderOwners();
   renderOffboarding(g.offb);
+  renderNoTracker();
   renderTimeline(g.active);
-  renderMilestones();
-  renderUpdatesBoard();
   renderContracts();
 }
 
@@ -746,6 +814,21 @@ function overdueTasks(tr){
   });});
   return out;
 }
+// PROJECT HEALTH — one clear signal per project instead of colour-by-date.
+// red  = At risk  : blocked task(s), go-live passed, or go-live <=7d with <80% done
+// amber= Watch    : overdue task(s), or go-live <=21d with <60% done
+// green= On track : none of the above
+function health(tr){
+  if(!tr.live || !tr.t) return {cls:'gray', lbl:'No data', why:''};
+  var t=tr.t, days=daysBetween(tr.golive), pct=Math.round(t.done/(t.total||1)*100);
+  var od=overdueTasks(tr).length;
+  if(t.blocked) return {cls:'red', lbl:'At risk', why:t.blocked+' blocked'};
+  if(days!==null && days<0) return {cls:'red', lbl:'At risk', why:'go-live date passed'};
+  if(days!==null && days<=7 && pct<80) return {cls:'red', lbl:'At risk', why:'go-live in '+days+'d, only '+pct+'% done'};
+  if(od) return {cls:'amber', lbl:'Watch', why:od+' overdue task'+(od===1?'':'s')};
+  if(days!==null && days<=21 && pct<60) return {cls:'amber', lbl:'Watch', why:'go-live in '+days+'d, '+pct+'% done'};
+  return {cls:'green', lbl:'On track', why:''};
+}
 // Hours spent / committed (estimate from SOW total × completion). null when unknown.
 function hoursTxt(tr){
   if(tr.sowHours==null || !tr.t || !tr.t.total) return null;
@@ -781,6 +864,7 @@ function loadNotes(){
       if(j && j.ok && j.data && typeof j.data==='object'){
         if(NOTE_EDITING) return;            // never clobber a note being typed
         WEEK_NOTES = j.data;
+        NOTE_TOMBSTONES.forEach(function(k){ delete WEEK_NOTES[k]; });  // keep local deletions
         saveNotes();
         renderWeekly();
       }
@@ -795,11 +879,12 @@ function pushNotes(){
     .then(function(j){
       var remote = (j && j.ok && j.data && typeof j.data==='object') ? j.data : {};
       var merged = Object.assign({}, remote, WEEK_NOTES);   // local edits win
+      NOTE_TOMBSTONES.forEach(function(k){ delete merged[k]; });        // deletions stick
       WEEK_NOTES = merged; saveNotes();
       return fetch(API+'?key='+encodeURIComponent(NOTES_KEY), {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ data: merged })
-      });
+      }).then(function(r){ if(r && r.ok){ NOTE_TOMBSTONES=[]; saveTombstones(); } });
     })
     .catch(function(){ /* offline — localStorage still holds the note */ });
 }
@@ -819,8 +904,9 @@ function editNote(encKey, btn){
   body.appendChild(ta); body.appendChild(hint); ta.focus();
   ta.addEventListener('blur', function(){
     var val=ta.value.trim();
-    if(val) WEEK_NOTES[key]=val; else delete WEEK_NOTES[key];
-    saveNotes();
+    if(val){ WEEK_NOTES[key]=val; var ti=NOTE_TOMBSTONES.indexOf(key); if(ti!==-1) NOTE_TOMBSTONES.splice(ti,1); }
+    else { delete WEEK_NOTES[key]; if(NOTE_TOMBSTONES.indexOf(key)===-1) NOTE_TOMBSTONES.push(key); }
+    saveTombstones(); saveNotes();
     // update just this task in place so the open client stays open
     body.removeChild(ta); body.removeChild(hint);
     var existing=body.querySelector('.wk-note');
@@ -891,15 +977,20 @@ function renderWeekly(){
       var rows = list.length ? list.map(function(x){ return weekTaskRow(g.name,x); }).join('') : '<div class="wk-empty">Nothing this week</div>';
       return '<div class="wk-side '+cls+'"><div class="wk-side-h">'+label+' <span class="wk-side-n">'+list.length+'</span></div>'+rows+'</div>';
     };
-    return '<details class="wk-client-drop" data-client="'+esc(g.name)+'"'+(openSet[g.name]?' open':'')+'>'
+    return '<details class="wk-client-drop" name="wkClient" data-client="'+esc(g.name)+'"'+(openSet[g.name]?' open':'')+'>'
       + '<summary><span class="ad-chev">&#9656;</span>'
       +   '<span class="wk-cd-nm">'+esc(g.name)+'</span>'
-      +   '<span class="wk-cd-meta">'+g.sabel.length+' from Sabel · '+g.client.length+' from client</span>'
-      +   '<span class="wk-cd-h-right"><a class="wk-tracker" href="'+url+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Tracker &#8599;</a></span>'
+      +   '<span class="wk-cd-h-right"><span class="wk-cd-meta">'+g.sabel.length+' from Sabel · '+g.client.length+' from client</span><a class="wk-tracker" href="'+url+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Tracker &#8599;</a></span>'
       + '</summary>'
       + '<div class="wk-split">'+sideHtml(g.sabel,'sabel','Due from Sabel')+sideHtml(g.client,'client','Due from client')+'</div>'
       + '</details>';
   }).join('');
+  // one client open at a time (fallback for browsers without native <details name>)
+  el.querySelectorAll('.wk-client-drop').forEach(function(d){
+    d.addEventListener('toggle', function(){
+      if(d.open) el.querySelectorAll('.wk-client-drop[open]').forEach(function(x){ if(x!==d) x.open=false; });
+    });
+  });
 }
 
 // CONTRACT EXPIRY — clients within the final 3 months of their 12-month term.
@@ -908,7 +999,7 @@ function renderContracts(){
   var today=new Date(); today.setHours(0,0,0,0);
   var rows=[];
   CONTRACTS.forEach(function(c){
-    if(!c.start || CONTRACT_REMOVED.indexOf(c.name)!==-1) return;
+    if(!c.start || SHARED.contractRemoved.indexOf(c.name)!==-1) return;
     var exp=new Date(c.start+'T00:00:00'); exp.setFullYear(exp.getFullYear()+1); exp.setHours(0,0,0,0);
     var days=Math.round((exp-today)/86400000);
     if(days>92) return;                 // only within final ~3 months
@@ -921,94 +1012,103 @@ function renderContracts(){
     var when = r.days<0 ? ('expired '+Math.abs(r.days)+'d ago') : r.days===0 ? 'expires today' : ('~'+Math.round(r.days/7)+' wks left');
     var tone = r.days<=30 ? 'var(--redText)' : 'var(--amber)';
     var arg=JSON.stringify(r.name).replace(/"/g,'&quot;');
-    return '<div class="nt-row"><div><div class="ob-name">'+r.name+'</div>'
+    return '<div class="nt-row"><div><div class="ob-name">'+esc(r.name)+'</div>'
       + '<div class="ob-meta">12-mo term ends '+fmtDate(r.exp.toISOString().slice(0,10))+'</div></div>'
       + '<span class="nt-right"><span class="nt-tag" style="color:'+tone+'">'+when+'</span>'
       + '<button class="nt-del" title="Remove from list" onclick="removeContract('+arg+')">&times;</button></span></div>';
   }).join('');
 }
 function removeContract(n){
-  if(CONTRACT_REMOVED.indexOf(n)===-1) CONTRACT_REMOVED.push(n);
-  localStorage.setItem('sabel_contract_removed', JSON.stringify(CONTRACT_REMOVED));
+  if(SHARED.contractRemoved.indexOf(n)===-1) SHARED.contractRemoved.push(n);
+  pushShared();
   renderContracts();
 }
-// Mark an offboarding project as closed out (persists locally, drops it off the list)
+// Mark an offboarding project as closed out — shared with the whole team.
 function closeOffb(n){
-  if(OFFB_CLOSED.indexOf(n)===-1) OFFB_CLOSED.push(n);
-  localStorage.setItem('sabel_offb_closed', JSON.stringify(OFFB_CLOSED));
+  if(SHARED.offbClosed.indexOf(n)===-1) SHARED.offbClosed.push(n);
+  pushShared();
   render();
 }
 
-// MILESTONE WATCH — each tracker's own milestones (where it defines them),
-// showing the next pending milestone per client plus anything overdue.
-function renderMilestones(){
-  var box=document.getElementById('mlBox'); if(!box) return;
-  var today=new Date(); today.setHours(0,0,0,0);
-  var rows=[];
+// NEEDS ATTENTION — blocked, waiting-on-client, and overdue items across all
+// live trackers, grouped BY CLIENT as an accordion. Only one client expands
+// at a time (native <details name> exclusivity, with a JS fallback), keeping
+// the panel readable at a glance instead of a wall of text.
+function renderAttention(){
+  var host=document.getElementById('attnBody'); if(!host) return;
+  var groups=[], tb=0, tw=0, to=0;
   TRACKERS.forEach(function(tr){
-    if(!tr.live || !Array.isArray(tr.milestones)) return;
-    var pend=tr.milestones.filter(function(m){ return m.status!=='done' && m.target; });
-    pend.sort(function(a,b){ return a.target<b.target?-1:1; });
-    pend.slice(0,2).forEach(function(m,i){
-      var d=new Date(m.target+'T00:00:00'); d.setHours(0,0,0,0);
-      var days=Math.round((d-today)/86400000);
-      rows.push({client:tr.name, label:m.full||m.short, target:m.target, days:days, next:i===0});
+    if(!tr.live||!tr.phases) return;
+    var b=[], w=[];
+    tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+      var s=(k.status||'').toLowerCase();
+      if(s==='blocked') b.push({task:k.task, who:k.owner||'—'});
+      if(k.dep && s!=='complete' && s!=='done') w.push({task:k.task, who:k.owner||'Client'});
+    });});
+    var o=overdueTasks(tr).sort(function(a,x){ return x.late-a.late; });
+    if(b.length||w.length||o.length){
+      groups.push({name:tr.name, file:tr.file, b:b, w:w, o:o, n:b.length+w.length+o.length});
+      tb+=b.length; tw+=w.length; to+=o.length;
+    }
+  });
+  // most urgent clients first: blocked > overdue > waiting
+  groups.sort(function(a,x){ return (x.b.length*100+x.o.length*10+x.w.length)-(a.b.length*100+a.o.length*10+a.w.length); });
+  var ac=document.getElementById('attnCounts');
+  if(ac) ac.innerHTML = groups.length
+    ? tb+' blocked &middot; '+tw+' waiting on client &middot; '+to+' overdue'
+    : 'All clear';
+  if(!groups.length){ host.innerHTML='<div class="empty">Nothing blocked, waiting, or overdue. &#127881;</div>'; return; }
+  // remember which client is open so the 5-minute refresh doesn't collapse it
+  var openName=null; var cur=host.querySelector('.ac[open]'); if(cur) openName=cur.getAttribute('data-client');
+  var row=function(tag,cls,txt,meta){
+    return '<div class="ac-row"><span class="ac-tag '+cls+'">'+tag+'</span><span>'+esc(cleanTitle(txt))+'</span>'
+      + (meta?'<span class="ac-meta">'+meta+'</span>':'')+'</div>';
+  };
+  host.innerHTML = groups.map(function(g){
+    var chips='';
+    if(g.b.length) chips+='<span class="a-chip b">'+g.b.length+' blocked</span>';
+    if(g.o.length) chips+='<span class="a-chip o">'+g.o.length+' overdue</span>';
+    if(g.w.length) chips+='<span class="a-chip w">'+g.w.length+' waiting</span>';
+    var body =
+      g.b.map(function(x){ return row('Blocked','b',x.task,esc(x.who)); }).join('')
+      + g.o.map(function(x){ return row('Overdue','o',x.task,esc(x.who)+' &middot; '+x.late+'d late'); }).join('')
+      + g.w.map(function(x){ return row('Client','w',x.task,esc(x.who)); }).join('');
+    return '<details class="ac" name="attnClient" data-client="'+esc(g.name)+'"'+(openName===g.name?' open':'')+'>'
+      + '<summary><span class="ad-chev">&#9656;</span><span class="nm">'+esc(g.name)+'</span>'
+      +   '<span class="chips">'+chips+'</span>'
+      +   '<a class="wk-tracker" href="'+BASE+g.file+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Tracker &#8599;</a>'
+      + '</summary><div class="ac-body">'+body+'</div></details>';
+  }).join('');
+  // fallback for browsers without native <details name> exclusivity:
+  host.querySelectorAll('.ac').forEach(function(d){
+    d.addEventListener('toggle', function(){
+      if(d.open) host.querySelectorAll('.ac[open]').forEach(function(x){ if(x!==d) x.open=false; });
     });
   });
-  rows.sort(function(a,b){ return a.target<b.target?-1:1; });
-  document.getElementById('mlCount').textContent=rows.length;
-  if(!rows.length){ box.innerHTML='<div class="empty">No pending milestones found. Trackers without a milestone list will not appear here.</div>'; return; }
+}
+// Live team workload — open Sabel-owned tasks per person, compact strip.
+function renderOwners(){
+  var box=document.getElementById('ownBox'); if(!box) return;
+  var stat={};
+  TRACKERS.forEach(function(tr){
+    if(!tr.live||!tr.phases) return;
+    tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+      if(k.dep) return; // Sabel-owned only
+      var s=(k.status||'').toLowerCase();
+      if(s==='complete'||s==='done') return;
+      var o=k.owner||'Unassigned';
+      if(SABEL_TEAM.indexOf(o)===-1) return; // only Chris / Greg / Richard
+      if(!stat[o]) stat[o]={open:0,blocked:0};
+      stat[o].open++; if(s==='blocked') stat[o].blocked++;
+    });});
+  });
+  var rows=SABEL_TEAM.map(function(o){ return {o:o,open:(stat[o]||{}).open||0,blocked:(stat[o]||{}).blocked||0}; });
+  var max=Math.max.apply(null, rows.map(function(r){return r.open;}).concat([1]));
   box.innerHTML=rows.map(function(r){
-    var tone = r.days<0 ? 'var(--redText)' : r.days<=7 ? 'var(--amber)' : 'var(--green)';
-    var when = r.days<0 ? Math.abs(r.days)+'d overdue' : r.days===0 ? 'today' : 'in '+r.days+'d';
-    return '<div class="nt-row"><div><div class="ob-name">'+esc(r.client)+' &middot; '+esc(r.label)+'</div>'
-      + '<div class="ob-meta">target '+fmtDate(r.target)+'</div></div>'
-      + '<span class="nt-tag" style="color:'+tone+'">'+when+'</span></div>';
+    return '<div class="own-cell"><span class="nm">'+r.o+'</span>'
+      + '<div class="own-bar"><div style="width:'+(r.open/max*100)+'%;background:'+(r.blocked?'var(--redText)':'var(--blue)')+'"></div></div>'
+      + '<span class="own-n"><b>'+r.open+'</b>'+(r.blocked?' &middot; <span style="color:var(--redText)">'+r.blocked+'&#9888;</span>':'')+'</span></div>';
   }).join('');
-}
-
-// THIS WEEK'S CLIENT COMMS — Monday / Friday draft status per client, read
-// from the shared Weekly Updates store. Gives a send-checklist at a glance.
-var UPDATES_KEY='sabel-weekly-updates-v1';
-var UPDATES_STORE=null, UPDATES_OK=false;
-function thisMondayISO(){
-  var d=new Date(); d.setHours(0,0,0,0);
-  d.setDate(d.getDate()-((d.getDay()+6)%7));
-  return d.toISOString().slice(0,10);
-}
-function loadUpdates(){
-  return fetch(API+'?key='+encodeURIComponent(UPDATES_KEY)+'&_t='+Date.now(),{cache:'no-store'})
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(j){
-      UPDATES_OK = !!(j && j.ok);
-      UPDATES_STORE = (UPDATES_OK && j.data && typeof j.data==='object') ? j.data : null;
-      renderUpdatesBoard();
-    }).catch(function(){ UPDATES_OK=false; renderUpdatesBoard(); });
-}
-function updPill(e){
-  if(!e || !e.text) return '<span class="nt-tag" style="color:var(--mono)">&mdash;</span>';
-  var col = e.status==='sent' ? 'var(--green)' : e.status==='reviewed' ? 'var(--blue)' : 'var(--amber)';
-  var lbl = e.status==='sent' ? 'Sent' : e.status==='reviewed' ? 'Reviewed' : 'Draft';
-  return '<span class="nt-tag" style="color:'+col+'">'+lbl+'</span>';
-}
-function renderUpdatesBoard(){
-  var box=document.getElementById('updBox'); if(!box) return;
-  if(!UPDATES_OK){
-    box.innerHTML='<div class="empty">Weekly Updates store not reachable yet. Add <b>sabel-weekly-updates-v1</b> to ALLOWED_KEYS in the webhook, then this shows each client\'s Monday and Friday message status for the week.</div>';
-    document.getElementById('updCount').textContent='';
-    return;
-  }
-  var wk=(UPDATES_STORE && UPDATES_STORE.weeks && UPDATES_STORE.weeks[thisMondayISO()]) || {monday:{},friday:{}};
-  var names=TRACKERS.map(function(t){ return t.name; });
-  var sent=0, total=0;
-  var html=names.map(function(n){
-    var m=(wk.monday||{})[n], f=(wk.friday||{})[n];
-    total+=2; if(m&&m.status==='sent')sent++; if(f&&f.status==='sent')sent++;
-    return '<div class="nt-row"><span class="nt-name" style="font-weight:600;color:var(--w)">'+esc(n)+'</span>'
-      + '<span class="nt-right">Mon '+updPill(m)+' &nbsp; Fri '+updPill(f)+'</span></div>';
-  }).join('');
-  document.getElementById('updCount').textContent=sent+'/'+total+' sent';
-  box.innerHTML=html || '<div class="empty">No active clients.</div>';
 }
 
 function renderKPIs(g){
@@ -1043,14 +1143,14 @@ function renderActive(list){
 // Compact stacked row (default)
 function activeRow(tr){
   var url=BASE+tr.file;
-  var nm='<a href="'+url+'" target="_blank" rel="noopener">'+tr.name+'</a>';
+  var nm='<a href="'+url+'" target="_blank" rel="noopener">'+esc(tr.name)+'</a>';
   if(!tr.live || !tr.t){
     return '<div class="arow gray"><span class="ar-dot"></span>'
       + '<div class="ar-main"><div class="ar-nm">'+nm+' <span class="ar-gl">'+(tr.keyPending?'· live key pending':'· no live data yet')+'</span></div></div>'
       + '<div class="ar-meta"></div><div class="ar-days"><div class="d1">—</div></div>'
       + '<a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open &rarr;</a></div>';
   }
-  var t=tr.t, total=t.total||1, days=daysBetween(tr.golive), light=lightFor(days);
+  var t=tr.t, total=t.total||1, days=daysBetween(tr.golive), h=health(tr), light=h.cls;
   var dtxt = days===null?'TBC':days<0?Math.abs(days)+'d':days===0?'Today':days+'d';
   var dlbl = days===null?'tbc':days<0?'overdue':'go-live';
   var open=t.total-t.done, risk=t.blocked+t.dep, pct=Math.round(t.done/total*100);
@@ -1058,8 +1158,8 @@ function activeRow(tr){
   return '<div class="arow '+light+'">'
     + '<span class="ar-dot"></span>'
     + '<div class="ar-main"><div class="ar-nm">'+nm+' <span class="ar-gl">· go-live '+fmtDate(tr.golive)+'</span>'+glSrcChip(tr)+glEdit(tr)+'</div>'
-    +   '<div class="ar-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+'</div>'+naLine(tr)+'</div>'
-    + '<div class="ar-meta"><span class="ar-pct">'+pct+'%</span>'+(hoursTxt(tr)?'<span class="ar-chip hrs">'+hoursTxt(tr)+'</span>':'')+'<span class="ar-chip">'+open+' open</span>'+(risk?'<span class="ar-chip risk">'+risk+' risk</span>':'')+(overdueTasks(tr).length?'<span class="ar-chip od">⚠ '+overdueTasks(tr).length+'</span>':'')+'</div>'
+    +   '<div class="ar-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+seg(t.other,'var(--mono)')+'</div>'+naLine(tr)+'</div>'
+    + '<div class="ar-meta"><span class="ar-chip hl '+h.cls+'">'+h.lbl+(h.why?' &middot; '+h.why:'')+'</span><span class="ar-pct">'+pct+'%</span>'+(hoursTxt(tr)?'<span class="ar-chip hrs">'+hoursTxt(tr)+'</span>':'')+'<span class="ar-chip">'+open+' open</span>'+(risk?'<span class="ar-chip risk">'+risk+' risk</span>':'')+(overdueTasks(tr).length?'<span class="ar-chip od">⚠ '+overdueTasks(tr).length+'</span>':'')+'</div>'
     + '<div class="ar-days"><div class="d1">'+dtxt+'</div><div class="d2">'+dlbl+'</div></div>'
     + '<a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open &rarr;</a>'
     + '</div>';
@@ -1068,23 +1168,23 @@ function activeRow(tr){
 // Detailed card (density=detailed)
 function activeCard(tr){
   var url=BASE+tr.file;
-  var link='<a href="'+url+'" target="_blank" rel="noopener">'+tr.name+'</a>';
+  var link='<a href="'+url+'" target="_blank" rel="noopener">'+esc(tr.name)+'</a>';
   if(!tr.live || !tr.t){
     return '<div class="pcard gray"><div class="pc-top"><div><div class="pc-name">'+link+'</div></div></div>'
       + '<div class="pc-pending">'+(tr.keyPending?'Live data pending — key not confirmed':'No live data returned yet')+'</div>'
       + '<div class="pc-foot"><span class="hrs na">Data not available</span><a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open tracker &rarr;</a></div></div>';
   }
   var t=tr.t, total=t.total||1;
-  var days=daysBetween(tr.golive), light=lightFor(days);
+  var days=daysBetween(tr.golive), h=health(tr), light=h.cls;
   var dtxt = days===null ? 'TBC' : days<0 ? Math.abs(days)+'d' : days===0 ? 'Today' : days+'d';
   var dlbl = days===null ? 'date TBC' : days<0 ? 'overdue' : 'to go-live';
   var open=t.total-t.done, risk=t.blocked+t.dep, pct=Math.round(t.done/total*100);
   var seg=function(n,c){ return n? '<div style="width:'+(n/total*100)+'%;background:'+c+'"></div>':''; };
   var ov=overdueTasks(tr).length, ht=hoursTxt(tr);
   return '<div class="pcard '+light+'">'
-    + '<div class="pc-top"><div><div class="pc-name">'+link+'</div><div class="pc-open">'+pct+'% complete &middot; go-live '+fmtDate(tr.golive)+' '+glSrcChip(tr)+glEdit(tr)+'</div></div>'
+    + '<div class="pc-top"><div><div class="pc-name">'+link+'</div><div class="pc-open"><span class="pc-health '+h.cls+'">'+h.lbl+(h.why?' &middot; '+h.why:'')+'</span> &middot; '+pct+'% complete &middot; go-live '+fmtDate(tr.golive)+' '+glSrcChip(tr)+glEdit(tr)+'</div></div>'
     +   '<div class="pc-days"><div class="d1">'+dtxt+'</div><div class="d2">'+dlbl+'</div></div></div>'
-    + '<div class="pc-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+'</div>'
+    + '<div class="pc-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+seg(t.other,'var(--mono)')+'</div>'
     + '<div class="pc-stats">'
     +   '<div class="pc-stat"><div class="n">'+open+'</div><div class="l">Open</div></div>'
     +   '<div class="pc-stat red"><div class="n">'+risk+'</div><div class="l">At risk</div></div>'
@@ -1135,34 +1235,34 @@ document.addEventListener('click',function(e){
 });
 
 function renderOffboarding(list){
-  var visible=list.filter(function(tr){ return OFFB_CLOSED.indexOf(tr.name)===-1; });
+  var visible=list.filter(function(tr){ return SHARED.offbClosed.indexOf(tr.name)===-1; });
   document.getElementById('offbCount').textContent=visible.length;
   var el=document.getElementById('offbBox');
   if(!visible.length){ el.innerHTML='<div class="empty">Nothing awaiting close-out. Projects appear here when every task in their tracker is complete.</div>'; return; }
   el.innerHTML=visible.map(function(tr){
     var url=BASE+tr.file;
     var arg=JSON.stringify(tr.name).replace(/"/g,'&quot;');
-    return '<div class="ob-row"><div><div class="ob-name"><a href="'+url+'" target="_blank" rel="noopener">'+tr.name+'</a></div>'
+    return '<div class="ob-row"><div><div class="ob-name"><a href="'+url+'" target="_blank" rel="noopener">'+esc(tr.name)+'</a></div>'
       + '<div class="ob-meta">All '+tr.t.total+' tasks complete &middot; go-live '+fmtDate(tr.golive)+'</div></div>'
       + '<button class="ob-btn" title="Mark closed out — offboarding pack sent" onclick="closeOffb('+arg+')">&#10003; Mark closed out</button></div>';
   }).join('');
 }
 
 function renderNoTracker(){
-  var list = NO_TRACKER.filter(function(n){ return NT_REMOVED.indexOf(n)===-1; });
+  var list = NO_TRACKER.filter(function(n){ return SHARED.ntRemoved.indexOf(n)===-1; });
   document.getElementById('ntCount').textContent=list.length;
   var box=document.getElementById('ntBox');
   if(!list.length){ box.innerHTML='<div class="empty">All clear — every client here now has a tracker or has been closed out.</div>'; return; }
   box.innerHTML = list.map(function(n){
     var arg = JSON.stringify(n).replace(/"/g,'&quot;');
-    return '<div class="nt-row"><span class="nt-name">'+n+'</span>'
-      + '<span class="nt-right"><span class="nt-tag">no live tracker</span>'
+    return '<div class="nt-row"><span class="nt-name">'+esc(n)+'</span>'
+      + '<span class="nt-right"><span class="nt-tag">no tracker</span>'
       + '<button class="nt-del" title="Remove from list" onclick="removeNT('+arg+')">&times;</button></span></div>';
   }).join('');
 }
 function removeNT(n){
-  if(NT_REMOVED.indexOf(n)===-1) NT_REMOVED.push(n);
-  localStorage.setItem('sabel_nt_removed', JSON.stringify(NT_REMOVED));
+  if(SHARED.ntRemoved.indexOf(n)===-1) SHARED.ntRemoved.push(n);
+  pushShared();
   renderNoTracker();
 }
 
@@ -1237,20 +1337,49 @@ function renderTimeline(active){
 }
 
 // ──────────────────────────────────────────────────────────────
-// AUTO-PICKUP: optional registry file so new trackers can be added
-// in ONE place (Intake-forms/trackers.json) without editing this file.
-// If trackers.json is present it replaces the built-in list; otherwise
-// the built-in TRACKERS list above is used. Either way it just works.
+// AUTO-PICKUP: registry file so new trackers, SOW hours, contract
+// start dates and the no-tracker list can all be maintained in ONE
+// place (Intake-forms/trackers.json) without editing this file.
+// Accepts either:
+//   [ {name, key, file, sowHours?, contractStart?}, ... ]           (array)
+//   { trackers:[...], noTracker:[...], contracts:[{name,start}] }   (object)
+// Registry entries are MERGED with the built-in list: registry wins,
+// but built-in sowHours is kept as a fallback when the registry
+// doesn't provide one. This is the single source of truth pattern —
+// every fact has one home and everything else reads from it.
 // ──────────────────────────────────────────────────────────────
+function applyRegistry(list){
+  if(!Array.isArray(list) || !list.length) return;
+  var builtin={}; TRACKERS.forEach(function(t){ builtin[t.name]=t; });
+  TRACKERS = list.filter(function(t){ return t && t.name && t.file; }).map(function(t){
+    var fb = builtin[t.name] || {};
+    return {
+      name: t.name,
+      key: t.key || fb.key || null,
+      file: t.file,
+      sowHours: (t.sowHours!=null) ? t.sowHours : (fb.sowHours!=null ? fb.sowHours : null),
+      contractStart: t.contractStart || fb.contractStart || ''
+    };
+  });
+}
+function rebuildContracts(extra){
+  CONTRACTS = TRACKERS.filter(function(t){ return t.contractStart; })
+    .map(function(t){ return {name:t.name, start:t.contractStart}; });
+  (extra||[]).forEach(function(c){
+    if(c && c.name && c.start && !CONTRACTS.some(function(x){ return x.name===c.name; })) CONTRACTS.push(c);
+  });
+}
 function loadConfig(){
   return fetch(BASE+'trackers.json',{cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(j){ if(Array.isArray(j) && j.length){
-      // honour the registry's active flag: inactive clients are done and
-      // dusted, so keep them off the live board entirely.
-      TRACKERS = j.filter(function(t){ return t.active!==false; });
-    } })
-    .catch(function(){ /* no registry — keep built-in list */ });
+    .then(function(j){
+      if(!j) { rebuildContracts(); return; }
+      if(Array.isArray(j)){ applyRegistry(j); rebuildContracts(); return; }
+      applyRegistry(j.trackers);
+      if(Array.isArray(j.noTracker) && j.noTracker.length) NO_TRACKER = j.noTracker;
+      rebuildContracts(j.contracts);
+    })
+    .catch(function(){ rebuildContracts(); /* no registry — keep built-in list */ });
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -1262,8 +1391,9 @@ render();                                   // paint shell immediately
 applyWidgets();                             // honour saved widget visibility
 loadNotes();                                // pull the team's shared notes
 loadOverrides();                            // pull shared go-live overrides
-loadConfig().then(function(){ loadLive(false); loadUpdates(); }); // registry (if any) → live data
-setInterval(function(){ loadLive(false); loadNotes(); loadOverrides(); loadUpdates(); }, REFRESH_MS); // keep it live
+loadShared();                               // pull shared close-outs / removals
+loadConfig().then(function(){ loadLive(false); }); // registry (if any) → live data
+setInterval(function(){ loadLive(false); loadNotes(); loadOverrides(); loadShared(); }, REFRESH_MS); // keep it live
 </script>
 </body>
 </html>
