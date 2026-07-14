@@ -610,15 +610,14 @@ function buildMonday(name, tasks){
   var msg=pick(['Morning! Quick look at the week ahead.','Happy Monday! Here is what this week looks like.','Morning all! A quick heads-up on the week.','Hi team! Here is the plan for the week.'],s);
   if(ours.length){
     msg+='\n\nOn our side this week:\n'+ours.slice(0,4).map(function(t){
-      return '• '+t.title+(t.date?' ('+niceDay(t.date)+')':'');
+      return '• '+t.title;
     }).join('\n');
   }
   var asks=needNow.concat(needWeek);
   if(asks.length){
-    msg+='\n\n'+pick(['To keep things moving, we would love a hand with:','A couple of things we need from your side:','From your side, when you get a chance:'],s)+'\n'
+    msg+='\n\nWe need these items actioned on your side:\n'
       + asks.slice(0,4).map(function(t){
-          var d=dISO(t.date), late=d&&d<today;
-          return '• '+t.title+(t.date?(late?' (was due '+niceDay(t.date)+')':' (by '+niceDay(t.date)+')'):'');
+          return '• '+t.title;
         }).join('\n');
     if(needNow.length) msg+='\n\nThe first '+(needNow.length===1?'one is':'couple are')+' holding up our build, so '+(needNow.length===1?'that one':'those')+' first if you can.';
   }
@@ -648,13 +647,11 @@ function buildFriday(name, tasks, snap){
     msg+='\n\nA quieter week on visible changes, but things are moving along in the background.';
   }
   if(coming.length){
-    msg+='\n\nComing up next week:\n'+coming.slice(0,3).map(function(t){ return '• '+t.title+(t.date?' ('+niceDay(t.date)+')':''); }).join('\n');
+    msg+='\n\nComing up next week:\n'+coming.slice(0,3).map(function(t){ return '• '+t.title; }).join('\n');
   }
   if(need.length){
-    msg+='\n\nTo keep things moving, could you get us '+(need.length===1
-      ? need[0].title.charAt(0).toLowerCase()+need[0].title.slice(1)
-      : 'these when you get a chance:\n'+need.slice(0,3).map(function(t){ return '• '+t.title; }).join('\n'));
-    if(need.length===1) msg+=' when you get a chance?';
+    msg+='\n\nWe need these items actioned on your side:\n'
+      + need.slice(0,3).map(function(t){ return '• '+t.title; }).join('\n');
   }
   msg+='\n\n'+pick(['Have a lovely weekend!','Enjoy the weekend, speak Monday!','Have a good one, back at it Monday!'],s+1);
   return msg;
