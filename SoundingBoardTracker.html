@@ -92,7 +92,7 @@ const GO_LIVE='2026-11-06';  // [CLIENT] go-live date YYYY-MM-DD, or '' to hide 
 const GO_LIVE_NOTE='Cutover to Intercom, Fin live on all channels';  // [CLIENT] one-line note
 const ALL_STATUSES=['Complete','In Progress','Pending','Blocked','Dependency'];
 const SABEL_TEAM=["Greg", "Richard", "Mary"];
-const BUILD_V=202607151019;  // set automatically by the build script from the build timestamp; do not edit
+const BUILD_V=202607152114;  // set automatically by the build script from the build timestamp; do not edit
 const P=[{"id": "setup", "l": "Setup & Access", "c": "#F87171", "w": "Week 1", "d": "Sep 14-18", "h": 0}, {"id": "inspect", "l": "Inspect & Design", "c": "#FBBF24", "w": "Weeks 2-3", "d": "Sep 21-Oct 2", "h": 0}, {"id": "foundations", "l": "Workspace Build", "c": "#3B82F6", "w": "Week 4", "d": "Oct 5-9", "h": 0}, {"id": "knowledge", "l": "Knowledge Base", "c": "#10B981", "w": "Week 5", "d": "Oct 12-16", "h": 0}, {"id": "fin", "l": "Fin AI & Jira", "c": "#C084FC", "w": "Week 6", "d": "Oct 19-23", "h": 0}, {"id": "migration", "l": "Migration & UAT", "c": "#6366F1", "w": "Week 7", "d": "Oct 26-30", "h": 0}, {"id": "golive", "l": "Go-live & Hypercare", "c": "#E10600", "w": "Week 8", "d": "Nov 2-6", "h": 0}];
 const OW={"Greg": {"c": "#34D399", "bg": "rgba(52,211,153,.15)"}, "Richard": {"c": "#C084FC", "bg": "rgba(192,132,252,.15)"}, "Mary": {"c": "#60A5FA", "bg": "rgba(96,165,250,.15)"}, "SB": {"c": "#FBBF24", "bg": "rgba(251,191,36,.15)"}};
 const SC={
@@ -442,14 +442,17 @@ function currentWeek(){
   const now=new Date(); now.setHours(0,0,0,0);
   const mx=maxWeek()+8; let cur=0;
   for(let n=1;n<=mx;n++){ if(weekStartDate(n)<=now) cur=n; }
-  return cur<1?1:cur;
+  return cur; // 0 = today is before Week 1 starts (project not yet begun)
 }
 function focusWeek(){
+  // The week the This week panel shows. now:true only when that week genuinely
+  // contains today; before the project starts (currentWeek 0) the first week
+  // with tasks is shown as "Coming up" instead of masquerading as this week.
   const cw=currentWeek(), mx=maxWeek();
   const has=n=>{const g=weekGroups('Week '+n);return (g.sabel.length+g.client.length)>0;};
-  if(has(cw))return{n:cw,now:true};
-  for(let n=cw+1;n<=mx+8;n++){ if(has(n))return{n,now:false}; }
-  return{n:cw,now:true};
+  if(cw>=1&&has(cw))return{n:cw,now:true};
+  for(let n=Math.max(cw,0)+1;n<=mx+8;n++){ if(has(n))return{n,now:false}; }
+  return{n:cw<1?1:cw,now:cw>=1};
 }
 function ovMetrics(gs){
   const pct=gs.total>0?Math.round(gs.complete/gs.total*100):0;
