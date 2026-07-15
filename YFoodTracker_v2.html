@@ -92,7 +92,7 @@ const GO_LIVE='2026-09-22';  // [CLIENT] go-live date YYYY-MM-DD, or '' to hide 
 const GO_LIVE_NOTE='Go-live, Intercom opens to customers across all channels';  // [CLIENT] one-line note
 const ALL_STATUSES=['Complete','In Progress','Pending','Blocked','Dependency'];
 const SABEL_TEAM=['Chris','Richard','Greg'];
-const BUILD_V=202607151326;  // set automatically by the build script from the build timestamp; do not edit
+const BUILD_V=202607152135;  // set automatically by the build script from the build timestamp; do not edit
 const P=[{"id": "setup", "l": "Setup", "c": "#64748B", "w": "Week 1", "d": "Jul 1-7", "h": 2}, {"id": "foundations", "l": "Foundations", "c": "#3B82F6", "w": "Weeks 1-2", "d": "Jul 6-19", "h": 14}, {"id": "fin", "l": "Fin AI & API", "c": "#10B981", "w": "Weeks 3-4", "d": "Jul 20-Aug 4", "h": 10}, {"id": "integrations", "l": "Integrations", "c": "#9333EA", "w": "Weeks 6-8", "d": "Aug 10-30", "h": 8}, {"id": "uat", "l": "UAT & testing", "c": "#E10600", "w": "Weeks 9-11", "d": "Aug 31-Sep 20", "h": 6}, {"id": "post", "l": "Post go-live", "c": "#94A3B8", "w": "Week 12+", "d": "Sep 21-Oct 4", "h": 4}];
 const OW={
   Chris:{c:'#60A5FA',bg:'rgba(96,165,250,.15)'},
@@ -447,14 +447,17 @@ function currentWeek(){
   const now=new Date(); now.setHours(0,0,0,0);
   const mx=maxWeek()+8; let cur=0;
   for(let n=1;n<=mx;n++){ if(weekStartDate(n)<=now) cur=n; }
-  return cur<1?1:cur;
+  return cur; // 0 = today is before Week 1 starts (project not yet begun)
 }
 function focusWeek(){
+  // The week the This week panel shows. now:true only when that week genuinely
+  // contains today; before the project starts (currentWeek 0) the first week
+  // with tasks is shown as "Coming up" instead of masquerading as this week.
   const cw=currentWeek(), mx=maxWeek();
   const has=n=>{const g=weekGroups('Week '+n);return (g.sabel.length+g.client.length)>0;};
-  if(has(cw))return{n:cw,now:true};
-  for(let n=cw+1;n<=mx+8;n++){ if(has(n))return{n,now:false}; }
-  return{n:cw,now:true};
+  if(cw>=1&&has(cw))return{n:cw,now:true};
+  for(let n=Math.max(cw,0)+1;n<=mx+8;n++){ if(has(n))return{n,now:false}; }
+  return{n:cw<1?1:cw,now:cw>=1};
 }
 function ovMetrics(gs){
   const pct=gs.total>0?Math.round(gs.complete/gs.total*100):0;
