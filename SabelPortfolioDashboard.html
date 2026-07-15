@@ -18,7 +18,7 @@
   ::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}::-webkit-scrollbar-track{background:transparent;}
 
   /* header */
-  .header{position:relative;display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--border2);background:rgba(11,11,12,.9);}
+  .header{position:relative;display:flex;align-items:center;gap:16px;padding:15px 28px;border-bottom:1px solid var(--border2);background:rgba(11,11,12,.9);}
   .brand{display:flex;align-items:baseline;gap:9px;}
   .brand .logo{font-size:16px;font-weight:800;letter-spacing:.32em;color:var(--w);text-transform:uppercase;}
   .brand .logo .dot{color:var(--red);}
@@ -31,23 +31,23 @@
   .refresh-btn:hover{border-color:var(--mono);color:var(--w);}
   .refresh-btn.spin{opacity:.6;pointer-events:none;}
 
-  .wrap{max-width:1160px;margin:0 auto;padding:12px 20px 44px;}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px 28px 70px;}
 
   /* KPI strip */
-  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;}
-  .kpi{background:var(--card);border:1px solid var(--border2);border-radius:9px;padding:8px 12px;}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px;}
+  .kpi{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;}
   .kpi .lbl{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mono);margin-bottom:7px;}
-  .kpi .val{font-size:20px;font-weight:800;line-height:1;color:var(--w);}
+  .kpi .val{font-size:27px;font-weight:800;line-height:1;color:var(--w);}
   .kpi .sub{font-size:10px;color:var(--mono);margin-top:5px;}
   .kpi.risk .val{color:var(--redText);}
   .kpi.live .val{color:var(--green);}
 
   /* section titles */
-  .sec-title{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;display:flex;align-items:center;gap:8px;}
+  .sec-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;display:flex;align-items:center;gap:9px;}
   .sec-title .count{font-size:9px;color:var(--mono);background:var(--card2);border:1px solid var(--border2);padding:1px 8px;border-radius:20px;}
 
   /* pinch graph */
-  .pinch{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:12px 16px 8px;margin-bottom:14px;}
+  .pinch{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:18px 22px 14px;margin-bottom:24px;}
   .pinch-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
   .pinch-head h2{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--w);}
   .pinch-head .legend{display:flex;gap:14px;flex-wrap:wrap;}
@@ -70,7 +70,7 @@
   .tl-tip b{color:#FCA5A5;} .tl-tip .d{color:var(--muted);font-weight:500;}
 
   /* main layout */
-  .layout{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;}
+  .layout{display:grid;grid-template-columns:1fr 360px;gap:22px;align-items:start;}
   @media(max-width:980px){.layout{grid-template-columns:1fr;}}
 
   .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
@@ -104,23 +104,23 @@
   .pc-pending{font-size:10px;color:var(--amber);font-style:italic;margin:4px 0 8px;}
 
   /* side column */
-  .side-box{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:11px 13px 5px;margin-bottom:14px;}
+  .side-box{background:var(--card);border:1px solid var(--border2);border-radius:11px;padding:16px 16px 8px;margin-bottom:18px;}
   .side-box.offb{border-color:rgba(74,222,128,.3);}
-  .ob-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid var(--border2);}
+  .ob-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid var(--border2);}
   .ob-row:last-child{border-bottom:none;}
   .ob-name{font-size:12.5px;font-weight:600;color:var(--w);}
   .ob-name a{color:var(--w);} .ob-name a:hover{color:var(--green);text-decoration:underline;}
   .ob-meta{font-size:9px;color:var(--mono);margin-top:2px;}
   .ob-badge{font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:rgba(74,222,128,.15);color:var(--green);white-space:nowrap;}
-  .nt-row{display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px solid var(--border2);}
+  .nt-row{display:flex;align-items:center;justify-content:space-between;padding:8px 2px;border-bottom:1px solid var(--border2);}
   .nt-row:last-child{border-bottom:none;}
   .nt-name{font-size:12px;color:var(--body);}
   .nt-tag{font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mono);}
   .empty{font-size:11px;color:var(--mono);padding:8px 2px 14px;}
 
   /* compact rows (active list, density=compact) */
-  .rows{display:flex;flex-direction:column;gap:5px;}
-  .arow{display:grid;grid-template-columns:auto 1fr auto auto auto;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border2);border-left-width:3px;border-radius:8px;padding:6px 12px;}
+  .rows{display:flex;flex-direction:column;gap:7px;}
+  .arow{display:grid;grid-template-columns:auto 1fr auto auto auto;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border2);border-left-width:3px;border-radius:8px;padding:9px 14px;}
   .arow.green{border-left-color:var(--green);} .arow.amber{border-left-color:var(--amber);} .arow.red{border-left-color:var(--redText);} .arow.gray{border-left-color:var(--mono);}
   .ar-dot{width:9px;height:9px;border-radius:50%;background:var(--mono);flex-shrink:0;}
   .arow.green .ar-dot{background:var(--green);} .arow.amber .ar-dot{background:var(--amber);} .arow.red .ar-dot{background:var(--redText);}
@@ -151,14 +151,6 @@
   .ar-pct{font-size:12px;font-weight:800;color:var(--body);}
   .ar-chip{font-size:9px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--border2);padding:2px 7px;border-radius:20px;white-space:nowrap;}
   .ar-chip.risk{color:var(--redText);border-color:rgba(248,113,113,.3);}
-  .ar-chip.hl{font-weight:800;}
-  .ar-chip.hl.green{color:var(--green);border-color:rgba(74,222,128,.35);}
-  .ar-chip.hl.amber{color:var(--amber);border-color:rgba(251,191,36,.35);}
-  .ar-chip.hl.red{color:var(--redText);border-color:rgba(248,113,113,.35);}
-  .ar-chip.hl.gray{color:var(--mono);}
-  .pc-health{font-weight:800;} .pc-health.green{color:var(--green);} .pc-health.amber{color:var(--amber);} .pc-health.red{color:var(--redText);} .pc-health.gray{color:var(--mono);}
-  .ap-legend{font-size:9.5px;color:var(--mono);margin:-2px 0 8px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-  .ap-legend .ld{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:-1px;}
   .ar-days{text-align:right;min-width:52px;}
   .ar-days .d1{font-size:14px;font-weight:800;white-space:nowrap;}
   .ar-days .d2{font-size:7.5px;color:var(--mono);text-transform:uppercase;letter-spacing:.05em;}
@@ -171,35 +163,21 @@
 
   .na-line{font-size:10px;color:var(--mono);margin-top:6px;}
   .na-line b{color:var(--body);font-weight:600;}
-  /* needs-attention: per-client accordion (one open at a time) */
-  .attn-inner{padding:0 14px 12px;}
-  .own-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 10px;}
-  @media(max-width:680px){.own-strip{grid-template-columns:1fr;}}
-  .own-cell{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border2);border-radius:7px;padding:6px 10px;}
-  .own-cell .nm{font-size:10px;font-weight:800;color:var(--w);width:52px;flex-shrink:0;}
-  .own-cell .own-n{font-size:9.5px;color:var(--muted);white-space:nowrap;}
-  .own-cell .own-n b{color:var(--body);}
-  .own-bar{flex:1;height:5px;background:var(--surface);border-radius:3px;overflow:hidden;}
+  /* attention panels */
+  .attn{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:28px;}
+  @media(max-width:980px){.attn{grid-template-columns:1fr;}}
+  .task-row{padding:9px 2px;border-bottom:1px solid var(--border2);}
+  .task-row:last-child{border-bottom:none;}
+  .task-row .tx{font-size:12px;color:var(--body);line-height:1.4;}
+  .task-row .tx b{color:var(--w);font-weight:700;}
+  .task-row .meta{font-size:9px;color:var(--mono);margin-top:3px;text-transform:uppercase;letter-spacing:.04em;}
+  .own-row{display:flex;align-items:center;gap:12px;padding:9px 2px;border-bottom:1px solid var(--border2);}
+  .own-row:last-child{border-bottom:none;}
+  .own-name{font-size:12px;font-weight:700;color:var(--w);width:84px;flex-shrink:0;}
+  .own-bar{flex:1;height:6px;background:var(--surface);border-radius:3px;overflow:hidden;}
   .own-bar > div{height:100%;}
-  .ac{border:1px solid var(--border2);border-radius:8px;background:var(--card2);margin-bottom:5px;overflow:hidden;}
-  .ac > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:7px 11px;}
-  .ac > summary::-webkit-details-marker{display:none;}
-  .ac > summary .ad-chev{font-size:10px;color:var(--mono);transition:transform .15s;}
-  .ac[open] > summary .ad-chev{transform:rotate(90deg);}
-  .ac .nm{font-size:12px;font-weight:800;color:var(--w);}
-  .ac .chips{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
-  .a-chip{font-size:8px;font-weight:800;letter-spacing:.03em;padding:2px 7px;border-radius:20px;white-space:nowrap;}
-  .a-chip.b{background:rgba(248,113,113,.14);color:var(--redText);}
-  .a-chip.w{background:rgba(251,191,36,.13);color:var(--amber);}
-  .a-chip.o{background:rgba(192,132,252,.13);color:var(--purple);}
-  .ac-body{padding:1px 11px 8px;border-top:1px solid var(--border2);}
-  .ac-row{display:flex;align-items:flex-start;gap:8px;padding:4px 0;border-bottom:1px solid var(--border2);font-size:11px;color:var(--body);line-height:1.35;}
-  .ac-row:last-child{border-bottom:none;}
-  .ac-tag{flex-shrink:0;font-size:7px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:3px;margin-top:1px;}
-  .ac-tag.b{background:rgba(248,113,113,.15);color:var(--redText);}
-  .ac-tag.w{background:rgba(251,191,36,.14);color:var(--amber);}
-  .ac-tag.o{background:rgba(192,132,252,.14);color:var(--purple);}
-  .ac-meta{color:var(--mono);font-size:9px;margin-left:auto;white-space:nowrap;padding-top:2px;flex-shrink:0;}
+  .own-nums{font-size:10px;color:var(--muted);white-space:nowrap;min-width:120px;text-align:right;}
+  .own-nums b{color:var(--body);}
 
   /* priority hero */
   .hero{background:linear-gradient(160deg,rgba(225,6,0,.10),var(--card));border:1px solid rgba(225,6,0,.35);border-radius:13px;padding:18px 20px;margin-bottom:24px;box-shadow:0 0 26px rgba(225,6,0,.06);}
@@ -220,12 +198,13 @@
   @media(max-width:640px){.prio-item{grid-template-columns:74px 1fr;}.prio-when{display:none;}}
 
   /* needs-attention collapsible */
-  .attn-drop{background:var(--card);border:1px solid var(--border2);border-radius:10px;margin:14px 0 0;overflow:hidden;}
-  .attn-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+  .attn-drop{background:var(--card);border:1px solid var(--border2);border-radius:11px;margin-bottom:24px;overflow:hidden;}
+  .attn-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 18px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
   .attn-drop > summary::-webkit-details-marker{display:none;}
   .attn-drop .ad-counts{font-size:10px;font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--mono);}
   .attn-drop .ad-chev{margin-left:auto;transition:transform .15s;color:var(--mono);font-size:12px;}
   .attn-drop[open] .ad-chev{transform:rotate(90deg);}
+  .attn-drop .attn{margin-top:0;padding:0 18px 14px;}
   .sec-sub{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);margin:6px 0 8px;display:flex;align-items:center;gap:8px;}
   /* widget config panel */
   .cfg-wrap{position:relative;}
@@ -239,29 +218,29 @@
   .weekly-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px;}
   .weekly-head h2{font-size:14px;font-weight:800;letter-spacing:.03em;color:var(--w);text-transform:uppercase;}
   .week-nav{display:flex;align-items:center;gap:8px;}
-  .wk-btn{padding:3px 9px;border-radius:5px;background:var(--card2);border:1px solid var(--border);color:var(--body);font-size:10px;font-weight:700;}
+  .wk-btn{padding:5px 11px;border-radius:6px;background:var(--card2);border:1px solid var(--border);color:var(--body);font-size:11px;font-weight:700;}
   .wk-btn:hover{border-color:var(--mono);color:var(--w);}
   .wk-today{color:#FCA5A5;}
-  .wk-label{font-size:10.5px;font-weight:700;color:var(--body);min-width:145px;text-align:center;}
-  .weekly-sub{font-size:9.5px;color:var(--mono);margin-bottom:8px;}
+  .wk-label{font-size:11px;font-weight:700;color:var(--body);min-width:158px;text-align:center;}
+  .weekly-sub{font-size:10px;color:var(--mono);margin-bottom:14px;}
   .weekly-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
   @media(max-width:760px){.weekly-cols{grid-template-columns:1fr;}}
   .wk-col{background:var(--card2);border:1px solid var(--border2);border-radius:9px;padding:11px 12px;min-height:64px;}
   .wk-col-h{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--w);text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
   .wk-n{font-size:9px;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1px 7px;}
-  .wk-item{display:flex;align-items:flex-start;gap:7px;padding:4px 0;border-bottom:1px solid var(--border2);}
+  .wk-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border2);}
   .wk-item:last-child{border-bottom:none;}
   .wk-item.done .wk-tx{opacity:.55;} .wk-item.done .wk-tx b{text-decoration:line-through;}
-  .wk-dot{width:7px;height:7px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+  .wk-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
   .wk-body{min-width:0;flex:1;}
-  .wk-tx{font-size:10.5px;color:var(--body);line-height:1.3;min-width:0;}
+  .wk-tx{font-size:11.5px;color:var(--body);line-height:1.35;min-width:0;}
   .wk-tx b{color:var(--w);font-weight:700;}
   .wk-empty{font-size:11px;color:var(--mono);padding:4px 0;}
   /* weekly plan — per-task actions + notes */
-  .wk-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:3px;}
+  .wk-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:5px;}
   .wk-tracker{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#FCA5A5;white-space:nowrap;}
   .wk-tracker:hover{color:#fff;text-decoration:underline;}
-  .wk-note-btn{font-size:8px;font-weight:700;letter-spacing:.03em;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:1px 7px;transition:.12s;}
+  .wk-note-btn{font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:2px 8px;transition:.12s;}
   .wk-note-btn:hover{border-color:var(--mono);color:var(--w);}
   .wk-note-btn.has{color:var(--amber);border-color:rgba(251,191,36,.35);}
   .wk-note{font-size:10.5px;color:var(--body);background:var(--surface);border:1px solid var(--border2);border-left:2px solid var(--amber);border-radius:5px;padding:5px 8px;margin-top:6px;white-space:pre-wrap;line-height:1.4;word-break:break-word;}
@@ -269,13 +248,13 @@
   .wk-note-edit:focus{outline:none;border-color:var(--amber);}
   .wk-note-hint{font-size:8.5px;color:var(--mono);margin-top:3px;}
   /* weekly plan — collapsible, grouped by client */
-  .wk-drop{background:linear-gradient(160deg,rgba(225,6,0,.08),var(--card));border:1px solid rgba(225,6,0,.30);border-radius:10px;margin-bottom:14px;overflow:hidden;}
-  .wk-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--w);}
+  .wk-drop{background:linear-gradient(160deg,rgba(225,6,0,.08),var(--card));border:1px solid rgba(225,6,0,.30);border-radius:12px;margin-bottom:24px;overflow:hidden;box-shadow:0 0 22px rgba(225,6,0,.05);}
+  .wk-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 18px;font-size:14px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--w);}
   .wk-drop > summary::-webkit-details-marker{display:none;}
   .wk-drop .wk-sum{font-size:10px;font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--mono);}
   .wk-drop .ad-chev{margin-left:auto;transition:transform .15s;color:var(--mono);font-size:12px;}
   .wk-drop[open] .ad-chev{transform:rotate(90deg);}
-  .wk-inner{padding:0 14px 10px;}
+  .wk-inner{padding:0 18px 16px;}
   .wk-client{border-top:1px solid var(--border2);padding:11px 0;}
   .wk-client:first-child{border-top:none;}
   .wk-client-h{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
@@ -286,16 +265,16 @@
   /* weekly plan — collapsible client + side-by-side Sabel/Client split */
   .wk-client-drop{border-top:1px solid var(--border2);}
   .wk-client-drop:first-child{border-top:none;}
-  .wk-client-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;padding:6px 2px;}
+  .wk-client-drop > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 2px;}
   .wk-client-drop > summary::-webkit-details-marker{display:none;}
   .wk-client-drop .ad-chev{color:var(--mono);font-size:11px;transition:transform .15s;}
   .wk-client-drop[open] > summary .ad-chev{transform:rotate(90deg);}
-  .wk-cd-nm{font-size:11.5px;font-weight:800;color:var(--w);letter-spacing:.02em;}
+  .wk-cd-nm{font-size:12.5px;font-weight:800;color:var(--w);letter-spacing:.02em;}
   .wk-cd-meta{font-size:9px;color:var(--mono);}
-  .wk-cd-h-right{margin-left:auto;display:flex;align-items:center;gap:10px;text-align:right;}
-  .wk-split{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 0 8px 14px;}
+  .wk-cd-h-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .wk-split{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:2px 0 12px 16px;}
   @media(max-width:640px){.wk-split{grid-template-columns:1fr;}}
-  .wk-side{background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:6px 9px;}
+  .wk-side{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;}
   .wk-side-h{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
   .wk-side.sabel .wk-side-h{color:#FCA5A5;}
   .wk-side.client .wk-side-h{color:var(--amber);}
@@ -303,6 +282,42 @@
   /* offboarding close-out button */
   .ob-btn{font-size:10px;font-weight:700;letter-spacing:.03em;color:var(--green);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);padding:6px 11px;border-radius:6px;white-space:nowrap;cursor:pointer;}
   .ob-btn:hover{background:rgba(74,222,128,.22);color:#fff;}
+
+  /* client contracts widget */
+  .ci-box{background:linear-gradient(160deg,rgba(225,6,0,.07),var(--card));border:1px solid var(--border);border-radius:13px;padding:18px 20px;margin-bottom:24px;}
+  .ci-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px;}
+  .ci-head h2{font-size:14px;font-weight:800;letter-spacing:.03em;color:var(--w);text-transform:uppercase;}
+  .ci-head .right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .ci-select{background:var(--card2);border:1px solid var(--border);color:var(--w);font-family:inherit;font-size:12px;font-weight:700;padding:7px 10px;border-radius:6px;outline:none;cursor:pointer;min-width:210px;}
+  .ci-select:focus{border-color:var(--red);}
+  .ci-sub{font-size:10px;color:var(--mono);margin-bottom:14px;}
+  .ci-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px;}
+  @media(max-width:900px){.ci-grid{grid-template-columns:repeat(2,1fr);}}
+  .ci-cell{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;}
+  .ci-cell .l{font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);margin-bottom:5px;}
+  .ci-cell .v{font-size:12.5px;font-weight:700;color:var(--w);line-height:1.35;word-break:break-word;}
+  .ci-cell .s{font-size:9.5px;color:var(--mono);margin-top:3px;line-height:1.35;}
+  .ci-cell.hours .v{font-size:21px;font-weight:800;color:#FCA5A5;}
+  .ci-cell.mig .v.yes{color:var(--amber);} .ci-cell.mig .v.no{color:var(--green);} .ci-cell.mig .v.tbc{color:var(--mono);}
+  .ci-scope{background:var(--surface);border:1px solid var(--border2);border-left:3px solid var(--red);border-radius:8px;padding:11px 14px;}
+  .ci-scope .l{font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);margin-bottom:6px;}
+  .ci-scope p{font-size:12px;color:var(--body);line-height:1.55;}
+  .ci-mignote{font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:10px;background:var(--surface);border:1px solid var(--border2);border-left:3px solid var(--amber);border-radius:8px;padding:9px 12px;}
+  .ci-mignote b{color:var(--amber);}
+  .ci-pending{font-size:12px;color:var(--amber);font-style:italic;padding:10px 2px;}
+  .ci-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+  @media(max-width:700px){.ci-form{grid-template-columns:1fr;}}
+  .ci-form label{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mono);display:block;margin-bottom:4px;}
+  .ci-form input,.ci-form textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--w);font-family:inherit;font-size:12px;padding:7px 9px;outline:none;}
+  .ci-form input:focus,.ci-form textarea:focus{border-color:var(--blue);}
+  .ci-form textarea{resize:vertical;min-height:70px;line-height:1.5;}
+  .ci-form .full{grid-column:1/-1;}
+  .ci-actions{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;}
+  .ci-save{font-size:11px;font-weight:700;color:var(--green);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);padding:7px 14px;border-radius:6px;cursor:pointer;}
+  .ci-save:hover{background:rgba(74,222,128,.22);color:#fff;}
+  .ci-cancel{font-size:11px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--border2);padding:7px 14px;border-radius:6px;cursor:pointer;}
+  .ci-cancel:hover{color:var(--w);}
+  .ci-src{font-size:9px;color:var(--mono);margin-top:10px;letter-spacing:.03em;}
 
   footer{margin-top:30px;padding:16px 0 0;border-top:1px solid var(--border2);font-size:9px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 </style>
@@ -325,6 +340,24 @@
 
 <div class="wrap">
 
+  <div id="w-clientinfo">
+    <details class="wk-drop">
+      <summary>&#128196; Client Contracts <span class="wk-sum" id="ciSummary"></span><span class="ad-chev">&#9656;</span></summary>
+      <div class="wk-inner">
+        <div class="ci-head" style="margin-top:10px;">
+          <select class="ci-select" id="ciSelect" onchange="ciPick(this.value)"></select>
+          <div class="right">
+            <button class="refresh-btn" onclick="ciToggleEdit()" title="Edit this client's contract details">&#9998; Edit</button>
+            <button class="refresh-btn" onclick="ciAddClient()" title="Add a new client to this widget">&#65291; Add client</button>
+            <button class="refresh-btn" onclick="ciRemoveClient()" title="Remove this client once their scope is complete" style="color:var(--redText);">&#128465; Remove</button>
+          </div>
+        </div>
+        <div class="ci-sub">Hours, scope, migration, key contact and dates pulled from each client's SOW, proposal and kick-off doc in Drive. New trackers appear here automatically with details pending. Remove a client once their scope is complete.</div>
+        <div id="ciBody"></div>
+      </div>
+    </details>
+  </div>
+
   <div id="w-weekly">
     <details class="wk-drop">
       <summary>&#128197; This week's plan <span class="wk-sum" id="wkSummary"></span><span class="ad-chev">&#9656;</span></summary>
@@ -337,7 +370,7 @@
             <button class="wk-btn wk-today" onclick="shiftWeek(0,true)">This week</button>
           </div>
         </div>
-        <div class="weekly-sub">Outstanding deliverables this week, live from the trackers. Click a client to expand; add per-task notes.</div>
+        <div class="weekly-sub">Every client's scheduled deliverables for the week, grouped by client and pulled live from the trackers. Open a client's tracker with its link, and add your own notes per task.</div>
         <div class="weekly-body" id="weeklyBody"></div>
       </div>
     </details>
@@ -359,47 +392,21 @@
   </div>
 
   <div class="layout">
-    <div>
-      <div id="w-active">
-        <div class="sec-title">Active Projects <span class="count" id="activeCount">0</span></div>
-        <div class="ap-legend">
-          <span><b style="color:var(--body)">Edge colour = health:</b></span>
-          <span><span class="ld" style="background:var(--green)"></span>On track</span>
-          <span><span class="ld" style="background:var(--amber)"></span>Watch (overdue / tight)</span>
-          <span><span class="ld" style="background:var(--redText)"></span>At risk (blocked / late)</span>
-          <span style="margin-left:auto"><b style="color:var(--body)">Bar = task mix:</b></span>
-          <span><span class="ld" style="background:var(--green)"></span>Done</span>
-          <span><span class="ld" style="background:var(--blue)"></span>In progress</span>
-          <span><span class="ld" style="background:var(--amber)"></span>Pending</span>
-          <span><span class="ld" style="background:var(--purple)"></span>Waiting on client</span>
-          <span><span class="ld" style="background:var(--redText)"></span>Blocked</span>
-        </div>
-        <div class="cards" id="activeCards"></div>
-      </div>
-      <div id="w-attn">
-        <details class="attn-drop">
-          <summary>&#9888; Needs attention <span class="ad-counts" id="attnCounts"></span><span class="ad-chev">&#9656;</span></summary>
-          <div class="attn-inner">
-            <div class="own-strip" id="ownBox"></div>
-            <div id="attnBody"></div>
-          </div>
-        </details>
-      </div>
+    <div id="w-active">
+      <div class="sec-title">Active Projects <span class="count" id="activeCount">0</span></div>
+      <div class="cards" id="activeCards"></div>
     </div>
     <div>
       <div id="w-offb">
         <div class="sec-title">Offboarding &mdash; ready for close-out <span class="count" id="offbCount">0</span></div>
         <div class="side-box offb" id="offbBox"></div>
       </div>
-      <div id="w-notracker">
-        <div class="sec-title">Clients with no tracker <span class="count" id="ntCount">0</span></div>
-        <div class="side-box" id="ntBox"></div>
-      </div>
-      <div id="w-contracts">
-        <div class="sec-title" style="margin-top:8px;">&#9203; Contract expiry &mdash; final 3 months <span class="count" id="conCount">0</span></div>
-        <div class="side-box" id="conBox"></div>
-      </div>
     </div>
+  </div>
+
+  <div id="w-contracts">
+    <div class="sec-title" style="margin-top:8px;">&#9203; Contract expiry &mdash; final 3 months <span class="count" id="conCount">0</span></div>
+    <div class="side-box" id="conBox"></div>
   </div>
 
   <footer>
@@ -438,75 +445,31 @@ var SABEL_TEAM = ['Chris','Greg','Richard'];
 
 // Configurable widgets (toggle from the header ⚙ Widgets menu).
 var WIDGETS = [
+  {id:'w-clientinfo', label:'Client contracts'},
   {id:'w-weekly',   label:"This week's plan"},
   {id:'w-kpis',     label:'KPI summary'},
   {id:'w-timeline', label:'Go-live timeline'},
   {id:'w-active',   label:'Active projects'},
-  {id:'w-attn',     label:'Needs attention'},
   {id:'w-offb',     label:'Offboarding'},
-  {id:'w-notracker',label:'Clients with no tracker'},
   {id:'w-contracts',label:'Contract expiry'}
 ];
 
-// UI state — per-browser preferences only (view density, hidden widgets).
+// UI state (persisted)
+var NT_REMOVED = JSON.parse(localStorage.getItem('sabel_nt_removed')||'[]');
 var DENSITY = localStorage.getItem('sabel_density')||'compact';
 var WIDGET_HIDDEN = JSON.parse(localStorage.getItem('sabel_widgets_hidden')||'[]');
+var OFFB_CLOSED = JSON.parse(localStorage.getItem('sabel_offb_closed')||'[]');
+// Clients already closed out — baked in so it holds for the whole team, not just
+// one browser's local storage.
+['Huuuge'].forEach(function(n){ if(OFFB_CLOSED.indexOf(n)===-1) OFFB_CLOSED.push(n); });
+var CONTRACT_REMOVED = JSON.parse(localStorage.getItem('sabel_contract_removed')||'[]');
 var WEEK_OFFSET = 0;
-
-// SHARED team state — close-outs and removals live in the webhook under
-// STATE_KEY so they hold for the whole team, not just one browser.
-// IMPORTANT: add 'sabel-dashboard-state-v1' to ALLOWED_KEYS in the webhook.
-// localStorage keeps an offline copy / instant first paint. Merging is by
-// UNION (a removal made anywhere sticks) so simultaneous edits can't clobber.
-var STATE_KEY = 'sabel-dashboard-state-v1';
-var SHARED = (function(){
-  try{ var s=JSON.parse(localStorage.getItem('sabel_shared_state')||'{}');
-    return { offbClosed: s.offbClosed||[], ntRemoved: s.ntRemoved||[], contractRemoved: s.contractRemoved||[] };
-  }catch(e){ return { offbClosed:[], ntRemoved:[], contractRemoved:[] }; }
-})();
-function saveSharedLocal(){ localStorage.setItem('sabel_shared_state', JSON.stringify(SHARED)); }
-function unionInto(target, extra){ (extra||[]).forEach(function(n){ if(target.indexOf(n)===-1) target.push(n); }); }
-function loadShared(){
-  return fetch(API+'?key='+encodeURIComponent(STATE_KEY)+'&_t='+Date.now(), {cache:'no-store'})
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(j){
-      if(j && j.ok && j.data && typeof j.data==='object'){
-        unionInto(SHARED.offbClosed, j.data.offbClosed);
-        unionInto(SHARED.ntRemoved, j.data.ntRemoved);
-        unionInto(SHARED.contractRemoved, j.data.contractRemoved);
-        saveSharedLocal(); render();
-      }
-    }).catch(function(){ /* offline — keep local copy */ });
-}
-function pushShared(){
-  saveSharedLocal();
-  // merge-before-push: pull the latest remote copy first so a teammate's
-  // removal made moments ago isn't overwritten (avoids last-write-wins).
-  return fetch(API+'?key='+encodeURIComponent(STATE_KEY)+'&_t='+Date.now(), {cache:'no-store'})
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(j){
-      if(j && j.ok && j.data && typeof j.data==='object'){
-        unionInto(SHARED.offbClosed, j.data.offbClosed);
-        unionInto(SHARED.ntRemoved, j.data.ntRemoved);
-        unionInto(SHARED.contractRemoved, j.data.contractRemoved);
-      }
-      saveSharedLocal();
-      return fetch(API+'?key='+encodeURIComponent(STATE_KEY), {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ data: SHARED })
-      });
-    }).catch(function(){ /* offline — local copy still holds it */ });
-}
 
 // Weekly-plan notes (persisted, keyed by client + task so a note follows its task
 // week to week). NOTE_EDITING pauses the weekly re-render so an open note editor
 // is never wiped by the 5-minute auto-refresh.
 var WEEK_NOTES = JSON.parse(localStorage.getItem('sabel_week_notes')||'{}');
 var NOTE_EDITING = false;
-// deleted-note tombstones: a deletion must survive the merge-with-remote in
-// pushNotes/loadNotes, otherwise the remote copy resurrects the note on sync.
-var NOTE_TOMBSTONES = JSON.parse(localStorage.getItem('sabel_note_tombstones')||'[]');
-function saveTombstones(){ localStorage.setItem('sabel_note_tombstones', JSON.stringify(NOTE_TOMBSTONES)); }
 // Shared notes live in the same webhook under this key. IMPORTANT: this key must
 // also be added to ALLOWED_KEYS in the sabel-webhook api/tracker.js, or reads and
 // writes 404. localStorage is kept as an offline fallback / instant first paint.
@@ -520,12 +483,131 @@ var GOLIVE_OVERRIDES = JSON.parse(localStorage.getItem('sabel_golive_overrides')
 
 // ─────────────────────────────────────────────────────────────
 // CONTRACT DATES — each client has 12 months from kick-off / contract
-// start to use their contracted hours. These are now driven from the
-// trackers.json registry (add "contractStart":"YYYY-MM-DD" to an entry)
-// so there is ONE place to maintain them. Entries can also be supplied
-// under a top-level "contracts" list for clients without a tracker.
+// start to use their contracted hours. Fill in "start" (YYYY-MM-DD) to
+// activate the expiry watch; the section shows only clients within the
+// final 3 months of their 12-month term.
 // ─────────────────────────────────────────────────────────────
-var CONTRACTS = [];
+var CONTRACTS = [
+  {name:'Raiz',                       start:''},
+  {name:'BTS',                        start:''},
+  {name:'Donkey Republic',            start:''},
+  {name:'FLKItOver',                  start:''},
+  {name:'YFood',                      start:''},
+  {name:'Cirqul',                     start:''},
+  {name:'Education Perfect',          start:''},
+  {name:'Huuuge',                     start:''},
+  {name:'The Giving Movement',        start:''},
+  {name:'Ainslie (Encum)',            start:''},
+  {name:'BetNinja (Magico)',          start:''},
+  {name:'Cronos (Particle Research)', start:''},
+  {name:'GPS Insight',                start:''},
+  {name:'Mambu',                      start:''},
+  {name:'PaySauce NZ',                start:''},
+  {name:'Workinitiatives',            start:''},
+  {name:'WPT Global',                 start:''}
+];
+
+// ─────────────────────────────────────────────────────────────
+// CLIENT CONTRACTS — SOW/proposal data per client, extracted from the
+// client Drive folders (SOWs, proposals, kick-off docs) on 15 Jul 2026.
+// Fields: h = hours contracted, hs = sub-note, scope = one-paragraph
+// summary, migYes = 'yes'|'no'|'tbc', mig = short migration label,
+// migNote = full migration detail, con/conR = main contact and role,
+// signed / signedS = contract signed date and source doc, ko = kick-off.
+// Edits and NEW clients are stored in the shared webhook under
+// CI_KEY (add it to ALLOWED_KEYS in sabel-webhook api/tracker.js).
+// ─────────────────────────────────────────────────────────────
+var CI_KEY = 'sabel-client-info-v1';
+var CLIENT_INFO = {
+'Raiz':{h:'40',hs:'USD 6,400 · SOW IC-11354',
+ scope:'Salesforce to Intercom transition covering Intercom Foundations and Fin Enablement. Phase 1 delivers FAQ deflection: workspace setup with query-based routing from day one, a Help Centre built from the Contentful FAQ content, Fin AI ("Raizy") with role-based knowledge audiences, then UAT, agent training and a 6 July go-live running in parallel with Salesforce until its contract expires.',
+ migYes:'no',mig:'None (Option B)',migNote:'No dedicated migration hours. Salesforce history stays in the Outlook archive (Option B, Tom to confirm); a full historical migration would be a separately quoted piece of work.',
+ con:'Mariela Arapi',conR:'Head of Customer Service — day-to-day owner, approves milestones',
+ signed:'14 May 2026',signedS:'Intercom SOW',ko:'w/c 25 May 2026 (kick-off guide prepared 18 May)'},
+'BTS':{h:'83',hs:'USD 13,280 · SOW IC-11199',
+ scope:'Multi-brand Intercom implementation for BTS USA: three brands in one workspace, consolidation of 75+ inbound email addresses, teams, inboxes and SLA routing, five workflows on a shared base, dual Jira integrations, a read-only Smartsheet connector, Fin deployed across 5 to 6 products, and Migr8Now migration from Freshdesk, FreshService and Zendesk ahead of the end-June Freshdesk licence expiry.',
+ migYes:'yes',mig:'Yes — hours not split',migNote:'Freshdesk, FreshService and Zendesk history via Migr8Now (Freshdesk range 24 Jun 2024 to present). Hours are not split out in the Intercom SOW; Migr8Now platform fees are priced at cutover on confirmed volumes.',
+ con:'Mary Schutzer-Weissmann',conR:'Primary day-to-day contact, Intercom admin and migration sign-off',
+ signed:'29 Apr 2026',signedS:'Intercom SOW',ko:'Not recorded in Drive (intake form May 2026)'},
+'Donkey Republic':{h:'72',hs:'USD 11,520 · SOW IC-11165',
+ scope:'Zendesk to Intercom move in four blocks: Intercom Foundations (workspace, channels, routing, SLAs — 10h), Automation Engine with a backend API connector and rider query procedure so Fin answers ride and booking status in real time (10h), multilingual Fin Enablement (22h), and a 30-hour Migr8Now migration. Go-live is required before the end of August 2026, when the current provider contract ends.',
+ migYes:'yes',mig:'30 of 72 hrs',migNote:'Migration Accelerator (Migr8Now) — 30 hours: full Zendesk migration of ~170,000 tickets (12-month window) plus ~200 Help Centre articles across 6 to 8 languages, with sample run, delta sync and cutover-day support.',
+ con:'Not named in SOW — TBC',conR:'',
+ signed:'29 Apr 2026',signedS:'Intercom SOW',ko:'Not found in Drive'},
+'FLKItOver':{h:'62',hs:'AUD 18,600 · hybrid engagement',
+ scope:'Intercom rebuild focused on adoption and growth: three segmented onboarding and lifecycle Series, behaviour-based feature adoption campaigns for three key features, a conversation data model with tagging and Jira sync, inbox and Help Centre optimisation with Fin-ready articles, a Product Tours refresh, expanded event tracking, and a CS strategy layer covering release comms and internal champion enablement, plus ongoing weekly support.',
+ migYes:'no',mig:'None',migNote:'',
+ con:'Andrew Colagiuri',conR:'Signed the proposal (Renzo is the internal Intercom champion)',
+ signed:'18 Nov 2025',signedS:'Direct proposal',ko:'Not found in Drive'},
+'YFood':{h:'60',hs:'USD 9,600 · SOW IC-11231',
+ scope:'Move from an outsourced BPO on Zendesk to an AI-first model on Intercom. Fin goes live early on informational queries and Shopify order lookups with fraud and QA monitoring on from the start, then action workflows are layered in: refunds with fraud guardrails, Recharge subscription changes, NetSuite stock checks and DHL return labels. German-first multilingual support with a staged go-live this quarter.',
+ migYes:'tbc',mig:'Decision pending',migNote:'Zendesk history decision open: migrate history (A), clean start (B) or contacts only (C). No dedicated migration hours in the SOW; tied to the BPO wind-down timing.',
+ con:'Lilly Huber (day-to-day) / Daniel Oberberger (project lead)',conR:'Customer Support Manager / Director Supply Chain',
+ signed:'4 May 2026',signedS:'Intercom SOW',ko:'w/c 9 June 2026 (kick-off guide prepared 11 June)'},
+'Cirqul':{h:'61',hs:'USD 13,000 · Phase 1',
+ scope:'Building "Cara", an AI-first debt collection experience where Fin is the product itself. Phase 1 covers the debt recovery launch: workspace foundations, escalation and after-hours workflows, six Supabase data connectors (identity verification, debt summary, offers, current plan, plan modification, tokenised payment links) and five Fin procedures including hardship and dispute handling, plus Fin policy, knowledge base and a controlled launch. Phase 2 (financial health) scoped separately after go-live.',
+ migYes:'no',mig:'None',migNote:'',
+ con:'Not named in proposal — CTO/engineering own inputs. TBC',conR:'',
+ signed:'Proposal dated 25 Mar 2026 — signed copy not in Drive',signedS:'Direct proposal',ko:'Not found in Drive'},
+'Education Perfect':{h:'58',hs:'Sabel SOW · 19 Mar 2026',
+ scope:'Full move from Help Scout to Intercom across four workstreams: workspace foundations with 13 inboxes and reporting, build and QA of all 337 workflows (routing, SLA, escalation, notifications, lifecycle), Fin enablement with a knowledge readiness pass, four integrations (JIRA, Aircall, Slack, Zendesk QA) plus a custom integration brief for EP engineering, and the Migr8Now migration. Eight-week delivery targeting an April 2026 go-live.',
+ migYes:'yes',mig:'8 of 58 hrs',migNote:'Migration Accelerator (Migr8Now) — 8 hours: ~330,000 Help Scout conversations with discovery and mapping, sample run and sign-off, full migration, delta run and cutover support.',
+ con:'Not named in SOW — TBC',conR:'',
+ signed:'SOW dated 19 Mar 2026 — signed copy not in Drive',signedS:'Sabel SOW',ko:'Not found in Drive (Week 1 of plan)'},
+'Huuuge':{h:'99',hs:'USD 15,840 · SOW IC-10946',
+ scope:'Fin Scale (Rapid) for Huuuge Games: a new consolidated workspace with four brand configurations (Huuuge Casino, Billionaire Casino and their VIP variants), loyalty tag-based VIP routing, a 169-article Help Centre across 24 categories, Fin AI on the non-VIP brands with VIP bypass, four player-facing workflows (GDPR/privacy, purchase issues, account recovery, self-exclusion), two training sessions and a full handover pack. Completed and closed out.',
+ migYes:'yes',mig:'4 of 99 hrs',migNote:'Migration Accelerator — 4 hours: custom objects and contact data from the two existing VIP workspaces. Conversation history migration explicitly out of scope.',
+ con:'Konrad Jakubowski',conR:'Project decision-maker, day-to-day owner (Support Ops) and Fin content approver',
+ signed:'2 Apr 2026',signedS:'Intercom SOW',ko:'Migration commenced 18 Mar 2026 (intake form March 2026)'},
+'The Giving Movement':{h:'60',hs:'USD 9,600 · SOW IC-11214',
+ scope:'Freshdesk to Intercom replacement for the Dubai-based fashion brand: chat, email, Instagram and WhatsApp channels across the Shopify storefronts, bilingual English and Arabic support (all dialects) from day one, Fin V1 with WISMO workflows, a pre-qualification flow to filter the ~30% of inbound that is partnership enquiries, and a hard cutover in late June 2026 when the Freshdesk contract expires.',
+ migYes:'yes',mig:'Yes — hours not split',migNote:'Freshdesk history migration. Kick-off flagged ~500K tickets (1.5 years) against ~150K sold — scope gap raised, not absorbed. Hours are not split out in the Intercom SOW.',
+ con:'Omar Abdel Aziz',conR:'Customer Service Manager — champion; Marc Jeffrey (COO) is decision-maker',
+ signed:'29 Apr 2026',signedS:'Intercom SOW',ko:'14 May 2026, 4:00 PM Melbourne / 9:00 AM Dubai'},
+'Ainslie (Encum)':{h:'30',hs:'USD 4,800 · Intercom SOW',
+ scope:'General Intercom implementation support for Encum Pty Ltd ATF Encum Trust (Ainslie): training, configuration and customisation, with an estimated delivery date of 28 February 2026.',
+ migYes:'no',mig:'None stated',migNote:'',
+ con:'Not named in SOW — TBC',conR:'',
+ signed:'6 Oct 2025',signedS:'Intercom SOW',ko:'Not found in Drive'},
+'BetNinja (Magico)':{h:'—',hs:'USD 3,187 · volume-priced, not hour-based',
+ scope:'A pure migration engagement: consolidating the BetNinja Intercom workspace into the shared Expert workspace alongside Insta Spin and Winner Island, without exposing to customers that the brands share one instance. Covers ~85,600 conversations and tickets (12 months), contacts, attributes, tags, macros and the full BetNinja Help Centre, everything prefixed "BetNinja" for brand isolation. Workflows and Help Centre styling are rebuilt by the client.',
+ migYes:'yes',mig:'Entire engagement',migNote:'Intercom-to-Intercom migration via Migr8Now: connect, 100-record sample, validation, full run, delta and cutover with notifications silenced. USD 1,687 volume fee + USD 1,500 Intercom-to-Intercom uplift.',
+ con:'Marianna K',conR:'Primary contact for technical decisions and sign-off (marianna@magnificentgaming.com)',
+ signed:'23 Apr 2026',signedS:'Direct proposal (PandaDoc)',ko:'Not found in Drive'},
+'Cronos (Particle Research)':{h:'20',hs:'USD 3,200 · SOW IC-10983',
+ scope:'Standard Launch (Suite) engagement for Particle Research (Cronos): project kickoff and plan, migration scoping/import/cutover, Fin and CX strategy (taxonomy, content assessment, program model), configuration of workflows and integrations, testing and UAT, go-live management and agent enablement, then optimisation and handover.',
+ migYes:'tbc',mig:'In scope — no hour split',migNote:'Migration (scoping, import, cutover) is listed in the standard SOW task description but hours are not broken out.',
+ con:'Not named in SOW — TBC',conR:'',
+ signed:'7 Apr 2026',signedS:'Intercom SOW',ko:'Not found in Drive'},
+'GPS Insight':{h:'50',hs:'USD 8,000 · SOW IC-11069',
+ scope:'Standard Launch (Suite) engagement for GPS Insight: project kickoff and plan, migration scoping/import/cutover, Fin and CX strategy (taxonomy, content assessment, program model), configuration of workflows and integrations, testing and UAT, go-live management and agent enablement, then optimisation and handover.',
+ migYes:'tbc',mig:'In scope — no hour split',migNote:'Migration (scoping, import, cutover) is listed in the standard SOW task description but hours are not broken out.',
+ con:'Not named in SOW — TBC',conR:'',
+ signed:'15 Apr 2026',signedS:'Intercom SOW',ko:'Not found in Drive'},
+'Mambu':{h:'12.5',hs:'USD 2,000 · SOW IC-11370',
+ scope:'General advisory on migration for Mambu Tech B.V. — a small consulting engagement guiding Mambu’s team on migration approach rather than hands-on build work.',
+ migYes:'yes',mig:'All 12.5 hrs (advisory)',migNote:'The whole engagement is migration advisory; no hands-on data migration is included.',
+ con:'Not named in SOW — TBC',conR:'',
+ signed:'18 May 2026',signedS:'Intercom SOW',ko:'Not found in Drive'},
+'PaySauce NZ':{h:'25 + fixed-fee Fin',hs:'NZD 15,750 · Options B, C, D selected',
+ scope:'NZ workspace optimisation and Fin uplift (the AU go-live workstream was not selected): a 12-hour optimisation sprint across inbox hygiene, routing, tagging, SLAs and reporting quick wins, 5 hours of team enablement, an 8-hour documentation and handover package, and a fixed-fee Fin configuration covering guardrails, content sources, guidance, escalation design, staged rollout and an optimisation cadence.',
+ migYes:'no',mig:'None',migNote:'',
+ con:'Jessica McLean',conR:'Signed the proposal (working contacts: Rachel and Paul)',
+ signed:'29 Jan 2026',signedS:'Direct proposal',ko:'Not found in Drive'},
+'Workinitiatives':{h:'31',hs:'Sabel SOW · 28 Feb 2026',
+ scope:'Fin AI enablement and workflow automation: inbox rationalisation with attribute-based routing and auto-tagging, an after-hours workflow routing weekend volume to Fin, a single Fin entry point replacing the multi-button intake, four purpose-built Fin procedures (callback booking via Go High Level, refund handling with agent-in-the-loop, company name change, bug capture with Slack escalation), and full Fin configuration launched on a conservative CAPS trial.',
+ migYes:'no',mig:'None',migNote:'',
+ con:'Kobe',conR:'Support Lead — responsible for all client inputs',
+ signed:'SOW dated 28 Feb 2026 — signed copy not in Drive',signedS:'Sabel SOW',ko:'Not found in Drive (delivery from 1 Apr 2026)'},
+'WPT Global':{h:'30',hs:'USD 4,800 · Intercom SOW (Kashxa Ltd)',
+ scope:'Standard Launch (Suite) engagement for Kashxa Ltd (WPT Global): project kickoff and plan, migration scoping/import/cutover, Fin and CX strategy, configuration of workflows and integrations, testing and UAT, go-live management and agent enablement, then optimisation and handover.',
+ migYes:'tbc',mig:'In scope — no hour split',migNote:'Migration (scoping, import, cutover) is listed in the standard SOW task description but hours are not broken out.',
+ con:'Not named in SOW — TBC',conR:'',
+ signed:'3 Feb 2026',signedS:'Intercom SOW',ko:'~19 Feb 2026 (kick-off deck in Drive)'}
+};
+// Shared edits/additions overlaying the baked-in data above.
+var CI_EXTRA = JSON.parse(localStorage.getItem('sabel_ci_extra')||'{}');
+var CI_EDITING = false;
 
 // ──────────────────────────────────────────────────────────────
 // DATA HELPERS
@@ -601,20 +683,13 @@ function fmtDate(iso){
 //    status overrides. Extract P/T from the file and overlay saved statuses. ──
 var SKILL_MONTHS={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
 function skillDate(d){
-  // human date strings like "May 14-15" → ISO of the last date. The year is
-  // INFERRED, not hardcoded: dates up to ~4 months in the past keep the
-  // current year; anything older rolls forward to the next year. This keeps
-  // active-project dates correct across the Dec→Jan boundary.
+  // human date strings like "May 14-15" → ISO of the last date. Year assumed 2026.
   if(!d) return '';
   var ms=String(d).match(/([A-Z][a-z]{2})\s*(\d{1,2})/g);
   if(!ms) return '';
   var m=ms[ms.length-1].match(/([A-Z][a-z]{2})\s*(\d{1,2})/);
   var mo=SKILL_MONTHS[m[1]]; if(mo==null) return '';
-  var now=new Date(); now.setHours(0,0,0,0);
-  var cutoff=new Date(now); cutoff.setDate(cutoff.getDate()-120); // 4-month look-back
-  var y=now.getFullYear()-1, cand;
-  for(var i=0;i<3;i++){ cand=new Date(y+i, mo, +m[2]); if(cand>=cutoff){ y=y+i; break; } }
-  return y+'-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
+  return '2026-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
 }
 function parseSkillHtml(html, saved){
   function extractLiteral(src, startIdx){
@@ -770,10 +845,7 @@ function render(){
   renderWeekly();
   renderKPIs(g);
   renderActive(g.active);
-  renderAttention();
-  renderOwners();
   renderOffboarding(g.offb);
-  renderNoTracker();
   renderTimeline(g.active);
   renderContracts();
 }
@@ -814,21 +886,6 @@ function overdueTasks(tr){
   });});
   return out;
 }
-// PROJECT HEALTH — one clear signal per project instead of colour-by-date.
-// red  = At risk  : blocked task(s), go-live passed, or go-live <=7d with <80% done
-// amber= Watch    : overdue task(s), or go-live <=21d with <60% done
-// green= On track : none of the above
-function health(tr){
-  if(!tr.live || !tr.t) return {cls:'gray', lbl:'No data', why:''};
-  var t=tr.t, days=daysBetween(tr.golive), pct=Math.round(t.done/(t.total||1)*100);
-  var od=overdueTasks(tr).length;
-  if(t.blocked) return {cls:'red', lbl:'At risk', why:t.blocked+' blocked'};
-  if(days!==null && days<0) return {cls:'red', lbl:'At risk', why:'go-live date passed'};
-  if(days!==null && days<=7 && pct<80) return {cls:'red', lbl:'At risk', why:'go-live in '+days+'d, only '+pct+'% done'};
-  if(od) return {cls:'amber', lbl:'Watch', why:od+' overdue task'+(od===1?'':'s')};
-  if(days!==null && days<=21 && pct<60) return {cls:'amber', lbl:'Watch', why:'go-live in '+days+'d, '+pct+'% done'};
-  return {cls:'green', lbl:'On track', why:''};
-}
 // Hours spent / committed (estimate from SOW total × completion). null when unknown.
 function hoursTxt(tr){
   if(tr.sowHours==null || !tr.t || !tr.t.total) return null;
@@ -864,7 +921,6 @@ function loadNotes(){
       if(j && j.ok && j.data && typeof j.data==='object'){
         if(NOTE_EDITING) return;            // never clobber a note being typed
         WEEK_NOTES = j.data;
-        NOTE_TOMBSTONES.forEach(function(k){ delete WEEK_NOTES[k]; });  // keep local deletions
         saveNotes();
         renderWeekly();
       }
@@ -879,12 +935,11 @@ function pushNotes(){
     .then(function(j){
       var remote = (j && j.ok && j.data && typeof j.data==='object') ? j.data : {};
       var merged = Object.assign({}, remote, WEEK_NOTES);   // local edits win
-      NOTE_TOMBSTONES.forEach(function(k){ delete merged[k]; });        // deletions stick
       WEEK_NOTES = merged; saveNotes();
       return fetch(API+'?key='+encodeURIComponent(NOTES_KEY), {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ data: merged })
-      }).then(function(r){ if(r && r.ok){ NOTE_TOMBSTONES=[]; saveTombstones(); } });
+      });
     })
     .catch(function(){ /* offline — localStorage still holds the note */ });
 }
@@ -904,9 +959,8 @@ function editNote(encKey, btn){
   body.appendChild(ta); body.appendChild(hint); ta.focus();
   ta.addEventListener('blur', function(){
     var val=ta.value.trim();
-    if(val){ WEEK_NOTES[key]=val; var ti=NOTE_TOMBSTONES.indexOf(key); if(ti!==-1) NOTE_TOMBSTONES.splice(ti,1); }
-    else { delete WEEK_NOTES[key]; if(NOTE_TOMBSTONES.indexOf(key)===-1) NOTE_TOMBSTONES.push(key); }
-    saveTombstones(); saveNotes();
+    if(val) WEEK_NOTES[key]=val; else delete WEEK_NOTES[key];
+    saveNotes();
     // update just this task in place so the open client stays open
     body.removeChild(ta); body.removeChild(hint);
     var existing=body.querySelector('.wk-note');
@@ -977,20 +1031,15 @@ function renderWeekly(){
       var rows = list.length ? list.map(function(x){ return weekTaskRow(g.name,x); }).join('') : '<div class="wk-empty">Nothing this week</div>';
       return '<div class="wk-side '+cls+'"><div class="wk-side-h">'+label+' <span class="wk-side-n">'+list.length+'</span></div>'+rows+'</div>';
     };
-    return '<details class="wk-client-drop" name="wkClient" data-client="'+esc(g.name)+'"'+(openSet[g.name]?' open':'')+'>'
+    return '<details class="wk-client-drop" data-client="'+esc(g.name)+'"'+(openSet[g.name]?' open':'')+'>'
       + '<summary><span class="ad-chev">&#9656;</span>'
       +   '<span class="wk-cd-nm">'+esc(g.name)+'</span>'
-      +   '<span class="wk-cd-h-right"><span class="wk-cd-meta">'+g.sabel.length+' from Sabel · '+g.client.length+' from client</span><a class="wk-tracker" href="'+url+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Tracker &#8599;</a></span>'
+      +   '<span class="wk-cd-meta">'+g.sabel.length+' from Sabel · '+g.client.length+' from client</span>'
+      +   '<span class="wk-cd-h-right"><a class="wk-tracker" href="'+url+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Tracker &#8599;</a></span>'
       + '</summary>'
       + '<div class="wk-split">'+sideHtml(g.sabel,'sabel','Due from Sabel')+sideHtml(g.client,'client','Due from client')+'</div>'
       + '</details>';
   }).join('');
-  // one client open at a time (fallback for browsers without native <details name>)
-  el.querySelectorAll('.wk-client-drop').forEach(function(d){
-    d.addEventListener('toggle', function(){
-      if(d.open) el.querySelectorAll('.wk-client-drop[open]').forEach(function(x){ if(x!==d) x.open=false; });
-    });
-  });
 }
 
 // CONTRACT EXPIRY — clients within the final 3 months of their 12-month term.
@@ -999,7 +1048,7 @@ function renderContracts(){
   var today=new Date(); today.setHours(0,0,0,0);
   var rows=[];
   CONTRACTS.forEach(function(c){
-    if(!c.start || SHARED.contractRemoved.indexOf(c.name)!==-1) return;
+    if(!c.start || CONTRACT_REMOVED.indexOf(c.name)!==-1) return;
     var exp=new Date(c.start+'T00:00:00'); exp.setFullYear(exp.getFullYear()+1); exp.setHours(0,0,0,0);
     var days=Math.round((exp-today)/86400000);
     if(days>92) return;                 // only within final ~3 months
@@ -1012,83 +1061,55 @@ function renderContracts(){
     var when = r.days<0 ? ('expired '+Math.abs(r.days)+'d ago') : r.days===0 ? 'expires today' : ('~'+Math.round(r.days/7)+' wks left');
     var tone = r.days<=30 ? 'var(--redText)' : 'var(--amber)';
     var arg=JSON.stringify(r.name).replace(/"/g,'&quot;');
-    return '<div class="nt-row"><div><div class="ob-name">'+esc(r.name)+'</div>'
+    return '<div class="nt-row"><div><div class="ob-name">'+r.name+'</div>'
       + '<div class="ob-meta">12-mo term ends '+fmtDate(r.exp.toISOString().slice(0,10))+'</div></div>'
       + '<span class="nt-right"><span class="nt-tag" style="color:'+tone+'">'+when+'</span>'
       + '<button class="nt-del" title="Remove from list" onclick="removeContract('+arg+')">&times;</button></span></div>';
   }).join('');
 }
 function removeContract(n){
-  if(SHARED.contractRemoved.indexOf(n)===-1) SHARED.contractRemoved.push(n);
-  pushShared();
+  if(CONTRACT_REMOVED.indexOf(n)===-1) CONTRACT_REMOVED.push(n);
+  localStorage.setItem('sabel_contract_removed', JSON.stringify(CONTRACT_REMOVED));
   renderContracts();
 }
-// Mark an offboarding project as closed out — shared with the whole team.
+// Mark an offboarding project as closed out (persists locally, drops it off the list)
 function closeOffb(n){
-  if(SHARED.offbClosed.indexOf(n)===-1) SHARED.offbClosed.push(n);
-  pushShared();
+  if(OFFB_CLOSED.indexOf(n)===-1) OFFB_CLOSED.push(n);
+  localStorage.setItem('sabel_offb_closed', JSON.stringify(OFFB_CLOSED));
   render();
 }
 
-// NEEDS ATTENTION — blocked, waiting-on-client, and overdue items across all
-// live trackers, grouped BY CLIENT as an accordion. Only one client expands
-// at a time (native <details name> exclusivity, with a JS fallback), keeping
-// the panel readable at a glance instead of a wall of text.
+// Blocked digest + client-waiting list (across all live trackers)
 function renderAttention(){
-  var host=document.getElementById('attnBody'); if(!host) return;
-  var groups=[], tb=0, tw=0, to=0;
+  var blocked=[], waiting=[];
   TRACKERS.forEach(function(tr){
     if(!tr.live||!tr.phases) return;
-    var b=[], w=[];
     tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
       var s=(k.status||'').toLowerCase();
-      if(s==='blocked') b.push({task:k.task, who:k.owner||'—'});
-      if(k.dep && s!=='complete' && s!=='done') w.push({task:k.task, who:k.owner||'Client'});
+      if(s==='blocked') blocked.push({client:tr.name,task:k.task,who:k.owner||'—'});
+      if(k.dep && s!=='complete' && s!=='done') waiting.push({client:tr.name,task:k.task,who:k.owner||'Client'});
     });});
-    var o=overdueTasks(tr).sort(function(a,x){ return x.late-a.late; });
-    if(b.length||w.length||o.length){
-      groups.push({name:tr.name, file:tr.file, b:b, w:w, o:o, n:b.length+w.length+o.length});
-      tb+=b.length; tw+=w.length; to+=o.length;
-    }
   });
-  // most urgent clients first: blocked > overdue > waiting
-  groups.sort(function(a,x){ return (x.b.length*100+x.o.length*10+x.w.length)-(a.b.length*100+a.o.length*10+a.w.length); });
+  var overdue=[];
+  TRACKERS.forEach(function(tr){ if(tr.live) overdue=overdue.concat(overdueTasks(tr)); });
+  overdue.sort(function(a,b){ return b.late-a.late; });
+  fillTasks('blkBox','blkCount',blocked,'Nothing blocked right now.');
+  fillTasks('waitBox','waitCount',waiting,'No open client dependencies.');
+  fillTasks('ovdBox','ovdCount',overdue.map(function(x){ return {client:x.client, task:x.task+' &nbsp;<span style="color:var(--redText)">('+x.late+'d late)</span>', who:x.who}; }),'Nothing overdue. 🎉');
   var ac=document.getElementById('attnCounts');
-  if(ac) ac.innerHTML = groups.length
-    ? tb+' blocked &middot; '+tw+' waiting on client &middot; '+to+' overdue'
-    : 'All clear';
-  if(!groups.length){ host.innerHTML='<div class="empty">Nothing blocked, waiting, or overdue. &#127881;</div>'; return; }
-  // remember which client is open so the 5-minute refresh doesn't collapse it
-  var openName=null; var cur=host.querySelector('.ac[open]'); if(cur) openName=cur.getAttribute('data-client');
-  var row=function(tag,cls,txt,meta){
-    return '<div class="ac-row"><span class="ac-tag '+cls+'">'+tag+'</span><span>'+esc(cleanTitle(txt))+'</span>'
-      + (meta?'<span class="ac-meta">'+meta+'</span>':'')+'</div>';
-  };
-  host.innerHTML = groups.map(function(g){
-    var chips='';
-    if(g.b.length) chips+='<span class="a-chip b">'+g.b.length+' blocked</span>';
-    if(g.o.length) chips+='<span class="a-chip o">'+g.o.length+' overdue</span>';
-    if(g.w.length) chips+='<span class="a-chip w">'+g.w.length+' waiting</span>';
-    var body =
-      g.b.map(function(x){ return row('Blocked','b',x.task,esc(x.who)); }).join('')
-      + g.o.map(function(x){ return row('Overdue','o',x.task,esc(x.who)+' &middot; '+x.late+'d late'); }).join('')
-      + g.w.map(function(x){ return row('Client','w',x.task,esc(x.who)); }).join('');
-    return '<details class="ac" name="attnClient" data-client="'+esc(g.name)+'"'+(openName===g.name?' open':'')+'>'
-      + '<summary><span class="ad-chev">&#9656;</span><span class="nm">'+esc(g.name)+'</span>'
-      +   '<span class="chips">'+chips+'</span>'
-      +   '<a class="wk-tracker" href="'+BASE+g.file+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Tracker &#8599;</a>'
-      + '</summary><div class="ac-body">'+body+'</div></details>';
-  }).join('');
-  // fallback for browsers without native <details name> exclusivity:
-  host.querySelectorAll('.ac').forEach(function(d){
-    d.addEventListener('toggle', function(){
-      if(d.open) host.querySelectorAll('.ac[open]').forEach(function(x){ if(x!==d) x.open=false; });
-    });
-  });
+  if(ac) ac.innerHTML='&#128681; '+blocked.length+' blocked &middot; &#8987; '+waiting.length+' waiting &middot; &#9888; '+overdue.length+' overdue';
 }
-// Live team workload — open Sabel-owned tasks per person, compact strip.
+function fillTasks(boxId,countId,arr,emptyMsg){
+  document.getElementById(countId).textContent=arr.length;
+  var box=document.getElementById(boxId);
+  if(!arr.length){ box.innerHTML='<div class="empty">'+emptyMsg+'</div>'; return; }
+  box.innerHTML=arr.map(function(x){
+    return '<div class="task-row"><div class="tx"><b>'+x.client+'</b> &mdash; '+cleanTitle(x.task)+'</div>'
+      + '<div class="meta">'+x.who+'</div></div>';
+  }).join('');
+}
+// Live owner workload — open Sabel-owned tasks per person
 function renderOwners(){
-  var box=document.getElementById('ownBox'); if(!box) return;
   var stat={};
   TRACKERS.forEach(function(tr){
     if(!tr.live||!tr.phases) return;
@@ -1102,12 +1123,15 @@ function renderOwners(){
       stat[o].open++; if(s==='blocked') stat[o].blocked++;
     });});
   });
-  var rows=SABEL_TEAM.map(function(o){ return {o:o,open:(stat[o]||{}).open||0,blocked:(stat[o]||{}).blocked||0}; });
-  var max=Math.max.apply(null, rows.map(function(r){return r.open;}).concat([1]));
+  var rows=Object.keys(stat).map(function(o){ return {o:o,open:stat[o].open,blocked:stat[o].blocked}; });
+  rows.sort(function(a,b){ return b.open-a.open; });
+  var box=document.getElementById('ownBox');
+  if(!rows.length){ box.innerHTML='<div class="empty">No open tasks.</div>'; return; }
+  var max=rows[0].open||1;
   box.innerHTML=rows.map(function(r){
-    return '<div class="own-cell"><span class="nm">'+r.o+'</span>'
+    return '<div class="own-row"><span class="own-name">'+r.o+'</span>'
       + '<div class="own-bar"><div style="width:'+(r.open/max*100)+'%;background:'+(r.blocked?'var(--redText)':'var(--blue)')+'"></div></div>'
-      + '<span class="own-n"><b>'+r.open+'</b>'+(r.blocked?' &middot; <span style="color:var(--redText)">'+r.blocked+'&#9888;</span>':'')+'</span></div>';
+      + '<span class="own-nums"><b>'+r.open+'</b> open'+(r.blocked?' &middot; <span style="color:var(--redText)">'+r.blocked+' blocked</span>':'')+'</span></div>';
   }).join('');
 }
 
@@ -1143,14 +1167,14 @@ function renderActive(list){
 // Compact stacked row (default)
 function activeRow(tr){
   var url=BASE+tr.file;
-  var nm='<a href="'+url+'" target="_blank" rel="noopener">'+esc(tr.name)+'</a>';
+  var nm='<a href="'+url+'" target="_blank" rel="noopener">'+tr.name+'</a>';
   if(!tr.live || !tr.t){
     return '<div class="arow gray"><span class="ar-dot"></span>'
       + '<div class="ar-main"><div class="ar-nm">'+nm+' <span class="ar-gl">'+(tr.keyPending?'· live key pending':'· no live data yet')+'</span></div></div>'
       + '<div class="ar-meta"></div><div class="ar-days"><div class="d1">—</div></div>'
       + '<a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open &rarr;</a></div>';
   }
-  var t=tr.t, total=t.total||1, days=daysBetween(tr.golive), h=health(tr), light=h.cls;
+  var t=tr.t, total=t.total||1, days=daysBetween(tr.golive), light=lightFor(days);
   var dtxt = days===null?'TBC':days<0?Math.abs(days)+'d':days===0?'Today':days+'d';
   var dlbl = days===null?'tbc':days<0?'overdue':'go-live';
   var open=t.total-t.done, risk=t.blocked+t.dep, pct=Math.round(t.done/total*100);
@@ -1158,8 +1182,8 @@ function activeRow(tr){
   return '<div class="arow '+light+'">'
     + '<span class="ar-dot"></span>'
     + '<div class="ar-main"><div class="ar-nm">'+nm+' <span class="ar-gl">· go-live '+fmtDate(tr.golive)+'</span>'+glSrcChip(tr)+glEdit(tr)+'</div>'
-    +   '<div class="ar-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+seg(t.other,'var(--mono)')+'</div>'+naLine(tr)+'</div>'
-    + '<div class="ar-meta"><span class="ar-chip hl '+h.cls+'">'+h.lbl+(h.why?' &middot; '+h.why:'')+'</span><span class="ar-pct">'+pct+'%</span>'+(hoursTxt(tr)?'<span class="ar-chip hrs">'+hoursTxt(tr)+'</span>':'')+'<span class="ar-chip">'+open+' open</span>'+(risk?'<span class="ar-chip risk">'+risk+' risk</span>':'')+(overdueTasks(tr).length?'<span class="ar-chip od">⚠ '+overdueTasks(tr).length+'</span>':'')+'</div>'
+    +   '<div class="ar-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+'</div>'+naLine(tr)+'</div>'
+    + '<div class="ar-meta"><span class="ar-pct">'+pct+'%</span>'+(hoursTxt(tr)?'<span class="ar-chip hrs">'+hoursTxt(tr)+'</span>':'')+'<span class="ar-chip">'+open+' open</span>'+(risk?'<span class="ar-chip risk">'+risk+' risk</span>':'')+(overdueTasks(tr).length?'<span class="ar-chip od">⚠ '+overdueTasks(tr).length+'</span>':'')+'</div>'
     + '<div class="ar-days"><div class="d1">'+dtxt+'</div><div class="d2">'+dlbl+'</div></div>'
     + '<a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open &rarr;</a>'
     + '</div>';
@@ -1168,23 +1192,23 @@ function activeRow(tr){
 // Detailed card (density=detailed)
 function activeCard(tr){
   var url=BASE+tr.file;
-  var link='<a href="'+url+'" target="_blank" rel="noopener">'+esc(tr.name)+'</a>';
+  var link='<a href="'+url+'" target="_blank" rel="noopener">'+tr.name+'</a>';
   if(!tr.live || !tr.t){
     return '<div class="pcard gray"><div class="pc-top"><div><div class="pc-name">'+link+'</div></div></div>'
       + '<div class="pc-pending">'+(tr.keyPending?'Live data pending — key not confirmed':'No live data returned yet')+'</div>'
       + '<div class="pc-foot"><span class="hrs na">Data not available</span><a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open tracker &rarr;</a></div></div>';
   }
   var t=tr.t, total=t.total||1;
-  var days=daysBetween(tr.golive), h=health(tr), light=h.cls;
+  var days=daysBetween(tr.golive), light=lightFor(days);
   var dtxt = days===null ? 'TBC' : days<0 ? Math.abs(days)+'d' : days===0 ? 'Today' : days+'d';
   var dlbl = days===null ? 'date TBC' : days<0 ? 'overdue' : 'to go-live';
   var open=t.total-t.done, risk=t.blocked+t.dep, pct=Math.round(t.done/total*100);
   var seg=function(n,c){ return n? '<div style="width:'+(n/total*100)+'%;background:'+c+'"></div>':''; };
   var ov=overdueTasks(tr).length, ht=hoursTxt(tr);
   return '<div class="pcard '+light+'">'
-    + '<div class="pc-top"><div><div class="pc-name">'+link+'</div><div class="pc-open"><span class="pc-health '+h.cls+'">'+h.lbl+(h.why?' &middot; '+h.why:'')+'</span> &middot; '+pct+'% complete &middot; go-live '+fmtDate(tr.golive)+' '+glSrcChip(tr)+glEdit(tr)+'</div></div>'
+    + '<div class="pc-top"><div><div class="pc-name">'+link+'</div><div class="pc-open">'+pct+'% complete &middot; go-live '+fmtDate(tr.golive)+' '+glSrcChip(tr)+glEdit(tr)+'</div></div>'
     +   '<div class="pc-days"><div class="d1">'+dtxt+'</div><div class="d2">'+dlbl+'</div></div></div>'
-    + '<div class="pc-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+seg(t.other,'var(--mono)')+'</div>'
+    + '<div class="pc-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+'</div>'
     + '<div class="pc-stats">'
     +   '<div class="pc-stat"><div class="n">'+open+'</div><div class="l">Open</div></div>'
     +   '<div class="pc-stat red"><div class="n">'+risk+'</div><div class="l">At risk</div></div>'
@@ -1235,34 +1259,34 @@ document.addEventListener('click',function(e){
 });
 
 function renderOffboarding(list){
-  var visible=list.filter(function(tr){ return SHARED.offbClosed.indexOf(tr.name)===-1; });
+  var visible=list.filter(function(tr){ return OFFB_CLOSED.indexOf(tr.name)===-1; });
   document.getElementById('offbCount').textContent=visible.length;
   var el=document.getElementById('offbBox');
   if(!visible.length){ el.innerHTML='<div class="empty">Nothing awaiting close-out. Projects appear here when every task in their tracker is complete.</div>'; return; }
   el.innerHTML=visible.map(function(tr){
     var url=BASE+tr.file;
     var arg=JSON.stringify(tr.name).replace(/"/g,'&quot;');
-    return '<div class="ob-row"><div><div class="ob-name"><a href="'+url+'" target="_blank" rel="noopener">'+esc(tr.name)+'</a></div>'
+    return '<div class="ob-row"><div><div class="ob-name"><a href="'+url+'" target="_blank" rel="noopener">'+tr.name+'</a></div>'
       + '<div class="ob-meta">All '+tr.t.total+' tasks complete &middot; go-live '+fmtDate(tr.golive)+'</div></div>'
       + '<button class="ob-btn" title="Mark closed out — offboarding pack sent" onclick="closeOffb('+arg+')">&#10003; Mark closed out</button></div>';
   }).join('');
 }
 
 function renderNoTracker(){
-  var list = NO_TRACKER.filter(function(n){ return SHARED.ntRemoved.indexOf(n)===-1; });
+  var list = NO_TRACKER.filter(function(n){ return NT_REMOVED.indexOf(n)===-1; });
   document.getElementById('ntCount').textContent=list.length;
   var box=document.getElementById('ntBox');
   if(!list.length){ box.innerHTML='<div class="empty">All clear — every client here now has a tracker or has been closed out.</div>'; return; }
   box.innerHTML = list.map(function(n){
     var arg = JSON.stringify(n).replace(/"/g,'&quot;');
-    return '<div class="nt-row"><span class="nt-name">'+esc(n)+'</span>'
-      + '<span class="nt-right"><span class="nt-tag">no tracker</span>'
+    return '<div class="nt-row"><span class="nt-name">'+n+'</span>'
+      + '<span class="nt-right"><span class="nt-tag">no live tracker</span>'
       + '<button class="nt-del" title="Remove from list" onclick="removeNT('+arg+')">&times;</button></span></div>';
   }).join('');
 }
 function removeNT(n){
-  if(SHARED.ntRemoved.indexOf(n)===-1) SHARED.ntRemoved.push(n);
-  pushShared();
+  if(NT_REMOVED.indexOf(n)===-1) NT_REMOVED.push(n);
+  localStorage.setItem('sabel_nt_removed', JSON.stringify(NT_REMOVED));
   renderNoTracker();
 }
 
@@ -1337,49 +1361,158 @@ function renderTimeline(active){
 }
 
 // ──────────────────────────────────────────────────────────────
-// AUTO-PICKUP: registry file so new trackers, SOW hours, contract
-// start dates and the no-tracker list can all be maintained in ONE
-// place (Intake-forms/trackers.json) without editing this file.
-// Accepts either:
-//   [ {name, key, file, sowHours?, contractStart?}, ... ]           (array)
-//   { trackers:[...], noTracker:[...], contracts:[{name,start}] }   (object)
-// Registry entries are MERGED with the built-in list: registry wins,
-// but built-in sowHours is kept as a fallback when the registry
-// doesn't provide one. This is the single source of truth pattern —
-// every fact has one home and everything else reads from it.
+// AUTO-PICKUP: optional registry file so new trackers can be added
+// in ONE place (Intake-forms/trackers.json) without editing this file.
+// If trackers.json is present it replaces the built-in list; otherwise
+// the built-in TRACKERS list above is used. Either way it just works.
 // ──────────────────────────────────────────────────────────────
-function applyRegistry(list){
-  if(!Array.isArray(list) || !list.length) return;
-  var builtin={}; TRACKERS.forEach(function(t){ builtin[t.name]=t; });
-  TRACKERS = list.filter(function(t){ return t && t.name && t.file; }).map(function(t){
-    var fb = builtin[t.name] || {};
-    return {
-      name: t.name,
-      key: t.key || fb.key || null,
-      file: t.file,
-      sowHours: (t.sowHours!=null) ? t.sowHours : (fb.sowHours!=null ? fb.sowHours : null),
-      contractStart: t.contractStart || fb.contractStart || ''
-    };
-  });
-}
-function rebuildContracts(extra){
-  CONTRACTS = TRACKERS.filter(function(t){ return t.contractStart; })
-    .map(function(t){ return {name:t.name, start:t.contractStart}; });
-  (extra||[]).forEach(function(c){
-    if(c && c.name && c.start && !CONTRACTS.some(function(x){ return x.name===c.name; })) CONTRACTS.push(c);
-  });
-}
 function loadConfig(){
   return fetch(BASE+'trackers.json',{cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ if(Array.isArray(j) && j.length){ TRACKERS = j; } })
+    .catch(function(){ /* no registry — keep built-in list */ });
+}
+
+// ──────────────────────────────────────────────────────────────
+// CLIENT CONTRACTS WIDGET
+// ──────────────────────────────────────────────────────────────
+function ciRemoved(){ return Array.isArray(CI_EXTRA.__removed) ? CI_EXTRA.__removed : []; }
+function ciNames(){
+  var set={}, rem=ciRemoved();
+  Object.keys(CLIENT_INFO).forEach(function(n){ set[n]=1; });
+  Object.keys(CI_EXTRA).forEach(function(n){ if(n!=='__removed') set[n]=1; });
+  TRACKERS.forEach(function(t){ set[t.name]=1; });   // new trackers auto-appear
+  NO_TRACKER.forEach(function(n){ set[n]=1; });
+  rem.forEach(function(n){ delete set[n]; });        // hide clients removed after close-out
+  return Object.keys(set).sort(function(a,b){ return a.toLowerCase()<b.toLowerCase()?-1:1; });
+}
+function ciData(name){
+  var base=CLIENT_INFO[name]||null, extra=CI_EXTRA[name]||null;
+  if(!base && !extra) return null;
+  var d={}; if(base){ for(var k in base) d[k]=base[k]; }
+  if(extra){ for(var k2 in extra){ if(extra[k2]!=null && extra[k2]!=='') d[k2]=extra[k2]; } }
+  return d;
+}
+function ciSelected(){
+  var names=ciNames();
+  var sel=localStorage.getItem('sabel_ci_selected');
+  if(sel && names.indexOf(sel)>=0) return sel;
+  return names[0]||null;
+}
+function ciPick(name){
+  localStorage.setItem('sabel_ci_selected', name);
+  CI_EDITING=false;
+  renderClientInfo();
+}
+function renderClientInfo(){
+  if(CI_EDITING) return;  // never wipe an open edit form on auto-refresh
+  var selEl=document.getElementById('ciSelect'), body=document.getElementById('ciBody');
+  if(!selEl||!body) return;
+  var names=ciNames(), cur=ciSelected();
+  var sum=document.getElementById('ciSummary');
+  if(sum){
+    var pending=names.filter(function(n){ return !ciData(n); }).length;
+    sum.textContent=names.length+' clients'+(pending?' · '+pending+' with details pending':'');
+  }
+  selEl.innerHTML=names.map(function(n){
+    var has=!!ciData(n);
+    return '<option value="'+esc(n)+'"'+(n===cur?' selected':'')+'>'+esc(n)+(has?'':' — details pending')+'</option>';
+  }).join('');
+  if(!cur){ body.innerHTML='<div class="ci-pending">No clients yet.</div>'; return; }
+  var d=ciData(cur);
+  if(!d){
+    body.innerHTML='<div class="ci-pending">Contract details pending for <b>'+esc(cur)+'</b>. Click &#9998; Edit to add them, or ask Claude to pull the SOW / proposal details from the client\'s Drive folder.</div>';
+    return;
+  }
+  var migCls=d.migYes==='yes'?'yes':(d.migYes==='no'?'no':'tbc');
+  var html='<div class="ci-grid">';
+  html+='<div class="ci-cell hours"><div class="l">Hours contracted</div><div class="v">'+esc(d.h||'TBC')+'</div>'+(d.hs?'<div class="s">'+esc(d.hs)+'</div>':'')+'</div>';
+  html+='<div class="ci-cell mig"><div class="l">Migration work</div><div class="v '+migCls+'">'+esc(d.mig||'TBC')+'</div></div>';
+  html+='<div class="ci-cell"><div class="l">Main client contact</div><div class="v">'+esc(d.con||'TBC')+'</div>'+(d.conR?'<div class="s">'+esc(d.conR)+'</div>':'')+'</div>';
+  html+='<div class="ci-cell"><div class="l">Contract signed</div><div class="v">'+esc(d.signed||'TBC')+'</div>'+(d.signedS?'<div class="s">'+esc(d.signedS)+'</div>':'')+'</div>';
+  html+='<div class="ci-cell"><div class="l">Kick-off meeting</div><div class="v">'+esc(d.ko||'TBC')+'</div></div>';
+  html+='</div>';
+  html+='<div class="ci-scope"><div class="l">Scope overview</div><p>'+esc(d.scope||'Scope summary pending.')+'</p></div>';
+  if(d.migNote) html+='<div class="ci-mignote"><b>Migration detail:</b> '+esc(d.migNote)+'</div>';
+  html+='<div class="ci-src">Source: '+esc(d.signedS||'SOW / proposal')+' in the client\'s Drive folder · extracted 15 Jul 2026 · edits save for the whole team</div>';
+  body.innerHTML=html;
+}
+function ciToggleEdit(){
+  var body=document.getElementById('ciBody'), cur=ciSelected();
+  if(!body||!cur) return;
+  if(CI_EDITING){ CI_EDITING=false; renderClientInfo(); return; }
+  CI_EDITING=true;
+  var d=ciData(cur)||{};
+  function f(id,label,val,full,ta){
+    return '<div'+(full?' class="full"':'')+'><label>'+label+'</label>'+
+      (ta?'<textarea id="'+id+'">'+esc(val||'')+'</textarea>'
+         :'<input id="'+id+'" value="'+esc(val||'')+'">')+'</div>';
+  }
+  body.innerHTML='<div class="ci-form">'+
+    f('ci_h','Hours contracted',d.h)+f('ci_hs','Hours note (fee / SOW ref)',d.hs)+
+    f('ci_mig','Migration — short label (e.g. "30 of 72 hrs", "None")',d.mig)+
+    f('ci_migYes','Migration? (yes / no / tbc)',d.migYes)+
+    f('ci_con','Main client contact',d.con)+f('ci_conR','Contact role / note',d.conR)+
+    f('ci_signed','Contract signed (date)',d.signed)+f('ci_signedS','Signed source (Intercom SOW / Proposal)',d.signedS)+
+    f('ci_ko','Kick-off meeting',d.ko,true)+
+    f('ci_scope','Scope overview (one paragraph)',d.scope,true,true)+
+    f('ci_migNote','Migration detail (optional)',d.migNote,true,true)+
+    '<div class="ci-actions"><button class="ci-cancel" onclick="CI_EDITING=false;renderClientInfo()">Cancel</button>'+
+    '<button class="ci-save" onclick="ciSave()">&#10003; Save for the team</button></div></div>';
+}
+function ciSave(){
+  var cur=ciSelected(); if(!cur) return;
+  function v(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
+  CI_EXTRA[cur]={h:v('ci_h'),hs:v('ci_hs'),mig:v('ci_mig'),migYes:v('ci_migYes').toLowerCase(),
+    con:v('ci_con'),conR:v('ci_conR'),signed:v('ci_signed'),signedS:v('ci_signedS'),
+    ko:v('ci_ko'),scope:v('ci_scope'),migNote:v('ci_migNote')};
+  CI_EDITING=false;
+  ciPersist();
+}
+// Save CI_EXTRA locally and share with the whole team via the webhook
+// (CI_KEY must be in ALLOWED_KEYS in sabel-webhook api/tracker.js).
+function ciPersist(){
+  localStorage.setItem('sabel_ci_extra', JSON.stringify(CI_EXTRA));
+  renderClientInfo();
+  fetch(API+'?key='+encodeURIComponent(CI_KEY)+'&_t='+Date.now(), {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ data: CI_EXTRA })
+  }).catch(function(){ /* offline — localStorage keeps it */ });
+}
+function ciAddClient(){
+  var name=prompt('New client name (exactly as it should appear):');
+  if(!name) return;
+  name=name.trim(); if(!name) return;
+  if(!CI_EXTRA[name] && !CLIENT_INFO[name]) CI_EXTRA[name]={};
+  // re-adding a previously removed client brings it back
+  if(ciRemoved().indexOf(name)>=0){
+    CI_EXTRA.__removed = ciRemoved().filter(function(n){ return n!==name; });
+  }
+  localStorage.setItem('sabel_ci_selected', name);
+  CI_EDITING=false;
+  ciPersist();
+  ciToggleEdit();
+}
+function ciRemoveClient(){
+  var cur=ciSelected(); if(!cur) return;
+  if(!confirm('Remove "'+cur+'" from the Client Contracts widget?\n\nUse this once their scope is complete. The whole team will stop seeing them here. You can bring them back any time with + Add client using the same name.')) return;
+  var rem=ciRemoved();
+  if(rem.indexOf(cur)===-1) rem.push(cur);
+  CI_EXTRA.__removed=rem;
+  localStorage.removeItem('sabel_ci_selected');
+  CI_EDITING=false;
+  ciPersist();
+}
+function loadClientInfo(){
+  return fetch(API+'?key='+encodeURIComponent(CI_KEY)+'&_t='+Date.now(), {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(j){
-      if(!j) { rebuildContracts(); return; }
-      if(Array.isArray(j)){ applyRegistry(j); rebuildContracts(); return; }
-      applyRegistry(j.trackers);
-      if(Array.isArray(j.noTracker) && j.noTracker.length) NO_TRACKER = j.noTracker;
-      rebuildContracts(j.contracts);
-    })
-    .catch(function(){ rebuildContracts(); /* no registry — keep built-in list */ });
+      if(j && j.ok && j.data && typeof j.data==='object'){
+        CI_EXTRA = j.data;
+        localStorage.setItem('sabel_ci_extra', JSON.stringify(CI_EXTRA));
+        renderClientInfo();
+      }
+    }).catch(function(){ /* offline — keep localStorage copy */ });
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -1389,11 +1522,12 @@ updateDensityBtn();
 buildConfigPanel();
 render();                                   // paint shell immediately
 applyWidgets();                             // honour saved widget visibility
+renderClientInfo();                         // client contracts widget (instant from baked data)
 loadNotes();                                // pull the team's shared notes
 loadOverrides();                            // pull shared go-live overrides
-loadShared();                               // pull shared close-outs / removals
-loadConfig().then(function(){ loadLive(false); }); // registry (if any) → live data
-setInterval(function(){ loadLive(false); loadNotes(); loadOverrides(); loadShared(); }, REFRESH_MS); // keep it live
+loadClientInfo();                           // pull shared client-contract edits
+loadConfig().then(function(){ loadLive(false); renderClientInfo(); }); // registry (if any) → live data; re-list clients from registry
+setInterval(function(){ loadLive(false); loadNotes(); loadOverrides(); loadClientInfo(); }, REFRESH_MS); // keep it live
 </script>
 </body>
 </html>
