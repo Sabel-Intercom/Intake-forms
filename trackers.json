@@ -32,7 +32,7 @@
     "key": "yfood-tracker-v1",
     "file": "YFoodTracker_v2.html",
     "sowHours": 60,
-    "active": false
+    "active": true
   },
   {
     "name": "Cirqul",
