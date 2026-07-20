@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sabel × The Giving Movement · Project Tracker</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0F1117;color:#E2E8F0;min-height:100vh}
+.pw{display:grid;grid-template-columns:176px 1fr;min-height:100vh}
+.sb{display:flex;flex-direction:column;background:#161B26;border-right:1px solid #1E2433}
+.sb-head{padding:16px 14px 14px;border-bottom:1px solid #1E2433}
+.sb-logo{height:22px;margin-bottom:8px}
+.sb-title{font-size:13px;font-weight:600;color:#E2E8F0}
+.sb-sub{font-size:11px;color:#94A3B8;margin-top:1px}
+.si{display:block;width:100%;text-align:left;border:none;cursor:pointer;padding:10px 14px;font-family:inherit;background:transparent;border-bottom:1px solid #1E2433;transition:background .12s}
+.si:hover{background:#1E2433}
+.sb-sec{padding:5px 14px 3px;font-size:10px;font-weight:600;letter-spacing:.08em;color:#475569;text-transform:uppercase;border-bottom:1px solid #1E2433}
+.sb-footer{margin-top:auto;padding:14px;border-top:1px solid #1E2433}
+.mn{padding:1.5rem;background:#0F1117}
+/* cards — overflow:visible so status picker floats above */
+.task{background:#161B26;border:1px solid #1E2433;border-radius:10px;margin-bottom:7px;overflow:visible;transition:border-color .12s;position:relative}
+.task:hover{border-color:#2A3145}
+.task-client{background:#0F1117;border:1px solid rgba(251,191,36,.28);border-radius:10px;margin-bottom:7px;overflow:visible;transition:border-color .12s;position:relative}
+.task-client:hover{border-color:rgba(251,191,36,.5)}
+.task.done,.task-client.done{opacity:.65}
+.task.overdue,.task-client.overdue{border-left:3px solid #F87171}
+.task-inner{border-radius:10px;overflow:hidden}
+.task-head{padding:10px 12px;cursor:grab;user-select:none}
+.col-drop{border:2px dashed rgba(96,165,250,.45)!important;background:rgba(96,165,250,.04)!important;border-radius:10px!important}
+.card-dragging{opacity:.35!important}
+.add-task-btn{display:flex;align-items:center;gap:6px;width:100%;padding:8px 10px;background:transparent;border:1px dashed #1E2433;border-radius:8px;color:#475569;font-size:12px;font-family:inherit;cursor:pointer;transition:all .15s;margin-top:6px}
+.add-task-btn:hover{border-color:#3B82F6;color:#60A5FA;background:rgba(59,130,246,.05)}
+.task-expand{border-top:1px solid #1E2433;padding:12px;background:#0F1117;display:none}
+.task-expand textarea,.task-expand input{width:100%;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:7px 10px;font-family:inherit;line-height:1.5;outline:none}
+.task-expand textarea{resize:vertical}
+.task-expand textarea:focus,.task-expand input:focus{border-color:#3B82F6}
+.task-expand label{font-size:11px;font-weight:500;color:#94A3B8;display:block;margin-bottom:4px}
+.chk-btn{background:none;border:none;cursor:pointer;padding:0;flex-shrink:0;display:flex;align-items:flex-start;padding-top:1px}
+.bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+/* status picker trigger */
+.stat-bdg{display:inline-flex;align-items:center;gap:3px;border-radius:20px;padding:2px 6px 2px 8px;font-size:11px;font-weight:500;cursor:pointer;border:none;font-family:inherit;flex-shrink:0}
+.stat-bdg:hover{filter:brightness(1.15)}
+/* filter stat cards */
+.sc{border-radius:8px;padding:10px 12px;cursor:pointer;border:1px solid transparent;transition:all .15s;user-select:none;text-align:left;font-family:inherit;width:100%}
+.sc.f-on{background:#161B26;border-color:#1E2433}.sc.f-on.active{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.4)}
+.sc.f-att{background:#161B26;border-color:#1E2433}.sc.f-att.active{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.4)}
+.sc.f-risk{background:#161B26;border-color:#1E2433}.sc.f-risk.active{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.4)}
+.col-head{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin:0 0 8px;display:flex;align-items:center;gap:5px}
+.phase-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+.ov-top{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.empty-col{font-size:12px;color:#334155;padding:20px 0;text-align:center}
+.ph-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ph-card{background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:12px;cursor:pointer;transition:border-color .12s}
+.ph-card:hover{border-color:#3B82F6}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:.5rem}
+/* phase view top row: completion card beside the filter stat cards, to reduce scroll */
+.phase-top{display:grid;grid-template-columns:minmax(190px,1fr) 1.7fr;gap:1rem;align-items:stretch;margin-bottom:1rem}
+@media(max-width:760px){.phase-top{grid-template-columns:1fr}}
+.toast{position:fixed;bottom:20px;right:20px;background:#1E2433;border:1px solid #2A3145;border-radius:8px;padding:9px 14px;font-size:12px;color:#94A3B8;opacity:0;transition:opacity .3s;pointer-events:none;z-index:1001}
+.toast.show{opacity:1}
+.filter-hint{font-size:11px;color:#475569;display:flex;align-items:center;gap:4px;margin-top:6px}
+/* floating status picker */
+#status-picker,#owner-picker,#add-picker{position:fixed;display:none;background:#1E2433;border:1px solid #2A3145;border-radius:9px;padding:4px;z-index:1000;min-width:158px;max-height:300px;overflow-y:auto;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+#add-picker{min-width:240px;max-width:320px}
+#status-picker button,#owner-picker button,#add-picker button{display:flex;align-items:center;gap:7px;width:100%;padding:7px 10px;background:transparent;border:none;cursor:pointer;font-family:inherit;border-radius:5px;transition:background .1s;text-align:left}
+#status-picker button:hover,#owner-picker button:hover,#add-picker button:hover{background:rgba(255,255,255,.06)}
+/* tooltip */
+#tip-box{position:fixed;display:none;background:#1E2433;border:1px solid #2A3145;border-radius:8px;padding:9px 12px;font-size:12px;color:#E2E8F0;max-width:240px;line-height:1.5;z-index:1002;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+/* autosave indicator */
+#autosave-dot{position:fixed;top:14px;right:16px;font-size:11px;color:#475569;display:flex;align-items:center;gap:5px;opacity:0;transition:opacity .4s;z-index:999}
+#autosave-dot.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="pw">
+  <div class="sb" id="sidebar"></div>
+  <div class="mn" id="main"></div>
+</div>
+<div id="status-picker"></div>
+<div id="owner-picker"></div>
+<div id="add-picker"></div>
+<div id="tip-box"></div>
+<div id="autosave-dot"><i class="ti ti-cloud-check" style="font-size:13px"></i>Autosaved</div>
+<div class="toast" id="toast"></div>
+<script>
+const API='https://sabel-webhook.vercel.app/api/tracker';
+const KEY='thegivingmovement-tracker-v1';  // [CLIENT] api key slug
+const LOGO='data:image/jpeg;base64,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';
+const GO_LIVE='2026-08-01';  // [CLIENT] go-live date YYYY-MM-DD, or '' to hide the box
+const GO_LIVE_NOTE='Cutover, Intercom opens across all channels';  // [CLIENT] one-line note
+const ALL_STATUSES=['Complete','In Progress','Pending','Blocked','Dependency'];
+const SABEL_TEAM=['Chris','Richard','Greg'];
+const BUILD_V=202607152141;  // set automatically by the build script from the build timestamp; do not edit
+const P=[
+  // [CLIENT] Replace these example phases with this client's phases.
+  {id:'setup',l:'Setup',c:'#64748B',w:'Week 0',d:'May 14-22',h:0},
+  {id:'foundations',l:'Foundations',c:'#3B82F6',w:'Weeks 1-2',d:'May 19-Jun 5',h:16},
+  {id:'automation',l:'Automation Engine',c:'#14B8A6',w:'Weeks 2-4',d:'May 26-Jun 19',h:16},
+  {id:'fin',l:'Fin & Help Centre',c:'#10B981',w:'Weeks 3-6',d:'Jun 2-Jul 16',h:18},
+  {id:'migration',l:'Migration',c:'#6366F1',w:'Weeks 6-9',d:'Jun 23-Jul 31',h:10},
+  {id:'uat',l:'UAT & Enablement',c:'#9333EA',w:'Week 10',d:'Jul 14-28',h:0},
+  {id:'golive',l:'Go-live & Cutover',c:'#E10600',w:'Cutover',d:'Aug 1',h:0},
+  {id:'post',l:'Post go-live',c:'#94A3B8',w:'Post',d:'Aug 4-28',h:0},
+];
+const OW={
+  Chris:{c:'#60A5FA',bg:'rgba(96,165,250,.15)'},
+  Richard:{c:'#C084FC',bg:'rgba(192,132,252,.15)'},
+  Greg:{c:'#34D399',bg:'rgba(52,211,153,.15)'},
+  'TGM':{c:'#FBBF24',bg:'rgba(251,191,36,.15)'}
+};
+const SC={
+  'Complete':{c:'#4ADE80',bg:'rgba(74,222,128,.12)'},
+  'In Progress':{c:'#60A5FA',bg:'rgba(96,165,250,.12)'},
+  'Pending':{c:'#94A3B8',bg:'rgba(148,163,184,.1)'},
+  'Blocked':{c:'#F87171',bg:'rgba(248,113,113,.12)'},
+  'Dependency':{c:'#FBBF24',bg:'rgba(251,191,36,.12)'}
+};
+const FILTER_MAP={on:['Complete','In Progress'],att:['Pending','Dependency'],risk:['Blocked']};
+
+const T={
+  setup:{sabel:[
+    {t:'Create Slack project channel and share with TGM team',o:'Chris',s:'Complete',d:'May 14-15',week:1,notes:'#thegivingmovement created. Omar and Guillaume added.',link:''},
+    {t:'Share pre-call context and SOW with Omar (champion)',o:'Richard',s:'Complete',d:'May 13-14',week:1,notes:'',link:''},
+    {t:'Kick-off call: scope, contacts and ways of working',o:'Chris',s:'Complete',d:'May 14',week:1,notes:'Held 14 May, Dubai.',link:''},
+  ],client:[
+    {t:'Intercom workspace admin access (App ID hgigtgrn)',o:'TGM',s:'Complete',d:'May 16',week:1,tip:'Grant the Sabel team admin access to your Intercom workspace (App ID hgigtgrn) so we can configure on your behalf.',notes:'Confirmed. Owner: Omar.',link:'https://www.intercom.com/help/en/articles/183-set-up-identity-verification-for-web-and-mobile'},
+    {t:'Freshdesk read access for migration mapping',o:'TGM',s:'Complete',d:'May 16',week:1,tip:'Give us read access to Freshdesk so we can map tickets, contacts and fields for the migration.',notes:'Owner: Omar.',link:''},
+    {t:'Shopify staff access, primary store',o:'TGM',s:'Complete',d:'May 16',week:1,tip:'Add the Sabel team as staff on your primary Shopify store so we can build and test the order-lookup sidebar.',notes:'Owner: Omar.',link:''},
+    {t:'Shopify staff access, remaining 4 stores',o:'TGM',s:'Pending',d:'May 23',week:2,tip:'Add staff access to your other four Shopify storefronts so we can connect them in sequence after the primary store is validated.',notes:'',link:''},
+    {t:'WhatsApp Business number verified with Meta',o:'TGM',s:'Pending',d:'May 18',week:2,tip:'Confirm your WhatsApp Business number is verified with Meta and ready to connect to Intercom.',notes:'Currently live on Freshdesk.',link:'https://www.intercom.com/help/en/articles/5454490-whatsapp-app'},
+    {t:'Instagram Business admin access',o:'TGM',s:'Pending',d:'May 18',week:2,tip:'Provide admin access to the Instagram Business account so we can connect it to your inbox.',notes:'Owner: Diana.',link:'https://www.intercom.com/help/en/articles/6139045-instagram-app'},
+    {t:'Kinder API documentation and sandbox credentials',o:'TGM',s:'Pending',d:'May 18',week:2,tip:'Share the Kinder API docs, available fields and authentication so we can build the shipping and returns sidebar.',notes:'Owner: Guillaume.',link:'https://developers.intercom.com/docs/build-an-integration/learn-more/rest-apis'},
+    {t:'Freshdesk Help Centre article export',o:'TGM',s:'Complete',d:'May 16',week:1,tip:'Export your current Freshdesk article set so we can clean it up for Fin to read from.',notes:'Moved and optimised already.',link:''},
+    {t:'Brand assets pack (logos, sender names, reply addresses)',o:'TGM',s:'Dependency',d:'May 25',week:3,tip:'Send logo files, sender names and reply-address preferences so we can brand the workspace and Messenger.',notes:'Doc to be supplied, Diana.',link:''},
+  ]},
+  foundations:{sabel:[
+    {t:'Workspace and brand config, region, Dubai hours, seats',o:'Chris',s:'Complete',d:'May 19-23',week:2,notes:'15 Full + 50 Lite seats. Region EMEA (Dubai).',link:'https://www.intercom.com/help/en/articles/168-install-intercom-in-your-product-for-logged-in-users'},
+    {t:'EN + AR language config with right-to-left support',o:'Chris',s:'In Progress',d:'May 19-23',week:2,notes:'',link:'https://www.intercom.com/help/en/articles/180-localize-intercom-to-work-with-multiple-languages#h_4411ec05b9'},
+    {t:'Issue email domain DNS records and verify once client adds them',o:'Chris',s:'In Progress',d:'May 25-29',week:3,notes:'Reply-from team@thegivingmovement.com.',link:''},
+    {t:'Connect Instagram Business, validate inbound',o:'Chris',s:'Pending',d:'May 28-Jun 3',week:3,notes:'',link:'https://www.intercom.com/help/en/articles/6139045-instagram-app'},
+    {t:'Connect WhatsApp Business via native integration',o:'Chris',s:'Pending',d:'May 28-Jun 3',week:3,notes:'',link:'https://www.intercom.com/help/en/articles/5454490-whatsapp-app'},
+    {t:'Configure Messenger for web (primary Shopify storefront)',o:'Chris',s:'Pending',d:'May 28-Jun 2',week:3,notes:'',link:'https://www.intercom.com/help/en/articles/167-install-intercom-in-your-product-for-visitors-and-leads'},
+    {t:'Inbox views and team inboxes (L1 / L2 / Ops)',o:'Chris',s:'In Progress',d:'May 21-27',week:2,notes:'',link:''},
+    {t:'Routing rules by language, channel and topic',o:'Chris',s:'Pending',d:'May 28-Jun 3',week:3,notes:'',link:''},
+    {t:'Ticket types, statuses and SLA targets',o:'Chris',s:'Pending',d:'Jun 1-5',week:4,notes:'L1 9am-3am, L2 9-6pm.',link:''},
+  ],client:[
+    {t:'Add email DNS records (SPF, DKIM, DMARC) at your domain host',o:'TGM',s:'Dependency',d:'May 25',week:2,tip:'We will send you the exact records. Your IT or domain admin adds them at your domain host. Intercom cannot send email as your brand until these are in place, so this is an early priority.',notes:'',link:''},
+    {t:'Install Messenger code snippet on your website',o:'TGM',s:'Pending',d:'May 28',week:3,tip:'Your developer adds the Intercom code snippet to your site so the Messenger can appear. It is a small copy-paste job; the guide has the exact code, and we can join a call if they hit any issues.',notes:'Owner: Guillaume.',link:'https://developers.intercom.com/installing-intercom/web/installation'},
+    {t:'Secure the Messenger with identity verification (JWT)',o:'TGM',s:'Pending',d:'May 28',week:3,tip:'Your developer sets up JSON Web Tokens so Intercom can verify who each logged-in user really is. This stops anyone impersonating your customers in chat and should be live before launch.',notes:'',link:'https://developers.intercom.com/installing-intercom/web/identity-verification'},
+    {t:'Pass logged-in user attributes to the Messenger',o:'TGM',s:'Pending',d:'May 28',week:3,tip:'Your developer sends basic user details (name, email, user ID and any useful custom fields) into the Messenger, so conversations arrive with context and Fin can personalise answers.',notes:'',link:'https://developers.intercom.com/installing-intercom/web/attributes-objects'},
+    {t:'Inbox structure and routing approval',o:'TGM',s:'Dependency',d:'May 27',week:3,tip:'Review and confirm the inbox and routing setup (L1 / L2 / Ops) before we finalise assignment rules.',notes:'',link:''},
+    {t:'Lite seat stakeholder list confirmed',o:'TGM',s:'Dependency',d:'May 27',week:3,tip:'Confirm who needs Lite (view-only) seats, finance, ops, dev, so we allocate the 50 Lite seats correctly.',notes:'',link:''},
+    {t:'Business hours, holidays and closures to configure',o:'TGM',s:'Dependency',d:'May 27',week:3,tip:'Share your Dubai business hours plus any office holidays and closures so we can configure operating hours and out-of-office behaviour.',notes:'',link:''},
+    {t:'SLA targets per channel confirmed',o:'TGM',s:'Dependency',d:'May 29',week:3,tip:'Confirm target response times per channel so we can set inbox SLAs and alerts.',notes:'',link:''},
+  ]},
+  automation:{sabel:[
+    {t:'Partnership and press enquiry triage workflow',o:'Chris',s:'In Progress',d:'May 26-Jun 1',week:3,notes:'Approximately 30% of inbound volume.',link:'https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation'},
+    {t:'Connect Shopify store 1 (primary), validate order lookup',o:'Chris',s:'In Progress',d:'May 26-Jun 1',week:3,notes:'',link:''},
+    {t:'Configure sidebar, order, fulfilment, customer history',o:'Chris',s:'Pending',d:'Jun 2-8',week:4,notes:'',link:''},
+    {t:'Connect Shopify stores 2-5 using config template',o:'Chris',s:'Pending',d:'Jun 9-15',week:5,notes:'Awaiting remaining store access.',link:''},
+    {t:'Test multi-store lookup logic per conversation',o:'Chris',s:'Pending',d:'Jun 16-19',week:6,notes:'',link:''},
+    {t:'Specify and review Kinder API endpoints with Guillaume',o:'Greg',s:'Pending',d:'Jun 2-8',week:4,notes:'',link:'https://developers.intercom.com/docs/build-an-integration/learn-more/rest-apis'},
+    {t:'Build Canvas Kit app for Kinder shipping and returns',o:'Greg',s:'Pending',d:'Jun 9-17',week:5,notes:'Subject to Kinder exposing a queryable API.',link:'https://www.intercom.com/help/en/articles/6298282-setting-up-a-custom-action'},
+    {t:'Test Kinder integration, validate field mapping',o:'Greg',s:'Pending',d:'Jun 18-19',week:6,notes:'',link:''},
+  ],client:[
+    {t:'Confirm primary Shopify store (largest by volume)',o:'TGM',s:'Dependency',d:'May 26',week:3,tip:'Tell us which of your five stores is the primary or largest so we connect and validate it first.',notes:'',link:''},
+    {t:'Kinder API queryable for required fields',o:'TGM',s:'Dependency',d:'Jun 2',week:4,tip:'Confirm Kinder exposes a queryable API for shipping and returns data. If not, the sidebar is replaced with an equivalent workflow (per SOW).',notes:'Owner: Guillaume.',link:'https://developers.intercom.com/docs/build-an-integration/learn-more/rest-apis'},
+    {t:'Partnership routing preference confirmed',o:'TGM',s:'Dependency',d:'May 26',week:3,tip:'Confirm how partnership and press enquiries should be handled, dedicated inbox, auto-reply, or routed away, so we filter them before Fin engages.',notes:'',link:''},
+  ]},
+  fin:{sabel:[
+    {t:'Audit Freshdesk articles, gaps, duplicates, outdated',o:'Chris',s:'In Progress',d:'Jun 2-8',week:4,notes:'',link:'https://www.intercom.com/help/en/articles/56644-customize-your-help-center'},
+    {t:'Restructure collections and categories for Fin readability',o:'Chris',s:'In Progress',d:'Jun 9-15',week:5,notes:'',link:'https://www.intercom.com/help/en/articles/56644-customize-your-help-center'},
+    {t:'Reformat top 50 articles for clarity and single-topic focus',o:'Chris',s:'Pending',d:'Jun 16-22',week:6,notes:'',link:''},
+    {t:'Publish cleaned article set in Help Centre (EN)',o:'Chris',s:'Pending',d:'Jun 23-26',week:7,notes:'',link:'https://www.intercom.com/help/en/articles/2982784-control-who-can-see-your-articles'},
+    {t:'Configure Fin across Messenger, email, Instagram, WhatsApp',o:'Chris',s:'Pending',d:'Jun 29-Jul 3',week:8,notes:'',link:'https://www.intercom.com/help/en/articles/9357948-manage-knowledge-audiences-and-targeting'},
+    {t:'Configure Fin bilingual EN + AR with dialect handling',o:'Chris',s:'Pending',d:'Jun 29-Jul 3',week:8,notes:'',link:'https://www.intercom.com/help/en/articles/180-localize-intercom-to-work-with-multiple-languages#h_4411ec05b9'},
+    {t:'Configure Fin escalation, handover and fallback logic',o:'Chris',s:'Pending',d:'Jul 6-8',week:9,notes:'',link:''},
+    {t:'Configure Fin persona and tone to brand voice',o:'Chris',s:'Pending',d:'Jul 6-8',week:9,notes:'Awaiting tone guide.',link:''},
+    {t:'Test Fin EN + AR sample queries, iterate on output',o:'Chris',s:'Pending',d:'Jul 8-10',week:9,notes:'',link:'https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live'},
+    {t:'Live team training, inbox and Fin handover',o:'Chris',s:'Pending',d:'Jul 13-14',week:10,notes:'',link:''},
+    {t:'Admin training for Omar and Guillaume',o:'Chris',s:'Pending',d:'Jul 14-15',week:10,notes:'Help Centre, Fin tuning, reporting.',link:''},
+  ],client:[
+    {t:'Brand tone guide and approved response examples',o:'TGM',s:'Dependency',d:'Jun 16',week:6,tip:'Share tone-of-voice guidance and 3-5 example responses you\'re happy with so Fin mirrors your brand language.',notes:'',link:''},
+    {t:'Help Centre owner confirmed for ongoing maintenance',o:'TGM',s:'Dependency',d:'Jun 16',week:6,tip:'Nominate your internal Help Centre owner to maintain content after handover.',notes:'Diana?',link:''},
+    {t:'Arabic dialect handling preference confirmed',o:'TGM',s:'Dependency',d:'Jun 23',week:7,tip:'Confirm whether Fin should detect language automatically or use profile language for Arabic dialects (9 to support).',notes:'',link:''},
+  ]},
+  migration:{sabel:[
+    {t:'Map FD tickets, contacts, agents, statuses, tags, fields',o:'Greg',s:'In Progress',d:'Jun 23-27',week:7,notes:'Up to 150k tickets, last 12 months.',link:'https://www.intercom.com/help/en/articles/177-import-your-user-data-into-intercom'},
+    {t:'Run sample migration batch, validate vs source records',o:'Greg',s:'Pending',d:'Jun 30-Jul 4',week:8,notes:'With Guillaume and Omar.',link:''},
+    {t:'Execute full historical migration (up to 150k tickets)',o:'Greg',s:'Pending',d:'Jul 7-11',week:9,notes:'',link:''},
+    {t:'Sample-based QA on migrated dataset',o:'Greg',s:'Pending',d:'Jul 14-17',week:10,notes:'',link:''},
+    {t:'Delta migration to capture build-phase tickets',o:'Greg',s:'Pending',d:'Jul 30-31',week:12,notes:'Runs at cutover.',link:''},
+  ],client:[
+    {t:'Migration mapping sign-off',o:'TGM',s:'Dependency',d:'Jul 6',week:9,tip:'Review and sign off the migration mapping (statuses, tags, agents, fields) before we run the full migration.',notes:'Owner: Guillaume.',link:''},
+    {t:'Confirm agent count transferring from Freshdesk',o:'TGM',s:'Dependency',d:'Jun 30',week:8,tip:'Confirm how many Freshdesk agents transfer to Intercom so we can map them; up to 15 Full Expert seats are provisioned.',notes:'',link:''},
+    {t:'Migrated dataset sign-off',o:'TGM',s:'Dependency',d:'Jul 18',week:10,tip:'Review the QA sample and approve moving from sample to full production migration.',notes:'Owner: Omar.',link:''},
+  ]},
+  uat:{sabel:[
+    {t:'E2E testing, channels, Fin workflows and connectors',o:'Chris',s:'Pending',d:'Jul 14-18',week:10,notes:'',link:'https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live'},
+    {t:'Fin test conversations across priority scenarios (EN + AR)',o:'Chris',s:'Pending',d:'Jul 14-18',week:10,notes:'',link:'https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live'},
+    {t:'Iterate Fin configuration based on test results',o:'Chris',s:'Pending',d:'Jul 20-24',week:11,notes:'',link:''},
+    {t:'Sabel go-live readiness checklist completed',o:'Richard',s:'Pending',d:'Jul 21-25',week:11,notes:'',link:''},
+  ],client:[
+    {t:'UAT testers confirmed and available',o:'TGM',s:'Dependency',d:'Jul 14',week:10,tip:'Identify testers (Omar\'s team) to run end-to-end testing across all channels and Fin before go-live.',notes:'',link:''},
+    {t:'Go-live readiness sign-off',o:'TGM',s:'Dependency',d:'Jul 28',week:12,tip:'Provide written sign-off that the platform is ready before we switch live traffic. Approver: Marc Jeffrey / Omar.',notes:'',link:''},
+  ]},
+  golive:{sabel:[
+    {t:'Freshdesk closes inbound channels (cutover)',o:'Greg',s:'Pending',d:'Jul 31-Aug 1',week:12,notes:'',link:''},
+    {t:'Open Intercom to inbound, email, Instagram, WhatsApp',o:'Chris',s:'Pending',d:'Jul 31-Aug 1',week:12,notes:'',link:'https://www.intercom.com/help/en/articles/6522819-forward-your-email-to-your-team-inbox'},
+    {t:'Activate Fin AI Agent on all configured channels',o:'Chris',s:'Pending',d:'Aug 1',week:12,notes:'',link:''},
+    {t:'Sabel on standby for go-live support',o:'Chris',s:'Pending',d:'Aug 1',week:12,notes:'',link:''},
+  ],client:[
+    {t:'Team comms sent re: Intercom go-live',o:'TGM',s:'Dependency',d:'Aug 1',week:12,tip:'Let your wider team know Intercom is live and when, so agents are ready before the first customer conversation.',notes:'',link:''},
+  ]},
+  post:{sabel:[
+    {t:'Week 1 health check, Fin deflection, resolution, CSAT',o:'Chris',s:'Pending',d:'Aug 4-8',week:13,notes:'',link:''},
+    {t:'Fin tuning pass, low-confidence topics and escalations',o:'Chris',s:'Pending',d:'Aug 11-15',week:14,notes:'',link:''},
+    {t:'Open items and snag list resolved',o:'Chris',s:'Pending',d:'Aug 4-14',week:13,notes:'',link:''},
+    {t:'Final handover docs and Slack channel wind-down',o:'Richard',s:'Pending',d:'Aug 25-28',week:16,notes:'',link:''},
+  ],client:[
+    {t:'Feedback on Week 1 agent experience',o:'TGM',s:'Dependency',d:'Aug 11',week:14,tip:'After the first week live, share agent feedback, what\'s working, what\'s clunky, to guide the Fin tuning pass.',notes:'',link:''},
+    {t:'Arabic article localisation decision (follow-on)',o:'TGM',s:'Dependency',d:'Aug 18',week:15,tip:'Decide whether to add native Arabic article sets as a follow-on phase (out of scope for this engagement).',notes:'',link:''},
+  ]},
+};
+
+// ── Standard task library ─────────────────────────────────────────────────────
+// [CLIENT] The Sabel standard subset per pillar. These appear in the "+ Add"
+// menu on each column so tasks can be added back manually as required.
+// Keep keys aligned with this client's phase ids. The human-editable master
+// list lives in references/standard-tasks.md; mirror any changes here.
+const STD={
+  setup:{sabel:[
+    {t:'Create Slack project channel and share with client team',o:'Chris',s:'Pending',d:'',week:1,notes:'',link:''},
+    {t:'Share pre-call context and SOW with client champion',o:'Richard',s:'Pending',d:'',week:1,notes:'',link:''},
+    {t:'Kick-off call: scope, contacts and ways of working',o:'Chris',s:'Pending',d:'',week:1,notes:'',link:''},
+  ],client:[
+    {t:'Intercom workspace admin access',o:'TGM',s:'Dependency',d:'',week:1,tip:'Grant the Sabel team admin access to your Intercom workspace so we can configure on your behalf.',notes:'',link:''},
+    {t:'Source platform read access for migration mapping',o:'TGM',s:'Dependency',d:'',week:1,tip:'Give us read access to your current platform so we can map tickets, contacts and fields for the migration.',notes:'',link:''},
+    {t:'Brand assets pack (logos, sender names, reply addresses)',o:'TGM',s:'Dependency',d:'',week:1,tip:'Send logo files, sender names and reply-address preferences so we can brand the workspace and Messenger.',notes:'',link:''},
+  ]},
+  foundations:{sabel:[
+    {t:'Workspace and brand config, region, hours, seats',o:'Chris',s:'Pending',d:'',week:1,notes:'',link:''},
+    {t:'Issue email domain DNS records to client and verify once added',o:'Chris',s:'Pending',d:'',week:1,notes:'',link:''},
+    {t:'Configure Messenger for web',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
+    {t:'Inbox views and team inboxes',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
+    {t:'Routing rules by language, channel and topic',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
+    {t:'Ticket types, statuses and SLA targets',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
+  ],client:[
+    {t:'Add email DNS records (SPF, DKIM, DMARC) at your domain host',o:'TGM',s:'Dependency',d:'',week:1,tip:'We will send you the exact records. Your IT or domain admin adds them at your domain host. Intercom cannot send email as your brand until these are in place, so this is a Week 1 priority.',notes:'',link:''},
+    {t:'Install Messenger code snippet on your website',o:'TGM',s:'Dependency',d:'',week:2,tip:'Your developer adds the Intercom code snippet to your site so the Messenger can appear. It is a small copy-paste job; the guide has the exact code, and we can join a call if they hit any issues.',notes:'',link:'https://developers.intercom.com/installing-intercom/web/installation'},
+    {t:'Secure the Messenger with identity verification (JWT)',o:'TGM',s:'Dependency',d:'',week:2,tip:'Your developer sets up JSON Web Tokens so Intercom can verify who each logged-in user really is. This stops anyone impersonating your customers in chat and should be live before launch.',notes:'',link:'https://developers.intercom.com/installing-intercom/web/identity-verification'},
+    {t:'Pass logged-in user attributes to the Messenger',o:'TGM',s:'Dependency',d:'',week:2,tip:'Your developer sends basic user details (name, email, user ID and any useful custom fields) into the Messenger, so conversations arrive with context and Fin can personalise answers.',notes:'',link:'https://developers.intercom.com/installing-intercom/web/attributes-objects'},
+    {t:'Business hours, holidays and closures',o:'TGM',s:'Dependency',d:'',week:1,tip:'Share your business hours plus any office holidays and closures so we can configure operating hours.',notes:'',link:''},
+    {t:'Inbox structure and routing approval',o:'TGM',s:'Dependency',d:'',week:2,tip:'Review and confirm the inbox and routing setup before we finalise assignment rules.',notes:'',link:''},
+    {t:'SLA targets per channel confirmed',o:'TGM',s:'Dependency',d:'',week:2,tip:'Confirm target response times per channel so we can set inbox SLAs and alerts.',notes:'',link:''},
+  ]},
+  automation:{sabel:[
+    {t:'Non-support enquiry triage workflow',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
+    {t:'Connect primary store, validate order lookup',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
+    {t:'Configure sidebar, order, fulfilment, customer history',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
+    {t:'Specify and review back-office API endpoints',o:'Greg',s:'Pending',d:'',week:3,notes:'',link:''},
+    {t:'Build custom action / Canvas Kit integration',o:'Greg',s:'Pending',d:'',week:4,notes:'',link:''},
+    {t:'Test integration, validate field mapping',o:'Greg',s:'Pending',d:'',week:4,notes:'',link:''},
+  ],client:[
+    {t:'Confirm primary store (largest by volume)',o:'TGM',s:'Dependency',d:'',week:3,tip:'Tell us which store is the primary or largest so we connect and validate it first.',notes:'',link:''},
+    {t:'Back-office API queryable for required fields',o:'TGM',s:'Dependency',d:'',week:3,tip:'Confirm your systems expose a queryable API for the data we need.',notes:'',link:''},
+  ]},
+  fin:{sabel:[
+    {t:'Audit articles, gaps, duplicates, outdated',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
+    {t:'Restructure collections and categories for Fin readability',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
+    {t:'Publish cleaned article set in Help Centre',o:'Chris',s:'Pending',d:'',week:4,notes:'',link:''},
+    {t:'Configure Fin across all connected channels',o:'Chris',s:'Pending',d:'',week:4,notes:'',link:''},
+    {t:'Configure Fin escalation, handover and fallback',o:'Chris',s:'Pending',d:'',week:4,notes:'',link:''},
+    {t:'Configure Fin persona and tone to brand voice',o:'Chris',s:'Pending',d:'',week:4,notes:'',link:''},
+    {t:'Test Fin sample queries and iterate during build',o:'Chris',s:'Pending',d:'',week:5,notes:'',link:''},
+    {t:'Live team training, inbox and Fin handover',o:'Chris',s:'Pending',d:'',week:5,notes:'',link:''},
+  ],client:[
+    {t:'Tone-of-voice guide and 3-5 approved response examples',o:'TGM',s:'Dependency',d:'',week:3,tip:'Share tone-of-voice guidance and a few example responses you are happy with so Fin mirrors your brand language.',notes:'',link:''},
+    {t:'Help Centre owner confirmed for ongoing maintenance',o:'TGM',s:'Dependency',d:'',week:4,tip:'Nominate your internal Help Centre owner to maintain content after handover.',notes:'',link:''},
+    {t:'Language / dialect handling preference confirmed',o:'TGM',s:'Dependency',d:'',week:4,tip:'Confirm whether Fin should detect language automatically or use profile language.',notes:'',link:''},
+  ]},
+  migration:{sabel:[
+    {t:'Map tickets, contacts, agents, statuses, tags, fields',o:'Greg',s:'Pending',d:'',week:4,notes:'',link:''},
+    {t:'Run sample migration batch, validate vs source records',o:'Greg',s:'Pending',d:'',week:5,notes:'',link:''},
+    {t:'Execute full historical migration',o:'Greg',s:'Pending',d:'',week:5,notes:'',link:''},
+    {t:'Sample-based QA on migrated dataset',o:'Greg',s:'Pending',d:'',week:6,notes:'',link:''},
+    {t:'Delta migration to capture build-phase tickets',o:'Greg',s:'Pending',d:'',week:6,notes:'',link:''},
+  ],client:[
+    {t:'Migration mapping sign-off',o:'TGM',s:'Dependency',d:'',week:4,tip:'Review and sign off the migration mapping before we run the full migration.',notes:'',link:''},
+    {t:'Confirm agent count transferring from source platform',o:'TGM',s:'Dependency',d:'',week:4,tip:'Confirm how many agents transfer so we can map them to Intercom seats.',notes:'',link:''},
+    {t:'Migrated dataset sign-off',o:'TGM',s:'Dependency',d:'',week:6,tip:'Review the QA sample and approve the full production migration.',notes:'',link:''},
+  ]},
+  uat:{sabel:[
+    {t:'E2E testing, channels, Fin workflows and connectors',o:'Chris',s:'Pending',d:'',week:6,notes:'',link:''},
+    {t:'Run Fin UAT scenarios and iterate configuration',o:'Chris',s:'Pending',d:'',week:6,notes:'',link:''},
+    {t:'Sabel go-live readiness checklist completed',o:'Richard',s:'Pending',d:'',week:6,notes:'',link:''},
+  ],client:[
+    {t:'UAT testers confirmed and available',o:'TGM',s:'Dependency',d:'',week:6,tip:'Identify testers to run end-to-end testing across all channels and Fin before go-live.',notes:'',link:''},
+    {t:'Go-live readiness sign-off',o:'TGM',s:'Dependency',d:'',week:6,tip:'Provide written sign-off that the platform is ready before we switch live traffic.',notes:'',link:''},
+  ]},
+  golive:{sabel:[
+    {t:'Source platform closes inbound channels (cutover)',o:'Greg',s:'Pending',d:'',week:7,notes:'',link:''},
+    {t:'Open Intercom to inbound across all channels',o:'Chris',s:'Pending',d:'',week:7,notes:'',link:''},
+    {t:'Activate Fin AI Agent on all configured channels',o:'Chris',s:'Pending',d:'',week:7,notes:'',link:''},
+    {t:'Sabel on standby for go-live support',o:'Chris',s:'Pending',d:'',week:7,notes:'',link:''},
+  ],client:[
+    {t:'Team comms sent re: Intercom go-live',o:'TGM',s:'Dependency',d:'',week:7,tip:'Let your wider team know Intercom is live and when, so agents are ready before the first customer conversation.',notes:'',link:''},
+  ]},
+  post:{sabel:[
+    {t:'Week 1 health check, Fin deflection, resolution, CSAT',o:'Chris',s:'Pending',d:'',week:8,notes:'',link:''},
+    {t:'Fin tuning pass, low-confidence topics and escalations',o:'Chris',s:'Pending',d:'',week:8,notes:'',link:''},
+    {t:'Open items and snag list resolved',o:'Chris',s:'Pending',d:'',week:8,notes:'',link:''},
+    {t:'Final handover docs and Slack channel wind-down',o:'Richard',s:'Pending',d:'',week:8,notes:'',link:''},
+  ],client:[
+    {t:'Feedback on Week 1 agent experience',o:'TGM',s:'Dependency',d:'',week:8,tip:'After the first week live, share agent feedback to guide the Fin tuning pass.',notes:'',link:''},
+    {t:'Localisation / follow-on phase decision',o:'TGM',s:'Dependency',d:'',week:0,tip:'Decide whether to add any follow-on phase work.',notes:'',link:''},
+  ]},
+};
+
+let cur='overview';
+let cardNotes={};
+let cardLinks={};
+let origStatus={};
+let expandedCards=new Set();
+let activeFilters=new Set();
+let pickerCid=null;
+let ownerPickerCid=null;
+let addMenuFor=null;
+let saveTimer=null;
+let dragInfo=null;
+let dragOverCol=null;
+let goLiveDate=GO_LIVE;   // editable in the UI; persisted with the saved state
+let editingGoLive=false;  // true while the go-live date input is showing
+let groupBy='pillar';    // 'pillar' | 'week' — how the board groups tasks
+const CLIENT_LABEL='TGM';
+
+// ── Auto-save ─────────────────────────────────────────────────────────────────
+function scheduleAutoSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>saveState(),800);
+}
+// Conflict guard: each browser session gets an id, and every save carries a
+// timestamp. Before saving we check whether someone else has saved since we
+// loaded; if so, the user chooses between reloading (recommended) and overwriting.
+const SESSION_ID=Math.random().toString(36).slice(2);
+let remoteStamp=null;
+function buildPayload(){
+  const payload={buildV:BUILD_V,goLive:goLiveDate,groupBy,weekStarts,statuses:{},notes:cardNotes,links:cardLinks,origStatus,taskData:{},savedAt:Date.now(),savedBy:SESSION_ID};
+  P.forEach(ph=>{
+    payload.taskData[ph.id]={sabel:[...T[ph.id].sabel],client:[...T[ph.id].client]};
+    ['sabel','client'].forEach(grp=>{
+      T[ph.id][grp].forEach((t,i)=>{ payload.statuses[ph.id+'-'+(grp==='sabel'?'s':'c')+'-'+i]=t.s; });
+    });
+  });
+  return payload;
+}
+async function saveState(){
+  const payload=buildPayload();
+  try{
+    // Check for a save from someone else since we loaded.
+    try{
+      const r=await fetch(API+'?key='+KEY);
+      const j=await r.json();
+      if(j&&j.value){
+        const cur=typeof j.value==='string'?JSON.parse(j.value):j.value;
+        const curStamp=cur.savedAt||null;
+        if(curStamp!==remoteStamp&&cur.savedBy!==SESSION_ID){
+          const overwrite=confirm('Someone else has updated this tracker since you opened it.\n\nOK = overwrite with your version\nCancel = keep theirs (then reload the page to see their changes)');
+          if(!overwrite){showToast('Not saved. Reload the page to see the latest changes');return;}
+        }
+      }
+    }catch(e){/* conflict check unavailable; fall through and save */}
+    await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:KEY,value:JSON.stringify(payload)})});
+    remoteStamp=payload.savedAt;
+    showAutosaved();
+  }catch(e){showToast('Save failed');}
+}
+async function loadInitial(){
+  try{
+    const r=await fetch(API+'?key='+KEY);
+    const j=await r.json();
+    if(j&&j.value){
+      const d=typeof j.value==='string'?JSON.parse(j.value):j.value;
+      remoteStamp=d.savedAt||null;
+      if(d.buildV!==undefined&&d.buildV!==BUILD_V){showToast('Plan updated since last save, showing the new plan');return;}
+      if(d.taskData){
+        P.forEach(ph=>{
+          if(d.taskData[ph.id]){
+            if(d.taskData[ph.id].sabel&&d.taskData[ph.id].sabel.length) T[ph.id].sabel=d.taskData[ph.id].sabel;
+            if(d.taskData[ph.id].client&&d.taskData[ph.id].client.length) T[ph.id].client=d.taskData[ph.id].client;
+          }
+        });
+      }
+      if(d.statuses) Object.entries(d.statuses).forEach(([k,v])=>{
+        const parts=k.split('-');
+        const idx=parseInt(parts[parts.length-1]);
+        const gs=parts[parts.length-2];
+        const phId=parts.slice(0,parts.length-2).join('-');
+        const gf=gs==='c'?'client':'sabel';
+        if(T[phId]&&T[phId][gf]&&T[phId][gf][idx]) T[phId][gf][idx].s=v;
+      });
+      if(d.notes) cardNotes=d.notes;
+      if(d.links) cardLinks=d.links;
+      if(d.origStatus) origStatus=d.origStatus;
+      if(d.goLive!==undefined) goLiveDate=d.goLive;
+      if(d.weekStarts) weekStarts={...WEEK_STARTS_DEFAULT,...d.weekStarts};
+      if(d.groupBy) groupBy=d.groupBy;
+      // A view link in the URL wins over the remembered view.
+      applyHash();
+      render();
+    }
+  }catch(e){showToast('Could not load saved progress');}
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+function showAutosaved(){
+  const d=document.getElementById('autosave-dot');
+  d.classList.add('show');
+  clearTimeout(d._t);
+  d._t=setTimeout(()=>d.classList.remove('show'),2000);
+}
+
+// ── Status picker ─────────────────────────────────────────────────────────────
+function openStatusPicker(e,cid){
+  e.stopPropagation();
+  closeOwnerPicker();closeAddMenu();
+  if(pickerCid===cid){closeStatusPicker();return;}
+  pickerCid=cid;
+  const t=resolveTask(cid);if(!t)return;
+  const rect=e.currentTarget.getBoundingClientRect();
+  const picker=document.getElementById('status-picker');
+  picker.innerHTML=ALL_STATUSES.map(s=>{
+    const x=SC[s]||SC.Pending;
+    const active=t.s===s;
+    return`<button onclick="pickStatus('${cid}','${s}')" style="background:${active?'rgba(255,255,255,.06)':'transparent'}">
+      <span style="width:7px;height:7px;border-radius:50%;background:${x.c};flex-shrink:0;display:inline-block"></span>
+      <span style="font-size:12px;color:${active?x.c:'#94A3B8'};font-weight:${active?'500':'400'};flex:1;text-align:left">${s}</span>
+      ${active?`<i class="ti ti-check" style="font-size:11px;color:${x.c}"></i>`:''}
+    </button>`;
+  }).join('');
+  // Position: try below badge, flip up if too close to bottom
+  const spaceBelow=window.innerHeight-rect.bottom;
+  const pickerH=180;
+  const top=spaceBelow>pickerH+10?rect.bottom+5:rect.top-pickerH-5;
+  picker.style.left=Math.min(rect.left,window.innerWidth-170)+'px';
+  picker.style.top=top+'px';
+  picker.style.display='block';
+}
+function pickStatus(cid,val){
+  closeStatusPicker();
+  const t=resolveTask(cid);if(!t)return;
+  if(val==='Complete'&&t.s!=='Complete') origStatus[cid]=t.s;
+  if(val!=='Complete') delete origStatus[cid];
+  t.s=val;
+  render();
+  scheduleAutoSave();
+}
+function closeStatusPicker(){
+  document.getElementById('status-picker').style.display='none';
+  pickerCid=null;
+}
+document.addEventListener('click',()=>{closeStatusPicker();closeOwnerPicker();closeAddMenu();});
+
+// ── Owner picker (Sabel tasks) ────────────────────────────────────────────────
+function openOwnerPicker(e,cid){
+  e.stopPropagation();
+  closeStatusPicker();closeAddMenu();
+  if(ownerPickerCid===cid){closeOwnerPicker();return;}
+  ownerPickerCid=cid;
+  const t=resolveTask(cid);if(!t)return;
+  const rect=e.currentTarget.getBoundingClientRect();
+  const picker=document.getElementById('owner-picker');
+  picker.innerHTML=SABEL_TEAM.map(o=>{
+    const x=OW[o]||OW.Chris;
+    const active=t.o===o;
+    return`<button onclick="pickOwner('${cid}','${o}')" style="background:${active?'rgba(255,255,255,.06)':'transparent'}">
+      <span style="width:7px;height:7px;border-radius:50%;background:${x.c};flex-shrink:0;display:inline-block"></span>
+      <span style="font-size:12px;color:${active?x.c:'#94A3B8'};font-weight:${active?'500':'400'};flex:1;text-align:left">${o}</span>
+      ${active?`<i class="ti ti-check" style="font-size:11px;color:${x.c}"></i>`:''}
+    </button>`;
+  }).join('');
+  const spaceBelow=window.innerHeight-rect.bottom;
+  const pickerH=SABEL_TEAM.length*34+10;
+  const top=spaceBelow>pickerH+10?rect.bottom+5:rect.top-pickerH-5;
+  picker.style.left=Math.min(rect.left,window.innerWidth-170)+'px';
+  picker.style.top=top+'px';
+  picker.style.display='block';
+}
+function pickOwner(cid,o){
+  closeOwnerPicker();
+  const t=resolveTask(cid);if(!t)return;
+  t.o=o;
+  render();
+  scheduleAutoSave();
+}
+function closeOwnerPicker(){
+  document.getElementById('owner-picker').style.display='none';
+  ownerPickerCid=null;
+}
+
+// ── Tooltip ───────────────────────────────────────────────────────────────────
+function showTip(e,txt){
+  const d=document.getElementById('tip-box');
+  d.textContent=txt;d.style.display='block';moveTip(e);
+}
+function moveTip(e){
+  const d=document.getElementById('tip-box');
+  d.style.left=Math.min(e.clientX+14,window.innerWidth-260)+'px';
+  d.style.top=Math.max(e.clientY-48,8)+'px';
+}
+function hideTip(){document.getElementById('tip-box').style.display='none';}
+function showTipFor(e,cid){const t=resolveTask(cid);if(t&&t.tip)showTip(e,t.tip);}
+
+// ── Filter ────────────────────────────────────────────────────────────────────
+function toggleFilter(key){
+  if(activeFilters.has(key)) activeFilters.delete(key);
+  else activeFilters.add(key);
+  renderMain();
+}
+function taskVisible(t){
+  if(activeFilters.size===0) return true;
+  for(const k of activeFilters){ if(FILTER_MAP[k].includes(t.s)) return true; }
+  return false;
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function globalStats(){
+  let total=0,complete=0,usedH=0,on=0,att=0,risk=0;
+  P.forEach(ph=>{
+    const tasks=[...T[ph.id].sabel,...T[ph.id].client];
+    const done=tasks.filter(t=>t.s==='Complete').length;
+    const inprog=tasks.filter(t=>t.s==='In Progress').length;
+    total+=tasks.length;complete+=done;
+    if(tasks.length>0)usedH+=((done+inprog*.5)/tasks.length)*ph.h;
+    tasks.forEach(t=>{
+      if(['Complete','In Progress'].includes(t.s))on++;
+      else if(t.s==='Blocked')risk++;
+      else att++;
+    });
+  });
+  return{total,complete,usedH:Math.round(usedH),on,att,risk};
+}
+function phaseStats(id){
+  const ph=P.find(p=>p.id===id);
+  const tasks=[...T[id].sabel,...T[id].client];
+  let on=0,att=0,risk=0,done=0,inprog=0;
+  tasks.forEach(t=>{
+    if(t.s==='Complete'){on++;done++;}
+    else if(t.s==='In Progress'){on++;inprog++;}
+    else if(t.s==='Blocked')risk++;
+    else att++;
+  });
+  const consumed=tasks.length>0?Math.round(((done+inprog*.5)/tasks.length)*ph.h):0;
+  return{on,att,risk,consumed,done,total:tasks.length};
+}
+function phaseMini(id){
+  const tasks=[...T[id].sabel,...T[id].client];
+  return{done:tasks.filter(t=>t.s==='Complete').length,total:tasks.length};
+}
+// ── Week grouping + scheduling helpers ────────────────────────────────────────
+const WEEK1_START='2026-05-11';  // [CLIENT] Monday of Week 1; the week-grid anchor. Task dates derive from this.
+const WEEK_STARTS_DEFAULT={};    // [CLIENT] Optional per-week start date overrides, e.g. {3:'2026-06-01'} if Week 3 starts late (holiday, client delay). Weeks not listed derive from WEEK1_START.
+let weekStarts={...WEEK_STARTS_DEFAULT}; // Live overrides; editable in the tracker (pencil on a week view) and persisted with saved state.
+let editingWeekStart=false;
+function weekStartDate(n){
+  if(weekStarts[n]){const d=new Date(weekStarts[n]+'T00:00:00');if(!isNaN(d.getTime()))return d;}
+  const d=new Date(WEEK1_START+'T00:00:00');d.setDate(d.getDate()+(n-1)*7);return d;
+}
+function setWeekStart(n,val){
+  editingWeekStart=false;
+  if(!val){renderMain();return;}
+  const nd=new Date(val+'T00:00:00'); if(isNaN(nd.getTime())){renderMain();return;}
+  const old=weekStartDate(n);
+  const delta=Math.round((nd-old)/86400000);
+  if(delta===0){renderMain();return;}
+  const mx=maxWeek()+8, upd={};
+  for(let i=n;i<=mx;i++){const d=new Date(weekStartDate(i).getTime());d.setDate(d.getDate()+delta);upd[i]=isoDate(d);}
+  Object.assign(weekStarts,upd);
+  // Go-live is a commitment date: it stays fixed when weeks shift. The buffer
+  // between the plan and go-live absorbs slippage; the go-live card warns when
+  // the build runs too close to (or past) the go-live date.
+  const dd=Math.abs(delta);
+  showToast('Week '+n+' moved '+dd+' day'+(dd>1?'s':'')+(delta>0?' later':' earlier')+' · later weeks shifted with it (go-live unchanged)');
+  render(); scheduleAutoSave();
+}
+function resetWeekStart(n){
+  const mx=maxWeek()+8;
+  for(let i=n;i<=mx;i++) delete weekStarts[i];
+  editingWeekStart=false;
+  showToast('Week '+n+' onwards back to the default schedule');
+  render(); scheduleAutoSave();
+}
+function openPicker(e,el){
+  // Open the native date calendar from a direct user click on the input.
+  // Called inside a real click gesture on a stable DOM, so the popup stays open.
+  e.stopPropagation();
+  try{el.showPicker();}catch(err){/* older browsers: field is still typeable */}
+}
+function toggleWeekStartEdit(e){
+  if(e)e.stopPropagation();
+  editingWeekStart=!editingWeekStart;
+  renderMain();
+  // Focus only; the picker opens on a direct click of the input (see openPicker).
+  // Auto-calling showPicker() during a re-render makes the popup close instantly.
+  if(editingWeekStart)setTimeout(()=>{const el=document.getElementById('wk-start-input');if(el)el.focus();},0);
+}
+function isoDate(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+da;}
+function weekRangeLabel(n){if(!n||n<1)return 'Unscheduled';const s=weekStartDate(n),e=new Date(s);e.setDate(e.getDate()+6);const f=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});return f(s)+' – '+f(e);}
+function isOverdue(t){
+  // A task is overdue when it is not Complete and its scheduled period has
+  // already ended. For a span (ongoing) task that means its END week: being
+  // still in progress mid-span is planned, not overdue. Unscheduled tasks
+  // (week 0/missing) are never overdue.
+  if(!t||t.s==='Complete'||!t.week||t.week<1)return false;
+  const e=new Date(weekStartDate(endWeek(t)).getTime()); e.setDate(e.getDate()+6);
+  const now=new Date(); now.setHours(0,0,0,0);
+  return e<now;
+}
+function weekLabel(n){return (n&&n>=1)?'Week '+n:'Unscheduled';}
+// ── Week ranges (ongoing tasks) and milestones ───────────────────────────────
+// A task may span several weeks: `week` is the start, optional `wkEnd` the end.
+// Single-week tasks have no wkEnd. `kind:'milestone'` marks checkpoint tasks
+// (sign-offs, approvals); level-of-effort work uses a span instead.
+function endWeek(t){return (t&&t.wkEnd&&t.week&&t.wkEnd>t.week)?t.wkEnd:((t&&t.week)||0);}
+function isSpan(t){return !!(t&&t.week&&t.wkEnd&&t.wkEnd>t.week);}
+function spanWeeksText(t){return isSpan(t)?('Wks '+t.week+'–'+t.wkEnd):weekLabel(t.week||0);}
+function taskDatesText(t){
+  if(!t.week||t.week<1)return t.d||'';
+  if(!isSpan(t))return weekRangeLabel(t.week);
+  const s=weekStartDate(t.week),e=new Date(weekStartDate(t.wkEnd));e.setDate(e.getDate()+6);
+  const f=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  return 'Wks '+t.week+'–'+t.wkEnd+' · '+f(s)+' – '+f(e);
+}
+function maxWeek(){let mx=0;P.forEach(ph=>['sabel','client'].forEach(g=>T[ph.id][g].forEach(t=>{const e=endWeek(t);if(e>mx)mx=e;})));return Math.max(mx,8);}
+function weekOptions(sel){let o='';const mx=maxWeek();for(let n=1;n<=mx;n++){o+=`<option value="${n}"${sel===n?' selected':''}>Week ${n} · ${weekRangeLabel(n)}</option>`;}return o;}
+function weekEndOptions(t){
+  let o=`<option value="0"${!isSpan(t)?' selected':''}>Single week</option>`;
+  const mx=Math.max(maxWeek(),endWeek(t));
+  for(let n=(t.week||0)+1;n<=mx;n++){o+=`<option value="${n}"${t.wkEnd===n?' selected':''}>to Week ${n} · ends ${weekRangeLabel(n).split('–')[1].trim()}</option>`;}
+  return o;
+}
+function effWeek(t){return weekLabel(t.week||0);}
+function weekList(){
+  const seen=new Set();
+  P.forEach(ph=>['sabel','client'].forEach(g=>T[ph.id][g].forEach(t=>{
+    if(!t.week||t.week<1){seen.add(effWeek(t));return;}
+    for(let w=t.week;w<=endWeek(t);w++)seen.add(weekLabel(w));
+  })));
+  const arr=[...seen];
+  const num=w=>{const m=/(\d+)/.exec(w);return m?parseInt(m[1]):9999;};
+  arr.sort((a,b)=>{if(a==='Unscheduled')return 1;if(b==='Unscheduled')return -1;return num(a)-num(b)||a.localeCompare(b);});
+  return arr;
+}
+function weekGroups(wk){
+  const out={sabel:[],client:[]};
+  P.forEach(ph=>['sabel','client'].forEach(g=>{
+    T[ph.id][g].forEach((t,i)=>{
+      // Span-aware: a task belongs to every week it covers, so ongoing work
+      // shows as active in each week view across its range.
+      const m=/(\d+)/.exec(wk), wn=m?parseInt(m[1],10):0;
+      const hit=wn?(t.week>=1&&t.week<=wn&&endWeek(t)>=wn):(effWeek(t)===wk);
+      if(hit) out[g].push({t,cid:ph.id+'-'+(g==='sabel'?'s':'c')+'-'+i,c:ph.c,l:ph.l});
+    });
+  }));
+  return out;
+}
+function weekMini(wk){const g=weekGroups(wk);const a=[...g.sabel,...g.client];return{done:a.filter(o=>o.t.s==='Complete').length,total:a.length};}
+function weekStats(wk){
+  const g=weekGroups(wk);const a=[...g.sabel,...g.client];let on=0,att=0,risk=0,done=0;
+  a.forEach(o=>{const s=o.t.s;if(s==='Complete'){on++;done++;}else if(s==='In Progress')on++;else if(s==='Blocked')risk++;else att++;});
+  return{on,att,risk,done,total:a.length,client:g.client,sabel:g.sabel};
+}
+function currentWeek(){
+  const now=new Date(); now.setHours(0,0,0,0);
+  const mx=maxWeek()+8; let cur=0;
+  for(let n=1;n<=mx;n++){ if(weekStartDate(n)<=now) cur=n; }
+  return cur; // 0 = today is before Week 1 starts (project not yet begun)
+}
+function focusWeek(){
+  // The week the This week panel shows. now:true only when that week genuinely
+  // contains today; before the project starts (currentWeek 0) the first week
+  // with tasks is shown as "Coming up" instead of masquerading as this week.
+  const cw=currentWeek(), mx=maxWeek();
+  const has=n=>{const g=weekGroups('Week '+n);return (g.sabel.length+g.client.length)>0;};
+  if(cw>=1&&has(cw))return{n:cw,now:true};
+  for(let n=Math.max(cw,0)+1;n<=mx+8;n++){ if(has(n))return{n,now:false}; }
+  return{n:cw<1?1:cw,now:cw>=1};
+}
+function ovMetrics(gs){
+  const pct=gs.total>0?Math.round(gs.complete/gs.total*100):0;
+  const pctClr=pct>66?'#4ADE80':pct>33?'#FBBF24':'#E10600';
+  let glBig='—',glSub='not set';
+  if(goLiveDate){const gl=new Date(goLiveDate+'T00:00:00');if(!isNaN(gl.getTime())){const now=new Date();now.setHours(0,0,0,0);const dd=Math.ceil((gl-now)/86400000);glBig=dd>0?dd+'d':(dd===0?'Today':'Live');glSub=gl.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}}
+  const f=focusWeek(), fg=weekGroups('Week '+f.n);
+  const weekYou=fg.client.filter(o=>o.t.s!=='Complete').length;
+  const outYou=P.reduce((n,p)=>n+T[p.id].client.filter(t=>t.s!=='Complete').length,0);
+  const card=(label,val,valClr,sub)=>`<div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:12px 13px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:7px">${label}</div>
+      <div style="font-size:24px;font-weight:700;color:${valClr};line-height:1">${val}</div>
+      <div style="font-size:10px;color:#475569;margin-top:5px">${sub}</div>
+    </div>`;
+  const glCard=editingGoLive
+    ? `<div style="background:#161B26;border:1px solid #E1060055;border-radius:10px;padding:12px 13px">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#E10600;margin-bottom:7px">Go-live</div>
+        <input type="date" id="golive-input" value="${goLiveDate||''}" onchange="setGoLive(this.value)" onclick="openPicker(event,this)" style="cursor:pointer;width:100%;font-size:12px;color:#E2E8F0;background:#0F1117;border:1px solid #2A3145;border-radius:6px;padding:5px 7px;font-family:inherit;box-sizing:border-box">
+        <div style="margin-top:6px"><span onclick="cancelGoLiveEdit(event)" style="font-size:10px;color:#94A3B8;cursor:pointer">Cancel</span></div>
+      </div>`
+    : (w=>`<div style="background:#161B26;border:1px solid ${w?w.clr+'66':'#1E2433'};border-radius:10px;padding:12px 13px" title="${esc(GO_LIVE_NOTE||'')}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+          <span style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#475569">Go-live</span>
+          <button onclick="toggleGoLiveEdit(event)" title="Edit go-live date" style="background:transparent;border:none;cursor:pointer;color:#64748B;padding:0;display:flex"><i class="ti ti-pencil" style="font-size:12px"></i></button>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap">
+          <span style="font-size:24px;font-weight:700;color:#E10600;line-height:1">${glBig}</span>
+          <span style="font-size:12px;font-weight:600;color:#E2E8F0;white-space:nowrap">${glSub}</span>
+        </div>
+        ${w?`<div style="font-size:10px;color:${w.clr};margin-top:5px">${w.msg}</div>`:''}
+      </div>`)(bufferWarning());
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1rem">
+    ${card('Completion',pct+'%',pctClr,gs.complete+' / '+gs.total+' actions')}
+    ${glCard}
+    ${card('Your actions this week',weekYou,weekYou>0?'#FBBF24':'#4ADE80',f.now?'due this week':'next: Week '+f.n)}
+    ${card('Your actions outstanding',outYou,outYou>0?'#FBBF24':'#4ADE80','across the plan')}
+  </div>`;
+}
+function thisWeekPanel(){
+  const f=focusWeek(), label='Week '+f.n, g=weekGroups(label);
+  const row=o=>{const done=o.t.s==='Complete';const sc=SC[o.t.s]||SC.Pending;return`<div style="display:flex;align-items:center;gap:8px;padding:6px 2px;border-top:1px solid #1E2433">
+      <span style="width:7px;height:7px;border-radius:50%;background:${o.c};flex-shrink:0" title="${esc(o.l)}"></span>
+      ${o.t.kind==='milestone'?`<i class="ti ti-diamonds" title="Milestone" style="font-size:11px;color:#C084FC;flex-shrink:0"></i>`:''}
+      <span style="font-size:12px;color:${done?'#475569':'#E2E8F0'};${done?'text-decoration:line-through':''};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.t.t)}</span>
+      ${isSpan(o.t)?`<span title="Planned multi-week work, not a delay" style="font-size:10px;color:#38BDF8;white-space:nowrap;flex-shrink:0">Wks ${o.t.week}–${o.t.wkEnd}</span>`:''}
+      <span style="font-size:10px;color:${sc.c};background:${sc.bg};border-radius:20px;padding:1px 7px;white-space:nowrap;flex-shrink:0">${o.t.s}</span>
+    </div>`;};
+  // Single-week tasks list first; ongoing (span) tasks sit together under their
+  // own small heading, so a task appearing several weeks running reads as
+  // planned multi-week work rather than something stuck.
+  const col=(title,icon,colour,items,empty)=>{
+    const singles=items.filter(o=>!isSpan(o.t)), spans=items.filter(o=>isSpan(o.t));
+    const spanBlock=spans.length?`<p style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#38BDF8;margin:8px 0 2px;display:flex;align-items:center;gap:4px"><i class="ti ti-arrows-horizontal" style="font-size:10px"></i>Ongoing this week</p>${spans.map(row).join('')}`:'';
+    return `<div>
+      <p class="col-head" style="color:${colour}"><i class="ti ${icon}" style="font-size:12px"></i>${title} <span style="font-size:10px;color:#475569;font-weight:400;margin-left:4px">${items.filter(o=>o.t.s!=='Complete').length} to do</span></p>
+      ${items.length?(singles.map(row).join('')+spanBlock):`<div style="font-size:11px;color:#334155;padding:8px 0">${empty}</div>`}
+    </div>`;};
+  const total=g.client.length+g.sabel.length;
+  const body=total?`<div class="phase-cols">
+      ${col('Your actions','ti-alert-circle','#CA8A04',g.client,'Nothing for you this week')}
+      ${col('Sabel is handling','ti-tool','#64748B',g.sabel,'Nothing scheduled')}
+    </div>`:`<div style="font-size:12px;color:#475569;padding:6px 0">Nothing scheduled for this week.</div>`;
+  // Overdue carry-over: incomplete tasks from weeks that have already ended,
+  // across all pillars. Shown above the current week so nothing gets buried.
+  const od={sabel:[],client:[]};
+  P.forEach(ph=>['sabel','client'].forEach(grp=>{
+    T[ph.id][grp].forEach((t,i)=>{ if(isOverdue(t)) od[grp].push({t,cid:ph.id+'-'+(grp==='sabel'?'s':'c')+'-'+i,c:ph.c,l:ph.l}); });
+  }));
+  const odTotal=od.client.length+od.sabel.length;
+  const odRow=o=>{const sc=SC[o.t.s]||SC.Pending;return`<div style="display:flex;align-items:center;gap:8px;padding:6px 2px;border-top:1px solid rgba(248,113,113,.15)">
+      <span style="width:7px;height:7px;border-radius:50%;background:${o.c};flex-shrink:0" title="${esc(o.l)}"></span>
+      <span style="font-size:12px;color:#E2E8F0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.t.t)}</span>
+      <span style="font-size:10px;color:#F87171;white-space:nowrap;flex-shrink:0">${spanWeeksText(o.t)}</span>
+      <span style="font-size:10px;color:${sc.c};background:${sc.bg};border-radius:20px;padding:1px 7px;white-space:nowrap;flex-shrink:0">${o.t.s}</span>
+    </div>`;};
+  const odCol=(title,items)=>items.length?`<div>
+      <p class="col-head" style="color:#F87171"><i class="ti ti-alert-triangle" style="font-size:12px"></i>${title} <span style="font-size:10px;color:#F87171;font-weight:400;margin-left:4px">${items.length} overdue</span></p>
+      ${items.map(odRow).join('')}
+    </div>`:'';
+  const odSection=odTotal?`<div style="border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.04);border-radius:10px;padding:10px 12px;margin-bottom:12px">
+      <div class="phase-cols">${odCol('Your overdue actions',od.client)}${odCol('Sabel overdue',od.sabel)}</div>
+    </div>`:'';
+  return `<div style="background:#12151D;border:1px solid #1E2433;border-radius:12px;padding:14px;margin-bottom:1rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px">
+        <i class="ti ti-calendar-event" style="font-size:16px;color:#E10600"></i>
+        <span style="font-size:14px;font-weight:600;color:#E2E8F0">${f.now?'This week':'Coming up'}</span>
+        <span style="font-size:11px;color:#94A3B8">${label} · ${weekRangeLabel(f.n)}</span>
+      </div>
+      <button onclick="setGroupBy('week');setP('${label}')" style="background:transparent;border:1px solid #2A3145;color:#94A3B8;font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer">Open full week <i class="ti ti-arrow-right" style="font-size:11px"></i></button>
+    </div>
+    ${odSection}
+    ${body}
+  </div>`;
+}
+function resolveTask(cid){
+  const parts=cid.split('-');
+  const idx=parseInt(parts[parts.length-1]);
+  const gs=parts[parts.length-2];
+  const phId=parts.slice(0,parts.length-2).join('-');
+  const gf=gs==='c'?'client':'sabel';
+  return T[phId]&&T[phId][gf]&&T[phId][gf][idx];
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function bdg(txt,c,bg){return`<span class="bdg" style="color:${c};background:${bg}">${txt}</span>`;}
+function ownerBtn(o,cid){const x=OW[o]||OW.Chris;return`<button class="stat-bdg" style="color:${x.c};background:${x.bg}" onclick="openOwnerPicker(event,'${cid}')" title="Change owner">${o}<i class="ti ti-chevron-down" style="font-size:9px;opacity:.7;margin-left:1px"></i></button>`;}
+function oBdg(o){const x=OW[o]||OW.Chris;return bdg(o,x.c,x.bg);}
+function gradBar(pct,h=12){
+  const p2=Math.min(Math.max(pct||0,0),100);
+  return`<div style="background:#1E2433;border-radius:5px;height:${h}px;overflow:hidden">
+    <div style="width:100%;height:100%;background:linear-gradient(to right,#E10600 0%,#FBBF24 50%,#4ADE80 100%);clip-path:inset(0 ${100-p2}% 0 0)"></div>
+  </div>`;
+}
+
+// ── Toggle complete (checkbox) ────────────────────────────────────────────────
+function toggleComplete(e,cid){
+  e.stopPropagation();
+  const t=resolveTask(cid);if(!t)return;
+  if(t.s==='Complete'){
+    t.s=origStatus[cid]||(cid.includes('-c-')?'Dependency':'Pending');
+    delete origStatus[cid];
+  } else {
+    origStatus[cid]=t.s;t.s='Complete';
+  }
+  render();
+  scheduleAutoSave();
+}
+
+// ── Add task ──────────────────────────────────────────────────────────────────
+function addTask(phId,grp){
+  closeAddMenu();
+  const isC=grp==='client';
+  const task={t:'New task',o:isC?CLIENT_LABEL:'Chris',s:isC?'Dependency':'Pending',d:'',week:0,notes:'',link:''};
+  if(isC) task.tip='';
+  T[phId][grp].push(task);
+  const gs=grp==='sabel'?'s':'c';
+  const cid=phId+'-'+gs+'-'+(T[phId][grp].length-1);
+  expandedCards.add(cid);
+  renderMain();
+  scheduleAutoSave();
+  setTimeout(()=>{const el=document.getElementById('ttl-'+cid);if(el){el.focus();el.select();}},60);
+}
+function saveTitle(cid,val){
+  const t=resolveTask(cid);if(t)t.t=val||'Untitled task';
+  renderMain();
+  scheduleAutoSave();
+}
+function openAddMenu(e,phId,grp){
+  e.stopPropagation();
+  closeStatusPicker();closeOwnerPicker();
+  const mkey=phId+'-'+grp;
+  if(addMenuFor===mkey){closeAddMenu();return;}
+  addMenuFor=mkey;
+  const menu=document.getElementById('add-picker');
+  const existing=new Set(T[phId][grp].map(t=>t.t.trim().toLowerCase()));
+  const opts=((STD[phId]||{})[grp]||[]).map((t,i)=>({t,i})).filter(o=>!existing.has(o.t.t.trim().toLowerCase()));
+  menu.innerHTML=`<button onclick="addTask('${phId}','${grp}')">
+      <i class="ti ti-plus" style="font-size:12px;color:#60A5FA;flex-shrink:0"></i>
+      <span style="font-size:12px;color:#E2E8F0">Blank task</span>
+    </button>`
+    +(opts.length?`<div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;padding:7px 10px 3px">Standard tasks</div>`
+      +opts.map(o=>`<button onclick="addStdTask('${phId}','${grp}',${o.i})">
+        <span style="font-size:12px;color:#94A3B8;line-height:1.4">${esc(o.t.t)}</span>
+      </button>`).join(''):'');
+  const rect=e.currentTarget.getBoundingClientRect();
+  menu.style.display='block';
+  const mh=Math.min(menu.scrollHeight,300);
+  const spaceBelow=window.innerHeight-rect.bottom;
+  menu.style.top=(spaceBelow>mh+10?rect.bottom+5:Math.max(rect.top-mh-5,8))+'px';
+  menu.style.left=Math.min(rect.left,window.innerWidth-330)+'px';
+}
+function addStdTask(phId,grp,i){
+  closeAddMenu();
+  const src=((STD[phId]||{})[grp]||[])[i];if(!src)return;
+  T[phId][grp].push(JSON.parse(JSON.stringify(src)));
+  renderMain();
+  scheduleAutoSave();
+}
+function closeAddMenu(){
+  document.getElementById('add-picker').style.display='none';
+  addMenuFor=null;
+}
+function deleteTask(e,cid){
+  e.stopPropagation();
+  const t=resolveTask(cid);if(!t)return;
+  if(!confirm('Remove this task from the tracker?'))return;
+  const parts=cid.split('-');
+  const idx=parseInt(parts[parts.length-1]);
+  const gs=parts[parts.length-2];
+  const phId=parts.slice(0,parts.length-2).join('-');
+  const grp=gs==='c'?'client':'sabel';
+  remapCids(phId,grp,idx);
+  T[phId][grp].splice(idx,1);
+  render();
+  scheduleAutoSave();
+}
+
+// ── Drag and drop ─────────────────────────────────────────────────────────────
+function remapCids(phId,grp,removedIdx){
+  const gs=grp==='sabel'?'s':'c';
+  const len=T[phId][grp].length+1;
+  for(let i=removedIdx+1;i<len;i++){
+    const o=phId+'-'+gs+'-'+i,n=phId+'-'+gs+'-'+(i-1);
+    if(cardNotes[o]!==undefined){cardNotes[n]=cardNotes[o];delete cardNotes[o];}
+    if(cardLinks[o]!==undefined){cardLinks[n]=cardLinks[o];delete cardLinks[o];}
+    if(origStatus[o]!==undefined){origStatus[n]=origStatus[o];delete origStatus[o];}
+    if(expandedCards.has(o)){expandedCards.delete(o);expandedCards.add(n);}
+  }
+  const rc=phId+'-'+gs+'-'+removedIdx;
+  delete cardNotes[rc];delete cardLinks[rc];delete origStatus[rc];expandedCards.delete(rc);
+}
+function clearDropHighlight(){
+  if(dragOverCol){const el=document.getElementById(dragOverCol);if(el)el.classList.remove('col-drop');dragOverCol=null;}
+}
+function onDragStart(e,phId,grp,idx){
+  // Ignore drags that begin on an interactive control (owner/status picker,
+  // checkbox, link, input) so a click on those controls is never swallowed by
+  // the drag-to-reassign gesture. This keeps the owner dropdown reliably clickable.
+  if(e.target.closest('button,input,textarea,a,select')){e.preventDefault();return;}
+  dragInfo={phId,grp,idx};
+  e.dataTransfer.effectAllowed='move';
+  setTimeout(()=>{const card=e.currentTarget;if(card)card.classList.add('card-dragging');},0);
+}
+function onDragEnd(e){
+  e.currentTarget.classList.remove('card-dragging');
+  clearDropHighlight();
+}
+function onDragOver(e,colId){
+  e.preventDefault();
+  if(dragOverCol!==colId){clearDropHighlight();dragOverCol=colId;const el=document.getElementById(colId);if(el)el.classList.add('col-drop');}
+}
+function onDragLeave(e,colId){
+  if(!e.currentTarget.contains(e.relatedTarget)){const el=document.getElementById(colId);if(el)el.classList.remove('col-drop');if(dragOverCol===colId)dragOverCol=null;}
+}
+function onDrop(e,tPhId,tGrp){
+  e.preventDefault();
+  clearDropHighlight();
+  if(!dragInfo)return;
+  const{phId:sPhId,grp:sGrp,idx:sIdx}=dragInfo;dragInfo=null;
+  if(sPhId===tPhId&&sGrp===tGrp)return;
+  const sCid=sPhId+'-'+(sGrp==='sabel'?'s':'c')+'-'+sIdx;
+  const keepNotes=cardNotes[sCid],keepLink=cardLinks[sCid],keepOrig=origStatus[sCid],wasOpen=expandedCards.has(sCid);
+  const task={...T[sPhId][sGrp][sIdx]};
+  if(tGrp==='client'){task.o=CLIENT_LABEL;if(!task.tip)task.tip='';}
+  else{if(!SABEL_TEAM.includes(task.o))task.o='Chris';delete task.tip;}
+  remapCids(sPhId,sGrp,sIdx);
+  T[sPhId][sGrp].splice(sIdx,1);
+  T[tPhId][tGrp].push(task);
+  const tCid=tPhId+'-'+(tGrp==='sabel'?'s':'c')+'-'+(T[tPhId][tGrp].length-1);
+  if(keepNotes!==undefined)cardNotes[tCid]=keepNotes;
+  if(keepLink!==undefined)cardLinks[tCid]=keepLink;
+  if(keepOrig!==undefined)origStatus[tCid]=keepOrig;
+  if(wasOpen)expandedCards.add(tCid);
+  render();
+  scheduleAutoSave();
+}
+
+// ── Expand/collapse ───────────────────────────────────────────────────────────
+function tog(cid){
+  if(expandedCards.has(cid)) expandedCards.delete(cid);
+  else expandedCards.add(cid);
+  renderMain();
+}
+function saveNote(cid,val){
+  cardNotes[cid]=val;
+  scheduleAutoSave();
+}
+function saveLink(cid,val){
+  cardLinks[cid]=val;
+  scheduleAutoSave();
+  renderMain();
+}
+function saveDate(cid,val){
+  const t=resolveTask(cid);if(t)t.d=val;
+  renderMain();
+  scheduleAutoSave();
+}
+function setTaskWeek(cid,val){
+  const t=resolveTask(cid);if(!t)return;
+  const dur=isSpan(t)?t.wkEnd-t.week:0; // moving a span keeps its length
+  const n=parseInt(val,10); t.week=(isNaN(n)||n<1)?0:n;
+  if(t.week&&dur)t.wkEnd=t.week+dur; else delete t.wkEnd;
+  renderMain(); scheduleAutoSave();
+}
+function setTaskWeekEnd(cid,val){
+  const t=resolveTask(cid);if(!t)return;
+  const n=parseInt(val,10);
+  if(isNaN(n)||n<=(t.week||0))delete t.wkEnd; else t.wkEnd=n;
+  renderMain(); scheduleAutoSave();
+}
+function setTaskKind(cid,on){
+  const t=resolveTask(cid);if(!t)return;
+  if(on)t.kind='milestone'; else delete t.kind;
+  renderMain(); scheduleAutoSave();
+}
+function setTaskWeekByDate(cid,val){
+  const t=resolveTask(cid);if(!t||!val)return;
+  const picked=new Date(val+'T00:00:00'); if(isNaN(picked.getTime()))return;
+  const mx=maxWeek()+8; let n=0;
+  for(let i=1;i<=mx;i++){ if(weekStartDate(i)<=picked) n=i; }
+  if(n<1)n=1;
+  const dur=isSpan(t)?t.wkEnd-t.week:0;
+  t.week=n; if(dur)t.wkEnd=n+dur; else delete t.wkEnd;
+  renderMain(); scheduleAutoSave();
+}
+function setGroupBy(mode){
+  if(groupBy===mode)return;
+  groupBy=mode; cur='overview'; activeFilters.clear(); editingWeekStart=false;
+  render(); scheduleAutoSave();
+}
+// ── Go-live date editing ──────────────────────────────────────────────────────
+function toggleGoLiveEdit(e){
+  if(e)e.stopPropagation();
+  editingGoLive=true;
+  renderMain();
+  // Focus only; the picker opens on a direct click of the input (see openPicker).
+  setTimeout(()=>{const el=document.getElementById('golive-input');if(el)el.focus();},0);
+}
+function cancelGoLiveEdit(e){ if(e)e.stopPropagation(); editingGoLive=false; renderMain(); }
+function setGoLive(val){
+  const old=goLiveDate; goLiveDate=val; editingGoLive=false;
+  if(old&&val){
+    const o=new Date(old+'T00:00:00'), n=new Date(val+'T00:00:00');
+    if(!isNaN(o)&&!isNaN(n)){
+      const dw=Math.round((n-o)/(7*86400000));
+      if(dw!==0){
+        P.forEach(ph=>['sabel','client'].forEach(g=>T[ph.id][g].forEach(t=>{
+          if(t.s!=='Complete'&&t.week&&t.week>=1) t.week=Math.max(1,t.week+dw);
+        })));
+        showToast('Go-live moved · unfinished tasks shifted '+Math.abs(dw)+' week'+(Math.abs(dw)>1?'s':'')+(dw>0?' later':' earlier'));
+      }
+    }
+  }
+  render(); scheduleAutoSave();
+}
+
+// ── Card ──────────────────────────────────────────────────────────────────────
+function makeCard(t,cid,isClient,ctx){
+  const _p=cid.split('-');
+  const _idx=parseInt(_p[_p.length-1]);
+  const _gs=_p[_p.length-2];
+  const _ph=_p.slice(0,_p.length-2).join('-');
+  const _grp=_gs==='c'?'client':'sabel';
+  const done=t.s==='Complete';
+  const curNotes=cardNotes[cid]!==undefined?cardNotes[cid]:(t.notes||'');
+  const curLink=cardLinks[cid]!==undefined?cardLinks[cid]:(t.link||'');
+  const isOpen=expandedCards.has(cid);
+  const hasNote=curNotes.length>0;
+  const hasLink=curLink.length>0;
+  const x=SC[t.s]||SC.Pending;
+  const tipIcon=isClient&&t.tip
+    ?`<i class="ti ti-info-circle" onmouseenter="showTipFor(event,'${cid}')" onmousemove="moveTip(event)" onmouseleave="hideTip()" style="font-size:13px;color:#475569;cursor:help;flex-shrink:0;margin-top:1px"></i>`:'';
+  const linkLabel='Link';
+  const linkEl=hasLink
+    ?`<a href="${esc(curLink)}" target="_blank" rel="noopener" style="font-size:12px;color:#60A5FA;display:flex;align-items:center;gap:5px;text-decoration:none;word-break:break-all"><i class="ti ti-external-link" style="font-size:12px;flex-shrink:0"></i>${esc(curLink.replace('https://','').split('/').slice(0,3).join('/'))}</a>`
+    :`<input type="url" value="${esc(curLink)}" style="width:100%;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit;box-sizing:border-box" placeholder="Paste a link..." onchange="saveLink('${cid}',this.value)">`;
+  const safeTitle=esc(t.t);
+  const late=isOverdue(t);
+  return`<div class="${isClient?'task-client':'task'}${done?' done':''}${late?' overdue':''}" draggable="${ctx&&ctx.noDrag?'false':'true'}" ondragstart="onDragStart(event,'${_ph}','${_grp}',${_idx})" ondragend="onDragEnd(event)">
+    <div class="task-inner">
+      <div class="task-head" onclick="tog('${cid}')">
+        <div style="display:flex;align-items:flex-start;gap:8px">
+          <button class="chk-btn" onclick="toggleComplete(event,'${cid}')" title="${done?'Mark incomplete':'Mark complete'}">
+            <i class="ti ti-${done?'circle-check-filled':'circle'}" style="font-size:18px;color:${done?'#4ADE80':'#334155'}"></i>
+          </button>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:6px">
+              <div style="display:flex;align-items:flex-start;gap:5px;flex:1;min-width:0">
+                ${ctx&&ctx.c?`<span title="${esc(ctx.l||'')}" style="width:8px;height:8px;border-radius:50%;background:${ctx.c};flex-shrink:0;margin-top:4px"></span>`:''}
+                ${t.kind==='milestone'?`<i class="ti ti-diamonds" title="Milestone" style="font-size:13px;color:#C084FC;flex-shrink:0;margin-top:2px"></i>`:''}
+                <span style="font-size:12px;line-height:1.45;color:${done?'#334155':'#E2E8F0'};${done?'text-decoration:line-through':''}">${esc(t.t)}</span>
+                ${tipIcon}
+              </div>
+              <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+                <button class="stat-bdg" style="color:${x.c};background:${x.bg}" onclick="openStatusPicker(event,'${cid}')">
+                  ${t.s}<i class="ti ti-chevron-down" style="font-size:9px;opacity:.7;margin-left:1px"></i>
+                </button>
+              </div>
+            </div>
+            <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+              ${isClient?oBdg(t.o):ownerBtn(t.o,cid)}
+              <span style="font-size:11px;color:${late?'#F87171':'#475569'}">${taskDatesText(t)}</span>
+              ${isSpan(t)&&!done?`<span title="Level-of-effort work running across Weeks ${t.week}–${t.wkEnd}" style="font-size:10px;font-weight:600;color:#38BDF8;background:rgba(56,189,248,.12);padding:1px 6px;border-radius:3px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-arrows-horizontal" style="font-size:10px"></i>Ongoing</span>`:''}
+              ${t.kind==='milestone'&&!done?`<span title="Checkpoint task: a sign-off or approval" style="font-size:10px;font-weight:600;color:#C084FC;background:rgba(192,132,252,.12);padding:1px 6px;border-radius:3px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-diamonds" style="font-size:10px"></i>Milestone</span>`:''}
+              ${late?`<span style="font-size:10px;font-weight:600;color:#F87171;background:rgba(248,113,113,.12);padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em">Overdue</span>`:''}
+              ${ctx&&ctx.l?`<span style="font-size:10px;color:#475569">· ${esc(ctx.l)}</span>`:''}
+              ${hasNote&&!done?`<span style="font-size:10px;color:#475569;background:#1E2433;padding:1px 5px;border-radius:3px">note</span>`:''}
+              ${hasLink&&!done?`<i class="ti ti-external-link" style="font-size:11px;color:#475569"></i>`:''}
+              <i class="ti ti-chevron-down" style="font-size:11px;color:#334155;margin-left:auto;${isOpen?'transform:rotate(180deg)':''}"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="task-expand" style="display:${isOpen?'block':'none'}">
+        <div style="margin-bottom:10px">
+          <label>Task title</label>
+          <input id="ttl-${cid}" type="text" value="${safeTitle}" style="width:100%;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit;box-sizing:border-box" placeholder="Task title..." onclick="event.stopPropagation()" onchange="saveTitle('${cid}',this.value)">
+        </div>
+        <div style="margin-bottom:10px">
+          <label>Schedule</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select onclick="event.stopPropagation()" onchange="setTaskWeek('${cid}',this.value)" style="flex:1;min-width:130px;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit">
+              <option value="0"${(!t.week||t.week<1)?' selected':''}>Unscheduled</option>
+              ${weekOptions(t.week||0)}
+            </select>
+            ${t.week?`<select onclick="event.stopPropagation()" onchange="setTaskWeekEnd('${cid}',this.value)" title="Ongoing work? Set the week it runs until" style="flex:1;min-width:120px;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit">
+              ${weekEndOptions(t)}
+            </select>`:''}
+            <input type="date" value="${t.week?isoDate(weekStartDate(t.week)):''}" onclick="openPicker(event,this)" onchange="setTaskWeekByDate('${cid}',this.value)" title="Pick a date to move this task (a span keeps its length)" style="font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:5px 8px;font-family:inherit">
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;flex-wrap:wrap">
+            <span style="font-size:10px;color:#475569">${t.week?(spanWeeksText(t)+' · '+ (isSpan(t)?taskDatesText(t).split('·')[1].trim():weekRangeLabel(t.week))):'Not scheduled to a week yet'}</span>
+            <label onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#C084FC;cursor:pointer;user-select:none">
+              <input type="checkbox" ${t.kind==='milestone'?'checked':''} onchange="setTaskKind('${cid}',this.checked)" style="accent-color:#C084FC;width:12px;height:12px">
+              Milestone (checkpoint / sign-off)
+            </label>
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <label>Notes</label>
+          <textarea rows="3" placeholder="Add notes for this action..." oninput="saveNote('${cid}',this.value)">${esc(curNotes)}</textarea>
+        </div>
+        <div>
+          <label>${linkLabel}</label>
+          ${linkEl}
+        </div>
+        <div style="margin-top:12px;text-align:right">
+          <button onclick="deleteTask(event,'${cid}')" style="background:transparent;border:1px solid rgba(248,113,113,.3);color:#F87171;font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer">Remove task</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Shared blocks ─────────────────────────────────────────────────────────────
+function pillarBarsHTML(){
+  return P.map(p=>{
+    const m=phaseMini(p.id);
+    const pPct=m.total>0?Math.round(m.done/m.total*100):0;
+    return`<div style="display:flex;align-items:center;gap:8px">
+      <span style="width:7px;height:7px;border-radius:50%;background:${p.c};flex-shrink:0;display:inline-block"></span>
+      <span style="font-size:11px;color:#94A3B8;width:82px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l}</span>
+      <div style="flex:1;background:#1E2433;border-radius:2px;height:5px;overflow:hidden"><div style="height:100%;width:${pPct}%;background:${p.c}"></div></div>
+      <span style="font-size:11px;width:26px;text-align:right;flex-shrink:0;font-weight:${pPct>0?'500':'400'};color:${pPct===100?'#4ADE80':pPct>0?p.c:'#475569'}">${pPct}%</span>
+    </div>`;
+  }).join('');
+}
+function ovTopCards(gs){
+  const pct=gs.total>0?Math.round(gs.complete/gs.total*100):0;
+  const pctClr=pct>66?'#4ADE80':pct>33?'#FBBF24':'#E10600';
+  const completion=`<div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:16px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569;margin-bottom:10px">Overall completion</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:10px">
+        <span style="font-size:36px;font-weight:700;color:${pctClr};line-height:1">${pct}%</span>
+        <span style="font-size:13px;color:#475569">${gs.complete} / ${gs.total} actions</span>
+      </div>
+      ${gradBar(pct,10)}
+      <div style="font-size:10px;font-weight:600;letter-spacing:.06em;color:#475569;text-transform:uppercase;margin:12px 0 8px">by pillar</div>
+      <div style="display:flex;flex-direction:column;gap:7px">${pillarBarsHTML()}</div>
+    </div>`;
+  const glc=goLiveCard();
+  // When there is no go-live date, the completion card spans the full width.
+  return`<div class="ov-top"${glc?'':' style="grid-template-columns:1fr"'}>${completion}${glc}</div>`;
+}
+function phaseCompletionCard(pct,done,total){
+  const clr=pct>66?'#4ADE80':pct>33?'#FBBF24':'#E10600';
+  // Compact card showing only THIS pillar's progress. Sits beside the filter
+  // stat cards (see .phase-top) so the board is visible with less scrolling.
+  return`<div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:14px;display:flex;flex-direction:column;justify-content:center;height:100%">
+    <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#475569;margin-bottom:8px">Phase completion</div>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:10px">
+      <span style="font-size:28px;font-weight:700;color:${clr};line-height:1">${pct}%</span>
+      <span style="font-size:11px;color:#475569">${done} / ${total} actions</span>
+    </div>
+    ${gradBar(pct,10)}
+  </div>`;
+}
+function filterStatCards(on,att,risk,inPhase){
+  const aOn=activeFilters.has('on'),aAtt=activeFilters.has('att'),aRisk=activeFilters.has('risk');
+  const anyActive=aOn||aAtt||aRisk;
+  const hint=inPhase?(anyActive?`<div class="filter-hint"><i class="ti ti-filter-filled" style="font-size:11px;color:#E10600"></i>Filtered view, click active card to clear</div>`:`<div class="filter-hint"><i class="ti ti-filter" style="font-size:11px"></i>Click a card to filter tasks below</div>`):'';
+  return`<div class="stat-grid">
+    <button class="sc f-on${aOn?' active':''}"${inPhase?'':' style="cursor:default"'} onclick="${inPhase?'toggleFilter(\'on\')':''}">
+      <div style="font-size:22px;font-weight:600;color:#4ADE80">${on}</div>
+      <div style="font-size:11px;color:${aOn?'#4ADE80':'#475569'};margin-top:2px;display:flex;align-items:center;gap:4px">${aOn?'<i class="ti ti-eye" style="font-size:11px"></i>':''}On track</div>
+    </button>
+    <button class="sc f-att${aAtt?' active':''}"${inPhase?'':' style="cursor:default"'} onclick="${inPhase?'toggleFilter(\'att\')':''}">
+      <div style="font-size:22px;font-weight:600;color:#FBBF24">${att}</div>
+      <div style="font-size:11px;color:${aAtt?'#FBBF24':'#475569'};margin-top:2px;display:flex;align-items:center;gap:4px">${aAtt?'<i class="ti ti-eye" style="font-size:11px"></i>':''}Needs attention</div>
+    </button>
+    <button class="sc f-risk${aRisk?' active':''}"${inPhase?'':' style="cursor:default"'} onclick="${inPhase?'toggleFilter(\'risk\')':''}">
+      <div style="font-size:22px;font-weight:600;color:#F87171">${risk}</div>
+      <div style="font-size:11px;color:${aRisk?'#F87171':'#475569'};margin-top:2px;display:flex;align-items:center;gap:4px">${aRisk?'<i class="ti ti-eye" style="font-size:11px"></i>':''}At risk</div>
+    </button>
+  </div>${hint}`;
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+function renderSidebar(){
+  const gs=globalStats();
+  const pct=gs.total>0?Math.round(gs.complete/gs.total*100):0;
+  const pctClr=pct>66?'#4ADE80':pct>33?'#FBBF24':'#E10600';
+  const oa=cur==='overview';
+  const ovBtn=`<button class="si" style="border-left:3px solid ${oa?'#E10600':'transparent'};${oa?'background:rgba(255,255,255,.03)':''}" onclick="setP('overview')">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+      <div><div style="font-size:12px;font-weight:500;color:${oa?'#E2E8F0':'#94A3B8'}">Overview</div>
+      <div style="font-size:10px;color:#475569;margin-top:1px">Full project snapshot</div></div>
+      <span style="font-size:12px;font-weight:600;color:${pctClr}">${pct}%</span>
+    </div>${gradBar(pct,3)}
+  </button>`;
+  const phBtns=P.map(p=>{
+    const m=phaseMini(p.id);
+    const act=groupBy==='pillar'&&p.id===cur;
+    const dPct=m.total>0?Math.round(m.done/m.total*100):0;
+    const dClr=dPct===100?'#4ADE80':dPct>0?p.c:'#475569';
+    return`<button class="si" style="border-left:3px solid ${act?p.c:'transparent'};${act?'background:rgba(255,255,255,.03)':''}" onclick="setP('${p.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:5px">
+        <div style="min-width:0;flex:1">
+          <div style="font-size:12px;font-weight:${act?'500':'400'};color:${act?'#E2E8F0':'#94A3B8'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.l}</div>
+          <div style="font-size:10px;color:#475569;margin-top:1px">${p.w}</div>
+        </div>
+        <span style="font-size:11px;font-weight:${dPct>0?'600':'400'};color:${dClr};flex-shrink:0">${dPct}%</span>
+      </div>
+      <div style="background:#1E2433;border-radius:2px;height:3px;overflow:hidden"><div style="height:100%;width:${dPct}%;background:${p.c}"></div></div>
+    </button>`;
+  }).join('');
+  const weekBtns=weekList().map(w=>{
+    const m=weekMini(w);
+    const act=groupBy==='week'&&w===cur;
+    const dPct=m.total>0?Math.round(m.done/m.total*100):0;
+    const dClr=dPct===100?'#4ADE80':dPct>0?'#E10600':'#475569';
+    return`<button class="si" style="border-left:3px solid ${act?'#E10600':'transparent'};${act?'background:rgba(255,255,255,.03)':''}" onclick="setP('${w}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:5px">
+        <div style="min-width:0;flex:1">
+          <div style="font-size:12px;font-weight:${act?'500':'400'};color:${act?'#E2E8F0':'#94A3B8'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${w}</div>
+          <div style="font-size:10px;color:#475569;margin-top:1px">${m.done}/${m.total} done</div>
+        </div>
+        <span style="font-size:11px;font-weight:${dPct>0?'600':'400'};color:${dClr};flex-shrink:0">${dPct}%</span>
+      </div>
+      <div style="background:#1E2433;border-radius:2px;height:3px;overflow:hidden"><div style="height:100%;width:${dPct}%;background:#E10600"></div></div>
+    </button>`;
+  }).join('');
+  const groupBtns=groupBy==='week'?weekBtns:phBtns;
+  const secLabel=groupBy==='week'?'Weeks':'Pillars';
+  const toggle=`<div style="padding:10px 12px;border-bottom:1px solid #1E2433">
+    <div style="display:flex;background:#0F1117;border:1px solid #1E2433;border-radius:7px;padding:2px">
+      <button onclick="setGroupBy('pillar')" style="flex:1;border:none;cursor:pointer;font-family:inherit;font-size:11px;padding:5px 6px;border-radius:5px;background:${groupBy==='pillar'?'#E10600':'transparent'};color:${groupBy==='pillar'?'#fff':'#94A3B8'}">By pillar</button>
+      <button onclick="setGroupBy('week')" style="flex:1;border:none;cursor:pointer;font-family:inherit;font-size:11px;padding:5px 6px;border-radius:5px;background:${groupBy==='week'?'#E10600':'transparent'};color:${groupBy==='week'?'#fff':'#94A3B8'}">By week</button>
+    </div>
+  </div>`;
+  document.getElementById('sidebar').innerHTML=`
+    <div class="sb-head">
+      <img src="${LOGO}" class="sb-logo" alt="Sabel">
+      <div class="sb-title">The Giving Movement</div>
+      <div class="sb-sub">Project tracker · May-Aug 2026</div>
+    </div>
+    ${toggle}${ovBtn}<div class="sb-sec">${secLabel}</div>${groupBtns}
+    <button onclick="downloadSnapshot()" title="Download the current plan state as a JSON backup" style="margin-top:14px;width:100%;background:transparent;border:1px solid #1E2433;color:#64748B;font-size:11px;font-family:inherit;border-radius:6px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-download" style="font-size:12px"></i>Download snapshot</button>`;
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+function buildBufferDays(){
+  // Days between the end of the last incomplete build task and the go-live date.
+  // Excludes the go-live and post go-live pillars (their tasks belong at/after
+  // go-live by design). Returns null when there is nothing to measure.
+  // The buffer itself is internal and never displayed while healthy; the
+  // go-live card only warns when it drops below WARN_BUFFER_DAYS or negative.
+  if(!goLiveDate)return null;
+  const gl=new Date(goLiveDate+'T00:00:00'); if(isNaN(gl.getTime()))return null;
+  let last=null;
+  P.forEach(p=>{ if(p.id==='golive'||p.id==='post')return;
+    ['sabel','client'].forEach(g=>(T[p.id]&&T[p.id][g]||[]).forEach(t=>{
+      if(t.s==='Complete'||!t.week||t.week<1)return;
+      const e=new Date(weekStartDate(endWeek(t)).getTime()); e.setDate(e.getDate()+6);
+      if(!last||e>last)last=e;
+    }));
+  });
+  if(!last)return null;
+  return Math.round((gl-last)/86400000);
+}
+const WARN_BUFFER_DAYS=7;
+function bufferWarning(){
+  // '' when healthy; otherwise {msg,clr} for the go-live card.
+  const b=buildBufferDays();
+  if(b===null||b>=WARN_BUFFER_DAYS)return null;
+  if(b<0)return{msg:'Build tasks are scheduled after go-live',clr:'#F87171'};
+  return{msg:'Build finishes within '+b+' day'+(b===1?'':'s')+' of go-live',clr:'#FBBF24'};
+}
+function goLiveCard(){
+  // Go-live countdown, styled as a card so it sits beside Overall completion
+  // in the overview top row. Returns '' when no go-live date is set.
+  const accentBase='#E10600';
+  // Edit mode: show a date picker (also reachable when there is currently no date).
+  if(editingGoLive){
+    return `<div style="background:linear-gradient(135deg,rgba(225,6,0,.12),rgba(225,6,0,.02));border:1px solid ${accentBase}55;border-radius:10px;padding:16px;display:flex;flex-direction:column">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:${accentBase};display:flex;align-items:center;gap:6px;margin-bottom:14px"><i class="ti ti-rocket" style="font-size:13px"></i>Go-live</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px">
+        <label style="font-size:12px;color:#94A3B8">Set the go-live date</label>
+        <input type="date" id="golive-input" value="${goLiveDate||''}" onchange="setGoLive(this.value)" onclick="openPicker(event,this)" style="cursor:pointer;width:100%;font-size:13px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:8px 10px;font-family:inherit;box-sizing:border-box">
+        <button onclick="cancelGoLiveEdit(event)" style="align-self:flex-start;background:transparent;border:1px solid #2A3145;color:#94A3B8;font-size:11px;font-family:inherit;border-radius:6px;padding:5px 12px;cursor:pointer">Cancel</button>
+      </div>
+    </div>`;
+  }
+  if(!goLiveDate) return '';
+  const gl=new Date(goLiveDate+'T00:00:00');
+  if(isNaN(gl.getTime())) return '';
+  const now=new Date(); now.setHours(0,0,0,0);
+  const days=Math.ceil((gl-now)/86400000);
+  const dateStr=gl.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  let big,sub,accent=accentBase;
+  if(days>0){ big=days; sub=(days===1?'day ':'days ')+'until go-live'; }
+  else if(days===0){ big='Today'; sub='go-live day'; accent='#4ADE80'; }
+  else { big='Live'; sub='launched '+Math.abs(days)+' days ago'; accent='#4ADE80'; }
+  const numeric=typeof big==='number';
+  return `<div style="background:linear-gradient(135deg,rgba(225,6,0,.12),rgba(225,6,0,.02));border:1px solid ${accent}55;border-radius:10px;padding:16px;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:${accent};display:flex;align-items:center;gap:6px"><i class="ti ti-rocket" style="font-size:13px"></i>Go-live</div>
+      <button onclick="toggleGoLiveEdit(event)" title="Edit go-live date" style="background:transparent;border:none;cursor:pointer;color:#64748B;padding:2px;display:flex"><i class="ti ti-pencil" style="font-size:13px"></i></button>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px 0">
+      <span style="font-size:${numeric?'58':'40'}px;font-weight:700;color:${accent};line-height:.95;font-variant-numeric:tabular-nums">${big}</span>
+      <span style="font-size:12px;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;margin-top:8px">${sub}</span>
+    </div>
+    <div style="border-top:1px solid ${accent}33;padding-top:12px">
+      <div style="font-size:13px;font-weight:600;color:#E2E8F0">${dateStr}</div>
+      <div style="font-size:12px;color:#94A3B8;margin-top:4px;display:flex;align-items:flex-start;gap:5px"><i class="ti ti-flag" style="font-size:12px;color:${accent};margin-top:2px;flex-shrink:0"></i><span>${GO_LIVE_NOTE}</span></div>
+      ${(w=>w?`<div style="font-size:11px;color:${w.clr};margin-top:6px;display:flex;align-items:center;gap:5px"><i class="ti ti-alert-triangle" style="font-size:12px"></i>${w.msg}</div>`:'')(bufferWarning())}
+    </div>
+  </div>`;
+}
+function renderMain(){
+  const gs=globalStats();
+  let html='';
+  if(cur==='overview'){
+    const phGrid=P.map(p=>{
+      const m=phaseMini(p.id);
+      const dPct=m.total>0?Math.round(m.done/m.total*100):0;
+      const dClr=dPct===100?'#4ADE80':dPct>0?p.c:'#475569';
+      return`<div class="ph-card" onclick="setP('${p.id}')">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+          <span style="width:8px;height:8px;border-radius:50%;background:${p.c};flex-shrink:0;display:inline-block"></span>
+          <span style="font-size:12px;font-weight:500;color:#E2E8F0">${p.l}</span>
+        </div>
+        <div style="font-size:11px;color:#475569;margin-bottom:8px">${p.w}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+          <span style="font-size:11px;color:#475569">${m.done}/${m.total}</span>
+          <span style="font-size:14px;font-weight:600;color:${dClr}">${dPct}%</span>
+        </div>
+        <div style="background:#0F1117;border-radius:2px;height:4px;overflow:hidden"><div style="height:100%;width:${dPct}%;background:${p.c}"></div></div>
+      </div>`;
+    }).join('');
+    const weekGrid=weekList().map(w=>{
+      const m=weekMini(w);
+      const dPct=m.total>0?Math.round(m.done/m.total*100):0;
+      const dClr=dPct===100?'#4ADE80':dPct>0?'#E10600':'#475569';
+      return`<div class="ph-card" onclick="setP('${w}')">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+          <i class="ti ti-calendar" style="font-size:13px;color:#E10600"></i>
+          <span style="font-size:12px;font-weight:500;color:#E2E8F0">${w}</span>
+        </div>
+        <div style="font-size:11px;color:#475569;margin-bottom:8px">across pillars</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+          <span style="font-size:11px;color:#475569">${m.done}/${m.total}</span>
+          <span style="font-size:14px;font-weight:600;color:${dClr}">${dPct}%</span>
+        </div>
+        <div style="background:#0F1117;border-radius:2px;height:4px;overflow:hidden"><div style="height:100%;width:${dPct}%;background:#E10600"></div></div>
+      </div>`;
+    }).join('');
+    const groupGrid=groupBy==='week'?weekGrid:phGrid;
+    html=`<p style="font-size:11px;color:#475569;margin-bottom:3px">May 2026 - Aug 2026</p>
+      <p style="font-size:18px;font-weight:600;color:#E2E8F0;margin-bottom:1rem">Project overview</p>
+      ${ovMetrics(gs)}
+      ${thisWeekPanel()}
+      <div style="font-size:10px;font-weight:600;letter-spacing:.06em;color:#475569;text-transform:uppercase;margin-bottom:8px">${groupBy==='week'?'Week status, click to open':'Pillar status, click to open'}</div>
+      <div class="ph-grid">${groupGrid}</div>`;
+  } else if(groupBy==='week'){
+    const ws=weekStats(cur);
+    const wpct=ws.total>0?Math.round(ws.done/ws.total*100):0;
+    const visClient=ws.client.filter(o=>taskVisible(o.t));
+    const visSabel=ws.sabel.filter(o=>taskVisible(o.t));
+    const cDone=ws.client.filter(o=>o.t.s==='Complete').length;
+    const sDone=ws.sabel.filter(o=>o.t.s==='Complete').length;
+    const emptyCol=`<div class="empty-col"><i class="ti ti-circle-check" style="font-size:22px;display:block;margin:0 auto 6px;color:#1E2433"></i>Nothing to show<br><span style="font-size:10px">Adjust filters above</span></div>`;
+    const wnMatch=/(\d+)/.exec(cur); const wn=wnMatch?parseInt(wnMatch[1]):0;
+    const wkDates=wn?weekRangeLabel(wn):'';
+    const hasOverride=wn?Object.keys(weekStarts).some(k=>parseInt(k)>=wn):false;
+    const wkEdit=wn?(editingWeekStart
+      ? `<span onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:6px;margin-left:8px">
+           <input type="date" id="wk-start-input" value="${isoDate(weekStartDate(wn))}" onclick="openPicker(event,this)" onchange="setWeekStart(${wn},this.value)" style="font-size:11px;color:#E2E8F0;background:#0F1117;border:1px solid #2A3145;border-radius:6px;padding:3px 6px;font-family:inherit;cursor:pointer">
+           ${hasOverride?`<span onclick="resetWeekStart(${wn})" style="font-size:10px;color:#94A3B8;cursor:pointer">Reset</span>`:''}
+           <span onclick="toggleWeekStartEdit(event)" style="font-size:10px;color:#94A3B8;cursor:pointer">Cancel</span>
+         </span>`
+      : `<i class="ti ti-pencil" onclick="toggleWeekStartEdit(event)" title="Change this week's start date (later weeks shift with it)" style="font-size:13px;color:#475569;cursor:pointer;margin-left:6px"></i>`):'';
+    html=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+        <i class="ti ti-calendar" style="font-size:16px;color:#E10600"></i>
+        <span style="font-size:18px;font-weight:600;color:#E2E8F0">${esc(cur)}</span>
+        ${wkDates?`<span style="font-size:12px;color:#94A3B8">· ${wkDates}</span>`:''}
+        ${wkEdit}
+      </div>
+      <div style="font-size:11px;color:#475569;margin-bottom:1.25rem">Tasks across all pillars scheduled in ${esc(cur)}</div>
+      <div class="phase-top">
+        ${phaseCompletionCard(wpct,ws.done,ws.total)}
+        <div>${filterStatCards(ws.on,ws.att,ws.risk,true)}</div>
+      </div>
+      <div class="phase-cols">
+        <div>
+          <p class="col-head" style="color:#CA8A04"><i class="ti ti-alert-circle" style="font-size:12px"></i>Your actions <span style="font-size:10px;color:#475569;font-weight:400;margin-left:4px">${cDone}/${ws.client.length}</span></p>
+          <div style="border-radius:10px;padding:2px;min-height:50px">
+            ${visClient.length?visClient.map(o=>makeCard(o.t,o.cid,true,{c:o.c,l:o.l,noDrag:true})).join(''):emptyCol}
+          </div>
+        </div>
+        <div>
+          <p class="col-head" style="color:#64748B"><i class="ti ti-tool" style="font-size:12px"></i>Sabel is handling <span style="font-size:10px;color:#475569;font-weight:400;margin-left:4px">${sDone}/${ws.sabel.length}</span></p>
+          <div style="border-radius:10px;padding:2px;min-height:50px">
+            ${visSabel.length?visSabel.map(o=>makeCard(o.t,o.cid,false,{c:o.c,l:o.l,noDrag:true})).join(''):emptyCol}
+          </div>
+        </div>
+      </div>`;
+  } else {
+    const ph=P.find(p=>p.id===cur);
+    const td=T[cur];
+    const ps=phaseStats(cur);
+    const phasePct=ps.total>0?Math.round(ps.done/ps.total*100):0;
+    const visClient=td.client.filter(t=>taskVisible(t));
+    const visSabel=td.sabel.filter(t=>taskVisible(t));
+    const clientDone=td.client.filter(t=>t.s==='Complete').length;
+    const sabelDone=td.sabel.filter(t=>t.s==='Complete').length;
+    const emptyCol=`<div class="empty-col"><i class="ti ti-circle-check" style="font-size:22px;display:block;margin:0 auto 6px;color:#1E2433"></i>Nothing to show<br><span style="font-size:10px">Adjust filters above</span></div>`;
+    html=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+        <span style="width:9px;height:9px;border-radius:50%;background:${ph.c};display:inline-block;flex-shrink:0"></span>
+        <span style="font-size:18px;font-weight:600;color:#E2E8F0">${ph.l}</span>
+      </div>
+      <div style="font-size:11px;color:#475569;margin-bottom:1.25rem">${ph.w} · ${ph.d}</div>
+      <div class="phase-top">
+        ${phaseCompletionCard(phasePct,ps.done,ps.total)}
+        <div>${filterStatCards(ps.on,ps.att,ps.risk,true)}</div>
+      </div>
+      <div class="phase-cols">
+        <div>
+          <p class="col-head" style="color:#CA8A04"><i class="ti ti-alert-circle" style="font-size:12px"></i>Your actions <span style="font-size:10px;color:#475569;font-weight:400;margin-left:4px">${clientDone}/${td.client.length}</span></p>
+          <div id="col-${cur}-c" ondragover="onDragOver(event,'col-${cur}-c')" ondragleave="onDragLeave(event,'col-${cur}-c')" ondrop="onDrop(event,'${cur}','client')" style="border-radius:10px;padding:2px;min-height:50px">
+            ${visClient.length?visClient.map(t=>{const i=td.client.indexOf(t);return makeCard(t,cur+'-c-'+i,true);}).join(''):emptyCol}
+            <button class="add-task-btn" onclick="openAddMenu(event,'${cur}','client')"><i class="ti ti-plus" style="font-size:13px"></i>Add client action</button>
+          </div>
+        </div>
+        <div>
+          <p class="col-head" style="color:#64748B"><i class="ti ti-tool" style="font-size:12px"></i>Sabel is handling <span style="font-size:10px;color:#475569;font-weight:400;margin-left:4px">${sabelDone}/${td.sabel.length}</span></p>
+          <div id="col-${cur}-s" ondragover="onDragOver(event,'col-${cur}-s')" ondragleave="onDragLeave(event,'col-${cur}-s')" ondrop="onDrop(event,'${cur}','sabel')" style="border-radius:10px;padding:2px;min-height:50px">
+            ${visSabel.length?visSabel.map(t=>{const i=td.sabel.indexOf(t);return makeCard(t,cur+'-s-'+i,false);}).join(''):emptyCol}
+            <button class="add-task-btn" onclick="openAddMenu(event,'${cur}','sabel')"><i class="ti ti-plus" style="font-size:13px"></i>Add Sabel action</button>
+          </div>
+        </div>
+      </div>`;
+  }
+  document.getElementById('main').innerHTML=html;
+}
+
+function render(){renderSidebar();renderMain();syncHash();}
+function setP(id){cur=id;activeFilters.clear();editingWeekStart=false;render();}
+// ── Shareable view links ──────────────────────────────────────────────────────
+// The current view is mirrored into the URL hash (#overview, #pillar/fin,
+// #week/3) so copying the address bar link opens the tracker on that view.
+function syncHash(){
+  let h='#overview';
+  if(cur!=='overview')h=groupBy==='week'?('#week/'+String(cur).replace(/\D/g,'')):('#pillar/'+cur);
+  if(location.hash!==h)history.replaceState(null,'',h);
+}
+function applyHash(){
+  const m=/^#(overview|pillar\/([\w-]+)|week\/(\d+))$/.exec(location.hash||'');
+  if(!m)return;
+  if(m[2]&&P.some(p=>p.id===m[2])){groupBy='pillar';cur=m[2];}
+  else if(m[3]){groupBy='week';cur='Week '+m[3];}
+  else cur='overview';
+}
+// ── Snapshot download ─────────────────────────────────────────────────────────
+// Saves the full current state as a date-stamped JSON file: a lightweight
+// backup and a point-in-time record for status reporting.
+function downloadSnapshot(){
+  const blob=new Blob([JSON.stringify(buildPayload(),null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=KEY+'-snapshot-'+isoDate(new Date())+'.json';
+  document.body.appendChild(a);a.click();a.remove();
+  URL.revokeObjectURL(a.href);
+  showToast('Snapshot downloaded');
+}
+applyHash();
+render();
+loadInitial();
+</script>
+</body>
+</html>
