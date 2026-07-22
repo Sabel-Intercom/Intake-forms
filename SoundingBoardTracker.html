@@ -26,6 +26,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .task-client:hover{border-color:rgba(251,191,36,.5)}
 .task.done,.task-client.done{opacity:.65}
 .task.overdue,.task-client.overdue{border-left:3px solid #F87171}
+.ov-two{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:10px;margin-bottom:1rem;align-items:start}
+@media(max-width:900px){.ov-two{grid-template-columns:1fr}}
+.ms-rail{position:relative}
+.ms-rail::before{content:'';position:absolute;left:9px;top:12px;bottom:12px;width:2px;background:#1E2433}
+.ms-row{position:relative;display:flex;align-items:flex-start;gap:12px;padding:13px 0;cursor:pointer}
+.ms-row:hover .ms-title{color:#FFFFFF}
 .task-inner{border-radius:10px;overflow:hidden}
 .task-head{padding:10px 12px;cursor:grab;user-select:none}
 .col-drop{border:2px dashed rgba(96,165,250,.45)!important;background:rgba(96,165,250,.04)!important;border-radius:10px!important}
@@ -91,10 +97,10 @@ const LOGO='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJT
 const GO_LIVE='2026-11-06';  // [CLIENT] go-live date YYYY-MM-DD, or '' to hide the box
 const GO_LIVE_NOTE='Cutover to Intercom, Fin live on all channels';  // [CLIENT] one-line note
 const ALL_STATUSES=['Complete','In Progress','Pending','Blocked','Dependency'];
-const SABEL_TEAM=["Greg", "Richard", "Mary"];
-const BUILD_V=202607152114;  // set automatically by the build script from the build timestamp; do not edit
+const SABEL_TEAM=['Chris','Richard','Greg'];
+const BUILD_V=202607222154;  // set automatically by the build script from the build timestamp; do not edit
 const P=[{"id": "setup", "l": "Setup & Access", "c": "#F87171", "w": "Week 1", "d": "Sep 14-18", "h": 0}, {"id": "inspect", "l": "Inspect & Design", "c": "#FBBF24", "w": "Weeks 2-3", "d": "Sep 21-Oct 2", "h": 0}, {"id": "foundations", "l": "Workspace Build", "c": "#3B82F6", "w": "Week 4", "d": "Oct 5-9", "h": 0}, {"id": "knowledge", "l": "Knowledge Base", "c": "#10B981", "w": "Week 5", "d": "Oct 12-16", "h": 0}, {"id": "fin", "l": "Fin AI & Jira", "c": "#C084FC", "w": "Week 6", "d": "Oct 19-23", "h": 0}, {"id": "migration", "l": "Migration & UAT", "c": "#6366F1", "w": "Week 7", "d": "Oct 26-30", "h": 0}, {"id": "golive", "l": "Go-live & Hypercare", "c": "#E10600", "w": "Week 8", "d": "Nov 2-6", "h": 0}];
-const OW={"Greg": {"c": "#34D399", "bg": "rgba(52,211,153,.15)"}, "Richard": {"c": "#C084FC", "bg": "rgba(192,132,252,.15)"}, "Mary": {"c": "#60A5FA", "bg": "rgba(96,165,250,.15)"}, "SB": {"c": "#FBBF24", "bg": "rgba(251,191,36,.15)"}};
+const OW={"Chris": {"c": "#60A5FA", "bg": "rgba(96,165,250,.15)"}, "Greg": {"c": "#34D399", "bg": "rgba(52,211,153,.15)"}, "Richard": {"c": "#C084FC", "bg": "rgba(192,132,252,.15)"}, "SB": {"c": "#FBBF24", "bg": "rgba(251,191,36,.15)"}};
 const SC={
   'Complete':{c:'#4ADE80',bg:'rgba(74,222,128,.12)'},
   'In Progress':{c:'#60A5FA',bg:'rgba(96,165,250,.12)'},
@@ -104,14 +110,14 @@ const SC={
 };
 const FILTER_MAP={on:['Complete','In Progress'],att:['Pending','Dependency'],risk:['Blocked']};
 
-const T={"setup": {"sabel": [{"t": "Kick-off call: scope, contacts and ways of working", "o": "Richard", "s": "Pending", "d": "", "week": 1, "notes": "Who we are, how we work, the plan alongside BTS, and the two decisions coming.", "link": ""}, {"t": "Create SB Slack channel and Friday status-note cadence", "o": "Greg", "s": "Pending", "d": "", "week": 1, "notes": "Done / In progress / Blocked / Asks, every Friday.", "link": ""}, {"t": "Request Zendesk read access for the integrations email", "o": "Greg", "s": "Pending", "d": "", "week": 1, "notes": "", "link": ""}, {"t": "Mary: Intercom intro and tracker walkthrough with Kelsey", "o": "Mary", "s": "Pending", "d": "", "week": 1, "notes": "Transfer Mary's Intercom understanding ahead of the weekly calls.", "link": ""}], "client": [{"t": "Grant Zendesk read access for the integrations email", "o": "SB", "s": "Blocked", "d": "", "week": 1, "tip": "Give the Sabel integrations email read access to your Zendesk so we can inspect and map your setup. Matt or Kelsey.", "notes": "Requested, pending. Unblocks the whole inspection.", "link": ""}, {"t": "Send the clean team and inbox doc with correct names", "o": "SB", "s": "Pending", "d": "", "week": 1, "tip": "Send Kelsey's clean doc with the correct names for Engagement Management, EXP and Support.", "notes": "", "link": ""}, {"t": "Confirm status of the Atlassian consolidation", "o": "SB", "s": "Dependency", "d": "", "week": 1, "tip": "Tell us when the two Jira instances are merged. This later unlocks the Jira integration. Matt.", "notes": "Approx 1 to 2 weeks.", "link": ""}]}, "inspect": {"sabel": [{"t": "Inspect routing, groups and inbox structure", "o": "Greg", "s": "Pending", "d": "", "week": 2, "notes": "How tickets are assigned and escalated today.", "link": ""}, {"t": "Map ticket fields and classifications", "o": "Greg", "s": "Pending", "d": "", "week": 2, "notes": "Assignee, I Need Help With, Service Type, Ticket Type, and the Jira status and priority fields.", "link": ""}, {"t": "Review Knowledge Base structure and existing translations", "o": "Greg", "s": "Pending", "d": "", "week": 2, "notes": "Around 106 articles, translations to be preserved.", "link": ""}, {"t": "Note unused and legacy config to leave behind", "o": "Greg", "s": "Pending", "d": "", "week": 2, "notes": "Replicate baseline plus light spring cleaning.", "link": ""}, {"t": "Mary: pre-brief Kelsey on the Zendesk walkthrough", "o": "Mary", "s": "Pending", "d": "", "week": 2, "notes": "So the walkthrough is quick and complete.", "link": ""}, {"t": "Design the Intercom replica: brands, inboxes, routing", "o": "Greg", "s": "Pending", "d": "", "week": 3, "notes": "", "link": ""}, {"t": "Recommendation: brands model, two brands or audiences", "o": "Greg", "s": "Pending", "d": "", "week": 3, "notes": "SB Services and Sounding Board are handled the same way today.", "link": ""}, {"t": "Recommendation: historical data, how far back and in what form", "o": "Greg", "s": "Pending", "d": "", "week": 3, "notes": "Migrate as tickets, not conversations, so it does not muddy Fin.", "link": ""}], "client": [{"t": "Kelsey walkthrough of the current Zendesk setup", "o": "SB", "s": "Pending", "d": "", "week": 2, "tip": "Walk us through groups, inboxes, routing and how tickets are handled today. Kelsey is the operational anchor.", "notes": "", "link": ""}, {"t": "Confirm agent count transferring from Zendesk", "o": "SB", "s": "Pending", "d": "", "week": 2, "tip": "Confirm how many agents transfer so we can map them to Intercom seats.", "notes": "", "link": ""}, {"t": "Give your steer on the brands model", "o": "SB", "s": "Pending", "d": "", "week": 3, "tip": "Two brands or audiences in Intercom. A strong view is welcome, otherwise sit tight for our recommendation.", "notes": "", "link": ""}, {"t": "Give your steer on historical data depth", "o": "SB", "s": "Pending", "d": "", "week": 3, "tip": "How far back to migrate, and roughly how many tickets.", "notes": "", "link": ""}]}, "foundations": {"sabel": [{"t": "Build workspace, brands and inbox structure", "o": "Greg", "s": "Pending", "d": "", "week": 4, "notes": "Engagement Management, EXP and Support.", "link": ""}, {"t": "Configure query-based routing", "o": "Greg", "s": "Pending", "d": "", "week": 4, "notes": "Routing rules by channel and topic.", "link": ""}, {"t": "Recreate the existing widget, form and routing", "o": "Greg", "s": "Pending", "d": "", "week": 4, "notes": "Widget-first support for internal teams, contractors and participants; the widget is already set up.", "link": ""}], "client": [{"t": "Confirm inbox names and membership against current", "o": "SB", "s": "Pending", "d": "", "week": 4, "tip": "Final check on the EXP and Support member names before we finalise the build. Kelsey.", "notes": "Old Support leadership inbox not carried across.", "link": "https://app.intercom.com/a/apps/_/inbox/inboxes"}, {"t": "Confirm subscription plan tier and seats", "o": "SB", "s": "Dependency", "d": "", "week": 4, "tip": "Confirm the Intercom plan tier and number of seats so we can provision correctly. Matt.", "notes": "TBC from kickoff.", "link": "https://app.intercom.com/a/apps/_/billing/summary"}]}, "knowledge": {"sabel": [{"t": "Migrate the Knowledge Base, preserving translations", "o": "Greg", "s": "Pending", "d": "", "week": 5, "notes": "Around 106 articles, existing translations carried across.", "link": ""}, {"t": "Restructure collections and set Help Centre audiences", "o": "Greg", "s": "Pending", "d": "", "week": 5, "notes": "Self-serve vs internal audiences.", "link": ""}, {"t": "Mary: walk Jason and Aaron through KB and audiences", "o": "Mary", "s": "Pending", "d": "", "week": 5, "notes": "", "link": ""}], "client": [{"t": "Help Centre owner confirmed for ongoing maintenance", "o": "SB", "s": "Pending", "d": "", "week": 5, "tip": "Nominate who owns Help Centre content after handover, and review the migrated articles. Jason returns from leave, Aaron covers.", "notes": "", "link": "https://app.intercom.com/a/apps/_/articles"}, {"t": "Confirm the multi-language target", "o": "SB", "s": "Dependency", "d": "", "week": 5, "tip": "Confirm the target languages. Up to 25 vs 8 today. Lori flags the BMS multi-language obligation as contractual.", "notes": "", "link": ""}]}, "fin": {"sabel": [{"t": "Configure and train two Fin agents for the SB platform", "o": "Greg", "s": "Pending", "d": "", "week": 6, "notes": "AI deflection, self-help, and out-of-hours data collection.", "link": ""}, {"t": "Configure Fin escalation, handover and fallback", "o": "Greg", "s": "Pending", "d": "", "week": 6, "notes": "", "link": ""}, {"t": "Build the Jira integration once instances are merged", "o": "Greg", "s": "Dependency", "d": "", "week": 6, "notes": "Gated on the Atlassian consolidation. Avoids maintaining two integrations or API keys.", "link": ""}, {"t": "Mary: prep Kelsey and Jason on Fin training", "o": "Mary", "s": "Pending", "d": "", "week": 6, "notes": "", "link": ""}], "client": [{"t": "Train and tune the Fin agents, one each", "o": "SB", "s": "Pending", "d": "", "week": 6, "tip": "Kelsey and Jason each take one Fin agent to train and tune on your content.", "notes": "", "link": "https://app.intercom.com/a/apps/_/fin/setup"}, {"t": "Confirm the Atlassian consolidation is complete", "o": "SB", "s": "Dependency", "d": "", "week": 6, "tip": "The signal that the two Jira instances are merged, which unlocks the integration. Matt.", "notes": "", "link": ""}]}, "migration": {"sabel": [{"t": "Run sample migration batch, validate vs source records", "o": "Greg", "s": "Pending", "d": "", "week": 7, "notes": "Migrate as tickets, not conversations, to keep Fin clean.", "link": ""}, {"t": "Execute historical migration at the agreed depth", "o": "Greg", "s": "Pending", "d": "", "week": 7, "notes": "High-value items converted to conversations later for training.", "link": ""}, {"t": "End-to-end UAT: routing, inboxes and Fin across brands", "o": "Greg", "s": "Pending", "d": "", "week": 7, "notes": "", "link": ""}, {"t": "Mary: run SB through UAT", "o": "Mary", "s": "Pending", "d": "", "week": 7, "notes": "So their feedback on the call is specific.", "link": ""}], "client": [{"t": "Migration mapping sign-off", "o": "SB", "s": "Pending", "d": "", "week": 7, "tip": "Review and sign off the migration mapping before we run the full migration.", "notes": "", "link": ""}, {"t": "UAT participation and feedback", "o": "SB", "s": "Pending", "d": "", "week": 7, "tip": "Test routing and Fin responses across your roles and give feedback before go-live.", "notes": "", "link": ""}, {"t": "Go-live readiness sign-off", "o": "SB", "s": "Dependency", "d": "", "week": 7, "tip": "Written sign-off that the platform is ready. This is the gate to cutover. Lori or Matt.", "notes": "", "link": ""}]}, "golive": {"sabel": [{"t": "Final go-live readiness checklist, Sabel side", "o": "Richard", "s": "Pending", "d": "", "week": 8, "notes": "", "link": ""}, {"t": "Cutover to Intercom, Fin live on your channels", "o": "Greg", "s": "Pending", "d": "", "week": 8, "notes": "Target go-live. Buffered, not a hard deadline.", "link": ""}, {"t": "Standby for the first hours, plus a day-1 check-in", "o": "Greg", "s": "Pending", "d": "", "week": 8, "notes": "", "link": ""}, {"t": "Week 1 health check: Fin deflection, resolution, routing", "o": "Greg", "s": "Pending", "d": "", "week": 8, "notes": "", "link": ""}], "client": [{"t": "Send team comms re: Intercom go-live", "o": "SB", "s": "Pending", "d": "", "week": 8, "tip": "Let your wider team know Intercom is live and when, so agents are ready before the first conversation.", "notes": "", "link": ""}, {"t": "Confirm the Zendesk safety-net window", "o": "SB", "s": "Pending", "d": "", "week": 8, "tip": "Agree how long Zendesk stays live as a fallback after cutover.", "notes": "", "link": ""}]}};
+const T={"setup": {"sabel": [{"t": "Kick-off call: scope, contacts and ways of working", "o": "Richard", "s": "Pending", "d": "", "week": 1, "notes": "Who we are, how we work, the plan alongside BTS, and the two decisions coming.", "link": ""}, {"t": "Create SB Slack channel and Friday status-note cadence", "o": "Chris", "s": "Pending", "d": "", "week": 1, "notes": "Done / In progress / Blocked / Asks, every Friday.", "link": ""}, {"t": "Request Zendesk read access for the integrations email", "o": "Greg", "s": "Pending", "d": "", "week": 1, "notes": "", "link": ""}], "client": [{"t": "Mary's Intercom intro and tracker walkthrough with Kelsey", "o": "SB", "s": "Pending", "d": "", "week": 1, "tip": "Mary gives Kelsey an Intercom and tracker orientation ahead of the weekly calls.", "notes": "", "link": ""}, {"t": "Grant Zendesk read access for the integrations email", "o": "SB", "s": "Blocked", "d": "", "week": 1, "tip": "Give the Sabel integrations email read access to your Zendesk so we can inspect and map your setup. Matt or Kelsey.", "notes": "Requested, pending. Unblocks the whole inspection.", "link": ""}, {"t": "Send the clean team and inbox doc with correct names", "o": "SB", "s": "Pending", "d": "", "week": 1, "tip": "Send Kelsey's clean doc with the correct names for Engagement Management, EXP and Support.", "notes": "", "link": ""}, {"t": "Confirm status of the Atlassian consolidation", "o": "SB", "s": "Dependency", "d": "", "week": 1, "tip": "Tell us when the two Jira instances are merged. This later unlocks the Jira integration. Matt.", "notes": "Approx 1 to 2 weeks.", "link": ""}]}, "inspect": {"sabel": [{"t": "Inspect routing, groups and inbox structure", "o": "Greg", "s": "Pending", "d": "", "week": 2, "notes": "How tickets are assigned and escalated today.", "link": ""}, {"t": "Map ticket fields and classifications", "o": "Greg", "s": "Pending", "d": "", "week": 2, "notes": "Assignee, I Need Help With, Service Type, Ticket Type, and the Jira status and priority fields.", "link": ""}, {"t": "Review Knowledge Base structure and existing translations", "o": "Greg", "s": "Pending", "d": "", "week": 2, "notes": "Around 106 articles, translations to be preserved.", "link": ""}, {"t": "Note unused and legacy config to leave behind", "o": "Greg", "s": "Pending", "d": "", "week": 2, "notes": "Replicate baseline plus light spring cleaning.", "link": ""}, {"t": "Design the Intercom replica: brands, inboxes, routing", "o": "Greg", "s": "Pending", "d": "", "week": 3, "notes": "", "link": ""}, {"t": "Recommendation: brands model, two brands or audiences", "o": "Greg", "s": "Pending", "d": "", "week": 3, "notes": "SB Services and Sounding Board are handled the same way today.", "link": ""}, {"t": "Recommendation: historical data, how far back and in what form", "o": "Greg", "s": "Pending", "d": "", "week": 3, "notes": "Migrate as tickets, not conversations, so it does not muddy Fin.", "link": ""}], "client": [{"t": "Mary pre-briefs Kelsey before the Zendesk walkthrough", "o": "SB", "s": "Pending", "d": "", "week": 2, "tip": "Mary preps Kelsey on what Sabel will cover, so the walkthrough is quick and complete.", "notes": "", "link": ""}, {"t": "Kelsey walkthrough of the current Zendesk setup", "o": "SB", "s": "Pending", "d": "", "week": 2, "tip": "Walk us through groups, inboxes, routing and how tickets are handled today. Kelsey is the operational anchor.", "notes": "", "link": ""}, {"t": "Confirm agent count transferring from Zendesk", "o": "SB", "s": "Pending", "d": "", "week": 2, "tip": "Confirm how many agents transfer so we can map them to Intercom seats.", "notes": "", "link": ""}, {"t": "Give your steer on the brands model", "o": "SB", "s": "Pending", "d": "", "week": 3, "tip": "Two brands or audiences in Intercom. A strong view is welcome, otherwise sit tight for our recommendation.", "notes": "", "link": "", "kind": "milestone"}, {"t": "Give your steer on historical data depth", "o": "SB", "s": "Pending", "d": "", "week": 3, "tip": "How far back to migrate, and roughly how many tickets.", "notes": "", "link": "", "kind": "milestone"}]}, "foundations": {"sabel": [{"t": "Build workspace, brands and inbox structure", "o": "Chris", "s": "Pending", "d": "", "week": 4, "notes": "Engagement Management, EXP and Support.", "link": ""}, {"t": "Configure query-based routing", "o": "Chris", "s": "Pending", "d": "", "week": 4, "notes": "Routing rules by channel and topic.", "link": ""}, {"t": "Recreate the existing widget, form and routing", "o": "Chris", "s": "Pending", "d": "", "week": 4, "notes": "Widget-first support for internal teams, contractors and participants; the widget is already set up.", "link": ""}], "client": [{"t": "Confirm inbox names and membership against current", "o": "SB", "s": "Pending", "d": "", "week": 4, "tip": "Final check on the EXP and Support member names before we finalise the build. Kelsey.", "notes": "Old Support leadership inbox not carried across.", "link": "https://app.intercom.com/a/apps/_/inbox/inboxes", "kind": "milestone"}, {"t": "Confirm subscription plan tier and seats", "o": "SB", "s": "Dependency", "d": "", "week": 4, "tip": "Confirm the Intercom plan tier and number of seats so we can provision correctly. Matt.", "notes": "TBC from kickoff.", "link": "https://app.intercom.com/a/apps/_/billing/summary"}]}, "knowledge": {"sabel": [{"t": "Migrate the Knowledge Base, preserving translations", "o": "Greg", "s": "Pending", "d": "", "week": 5, "notes": "Around 106 articles, existing translations carried across.", "link": ""}, {"t": "Restructure collections and set Help Centre audiences", "o": "Chris", "s": "Pending", "d": "", "week": 5, "notes": "Self-serve vs internal audiences.", "link": ""}], "client": [{"t": "Mary briefs Jason and Aaron on KB and audiences", "o": "SB", "s": "Pending", "d": "", "week": 5, "tip": "Mary walks Jason and Aaron through how Help Centre content and audiences work in Intercom.", "notes": "", "link": ""}, {"t": "Help Centre owner confirmed for ongoing maintenance", "o": "SB", "s": "Pending", "d": "", "week": 5, "tip": "Nominate who owns Help Centre content after handover, and review the migrated articles. Jason returns from leave, Aaron covers.", "notes": "", "link": "https://app.intercom.com/a/apps/_/articles"}, {"t": "Confirm the multi-language target", "o": "SB", "s": "Dependency", "d": "", "week": 5, "tip": "Confirm the target languages. Up to 25 vs 8 today. Lori flags the BMS multi-language obligation as contractual.", "notes": "", "link": ""}]}, "fin": {"sabel": [{"t": "Configure and train two Fin agents for the SB platform", "o": "Chris", "s": "Pending", "d": "", "week": 6, "notes": "AI deflection, self-help, and out-of-hours data collection.", "link": "", "wkEnd": 7}, {"t": "Configure Fin escalation, handover and fallback", "o": "Chris", "s": "Pending", "d": "", "week": 6, "notes": "", "link": ""}, {"t": "Build the Jira integration once instances are merged", "o": "Greg", "s": "Dependency", "d": "", "week": 6, "notes": "Gated on the Atlassian consolidation. Avoids maintaining two integrations or API keys.", "link": ""}], "client": [{"t": "Mary preps Kelsey and Jason for Fin training", "o": "SB", "s": "Pending", "d": "", "week": 6, "tip": "Mary gets Kelsey and Jason ready to train and tune their Fin agents.", "notes": "", "link": ""}, {"t": "Train and tune the Fin agents, one each", "o": "SB", "s": "Pending", "d": "", "week": 6, "tip": "Kelsey and Jason each take one Fin agent to train and tune on your content.", "notes": "", "link": "https://app.intercom.com/a/apps/_/fin/setup", "wkEnd": 7}, {"t": "Confirm the Atlassian consolidation is complete", "o": "SB", "s": "Dependency", "d": "", "week": 6, "tip": "The signal that the two Jira instances are merged, which unlocks the integration. Matt.", "notes": "", "link": "", "kind": "milestone"}]}, "migration": {"sabel": [{"t": "Run sample migration batch, validate vs source records", "o": "Greg", "s": "Pending", "d": "", "week": 7, "notes": "Migrate as tickets, not conversations, to keep Fin clean.", "link": ""}, {"t": "Execute historical migration at the agreed depth", "o": "Greg", "s": "Pending", "d": "", "week": 7, "notes": "High-value items converted to conversations later for training.", "link": ""}, {"t": "End-to-end UAT: routing, inboxes and Fin across brands", "o": "Chris", "s": "Pending", "d": "", "week": 7, "notes": "", "link": ""}], "client": [{"t": "Mary runs the SB team through UAT", "o": "SB", "s": "Pending", "d": "", "week": 7, "tip": "Mary walks the SB testers through UAT so feedback on the call is specific.", "notes": "", "link": ""}, {"t": "Migration mapping sign-off", "o": "SB", "s": "Pending", "d": "", "week": 7, "tip": "Review and sign off the migration mapping before we run the full migration.", "notes": "", "link": "", "kind": "milestone"}, {"t": "UAT participation and feedback", "o": "SB", "s": "Pending", "d": "", "week": 7, "tip": "Test routing and Fin responses across your roles and give feedback before go-live.", "notes": "", "link": ""}, {"t": "Go-live readiness sign-off", "o": "SB", "s": "Dependency", "d": "", "week": 7, "tip": "Written sign-off that the platform is ready. This is the gate to cutover. Lori or Matt.", "notes": "", "link": "", "kind": "milestone"}]}, "golive": {"sabel": [{"t": "Final go-live readiness checklist, Sabel side", "o": "Richard", "s": "Pending", "d": "", "week": 8, "notes": "", "link": ""}, {"t": "Cutover to Intercom, Fin live on your channels", "o": "Chris", "s": "Pending", "d": "", "week": 8, "notes": "Target go-live. Buffered, not a hard deadline.", "link": ""}, {"t": "Standby for the first hours, plus a day-1 check-in", "o": "Chris", "s": "Pending", "d": "", "week": 8, "notes": "", "link": ""}, {"t": "Week 1 health check: Fin deflection, resolution, routing", "o": "Chris", "s": "Pending", "d": "", "week": 8, "notes": "", "link": ""}], "client": [{"t": "Send team comms re: Intercom go-live", "o": "SB", "s": "Pending", "d": "", "week": 8, "tip": "Let your wider team know Intercom is live and when, so agents are ready before the first conversation.", "notes": "", "link": ""}, {"t": "Confirm the Zendesk safety-net window", "o": "SB", "s": "Pending", "d": "", "week": 8, "tip": "Agree how long Zendesk stays live as a fallback after cutover.", "notes": "", "link": ""}]}};
 
 // ── Standard task library ─────────────────────────────────────────────────────
 // [CLIENT] The Sabel standard subset per pillar. These appear in the "+ Add"
 // menu on each column so tasks can be added back manually as required.
 // Keep keys aligned with this client's phase ids. The human-editable master
 // list lives in references/standard-tasks.md; mirror any changes here.
-const STD={"setup": {"sabel": [{"t": "Create Slack project channel and share with client team", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Share pre-call context and SOW with client champion", "o": "Richard", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Kick-off call: scope, contacts and ways of working", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Intercom workspace admin access", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Grant the Sabel team admin access to your Intercom workspace so we can configure on your behalf.", "notes": "", "link": ""}, {"t": "Source platform read access for migration mapping", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Give us read access to your current platform so we can map tickets, contacts and fields for the migration.", "notes": "", "link": ""}, {"t": "Brand assets pack (logos, sender names, reply addresses)", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Send logo files, sender names and reply-address preferences so we can brand the workspace and Messenger.", "notes": "", "link": ""}]}, "inspect": {"sabel": [{"t": "Map tickets, contacts, agents, statuses, tags, fields", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Inbox views and team inboxes", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Routing rules by language, channel and topic", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Inbox structure and routing approval", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Review and confirm the inbox and routing setup before we finalise assignment rules.", "notes": "", "link": ""}, {"t": "Confirm agent count transferring from source platform", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Confirm how many agents transfer so we can map them to Intercom seats.", "notes": "", "link": ""}]}, "foundations": {"sabel": [{"t": "Workspace and brand config, region, hours, seats", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Configure Messenger for web", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Ticket types, statuses and SLA targets", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Business hours, holidays and closures", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Share your business hours plus any office holidays and closures so we can configure operating hours.", "notes": "", "link": ""}, {"t": "SLA targets per channel confirmed", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Confirm target response times per channel so we can set inbox SLAs and alerts.", "notes": "", "link": ""}]}, "knowledge": {"sabel": [{"t": "Audit articles, gaps, duplicates, outdated", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Restructure collections and categories for Fin readability", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Publish cleaned article set in Help Centre", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Help Centre owner confirmed for ongoing maintenance", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Nominate your internal Help Centre owner to maintain content after handover.", "notes": "", "link": ""}, {"t": "Language / dialect handling preference confirmed", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Confirm whether Fin should detect language automatically or use profile language.", "notes": "", "link": ""}]}, "fin": {"sabel": [{"t": "Configure Fin across all connected channels", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Configure Fin escalation, handover and fallback", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Configure Fin persona and tone to brand voice", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Test Fin sample queries and iterate during build", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Tone-of-voice guide and 3-5 approved response examples", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Share tone-of-voice guidance and a few example responses you are happy with so Fin mirrors your brand language.", "notes": "", "link": ""}]}, "migration": {"sabel": [{"t": "Run sample migration batch, validate vs source records", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Execute full historical migration", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Sample-based QA on migrated dataset", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Delta migration to capture build-phase tickets", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "E2E testing, channels, Fin workflows and connectors", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Run Fin UAT scenarios and iterate configuration", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Sabel go-live readiness checklist completed", "o": "Richard", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Migration mapping sign-off", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Review and sign off the migration mapping before we run the full migration.", "notes": "", "link": ""}, {"t": "Migrated dataset sign-off", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Review the QA sample and approve the full production migration.", "notes": "", "link": ""}, {"t": "UAT testers confirmed and available", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Identify testers to run end-to-end testing across all channels and Fin before go-live.", "notes": "", "link": ""}, {"t": "Go-live readiness sign-off", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Provide written sign-off that the platform is ready before we switch live traffic.", "notes": "", "link": ""}]}, "golive": {"sabel": [{"t": "Source platform closes inbound channels (cutover)", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Open Intercom to inbound across all channels", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Activate Fin AI Agent on all configured channels", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Sabel on standby for go-live support", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Fin tuning pass, low-confidence topics and escalations", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Final handover docs and Slack channel wind-down", "o": "Richard", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Team comms sent re: Intercom go-live", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Let your wider team know Intercom is live and when, so agents are ready before the first customer conversation.", "notes": "", "link": ""}, {"t": "Feedback on Week 1 agent experience", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "After the first week live, share agent feedback to guide the Fin tuning pass.", "notes": "", "link": ""}]}};
+const STD={"setup": {"sabel": [{"t": "Create Slack project channel and share with client team", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Share pre-call context and SOW with client champion", "o": "Richard", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Kick-off call: scope, contacts and ways of working", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Intercom workspace admin access", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Grant the Sabel team admin access to your Intercom workspace so we can configure on your behalf.", "notes": "", "link": ""}, {"t": "Source platform read access for migration mapping", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Give us read access to your current platform so we can map tickets, contacts and fields for the migration.", "notes": "", "link": ""}, {"t": "Brand assets pack (logos, sender names, reply addresses)", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Send logo files, sender names and reply-address preferences so we can brand the workspace and Messenger.", "notes": "", "link": ""}]}, "inspect": {"sabel": [{"t": "Map tickets, contacts, agents, statuses, tags, fields", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Inbox views and team inboxes", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Routing rules by language, channel and topic", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Inbox structure and routing approval", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Review and confirm the inbox and routing setup before we finalise assignment rules.", "notes": "", "link": "", "kind": "milestone"}, {"t": "Confirm agent count transferring from source platform", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Confirm how many agents transfer so we can map them to Intercom seats.", "notes": "", "link": ""}]}, "foundations": {"sabel": [{"t": "Workspace and brand config, region, hours, seats", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Configure Messenger for web", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Ticket types, statuses and SLA targets", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Business hours, holidays and closures", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Share your business hours plus any office holidays and closures so we can configure operating hours.", "notes": "", "link": ""}, {"t": "SLA targets per channel confirmed", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Confirm target response times per channel so we can set inbox SLAs and alerts.", "notes": "", "link": ""}]}, "knowledge": {"sabel": [{"t": "Audit articles, gaps, duplicates, outdated", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Restructure collections and categories for Fin readability", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Publish cleaned article set in Help Centre", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Help Centre owner confirmed for ongoing maintenance", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Nominate your internal Help Centre owner to maintain content after handover.", "notes": "", "link": ""}, {"t": "Language / dialect handling preference confirmed", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Confirm whether Fin should detect language automatically or use profile language.", "notes": "", "link": ""}]}, "fin": {"sabel": [{"t": "Configure Fin across all connected channels", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Configure Fin escalation, handover and fallback", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Configure Fin persona and tone to brand voice", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Test Fin sample queries and iterate during build", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Tone-of-voice guide and 3-5 approved response examples", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Share tone-of-voice guidance and a few example responses you are happy with so Fin mirrors your brand language.", "notes": "", "link": ""}]}, "migration": {"sabel": [{"t": "Run sample migration batch, validate vs source records", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Execute full historical migration", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Sample-based QA on migrated dataset", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Delta migration to capture build-phase tickets", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "E2E testing, channels, Fin workflows and connectors", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Run Fin UAT scenarios and iterate configuration", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Sabel go-live readiness checklist completed", "o": "Richard", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Migration mapping sign-off", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Review and sign off the migration mapping before we run the full migration.", "notes": "", "link": "", "kind": "milestone"}, {"t": "Migrated dataset sign-off", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Review the QA sample and approve the full production migration.", "notes": "", "link": "", "kind": "milestone"}, {"t": "UAT testers confirmed and available", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Identify testers to run end-to-end testing across all channels and Fin before go-live.", "notes": "", "link": ""}, {"t": "Go-live readiness sign-off", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Provide written sign-off that the platform is ready before we switch live traffic.", "notes": "", "link": "", "kind": "milestone"}]}, "golive": {"sabel": [{"t": "Source platform closes inbound channels (cutover)", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Open Intercom to inbound across all channels", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Activate Fin AI Agent on all configured channels", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Sabel on standby for go-live support", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Fin tuning pass, low-confidence topics and escalations", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Final handover docs and Slack channel wind-down", "o": "Richard", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Team comms sent re: Intercom go-live", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "Let your wider team know Intercom is live and when, so agents are ready before the first customer conversation.", "notes": "", "link": ""}, {"t": "Feedback on Week 1 agent experience", "o": "SB", "s": "Dependency", "d": "", "week": 0, "tip": "After the first week live, share agent feedback to guide the Fin tuning pass.", "notes": "", "link": ""}]}};
 
 let cur='overview';
 let cardNotes={};
@@ -406,20 +412,45 @@ function toggleWeekStartEdit(e){
 function isoDate(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+da;}
 function weekRangeLabel(n){if(!n||n<1)return 'Unscheduled';const s=weekStartDate(n),e=new Date(s);e.setDate(e.getDate()+6);const f=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});return f(s)+' – '+f(e);}
 function isOverdue(t){
-  // A task is overdue when it is not Complete and its scheduled week has
-  // already ended. Unscheduled tasks (week 0/missing) are never overdue.
+  // A task is overdue when it is not Complete and its scheduled period has
+  // already ended. For a span (ongoing) task that means its END week: being
+  // still in progress mid-span is planned, not overdue. Unscheduled tasks
+  // (week 0/missing) are never overdue.
   if(!t||t.s==='Complete'||!t.week||t.week<1)return false;
-  const e=new Date(weekStartDate(t.week).getTime()); e.setDate(e.getDate()+6);
+  const e=new Date(weekStartDate(endWeek(t)).getTime()); e.setDate(e.getDate()+6);
   const now=new Date(); now.setHours(0,0,0,0);
   return e<now;
 }
 function weekLabel(n){return (n&&n>=1)?'Week '+n:'Unscheduled';}
-function maxWeek(){let mx=0;P.forEach(ph=>['sabel','client'].forEach(g=>T[ph.id][g].forEach(t=>{if(t.week&&t.week>mx)mx=t.week;})));return Math.max(mx,8);}
+// ── Week ranges (ongoing tasks) and milestones ───────────────────────────────
+// A task may span several weeks: `week` is the start, optional `wkEnd` the end.
+// Single-week tasks have no wkEnd. `kind:'milestone'` marks checkpoint tasks
+// (sign-offs, approvals); level-of-effort work uses a span instead.
+function endWeek(t){return (t&&t.wkEnd&&t.week&&t.wkEnd>t.week)?t.wkEnd:((t&&t.week)||0);}
+function isSpan(t){return !!(t&&t.week&&t.wkEnd&&t.wkEnd>t.week);}
+function spanWeeksText(t){return isSpan(t)?('Wks '+t.week+'–'+t.wkEnd):weekLabel(t.week||0);}
+function taskDatesText(t){
+  if(!t.week||t.week<1)return t.d||'';
+  if(!isSpan(t))return weekRangeLabel(t.week);
+  const s=weekStartDate(t.week),e=new Date(weekStartDate(t.wkEnd));e.setDate(e.getDate()+6);
+  const f=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  return 'Wks '+t.week+'–'+t.wkEnd+' · '+f(s)+' – '+f(e);
+}
+function maxWeek(){let mx=0;P.forEach(ph=>['sabel','client'].forEach(g=>T[ph.id][g].forEach(t=>{const e=endWeek(t);if(e>mx)mx=e;})));return Math.max(mx,8);}
 function weekOptions(sel){let o='';const mx=maxWeek();for(let n=1;n<=mx;n++){o+=`<option value="${n}"${sel===n?' selected':''}>Week ${n} · ${weekRangeLabel(n)}</option>`;}return o;}
+function weekEndOptions(t){
+  let o=`<option value="0"${!isSpan(t)?' selected':''}>Single week</option>`;
+  const mx=Math.max(maxWeek(),endWeek(t));
+  for(let n=(t.week||0)+1;n<=mx;n++){o+=`<option value="${n}"${t.wkEnd===n?' selected':''}>to Week ${n} · ends ${weekRangeLabel(n).split('–')[1].trim()}</option>`;}
+  return o;
+}
 function effWeek(t){return weekLabel(t.week||0);}
 function weekList(){
   const seen=new Set();
-  P.forEach(ph=>['sabel','client'].forEach(g=>T[ph.id][g].forEach(t=>seen.add(effWeek(t)))));
+  P.forEach(ph=>['sabel','client'].forEach(g=>T[ph.id][g].forEach(t=>{
+    if(!t.week||t.week<1){seen.add(effWeek(t));return;}
+    for(let w=t.week;w<=endWeek(t);w++)seen.add(weekLabel(w));
+  })));
   const arr=[...seen];
   const num=w=>{const m=/(\d+)/.exec(w);return m?parseInt(m[1]):9999;};
   arr.sort((a,b)=>{if(a==='Unscheduled')return 1;if(b==='Unscheduled')return -1;return num(a)-num(b)||a.localeCompare(b);});
@@ -428,7 +459,13 @@ function weekList(){
 function weekGroups(wk){
   const out={sabel:[],client:[]};
   P.forEach(ph=>['sabel','client'].forEach(g=>{
-    T[ph.id][g].forEach((t,i)=>{ if(effWeek(t)===wk) out[g].push({t,cid:ph.id+'-'+(g==='sabel'?'s':'c')+'-'+i,c:ph.c,l:ph.l}); });
+    T[ph.id][g].forEach((t,i)=>{
+      // Span-aware: a task belongs to every week it covers, so ongoing work
+      // shows as active in each week view across its range.
+      const m=/(\d+)/.exec(wk), wn=m?parseInt(m[1],10):0;
+      const hit=wn?(t.week>=1&&t.week<=wn&&endWeek(t)>=wn):(effWeek(t)===wk);
+      if(hit) out[g].push({t,cid:ph.id+'-'+(g==='sabel'?'s':'c')+'-'+i,c:ph.c,l:ph.l});
+    });
   }));
   return out;
 }
@@ -454,6 +491,85 @@ function focusWeek(){
   for(let n=Math.max(cw,0)+1;n<=mx+8;n++){ if(has(n))return{n,now:false}; }
   return{n:cw<1?1:cw,now:cw>=1};
 }
+// ── Key milestones chart (overview) ───────────────────────────────────────────
+// The milestones are the PILLARS: each pillar is one entry, Complete only when
+// every task in it is Complete. If a pillar has milestone-flagged tasks (kind:
+// 'milestone'), those named gates represent it instead, so trackers upgrade
+// automatically once the task library carries MILESTONE lines. The go-live and
+// post go-live pillars are excluded; the fixed Go-live · Cutover row covers launch.
+function pillarComplete(pid){const m=phaseMini(pid);return m.total>0&&m.done===m.total;}
+function weekDueDate(n){if(!n||n<1)return '';const d=new Date(weekStartDate(n));d.setDate(d.getDate()+4);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
+function pillarWeekSpan(pid){
+  let fw=0,lw=0;
+  ['sabel','client'].forEach(g=>(T[pid]&&T[pid][g]||[]).forEach(t=>{
+    if(!t.week||t.week<1)return;
+    if(!fw||t.week<fw)fw=t.week;
+    const e=endWeek(t); if(e>lw)lw=e;
+  }));
+  return{fw,lw};
+}
+function milestoneEntries(){
+  const out=[];
+  P.forEach(p=>{
+    if(p.id==='golive'||p.id==='post')return;
+    const flagged=[];
+    ['sabel','client'].forEach(g=>(T[p.id]&&T[p.id][g]||[]).forEach(t=>{if(t.kind==='milestone')flagged.push(t);}));
+    if(flagged.length){
+      flagged.forEach(t=>out.push({type:'task',t,p,due:endWeek(t)}));
+    }else{
+      out.push({type:'pillar',p,due:pillarWeekSpan(p.id).lw});
+    }
+  });
+  out.sort((a,b)=>(a.due||99)-(b.due||99));
+  return out;
+}
+function milestoneState(e){
+  const cw=currentWeek(),m=phaseMini(e.p.id);
+  if(pillarComplete(e.p.id))return{label:'Achieved',clr:'#4ADE80'};
+  if(e.type==='task'&&e.t.s==='Complete')return{label:'Signed off · pillar work ongoing',clr:'#60A5FA'};
+  if(e.due&&cw>e.due)return{label:'Overdue · was due Week '+e.due,clr:'#F87171'};
+  if(e.due&&cw===e.due)return{label:'Due now · Week '+e.due,clr:'#C084FC'};
+  const fw=e.type==='pillar'?pillarWeekSpan(e.p.id).fw:0;
+  if(e.type==='pillar'&&fw&&cw>=fw&&m.done>0)return{label:'In progress · '+m.done+'/'+m.total+' done',clr:'#60A5FA'};
+  return{label:'Upcoming'+(e.due?' · Week '+e.due:''),clr:'#475569'};
+}
+function milestonesCard(){
+  const entries=milestoneEntries();
+  if(!entries.length&&!goLiveDate)return '';
+  const row=e=>{const s=milestoneState(e);
+    const title=e.type==='task'?esc(e.t.t):esc(e.p.l)+' complete';
+    return`<div class="ms-row" onclick="setGroupBy('pillar');setP('${e.p.id}')" title="Open ${esc(e.p.l)}">
+      <i class="ti ti-diamonds" style="font-size:20px;color:${s.clr};flex-shrink:0;background:#12151D;position:relative;z-index:1"></i>
+      <div style="flex:1;min-width:0">
+        <div class="ms-title" style="font-size:13px;font-weight:600;color:#E2E8F0;line-height:1.4">${title}</div>
+        <div style="font-size:11px;color:${s.clr};margin-top:3px">${s.label}</div>
+      </div>
+      <span style="font-size:11px;font-weight:600;color:${s.clr==='#475569'?'#64748B':s.clr};flex-shrink:0;white-space:nowrap">${weekDueDate(e.due)}</span>
+    </div>`;};
+  let glRow='';
+  if(goLiveDate){
+    const gl=new Date(goLiveDate+'T00:00:00');
+    const glDone=P.every(p=>p.id==='post'||pillarComplete(p.id));
+    const now=new Date();now.setHours(0,0,0,0);
+    const glClr=glDone?'#4ADE80':(gl<now?'#F87171':'#E10600');
+    glRow=`<div class="ms-row" onclick="setGroupBy('pillar');${P.some(p=>p.id==='golive')?`setP('golive')`:''}" title="Open Go-live">
+      <i class="ti ti-rocket" style="font-size:20px;color:${glClr};flex-shrink:0;background:#12151D;position:relative;z-index:1"></i>
+      <div style="flex:1;min-width:0">
+        <div class="ms-title" style="font-size:13px;font-weight:600;color:#E2E8F0;line-height:1.4">Go-live · Cutover</div>
+        <div style="font-size:11px;color:${glClr};margin-top:3px">${esc(GO_LIVE_NOTE||'')}</div>
+      </div>
+      <span style="font-size:11px;font-weight:600;color:${glClr};flex-shrink:0;white-space:nowrap">${gl.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
+    </div>`;
+  }
+  const body=entries.map(row).join('');
+  return `<div style="background:#12151D;border:1px solid #1E2433;border-radius:10px;padding:14px 16px">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+      <span style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569">Key milestones</span>
+      <i class="ti ti-info-circle" onmouseenter="showTip(event,'A milestone is achieved when every task in that stage is complete. Dates update automatically if the plan moves.')" onmousemove="moveTip(event)" onmouseleave="hideTip()" style="font-size:13px;color:#475569;cursor:help"></i>
+    </div>
+    <div class="ms-rail">${body}${glRow}</div>
+  </div>`;
+}
 function ovMetrics(gs){
   const pct=gs.total>0?Math.round(gs.complete/gs.total*100):0;
   const pctClr=pct>66?'#4ADE80':pct>33?'#FBBF24':'#E10600';
@@ -462,10 +578,10 @@ function ovMetrics(gs){
   const f=focusWeek(), fg=weekGroups('Week '+f.n);
   const weekYou=fg.client.filter(o=>o.t.s!=='Complete').length;
   const outYou=P.reduce((n,p)=>n+T[p.id].client.filter(t=>t.s!=='Complete').length,0);
-  const card=(label,val,valClr,sub)=>`<div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:12px 13px">
-      <div style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:7px">${label}</div>
-      <div style="font-size:24px;font-weight:700;color:${valClr};line-height:1">${val}</div>
-      <div style="font-size:10px;color:#475569;margin-top:5px">${sub}</div>
+  const card=(label,val,valClr,sub)=>`<div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:10px 12px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:5px">${label}</div>
+      <div style="font-size:20px;font-weight:700;color:${valClr};line-height:1">${val}</div>
+      <div style="font-size:10px;color:#475569;margin-top:4px">${sub}</div>
     </div>`;
   const glCard=editingGoLive
     ? `<div style="background:#161B26;border:1px solid #E1060055;border-radius:10px;padding:12px 13px">
@@ -473,15 +589,19 @@ function ovMetrics(gs){
         <input type="date" id="golive-input" value="${goLiveDate||''}" onchange="setGoLive(this.value)" onclick="openPicker(event,this)" style="cursor:pointer;width:100%;font-size:12px;color:#E2E8F0;background:#0F1117;border:1px solid #2A3145;border-radius:6px;padding:5px 7px;font-family:inherit;box-sizing:border-box">
         <div style="margin-top:6px"><span onclick="cancelGoLiveEdit(event)" style="font-size:10px;color:#94A3B8;cursor:pointer">Cancel</span></div>
       </div>`
-    : (w=>`<div style="background:#161B26;border:1px solid ${w?w.clr+'66':'#1E2433'};border-radius:10px;padding:12px 13px" title="${esc(GO_LIVE_NOTE||'')}">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+    : (w=>`<div style="background:#161B26;border:1px solid ${w?w.clr+'66':'#1E2433'};border-radius:10px;padding:10px 12px" title="${esc(GO_LIVE_NOTE||'')}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
           <span style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#475569">Go-live</span>
           <button onclick="toggleGoLiveEdit(event)" title="Edit go-live date" style="background:transparent;border:none;cursor:pointer;color:#64748B;padding:0;display:flex"><i class="ti ti-pencil" style="font-size:12px"></i></button>
         </div>
-        <div style="font-size:24px;font-weight:700;color:#E10600;line-height:1">${glBig}</div>
-        <div style="font-size:10px;color:${w?w.clr:'#475569'};margin-top:5px">${w?w.msg:glSub}</div>
+        <div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap">
+          <span style="font-size:20px;font-weight:700;color:#E10600;line-height:1">${glBig}</span>
+          <span style="font-size:12px;font-weight:600;color:#E2E8F0;white-space:nowrap">${glSub}</span>
+        </div>
+        ${w?`<div style="font-size:10px;color:${w.clr};margin-top:5px">${w.msg}</div>`:''}
       </div>`)(bufferWarning());
-  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1rem">
+  // Four compact metric cards in a single row across the top of the overview.
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px">
     ${card('Completion',pct+'%',pctClr,gs.complete+' / '+gs.total+' actions')}
     ${glCard}
     ${card('Your actions this week',weekYou,weekYou>0?'#FBBF24':'#4ADE80',f.now?'due this week':'next: Week '+f.n)}
@@ -492,13 +612,21 @@ function thisWeekPanel(){
   const f=focusWeek(), label='Week '+f.n, g=weekGroups(label);
   const row=o=>{const done=o.t.s==='Complete';const sc=SC[o.t.s]||SC.Pending;return`<div style="display:flex;align-items:center;gap:8px;padding:6px 2px;border-top:1px solid #1E2433">
       <span style="width:7px;height:7px;border-radius:50%;background:${o.c};flex-shrink:0" title="${esc(o.l)}"></span>
-      <span style="font-size:12px;color:${done?'#475569':'#E2E8F0'};${done?'text-decoration:line-through':''};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.t.t)}</span>
+      ${o.t.kind==='milestone'?`<i class="ti ti-diamonds" title="Milestone" style="font-size:11px;color:#C084FC;flex-shrink:0"></i>`:''}
+      <span style="font-size:12px;color:${done?'#475569':'#E2E8F0'};${done?'text-decoration:line-through':''};flex:1;min-width:0;line-height:1.4">${esc(o.t.t)}</span>
+      ${isSpan(o.t)?`<span title="Planned multi-week work, not a delay" style="font-size:10px;color:#38BDF8;white-space:nowrap;flex-shrink:0">Wks ${o.t.week}–${o.t.wkEnd}</span>`:''}
       <span style="font-size:10px;color:${sc.c};background:${sc.bg};border-radius:20px;padding:1px 7px;white-space:nowrap;flex-shrink:0">${o.t.s}</span>
     </div>`;};
-  const col=(title,icon,colour,items,empty)=>`<div>
+  // Single-week tasks list first; ongoing (span) tasks sit together under their
+  // own small heading, so a task appearing several weeks running reads as
+  // planned multi-week work rather than something stuck.
+  const col=(title,icon,colour,items,empty)=>{
+    const singles=items.filter(o=>!isSpan(o.t)), spans=items.filter(o=>isSpan(o.t));
+    const spanBlock=spans.length?`<p style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#38BDF8;margin:8px 0 2px;display:flex;align-items:center;gap:4px"><i class="ti ti-arrows-horizontal" style="font-size:10px"></i>Ongoing this week</p>${spans.map(row).join('')}`:'';
+    return `<div>
       <p class="col-head" style="color:${colour}"><i class="ti ${icon}" style="font-size:12px"></i>${title} <span style="font-size:10px;color:#475569;font-weight:400;margin-left:4px">${items.filter(o=>o.t.s!=='Complete').length} to do</span></p>
-      ${items.length?items.map(row).join(''):`<div style="font-size:11px;color:#334155;padding:8px 0">${empty}</div>`}
-    </div>`;
+      ${items.length?(singles.map(row).join('')+spanBlock):`<div style="font-size:11px;color:#334155;padding:8px 0">${empty}</div>`}
+    </div>`;};
   const total=g.client.length+g.sabel.length;
   const body=total?`<div class="phase-cols">
       ${col('Your actions','ti-alert-circle','#CA8A04',g.client,'Nothing for you this week')}
@@ -513,8 +641,8 @@ function thisWeekPanel(){
   const odTotal=od.client.length+od.sabel.length;
   const odRow=o=>{const sc=SC[o.t.s]||SC.Pending;return`<div style="display:flex;align-items:center;gap:8px;padding:6px 2px;border-top:1px solid rgba(248,113,113,.15)">
       <span style="width:7px;height:7px;border-radius:50%;background:${o.c};flex-shrink:0" title="${esc(o.l)}"></span>
-      <span style="font-size:12px;color:#E2E8F0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.t.t)}</span>
-      <span style="font-size:10px;color:#F87171;white-space:nowrap;flex-shrink:0">Week ${o.t.week}</span>
+      <span style="font-size:12px;color:#E2E8F0;flex:1;min-width:0;line-height:1.4">${esc(o.t.t)}</span>
+      <span style="font-size:10px;color:#F87171;white-space:nowrap;flex-shrink:0">${spanWeeksText(o.t)}</span>
       <span style="font-size:10px;color:${sc.c};background:${sc.bg};border-radius:20px;padding:1px 7px;white-space:nowrap;flex-shrink:0">${o.t.s}</span>
     </div>`;};
   const odCol=(title,items)=>items.length?`<div>
@@ -723,7 +851,20 @@ function saveDate(cid,val){
 }
 function setTaskWeek(cid,val){
   const t=resolveTask(cid);if(!t)return;
+  const dur=isSpan(t)?t.wkEnd-t.week:0; // moving a span keeps its length
   const n=parseInt(val,10); t.week=(isNaN(n)||n<1)?0:n;
+  if(t.week&&dur)t.wkEnd=t.week+dur; else delete t.wkEnd;
+  renderMain(); scheduleAutoSave();
+}
+function setTaskWeekEnd(cid,val){
+  const t=resolveTask(cid);if(!t)return;
+  const n=parseInt(val,10);
+  if(isNaN(n)||n<=(t.week||0))delete t.wkEnd; else t.wkEnd=n;
+  renderMain(); scheduleAutoSave();
+}
+function setTaskKind(cid,on){
+  const t=resolveTask(cid);if(!t)return;
+  if(on)t.kind='milestone'; else delete t.kind;
   renderMain(); scheduleAutoSave();
 }
 function setTaskWeekByDate(cid,val){
@@ -732,7 +873,9 @@ function setTaskWeekByDate(cid,val){
   const mx=maxWeek()+8; let n=0;
   for(let i=1;i<=mx;i++){ if(weekStartDate(i)<=picked) n=i; }
   if(n<1)n=1;
-  t.week=n; renderMain(); scheduleAutoSave();
+  const dur=isSpan(t)?t.wkEnd-t.week:0;
+  t.week=n; if(dur)t.wkEnd=n+dur; else delete t.wkEnd;
+  renderMain(); scheduleAutoSave();
 }
 function setGroupBy(mode){
   if(groupBy===mode)return;
@@ -798,6 +941,7 @@ function makeCard(t,cid,isClient,ctx){
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:6px">
               <div style="display:flex;align-items:flex-start;gap:5px;flex:1;min-width:0">
                 ${ctx&&ctx.c?`<span title="${esc(ctx.l||'')}" style="width:8px;height:8px;border-radius:50%;background:${ctx.c};flex-shrink:0;margin-top:4px"></span>`:''}
+                ${t.kind==='milestone'?`<i class="ti ti-diamonds" title="Milestone" style="font-size:13px;color:#C084FC;flex-shrink:0;margin-top:2px"></i>`:''}
                 <span style="font-size:12px;line-height:1.45;color:${done?'#334155':'#E2E8F0'};${done?'text-decoration:line-through':''}">${esc(t.t)}</span>
                 ${tipIcon}
               </div>
@@ -809,7 +953,9 @@ function makeCard(t,cid,isClient,ctx){
             </div>
             <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
               ${isClient?oBdg(t.o):ownerBtn(t.o,cid)}
-              <span style="font-size:11px;color:${late?'#F87171':'#475569'}">${t.week?weekRangeLabel(t.week):(t.d||'')}</span>
+              <span style="font-size:11px;color:${late?'#F87171':'#475569'}">${taskDatesText(t)}</span>
+              ${isSpan(t)&&!done?`<span title="Level-of-effort work running across Weeks ${t.week}–${t.wkEnd}" style="font-size:10px;font-weight:600;color:#38BDF8;background:rgba(56,189,248,.12);padding:1px 6px;border-radius:3px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-arrows-horizontal" style="font-size:10px"></i>Ongoing</span>`:''}
+              ${t.kind==='milestone'&&!done?`<span title="Checkpoint task: a sign-off or approval" style="font-size:10px;font-weight:600;color:#C084FC;background:rgba(192,132,252,.12);padding:1px 6px;border-radius:3px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-diamonds" style="font-size:10px"></i>Milestone</span>`:''}
               ${late?`<span style="font-size:10px;font-weight:600;color:#F87171;background:rgba(248,113,113,.12);padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em">Overdue</span>`:''}
               ${ctx&&ctx.l?`<span style="font-size:10px;color:#475569">· ${esc(ctx.l)}</span>`:''}
               ${hasNote&&!done?`<span style="font-size:10px;color:#475569;background:#1E2433;padding:1px 5px;border-radius:3px">note</span>`:''}
@@ -825,15 +971,24 @@ function makeCard(t,cid,isClient,ctx){
           <input id="ttl-${cid}" type="text" value="${safeTitle}" style="width:100%;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit;box-sizing:border-box" placeholder="Task title..." onclick="event.stopPropagation()" onchange="saveTitle('${cid}',this.value)">
         </div>
         <div style="margin-bottom:10px">
-          <label>Week</label>
-          <div style="display:flex;gap:8px">
-            <select onclick="event.stopPropagation()" onchange="setTaskWeek('${cid}',this.value)" style="flex:1;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit">
+          <label>Schedule</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select onclick="event.stopPropagation()" onchange="setTaskWeek('${cid}',this.value)" style="flex:1;min-width:130px;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit">
               <option value="0"${(!t.week||t.week<1)?' selected':''}>Unscheduled</option>
               ${weekOptions(t.week||0)}
             </select>
-            <input type="date" value="${t.week?isoDate(weekStartDate(t.week)):''}" onclick="openPicker(event,this)" onchange="setTaskWeekByDate('${cid}',this.value)" title="Pick a date to move this task to that week" style="font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:5px 8px;font-family:inherit">
+            ${t.week?`<select onclick="event.stopPropagation()" onchange="setTaskWeekEnd('${cid}',this.value)" title="Ongoing work? Set the week it runs until" style="flex:1;min-width:120px;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit">
+              ${weekEndOptions(t)}
+            </select>`:''}
+            <input type="date" value="${t.week?isoDate(weekStartDate(t.week)):''}" onclick="openPicker(event,this)" onchange="setTaskWeekByDate('${cid}',this.value)" title="Pick a date to move this task (a span keeps its length)" style="font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:5px 8px;font-family:inherit">
           </div>
-          <div style="font-size:10px;color:#475569;margin-top:5px">${t.week?('Week '+t.week+' · '+weekRangeLabel(t.week)):'Not scheduled to a week yet'}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;flex-wrap:wrap">
+            <span style="font-size:10px;color:#475569">${t.week?(spanWeeksText(t)+' · '+ (isSpan(t)?taskDatesText(t).split('·')[1].trim():weekRangeLabel(t.week))):'Not scheduled to a week yet'}</span>
+            <label onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#C084FC;cursor:pointer;user-select:none">
+              <input type="checkbox" ${t.kind==='milestone'?'checked':''} onchange="setTaskKind('${cid}',this.checked)" style="accent-color:#C084FC;width:12px;height:12px">
+              Milestone (checkpoint / sign-off)
+            </label>
+          </div>
         </div>
         <div style="margin-bottom:10px">
           <label>Notes</label>
@@ -972,6 +1127,7 @@ function renderSidebar(){
       <img src="${LOGO}" class="sb-logo" alt="Sabel">
       <div class="sb-title">Sounding Board</div>
       <div class="sb-sub">Project tracker · Sep-Nov 2026</div>
+      ${goLiveDate?`<div title="Target go-live date" style="font-size:11px;font-weight:600;color:#E10600;margin-top:6px;display:flex;align-items:center;gap:5px"><i class="ti ti-rocket" style="font-size:12px"></i>Go-live ${new Date(goLiveDate+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>`:''}
     </div>
     ${toggle}${ovBtn}<div class="sb-sec">${secLabel}</div>${groupBtns}
     <button onclick="downloadSnapshot()" title="Download the current plan state as a JSON backup" style="margin-top:14px;width:100%;background:transparent;border:1px solid #1E2433;color:#64748B;font-size:11px;font-family:inherit;border-radius:6px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-download" style="font-size:12px"></i>Download snapshot</button>`;
@@ -990,7 +1146,7 @@ function buildBufferDays(){
   P.forEach(p=>{ if(p.id==='golive'||p.id==='post')return;
     ['sabel','client'].forEach(g=>(T[p.id]&&T[p.id][g]||[]).forEach(t=>{
       if(t.s==='Complete'||!t.week||t.week<1)return;
-      const e=new Date(weekStartDate(t.week).getTime()); e.setDate(e.getDate()+6);
+      const e=new Date(weekStartDate(endWeek(t)).getTime()); e.setDate(e.getDate()+6);
       if(!last||e>last)last=e;
     }));
   });
@@ -1002,8 +1158,9 @@ function bufferWarning(){
   // '' when healthy; otherwise {msg,clr} for the go-live card.
   const b=buildBufferDays();
   if(b===null||b>=WARN_BUFFER_DAYS)return null;
+  // Qualitative only: never disclose the number of buffer days on the card.
   if(b<0)return{msg:'Build tasks are scheduled after go-live',clr:'#F87171'};
-  return{msg:'Build finishes within '+b+' day'+(b===1?'':'s')+' of go-live',clr:'#FBBF24'};
+  return{msg:'Build schedule is running close to go-live',clr:'#FBBF24'};
 }
 function goLiveCard(){
   // Go-live countdown, styled as a card so it sits beside Overall completion
@@ -1089,9 +1246,7 @@ function renderMain(){
     html=`<p style="font-size:11px;color:#475569;margin-bottom:3px">September 2026 - November 2026</p>
       <p style="font-size:18px;font-weight:600;color:#E2E8F0;margin-bottom:1rem">Project overview</p>
       ${ovMetrics(gs)}
-      ${thisWeekPanel()}
-      <div style="font-size:10px;font-weight:600;letter-spacing:.06em;color:#475569;text-transform:uppercase;margin-bottom:8px">${groupBy==='week'?'Week status, click to open':'Pillar status, click to open'}</div>
-      <div class="ph-grid">${groupGrid}</div>`;
+      <div class="ov-two">${milestonesCard()}${thisWeekPanel()}</div>`;
   } else if(groupBy==='week'){
     const ws=weekStats(cur);
     const wpct=ws.total>0?Math.round(ws.done/ws.total*100):0;
