@@ -96,5 +96,12 @@
   "file": "SoundingBoardTracker.html",
   "sowHours": 30,
   "active": true
+},
+{
+  "name": "Eugene Labs",
+  "key": "eugene-labs-tracker-v1",
+  "file": "EugeneLabsTracker.html",
+  "sowHours": 27.5,
+  "active": true
 }
 ]
