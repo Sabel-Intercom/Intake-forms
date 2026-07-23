@@ -155,10 +155,7 @@
   .ar-meta{display:flex;align-items:center;gap:8px;}
   .ar-pct{font-size:12px;font-weight:800;color:var(--body);}
   /* instant hover tooltip (chips etc.) */
-  .dtip{position:fixed;z-index:9999;background:var(--card2);border:1px solid var(--border);color:var(--w);font-size:11px;font-weight:600;line-height:1.5;padding:7px 10px;border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.55);pointer-events:none;opacity:0;transform:translate(-50%,-100%);transition:opacity .1s;max-width:340px;text-align:left;}
-  .dtip b{display:block;margin-bottom:3px;color:#FCA5A5;}
-  .dtip .tl{font-weight:500;color:var(--body);display:block;}
-  .dtip .tl .m{color:var(--mono);}
+  .dtip{position:fixed;z-index:9999;background:var(--card2);border:1px solid var(--border);color:var(--w);font-size:11px;font-weight:500;line-height:1.5;padding:8px 11px;border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.55);pointer-events:none;opacity:0;transform:translate(-50%,-100%);transition:opacity .1s;max-width:340px;text-align:left;white-space:pre-line;}
   .ar-chip{font-size:9px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--border2);padding:2px 7px;border-radius:20px;white-space:nowrap;}
   .ar-chip.risk{color:var(--redText);border-color:rgba(248,113,113,.3);}
   .ar-days{text-align:right;min-width:52px;}
@@ -893,6 +890,25 @@ function naLine(tr){
   return '<div class="na-line">Next: <b>'+cleanTitle(n.task)+'</b>'+(n.owner?' &middot; '+n.owner:'')+(n.end?' &middot; '+fmtDate(n.end):'')+'</div>';
 }
 // "Stale / slipping" proxy: Sabel-owned, incomplete tasks whose end date has already passed.
+// Tasks counted as "at risk": blocked, or client-dependency not yet complete.
+function riskTasks(tr){
+  if(!tr.phases) return [];
+  var out=[];
+  tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+    var s=(k.status||'').toLowerCase();
+    if(s==='blocked') out.push({task:k.task, why:'blocked'});
+    else if(k.dep && s!=='complete' && s!=='done') out.push({task:k.task, why:'client dependency'});
+  });});
+  return out;
+}
+// Build a multiline tooltip listing tasks (capped so it stays readable).
+function tipList(title, lines){
+  var MAX=7;
+  var shown=lines.slice(0,MAX);
+  var txt=title+'\n'+shown.map(function(l){ return '• '+l; }).join('\n');
+  if(lines.length>MAX) txt+='\n…and '+(lines.length-MAX)+' more';
+  return txt;
+}
 function overdueTasks(tr){
   if(!tr.phases) return [];
   var today=new Date(); today.setHours(0,0,0,0); var out=[];
@@ -904,52 +920,6 @@ function overdueTasks(tr){
     if(d<today) out.push({client:tr.name, task:k.task, who:k.owner||'—', late:Math.round((today-d)/86400000)});
   });});
   return out;
-}
-// At-risk tasks for a project: blocked, or sitting on a client dependency.
-// Mirrors the "risk" count (t.blocked + t.dep) so the tooltip always matches the chip.
-function riskTasks(tr){
-  if(!tr.phases) return [];
-  var out=[];
-  tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
-    var s=(k.status||'').toLowerCase();
-    if(s==='blocked') out.push({task:k.task, why:'Blocked', who:k.owner||''});
-    else if(s==='dependency') out.push({task:k.task, why:'Waiting on client', who:k.owner||''});
-  });});
-  return out;
-}
-// All incomplete tasks for a project (feeds the "open" chip tooltip).
-function openTasks(tr){
-  if(!tr.phases) return [];
-  var out=[];
-  tr.phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
-    var s=(k.status||'').toLowerCase();
-    if(s==='complete'||s==='done') return;
-    out.push({task:k.task, who:k.owner||'', status:k.status||''});
-  });});
-  return out;
-}
-// Build a data-tip attribute holding a title + itemised list (capped, escaped).
-function tipAttr(title, lines){
-  var MAX=8;
-  var shown=lines.slice(0,MAX);
-  if(lines.length>MAX) shown.push('<span class="m">&hellip; and '+(lines.length-MAX)+' more</span>');
-  var html='<b>'+esc(title)+'</b>'+shown.map(function(l){ return '<span class="tl">'+l+'</span>'; }).join('');
-  return ' data-tip="'+html.replace(/"/g,'&quot;')+'"';
-}
-function riskTip(items){
-  return tipAttr(items.length+' at risk', items.map(function(x){
-    return '&bull; '+esc(cleanTitle(x.task))+' <span class="m">&middot; '+esc(x.why)+(x.who?' &middot; '+esc(x.who):'')+'</span>';
-  }));
-}
-function overdueTip(items){
-  return tipAttr(items.length+' overdue', items.map(function(x){
-    return '&bull; '+esc(cleanTitle(x.task))+' <span class="m">&middot; '+x.late+'d late'+(x.who&&x.who!=='—'?' &middot; '+esc(x.who):'')+'</span>';
-  }));
-}
-function openTip(items){
-  return tipAttr(items.length+' open task'+(items.length===1?'':'s'), items.map(function(x){
-    return '&bull; '+esc(cleanTitle(x.task))+' <span class="m">'+(x.status?'&middot; '+esc(x.status):'')+(x.who?' &middot; '+esc(x.who):'')+'</span>';
-  }));
 }
 // Hours spent / committed (estimate from SOW total × completion). null when unknown.
 function hoursTxt(tr){
@@ -1202,40 +1172,24 @@ function renderOwners(){
 
 function renderKPIs(g){
   var openTotal=0, riskTotal=0, doneSum=0, totSum=0;
-  var riskItems=[], openByClient=[];
   g.active.concat(g.offb).forEach(function(tr){
     if(!tr.t) return;
-    var o = tr.t.total - tr.t.done;
-    openTotal += o;
+    openTotal += (tr.t.total - tr.t.done);
     riskTotal += tr.t.blocked + tr.t.dep;
     doneSum += tr.t.done; totSum += tr.t.total;
-    if(o) openByClient.push({name:tr.name, n:o});
-    riskTasks(tr).forEach(function(x){ riskItems.push({task:tr.name+' &mdash; '+cleanTitle(x.task), why:x.why, who:x.who}); });
   });
   var pct = totSum ? Math.round(doneSum/totSum*100) : 0;
   // Offboarding KPI mirrors the widget: only those NOT yet marked closed out.
-  var offbList = g.offb.filter(function(tr){ return OFFB_CLOSED.indexOf(tr.name)===-1; });
-  var offbOpen = offbList.length;
-  // Hover breakdowns for the countable KPIs
-  var riskKpiTip = riskItems.length ? tipAttr(riskItems.length+' at risk across clients', riskItems.map(function(x){
-    return '&bull; '+x.task+' <span class="m">&middot; '+esc(x.why)+(x.who?' &middot; '+esc(x.who):'')+'</span>';
-  })) : '';
-  openByClient.sort(function(a,b){ return b.n-a.n; });
-  var openKpiTip = openByClient.length ? tipAttr(openTotal+' open actions by client', openByClient.map(function(x){
-    return '&bull; '+esc(x.name)+' <span class="m">&middot; '+x.n+' open</span>';
-  })) : '';
-  var offbKpiTip = offbList.length ? tipAttr(offbOpen+' ready to close', offbList.map(function(x){
-    return '&bull; '+esc(x.name)+' <span class="m">&middot; all '+x.t.total+' tasks complete</span>';
-  })) : '';
+  var offbOpen = g.offb.filter(function(tr){ return OFFB_CLOSED.indexOf(tr.name)===-1; }).length;
   var k=[
     {lbl:'Active Projects', val:g.active.length, sub:'in delivery', cls:''},
-    {lbl:'Offboarding', val:offbOpen, sub:'ready to close', cls:'live', tip:offbKpiTip},
-    {lbl:'Open Actions', val:openTotal, sub:'across active', cls:'', tip:openKpiTip},
-    {lbl:'At Risk', val:riskTotal, sub:'blocked + dependency', cls:'risk', tip:riskKpiTip},
+    {lbl:'Offboarding', val:offbOpen, sub:'ready to close', cls:'live'},
+    {lbl:'Open Actions', val:openTotal, sub:'across active', cls:''},
+    {lbl:'At Risk', val:riskTotal, sub:'blocked + dependency', cls:'risk'},
     {lbl:'Avg Progress', val:pct+'%', sub:'tasks complete', cls:''}
   ];
   document.getElementById('kpis').innerHTML = k.map(function(x){
-    return '<div class="kpi '+x.cls+'"'+(x.tip||'')+'><div class="lbl">'+x.lbl+'</div><div class="val">'+x.val+'</div><div class="sub">'+x.sub+'</div></div>';
+    return '<div class="kpi '+x.cls+'"><div class="lbl">'+x.lbl+'</div><div class="val">'+x.val+'</div><div class="sub">'+x.sub+'</div></div>';
   }).join('');
 }
 
@@ -1261,13 +1215,22 @@ function activeRow(tr){
   var dtxt = days===null?'TBC':days<0?Math.abs(days)+'d':days===0?'Today':days+'d';
   var dlbl = days===null?'tbc':days<0?'overdue':'go-live';
   var open=t.total-t.done, risk=t.blocked+t.dep, pct=Math.round(t.done/total*100);
-  var odList=overdueTasks(tr), rkList=riskTasks(tr), opList=openTasks(tr);
   var seg=function(n,c){ return n?'<div style="width:'+(n/total*100)+'%;background:'+c+'"></div>':''; };
   return '<div class="arow '+light+'">'
     + '<span class="ar-dot"></span>'
     + '<div class="ar-main"><div class="ar-nm">'+nm+' <span class="ar-gl">· go-live '+fmtDate(tr.golive)+'</span>'+glSrcChip(tr)+glEdit(tr)+'</div>'
     +   '<div class="ar-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+'</div>'+naLine(tr)+'</div>'
-    + '<div class="ar-meta"><span class="ar-pct" data-tip="Percentage of tasks complete">'+pct+'%</span>'+(hoursTxt(tr)?'<span class="ar-chip hrs" data-tip="Estimated hours used vs SOW hours">'+hoursTxt(tr)+'</span>':'')+'<span class="ar-chip"'+openTip(opList)+'>'+open+' open</span>'+(risk?'<span class="ar-chip risk"'+riskTip(rkList)+'>'+risk+' risk</span>':'')+(odList.length?'<span class="ar-chip od"'+overdueTip(odList)+'>⚠ '+odList.length+'</span>':'')+'</div>'
+    + (function(){
+        var rl=riskTasks(tr), ol=overdueTasks(tr);
+        var riskTip = rl.length ? tipList('At risk:', rl.map(function(x){ return cleanTitle(x.task)+' ('+x.why+')'; })) : '';
+        var odTip = ol.length ? tipList('Overdue:', ol.map(function(x){ return cleanTitle(x.task)+' — '+x.late+'d late'; })) : '';
+        return '<div class="ar-meta"><span class="ar-pct" data-tip="Percentage of tasks complete">'+pct+'%</span>'
+          +(hoursTxt(tr)?'<span class="ar-chip hrs" data-tip="Estimated hours used vs SOW hours">'+hoursTxt(tr)+'</span>':'')
+          +'<span class="ar-chip" data-tip="Open tasks remaining">'+open+' open</span>'
+          +(risk?'<span class="ar-chip risk" data-tip="'+esc(riskTip)+'">'+risk+' risk</span>':'')
+          +(ol.length?'<span class="ar-chip od" data-tip="'+esc(odTip)+'">⚠ '+ol.length+'</span>':'')
+          +'</div>';
+      })()
     + '<div class="ar-days"><div class="d1">'+dtxt+'</div><div class="d2">'+dlbl+'</div></div>'
     + '<a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open &rarr;</a>'
     + '</div>';
@@ -1288,20 +1251,19 @@ function activeCard(tr){
   var dlbl = days===null ? 'date TBC' : days<0 ? 'overdue' : 'to go-live';
   var open=t.total-t.done, risk=t.blocked+t.dep, pct=Math.round(t.done/total*100);
   var seg=function(n,c){ return n? '<div style="width:'+(n/total*100)+'%;background:'+c+'"></div>':''; };
-  var odList=overdueTasks(tr), rkList=riskTasks(tr), opList=openTasks(tr);
-  var ov=odList.length, ht=hoursTxt(tr);
+  var ov=overdueTasks(tr).length, ht=hoursTxt(tr);
   return '<div class="pcard '+light+'">'
     + '<div class="pc-top"><div><div class="pc-name">'+link+'</div><div class="pc-open">'+pct+'% complete &middot; go-live '+fmtDate(tr.golive)+' '+glSrcChip(tr)+glEdit(tr)+'</div></div>'
     +   '<div class="pc-days"><div class="d1">'+dtxt+'</div><div class="d2">'+dlbl+'</div></div></div>'
     + '<div class="pc-bar">'+seg(t.done,'var(--green)')+seg(t.inprog,'var(--blue)')+seg(t.pending,'var(--amber)')+seg(t.dep,'var(--purple)')+seg(t.blocked,'var(--redText)')+'</div>'
     + '<div class="pc-stats">'
-    +   '<div class="pc-stat"'+openTip(opList)+'><div class="n">'+open+'</div><div class="l">Open</div></div>'
-    +   '<div class="pc-stat red"'+riskTip(rkList)+'><div class="n">'+risk+'</div><div class="l">At risk</div></div>'
-    +   '<div class="pc-stat amber"'+overdueTip(odList)+'><div class="n">'+ov+'</div><div class="l">Overdue</div></div>'
+    +   '<div class="pc-stat"><div class="n">'+open+'</div><div class="l">Open</div></div>'
+    +   '<div class="pc-stat red"><div class="n">'+risk+'</div><div class="l">At risk</div></div>'
+    +   '<div class="pc-stat amber"><div class="n">'+ov+'</div><div class="l">Overdue</div></div>'
     +   '<div class="pc-stat hrs"><div class="n">'+(ht||'—')+'</div><div class="l">Hours</div></div>'
     + '</div>'
     + naLine(tr)
-    + '<div class="pc-foot"><span class="pc-od"'+(ov?overdueTip(odList):'')+'>'+(ov?('⚠ '+ov+' overdue'):'')+'</span><a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open tracker &rarr;</a></div>'
+    + '<div class="pc-foot"><span class="pc-od">'+(ov?('⚠ '+ov+' overdue'):'')+'</span><a class="pc-link" href="'+url+'" target="_blank" rel="noopener">Open tracker &rarr;</a></div>'
     + '</div>';
 }
 
@@ -1454,7 +1416,11 @@ function renderTimeline(active){
 function loadConfig(){
   return fetch(BASE+'trackers.json',{cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(j){ if(Array.isArray(j) && j.length){ TRACKERS = j; } })
+    .then(function(j){ if(Array.isArray(j) && j.length){
+      // Honour the registry's active flag: engagements marked "active": false
+      // are complete/closed and no longer shown on the dashboard.
+      TRACKERS = j.filter(function(t){ return t && t.active!==false; });
+    } })
     .catch(function(){ /* no registry — keep built-in list */ });
 }
 
@@ -1620,19 +1586,13 @@ setInterval(function(){ loadLive(false); loadNotes(); loadOverrides(); loadClien
   var tip=document.createElement('div'); tip.className='dtip'; document.body.appendChild(tip);
   function place(el){
     var r=el.getBoundingClientRect();
-    // measure the rendered tooltip, then keep it inside the viewport:
-    // flip below the element when it would run off the top, clamp left/right.
-    var w=tip.offsetWidth||0, h=tip.offsetHeight||0;
-    var cx=r.left+r.width/2;
-    cx=Math.max(w/2+8, Math.min(cx, window.innerWidth-w/2-8));
-    tip.style.left=cx+'px';
-    if(r.top-h-12 < 0){ tip.style.top=(r.bottom+8)+'px'; tip.style.transform='translate(-50%,0)'; }
-    else { tip.style.top=(r.top-8)+'px'; tip.style.transform='translate(-50%,-100%)'; }
+    tip.style.left=(r.left+r.width/2)+'px';
+    tip.style.top=(r.top-8)+'px';
   }
   document.addEventListener('mouseover', function(e){
     var el=e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
     if(!el) return;
-    tip.innerHTML=el.getAttribute('data-tip'); place(el); tip.style.opacity='1';
+    tip.textContent=el.getAttribute('data-tip'); place(el); tip.style.opacity='1';
   });
   document.addEventListener('mouseout', function(e){
     var el=e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
