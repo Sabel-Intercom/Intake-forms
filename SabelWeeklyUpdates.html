@@ -364,12 +364,23 @@ function setRemote(ok){
 // ─────────────────────────────────────────────────────────────
 // CLIENT LIST — live from the tracker registry
 // ─────────────────────────────────────────────────────────────
+// Motion-only clients: appear in Weekly Updates (Motion triage + Friday drafts)
+// but have NO project tracker. Their Friday draft is built purely from what you
+// queue via Motion / the manual add box.
+var EXTRA_CLIENTS = [
+  {name:'Bulk Nutrients', key:null, file:null}
+];
 function loadClients(){
   return fetch(BASE+'trackers.json',{cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(j){
       if(Array.isArray(j)) CLIENTS=j.filter(function(t){ return t.active!==false; });
-    }).catch(function(){});
+    }).catch(function(){})
+    .then(function(){
+      EXTRA_CLIENTS.forEach(function(x){
+        if(!CLIENTS.some(function(c){ return c.name===x.name; })) CLIENTS.push(x);
+      });
+    });
 }
 function clientNames(){ return CLIENTS.map(function(c){ return c.name; }); }
 
@@ -688,11 +699,16 @@ function generate(sec, btn){
   if(!STORE.snapshots) STORE.snapshots={};
   var wk=ensure(), made=0, skipped=0, noData=[];
   Promise.all(CLIENTS.map(function(c){
-    return fetch(API+'?key='+encodeURIComponent(c.key)+'&_t='+Date.now(),{cache:'no-store'})
-      .then(function(r){ return r.ok ? r.json() : null; })
+    var fetchP = c.key
+      ? fetch(API+'?key='+encodeURIComponent(c.key)+'&_t='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; })
+      : Promise.resolve(null);            // Motion-only client — no tracker to read
+    return fetchP
       .then(function(j){
         var tasks=normaliseTracker(j&&j.ok?j.data:null);
-        if(!tasks || !tasks.length){ noData.push(c.name); return; }
+        if(!tasks || !tasks.length){
+          if(c.key){ noData.push(c.name); return; }
+          tasks=[];                       // Friday draft comes from the queued items only
+        }
         var cur=wk[sec][c.name];
         if(cur && (cur.status==='reviewed'||cur.status==='sent')){ skipped++; }
         else {
@@ -940,8 +956,9 @@ function pushDraft(encName, btn){
     if(!confirm('The Friday draft for '+name+' is already '+cur.status+'. Rebuild it as a fresh Draft?')) return;
   }
   var orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='&#8987; Building&hellip;';
-  fetch(API+'?key='+encodeURIComponent(c.key)+'&_t='+Date.now(),{cache:'no-store'})
-    .then(function(r){ return r.ok ? r.json() : null; })
+  (c.key
+    ? fetch(API+'?key='+encodeURIComponent(c.key)+'&_t='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; })
+    : Promise.resolve(null))
     .then(function(j){
       var tasks=normaliseTracker(j&&j.ok?j.data:null)||[];
       var wsIso=weekStart(0).toISOString();
