@@ -135,6 +135,17 @@
   .n-add textarea:focus{outline:none;border-color:var(--amber);}
   .n-add button{font-size:10px;font-weight:700;color:var(--amber);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35);border-radius:6px;padding:8px 13px;white-space:nowrap;}
   .n-add button:hover{background:rgba(251,191,36,.2);color:#fff;}
+  /* ad-hoc delivered log */
+  .ah-h{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin:14px 0 8px;}
+  .n-item.ah{border-left-color:var(--green);}
+  .ah-scope{font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--amber);background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:1px 7px;margin-left:6px;vertical-align:middle;}
+  .ah-add{display:flex;gap:8px;align-items:flex-start;margin-top:4px;flex-wrap:wrap;}
+  .ah-add textarea{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--body);font-family:inherit;font-size:12px;line-height:1.5;padding:8px 10px;resize:vertical;min-height:44px;}
+  .ah-add textarea:focus{outline:none;border-color:var(--green);}
+  .ah-add label{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);cursor:pointer;white-space:nowrap;padding-top:10px;}
+  .ah-add input[type=checkbox]{accent-color:var(--amber);width:13px;height:13px;cursor:pointer;}
+  .ah-add button{font-size:10px;font-weight:700;color:var(--green);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.35);border-radius:6px;padding:8px 13px;white-space:nowrap;}
+  .ah-add button:hover{background:rgba(74,222,128,.2);color:#fff;}
 
   footer{margin-top:34px;padding:16px 0 0;border-top:1px solid var(--border2);font-size:9px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 
@@ -203,13 +214,11 @@
     </div>
   </div>
 
-  <div class="notes-sec">
-    <div class="col-h"><span class="dot" style="background:var(--amber)"></span><h2>Call notes &amp; actions</h2></div>
-    <div class="notes-sub">
-      Had a client call? Drop the actions here straight away (and add them to Motion as usual).
-      The Friday wrap-up reads this list, so anything noted here makes it into the client summary without relying on memory.
-    </div>
-    <div id="notesCol"></div>
+  <div class="notes-sec" id="motionSec">
+    <div class="col-h"><span class="dot" style="background:var(--blue)"></span><h2>Completed in Motion this week</h2>
+      <button class="hbtn" style="margin-left:auto;" onclick="loadMotion(true)">&#8635; Pull from Motion</button></div>
+    <div class="notes-sub">Pull any time for the latest Motion completions — nothing is sent to clients from here. <b>Add</b> queues a line for that client's Friday draft, <b>Add as scope</b> also counts it as added scope, <b>Ignore</b> hides internal noise. Each client card also shows what's queued for the draft (deletable) and a manual add box for work not in Motion. Decisions sync to the whole team.</div>
+    <div id="motionCol"><div class="empty">Loading Motion&hellip;</div></div>
   </div>
 
   <footer>
@@ -225,6 +234,7 @@
 var API = 'https://sabel-webhook.vercel.app/api/tracker';
 var BASE = 'https://sabel-intercom.github.io/Intake-forms/';
 var STORE_KEY = 'sabel-weekly-updates-v1';       // must be in ALLOWED_KEYS on the backend
+var MOTION_API = 'https://sabel-webhook.vercel.app/api/motion';
 var REFRESH_MS = 5 * 60 * 1000;
 var TEAM = ['Chris','Greg','Richard','Nikki'];
 
@@ -259,6 +269,8 @@ function ensure(){
   if(!STORE.weeks) STORE.weeks={};
   if(!STORE.callNotes) STORE.callNotes={};
   if(!STORE.reviewers) STORE.reviewers={};
+  if(!STORE.adhoc) STORE.adhoc={};
+  if(!STORE.motionHandled) STORE.motionHandled={};
   var wk=weekKey(WEEK_OFFSET);
   if(!STORE.weeks[wk]) STORE.weeks[wk]={monday:{},friday:{}};
   if(!STORE.weeks[wk].monday) STORE.weeks[wk].monday={};
@@ -276,11 +288,15 @@ function fetchStore(){
     .then(function(j){ return (j&&j.ok) ? {ok:true, data:(j.data&&typeof j.data==='object')?j.data:null} : null; });
 }
 function unionByAtText(a,b){
+  // Union two entry lists. Deleted "tombstones" win over live copies of the
+  // same entry, and are KEPT in the result so a deletion can never be
+  // resurrected by another browser pushing its stale copy.
   var seen={}, out=[];
   (a||[]).concat(b||[]).forEach(function(x){
     if(!x) return;
-    var id=(x.at||'')+'|'+(x.text||''); if(seen[id]) return; seen[id]=1;
-    out.push(x);
+    var id=(x.at||'')+'|'+(x.text||'');
+    if(seen[id]!==undefined){ if(x.deleted && !out[seen[id]].deleted) out[seen[id]]=x; return; }
+    seen[id]=out.length; out.push(x);
   });
   out.sort(function(x,y){ return (x.at||'')<(y.at||'')?-1:1; });
   return out;
@@ -295,7 +311,8 @@ function mergeEntry(re,le){
 }
 function mergeStores(remote, local){
   remote=remote||{}; local=local||{};
-  var out={weeks:{},callNotes:{},reviewers:Object.assign({},remote.reviewers||{},local.reviewers||{}),snapshots:{}};
+  var out={weeks:{},callNotes:{},adhoc:{},reviewers:Object.assign({},remote.reviewers||{},local.reviewers||{}),snapshots:{},
+    motionHandled:Object.assign({},remote.motionHandled||{},local.motionHandled||{})};
   // snapshots: newest wins per client
   var snNames={}; Object.keys(remote.snapshots||{}).concat(Object.keys(local.snapshots||{})).forEach(function(n){ snNames[n]=1; });
   Object.keys(snNames).forEach(function(n){
@@ -313,13 +330,15 @@ function mergeStores(remote, local){
       });
     });
   });
-  // call notes: union, honouring delete tombstones
+  // call notes + ad-hoc log: union keeps tombstones (deleted entries) so
+  // deletions stick across every browser. Filtering happens at render time.
   var names={}; Object.keys(remote.callNotes||{}).concat(Object.keys(local.callNotes||{})).forEach(function(n){ names[n]=1; });
   Object.keys(names).forEach(function(n){
-    var all=unionByAtText((remote.callNotes||{})[n], (local.callNotes||{})[n]);
-    var dels={};
-    ((remote.callNotes||{})[n]||[]).concat(((local.callNotes||{})[n]||[])).forEach(function(x){ if(x&&x.deleted) dels[(x.at||'')+'|'+(x.text||'')]=1; });
-    out.callNotes[n]=all.filter(function(x){ return !x.deleted && !dels[(x.at||'')+'|'+(x.text||'')]; });
+    out.callNotes[n]=unionByAtText((remote.callNotes||{})[n], (local.callNotes||{})[n]);
+  });
+  var anames={}; Object.keys(remote.adhoc||{}).concat(Object.keys(local.adhoc||{})).forEach(function(n){ anames[n]=1; });
+  Object.keys(anames).forEach(function(n){
+    out.adhoc[n]=unionByAtText((remote.adhoc||{})[n], (local.adhoc||{})[n]);
   });
   return out;
 }
@@ -433,32 +452,10 @@ function render(){
     }
     col.innerHTML = html || '<div class="empty">No active clients found in the tracker registry yet.</div>';
   });
-  renderNotes();
+  renderMotion();
   document.getElementById('footNote').textContent='Week key '+weekKey(WEEK_OFFSET);
 }
 
-function renderNotes(){
-  var col=document.getElementById('notesCol');
-  var names={}; clientNames().forEach(function(n){ names[n]=1; });
-  Object.keys(STORE.callNotes||{}).forEach(function(n){ if((STORE.callNotes[n]||[]).length) names[n]=1; });
-  var list=Object.keys(names).sort();
-  if(!list.length){ col.innerHTML='<div class="empty">No active clients found yet.</div>'; return; }
-  var openSet={}; col.querySelectorAll('.ncard[open]').forEach(function(d){ openSet[d.getAttribute('data-name')]=1; });
-  col.innerHTML=list.map(function(n){
-    var notes=(STORE.callNotes||{})[n]||[];
-    var rows=notes.map(function(x,i){
-      return '<div class="n-item"><button class="n-del" title="Remove" onclick="delNote(\''+encodeURIComponent(n)+'\','+i+')">&times;</button>'
-        + '<div class="n-tx">'+esc(x.text)+'</div>'
-        + '<div class="n-meta">'+(x.by?esc(x.by)+' &middot; ':'')+fmtStamp(x.at)+'</div></div>';
-    }).join('');
-    return '<details class="ncard" data-name="'+esc(n)+'"'+(openSet[n]?' open':'')+'>'
-      + '<summary><span class="n-chev">&#9656;</span><span class="n-name">'+esc(n)+'</span><span class="n-count">'+notes.length+' note'+(notes.length===1?'':'s')+'</span></summary>'
-      + '<div class="n-inner">'+rows
-      +   '<div class="n-add"><textarea placeholder="e.g. Call with '+esc(n)+' today: they will send the agent list by Wed; we owe them the routing doc&hellip;" onfocus="EDITING=true" onblur="EDITING=false"></textarea>'
-      +   '<button onclick="addNote(\''+encodeURIComponent(n)+'\',this)">Add note</button></div>'
-      + '</div></details>';
-  }).join('');
-}
 
 // ─────────────────────────────────────────────────────────────
 // DRAFT ACTIONS
@@ -553,25 +550,27 @@ function setReviewer(encName, val){
 // ─────────────────────────────────────────────────────────────
 // CALL NOTES
 // ─────────────────────────────────────────────────────────────
-function addNote(encName, btn){
+function addAdhoc(encName, btn){
   var name=decodeURIComponent(encName);
-  var ta=btn.parentNode.querySelector('textarea');
+  var box=btn.parentNode;
+  var ta=box.querySelector('textarea');
+  var cb=box.querySelector('input[type=checkbox]');
   var text=ta.value.trim(); if(!text) return;
-  if(!STORE.callNotes[name]) STORE.callNotes[name]=[];
-  STORE.callNotes[name].push({at:nowStamp(), by:whoAmI(), text:text});
-  ta.value=''; EDITING=false;
+  if(!STORE.adhoc) STORE.adhoc={};
+  if(!STORE.adhoc[name]) STORE.adhoc[name]=[];
+  STORE.adhoc[name].push({at:nowStamp(), by:whoAmI(), text:text, scope:!!(cb&&cb.checked)});
+  ta.value=''; if(cb) cb.checked=false; EDITING=false;
   saveLocal(); pushStore().then(render);
 }
-function delNote(encName, idx){
-  var name=decodeURIComponent(encName);
-  var arr=STORE.callNotes[name]||[];
-  var x=arr[idx]; if(!x) return;
-  x.deleted=true;
+function delAdhoc(encName, encAt){
+  var name=decodeURIComponent(encName), at=decodeURIComponent(encAt);
+  var arr=(STORE.adhoc||{})[name]||[];
+  var hit=false;
+  arr.forEach(function(x){ if(x && x.at===at && !x.deleted){ x.deleted=true; hit=true; } });
+  if(!hit) return;
   saveLocal();
-  pushStore().then(function(){
-    STORE.callNotes[name]=(STORE.callNotes[name]||[]).filter(function(y){ return !y.deleted; });
-    saveLocal(); render();
-  });
+  renderMotion();                        // reflect the delete immediately
+  pushStore().then(renderMotion);        // tombstone stays in the store, so it can't come back
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -649,7 +648,8 @@ function buildMonday(name, tasks){
   msg+='\n\n'+pick(['Give me a shout if anything needs juggling.','Any questions, just ping me here.','Shout if you need anything from us first.'],s+1);
   return msg;
 }
-function buildFriday(name, tasks, snap){
+function buildFriday(name, tasks, snap, adhoc){
+  adhoc = adhoc || [];
   var today=new Date(); today.setHours(0,0,0,0);
   var ws=weekStart(0);
   var soon=new Date(today); soon.setDate(today.getDate()+3);
@@ -663,20 +663,20 @@ function buildFriday(name, tasks, snap){
     .sort(function(a,b){ return a.date<b.date?-1:1; });
   var need=tasks.filter(function(t){ var d=dISO(t.date); return t.client && isOutstanding(t.status) && d && d<=soon; })
     .sort(function(a,b){ return a.date<b.date?-1:1; });
-  if(!done.length && !coming.length && !need.length) return null;
+  if(!done.length && !coming.length && !need.length && !adhoc.length) return null;
   var s=seedFor(name)+3;
   var msg=pick(['Happy Friday! Quick rundown of the week.','That is a wrap on the week. Here is where things landed.','Friday check-in! Here is how the week went.'],s);
-  if(done.length){
-    msg+='\n\nThis week we:\n'+done.slice(0,5).map(function(t){ return '• '+t.title; }).join('\n');
-  } else {
-    msg+='\n\nA quieter week on visible changes, but things are moving along in the background.';
+  // Three fixed sections, each shown only when it has content.
+  var completed=done.slice(0,6).map(function(t){ return t.title; }).concat(adhoc).slice(0,8);
+  if(completed.length){
+    msg+='\n\nWhat we completed this week:\n'+completed.map(function(t){ return '• '+t; }).join('\n');
   }
   if(coming.length){
-    msg+='\n\nComing up next week:\n'+coming.slice(0,3).map(function(t){ return '• '+t.title; }).join('\n');
+    msg+='\n\nNext week we will:\n'+coming.slice(0,5).map(function(t){ return '• '+t.title; }).join('\n');
   }
   if(need.length){
-    msg+='\n\nWe need these items actioned on your side:\n'
-      + need.slice(0,3).map(function(t){ return '• '+t.title; }).join('\n');
+    msg+='\n\nWhat we need from '+name+':\n'
+      + need.slice(0,5).map(function(t){ return '• '+t.title; }).join('\n');
   }
   msg+='\n\n'+pick(['Have a lovely weekend!','Enjoy the weekend, speak Monday!','Have a good one, back at it Monday!'],s+1);
   return msg;
@@ -696,9 +696,17 @@ function generate(sec, btn){
         var cur=wk[sec][c.name];
         if(cur && (cur.status==='reviewed'||cur.status==='sent')){ skipped++; }
         else {
-          var text = sec==='monday' ? buildMonday(c.name,tasks) : buildFriday(c.name,tasks,STORE.snapshots[c.name]);
+          var wsIso=weekStart(0).toISOString();
+          var adhocW=((STORE.adhoc||{})[c.name]||[]).filter(function(x){ return x && !x.deleted && (x.at||'')>=wsIso; }).map(function(x){ return x.text; });
+          var notesW=((STORE.callNotes||{})[c.name]||[]).filter(function(x){ return x && !x.deleted && (x.at||'')>=wsIso; }).map(function(x){ return x.text; });
+          var text = sec==='monday' ? buildMonday(c.name,tasks) : buildFriday(c.name,tasks,STORE.snapshots[c.name],adhocW);
           if(text){
-            wk[sec][c.name]={text:text,status:'draft',by:'Generated',at:nowStamp(),comments:(cur&&cur.comments)||[]};
+            // carry human comments; refresh the auto call-notes comment rather than duplicating it
+            var carried=((cur&&cur.comments)||[]).filter(function(cm){ return cm.by!=='Call notes'; });
+            if(sec==='friday' && notesW.length){
+              carried=carried.concat([{at:nowStamp(), by:'Call notes', text:'This week’s call notes (for your review, not in the message): '+notesW.join(' | ')}]);
+            }
+            wk[sec][c.name]={text:text,status:'draft',by:'Generated',at:nowStamp(),comments:carried};
             made++;
           }
         }
@@ -797,6 +805,160 @@ function runImport(){
 }
 
 // ─────────────────────────────────────────────────────────────
+// MOTION — completed-this-week suggestions, matched to clients by the
+// (Client) title prefix or the Motion project name. Read-only feed;
+// Add / Ignore decisions are stored in the shared store (motionHandled).
+// ─────────────────────────────────────────────────────────────
+var MOTION_TASKS=[]; var MOTION_ERR='';
+function acronym(name){
+  return name.split(/\s+/).map(function(w){ return (w[0]||''); }).join('').toLowerCase();
+}
+function motionClientFor(t){
+  var title=(t.title||'').toLowerCase();
+  var proj=(t.project||'').toLowerCase();
+  var pref=(t.title||'').match(/^\s*\(([^)]*)\)/);
+  var prefTxt=pref ? pref[1].toLowerCase() : '';
+  var names=clientNames();
+  for(var i=0;i<names.length;i++){
+    var n=names[i], nl=n.toLowerCase();
+    if(proj.indexOf(nl)!==-1) return n;                 // project contains client name
+    if(prefTxt && (prefTxt.indexOf(nl)!==-1 || nl.indexOf(prefTxt)!==-1)) return n;
+    if(prefTxt && prefTxt.replace(/[^a-z]/g,'')===acronym(n)) return n;   // (TGM) etc.
+    if(title.indexOf('('+nl)===0) return n;
+  }
+  return null;
+}
+function stripMotionPrefix(title){
+  return (title||'').replace(/^\s*\([^)]*\)\s*/,'').replace(/^[–—\-:\s]+/,'').trim();
+}
+function loadMotion(manual){
+  var col=document.getElementById('motionCol'); if(!col) return;
+  if(manual) col.innerHTML='<div class="empty">Pulling from Motion&hellip;</div>';
+  return fetch(MOTION_API+'?since='+encodeURIComponent(weekStart(0).toISOString())+'&_t='+Date.now(),{cache:'no-store'})
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if(j && j.ok){ MOTION_TASKS=j.tasks||[]; MOTION_ERR=''; }
+      else { MOTION_ERR=(j&&j.error)||'Motion bridge returned an error.'; }
+      renderMotion();
+    })
+    .catch(function(){ MOTION_ERR='Could not reach the Motion bridge (api/motion). Is it deployed?'; renderMotion(); });
+}
+function renderMotion(){
+  var col=document.getElementById('motionCol'); if(!col) return;
+  if(EDITING) return;
+  // keep whichever cards the user has opened; everything defaults to collapsed
+  var openSet={}; col.querySelectorAll('details.ncard[open]').forEach(function(d){ openSet[d.getAttribute('data-name')]=1; });
+  var handled=STORE.motionHandled||{};
+  var open=MOTION_TASKS.filter(function(t){ return !handled[t.id]; });
+  var groups={}, other=[];
+  open.forEach(function(t){
+    var c=motionClientFor(t);
+    if(c){ if(!groups[c]) groups[c]=[]; groups[c].push(t); }
+    else other.push(t);
+  });
+  var handledCount=MOTION_TASKS.length-open.length;
+  var wsIso=weekStart(0).toISOString();
+  // one card per active client (plus any client that has suggestions or queued lines)
+  var names={}; clientNames().forEach(function(n){ names[n]=1; });
+  Object.keys(groups).forEach(function(n){ names[n]=1; });
+  Object.keys(STORE.adhoc||{}).forEach(function(n){
+    if(((STORE.adhoc||{})[n]||[]).some(function(x){ return x && !x.deleted && (x.at||'')>=wsIso; })) names[n]=1;
+  });
+  var list=Object.keys(names).sort();
+  function suggRows(arr, clientName){
+    return arr.map(function(t){
+      var encId=encodeURIComponent(t.id), encC=encodeURIComponent(clientName||'');
+      var day=t.completedAt? new Date(t.completedAt).toLocaleDateString('en-GB',{weekday:'short'}):'';
+      return '<div class="n-item" style="border-left-color:var(--blue)">'
+        + '<div class="n-tx">'+esc(stripMotionPrefix(t.title))+'</div>'
+        + '<div class="n-meta">'+esc(t.assignee||'')+(day?' &middot; '+day:'')+(clientName?'':' &middot; '+esc(t.project||''))+'</div>'
+        + (clientName
+            ? '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">'
+              + '<button class="abtn" style="color:var(--green);border-color:rgba(74,222,128,.4)" onclick="motionAct(\''+encId+'\',\''+encC+'\',\'add\')">&#43; Add</button>'
+              + '<button class="abtn" style="color:var(--amber);border-color:rgba(251,191,36,.4)" onclick="motionAct(\''+encId+'\',\''+encC+'\',\'scope\')">&#43; Add as scope</button>'
+              + '<button class="abtn" onclick="motionAct(\''+encId+'\',\''+encC+'\',\'ignore\')">Ignore</button></div>'
+            : '<div style="display:flex;gap:6px;margin-top:6px;"><button class="abtn" onclick="motionAct(\''+encId+'\',\'\',\'ignore\')">Ignore</button></div>')
+        + '</div>';
+    }).join('');
+  }
+  var html = MOTION_ERR ? '<div class="empty">'+esc(MOTION_ERR)+'</div>' : '';
+  html += list.map(function(n){
+    var sugg=groups[n]||[];
+    var queued=((STORE.adhoc||{})[n]||[]).filter(function(x){ return x && !x.deleted && (x.at||'')>=wsIso; });
+    var scopeN=queued.filter(function(x){ return x.scope; }).length;
+    var qrows=queued.map(function(x){
+      return '<div class="n-item ah"><button class="n-del" title="Remove from the draft" onclick="delAdhoc(\''+encodeURIComponent(n)+'\',\''+encodeURIComponent(x.at||'')+'\')">&times;</button>'
+        + '<div class="n-tx">'+esc(x.text)+(x.scope?'<span class="ah-scope">added scope</span>':'')+'</div>'
+        + '<div class="n-meta">'+(x.by?esc(x.by)+' &middot; ':'')+fmtStamp(x.at)+'</div></div>';
+    }).join('');
+    var sum=(sugg.length? sugg.length+' to review':'nothing to review')+' &middot; '+queued.length+' in draft'+(scopeN?' ('+scopeN+' scope)':'');
+    return '<details class="ncard" data-name="'+esc(n)+'"'+(openSet[n]?' open':'')+'>'
+      + '<summary><span class="n-chev">&#9656;</span><span class="n-name">'+esc(n)+'</span><span class="n-count">'+sum+'</span></summary>'
+      + '<div class="n-inner">'
+      +   (sugg.length? suggRows(sugg,n) : '<div class="empty" style="padding:4px 2px 8px;">No unhandled Motion completions this week.</div>')
+      +   '<div class="ah-h" style="display:flex;align-items:center;gap:10px;">In Friday\'s draft ('+queued.length+')'
+      +     '<button class="abtn" style="margin-left:auto;color:var(--blue);border-color:rgba(96,165,250,.4)" onclick="pushDraft(\''+encodeURIComponent(n)+'\',this)">&#9889; Push to Friday draft</button></div>'
+      +   (qrows || '<div class="empty" style="padding:2px 2px 8px;">Nothing queued yet.</div>')
+      +   '<div class="ah-add"><textarea placeholder="Add work manually, e.g. Rebuilt the refund macro set&hellip;" onfocus="EDITING=true" onblur="EDITING=false"></textarea>'
+      +   '<label><input type="checkbox"> added scope</label>'
+      +   '<button onclick="addAdhoc(\''+encodeURIComponent(n)+'\',this)">Add</button></div>'
+      + '</div></details>';
+  }).join('');
+  if(other.length){
+    html+='<details class="ncard" data-name="__other"'+(openSet['__other']?' open':'')+'><summary><span class="n-chev">&#9656;</span><span class="n-name">Other (not in the registry)</span><span class="n-count">'+other.length+'</span></summary>'
+      + '<div class="n-inner">'+suggRows(other,null)+'</div></details>';
+  }
+  if(handledCount) html+='<div class="empty">'+handledCount+' Motion item'+(handledCount===1?'':'s')+' already handled this week.</div>';
+  col.innerHTML=html || '<div class="empty">No active clients found in the tracker registry yet.</div>';
+}
+function motionAct(encId, encClient, action){
+  var id=decodeURIComponent(encId), client=decodeURIComponent(encClient);
+  var t=null; for(var i=0;i<MOTION_TASKS.length;i++){ if(MOTION_TASKS[i].id===id){ t=MOTION_TASKS[i]; break; } }
+  if(!t) return;
+  if((action==='add'||action==='scope') && client){
+    if(!STORE.adhoc) STORE.adhoc={};
+    if(!STORE.adhoc[client]) STORE.adhoc[client]=[];
+    STORE.adhoc[client].push({at:nowStamp(), by:(t.assignee||whoAmI()||'').split(' ')[0], text:stripMotionPrefix(t.title), scope:action==='scope'});
+  }
+  if(!STORE.motionHandled) STORE.motionHandled={};
+  STORE.motionHandled[id]={at:nowStamp(), action:action, by:whoAmI()||''};
+  saveLocal();
+  renderMotion();                       // hide the row immediately (prevents double-clicks duplicating)
+  pushStore().then(renderMotion);
+}
+
+// Rebuild ONE client's Friday draft from the live tracker + everything queued
+// in the ad-hoc list — so you can triage Motion, then push, without running
+// the full Generate for every client.
+function pushDraft(encName, btn){
+  var name=decodeURIComponent(encName);
+  var c=null; CLIENTS.forEach(function(x){ if(x.name===name) c=x; });
+  if(!c){ alert('No registry entry for '+name+', so there is no tracker to build the draft from.'); return; }
+  var wk=ensure();
+  var cur=wk.friday[name];
+  if(cur && (cur.status==='reviewed'||cur.status==='sent')){
+    if(!confirm('The Friday draft for '+name+' is already '+cur.status+'. Rebuild it as a fresh Draft?')) return;
+  }
+  var orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='&#8987; Building&hellip;';
+  fetch(API+'?key='+encodeURIComponent(c.key)+'&_t='+Date.now(),{cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      var tasks=normaliseTracker(j&&j.ok?j.data:null)||[];
+      var wsIso=weekStart(0).toISOString();
+      var adhocW=((STORE.adhoc||{})[name]||[]).filter(function(x){ return x && !x.deleted && (x.at||'')>=wsIso; }).map(function(x){ return x.text; });
+      var text=buildFriday(name,tasks,(STORE.snapshots||{})[name],adhocW);
+      btn.disabled=false; btn.innerHTML=orig;
+      if(!text){ alert('Nothing to put in a draft for '+name+' yet.'); return; }
+      wk.friday[name]={text:text,status:'draft',by:'Generated',at:nowStamp(),comments:(cur&&cur.comments)||[]};
+      saveLocal();
+      pushStore().then(function(){ render(); });
+      btn.innerHTML='&#10003; Pushed';
+      setTimeout(function(){ btn.innerHTML=orig; },1600);
+    })
+    .catch(function(){ btn.disabled=false; btn.innerHTML=orig; alert('Could not reach the tracker store. Try again.'); });
+}
+
+// ─────────────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────────────
 function loadAll(manual){
@@ -808,8 +970,8 @@ function loadAll(manual){
 document.getElementById('whoInput').value=WHO;
 document.getElementById('whoInput').addEventListener('blur', whoAmI);
 render();
-loadAll(false);
-setInterval(function(){ if(!EDITING) loadAll(false); }, REFRESH_MS);
+loadAll(false).then(function(){ loadMotion(false); });
+setInterval(function(){ if(!EDITING) loadAll(false).then(renderMotion); }, REFRESH_MS);
 </script>
 </body>
 </html>
