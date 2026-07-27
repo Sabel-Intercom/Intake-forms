@@ -19,13 +19,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sb-sec{padding:5px 14px 3px;font-size:10px;font-weight:600;letter-spacing:.08em;color:#475569;text-transform:uppercase;border-bottom:1px solid #1E2433}
 .sb-footer{margin-top:auto;padding:14px;border-top:1px solid #1E2433}
 .mn{padding:1.5rem;background:#0F1117}
-/* cards — overflow:visible so status picker floats above */
+/* cards, overflow:visible so status picker floats above */
 .task{background:#161B26;border:1px solid #1E2433;border-radius:10px;margin-bottom:7px;overflow:visible;transition:border-color .12s;position:relative}
 .task:hover{border-color:#2A3145}
 .task-client{background:#0F1117;border:1px solid rgba(251,191,36,.28);border-radius:10px;margin-bottom:7px;overflow:visible;transition:border-color .12s;position:relative}
 .task-client:hover{border-color:rgba(251,191,36,.5)}
 .task.done,.task-client.done{opacity:.65}
 .task.overdue,.task-client.overdue{border-left:3px solid #F87171}
+.ov-two{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:10px;margin-bottom:1rem;align-items:start}
+@media(max-width:900px){.ov-two{grid-template-columns:1fr}}
+.ms-rail{position:relative}
+.ms-rail::before{content:'';position:absolute;left:9px;top:12px;bottom:12px;width:2px;background:#1E2433}
+.ms-row{position:relative;display:flex;align-items:flex-start;gap:12px;padding:13px 0;cursor:pointer}
+.ms-row:hover .ms-title{color:#FFFFFF}
 .task-inner{border-radius:10px;overflow:hidden}
 .task-head{padding:10px 12px;cursor:grab;user-select:none}
 .col-drop{border:2px dashed rgba(96,165,250,.45)!important;background:rgba(96,165,250,.04)!important;border-radius:10px!important}
@@ -92,8 +98,16 @@ const GO_LIVE='2026-09-22';  // [CLIENT] go-live date YYYY-MM-DD, or '' to hide 
 const GO_LIVE_NOTE='Go-live, Intercom opens to customers across all channels';  // [CLIENT] one-line note
 const ALL_STATUSES=['Complete','In Progress','Pending','Blocked','Dependency'];
 const SABEL_TEAM=['Chris','Richard','Greg'];
-const BUILD_V=202607152135;  // set automatically by the build script from the build timestamp; do not edit
-const P=[{"id": "setup", "l": "Setup", "c": "#64748B", "w": "Week 1", "d": "Jul 1-7", "h": 2}, {"id": "foundations", "l": "Foundations", "c": "#3B82F6", "w": "Weeks 1-2", "d": "Jul 6-19", "h": 14}, {"id": "fin", "l": "Fin AI & API", "c": "#10B981", "w": "Weeks 3-4", "d": "Jul 20-Aug 4", "h": 10}, {"id": "integrations", "l": "Integrations", "c": "#9333EA", "w": "Weeks 6-8", "d": "Aug 10-30", "h": 8}, {"id": "uat", "l": "UAT & testing", "c": "#E10600", "w": "Weeks 9-11", "d": "Aug 31-Sep 20", "h": 6}, {"id": "post", "l": "Post go-live", "c": "#94A3B8", "w": "Week 12+", "d": "Sep 21-Oct 4", "h": 4}];
+const BUILD_V=202607270309;  // set automatically by the build script from the build timestamp; do not edit
+const P=[
+  {id:'setup',l:'Setup',c:'#64748B',w:'Week 1',d:'Jul 6-12',h:2},
+  {id:'foundations',l:'Foundations',c:'#3B82F6',w:'Weeks 1-4',d:'Jul 6-Aug 2',h:14},
+  {id:'fin',l:'Fin AI & API',c:'#10B981',w:'Weeks 3-6',d:'Jul 20-Aug 16',h:10},
+  {id:'integrations',l:'Integrations',c:'#6366F1',w:'Weeks 6-8',d:'Aug 10-30',h:8},
+  {id:'uat',l:'UAT & testing',c:'#9333EA',w:'Weeks 9-11',d:'Aug 31-Sep 20',h:6},
+  {id:'golive',l:'Go-live & Cutover',c:'#E10600',w:'Week 12',d:'Sep 22',h:0},
+  {id:'post',l:'Post go-live',c:'#94A3B8',w:'Weeks 12-14',d:'Sep 21-Oct 11',h:4},
+];
 const OW={
   Chris:{c:'#60A5FA',bg:'rgba(96,165,250,.15)'},
   Richard:{c:'#C084FC',bg:'rgba(192,132,252,.15)'},
@@ -109,14 +123,169 @@ const SC={
 };
 const FILTER_MAP={on:['Complete','In Progress'],att:['Pending','Dependency'],risk:['Blocked']};
 
-const T={"setup": {"sabel": [{"t": "Create Slack project channel and share with YFood team", "o": "Chris", "s": "Complete", "d": "Jul 1-2", "week": 1, "notes": "Channel #yfood-implementation created. Mariela, Tom and Marcin added.", "link": ""}, {"t": "Share pre-call context and SOW with YFood lead", "o": "Richard", "s": "Complete", "d": "Jul 1-3", "week": 1, "notes": "", "link": ""}, {"t": "Schedule Week 1 alignment call", "o": "Chris", "s": "Complete", "d": "Jul 1-2", "week": 1, "notes": "Booked for 8 Jul 10am CEST.", "link": ""}], "client": [{"t": "Intercom workspace admin access for Sabel", "o": "YFood", "s": "Complete", "d": "Jul 7", "week": 1, "tip": "Grant the Sabel team admin access to your Intercom workspace so we can begin configuration on your behalf.", "notes": "Admin access confirmed. App ID: b7klkohj.", "link": ""}, {"t": "Initial agent list and roles (~10 agents)", "o": "YFood", "s": "Pending", "d": "Jul 7", "week": 1, "tip": "Send us a list of agents who will use Intercom along with their roles (e.g. support, finance). This determines how we allocate your Full and Lite seats.", "notes": "Needs to be provided pre-migration.", "link": ""}, {"t": "Back-office API endpoint docs and sandbox credentials", "o": "YFood", "s": "Pending", "d": "Jul 7", "week": 1, "tip": "Share your API documentation and sandbox login details so we can test order and account lookups in Intercom before going live.", "notes": "", "link": "https://developers.intercom.com/docs/build-an-integration/learn-more/rest-apis"}]}, "foundations": {"sabel": [{"t": "Workspace setup, identity, brand, region, seat allocation", "o": "Chris", "s": "In Progress", "d": "Jul 7-14", "week": 1, "notes": "Using trial workspace (App ID b7klkohj). 15 Full + 20 Lite Advanced. Region AU.", "link": "https://www.intercom.com/help/en/articles/168-install-intercom-in-your-product-for-logged-in-users"}, {"t": "Channel setup, Messenger (web + in-product) and email", "o": "Chris", "s": "In Progress", "d": "Jul 7-14", "week": 2, "notes": "Messenger live on web. Email routing awaiting DNS from Marcin.", "link": "https://www.intercom.com/help/en/articles/182-sending-email-from-your-own-address"}, {"t": "Inbox creation and routing logic", "o": "Chris", "s": "Pending", "d": "Jul 7-14", "week": 2, "notes": "", "link": ""}, {"t": "Help Centre structure, collections, sections, hierarchy", "o": "Chris", "s": "Pending", "d": "Jul 14-21", "week": 2, "notes": "", "link": "https://www.intercom.com/help/en/articles/56644-customize-your-help-center"}, {"t": "Foundational Help Centre articles authored and published", "o": "Chris", "s": "Pending", "d": "Jul 14-21", "week": 3, "notes": "", "link": ""}], "client": [{"t": "Inbox structure and routing logic approval", "o": "YFood", "s": "Dependency", "d": "Jul 14", "week": 2, "tip": "Review the routing matrix we've shared in Slack and confirm the conversation assignment logic is correct. We can't build the inbox until this is signed off.", "notes": "Routing matrix shared in Slack on 10 Jul. Awaiting Mariela's sign-off.", "link": ""}, {"t": "Light seat stakeholder list confirmed (finance, dev)", "o": "YFood", "s": "Dependency", "d": "Jul 14", "week": 2, "tip": "Confirm which team members outside of support need Lite (view-only) access, typically finance, operations, or dev. We'll add them during workspace setup.", "notes": "", "link": ""}, {"t": "Top support topics and most frequent queries", "o": "YFood", "s": "Dependency", "d": "Jul 14", "week": 2, "tip": "Share your top 10-15 most common customer questions. This directly shapes your Help Centre structure and the topics Fin AI is trained to answer.", "notes": "", "link": ""}, {"t": "SLA targets per channel confirmed", "o": "YFood", "s": "Dependency", "d": "Jul 14", "week": 2, "tip": "Let us know your target response times per channel (e.g. chat: under 2 min, email: 4 hours). We'll configure inbox rules and SLA alerts to match.", "notes": "", "link": ""}]}, "fin": {"sabel": [{"t": "Fin AI configured against completed Help Centre", "o": "Chris", "s": "Pending", "d": "Jul 21-28", "week": 3, "notes": "", "link": "https://www.intercom.com/help/en/articles/9357948-manage-knowledge-audiences-and-targeting"}, {"t": "Fin topic coverage review and confidence calibration", "o": "Chris", "s": "Pending", "d": "Jul 21-28", "week": 3, "notes": "", "link": ""}, {"t": "Fin workflow 1, account verification queries", "o": "Chris", "s": "Pending", "d": "Jul 28-Aug 4", "week": 4, "notes": "", "link": "https://www.intercom.com/help/en/articles/6298285-using-custom-actions-in-automation"}, {"t": "Fin workflow 2, billing and order escalation", "o": "Chris", "s": "Pending", "d": "Jul 28-Aug 4", "week": 4, "notes": "", "link": ""}, {"t": "Back-office API integration, balance and transaction lookups", "o": "Greg", "s": "Pending", "d": "Jul 28-Aug 4", "week": 4, "notes": "", "link": "https://www.intercom.com/help/en/articles/6298282-setting-up-a-custom-action"}], "client": [{"t": "Brand tone guide and approved response language examples", "o": "YFood", "s": "Dependency", "d": "Jul 21", "week": 3, "tip": "Share your tone of voice guidelines and 3-5 example customer responses you're happy with. Fin AI will mirror your brand language when replying.", "notes": "", "link": ""}, {"t": "Up to 4 Fin workflow use cases confirmed and prioritised", "o": "YFood", "s": "Dependency", "d": "Jul 21", "week": 3, "tip": "Confirm the top 4 scenarios you'd like Fin to automate (e.g. check order status, initiate a refund). We'll prioritise these when building Fin's workflow logic.", "notes": "", "link": ""}, {"t": "API credentials and sandbox access confirmed active", "o": "YFood", "s": "Dependency", "d": "Jul 21", "week": 3, "tip": "Provide live or sandbox API credentials for your back-office system so we can wire up Fin's lookup and action capabilities.", "notes": "", "link": ""}]}, "integrations": {"sabel": [{"t": "Salesforce connector configuration and data mapping", "o": "Greg", "s": "Pending", "d": "Aug 11-18", "week": 6, "notes": "", "link": "https://www.intercom.com/help/en/articles/4497943-install-and-configure-the-salesforce-app"}, {"t": "Custom objects, product data and order history", "o": "Greg", "s": "Pending", "d": "Aug 18-25", "week": 7, "notes": "", "link": ""}, {"t": "Webhook event triggers for order state changes", "o": "Greg", "s": "Pending", "d": "Aug 18-25", "week": 7, "notes": "", "link": ""}, {"t": "Data connector smoke test and validation", "o": "Greg", "s": "Pending", "d": "Aug 25-Sep 1", "week": 8, "notes": "", "link": ""}], "client": [{"t": "Salesforce API credentials and sandbox access", "o": "YFood", "s": "Dependency", "d": "Aug 11", "week": 6, "tip": "Share your Salesforce API credentials and sandbox access so we can install and configure the Intercom-Salesforce connector.", "notes": "", "link": ""}, {"t": "Dev resource available for JWT + CNAME DNS records", "o": "YFood", "s": "Dependency", "d": "Aug 11", "week": 6, "tip": "We'll need a developer available for ~2 hours to complete identity verification (JWT) and set up email DNS records (CNAME). Sabel will guide them step by step.", "notes": "", "link": ""}, {"t": "Data schema: product IDs, order statuses, customer fields", "o": "YFood", "s": "Dependency", "d": "Aug 11", "week": 6, "tip": "Share the field names and data structure from your back-office system. This lets us correctly map your Salesforce objects to Intercom conversation data.", "notes": "", "link": ""}]}, "uat": {"sabel": [{"t": "End-to-end conversation flow testing (web + mobile)", "o": "Chris", "s": "Pending", "d": "Sep 1-8", "week": 9, "notes": "", "link": "https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"}, {"t": "Agent training session 1, Messenger and inbox", "o": "Chris", "s": "Pending", "d": "Sep 8-12", "week": 10, "notes": "", "link": ""}, {"t": "Agent training session 2, Fin AI and workflows", "o": "Chris", "s": "Pending", "d": "Sep 8-12", "week": 10, "notes": "", "link": ""}, {"t": "Final bug fixes and configuration sign-off", "o": "Chris", "s": "Pending", "d": "Sep 12-15", "week": 11, "notes": "", "link": ""}], "client": [{"t": "UAT test users (5-10 agents) confirmed and available", "o": "YFood", "s": "Dependency", "d": "Sep 1", "week": 9, "tip": "Identify 5-10 agents who will run end-to-end testing across Messenger, email, Fin AI and your integrated workflows before go-live.", "notes": "", "link": ""}, {"t": "Written UAT sign-off before go-live", "o": "YFood", "s": "Dependency", "d": "Sep 15", "week": 11, "tip": "Once testing is complete, we need written confirmation that the platform meets your requirements. This is the formal gate before switching to live customer traffic.", "notes": "", "link": ""}, {"t": "Team comms sent re: Intercom go-live date", "o": "YFood", "s": "Dependency", "d": "Sep 15", "week": 11, "tip": "Let your wider team know Intercom is going live and when. Agents should know before the first customer conversation hits. We can provide a template if helpful.", "notes": "", "link": ""}]}, "post": {"sabel": [{"t": "Week 1 health check, CSAT, resolution rate, Fin deflection", "o": "Chris", "s": "Pending", "d": "Sep 22-25", "week": 12, "notes": "", "link": ""}, {"t": "Fin tuning pass, low-confidence topics and escalations", "o": "Chris", "s": "Pending", "d": "Sep 25-29", "week": 12, "notes": "", "link": ""}, {"t": "Final handover documentation and Slack channel wind-down", "o": "Richard", "s": "Pending", "d": "Oct 1-5", "week": 13, "notes": "", "link": ""}], "client": [{"t": "CSAT and resolution rate targets confirmed", "o": "YFood", "s": "Dependency", "d": "Sep 22", "week": 12, "tip": "Share your CSAT score and resolution rate benchmarks so we can measure Fin's Week 1 performance against your actual goals.", "notes": "", "link": ""}, {"t": "Feedback on Week 1 agent experience", "o": "YFood", "s": "Dependency", "d": "Sep 25", "week": 12, "tip": "After the first week live, share qualitative feedback from your agents, what's working and what feels clunky. This informs the Fin tuning pass.", "notes": "", "link": ""}]}};
+const T={
+  setup:{sabel:[
+    {t:'Create Slack project channel and share with YFood team',o:'Chris',s:'Complete',d:'Jul 6-7',week:1,notes:'Channel #yfood-implementation created. Mariela, Tom and Marcin added.',link:''},
+    {t:'Share pre-call context and SOW with YFood lead',o:'Richard',s:'Complete',d:'Jul 6-8',week:1,notes:'',link:''},
+    {t:'Kick-off call: scope, contacts and ways of working',o:'Chris',s:'Complete',d:'Jul 8',week:1,notes:'Held 8 Jul 10am CEST.',link:''},
+  ],client:[
+    {t:'Intercom workspace admin access for Sabel',o:'YFood',s:'Complete',d:'Jul 7',week:1,tip:'Grant the Sabel team admin access to your Intercom workspace so we can begin configuration on your behalf.',notes:'Admin access confirmed. App ID: b7klkohj.',link:'https://app.au.intercom.com/a/apps/_/settings/workspace/teammates'},
+    {t:'Initial agent list and roles (~10 agents)',o:'YFood',s:'Complete',d:'Jul 17',week:2,tip:'Send us a list of agents who will use Intercom along with their roles (e.g. support, finance). This determines how we allocate your Full and Lite seats.',notes:'Lilly provided 17 July via Slack.',link:''},
+    {t:'Back-office API endpoint docs and sandbox credentials',o:'YFood',s:'Complete',d:'Jul 17',week:2,tip:'Share your API documentation and sandbox login details so we can test order and account lookups in Intercom before going live.',notes:'Marked complete 27 Jul. Note still open: pending exploration of system capabilities, Greg looking into this. YFood waiting for Shop team to provide some information (17 Jul).',link:'https://developers.intercom.com/docs/build-an-integration/learn-more/rest-apis'},
+  ]},
+  foundations:{sabel:[
+    {t:'Workspace setup, identity, brand, region, seat allocation',o:'Chris',s:'In Progress',d:'Jul 6-Aug 2',week:1,wkEnd:4,notes:'Using trial workspace (App ID b7klkohj). 15 Full + 20 Lite Advanced. Region AU. Ongoing.',link:''},
+    {t:'Channel setup, Messenger (web + in-product)',o:'Chris',s:'In Progress',d:'Jul 13-Aug 2',week:2,wkEnd:4,notes:'Messenger live on web. In-product still to configure.',link:''},
+    {t:'Issue email domain DNS records and verify once added',o:'Chris',s:'In Progress',d:'Jul 13-Aug 2',week:2,wkEnd:4,notes:'Records issued. Awaiting DNS from Marcin before the domain can be verified.',link:''},
+    {t:'Inbox creation and routing logic',o:'Chris',s:'In Progress',d:'Jul 13-Aug 2',week:2,wkEnd:4,notes:'Waiting on confirmation of additional inboxes.',link:''},
+    {t:'Help Centre structure, collections, sections, hierarchy',o:'Chris',s:'In Progress',d:'Jul 20-Aug 2',week:3,wkEnd:4,notes:'Knowledge and macros implemented, waiting on messenger to be added to sandbox dev to commence testing.',link:''},
+    {t:'Foundational Help Centre articles authored and published',o:'Chris',s:'Complete',d:'Jul 20-26',week:3,notes:'',link:''},
+  ],client:[
+    {t:'Add email DNS records (SPF, DKIM, DMARC) at your domain host',o:'YFood',s:'Dependency',d:'Jul 13-19',week:2,tip:'We will send you the exact records. Your IT or domain admin adds them at your domain host. Intercom cannot send email as your brand until these are in place, so this is the current blocker on email.',notes:'Awaiting Marcin. Blocking email domain verification.',link:'https://www.intercom.com/help/en/articles/182-sending-email-from-your-own-address'},
+    {t:'Inbox structure and routing logic approval',o:'YFood',s:'Complete',d:'Jul 20-26',week:3,kind:'milestone',tip:'Review the routing matrix we have shared in Slack and confirm the conversation assignment logic is correct. We cannot build the inbox until this is signed off.',notes:'Support inbox only, checking on other inboxes.',link:''},
+    {t:'Light seat stakeholder list confirmed (finance, dev)',o:'YFood',s:'Dependency',d:'Jul 13-19',week:2,tip:"Confirm which team members outside of support need Lite (view-only) access, typically finance, operations, or dev. We'll add them during workspace setup.",notes:'',link:'https://app.au.intercom.com/a/apps/_/settings/workspace/teammates'},
+    {t:'Top support topics and most frequent queries',o:'YFood',s:'Complete',d:'Jul 13-19',week:2,tip:'Share your top 10-15 most common customer questions. This directly shapes your Help Centre structure and the topics Fin AI is trained to answer.',notes:'',link:''},
+    {t:'SLA targets per channel confirmed',o:'YFood',s:'Dependency',d:'Jul 20-26',week:3,tip:"Let us know your target response times per channel (e.g. chat: under 2 min, email: 4 hours). We'll configure inbox rules and SLA alerts to match.",notes:'Dominik to provide.',link:''},
+  ]},
+  fin:{sabel:[
+    {t:'Fin AI configured against completed Help Centre',o:'Chris',s:'Complete',d:'Jul 20-26',week:3,notes:'',link:''},
+    {t:'Fin topic coverage review and confidence calibration',o:'Chris',s:'In Progress',d:'Jul 20-Aug 9',week:3,wkEnd:5,notes:'Pending sandbox install and test.',link:''},
+    {t:'Fin workflow 1, account verification queries',o:'Greg',s:'Blocked',d:'Jul 27-Aug 2',week:4,notes:'',link:''},
+    {t:'Fin workflow 2, billing and order escalation',o:'Chris',s:'In Progress',d:'Jul 27-Aug 2',week:4,notes:'',link:''},
+    {t:'Back-office API integration, balance and transaction lookups',o:'Greg',s:'Blocked',d:'Jul 27-Aug 16',week:4,wkEnd:6,notes:'Permission on app blocked. Waiting for updated permissions.',link:''},
+  ],client:[
+    {t:'Brand tone guide and approved response language examples',o:'YFood',s:'Dependency',d:'Jul 20-26',week:3,tip:"Share your tone of voice guidelines and 3-5 example customer responses you're happy with. Fin AI will mirror your brand language when replying.",notes:'',link:''},
+    {t:'Up to 4 Fin workflow use cases confirmed and prioritised',o:'YFood',s:'Dependency',d:'Jul 20-26',week:3,tip:"Confirm the top 4 scenarios you'd like Fin to automate (e.g. check order status, initiate a refund). We'll prioritise these when building Fin's workflow logic.",notes:'',link:''},
+    {t:'API credentials and sandbox access confirmed active',o:'YFood',s:'Dependency',d:'Jul 20-26',week:3,tip:"Provide live or sandbox API credentials for your back-office system so we can wire up Fin's lookup and action capabilities. App permissions are currently blocking this.",notes:'Blocking the back-office API integration.',link:''},
+  ]},
+  integrations:{sabel:[
+    {t:'Salesforce connector configuration and data mapping',o:'Greg',s:'Pending',d:'Aug 10-16',week:6,notes:'',link:''},
+    {t:'Custom objects, product data and order history',o:'Greg',s:'Pending',d:'Aug 17-23',week:7,notes:'',link:''},
+    {t:'Webhook event triggers for order state changes',o:'Greg',s:'Pending',d:'Aug 17-23',week:7,notes:'',link:''},
+    {t:'Data connector smoke test and validation',o:'Greg',s:'Pending',d:'Aug 24-30',week:8,notes:'',link:''},
+  ],client:[
+    {t:'Salesforce API credentials and sandbox access',o:'YFood',s:'Dependency',d:'Aug 10-16',week:6,tip:'Share your Salesforce API credentials and sandbox access so we can install and configure the Intercom-Salesforce connector.',notes:'',link:''},
+    {t:'Dev resource available for Messenger identity verification (JWT)',o:'YFood',s:'Dependency',d:'Aug 10-16',week:6,tip:'Your developer sets up JSON Web Tokens so Intercom can verify who each logged-in user really is. This stops anyone impersonating your customers in chat and should be live before launch. It is a short piece of dev work and Sabel will guide them step by step.',notes:'',link:'https://developers.intercom.com/installing-intercom/web/identity-verification'},
+    {t:'Data schema: product IDs, order statuses, customer fields',o:'YFood',s:'Dependency',d:'Aug 10-16',week:6,tip:'Share the field names and data structure from your back-office system. This lets us correctly map your Salesforce objects to Intercom conversation data.',notes:'',link:''},
+  ]},
+  uat:{sabel:[
+    {t:'End-to-end conversation flow testing (web + mobile)',o:'Chris',s:'Pending',d:'Aug 31-Sep 6',week:9,notes:'',link:''},
+    {t:'Agent training session 1, Messenger and inbox',o:'Chris',s:'Pending',d:'Sep 7-13',week:10,notes:'',link:''},
+    {t:'Agent training session 2, Fin AI and workflows',o:'Chris',s:'Pending',d:'Sep 7-13',week:10,notes:'',link:''},
+    {t:'Final bug fixes and configuration sign-off',o:'Chris',s:'Pending',d:'Sep 14-20',week:11,notes:'',link:''},
+    {t:'Sabel go-live readiness checklist completed',o:'Richard',s:'Pending',d:'Sep 14-20',week:11,notes:'',link:''},
+  ],client:[
+    {t:'UAT test users (5-10 agents) confirmed and available',o:'YFood',s:'Dependency',d:'Aug 31-Sep 6',week:9,tip:'Identify 5-10 agents who will run end-to-end testing across Messenger, email, Fin AI and your integrated workflows before go-live.',notes:'',link:''},
+    {t:'Written UAT sign-off before go-live',o:'YFood',s:'Dependency',d:'Sep 14-20',week:11,kind:'milestone',tip:'Once testing is complete, we need written confirmation that the platform meets your requirements. This is the formal gate before switching to live customer traffic.',notes:'',link:''},
+  ]},
+  golive:{sabel:[
+    {t:'Open Intercom to inbound across all channels',o:'Chris',s:'Pending',d:'Sep 21-27',week:12,notes:'',link:''},
+    {t:'Activate Fin AI Agent on all configured channels',o:'Chris',s:'Pending',d:'Sep 21-27',week:12,notes:'',link:''},
+    {t:'Sabel on standby for go-live support',o:'Chris',s:'Pending',d:'Sep 21-27',week:12,notes:'',link:''},
+  ],client:[
+    {t:'Team comms sent re: Intercom go-live date',o:'YFood',s:'Dependency',d:'Sep 21-27',week:12,tip:'Let your wider team know Intercom is going live and when. Agents should know before the first customer conversation hits. We can provide a template if helpful.',notes:'',link:''},
+  ]},
+  post:{sabel:[
+    {t:'Week 1 health check, CSAT, resolution rate, Fin deflection',o:'Chris',s:'Pending',d:'Sep 28-Oct 4',week:13,notes:'',link:''},
+    {t:'Fin tuning pass, low-confidence topics and escalations',o:'Chris',s:'Pending',d:'Sep 28-Oct 4',week:13,notes:'',link:''},
+    {t:'Open items and snag list resolved',o:'Chris',s:'Pending',d:'Sep 28-Oct 4',week:13,notes:'',link:''},
+    {t:'Final handover documentation and Slack channel wind-down',o:'Richard',s:'Pending',d:'Oct 5-11',week:14,notes:'',link:''},
+  ],client:[
+    {t:'CSAT and resolution rate targets confirmed',o:'YFood',s:'Dependency',d:'Sep 21-27',week:12,tip:"Share your CSAT score and resolution rate benchmarks so we can measure Fin's Week 1 performance against your actual goals.",notes:'',link:''},
+    {t:'Feedback on Week 1 agent experience',o:'YFood',s:'Dependency',d:'Sep 28-Oct 4',week:13,tip:"After the first week live, share qualitative feedback from your agents, what's working and what feels clunky. This informs the Fin tuning pass.",notes:'',link:''},
+  ]},
+};
 
 // ── Standard task library ─────────────────────────────────────────────────────
 // [CLIENT] The Sabel standard subset per pillar. These appear in the "+ Add"
 // menu on each column so tasks can be added back manually as required.
 // Keep keys aligned with this client's phase ids. The human-editable master
 // list lives in references/standard-tasks.md; mirror any changes here.
-const STD={"setup": {"sabel": [{"t": "Create Slack project channel and share with client team", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Share pre-call context and SOW with client champion", "o": "Richard", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Kick-off call: scope, contacts and ways of working", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Intercom workspace admin access", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Grant the Sabel team admin access to your Intercom workspace so we can configure on your behalf.", "notes": "", "link": ""}, {"t": "Brand assets pack (logos, sender names, reply addresses)", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Send logo files, sender names and reply-address preferences so we can brand the workspace and Messenger.", "notes": "", "link": ""}]}, "foundations": {"sabel": [{"t": "Workspace and brand config, region, hours, seats", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Issue email domain DNS records to client and verify once added", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Configure Messenger for web", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Inbox views and team inboxes", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Routing rules by language, channel and topic", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Ticket types, statuses and SLA targets", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Add email DNS records (SPF, DKIM, DMARC) at your domain host", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "We will send you the exact records. Your IT or domain admin adds them at your domain host. Intercom cannot send email as your brand until these are in place, so this is a Week 1 priority.", "notes": "", "link": ""}, {"t": "Install Messenger code snippet on your website", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Your developer adds the Intercom code snippet to your site so the Messenger can appear. It is a small copy-paste job; the guide has the exact code.", "notes": "", "link": "https://developers.intercom.com/installing-intercom/web/installation"}, {"t": "Secure the Messenger with identity verification (JWT)", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Your developer sets up JSON Web Tokens so Intercom can verify who each logged-in user really is.", "notes": "", "link": "https://developers.intercom.com/installing-intercom/web/identity-verification"}, {"t": "Business hours, holidays and closures", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Share your business hours plus any office holidays and closures so we can configure operating hours.", "notes": "", "link": ""}]}, "fin": {"sabel": [{"t": "Audit articles, gaps, duplicates, outdated", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Restructure collections and categories for Fin readability", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Publish cleaned article set in Help Centre", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Configure Fin across all connected channels", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Configure Fin escalation, handover and fallback", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Configure Fin persona and tone to brand voice", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Test Fin sample queries and iterate during build", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Specify and review back-office API endpoints", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Tone-of-voice guide and 3-5 approved response examples", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Share tone-of-voice guidance and a few example responses you are happy with so Fin mirrors your brand language.", "notes": "", "link": ""}, {"t": "Help Centre owner confirmed for ongoing maintenance", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Nominate your internal Help Centre owner to maintain content after handover.", "notes": "", "link": ""}, {"t": "Back-office API queryable for required fields", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Confirm your systems expose a queryable API for the data we need.", "notes": "", "link": ""}]}, "integrations": {"sabel": [{"t": "Build custom action / Canvas Kit integration", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Map contacts, orders and custom fields", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Test integration, validate field mapping", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Webhook event triggers for state changes", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Connector API credentials and sandbox access", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Share API credentials and sandbox access so we can install and configure the connector.", "notes": "", "link": ""}, {"t": "Data schema for required fields", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Share the field names and data structure so we can map objects to Intercom conversation data.", "notes": "", "link": ""}]}, "uat": {"sabel": [{"t": "E2E testing, channels, Fin workflows and connectors", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Run Fin UAT scenarios and iterate configuration", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Sabel go-live readiness checklist completed", "o": "Richard", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Open Intercom to inbound across all channels", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Activate Fin AI Agent on all configured channels", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "UAT testers confirmed and available", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Identify testers to run end-to-end testing across all channels and Fin before go-live.", "notes": "", "link": ""}, {"t": "Go-live readiness sign-off", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Provide written sign-off that the platform is ready before we switch live traffic.", "notes": "", "link": ""}, {"t": "Team comms sent re: Intercom go-live", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Let your wider team know Intercom is live and when, so agents are ready before the first customer conversation.", "notes": "", "link": ""}]}, "post": {"sabel": [{"t": "Week 1 health check, Fin deflection, resolution, CSAT", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Fin tuning pass, low-confidence topics and escalations", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Open items and snag list resolved", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}, {"t": "Final handover docs and Slack channel wind-down", "o": "Richard", "s": "Pending", "d": "", "week": 0, "notes": "", "link": ""}], "client": [{"t": "Feedback on Week 1 agent experience", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "After the first week live, share agent feedback to guide the Fin tuning pass.", "notes": "", "link": ""}, {"t": "Localisation / follow-on phase decision", "o": "YFood", "s": "Dependency", "d": "", "week": 0, "tip": "Decide whether to add any follow-on phase work.", "notes": "", "link": ""}]}};
+const STD={
+  setup:{sabel:[
+    {t:'Create Slack project channel and share with client team',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Share pre-call context and SOW with client champion',o:'Richard',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Kick-off call: scope, contacts and ways of working',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+  ],client:[
+    {t:'Intercom workspace admin access',o:'YFood',s:'Dependency',d:'',week:0,tip:'Grant the Sabel team admin access to your Intercom workspace so we can configure on your behalf.',notes:'',link:'https://app.au.intercom.com/a/apps/_/settings/workspace/teammates'},
+    {t:'Source platform read access for migration mapping',o:'YFood',s:'Dependency',d:'',week:0,tip:'Give us read access to your current platform so we can map tickets, contacts and fields for the migration.',notes:'',link:''},
+    {t:'Brand assets pack (logos, sender names, reply addresses)',o:'YFood',s:'Dependency',d:'',week:0,tip:'Send logo files, sender names and reply-address preferences so we can brand the workspace and Messenger.',notes:'',link:''},
+  ]},
+  foundations:{sabel:[
+    {t:'Workspace and brand config, region, hours, seats',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Issue email domain DNS records to client and verify once added',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Configure Messenger for web',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Inbox views and team inboxes',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Routing rules by language, channel and topic',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Ticket types, statuses and SLA targets',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+  ],client:[
+    {t:'Add email DNS records (SPF, DKIM, DMARC) at your domain host',o:'YFood',s:'Dependency',d:'',week:0,tip:'We will send you the exact records. Your IT or domain admin adds them at your domain host. Intercom cannot send email as your brand until these are in place, so this is a Week 1 priority.',notes:'',link:'https://www.intercom.com/help/en/articles/182-sending-email-from-your-own-address'},
+    {t:'Install Messenger code snippet on your website',o:'YFood',s:'Dependency',d:'',week:0,tip:'Your developer adds the Intercom code snippet to your site so the Messenger can appear. It is a small copy-paste job; the guide has the exact code, and we can join a call if they hit any issues.',notes:'',link:'https://developers.intercom.com/installing-intercom/web/installation'},
+    {t:'Secure the Messenger with identity verification (JWT)',o:'YFood',s:'Dependency',d:'',week:0,tip:'Your developer sets up JSON Web Tokens so Intercom can verify who each logged-in user really is. This stops anyone impersonating your customers in chat and should be live before launch.',notes:'',link:'https://developers.intercom.com/installing-intercom/web/identity-verification'},
+    {t:'Pass logged-in user attributes to the Messenger',o:'YFood',s:'Dependency',d:'',week:0,tip:'Your developer sends basic user details (name, email, user ID and any useful custom fields) into the Messenger, so conversations arrive with context and Fin can personalise answers.',notes:'',link:'https://developers.intercom.com/installing-intercom/web/attributes-objects'},
+    {t:'Business hours, holidays and closures',o:'YFood',s:'Dependency',d:'',week:0,tip:'Share your business hours plus any office holidays and closures so we can configure operating hours.',notes:'',link:''},
+    {t:'Inbox structure and routing approval',o:'YFood',s:'Dependency',d:'',week:0,kind:'milestone',tip:'Review and confirm the inbox and routing setup before we finalise assignment rules.',notes:'',link:''},
+    {t:'SLA targets per channel confirmed',o:'YFood',s:'Dependency',d:'',week:0,tip:'Confirm target response times per channel so we can set inbox SLAs and alerts.',notes:'',link:''},
+  ]},
+  fin:{sabel:[
+    {t:'Non-support enquiry triage workflow',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Configure sidebar, order, fulfilment, customer history',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Specify and review back-office API endpoints',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Build custom action / Canvas Kit integration',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Audit articles, gaps, duplicates, outdated',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Restructure collections and categories for Fin readability',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Publish cleaned article set in Help Centre',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Configure Fin across all connected channels',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Configure Fin escalation, handover and fallback',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Configure Fin persona and tone to brand voice',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Test Fin sample queries and iterate during build',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Live team training, inbox and Fin handover',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+  ],client:[
+    {t:'Tone-of-voice guide and 3-5 approved response examples',o:'YFood',s:'Dependency',d:'',week:0,tip:'Share tone-of-voice guidance and a few example responses you are happy with so Fin mirrors your brand language.',notes:'',link:''},
+    {t:'Help Centre owner confirmed for ongoing maintenance',o:'YFood',s:'Dependency',d:'',week:0,tip:'Nominate your internal Help Centre owner to maintain content after handover.',notes:'',link:''},
+    {t:'Language / dialect handling preference confirmed',o:'YFood',s:'Dependency',d:'',week:0,tip:'Confirm whether Fin should detect language automatically or use profile language.',notes:'',link:''},
+    {t:'Back-office API queryable for required fields',o:'YFood',s:'Dependency',d:'',week:0,tip:'Confirm your systems expose a queryable API for the data we need.',notes:'',link:''},
+  ]},
+  integrations:{sabel:[
+    {t:'Connect primary store, validate order lookup',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Test integration, validate field mapping',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Map tickets, contacts, agents, statuses, tags, fields',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Run sample migration batch, validate vs source records',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Execute full historical migration',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Sample-based QA on migrated dataset',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Delta migration to capture build-phase tickets',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
+  ],client:[
+    {t:'Confirm primary store (largest by volume)',o:'YFood',s:'Dependency',d:'',week:0,tip:'Tell us which store is the primary or largest so we connect and validate it first.',notes:'',link:''},
+    {t:'Migration mapping sign-off',o:'YFood',s:'Dependency',d:'',week:0,kind:'milestone',tip:'Review and sign off the migration mapping before we run the full migration.',notes:'',link:''},
+    {t:'Confirm agent count transferring from source platform',o:'YFood',s:'Dependency',d:'',week:0,tip:'Confirm how many agents transfer so we can map them to Intercom seats.',notes:'',link:''},
+    {t:'Migrated dataset sign-off',o:'YFood',s:'Dependency',d:'',week:0,kind:'milestone',tip:'Review the QA sample and approve the full production migration.',notes:'',link:''},
+  ]},
+  uat:{sabel:[
+    {t:'E2E testing, channels, Fin workflows and connectors',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Run Fin UAT scenarios and iterate configuration',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Sabel go-live readiness checklist completed',o:'Richard',s:'Pending',d:'',week:0,notes:'',link:''},
+  ],client:[
+    {t:'UAT testers confirmed and available',o:'YFood',s:'Dependency',d:'',week:0,tip:'Identify testers to run end-to-end testing across all channels and Fin before go-live.',notes:'',link:''},
+    {t:'Go-live readiness sign-off',o:'YFood',s:'Dependency',d:'',week:0,kind:'milestone',tip:'Provide written sign-off that the platform is ready before we switch live traffic.',notes:'',link:''},
+  ]},
+  golive:{sabel:[
+    {t:'Source platform closes inbound channels (cutover)',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Open Intercom to inbound across all channels',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Activate Fin AI Agent on all configured channels',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Sabel on standby for go-live support',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+  ],client:[
+    {t:'Team comms sent re: Intercom go-live',o:'YFood',s:'Dependency',d:'',week:0,tip:'Let your wider team know Intercom is live and when, so agents are ready before the first customer conversation.',notes:'',link:''},
+  ]},
+  post:{sabel:[
+    {t:'Week 1 health check, Fin deflection, resolution, CSAT',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Fin tuning pass, low-confidence topics and escalations',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Open items and snag list resolved',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
+    {t:'Final handover docs and Slack channel wind-down',o:'Richard',s:'Pending',d:'',week:0,notes:'',link:''},
+  ],client:[
+    {t:'Feedback on Week 1 agent experience',o:'YFood',s:'Dependency',d:'',week:0,tip:'After the first week live, share agent feedback to guide the Fin tuning pass.',notes:'',link:''},
+    {t:'Localisation / follow-on phase decision',o:'YFood',s:'Dependency',d:'',week:0,tip:'Decide whether to add any follow-on phase work.',notes:'',link:''},
+  ]},
+};
 
 let cur='overview';
 let cardNotes={};
@@ -132,7 +301,7 @@ let dragInfo=null;
 let dragOverCol=null;
 let goLiveDate=GO_LIVE;   // editable in the UI; persisted with the saved state
 let editingGoLive=false;  // true while the go-live date input is showing
-let groupBy='pillar';    // 'pillar' | 'week' — how the board groups tasks
+let groupBy='pillar';    // 'pillar' | 'week', how the board groups tasks
 const CLIENT_LABEL='YFood';
 
 // ── Auto-save ─────────────────────────────────────────────────────────────────
@@ -183,7 +352,7 @@ async function loadInitial(){
     if(j&&j.value){
       const d=typeof j.value==='string'?JSON.parse(j.value):j.value;
       remoteStamp=d.savedAt||null;
-      if(d.buildV!==BUILD_V){showToast('Plan updated since last save, showing the new plan');return;}
+      if(d.buildV!==undefined&&d.buildV!==BUILD_V){showToast('Plan updated since last save, showing the new plan');return;}
       if(d.taskData){
         P.forEach(ph=>{
           if(d.taskData[ph.id]){
@@ -411,20 +580,45 @@ function toggleWeekStartEdit(e){
 function isoDate(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+da;}
 function weekRangeLabel(n){if(!n||n<1)return 'Unscheduled';const s=weekStartDate(n),e=new Date(s);e.setDate(e.getDate()+6);const f=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});return f(s)+' – '+f(e);}
 function isOverdue(t){
-  // A task is overdue when it is not Complete and its scheduled week has
-  // already ended. Unscheduled tasks (week 0/missing) are never overdue.
+  // A task is overdue when it is not Complete and its scheduled period has
+  // already ended. For a span (ongoing) task that means its END week: being
+  // still in progress mid-span is planned, not overdue. Unscheduled tasks
+  // (week 0/missing) are never overdue.
   if(!t||t.s==='Complete'||!t.week||t.week<1)return false;
-  const e=new Date(weekStartDate(t.week).getTime()); e.setDate(e.getDate()+6);
+  const e=new Date(weekStartDate(endWeek(t)).getTime()); e.setDate(e.getDate()+6);
   const now=new Date(); now.setHours(0,0,0,0);
   return e<now;
 }
 function weekLabel(n){return (n&&n>=1)?'Week '+n:'Unscheduled';}
-function maxWeek(){let mx=0;P.forEach(ph=>['sabel','client'].forEach(g=>T[ph.id][g].forEach(t=>{if(t.week&&t.week>mx)mx=t.week;})));return Math.max(mx,8);}
+// ── Week ranges (ongoing tasks) and milestones ───────────────────────────────
+// A task may span several weeks: `week` is the start, optional `wkEnd` the end.
+// Single-week tasks have no wkEnd. `kind:'milestone'` marks checkpoint tasks
+// (sign-offs, approvals); level-of-effort work uses a span instead.
+function endWeek(t){return (t&&t.wkEnd&&t.week&&t.wkEnd>t.week)?t.wkEnd:((t&&t.week)||0);}
+function isSpan(t){return !!(t&&t.week&&t.wkEnd&&t.wkEnd>t.week);}
+function spanWeeksText(t){return isSpan(t)?('Wks '+t.week+'–'+t.wkEnd):weekLabel(t.week||0);}
+function taskDatesText(t){
+  if(!t.week||t.week<1)return t.d||'';
+  if(!isSpan(t))return weekRangeLabel(t.week);
+  const s=weekStartDate(t.week),e=new Date(weekStartDate(t.wkEnd));e.setDate(e.getDate()+6);
+  const f=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  return 'Wks '+t.week+'–'+t.wkEnd+' · '+f(s)+' – '+f(e);
+}
+function maxWeek(){let mx=0;P.forEach(ph=>['sabel','client'].forEach(g=>T[ph.id][g].forEach(t=>{const e=endWeek(t);if(e>mx)mx=e;})));return Math.max(mx,8);}
 function weekOptions(sel){let o='';const mx=maxWeek();for(let n=1;n<=mx;n++){o+=`<option value="${n}"${sel===n?' selected':''}>Week ${n} · ${weekRangeLabel(n)}</option>`;}return o;}
+function weekEndOptions(t){
+  let o=`<option value="0"${!isSpan(t)?' selected':''}>Single week</option>`;
+  const mx=Math.max(maxWeek(),endWeek(t));
+  for(let n=(t.week||0)+1;n<=mx;n++){o+=`<option value="${n}"${t.wkEnd===n?' selected':''}>to Week ${n} · ends ${weekRangeLabel(n).split('–')[1].trim()}</option>`;}
+  return o;
+}
 function effWeek(t){return weekLabel(t.week||0);}
 function weekList(){
   const seen=new Set();
-  P.forEach(ph=>['sabel','client'].forEach(g=>T[ph.id][g].forEach(t=>seen.add(effWeek(t)))));
+  P.forEach(ph=>['sabel','client'].forEach(g=>T[ph.id][g].forEach(t=>{
+    if(!t.week||t.week<1){seen.add(effWeek(t));return;}
+    for(let w=t.week;w<=endWeek(t);w++)seen.add(weekLabel(w));
+  })));
   const arr=[...seen];
   const num=w=>{const m=/(\d+)/.exec(w);return m?parseInt(m[1]):9999;};
   arr.sort((a,b)=>{if(a==='Unscheduled')return 1;if(b==='Unscheduled')return -1;return num(a)-num(b)||a.localeCompare(b);});
@@ -433,7 +627,13 @@ function weekList(){
 function weekGroups(wk){
   const out={sabel:[],client:[]};
   P.forEach(ph=>['sabel','client'].forEach(g=>{
-    T[ph.id][g].forEach((t,i)=>{ if(effWeek(t)===wk) out[g].push({t,cid:ph.id+'-'+(g==='sabel'?'s':'c')+'-'+i,c:ph.c,l:ph.l}); });
+    T[ph.id][g].forEach((t,i)=>{
+      // Span-aware: a task belongs to every week it covers, so ongoing work
+      // shows as active in each week view across its range.
+      const m=/(\d+)/.exec(wk), wn=m?parseInt(m[1],10):0;
+      const hit=wn?(t.week>=1&&t.week<=wn&&endWeek(t)>=wn):(effWeek(t)===wk);
+      if(hit) out[g].push({t,cid:ph.id+'-'+(g==='sabel'?'s':'c')+'-'+i,c:ph.c,l:ph.l});
+    });
   }));
   return out;
 }
@@ -459,18 +659,97 @@ function focusWeek(){
   for(let n=Math.max(cw,0)+1;n<=mx+8;n++){ if(has(n))return{n,now:false}; }
   return{n:cw<1?1:cw,now:cw>=1};
 }
+// ── Key milestones chart (overview) ───────────────────────────────────────────
+// The milestones are the PILLARS: each pillar is one entry, Complete only when
+// every task in it is Complete. If a pillar has milestone-flagged tasks (kind:
+// 'milestone'), those named gates represent it instead, so trackers upgrade
+// automatically once the task library carries MILESTONE lines. The go-live and
+// post go-live pillars are excluded; the fixed Go-live · Cutover row covers launch.
+function pillarComplete(pid){const m=phaseMini(pid);return m.total>0&&m.done===m.total;}
+function weekDueDate(n){if(!n||n<1)return '';const d=new Date(weekStartDate(n));d.setDate(d.getDate()+4);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
+function pillarWeekSpan(pid){
+  let fw=0,lw=0;
+  ['sabel','client'].forEach(g=>(T[pid]&&T[pid][g]||[]).forEach(t=>{
+    if(!t.week||t.week<1)return;
+    if(!fw||t.week<fw)fw=t.week;
+    const e=endWeek(t); if(e>lw)lw=e;
+  }));
+  return{fw,lw};
+}
+function milestoneEntries(){
+  const out=[];
+  P.forEach(p=>{
+    if(p.id==='golive'||p.id==='post')return;
+    const flagged=[];
+    ['sabel','client'].forEach(g=>(T[p.id]&&T[p.id][g]||[]).forEach(t=>{if(t.kind==='milestone')flagged.push(t);}));
+    if(flagged.length){
+      flagged.forEach(t=>out.push({type:'task',t,p,due:endWeek(t)}));
+    }else{
+      out.push({type:'pillar',p,due:pillarWeekSpan(p.id).lw});
+    }
+  });
+  out.sort((a,b)=>(a.due||99)-(b.due||99));
+  return out;
+}
+function milestoneState(e){
+  const cw=currentWeek(),m=phaseMini(e.p.id);
+  if(pillarComplete(e.p.id))return{label:'Achieved',clr:'#4ADE80'};
+  if(e.type==='task'&&e.t.s==='Complete')return{label:'Signed off · pillar work ongoing',clr:'#60A5FA'};
+  if(e.due&&cw>e.due)return{label:'Overdue · was due Week '+e.due,clr:'#F87171'};
+  if(e.due&&cw===e.due)return{label:'Due now · Week '+e.due,clr:'#C084FC'};
+  const fw=e.type==='pillar'?pillarWeekSpan(e.p.id).fw:0;
+  if(e.type==='pillar'&&fw&&cw>=fw&&m.done>0)return{label:'In progress · '+m.done+'/'+m.total+' done',clr:'#60A5FA'};
+  return{label:'Upcoming'+(e.due?' · Week '+e.due:''),clr:'#475569'};
+}
+function milestonesCard(){
+  const entries=milestoneEntries();
+  if(!entries.length&&!goLiveDate)return '';
+  const row=e=>{const s=milestoneState(e);
+    const title=e.type==='task'?esc(e.t.t):esc(e.p.l)+' complete';
+    return`<div class="ms-row" onclick="setGroupBy('pillar');setP('${e.p.id}')" title="Open ${esc(e.p.l)}">
+      <i class="ti ti-diamonds" style="font-size:20px;color:${s.clr};flex-shrink:0;background:#12151D;position:relative;z-index:1"></i>
+      <div style="flex:1;min-width:0">
+        <div class="ms-title" style="font-size:13px;font-weight:600;color:#E2E8F0;line-height:1.4">${title}</div>
+        <div style="font-size:11px;color:${s.clr};margin-top:3px">${s.label}</div>
+      </div>
+      <span style="font-size:11px;font-weight:600;color:${s.clr==='#475569'?'#64748B':s.clr};flex-shrink:0;white-space:nowrap">${weekDueDate(e.due)}</span>
+    </div>`;};
+  let glRow='';
+  if(goLiveDate){
+    const gl=new Date(goLiveDate+'T00:00:00');
+    const glDone=P.every(p=>p.id==='post'||pillarComplete(p.id));
+    const now=new Date();now.setHours(0,0,0,0);
+    const glClr=glDone?'#4ADE80':(gl<now?'#F87171':'#E10600');
+    glRow=`<div class="ms-row" onclick="setGroupBy('pillar');${P.some(p=>p.id==='golive')?`setP('golive')`:''}" title="Open Go-live">
+      <i class="ti ti-rocket" style="font-size:20px;color:${glClr};flex-shrink:0;background:#12151D;position:relative;z-index:1"></i>
+      <div style="flex:1;min-width:0">
+        <div class="ms-title" style="font-size:13px;font-weight:600;color:#E2E8F0;line-height:1.4">Go-live · Cutover</div>
+        <div style="font-size:11px;color:${glClr};margin-top:3px">${esc(GO_LIVE_NOTE||'')}</div>
+      </div>
+      <span style="font-size:11px;font-weight:600;color:${glClr};flex-shrink:0;white-space:nowrap">${gl.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
+    </div>`;
+  }
+  const body=entries.map(row).join('');
+  return `<div style="background:#12151D;border:1px solid #1E2433;border-radius:10px;padding:14px 16px">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+      <span style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569">Key milestones</span>
+      <i class="ti ti-info-circle" onmouseenter="showTip(event,'A milestone is achieved when every task in that stage is complete. Dates update automatically if the plan moves.')" onmousemove="moveTip(event)" onmouseleave="hideTip()" style="font-size:13px;color:#475569;cursor:help"></i>
+    </div>
+    <div class="ms-rail">${body}${glRow}</div>
+  </div>`;
+}
 function ovMetrics(gs){
   const pct=gs.total>0?Math.round(gs.complete/gs.total*100):0;
   const pctClr=pct>66?'#4ADE80':pct>33?'#FBBF24':'#E10600';
-  let glBig='—',glSub='not set';
+  let glBig='-',glSub='not set';
   if(goLiveDate){const gl=new Date(goLiveDate+'T00:00:00');if(!isNaN(gl.getTime())){const now=new Date();now.setHours(0,0,0,0);const dd=Math.ceil((gl-now)/86400000);glBig=dd>0?dd+'d':(dd===0?'Today':'Live');glSub=gl.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}}
   const f=focusWeek(), fg=weekGroups('Week '+f.n);
   const weekYou=fg.client.filter(o=>o.t.s!=='Complete').length;
   const outYou=P.reduce((n,p)=>n+T[p.id].client.filter(t=>t.s!=='Complete').length,0);
-  const card=(label,val,valClr,sub)=>`<div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:12px 13px">
-      <div style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:7px">${label}</div>
-      <div style="font-size:24px;font-weight:700;color:${valClr};line-height:1">${val}</div>
-      <div style="font-size:10px;color:#475569;margin-top:5px">${sub}</div>
+  const card=(label,val,valClr,sub)=>`<div style="background:#161B26;border:1px solid #1E2433;border-radius:10px;padding:10px 12px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#475569;margin-bottom:5px">${label}</div>
+      <div style="font-size:20px;font-weight:700;color:${valClr};line-height:1">${val}</div>
+      <div style="font-size:10px;color:#475569;margin-top:4px">${sub}</div>
     </div>`;
   const glCard=editingGoLive
     ? `<div style="background:#161B26;border:1px solid #E1060055;border-radius:10px;padding:12px 13px">
@@ -478,15 +757,19 @@ function ovMetrics(gs){
         <input type="date" id="golive-input" value="${goLiveDate||''}" onchange="setGoLive(this.value)" onclick="openPicker(event,this)" style="cursor:pointer;width:100%;font-size:12px;color:#E2E8F0;background:#0F1117;border:1px solid #2A3145;border-radius:6px;padding:5px 7px;font-family:inherit;box-sizing:border-box">
         <div style="margin-top:6px"><span onclick="cancelGoLiveEdit(event)" style="font-size:10px;color:#94A3B8;cursor:pointer">Cancel</span></div>
       </div>`
-    : (w=>`<div style="background:#161B26;border:1px solid ${w?w.clr+'66':'#1E2433'};border-radius:10px;padding:12px 13px" title="${esc(GO_LIVE_NOTE||'')}">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+    : (w=>`<div style="background:#161B26;border:1px solid ${w?w.clr+'66':'#1E2433'};border-radius:10px;padding:10px 12px" title="${esc(GO_LIVE_NOTE||'')}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
           <span style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#475569">Go-live</span>
           <button onclick="toggleGoLiveEdit(event)" title="Edit go-live date" style="background:transparent;border:none;cursor:pointer;color:#64748B;padding:0;display:flex"><i class="ti ti-pencil" style="font-size:12px"></i></button>
         </div>
-        <div style="font-size:24px;font-weight:700;color:#E10600;line-height:1">${glBig}</div>
-        <div style="font-size:10px;color:${w?w.clr:'#475569'};margin-top:5px">${w?w.msg:glSub}</div>
+        <div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap">
+          <span style="font-size:20px;font-weight:700;color:#E10600;line-height:1">${glBig}</span>
+          <span style="font-size:12px;font-weight:600;color:#E2E8F0;white-space:nowrap">${glSub}</span>
+        </div>
+        ${w?`<div style="font-size:10px;color:${w.clr};margin-top:5px">${w.msg}</div>`:''}
       </div>`)(bufferWarning());
-  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1rem">
+  // Four compact metric cards in a single row across the top of the overview.
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px">
     ${card('Completion',pct+'%',pctClr,gs.complete+' / '+gs.total+' actions')}
     ${glCard}
     ${card('Your actions this week',weekYou,weekYou>0?'#FBBF24':'#4ADE80',f.now?'due this week':'next: Week '+f.n)}
@@ -497,13 +780,21 @@ function thisWeekPanel(){
   const f=focusWeek(), label='Week '+f.n, g=weekGroups(label);
   const row=o=>{const done=o.t.s==='Complete';const sc=SC[o.t.s]||SC.Pending;return`<div style="display:flex;align-items:center;gap:8px;padding:6px 2px;border-top:1px solid #1E2433">
       <span style="width:7px;height:7px;border-radius:50%;background:${o.c};flex-shrink:0" title="${esc(o.l)}"></span>
-      <span style="font-size:12px;color:${done?'#475569':'#E2E8F0'};${done?'text-decoration:line-through':''};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.t.t)}</span>
+      ${o.t.kind==='milestone'?`<i class="ti ti-diamonds" title="Milestone" style="font-size:11px;color:#C084FC;flex-shrink:0"></i>`:''}
+      <span style="font-size:12px;color:${done?'#475569':'#E2E8F0'};${done?'text-decoration:line-through':''};flex:1;min-width:0;line-height:1.4">${esc(o.t.t)}</span>
+      ${isSpan(o.t)?`<span title="Planned multi-week work, not a delay" style="font-size:10px;color:#38BDF8;white-space:nowrap;flex-shrink:0">Wks ${o.t.week}–${o.t.wkEnd}</span>`:''}
       <span style="font-size:10px;color:${sc.c};background:${sc.bg};border-radius:20px;padding:1px 7px;white-space:nowrap;flex-shrink:0">${o.t.s}</span>
     </div>`;};
-  const col=(title,icon,colour,items,empty)=>`<div>
+  // Single-week tasks list first; ongoing (span) tasks sit together under their
+  // own small heading, so a task appearing several weeks running reads as
+  // planned multi-week work rather than something stuck.
+  const col=(title,icon,colour,items,empty)=>{
+    const singles=items.filter(o=>!isSpan(o.t)), spans=items.filter(o=>isSpan(o.t));
+    const spanBlock=spans.length?`<p style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#38BDF8;margin:8px 0 2px;display:flex;align-items:center;gap:4px"><i class="ti ti-arrows-horizontal" style="font-size:10px"></i>Ongoing this week</p>${spans.map(row).join('')}`:'';
+    return `<div>
       <p class="col-head" style="color:${colour}"><i class="ti ${icon}" style="font-size:12px"></i>${title} <span style="font-size:10px;color:#475569;font-weight:400;margin-left:4px">${items.filter(o=>o.t.s!=='Complete').length} to do</span></p>
-      ${items.length?items.map(row).join(''):`<div style="font-size:11px;color:#334155;padding:8px 0">${empty}</div>`}
-    </div>`;
+      ${items.length?(singles.map(row).join('')+spanBlock):`<div style="font-size:11px;color:#334155;padding:8px 0">${empty}</div>`}
+    </div>`;};
   const total=g.client.length+g.sabel.length;
   const body=total?`<div class="phase-cols">
       ${col('Your actions','ti-alert-circle','#CA8A04',g.client,'Nothing for you this week')}
@@ -518,8 +809,8 @@ function thisWeekPanel(){
   const odTotal=od.client.length+od.sabel.length;
   const odRow=o=>{const sc=SC[o.t.s]||SC.Pending;return`<div style="display:flex;align-items:center;gap:8px;padding:6px 2px;border-top:1px solid rgba(248,113,113,.15)">
       <span style="width:7px;height:7px;border-radius:50%;background:${o.c};flex-shrink:0" title="${esc(o.l)}"></span>
-      <span style="font-size:12px;color:#E2E8F0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.t.t)}</span>
-      <span style="font-size:10px;color:#F87171;white-space:nowrap;flex-shrink:0">Week ${o.t.week}</span>
+      <span style="font-size:12px;color:#E2E8F0;flex:1;min-width:0;line-height:1.4">${esc(o.t.t)}</span>
+      <span style="font-size:10px;color:#F87171;white-space:nowrap;flex-shrink:0">${spanWeeksText(o.t)}</span>
       <span style="font-size:10px;color:${sc.c};background:${sc.bg};border-radius:20px;padding:1px 7px;white-space:nowrap;flex-shrink:0">${o.t.s}</span>
     </div>`;};
   const odCol=(title,items)=>items.length?`<div>
@@ -728,7 +1019,20 @@ function saveDate(cid,val){
 }
 function setTaskWeek(cid,val){
   const t=resolveTask(cid);if(!t)return;
+  const dur=isSpan(t)?t.wkEnd-t.week:0; // moving a span keeps its length
   const n=parseInt(val,10); t.week=(isNaN(n)||n<1)?0:n;
+  if(t.week&&dur)t.wkEnd=t.week+dur; else delete t.wkEnd;
+  renderMain(); scheduleAutoSave();
+}
+function setTaskWeekEnd(cid,val){
+  const t=resolveTask(cid);if(!t)return;
+  const n=parseInt(val,10);
+  if(isNaN(n)||n<=(t.week||0))delete t.wkEnd; else t.wkEnd=n;
+  renderMain(); scheduleAutoSave();
+}
+function setTaskKind(cid,on){
+  const t=resolveTask(cid);if(!t)return;
+  if(on)t.kind='milestone'; else delete t.kind;
   renderMain(); scheduleAutoSave();
 }
 function setTaskWeekByDate(cid,val){
@@ -737,7 +1041,9 @@ function setTaskWeekByDate(cid,val){
   const mx=maxWeek()+8; let n=0;
   for(let i=1;i<=mx;i++){ if(weekStartDate(i)<=picked) n=i; }
   if(n<1)n=1;
-  t.week=n; renderMain(); scheduleAutoSave();
+  const dur=isSpan(t)?t.wkEnd-t.week:0;
+  t.week=n; if(dur)t.wkEnd=n+dur; else delete t.wkEnd;
+  renderMain(); scheduleAutoSave();
 }
 function setGroupBy(mode){
   if(groupBy===mode)return;
@@ -803,6 +1109,7 @@ function makeCard(t,cid,isClient,ctx){
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:6px">
               <div style="display:flex;align-items:flex-start;gap:5px;flex:1;min-width:0">
                 ${ctx&&ctx.c?`<span title="${esc(ctx.l||'')}" style="width:8px;height:8px;border-radius:50%;background:${ctx.c};flex-shrink:0;margin-top:4px"></span>`:''}
+                ${t.kind==='milestone'?`<i class="ti ti-diamonds" title="Milestone" style="font-size:13px;color:#C084FC;flex-shrink:0;margin-top:2px"></i>`:''}
                 <span style="font-size:12px;line-height:1.45;color:${done?'#334155':'#E2E8F0'};${done?'text-decoration:line-through':''}">${esc(t.t)}</span>
                 ${tipIcon}
               </div>
@@ -814,7 +1121,9 @@ function makeCard(t,cid,isClient,ctx){
             </div>
             <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
               ${isClient?oBdg(t.o):ownerBtn(t.o,cid)}
-              <span style="font-size:11px;color:${late?'#F87171':'#475569'}">${t.week?weekRangeLabel(t.week):(t.d||'')}</span>
+              <span style="font-size:11px;color:${late?'#F87171':'#475569'}">${taskDatesText(t)}</span>
+              ${isSpan(t)&&!done?`<span title="Level-of-effort work running across Weeks ${t.week}–${t.wkEnd}" style="font-size:10px;font-weight:600;color:#38BDF8;background:rgba(56,189,248,.12);padding:1px 6px;border-radius:3px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-arrows-horizontal" style="font-size:10px"></i>Ongoing</span>`:''}
+              ${t.kind==='milestone'&&!done?`<span title="Checkpoint task: a sign-off or approval" style="font-size:10px;font-weight:600;color:#C084FC;background:rgba(192,132,252,.12);padding:1px 6px;border-radius:3px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-diamonds" style="font-size:10px"></i>Milestone</span>`:''}
               ${late?`<span style="font-size:10px;font-weight:600;color:#F87171;background:rgba(248,113,113,.12);padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em">Overdue</span>`:''}
               ${ctx&&ctx.l?`<span style="font-size:10px;color:#475569">· ${esc(ctx.l)}</span>`:''}
               ${hasNote&&!done?`<span style="font-size:10px;color:#475569;background:#1E2433;padding:1px 5px;border-radius:3px">note</span>`:''}
@@ -830,15 +1139,24 @@ function makeCard(t,cid,isClient,ctx){
           <input id="ttl-${cid}" type="text" value="${safeTitle}" style="width:100%;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit;box-sizing:border-box" placeholder="Task title..." onclick="event.stopPropagation()" onchange="saveTitle('${cid}',this.value)">
         </div>
         <div style="margin-bottom:10px">
-          <label>Week</label>
-          <div style="display:flex;gap:8px">
-            <select onclick="event.stopPropagation()" onchange="setTaskWeek('${cid}',this.value)" style="flex:1;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit">
+          <label>Schedule</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select onclick="event.stopPropagation()" onchange="setTaskWeek('${cid}',this.value)" style="flex:1;min-width:130px;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit">
               <option value="0"${(!t.week||t.week<1)?' selected':''}>Unscheduled</option>
               ${weekOptions(t.week||0)}
             </select>
-            <input type="date" value="${t.week?isoDate(weekStartDate(t.week)):''}" onclick="openPicker(event,this)" onchange="setTaskWeekByDate('${cid}',this.value)" title="Pick a date to move this task to that week" style="font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:5px 8px;font-family:inherit">
+            ${t.week?`<select onclick="event.stopPropagation()" onchange="setTaskWeekEnd('${cid}',this.value)" title="Ongoing work? Set the week it runs until" style="flex:1;min-width:120px;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit">
+              ${weekEndOptions(t)}
+            </select>`:''}
+            <input type="date" value="${t.week?isoDate(weekStartDate(t.week)):''}" onclick="openPicker(event,this)" onchange="setTaskWeekByDate('${cid}',this.value)" title="Pick a date to move this task (a span keeps its length)" style="font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:5px 8px;font-family:inherit">
           </div>
-          <div style="font-size:10px;color:#475569;margin-top:5px">${t.week?('Week '+t.week+' · '+weekRangeLabel(t.week)):'Not scheduled to a week yet'}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;flex-wrap:wrap">
+            <span style="font-size:10px;color:#475569">${t.week?(spanWeeksText(t)+' · '+ (isSpan(t)?taskDatesText(t).split('·')[1].trim():weekRangeLabel(t.week))):'Not scheduled to a week yet'}</span>
+            <label onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#C084FC;cursor:pointer;user-select:none">
+              <input type="checkbox" ${t.kind==='milestone'?'checked':''} onchange="setTaskKind('${cid}',this.checked)" style="accent-color:#C084FC;width:12px;height:12px">
+              Milestone (checkpoint / sign-off)
+            </label>
+          </div>
         </div>
         <div style="margin-bottom:10px">
           <label>Notes</label>
@@ -977,6 +1295,7 @@ function renderSidebar(){
       <img src="${LOGO}" class="sb-logo" alt="Sabel">
       <div class="sb-title">YFood Labs</div>
       <div class="sb-sub">Project tracker · Jul-Oct 2026</div>
+      ${goLiveDate?`<div title="Target go-live date" style="font-size:11px;font-weight:600;color:#E10600;margin-top:6px;display:flex;align-items:center;gap:5px"><i class="ti ti-rocket" style="font-size:12px"></i>Go-live ${new Date(goLiveDate+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>`:''}
     </div>
     ${toggle}${ovBtn}<div class="sb-sec">${secLabel}</div>${groupBtns}
     <button onclick="downloadSnapshot()" title="Download the current plan state as a JSON backup" style="margin-top:14px;width:100%;background:transparent;border:1px solid #1E2433;color:#64748B;font-size:11px;font-family:inherit;border-radius:6px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-download" style="font-size:12px"></i>Download snapshot</button>`;
@@ -995,7 +1314,7 @@ function buildBufferDays(){
   P.forEach(p=>{ if(p.id==='golive'||p.id==='post')return;
     ['sabel','client'].forEach(g=>(T[p.id]&&T[p.id][g]||[]).forEach(t=>{
       if(t.s==='Complete'||!t.week||t.week<1)return;
-      const e=new Date(weekStartDate(t.week).getTime()); e.setDate(e.getDate()+6);
+      const e=new Date(weekStartDate(endWeek(t)).getTime()); e.setDate(e.getDate()+6);
       if(!last||e>last)last=e;
     }));
   });
@@ -1007,8 +1326,9 @@ function bufferWarning(){
   // '' when healthy; otherwise {msg,clr} for the go-live card.
   const b=buildBufferDays();
   if(b===null||b>=WARN_BUFFER_DAYS)return null;
+  // Qualitative only: never disclose the number of buffer days on the card.
   if(b<0)return{msg:'Build tasks are scheduled after go-live',clr:'#F87171'};
-  return{msg:'Build finishes within '+b+' day'+(b===1?'':'s')+' of go-live',clr:'#FBBF24'};
+  return{msg:'Build schedule is running close to go-live',clr:'#FBBF24'};
 }
 function goLiveCard(){
   // Go-live countdown, styled as a card so it sits beside Overall completion
@@ -1094,9 +1414,7 @@ function renderMain(){
     html=`<p style="font-size:11px;color:#475569;margin-bottom:3px">July 2026 - October 2026</p>
       <p style="font-size:18px;font-weight:600;color:#E2E8F0;margin-bottom:1rem">Project overview</p>
       ${ovMetrics(gs)}
-      ${thisWeekPanel()}
-      <div style="font-size:10px;font-weight:600;letter-spacing:.06em;color:#475569;text-transform:uppercase;margin-bottom:8px">${groupBy==='week'?'Week status, click to open':'Pillar status, click to open'}</div>
-      <div class="ph-grid">${groupGrid}</div>`;
+      <div class="ov-two">${milestonesCard()}${thisWeekPanel()}</div>`;
   } else if(groupBy==='week'){
     const ws=weekStats(cur);
     const wpct=ws.total>0?Math.round(ws.done/ws.total*100):0;
