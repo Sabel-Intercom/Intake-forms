@@ -430,20 +430,26 @@ var REFRESH_MS = 5 * 60 * 1000; // auto-refresh every 5 minutes
 
 // Each tracker Nikki has deployed. key = Upstash key (null if unknown).
 // sowHours = total engagement hours from SOW (null => "Data not available").
+// This list is only the first-paint fallback — trackers.json on GitHub is the
+// source of truth and overwrites it on load (honouring its "active" flag).
+// Synced with trackers.json on 27 Jul 2026: active engagements only.
 var TRACKERS = [
-  {name:'Raiz',                key:'raiz-tracker-v1',            file:'RaizTracker_v2.html',            sowHours:40},
-  {name:'BTS',                 key:'bts-usa-june-tracker-v1',    file:'BTSUSATracker_v2.html',          sowHours:83},
-  {name:'Donkey Republic',     key:'donkey-republic-tracker-v1', file:'DonkeyRepublicTracker_v2.html',  sowHours:72},
-  {name:'FLKItOver',           key:'flkitover-tracker-v1',       file:'FlkitOverTracker_v2.html',       sowHours:null},
-  {name:'YFood',               key:'yfood-tracker-v1',           file:'YFoodTracker_v2.html',           sowHours:60},
-  {name:'Cirqul',              key:'cirqul-tracker-v1',          file:'CirqulTracker_v2.html',          sowHours:null},
-  {name:'Education Perfect',   key:'education-perfect-tracker-v1',file:'EducationPerfectTracker_v2.html',sowHours:null},
-  {name:'Huuuge',              key:'huuuge-tracker-v1',          file:'HuuugeTracker_v2.html',          sowHours:99},
-  {name:'The Giving Movement', key:'thegivingmovement-tracker-v1', file:'TheGivingMovementTracker_v2.html',sowHours:60}
+  {name:'Raiz',                      key:'raiz-tracker-v1',                        file:'RaizTracker_v2.html',                     sowHours:40},
+  {name:'FLKItOver',                 key:'flkitover-tracker-v1',                   file:'FlkitOverTracker_v2.html',                sowHours:null},
+  {name:'YFood',                     key:'yfood-tracker-v1',                       file:'YFoodTracker_v2.html',                    sowHours:60},
+  {name:'GPS Insight',               key:'gps-insight-tracker-v1',                 file:'GPSInsightTracker_v2.html',               sowHours:50},
+  {name:'The Giving Movement',       key:'thegivingmovement-tracker-v1',           file:'TheGivingMovementTracker_v2.html',        sowHours:60},
+  {name:'Cronos',                    key:'cronos-tracker-v1',                      file:'CronosTracker_v2.html',                   sowHours:20},
+  {name:'Tulka',                     key:'tulka-tracker-v1',                       file:'TulkaTracker_v2.html',                    sowHours:65},
+  {name:'Positive Salary Packaging', key:'positive-salary-packaging-tracker-v1',   file:'PositiveSalaryPackagingTracker_v2.html',  sowHours:10},
+  {name:'Sounding Board',            key:'soundingboard-tracker-v1',               file:'SoundingBoardTracker.html',               sowHours:30},
+  {name:'Eugene Labs',               key:'eugenelabs-tracker-v1',                  file:'EugeneLabsTracker.html',                  sowHours:27.5}
 ];
 
 // Active clients without a live tracker yet (shown for coverage).
-var NO_TRACKER = ['Ainslie (Encum)','BetNinja (Magico)','Cronos (Particle Research)','GPS Insight','Mambu','PaySauce NZ','Workinitiatives','WPT Global'];
+// Cronos and GPS Insight were removed here on 27 Jul 2026 — both now have live
+// trackers in trackers.json, and listing them in both places created duplicates.
+var NO_TRACKER = ['Ainslie (Encum)','BetNinja (Magico)','Mambu','PaySauce NZ','Workinitiatives','WPT Global'];
 
 // Sabel delivery team — only these appear in the workload widget.
 var SABEL_TEAM = ['Chris','Greg','Richard'];
@@ -504,12 +510,16 @@ var CONTRACTS = [
   {name:'The Giving Movement',        start:''},
   {name:'Ainslie (Encum)',            start:''},
   {name:'BetNinja (Magico)',          start:''},
-  {name:'Cronos (Particle Research)', start:''},
+  {name:'Cronos',                     start:''},
   {name:'GPS Insight',                start:''},
   {name:'Mambu',                      start:''},
   {name:'PaySauce NZ',                start:''},
   {name:'Workinitiatives',            start:''},
-  {name:'WPT Global',                 start:''}
+  {name:'WPT Global',                 start:''},
+  {name:'Tulka',                      start:''},
+  {name:'Eugene Labs',                start:''},
+  {name:'Sounding Board',             start:''},
+  {name:'Positive Salary Packaging',  start:''}
 ];
 
 // ─────────────────────────────────────────────────────────────
@@ -579,7 +589,10 @@ var CLIENT_INFO = {
  migYes:'yes',mig:'Entire engagement',migNote:'Intercom-to-Intercom migration via Migr8Now: connect, 100-record sample, validation, full run, delta and cutover with notifications silenced. USD 1,687 volume fee + USD 1,500 Intercom-to-Intercom uplift.',
  con:'Marianna K',conR:'Primary contact for technical decisions and sign-off (marianna@magnificentgaming.com)',
  signed:'23 Apr 2026',signedS:'Direct proposal (PandaDoc)',ko:'Not found in Drive'},
-'Cronos (Particle Research)':{h:'20',hs:'USD 3,200 · SOW IC-10983',
+// Key renamed from 'Cronos (Particle Research)' on 27 Jul 2026. It MUST match the
+// tracker name in trackers.json exactly ('Cronos'), or the client shows up twice in
+// this widget — once with data, once as "details pending".
+'Cronos':{h:'20',hs:'USD 3,200 · SOW IC-10983 · Particle Research',
  scope:'Standard Launch (Suite) engagement for Particle Research (Cronos): project kickoff and plan, migration scoping/import/cutover, Fin and CX strategy (taxonomy, content assessment, program model), configuration of workflows and integrations, testing and UAT, go-live management and agent enablement, then optimisation and handover.',
  migYes:'tbc',mig:'In scope — no hour split',migNote:'Migration (scoping, import, cutover) is listed in the standard SOW task description but hours are not broken out.',
  con:'Not named in SOW — TBC',conR:'',
