@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Migration Mapping Requirements | Sabel Customer Success</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0F1117;--card:#161B26;--line:#1E2433;--line2:#2A3145;--txt:#E2E8F0;--mut:#94A3B8;--fnt:#475569;--blue:#3B82F6;--blue2:#60A5FA;--red:#E11D48;--amber:#FBBF24;--green:#4ADE80}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+a{color:var(--blue2)}
+.top{position:sticky;top:0;z-index:50;background:rgba(15,17,23,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1120px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px}
+.top img{height:34px;border-radius:6px}
+.top-t{flex:1;min-width:0}
+.top-t h1{font-size:15px;font-weight:600;letter-spacing:.01em}
+.top-t p{font-size:11px;color:var(--mut);margin-top:1px}
+.client-chip{font-size:12px;font-weight:600;color:var(--amber);background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:20px;padding:4px 12px;white-space:nowrap}
+#save-dot{font-size:11px;color:var(--fnt);display:flex;align-items:center;gap:5px;opacity:0;transition:opacity .4s;white-space:nowrap}
+#save-dot span{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block}
+.pbar{height:3px;background:var(--line)}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),#F87171);transition:width .4s}
+.wrap{max-width:1120px;margin:0 auto;padding:22px 20px 80px;display:flex;gap:26px;align-items:flex-start}
+nav.rail{position:sticky;top:76px;width:230px;flex-shrink:0}
+.rail button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:transparent;border:none;border-left:2px solid var(--line);color:var(--mut);font-family:inherit;font-size:12px;padding:7px 10px;cursor:pointer;transition:all .12s}
+.rail button:hover{color:var(--txt);background:rgba(255,255,255,.03)}
+.rail button.on{color:var(--txt);border-left-color:var(--red)}
+.rail .tick{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--fnt);flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:transparent}
+.rail .tick.done{background:rgba(74,222,128,.15);border-color:var(--green);color:var(--green)}
+main{flex:1;min-width:0}
+.banner{border-radius:10px;padding:12px 16px;font-size:13px;line-height:1.55;margin-bottom:18px}
+.banner.amber{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.35);color:#FDE68A}
+.banner.green{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.35);color:#BBF7D0}
+.intro{font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:20px;max-width:720px}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px;scroll-margin-top:86px}
+.sec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.sec-n{font-size:11px;font-weight:700;color:var(--red);letter-spacing:.06em}
+.sec-h h2{font-size:15px;font-weight:600}
+.sec-d{font-size:12px;color:var(--mut);line-height:1.55;margin-bottom:14px;max-width:700px}
+.note{font-size:12px;color:var(--mut);background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:8px;padding:10px 12px;line-height:1.55;margin:10px 0 14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.grid .full{grid-column:1/-1}
+.f label{display:block;font-size:11px;font-weight:500;color:var(--mut);margin-bottom:5px}
+.f label em{color:var(--fnt);font-style:normal;font-weight:400}
+.hint{font-size:10.5px;color:var(--fnt);margin-top:4px;line-height:1.4}
+.na-toggle{margin:2px 0 4px}
+input[type=text],input[type=date],textarea,select{width:100%;font-size:13px;color:var(--txt);background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:9px 11px;font-family:inherit;line-height:1.5;outline:none;transition:border-color .12s}
+input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+textarea{resize:vertical;min-height:70px}
+select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%2394A3B8' fill='none' stroke-width='1.5'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{font-family:inherit;font-size:12px;color:var(--mut);background:var(--bg);border:1px solid var(--line2);border-radius:20px;padding:7px 16px;cursor:pointer;transition:all .12s}
+.pill:hover{border-color:var(--blue)}
+.pill.on{color:#fff;background:rgba(59,130,246,.18);border-color:var(--blue)}
+.chks{display:flex;flex-direction:column;gap:8px}
+.chk{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--txt);cursor:pointer;user-select:none}
+.chk .box{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--line2);flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:transparent;transition:all .12s}
+.chk.on .box{background:rgba(59,130,246,.2);border-color:var(--blue);color:var(--blue2)}
+table.map{width:100%;border-collapse:collapse;margin-top:8px}
+table.map th{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--fnt);text-align:left;padding:4px 8px 6px}
+table.map td{padding:3px 4px;vertical-align:top}
+table.map td:last-child{width:34px}
+.row-x{background:none;border:none;color:var(--fnt);font-size:15px;cursor:pointer;padding:8px 6px;line-height:1}
+.row-x:hover{color:#F87171}
+.add-row{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:7px 14px;background:transparent;border:1px dashed var(--line2);border-radius:8px;color:var(--fnt);font-size:12px;font-family:inherit;cursor:pointer;transition:all .15s}
+.add-row:hover{border-color:var(--blue);color:var(--blue2)}
+.subhide{display:none;margin-top:12px}
+.subhide.show{display:block}
+.submit-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px}
+.btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:11px 22px;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.btn.primary{background:var(--red);color:#fff}
+.btn.primary:hover{background:#F43F5E}
+.btn.ghost{background:transparent;color:var(--mut);border-color:var(--line2)}
+.btn.ghost:hover{color:var(--txt);border-color:var(--mut)}
+#admin{display:none;background:#131727;border:1px solid rgba(192,132,252,.35);border-radius:12px;padding:16px 18px;margin-bottom:18px}
+#admin h3{font-size:13px;color:#C084FC;margin-bottom:4px}
+#admin .meta{font-size:11px;color:var(--fnt);margin-bottom:12px;line-height:1.6}
+#admin .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#admin input{width:auto;flex:1;min-width:160px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--line);border:1px solid var(--line2);border-radius:8px;padding:9px 14px;font-size:12px;color:var(--txt);opacity:0;transition:opacity .3s;pointer-events:none;z-index:1001}
+footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;font-size:11px;color:var(--fnt)}
+@media(max-width:1000px){nav.rail{display:none}.grid{grid-template-columns:1fr}.top-t p{display:none}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-in">
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCADbApEDASIAAhEBAxEB/8QAHQABAAMBAQEBAQEAAAAAAAAAAAcICQYFBAMCAf/EAFkQAAEDAwECBwQSDgkEAwEAAAEAAgMEBQYRBxIIEyExQVFhInF1sgkUFhcYNTc4VFdzgZGSldHS0xUyNkJSU1ZncnSlsbPkIzNDYoKUoaLCJCW0wTR2o5P/xAAbAQEAAgMBAQAAAAAAAAAAAAAABAUDBgcCAf/EADwRAQABAgICDA0EAwEAAAAAAAABAgMEBRFxBgcSITE1UXKRobHBExQVFjIzNEFSU2GB0iKy0fAXJGLx/9oADAMBAAIRAxEAPwCmSIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiIP2o6WesqG09NGZJHcwC7a0YjSQMElefLEvS0Ehg/9lfbitoZbKBrntHlqUAyHpH933v3r977eaW0wh0ur5XfaRNPKe3sHaqLE425er8HZ/8AXWMk2MYLLcL47mejTo06J4Kfpo989+9EPrho6SBu7DSwxjqawBfpxUX4tnxQo+rMru87yYpWU7OhrGA/6nVfP5o717Pf8VvzLzGWX535mGerZ3lNqdxbt1TEckREdqSeKi/Fs+KE4qL8Wz4oUbeaO9ez3/Fb8yeaO9ez3/Fb8y++Sr3xR1vPn/lvyquin8kk8VF+LZ8UJxUX4tnxQo280d69nv8Ait+ZPNHevZ7/AIrfmTyVe+KOs8/8t+VV0U/kkniovxbPihOKi/Fs+KFG3mjvXs9/xW/MnmjvXs9/xW/Mnkq98UdZ5/5b8qrop/JJPFRfi2fFCcVF+LZ8UKNvNHevZ7/it+ZPNHevZ7/it+ZPJV74o6zz/wAt+VV0U/kkniovxbPihOKi/Fs+KFG3mjvXs9/xW/MnmjvXs9/xW/Mnkq98UdZ5/wCW/Kq6KfySTxUX4tnxQv4lpaaVu7LTwvb1OYCFHPmjvXs9/wAVvzL9qXKrxC8F87J2/gyMH7xoV8nK78b8THW9U7PMqrnc126oifpT/LpLtidBUsL6MeVZujTlYe+Oj3lxFxoam31Jp6qMseOUdTh1g9IUhY/faW7MLAOKqGjV0ZPR1g9IX65DaorrQOiIAmbqYn9R6u8V9sYy7h6/B3uDsY822N4DN8L45luiKuGNG9FX0mPdPRv8KL0X9SMdG9zHtLXNJBB6Cv5V85LMTE6JEREfBERAREQEREBTdsm4MW0zPIYrhNRR45aZAHNqrmHMfI09LIgN49GhO6D0FTbwKeD/AEENootpmaULKmsqQJ7NRTN1ZBHztqHNPO93O3oA0dzkbtvUFUMf4EWIQwgZBmd9rpdOU0MMVM3XvPEi96fgY7J5IQxlyyuJw07tlbDvH4YSP9FZFEFPMr4EFC6F0mK5zURSD7WG5UjXtd35IyNPilVr2s7G9oGzGbXJ7K4ULn7kdxpXcbSyHoG+B3JPLoHBpOnMtV1810t9DdbdUW25UkFZR1MZjngmYHskaecOB5CEGOCKfeGBsObsuyGG+48yR2K3WUtha4lxop9C4wknnaQCWk8ugIPNqYCQEREBERAVgeDvwZrjtYw2fKanJ2Y/ReWXU9K3ygal0+6Bvv8A6xga0E7o59SHc2g1gSipqitrIKOkidNUTyNiijaNS97joAO0krWvZTidPg2ziw4nT7pFtomRSOaNA+U91I//ABPLne+gq16Bj86P7A/mF/FRwGZm08jqfadHJMGExsksZY1ztOQFwnJA16dDp1FXPRBjlebdV2i8VtpuEJhrKKokp6iM87JGOLXD3iCvkVg+HphXmZ21vvlNDuUOR04rGkDuRO3Rkze/qGvPuir4gIiICIiDuthezmp2p7RKTEaa5xWwSxSTS1UkRk4tjBqdGAjePMNNR31ZL0DH50f2B/MKM+AJ64al8G1XihaMIKZ+gY/Oj+wP5hPQMfnR/YH8wrmIgpn6Bj86P7A/mF+NXwGqpsetJtLhlf1S2UsHwiZ37ldJEGeGacD/AGq2SF9RaHWnIomjXcpKgxzafoSBo94OJUB3u03Sx3Oa13m3VduroDpLTVULopGHn5WuAIWxa4HbTsmxParjzrbkFI2OsjYRRXGJo4+ld0aH75uvOw8h7DoQGUqLodo2IXjA80uWKX6JrK6gl3HOZyslaRqyRp6WuaQR08vLodQueQEREFoNkPBFqc72d2nLqrPIrUbnEZo6WO1mo3GakN1eZWcp01005OsrrPQMfnR/YH8wrAcFf1vOFeDW+M5SYgpn6Bj86P7A/mE9Ax+dH9gfzCuYiCmfoGPzo/sD+YT0DH50f2B/MK5iIKZ+gY/Oj+wP5hV64Q2yup2QZ5FjFReIrvHPQx1sFSyAwksc57NHMJdukOjdzOPJoenQaoqgHkjvq32b/wCtwf8Ak1KCsyIiArQbIeCLU53s7tOXVWeRWo3OIzR0sdrNRuM1Ibq8ys5TprppydZVX1qZwV/W84V4Nb4zkFf/AEDH50f2B/MKvPCG2X+dJnseK/Zz7Nb9DHV+WPKnlfTfc8bu7vv5tzn16eZapLPTyQz1eoPAlP8AxJUFckREBERAREQF6mKUwqr/AEsbhq1rt8/4Rr+8BeWvfwP7oG+5uWDE1TTZqmOSVpkdqm7mNiirgmqntSDI9scbpHnRrQXE9QCim61stwr5aqUnV55B+COgKTL5yWWuI9jSeKVFKrcpojRVV7287YmJr3VmxE/p35+/BHRv9IiIrlzIREQf6ASdANSVO2zjgqbVMwoI7lU0tFjlHK3ejN1kcyV7egiJrXOH+Pd/dr33kf8Asnt99rqzaTf6VlTBbajyraoJW6sM4aHPmIPId0OaG841JPO0K8aCgeS8C7aPQUb6izXuw3h7G6+VxI+CR56m7zdz4XBV3yjHr3i97nsuQ2uqtlwgOklPURlrh1EdYPQRyHoWwihvhY7J7ftL2bVtRBSsGR2iB9TbahrO7fugudAekteAQB0O0PXqGZaIiAiIgIiIP2o6mWkqo6mB27JG7eBUrUU7aqkhqWfaysDwOrUKI1JuJknHaMn8Aj/UqozaiNzTX7+B0ba7xVcYi7h9P6ZjdfeJiO/qcdnFMKe/yOaNBMwSad/kP+oK8NdRtG9NKf3H/kVy6nYOqarFMzyNU2SWqbOa36aeDdTPTv8AeIiKSpBERAREQF0uyzHW5btJxzGX73FXK5QU8xbztjc8B5HebvH3lzSk7gqTQwcIjC3zta5huIYAXad05jmtPxiOTpQaj08MVPTx09PEyKGJgZGxg0a1oGgAHQAF+Vzraa222quNbKIqWlhfPNIeZrGtLnH3gCvoXg7RrNPkWz3JMfpXhlRc7TVUcTidNHSxOYD8LkGcO3Xb1mm0y/VJbc6y1Y8HkUlrp5ixgZ0GXd/rHnnJOoGp00Ci213G4WusZW2yuqqGqjOrJqeV0b295zSCF/FwpKq3109DXU8lNVU8jopoZG7ro3tOjmkHmII0X4ILs8DPhD3rIb7Bs7zytNdVTxn7FXKT+tkc0EmKV33xLQS1x5SQQSSQrfrHrE75XYzlFryK2FgrbZVxVcG+CWl8bg4BwBGrSRoRryjVT16Mna57Gxn/ACMn1iC6HCAxGDONjuS4/LEHzSUT5qQ9LaiMb8ZHV3TQD2ErKJWIquGJtemppYWMx2Bz2FoljoXbzNRzjWQjUdoKrugIiICIiCc+BBhXmu26W+tqId+gsDDc5iW6tMjSBCNevjC13eYVpKq3eR+YV5n9kM+T1MO7WZHVGVpI0Ip4iWRj33ca7tDgrIoP5fJGxzGvka10jt1gJ0LjoToOs6AnvAr+lUzhj7XJMQ2zbPbfQTuMdhqW3e5RxnXfbITFudjuK473pQrX008NTTRVNPI2WGVgfG9p1Dmkagg9RCCA+HjhXmo2JTXqmh367HJxWsIHdGA9xM3vaFrz7ms51sdd7fSXa01lrr4RNR1kD6eeM8z43tLXN98EhZHbQcaq8Ozi9YvXame2VklOXEab7Wu7l/ec3Rw76DwkREBERBYDgCeuGpfBtV4oWjCzn4AnrhqXwbVeKFowg4zbpdLhZdjmXXe1VUlJX0dpqJqeeM91G9rCQ4doKzn8/wC2y+2Fefjt+ZaGcI/1Bc58CVP8MrKZBJzOEBtla8OG0K8ag6jVzSPgLeVdzs94XW1Gw3GI5JUUuUW7eHGw1EDIZg3p3JI2jQ/pByrwiDXrZ/llmznDrdlVgmdLb7hFxke+NHsIJa5jh0Oa4Fp7R0r3lWXyOWask2L3eOYE00d+lEBPbBCXAdmp175Ks0gpb5JPjNPHV4pmEETWzzNmt9U8DlcG6Pi+Del/0VOVejySeuhjwPFLY4jjqi6SzsGvLuxxbruTvytVF0BERBqZwV/W84V4Nb4zlJijPgr+t5wrwa3xnKTEFLuGjtf2kYNtghsuKZRUWy3utUE5hjhicC9z5AXauaTzNHT0KEvRI7bfy+rf8tT/AFa7PyQz1eoPAlP/ABJVXJBLXokdtv5fVv8Alqf6tPRI7bfy+rf8tT/VqJUQS16JHbb+X1b/AJan+rXD59m2U57eIrxl13lutdDTtpo5pI2MLYg5zg3RoA53uPvrnUQEREBamcFf1vOFeDW+M5ZZrUzgr+t5wrwa3xnIJMWenkhnq9QeBKf+JKtC1np5IZ6vUHgSn/iSoK5IiICIiAiIgL38D+6Bvubl4C9/A/ugb7m5R8X6ivUuNj3GmH50drt756SV36tJ4pUUqVr56SV36tJ4pUUqDlPoVa227YntNnmz2iIitnOhERBpDwDnwO4OVpEJYXtrKsTbvOHca48vbulvvaKd1QXgKbY7dhd6rMHyetZSWe7zCajqpX7sdPVaBpDyeRrXgNG9zAtGvISRfoEEag6goC/xxDWlziAANST0L/VAvDF2x23AMBrccttayTKbxA6nghif3dJE8aPnfp9ryEhvSXEEcjSgzquhhdc6p1Pu8SZnmPdGg3d46admi+ZFYzgl8Hip2iVkOWZbBLTYlBJrFEdWvuT2nla084iBGjnDn+1by6loeXwc+DbkG1Sk+z9zrHWHGg/djqXQ781WQe6ETSQN0coLzya8gDtDpN2S8CPFZLU4Y3mF6prgGdy64Mimhe7qIY1haD16nTtVrKGlpqGjhoqKnipqaCNscMMTA1kbGjQNaByAADTQL9kGQmfYlfMHyyuxjI6TyrcaJ+69oOrXgjVr2npa4EEHt6DyLwlbLySimoGZvidXE1gr5bdMycjnMbZAY9ffdIqmoCk3Efuco/0T4xUZKTcR+5yj/RPjFVebeqjX3S33a94wucyf3Uua2jemlP7j/wAiuXXUbRvTSn9x/wCRXLqVgfZ6VFsq43v6+6BERSmviIiAiIgL0cZu9Xj+R2y/UBAq7bVxVcBPNvxvD269moC85EGvmA5Tac1w+2ZRZJhLQ3CBsrOXUsPM5jupzXAtI6wV7izI4OG3i/7Irm+lMTrpjdXJv1duLtC13IONicftX6DlHM4c/KARoFsu2qYLtJt4qcUvsFTMGB01FIeLqYOvfjPLprybw1aeglBxu3bg54TtSqZbw8zWTIXMDTcKVoIl0Gg42M8j9ByagtdyAa6ABVB2i8Ffazib5JqG1R5NQt1ImtTt+TTo1hOj9exocO1aSogxtraWqoauSkraaamqIjuyRTMLHsPUQeUFfitds1wbD81ozS5Vjdtu7N3da6ogBkYP7j/tmHtaQVV3bBwMqSSGe57Mbq+GYauFpuMm8x392Obnb2B+up53BBStF6eT2C84xfKmx5Bbam23KlduzU87N1zeo9oI5QRyEEEaheYgIiIC9XEbFW5PlNrx23N3qu5VcVLDyagOe4N1PYNdT2ArylZnyPXCvs5tTrcuqod6kx+l/oiW8hqZgWN+BgkPYd1Be/GbPRY9jltsNtj4ujt1LHSwN6mMaGjXt0C+6V7Io3SSPaxjAXOc46BoHOSV/SiLhfZn5i9g99qIpeLrboz7F0mh0O/MCHEdojEjh2gIM9ttuXuzzavkeVb7nwVta7yrvDQiBncRDTr3Gt99X+4F2Y+a7YJZmTTcZW2UutdRqeXSLTiv/wAnRjXrBWZ6tJ5HXmP2K2kXbDqmbdgvlJx1O0nnqINToO/G6Qn9AIL6Kh3kimFfYvaBas2pYdKe9U3leqcByCohAAJ/SjLAP0Cr4qIuF5hXm22FXymhh4yvtjPsnR8mp34QS4DtMZkb3yEGYiIiAiIgsBwBPXDUvg2q8ULRhZz8AT1w1L4NqvFC0YQcBwj/AFBc58CVP8MrKiNj5JGxxtc97iA1rRqST0Bar8I/1Bc58CVP8MrMDBPu4sPhKn/itQf1Fh2XSyNjixa+SPcdGtbb5ST726u72f8AB52s5jXwwwYlXWmkeRv1l1jdSxRt/C0eA5w/RaStQUQcjsewK17Ndn1txG1PMzKVpdNUOaGuqJnHV8hHRqeYanQADU6LrJpI4YnyyyNjjY0ue9x0DQOck9AX9HkHNqs/eFnte2w3KrmxS/49WYRY5tQKRurnVrP7847mRvW1nc9B1QcpwxdqNNtM2pE2efjrDZojR0MgPczu3tZJh2OOgHW1jT0qFERAREQamcFf1vOFeDW+M5SYoz4K/recK8Gt8ZykxBQ3h54nlN623wVlmxq83KmFmp2GakoZZWbwfLqN5rSNeUcnaoA87zP/AMh8m+SZ/orXFEGR3neZ/wDkPk3yTP8ARTzvM/8AyHyb5Jn+itcUQZFVGB5zTU8lRUYZkcMMTC+SSS1zNaxoGpJJboAB0rnFrltY9SzLfAlb/AesjUBERAWpnBX9bzhXg1vjOWWa1M4K/recK8Gt8ZyCTFnp5IZ6vUHgSn/iSrQtZ6eSGer1B4Ep/wCJKgrkiIgIiICIiAvfwP7oG+5uXgL38D+6BvublHxfqK9S42PcaYfnR2u3vnpJXfq0nilRSpWvnpJXfq0nilRSoOU+hVrbbtie02ebPaL7bFablfbzSWaz0ctbcKyVsNPBENXSPcdAB8/MF8Ssd5HlQUFZt3qairYx81FZKiek3udshkijJHbuSPHeJVs507nC+BJNNaY6jL8zNJXSM1dS2+lEjYT1GRxG8evRoHUSox4QHBmynZfbHZBQVzcix9h0nqYoDHNS6nkMkeru55hvgka84bya6Pr86mCCqppaaphjmglYWSRyNDmvaRoWkHkII5NEGNalXZvwg9qmBUMVttGRuqrbCA2OiuEQqI2NHM1pPdtb2NcApC4XHB1nwSpqMzwymkmxaV+9U0zdXOtrifhMRPMfveY9BNaEE8ZJws9sl4oXUkF0ttoDwWukoKINkI7HPLi09o0KhC511bc7hPcLlWVFZWVDzJNPPIXySOPO5zjyk9pXzKxnBL4PFTtErIcsy2CWmxKCTWKI6tfcntPK1p5xECNHOHP9q3l1LQcEvg8VO0SshyzLYJabEoJNYojq19ye08rWnnEQI0c4c/2reXUt0GoaWmoaOGioqeKmpoI2xwwxMDWRsaNA1oHIAANNAlDS01DRw0VFTxU1NBG2OGGJgayNjRoGtA5AABpoF+yAuV2pZ9jmzfEKnJclq+Jpou5iiboZamUjuY429Ljp3gNSdACU2pZ9jmzfEKnJclq+Jpou5iiboZamUjuY429Ljp3gNSdACVmdtv2p5HtXy997vcnE0sWrKCgjcTFSRE8w63HQbzucnqAAAfNto2iXjahn1Zld4a2EyAQ0tMx2raaBuu5GD085JPS5zjoNdFxaIgKTcR+5yj/RPjFRkpNxH7nKP9E+MVV5t6qNfdLfdr3jC5zJ/dS5raN6aU/uP/Irl11G0b00p/cf+RXLqVgfZ6VFsq43v6+6BERSmviIiAiIgIi9vDcTyXMrs604tZay71rYjM+Kmj3ixgIBc7oA1IGp6SB0oPEX70NXVUFXFWUNTNS1MTt6OaGQsew9YcOUFSN5wO2X2vbz8Rvzrxsx2VbRMPs/2YybErla6DjGxGeZg3Q52ug5D06FB3eBcKXa9iojgqL1FkNIwj+iu0XGvI6f6UESE99x7ysfsz4Y+CX18VHmFuq8Yq3chnH/AFFKT2uaA9uva0gdJVAUQbG2e526822C52ivpa+hqG78NRTStkjkb1hzSQV9ayw2C7YMl2T5RFXW6olqbPNIPshbHPPFTs6SBzNkA5nDvHUag6h2K50d6slDebdLx1FX00dVTyfhxyNDmn3wQgi7hPbG7btXwqUQwRRZNQROfa6vmLiOXiXnpY4/FJ1HSDmRUQzU1RJT1ET4ponlkjHjRzXA6EEdBBWyiy74W1lhsPCKzCip49yKWsbWDQaAmeJkztP8T3IIrREQFpdwLMK8x2wm1Szw8XX3sm6VGo0OkgHFD/8AmGHTrcVn/sbxCXPNp+P4pG1xZX1jW1Bbrq2BvdSu5OpjXFaz08MVPTx08EbY4omBjGNGga0DQAdmiD+1RXyRnMzcM3smD00oMFppjWVQaf7eb7Vp7WxtBHuhV6lzF62d7P73c5rpecGxi5V85Bmqqu0wTSyaAAbz3NJOgAHKeYBBkcvf2dZLU4dndkyml3jJbK2KpLW/fta4bzO85urffWo3nT7LPa0wz5CpvoJ50+yz2tMM+Qqb6CDrLdWU1xt9NcKKZs1LVRNmhkbzPY4AtI7CCCv2e1r2Fj2hzXDQgjUEL8bfR0duoIKC30kFJSU8bYoIIIwyOJjRo1rWjkaAOQAcy/dBlBt7wx2AbXMhxhsZZTU9WZKPUc9PJ3cff0a4A9oK4ZXL8kgwvQ47tApYRy62uucB35ISf/1Gp/uhU0QEREFgOAJ64al8G1XihaMLOfgCeuGpfBtV4oWjCDgOEf6guc+BKn+GVllY642u9UNzbGJTSVMc4YTpvbjg7TXo10WpvCP9QXOfAlT/AAyspkFwo+HHcRI0ybOKRzNe6Dbs4EjsPFHT4F1eIcNjEK+rjgybE7pY2PdoZ6eobWMj5ed3csdp3mk9hVEkQbDYvf7LlFipb5j9yp7lbapm/DUQO3muHSOsEHkIOhBBBAK/HM8XsOY47U4/ktsguNuqW6PilbroehzTztcOhw0I6FTHyOLLrhBmt9wiSZ77bV0JuEUZOojnjexhIHRvNfy/oNV5kGXfCX2RV2yPOzbmvkqbHXh09qq3jldGDyxvPNvs1AOnOC06DXQRWtJOHLitPkWwG6V5jaayxyxV9O8jlA3gyQa9RY9x06S0LNtAREQamcFf1vOFeDW+M5SYoz4K/recK8Gt8ZykxBAW37hK0OybOWYtUYlUXZ76KOr4+OtbEAHucN3dLDzbnPr0qPfRx2r2uq35Ub9Woz8kM9XqDwJT/wASVVyQXZ9HHava6rflRv1aejjtXtdVvyo36tUmRBcXL+GbbL7id4sbMBrIHXGgnpBKbk1wYZI3M3tOL5dNddFTpEQEREBamcFf1vOFeDW+M5ZZrUzgr+t5wrwa3xnIJMWenkhnq9QeBKf+JKtC1np5IZ6vUHgSn/iSoK5IiICIiAiIgL38D+6Bvubl4C9/A/ugb7m5R8X6ivUuNj3GmH50drt756SV36tJ4pUUqVr56SV36tJ4pUUqDlPoVa227YntNnmz2i6rZPnN22c57bcuswbJPRvPGQvJDJ4nDR8buwgnl6DoehcqitnOmtGyPaLje03EIMjxyp3mO7ippnkcbSy6csbx0HqPMRyhdgsndjO0zJNlmXxZBj828x2jK2ikceKq4teVjh0HqdztPvg6ZbI9ouN7TcQgyPHKneY7uKmmeRxtLLpyxvHQeo8xHKEHWVMEFVTS01TDHNBKwskjkaHNe0jQtIPIQRyaKgXC44Os+CVNRmeGU0k2LSv3qmmbq51tcT8JiJ5j97zHoJ0BX51MEFVTS01TDHNBKwskjkaHNe0jQtIPIQRyaIMs+Dbj+EZNtbtVpz65mhtMhJYwndbVTgjcgc/7xruXl6dN0aFwI1KoaWmoaOGioqeKmpoI2xwwxMDWRsaNA1oHIAANNAqCcLjg6z4JU1GZ4ZTSTYtK/eqaZurnW1xPwmInmP3vMegnvOB7wkfLHlPZ5tDr/wCn7mG03ad/9Z0Ngmcfvuhrzz8x5dCQuKuV2pZ9jmzfEKnJclq+Jpou5iiboZamUjuY429Ljp3gNSdACU2pZ9jmzfEKnJclq+Jpou5iiboZamUjuY429Ljp3gNSdACVmdtv2p5HtXy997vcnE0sWrKCgjcTFSRE8w63HQbzucnqAAANt+1PI9q+Xvvd7k4mli1ZQUEbiYqSInmHW46Dedzk9QAA4JEQEREBSbiP3OUf6J8YqMlJuI/c5R/onxiqvNvVRr7pb7te8YXOZP7qXNbRvTSn9x/5Fcuuo2jemlP7j/yK5dSsD7PSotlXG9/X3QIiKU18REQEREBWL8j4vkdr28PtsrwBd7VPTRg9MjCyYf7Y3qui9rBsjr8QzG0ZPbD/ANXbKuOpjGugfunUsPY4atPYSg1+UZcKPDarOthuRWO3Qma4tibV0cbRq58kLg/caPwnNDmjtcuxwHKrRm2H23KLHOJqGvhErPwmHmcx3U5p1aR1he4gxoIIOhGhC/xaH7dOCpimfXWoyHHq44zeqhxkqNyHjKWpeedzmagscelzToectJJKg+TgT7ShVlseS4k6n15JHT1Afp17vEka/wCJBWBax7B7RX2HYxiFoujXsraa0U7Zo3jR0biwEsPa3Xd95Q3sR4I+OYbeqbIMtuoyS40r2y09M2HiqWKQHUOIJJkIIBGug6wVZlAWZfDSuUVz4SWUvgc10dO6nptR+EyCMP17zt4e8tDdqeaWrZ9gd0yy7yNENFCXRxF2jp5TyMib2udoOzlJ5AVk7kV2rr/f7hfLnLxtbcKmSqqHgaB0j3Fzj2DUlB8CIiC33kcOFeWLzf8AP6qHVlJGLbROI/tH6PlI7Q0MHeeVdpR1wbsJ8wGxjHrBLFxdcacVVcCNHeWJe7eD+jqGd5oUioOX2kbQcP2dWinu2ZXllrpKicU8LzDJK58m6XaBsbXO5mnl00HJy8oXA+ij2E/lz+ya36lVr8kQzIXjafbcQppt6nsFJvztB5PLE+jiD16RiL4xVYUGmXoo9hP5c/smt+pT0Uewn8uf2TW/UrM1EGpeF7fNkuZZLSY3jmXNrLpWFwp4HUFTDvlrS4jekja3XRp5zy9Ck1Y/YXfqvFsutGSUB0qbZWRVUY103ixwdunsOmh7CtdbHc6O9WWhvFvl42jrqeOpgf8AhRvaHNPwEIOS2+YY3P8AZFkWMNjD6qopDJR69FRH3cXL0auaAewlZQuBa4tcCCDoQehbLrMPhd4X5idu19pYYuLobm8XSj5NBuTElwHYJBI0dgCCI0REFgOAJ64al8G1XihaMLOfgCeuGpfBtV4oWjCDgOEf6guc+BKn+GVlMtfs6x2ly7DbvjFbPNBTXSkkpZZIdN9jXt0JbqCNeXpCrp6CXAPyryb4YPq0FDEV8/QS4B+VeTfDB9Wuixbgg7IrNVsqa1l7vpYQeLr6xojJ/RiYwkdhJ99BFHkc2CXI3+87Q6uCSK3MpHW6ic8ECeRz2ukc3rDAwNJ5tX9bTpdpfPbKGitlvgt9to6ejo6dgjhggjDI42jma1o5AOwL6EEacKWshoeD1ms8+7uutj4RvfhSERt9/VwWWSvD5IhtGpaXG6HZpb6gPra2VlbcmsOvFwMJMbHdRc/R2nUwHpCo8gIiINTOCv63nCvBrfGcpMUZ8Ff1vOFeDW+M5SYgz08kM9XqDwJT/wASVVyWlm23g4YttWzJmT3m+XmhqWUjKUR0hi3N1jnEHumk690elcN6CXAPyryb4YPq0FDEV8/QS4B+VeTfDB9WnoJcA/KvJvhg+rQUMRXz9BLgH5V5N8MH1arPwqdltn2SbQqDG7LcK6vp6m0x1zpKvc3w90szCBugDTSMfCUESIiIC1M4K/recK8Gt8ZyyzWpnBX9bzhXg1vjOQSYs9PJDPV6g8CU/wDElWhagLb9waqHaznLMpqMtqLS9lFHScRHRNlBDHOO9vF459/m06EGciK7PoHLV7Ytb8lt+sT0Dlq9sWt+S2/WIKTIrs+gctXti1vyW36xPQOWr2xa35Lb9YgpMi7bbpg0WzbaneMLguL7lHbuI0qXxCMv4yCOX7UE6ab+nP0LiUBe/gf3QN9zcvAXvYGR5oGe5u/co+L9RXqXGx7jTD86O13F89JK79Wk8UqKVK95aX2etY0al1PIB8UqKFAyn0KtbbdsWP8AZsz/AMz2iIit3OhdtsZ2mZJssy+LIMfm3mO0ZW0UjjxVXFryscOg9Tudp98HiUQa0bI9ouN7TcQgyPHKneY7uKmmeRxtLLpyxvHQeo8xHKF2Cyd2M7TMk2WZfFkGPzbzHaMraKRx4qri15WOHQep3O0++Dplsj2i43tNxCDI8cqd5ju4qaZ5HG0sunLG8dB6jzEcoQdZUwQVVNLTVMMc0ErCySORoc17SNC0g8hBHJos9+GPsHpdmtwjyzGZI243cqnihRvk/pKOYgu3G68royASOlumh6CbxbUs+xzZviFTkuS1fE00XcxRN0MtTKR3Mcbelx07wGpOgBKzO237U8j2r5e+93uTiaWLVlBQRuJipIieYdbjoN53OT1AAAPBy3M8qy2K3RZLfq66sttOKejbUSbwiZ1DrJ0GrjqToNSdAvAREBERAREQFJuI/c5R/onxioyUn4qwsx6jB5zHr8JJ/wDaq829VGtv215E+P3J/wCO+HMbRvTSn9x/5Fcuun2ikfZWnbryiDX/AHFcwpWC9npUOynje/r7oERFKa+IiICIiAiIgl7g47dcg2Q3Z8DY3XTG6uQOrbc5+ha7m42I8zX6Aa9DgND0FugGy7a3gO0iiZNjF+p5aot1koJyIqqLrBjJ1OnW3VvasoV/UT3xSNlie5j2EOa5p0LSOYg9aDZZFlZje3La7j8TYrbn974tmgaypmFS1o6gJQ4Adi6UcKfbmIDGczjLidRIbVSbw7P6rTT3kGly4bartZwXZpbn1OUXuGKp3d6GghIkqpuTk3YxygH8J2jeshZ15Ft72xX+F8Nw2gXhsb/thSObSajq/oQ3k7FHFRNNUTvnqJZJpZDvPe9xc5x6yTzlBKXCI225Dtfvsb6qP7HWKjeTQW1j94MJ5OMkd9/IR08wHIOkmKURAUncFvDmZxtyxy0VDGvooJ/L1W13M6KEb5aexxDW/wCJRivusd4u1iuUdysl0rrXXRghlTR1DoZW6jQ6OaQRqO1BsUvlvFwpLTaay618oipKKB9RPIfvI2NLnH3gCspPPY2p+2Xmfy7U/TXyXfaNtCvFumtt3zvKLhRTjdlpqq7zyxSDqc1zyCO+g+PPsjqsvza85PW6ie6VstSWl2u4HOJDAepo0aOwLw0RAREQFotwC8yGSbEIrLPNv1uO1LqNwJ7riXd3E7vaFzB7ms6V62NZNkmM1EtRjeQXayzTMDJZLfWSU7ntB10cWEEjXoKDYJVW8kXw1tywGz5tTsHliz1XlaoPNrBNpoT17sjWgD++5VD89jan7ZeZ/LtT9NedkOd5vkVB9j8gzLIrvR74f5XrrnNPHvDmO69xGo60HOoiIJ/4AhA4Q1Jqee21WnxQtGVjlaLlcbRcoblaa+qt9dA7ehqaWZ0UsZ001a5pBB0J5iuo89jan7ZeZ/LtT9NBrKiya89jan7ZeZ/LtT9NPPY2p+2Xmfy7U/TQayosmvPY2p+2Xmfy7U/TX8T7Utp1REYp9o2Xyxnna+91LgfeL0Grl3utss9E6uu9yo7dSs+2nqp2xRt77nEAKtm3Hhc4tj1HNa9nbo8hvDgW+XS0ijpz16nQynqDe5/vcmiojc7lcbnPx9yr6qtm/GVEzpHfC4kr5EH35BeLpkF6q71eq6auuNZKZaiomdq57j0n9wA5AAAORfAiICIiDUvgrkHg84Vodf8AtrfGcpNWRdhz7O8ftrbbYc1yS1ULHFzaaiuk0ETSTqSGscACT2L7/PY2p+2Xmfy7U/TQayosmvPY2p+2Xmfy7U/TTz2Nqftl5n8u1P00GsqLJrz2Nqftl5n8u1P0089jan7ZeZ/LtT9NBrKqAeSOEHbfZ+XmxuD/AMmpUM+extT9svM/l2p+muavl4u19uUlzvl0rrpXSgCSprKh00r9BoNXuJJ0AA50HwoiIC1L4K5B4POFaHX/ALa3xnLLRdJYc+zvH7a222HNcktVCxxc2morpNBE0k6khrHAAk9iDXRFk157G1P2y8z+Xan6aeextT9svM/l2p+mg1lRZNeextT9svM/l2p+mnnsbU/bLzP5dqfpoNZUWTXnsbU/bLzP5dqfpp57G1P2y8z+Xan6aDs+GyQeE7l2h1/+F/4UChlfvcKysuNdPX3Crnq6uoeZJp55C+SR5Opc5x5SSekr8EBffj9WKG801S46Ma/R56mnkP8AoV8CLzXTFdM0z72bD36sPdpu0cNMxMa4nSmHkI6CCoxyS1yWu4vi3TxLyXRO6C3q74XUYXe2VNO231LwJ4xpGSft29XfC9+vo6aupzBVRNkYeg84PWD0LXrNyvA3ppqje/u+7JmOCw+yrLqL1irRVG/H0n30z/eSeBEqLsazCtXk0lbo3obK3lHvj5l83mLr/ZdN/u+ZW8Y/DzGndOc3diOb26tz4GZ1TE97l0XR1mI1tNSTVL6mnLYo3PIGupAGvUucWe1eouxponSqcdluKwFUU4miaZng0i6XZ7nuX7P7tJdMPvtTaamVm5KYw17JWjmD2PBa7To1B0XNIsqC6jaJtCzPaFcYa/Mb/U3aaBpbCHtayOIHTXdYwBrddBroOXQarl0Xu2rGK+vpBUh0cDHfaCTXVw6+Qcyx3LtFqNNc6EvBYDE4654PD0TVPDvPCRdR5i6/2XTf7vmTzF1/sum/3fMsPj2H+Ja+aub/ACJ6v5cui6jzF1/sum/3fMnmLr/ZdN/u+ZPHsP8AEeaub/Inq/ly6LqPMXX+y6b/AHfMvopcKdvg1VcN3pEbOU++fmXycfh4j0nu3sSziurR4GY1zEd7nLLbprnXspogd3XWR2nI1vSVKUUbIomRRjdYxoa0dQC/C2W+kt0HE0kQY08rjzlx6yV5WXXxlvpnUtO/WrkboND/AFYPT3+pVGIvVY27FFEb3933Rsoy2xsXwNeIxNUTVPD3Uxy9+qHJ5dVtrL7O9h1ZHpG097n/ANdV5CIr+3RFuiKY9zj+MxVeLxFd+vhqmZ6RERe0YREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQf60lrg5pIIOoI5wuns+X1EDWxV8ZqGDk4xvI/wB/oP8AouXRYr1i3ejRXGlYZdmuLy254TDV7nl5J1xwJIgyiyyt1NS6I9T4z/65F9lDd7dXTcTS1TZZNN7dAI5PfCitdFs/9PXe4O/eFV4jLbVu3VXEzvN8yfZtjsXjLWGuUU6KpiJmInT26HaXz0krv1aTxSopUrXz0krv1aTxSopXvKfQq1sG2J7TZ5s9oiLp8Sx01hbXVzCKccrGH+07T2fvVjevU2ad1U0rLMsxGZYiLFiNMz0RHLP0MRx41bmV1azSnB1jYf7TtPZ+9dzI9kUTnvc1jGDUknQAI4sijLnFrGMGpJ5AAFH+WX91xlNLSuc2kYeXo4w9Z7OoKiiLuPu7+9EdTrNdeB2I4DRT+qurpqnuiOrXO/1vmisvs9nxXfMnmisvs9nxXfMoyRTvJNrlnq/hqf8AkLMPl0dFX5JN80Vl9ns+K75k80Vl9ns+K75lGSJ5Jtcs9X8H+Qsw+XR0Vfkk3zRWX2ez4rvmX5zZPZY26irLz1Mjcf8A1oo2RIyqzyz/AH7PlW2FmMxoi3RH2n8nWXbMZJGuit0JiB/tZNC73hzD/VcrLI+WR0kj3Pe46uc46klfyinWcPbsxoohq2ZZvjMzr3eJr06OCOCI1R/ZERFmVgiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAui2f+nrvcHfvC51dFs/9PXe4O/eFGxnqKtS72N8a4fnQ7S+ekld+rSeKVFKla+ekld+rSeKVx+I495cLa6tb/wBMD3DD/aHt7P3qty+9TZs1VVcredmWW38yzGxYsRpmaZ1RGnhn6P8AcSx01hbXVzCKccrGH+07T2fvXcuLIoy5xaxjBqSeQABHFkUZc4tYxg1JPIAAuByvIHXB5pKRxbSNPKeYyHr73Yo8Rdx93kiOpbVVYDYjgNEfqrq6ap7ojq+szvsryB1weaSkcW0jTynmMh6+92LnURX9q1Tap3NLkWYZhfzC/N+/OmqeiI5I+giIsiEIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiIC9XFa5lvvUU0p3YnAseeoHp+HReUi8XKIrpmmfekYTE14S/Rft8NMxMfZMBDJGaENexw74IQmOKIklscbG94NAUZ26/wB0oIhDDUaxjmY8bwHe6l/NzvlyuEfFVFR/RdLGDdB7/WqTyVc3WjTGh1SdsHBeB3cW6vCaODe0adeng+32ehleQOuDzSUji2kaeU8xkPX3uxc6iK6tWqbVO5pcwzDML+YX5v3501T0RHJH0ERFkQhERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERB//2Q==" alt="Sabel">
+    <div class="top-t">
+      <h1>Migration Mapping Requirements</h1>
+      <p>Your inputs for the migration into Intercom · Prepared with Sabel Customer Success Solutions</p>
+    </div>
+    <div id="save-dot"><span></span>Autosaved</div>
+    <div class="client-chip" id="client-chip">Client</div>
+  </div>
+  <div class="pbar"><i id="pbar"></i></div>
+</div>
+
+<div class="wrap">
+<nav class="rail" id="rail"></nav>
+<main>
+  <div id="nokey" class="banner amber" style="display:none">
+    <strong>This is the master template link.</strong> Answers typed here will not be saved.
+    Please use the personalised link Sabel sent you (it ends in <code>?client=yourcompany</code>).
+  </div>
+  <div id="submitted-banner" class="banner green" style="display:none"></div>
+
+  <div id="admin">
+    <h3>Sabel admin</h3>
+    <div class="meta" id="admin-meta"></div>
+    <div class="row" style="margin-bottom:10px">
+      <button class="btn ghost" onclick="exportXLSX()">Export Excel (.xlsx)</button>
+      <button class="btn ghost" onclick="exportCSV()">Export CSV</button>
+      <button class="btn ghost" onclick="exportJSON()">Download JSON backup</button>
+    </div>
+    <div class="row">
+      <input type="text" id="linkgen" placeholder="new client slug, e.g. syncronest">
+      <button class="btn ghost" onclick="makeLink()">Copy client link</button>
+    </div>
+  </div>
+
+  <p class="intro">This form captures everything we need to migrate your historical support data into Intercom accurately.
+  Answer what you can; your progress <strong>saves automatically</strong>, so you can return any time using the same link.
+  Anything you are unsure about, leave blank and add a note, we will pick it up together.</p>
+
+  <div id="form-root"></div>
+
+  <section class="card">
+    <div class="submit-bar">
+      <button class="btn primary" onclick="submitForm()">Submit to Sabel</button>
+      <span style="font-size:12px;color:var(--fnt)">You can still edit after submitting, changes keep saving.</span>
+    </div>
+  </section>
+</main>
+</div>
+<footer>Sabel Customer Success Solutions · Migration Mapping Requirements · All information is used solely to configure your migration.</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const BUILD_V='202607290418';
+const API='https://sabel-webhook.vercel.app/api/tracker';
+const qs=new URLSearchParams(location.search);
+const SLUG=(qs.get('client')||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
+const KEY=SLUG?('migration-intake-'+SLUG+'-v1'):'';
+const ADMIN=location.hash.replace('#','')==='admin';
+const SESS=Math.random().toString(36).slice(2);
+const TZ=(Intl.DateTimeFormat().resolvedOptions().timeZone)||'';
+
+/* ---------- data model ---------- */
+let F={};                                  // scalar fields
+let T={inbox:[],status:[],attrs:[],agents:[]}; // mapping tables
+let lastSavedAt=0, dirty=false, saveTimer=null;
+
+const YN=['Yes','No'];
+const SECTIONS=[
+ {id:'details',n:'',t:'Project details',fields:[
+   {id:'client',l:'Client / company name',ty:'text'},
+   {id:'source_platform',l:'Source platform (the system you are moving away from)',ty:'select',opts:['Zendesk','Freshdesk','Help Scout','Salesforce Service Cloud','Gorgias','HubSpot Service Hub','Other']},
+   {id:'source_platform_other',l:'If Other, name the platform',ty:'text',showIf:['source_platform','Other']},
+   {id:'intercom_workspace',l:'Intercom workspace (name + URL)',ty:'text',ph:'e.g. Acme Support, https://app.intercom.com/a/apps/abc123'},
+   {id:'migration_type',l:'Migration type',ty:'pills',opts:['Tickets','Conversations','Both']},
+   {id:'co_name',l:'Client owner, name',ty:'text',ph:'Your day-to-day contact for the migration'},
+   {id:'co_email',l:'Client owner, email',ty:'text'},
+   {id:'so_name',l:'Sign-off owner, name',ty:'text',ph:'The person who approves the migration'},
+   {id:'so_role',l:'Sign-off owner, role',ty:'text'},
+   {id:'so_email',l:'Sign-off owner, email',ty:'text'},
+   {id:'target_golive',l:'Target go-live (cutover date)',ty:'date'},
+   {id:'golive_tz',l:'Timezone',ty:'text',ph:'e.g. Australia/Perth'}
+ ]},
+ {id:'access',n:'1',t:'Access and readiness',desc:'We need admin access to both platforms to run the migration.',
+  note:'Please grant admin access to <strong>info+1@sabelcustomersuccess.com</strong> in both your source platform and Intercom.',
+  fields:[
+   {id:'source_access',l:'Source platform admin access granted',ty:'pills',opts:YN},
+   {id:'intercom_access',l:'Intercom admin access granted',ty:'pills',opts:YN},
+   {id:'_constraints',l:'Access constraints (tick any that apply)',ty:'checks',opts:[
+     ['c_sso','SSO required'],['c_ip','IP allowlist'],['c_2fa','2FA enforced'],['c_other','Other (describe below)']]},
+   {id:'access_notes',l:'Notes / constraints details',ty:'textarea',full:1,opt:1}
+ ]},
+ {id:'settings',n:'2',t:'Migration settings',fields:[
+   {id:'migrate_as',l:'Migrate into Intercom as',ty:'pills',opts:['Tickets','Conversations']},
+   {id:'_optset',l:'Optional settings',ty:'checks',opts:[
+     ['o_unassign_closed','Unassign closed tickets'],
+     ['o_unassign_team','Unassign ticket if it is assigned to a team'],
+     ['o_notify_last','Include notifications for last comment (tickets only)']]}
+ ]},
+ {id:'tags',n:'3',t:'Tags',
+  note:'A tag of <strong>"migration"</strong> is automatically added to every migrated ticket, so you can always tell migrated records apart.',
+  fields:[
+   {id:'tags_wanted',l:'Would you like any additional tags added?',ty:'pills',opts:YN},
+   {id:'extra_tags',l:'Additional tags (comma-separated)',ty:'text',full:1,ph:'e.g. legacy-zendesk, pre-2026',showIf:['tags_wanted','Yes']}
+ ]},
+ {id:'filter',n:'4',t:'Filter (timeframe)',desc:'Optionally limit the migration to a date window. Leave off to migrate everything.',fields:[
+   {id:'tf_enable',l:'Enable timeframe filter',ty:'pills',opts:YN},
+   {id:'tf_start',l:'Start date and time',ty:'datetime',showIf:['tf_enable','Yes']},
+   {id:'tf_end',l:'End date and time',ty:'datetime',showIf:['tf_enable','Yes']},
+   {id:'tf_tz',l:'Timezone for the filter window',ty:'text',ph:'e.g. Australia/Perth',showIf:['tf_enable','Yes']}
+ ]},
+ {id:'inbox',n:'5',t:'Team inbox mappings',
+  note:'We can replicate your existing inbox structure, or use this as a chance to clean things up and create inboxes aligned to specific use cases. List each source queue/group/inbox and where its tickets should land in Intercom.',
+  table:{key:'inbox',na:['na_inbox','Not applicable, we do not use separate queues or inboxes'],cols:[['src','Source queue / group / inbox'],['dst','Intercom team inbox'],['notes','Notes']]}},
+ {id:'status',n:'6',t:'Ticket status mapping',
+  note:'New statuses can be created in Intercom if required. Map each source status to the Intercom status it should become.',
+  table:{key:'status',na:['na_status','Not applicable, use the Intercom default statuses'],cols:[['src','Source status'],['dst','Intercom status'],['notes','Notes']]},
+  fields:[{id:'status_default',l:'Default behaviour for empty or unmapped statuses',ty:'text',full:1,opt:1}]},
+ {id:'types',n:'7',t:'Ticket type mapping',
+  desc:'We want to understand what kinds of tickets you currently use: customer tickets, back office tickets, tracker tickets. Should historical tickets be customer-facing in Intercom, or internal only?',
+  fields:[
+   {id:'type_open',l:'Open tickets migrate as',ty:'select',opts:['Customer Ticket','Back-office Ticket','Tracker Ticket']},
+   {id:'type_closed',l:'Closed tickets migrate as',ty:'select',opts:['Customer Ticket','Back-office Ticket','Tracker Ticket']},
+   {id:'type_notes',l:'How many ticket types do you have, and should historical tickets be customer-facing?',ty:'textarea',full:1,opt:1}
+ ]},
+ {id:'attrs',n:'8',t:'Custom attributes',
+  note:'By default, ALL custom attributes are migrated. If you have many historical attributes you no longer need, choose "Specific only" and list just the ones to migrate.',
+  fields:[{id:'attr_mode',l:'Attribute import selection',ty:'pills',opts:['ALL','Specific only']}],
+  table:{key:'attrs',showIf:['attr_mode','Specific only'],cols:[['src','Field name in source'],['obj','Object (Ticket, Contact, Company)']]}},
+ {id:'agents',n:'9',t:'Agent settings (agent mapping)',
+  note:'Some previous agents may no longer exist in your source platform or in Intercom. Map each source agent to their Intercom teammate. For the migration to succeed, all mapped agents must be configured and accepted in Intercom. Unmatched agents fall back to the handling you choose below.',
+  table:{key:'agents',na:['na_agents','Not applicable, no individual agent mapping needed'],cols:[['src','Source agent (name + email)'],['dst','Intercom teammate']]},
+  fields:[
+   {id:'unmatched',l:'Unmatched agent handling',ty:'pills',opts:['Leave unassigned','Assign to specific teammate']},
+   {id:'fallback_agent',l:'Fallback teammate (name + email)',ty:'text',full:1,showIf:['unmatched','Assign to specific teammate']}
+ ]},
+ {id:'contacts',n:'10',t:'Contact settings',
+  note:'The default matching method is Email. If you use External IDs in your source platform, tell us whether to use them in Intercom too.',
+  fields:[
+   {id:'match',l:'Contact matching approach',ty:'pills',opts:['Email only','External ID']},
+   {id:'external_field',l:'External ID source field name',ty:'text',showIf:['match','External ID']},
+   {id:'contact_type',l:'Contact type in Intercom',ty:'text',ph:'e.g. User, Lead',opt:1},
+   {id:'contact_scope',l:'Which contacts should we migrate?',ty:'pills',opts:['All contacts','Only ticket contacts']}
+ ]},
+ {id:'companies',n:'11',t:'Company settings',fields:[
+   {id:'migrate_companies',l:'Migrate companies',ty:'pills',opts:YN},
+   {id:'company_rule',l:'Preferred matching rule',ty:'text',ph:'e.g. match on company domain',showIf:['migrate_companies','Yes']}
+ ]},
+ {id:'signoff',n:'12',t:'Sample review and sign-off',
+  desc:'We migrate a small sample first for you to review, then run the full production migration once you sign off.',
+  fields:[
+   {id:'reviewer_name',l:'Reviewer, name',ty:'text'},
+   {id:'reviewer_email',l:'Reviewer, email',ty:'text'},
+   {id:'review_deadline',l:'Review deadline',ty:'date'},
+   {id:'approver_name',l:'Sign-off approver, name',ty:'text',hint:'Pre-filled from your sign-off owner in Project details, edit to override'},
+   {id:'approver_role',l:'Sign-off approver, role',ty:'text',hint:'Pre-filled from Project details'},
+   {id:'approver_email',l:'Sign-off approver, email',ty:'text',hint:'Pre-filled from Project details'}
+ ]}
+];
+
+/* ---------- render ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fieldHTML(f){
+  const v=F[f.id]||'';
+  const si=f.showIf?` data-si="${f.showIf[0]}::${esc(f.showIf[1])}"`:'';
+  const lab=`<label>${esc(f.l)}${f.opt?' <em>(optional)</em>':''}</label>`;
+  const hint=f.hint?`<div class="hint">${esc(f.hint)}</div>`:'';
+  if(f.ty==='checks'){
+    return `<div class="f full"><label>${esc(f.l)}</label><div class="chks">${f.opts.map(([id,l])=>
+      `<span class="chk${F[id]?' on':''}" data-chk="${id}"><span class="box">✓</span>${esc(l)}</span>`).join('')}</div></div>`;
+  }
+  if(f.ty==='pills'){
+    return `<div class="f${f.full?' full':''}"${si}>${lab}<div class="pills">${f.opts.map(o=>
+      `<button type="button" class="pill${v===o?' on':''}" data-pill="${f.id}" data-val="${esc(o)}">${esc(o)}</button>`).join('')}</div>${hint}</div>`;
+  }
+  if(f.ty==='textarea')
+    return `<div class="f full"${si}>${lab}<textarea data-f="${f.id}" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea>${hint}</div>`;
+  if(f.ty==='select')
+    return `<div class="f${f.full?' full':''}"${si}>${lab}<select data-f="${f.id}"><option value=""></option>${f.opts.map(o=>
+      `<option${v===o?' selected':''}>${esc(o)}</option>`).join('')}</select>${hint}</div>`;
+  const ity=f.ty==='date'?'date':(f.ty==='datetime'?'datetime-local':'text');
+  return `<div class="f${f.full?' full':''}"${si}>${lab}<input type="${ity}" data-f="${f.id}" value="${esc(v)}" placeholder="${esc(f.ph||'')}">${hint}</div>`;
+}
+function tableHTML(tb){
+  const rows=T[tb.key];
+  const naOn=tb.na&&F[tb.na[0]];
+  const body=rows.map((r,i)=>`<tr>${tb.cols.map(([k])=>
+    `<td><input type="text" data-t="${tb.key}" data-i="${i}" data-k="${k}" value="${esc(r[k]||'')}"></td>`).join('')}
+    <td><button class="row-x" data-del="${tb.key}" data-i="${i}" title="Remove row">×</button></td></tr>`).join('');
+  const naHTML=tb.na?`<div class="na-toggle"><span class="chk${naOn?' on':''}" data-chk="${tb.na[0]}"><span class="box">✓</span>${esc(tb.na[1])}</span></div>`:'';
+  const hid=tb.showIf?` id="tbl-${tb.key}" class="subhide${(F[tb.showIf[0]]===tb.showIf[1])?' show':''}"`:'';
+  return `<div${hid}>${naHTML}<div${naOn?' style="display:none"':''}><table class="map"><thead><tr>${tb.cols.map(([,l])=>`<th>${esc(l)}</th>`).join('')}<th></th></tr></thead>
+    <tbody>${body}</tbody></table>
+    <button class="add-row" data-add="${tb.key}">+ Add row</button></div></div>`;
+}
+function render(){
+  document.getElementById('form-root').innerHTML=SECTIONS.map(s=>`
+    <section class="card" id="sec-${s.id}">
+      <div class="sec-h">${s.n?`<span class="sec-n">${s.n}</span>`:''}<h2>${esc(s.t)}</h2></div>
+      ${s.desc?`<p class="sec-d">${esc(s.desc)}</p>`:''}
+      ${s.note?`<div class="note">${s.note}</div>`:''}
+      ${s.fields?`<div class="grid">${s.fields.map(fieldHTML).join('')}</div>`:''}
+      ${s.table?tableHTML(s.table):''}
+    </section>`).join('');
+  renderRail(); renderChip(); renderProgress(); applyConditions(); spyUpdate();
+}
+function applyConditions(){
+  document.querySelectorAll('[data-si]').forEach(el=>{
+    const[id,val]=el.dataset.si.split('::');
+    el.style.display=(F[id]===val)?'':'none';
+  });
+  const tb=document.getElementById('tbl-attrs');
+  if(tb)tb.classList.toggle('show',F.attr_mode==='Specific only');
+}
+function spyUpdate(){
+  const line=window.innerHeight*0.35;
+  let cur=SECTIONS[0].id;
+  document.querySelectorAll('section.card[id^="sec-"]').forEach(el=>{
+    if(el.getBoundingClientRect().top<=line)cur=el.id.slice(4);
+  });
+  document.querySelectorAll('.rail button').forEach(b=>b.classList.toggle('on',b.dataset.nav===cur));
+}
+window.addEventListener('scroll',()=>requestAnimationFrame(spyUpdate),{passive:true});
+function renderRail(){
+  document.getElementById('rail').innerHTML=SECTIONS.map(s=>
+    `<button data-nav="${s.id}"><span class="tick${secDone(s)?' done':''}">✓</span>${s.n?s.n+' · ':''}${esc(s.t)}</button>`).join('');
+}
+function renderChip(){
+  document.getElementById('client-chip').textContent=F.client||(SLUG?SLUG:'Template');
+}
+function condOK(f){return !f.showIf||F[f.showIf[0]]===f.showIf[1]}
+function secFilled(s){
+  let filled=0,total=0;
+  (s.fields||[]).forEach(f=>{
+    if(f.ty==='checks'||f.opt)return;
+    if(!condOK(f))return;
+    total++; if((F[f.id]||'').trim())filled++;
+  });
+  if(s.table&&condOK(s.table)){
+    total++;
+    if((s.table.na&&F[s.table.na[0]])||T[s.table.key].some(r=>Object.values(r).some(v=>(v||'').trim())))filled++;
+  }
+  return [filled,total];
+}
+function secDone(s){const[a,b]=secFilled(s);return b>0&&a>=b}
+function renderProgress(){
+  let f=0,t=0; SECTIONS.forEach(s=>{const[a,b]=secFilled(s);f+=a;t+=b});
+  document.getElementById('pbar').style.width=(t?Math.round(f/t*100):0)+'%';
+}
+
+/* ---------- events (delegated) ---------- */
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(el.dataset.f!==undefined){
+    F[el.dataset.f]=el.value;
+    if(/^approver_/.test(el.dataset.f))F.__apprTouched=true;
+    if(/^so_(name|role|email)$/.test(el.dataset.f)&&!F.__apprTouched)mirrorApprover();
+    touch(false);
+  }
+  if(el.dataset.t!==undefined){T[el.dataset.t][+el.dataset.i][el.dataset.k]=el.value;touch(false)}
+});
+function mirrorApprover(){
+  F.approver_name=F.so_name||'';F.approver_role=F.so_role||'';F.approver_email=F.so_email||'';
+  ['approver_name','approver_role','approver_email'].forEach(id=>{
+    const t=document.querySelector('[data-f="'+id+'"]');if(t)t.value=F[id]||'';
+  });
+}
+// Native calendar pop-out on focus for date and datetime fields
+document.addEventListener('focusin',e=>{
+  const el=e.target;
+  if(el.matches&&el.matches('input[type=date],input[type=datetime-local]')&&el.showPicker){
+    try{el.showPicker()}catch(_){}
+  }
+});
+document.addEventListener('change',e=>{if(e.target.dataset.f!==undefined){F[e.target.dataset.f]=e.target.value;touch(false)}});
+document.addEventListener('click',e=>{
+  const p=e.target.closest('[data-pill]');
+  if(p){F[p.dataset.pill]=(F[p.dataset.pill]===p.dataset.val)?'':p.dataset.val;touch(true);return}
+  const c=e.target.closest('[data-chk]');
+  if(c){F[c.dataset.chk]=!F[c.dataset.chk];touch(true);return}
+  const a=e.target.closest('[data-add]');
+  if(a){T[a.dataset.add].push({});touch(true);return}
+  const d=e.target.closest('[data-del]');
+  if(d){T[d.dataset.del].splice(+d.dataset.i,1);touch(true);return}
+  const n=e.target.closest('[data-nav]');
+  if(n){document.getElementById('sec-'+n.dataset.nav).scrollIntoView({behavior:'smooth'});
+    document.querySelectorAll('.rail button').forEach(b=>b.classList.toggle('on',b===n));return}
+});
+function touch(rerender){
+  dirty=true;
+  if(rerender)render(); else {renderRail();renderChip();renderProgress();applyConditions()}
+  clearTimeout(saveTimer);saveTimer=setTimeout(save,800);
+}
+
+/* ---------- persistence ---------- */
+async function apiGet(){
+  const r=await fetch(API+'?key='+encodeURIComponent(KEY));
+  const j=await r.json();
+  return j.value?JSON.parse(j.value):null;
+}
+async function save(){
+  if(!KEY||!dirty)return;
+  try{
+    const cur=await apiGet();
+    if(cur&&cur.savedAt>lastSavedAt&&cur.sess!==SESS){
+      if(!confirm('Someone else has saved changes to this form since you opened it. Overwrite with your version? (Cancel keeps theirs and reloads.)')){
+        location.reload();return;
+      }
+    }
+    const payload={v:BUILD_V,savedAt:Date.now(),sess:SESS,F,T};
+    await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key:KEY,value:JSON.stringify(payload)})});
+    lastSavedAt=payload.savedAt;dirty=false;
+    const dot=document.getElementById('save-dot');dot.style.opacity=1;setTimeout(()=>dot.style.opacity=0,1600);
+  }catch(err){toast('Could not save, will retry with your next change')}
+}
+async function load(){
+  if(!KEY)return;
+  try{
+    const st=await apiGet();
+    if(st){F=st.F||{};T=Object.assign({inbox:[],status:[],attrs:[],agents:[]},st.T||{});lastSavedAt=st.savedAt||0;}
+  }catch(err){toast('Could not load saved answers, check your connection')}
+  if(F.__submitted)showSubmitted();
+}
+function submitForm(){
+  const inc=SECTIONS.filter(s=>!secDone(s)).map(s=>(s.n?s.n+' · ':'')+s.t);
+  if(inc.length&&!confirm('Some sections look incomplete:\n\n- '+inc.join('\n- ')+'\n\nSubmit anyway? You can come back and finish them later, your answers keep saving.'))return;
+  F.__submitted=new Date().toISOString();
+  dirty=true;save();showSubmitted();
+  toast('Submitted, thank you.');
+}
+function showSubmitted(){
+  const b=document.getElementById('submitted-banner');
+  b.style.display='block';
+  b.innerHTML='<strong>Submitted to Sabel</strong> on '+new Date(F.__submitted).toLocaleString()+'. You can keep editing, any changes continue to save.';
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.opacity=1;setTimeout(()=>t.style.opacity=0,2800)}
+
+/* ---------- export (admin) ---------- */
+function exportRows(){
+  // [section, field, value] scalar rows per section; tables handled separately
+  const out=[];
+  SECTIONS.forEach(s=>{
+    (s.fields||[]).forEach(f=>{
+      if(f.ty==='checks'){f.opts.forEach(([id,l])=>out.push([s.t,l,F[id]?'Yes':'No']))}
+      else out.push([s.t,f.l,F[f.id]||'']);
+    });
+  });
+  SECTIONS.forEach(s=>{if(s.table&&s.table.na)out.push([s.t,s.table.na[1],F[s.table.na[0]]?'Yes':'No'])});
+  out.push(['Meta','Submitted at',F.__submitted||'']);
+  out.push(['Meta','Storage key',KEY]);
+  return out;
+}
+function tableDefs(){
+  const defs=[];
+  SECTIONS.forEach(s=>{if(s.table)defs.push({name:s.t,key:s.table.key,cols:s.table.cols})});
+  return defs;
+}
+function csvCell(v){v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function dl(name,blob){
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+function fname(ext){return 'MigrationIntake_'+(SLUG||'template')+'_'+new Date().toISOString().slice(0,10)+'.'+ext}
+function exportCSV(){
+  let lines=[['Section','Field','Value'].join(',')];
+  exportRows().forEach(r=>lines.push(r.map(csvCell).join(',')));
+  tableDefs().forEach(td=>{
+    lines.push('');lines.push(csvCell(td.name));
+    lines.push(td.cols.map(c=>csvCell(c[1])).join(','));
+    T[td.key].forEach(r=>lines.push(td.cols.map(c=>csvCell(r[c[0]]||'')).join(',')));
+  });
+  dl(fname('csv'),new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'}));
+}
+function loadSheetJS(cb){
+  if(window.XLSX)return cb();
+  const s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  s.onload=cb;s.onerror=()=>toast('Could not load the Excel library, try CSV instead');
+  document.head.appendChild(s);
+}
+function exportXLSX(){
+  loadSheetJS(()=>{
+    const wb=XLSX.utils.book_new();
+    // Answers sheet: grouped scalar answers
+    const ans=[['Section','Field','Value'],...exportRows()];
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ans),'Answers');
+    // one tab per mapping table
+    tableDefs().forEach(td=>{
+      const aoa=[td.cols.map(c=>c[1]),...T[td.key].map(r=>td.cols.map(c=>r[c[0]]||''))];
+      const nm=td.name.replace(/[\\\/?*\[\]:]/g,'').slice(0,31);
+      XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),nm);
+    });
+    const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    dl(fname('xlsx'),new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  });
+}
+function exportJSON(){
+  dl(fname('json'),new Blob([JSON.stringify({v:BUILD_V,exportedAt:new Date().toISOString(),slug:SLUG,F,T},null,2)],{type:'application/json'}));
+}
+function makeLink(){
+  const slug=document.getElementById('linkgen').value.toLowerCase().replace(/[^a-z0-9-]/g,'');
+  if(!slug){toast('Type a client slug first');return}
+  const url=location.origin+location.pathname+'?client='+slug;
+  navigator.clipboard.writeText(url).then(()=>toast('Copied: '+url)).catch(()=>prompt('Client link:',url));
+}
+
+/* ---------- boot ---------- */
+(async function(){
+  if(!KEY)document.getElementById('nokey').style.display='block';
+  if(ADMIN){
+    document.getElementById('admin').style.display='block';
+    document.getElementById('admin-meta').innerHTML=
+      'Build '+BUILD_V+' · Storage key: <code>'+(KEY||'none, template link')+'</code>'+
+      (KEY?'':'<br>Open a client\'s link with #admin on the end to export their answers.');
+  }
+  await load();
+  if(!F.golive_tz)F.golive_tz=TZ;
+  if(!F.tf_tz)F.tf_tz=TZ;
+  if(ADMIN&&lastSavedAt)document.getElementById('admin-meta').innerHTML+=
+    ' · Last saved: '+new Date(lastSavedAt).toLocaleString()+
+    (F.__submitted?' · <span style="color:#4ADE80">Submitted '+new Date(F.__submitted).toLocaleString()+'</span>':' · Not yet submitted');
+  render();
+})();
+</script>
+</body>
+</html>
