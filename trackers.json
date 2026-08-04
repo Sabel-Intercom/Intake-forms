@@ -103,5 +103,12 @@
   "file": "EugeneLabsTracker.html",
   "sowHours": 27.5,
   "active": true
-}
+},
+  {
+    "name": "Synchronest",
+  "key": "synchronest-tracker-v1",
+  "file": "SynchronestTracker.html",
+  "sowHours": 0,
+  "active": true
+  }
 ]
