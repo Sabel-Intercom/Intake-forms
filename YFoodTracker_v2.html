@@ -73,7 +73,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 #status-picker button,#owner-picker button,#add-picker button{display:flex;align-items:center;gap:7px;width:100%;padding:7px 10px;background:transparent;border:none;cursor:pointer;font-family:inherit;border-radius:5px;transition:background .1s;text-align:left}
 #status-picker button:hover,#owner-picker button:hover,#add-picker button:hover{background:rgba(255,255,255,.06)}
 /* tooltip */
-#runway-pop{position:fixed;display:none;background:#1E2433;border:1px solid #2A3145;border-radius:9px;padding:11px 13px;z-index:1001;max-width:270px;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+#runway-pop,#actions-pop{position:fixed;display:none;background:#1E2433;border:1px solid #2A3145;border-radius:9px;padding:11px 13px;z-index:1001;max-width:270px;box-shadow:0 6px 24px rgba(0,0,0,.5)}
 .card-flash{animation:cardflash 2.4s ease}
 @keyframes cardflash{0%{box-shadow:0 0 0 3px rgba(251,146,60,.95)}55%{box-shadow:0 0 0 3px rgba(251,146,60,.5)}100%{box-shadow:0 0 0 0 rgba(251,146,60,0)}}
 display:none;background:#1E2433;border:1px solid #2A3145;border-radius:8px;padding:9px 12px;font-size:12px;color:#E2E8F0;max-width:240px;line-height:1.5;z-index:1002;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4)}
@@ -90,6 +90,7 @@ display:none;background:#1E2433;border:1px solid #2A3145;border-radius:8px;paddi
 <div id="status-picker"></div>
 <div id="owner-picker"></div>
 <div id="runway-pop" onclick="event.stopPropagation()"></div>
+<div id="actions-pop" onclick="event.stopPropagation()"></div>
 <div id="add-picker"></div>
 <div id="tip-box"></div>
 <div id="autosave-dot"><i class="ti ti-cloud-check" style="font-size:13px"></i>Autosaved</div>
@@ -103,7 +104,7 @@ const GO_LIVE='2026-09-22';  // [CLIENT] go-live date YYYY-MM-DD, or '' to hide 
 const GO_LIVE_NOTE='Go-live, Intercom opens to customers across all channels';  // [CLIENT] one-line note
 const ALL_STATUSES=['Complete','In Progress','Pending','Blocked','Dependency'];
 const SABEL_TEAM=['Chris','Richard','Greg'];
-const BUILD_V=202608050603;  // set automatically by the build script from the build timestamp; do not edit
+const BUILD_V=202608050751;  // set automatically by the build script from the build timestamp; do not edit
 const P=[
   {id:'setup',l:'Setup',c:'#64748B',w:'Week 1',d:'Jul 6-12',h:2},
   {id:'foundations',l:'Foundations',c:'#3B82F6',w:'Weeks 1-4',d:'Jul 6-Aug 2',h:14},
@@ -430,7 +431,7 @@ function closeStatusPicker(){
   document.getElementById('status-picker').style.display='none';
   pickerCid=null;
 }
-document.addEventListener('click',()=>{closeStatusPicker();closeOwnerPicker();closeAddMenu();closeRunwayPop();});
+document.addEventListener('click',()=>{closeStatusPicker();closeOwnerPicker();closeAddMenu();closeRunwayPop();closeActionsPop();});
 
 // ── Owner picker (Sabel tasks) ────────────────────────────────────────────────
 function openOwnerPicker(e,cid){
@@ -950,6 +951,79 @@ function callActionsPanel(){
     ${items.length?`<div onclick="toggleCallActions()" style="display:flex;align-items:center;justify-content:center;gap:5px;padding-top:8px;margin-top:8px;border-top:1px solid #1E2433;cursor:pointer;font-size:11px;color:#94A3B8;user-select:none">${callOpen?'Hide actions':'View actions ('+items.length+')'}<i class="ti ti-chevron-${callOpen?'up':'down'}" style="font-size:12px"></i></div>`:''}
     ${quickAdd}
   </div>`;
+}
+
+// ── Export actions table ──────────────────────────────────────────────────────
+// Every action in the plan as a flat table anyone can drop into a spreadsheet:
+// CSV download or copy-as-TSV, filtered to Client / Sabel / both, sorted by due
+// date (Friday of each task's final week) then pillar order. Includes an
+// Urgency column (Overdue / Due this week / Go-live day / Upcoming / Done) so
+// the table filters by urgency out of the box.
+function closeActionsPop(){const p=document.getElementById('actions-pop');if(p)p.style.display='none';}
+function openActionsPop(e){
+  e.stopPropagation();
+  closeStatusPicker();closeOwnerPicker();closeAddMenu();closeRunwayPop();
+  const pop=document.getElementById('actions-pop');
+  pop.innerHTML=`
+    <div style="font-size:12px;font-weight:600;color:#E2E8F0;margin-bottom:8px">Export actions table</div>
+    <select id="exp-side" style="width:100%;font-size:11px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 8px;font-family:inherit">
+      <option value="all">Client + Sabel actions</option>
+      <option value="client">Client actions only</option>
+      <option value="sabel">Sabel actions only</option>
+    </select>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button onclick="exportActionsCSV()" style="flex:1;background:rgba(74,222,128,.1);border:1px solid #4ADE8055;color:#4ADE80;font-size:11px;font-weight:600;font-family:inherit;border-radius:6px;padding:6px 8px;cursor:pointer">Download CSV</button>
+      <button onclick="copyActionsTable()" style="flex:1;background:transparent;border:1px solid #2A3145;color:#94A3B8;font-size:11px;font-family:inherit;border-radius:6px;padding:6px 8px;cursor:pointer">Copy for sheet</button>
+    </div>
+    <div style="font-size:10px;color:#64748B;margin-top:7px;line-height:1.4">Sorted by due date, then pillar. Urgency column included for filtering.</div>`;
+  const rect=e.currentTarget.getBoundingClientRect();
+  pop.style.left=Math.max(8,Math.min(rect.left,window.innerWidth-285))+'px';
+  pop.style.top=Math.min(rect.bottom+6,window.innerHeight-190)+'px';
+  pop.style.display='block';
+}
+function actionRows(side){
+  const rows=[];
+  P.forEach((p,pi)=>['client','sabel'].forEach(g=>{
+    if(side==='client'&&g!=='client')return;
+    if(side==='sabel'&&g!=='sabel')return;
+    (T[p.id]&&T[p.id][g]||[]).forEach(t=>{
+      const ew=endWeek(t);
+      let due='';
+      if(ew&&ew>=1){const d=new Date(weekStartDate(ew));d.setDate(d.getDate()+4);due=isoDate(d);}
+      let urg='Upcoming';
+      if(t.s==='Complete')urg='Done';
+      else if(isOverdue(t))urg='Overdue';
+      else if(t.gate==='day'||p.id==='golive')urg='Go-live day';
+      else if(ew&&ew===currentWeek())urg='Due this week';
+      const flags=[t.kind==='milestone'?'Milestone':'',t.gate===true?'Blocker':'',t.gate==='day'?'On the day':'',t.call?('Call '+t.call):''].filter(Boolean).join('; ');
+      rows.push({pi,cells:[t.t,p.l,g==='client'?'Client':'Sabel',t.o,t.week?spanWeeksText(t):'Unscheduled',due,urg,t.s,flags],due});
+    });
+  }));
+  rows.sort((a,b)=>((a.due||'9999')).localeCompare(b.due||'9999')||a.pi-b.pi);
+  return rows;
+}
+function actionMatrix(side){
+  const clean=v=>String(v==null?'':v).replace(/[\t\r\n]+/g,' ');
+  return [['Task','Pillar','Action for','Owner','Week(s)','Due date','Urgency','Status','Flags']]
+    .concat(actionRows(side).map(r=>r.cells.map(clean)));
+}
+function exportActionsCSV(){
+  const side=(document.getElementById('exp-side')||{}).value||'all';
+  const escC=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const csv='﻿'+actionMatrix(side).map(r=>r.map(escC).join(',')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=KEY+'-actions-'+side+'-'+isoDate(new Date())+'.csv';
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href);
+  closeActionsPop();showToast('Actions table downloaded');
+}
+function copyActionsTable(){
+  const side=(document.getElementById('exp-side')||{}).value||'all';
+  const tsv=actionMatrix(side).map(r=>r.join('\t')).join('\n');
+  const fin=()=>{closeActionsPop();showToast('Copied. Paste straight into a spreadsheet');};
+  const fallback=()=>{const ta=document.createElement('textarea');ta.value=tsv;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(err){}ta.remove();fin();};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(tsv).then(fin,fallback);
+  else fallback();
 }
 
 // ── Key milestones chart (overview) ───────────────────────────────────────────
@@ -1664,7 +1738,8 @@ function renderSidebar(){
       ${goLiveDate?`<div title="Target go-live date" style="font-size:11px;font-weight:600;color:#E10600;margin-top:6px;display:flex;align-items:center;gap:5px"><i class="ti ti-rocket" style="font-size:12px"></i>Go-live ${new Date(goLiveDate+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>`:''}
     </div>
     ${toggle}${ovBtn}<div class="sb-sec">${secLabel}</div>${groupBtns}
-    <button onclick="downloadSnapshot()" title="Download the current plan state as a JSON backup" style="margin-top:14px;width:100%;background:transparent;border:1px solid #1E2433;color:#64748B;font-size:11px;font-family:inherit;border-radius:6px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-download" style="font-size:12px"></i>Download snapshot</button>`;
+    <button onclick="openActionsPop(event)" title="Export every action as a table (CSV or copy-paste) filtered to Client, Sabel or both" style="margin-top:14px;width:100%;background:transparent;border:1px solid #1E2433;color:#64748B;font-size:11px;font-family:inherit;border-radius:6px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-table-export" style="font-size:12px"></i>Export actions</button>
+    <button onclick="downloadSnapshot()" title="Download the current plan state as a JSON backup" style="margin-top:8px;width:100%;background:transparent;border:1px solid #1E2433;color:#64748B;font-size:11px;font-family:inherit;border-radius:6px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-download" style="font-size:12px"></i>Download snapshot</button>`;
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
