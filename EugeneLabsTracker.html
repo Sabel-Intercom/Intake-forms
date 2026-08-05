@@ -73,7 +73,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 #status-picker button,#owner-picker button,#add-picker button{display:flex;align-items:center;gap:7px;width:100%;padding:7px 10px;background:transparent;border:none;cursor:pointer;font-family:inherit;border-radius:5px;transition:background .1s;text-align:left}
 #status-picker button:hover,#owner-picker button:hover,#add-picker button:hover{background:rgba(255,255,255,.06)}
 /* tooltip */
-#tip-box{position:fixed;display:none;background:#1E2433;border:1px solid #2A3145;border-radius:8px;padding:9px 12px;font-size:12px;color:#E2E8F0;max-width:240px;line-height:1.5;z-index:1002;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+#runway-pop,#actions-pop{position:fixed;display:none;background:#1E2433;border:1px solid #2A3145;border-radius:9px;padding:11px 13px;z-index:1001;max-width:270px;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+.card-flash{animation:cardflash 2.4s ease}
+@keyframes cardflash{0%{box-shadow:0 0 0 3px rgba(251,146,60,.95)}55%{box-shadow:0 0 0 3px rgba(251,146,60,.5)}100%{box-shadow:0 0 0 0 rgba(251,146,60,0)}}
+display:none;background:#1E2433;border:1px solid #2A3145;border-radius:8px;padding:9px 12px;font-size:12px;color:#E2E8F0;max-width:240px;line-height:1.5;z-index:1002;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4)}
 /* autosave indicator */
 #autosave-dot{position:fixed;top:14px;right:16px;font-size:11px;color:#475569;display:flex;align-items:center;gap:5px;opacity:0;transition:opacity .4s;z-index:999}
 #autosave-dot.show{opacity:1}
@@ -86,6 +89,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 <div id="status-picker"></div>
 <div id="owner-picker"></div>
+<div id="runway-pop" onclick="event.stopPropagation()"></div>
+<div id="actions-pop" onclick="event.stopPropagation()"></div>
 <div id="add-picker"></div>
 <div id="tip-box"></div>
 <div id="autosave-dot"><i class="ti ti-cloud-check" style="font-size:13px"></i>Autosaved</div>
@@ -93,27 +98,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <script>
 const API='https://sabel-webhook.vercel.app/api/tracker';
 const KEY='eugenelabs-tracker-v1';  // [CLIENT] api key slug
+const CLIENT_NAME='Eugene Labs';  // used on the exported go-live checklist
 const LOGO='data:image/jpeg;base64,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01T0RHJH0ERFkQhERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERB//2Q==';
 const GO_LIVE='2026-08-12';  // [CLIENT] go-live date YYYY-MM-DD, or '' to hide the box
-const GO_LIVE_NOTE='Cutover, Fin live on member portal and web Messenger, delta migration sync';  // [CLIENT] one-line note
+const GO_LIVE_NOTE='Cutover, Intercom opens across all channels';  // [CLIENT] one-line note
 const ALL_STATUSES=['Complete','In Progress','Pending','Blocked','Dependency'];
 const SABEL_TEAM=['Chris','Richard','Greg'];
-const BUILD_V=202607230415;  // set automatically by the build script from the build timestamp; do not edit
-const P=[
-  {id:'setup',l:'Setup & Kickoff',c:'#64748B',w:'Week 1',d:'Jul 27-Aug 2',h:0},
-  {id:'foundations',l:'Intercom Foundations',c:'#3B82F6',w:'Weeks 1-2',d:'Jul 27-Aug 9',h:0},
-  {id:'fin',l:'Fin & Help Centre',c:'#10B981',w:'Weeks 2-3',d:'Aug 3-16',h:0},
-  {id:'migration',l:'Migration',c:'#6366F1',w:'Weeks 1-3',d:'Jul 27-Aug 16',h:0},
-  {id:'uat',l:'UAT & Enablement',c:'#9333EA',w:'Week 3',d:'Aug 10-16',h:0},
-  {id:'golive',l:'Go-live & Cutover',c:'#E10600',w:'Cutover',d:'Aug 12',h:0},
-  {id:'post',l:'Post go-live',c:'#94A3B8',w:'Week 4',d:'Aug 17-23',h:0},
-];
-const OW={
-  Chris:{c:'#60A5FA',bg:'rgba(96,165,250,.15)'},
-  Richard:{c:'#C084FC',bg:'rgba(192,132,252,.15)'},
-  Greg:{c:'#34D399',bg:'rgba(52,211,153,.15)'},
-  'Eugene':{c:'#FBBF24',bg:'rgba(251,191,36,.15)'}
-};
+const BUILD_V=202608050943;  // set automatically by the build script from the build timestamp; do not edit
+const P=[{"id":"setup","l":"Setup & Kickoff","c":"#64748B","w":"Week 1","d":"Jul 27-Aug 2","h":0},{"id":"foundations","l":"Intercom Foundations","c":"#3B82F6","w":"Weeks 1-2","d":"Jul 27-Aug 9","h":0},{"id":"fin","l":"Fin & Help Centre","c":"#10B981","w":"Weeks 2-3","d":"Aug 3-16","h":0},{"id":"migration","l":"Migration","c":"#6366F1","w":"Weeks 1-3","d":"Jul 27-Aug 16","h":0},{"id":"uat","l":"UAT & Enablement","c":"#9333EA","w":"Week 3","d":"Aug 10-16","h":0},{"id":"golive","l":"Go-live & Cutover","c":"#E10600","w":"Cutover","d":"Aug 12","h":0},{"id":"post","l":"Post go-live","c":"#94A3B8","w":"Week 4","d":"Aug 17-23","h":0}];
+const OW={"Chris":{"c":"#60A5FA","bg":"rgba(96,165,250,.15)"},"Richard":{"c":"#C084FC","bg":"rgba(192,132,252,.15)"},"Greg":{"c":"#34D399","bg":"rgba(52,211,153,.15)"},"Eugene":{"c":"#FBBF24","bg":"rgba(251,191,36,.15)"}};
 const SC={
   'Complete':{c:'#4ADE80',bg:'rgba(74,222,128,.12)'},
   'In Progress':{c:'#60A5FA',bg:'rgba(96,165,250,.12)'},
@@ -123,175 +116,14 @@ const SC={
 };
 const FILTER_MAP={on:['Complete','In Progress'],att:['Pending','Dependency'],risk:['Blocked']};
 
-const T={
-  setup:{sabel:[
-    {t:'Create Slack project channel and share with the Eugene team',o:'Chris',s:'Complete',d:'',week:1,notes:'Eugene team added to the channel.',link:''},
-    {t:'Share pre-call context and SOW with client champion',o:'Richard',s:'Complete',d:'',week:1,notes:'Shared with Gabi.',link:''},
-    {t:'Kick-off call: scope, contacts and ways of working',o:'Chris',s:'Complete',d:'',week:1,notes:'Held 23 Jul.',link:''},
-  ],client:[
-    {t:'Intercom workspace admin access',o:'Eugene',s:'Complete',d:'',week:1,tip:'Grant the Sabel team admin access to your Intercom workspace so we can configure on your behalf.',notes:'Confirmed at kickoff.',link:'https://app.au.intercom.com/a/apps/_/settings/workspace/teammates'},
-    {t:'Zendesk read access for migration mapping',o:'Eugene',s:'Complete',d:'',week:1,tip:'Give us read access to your Zendesk so we can map tickets, contacts and fields for the migration.',notes:'Zendesk admin access confirmed.',link:''},
-    {t:'Brand assets pack (logos, sender names, reply addresses)',o:'Eugene',s:'Pending',d:'',week:1,tip:'Send logo files, sender names and reply-address preferences so we can brand the workspace and Messenger.',notes:'',link:''},
-  ]},
-  foundations:{sabel:[
-    {t:'Workspace and brand config, region, hours, seats',o:'Chris',s:'In Progress',d:'',week:1,notes:'',link:''},
-    {t:'Roles and permissions: agent, admin and team-lead',o:'Chris',s:'Pending',d:'',week:1,notes:'',link:''},
-    {t:'Day-one automation and hygiene rules: spam, AI summaries, auto-assignment',o:'Chris',s:'Pending',d:'',week:1,notes:'',link:''},
-    {t:'Issue email domain DNS records to Eugene and verify once added',o:'Chris',s:'Pending',d:'',week:1,notes:'',link:''},
-    {t:'Configure Messenger for web and the member portal',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
-    {t:'Stand up interim Intercom number and call forwarding',o:'Greg',s:'Pending',d:'',week:1,notes:'Covers calls until the carrier completes the port.',link:''},
-    {t:'Build and test inbound call workflow with welcome message',o:'Greg',s:'Pending',d:'',week:2,notes:'',link:''},
-    {t:'Inbox views and team inboxes',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
-    {t:'Routing model: support, clinical, results and appointments',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
-    {t:'Ticket types, statuses and SLA targets',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
-    {t:'CSAT collection with Amplitude integration',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
-    {t:'Reporting dashboards: response time, resolution rate and CSAT',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
-  ],client:[
-    {t:'Add email DNS records (SPF, DKIM, DMARC) at your domain host',o:'Eugene',s:'Pending',d:'',week:1,tip:'We will send you the exact records. Your IT or domain admin adds them at your domain host. Intercom cannot send email as your brand until these are in place, so this is a Week 1 priority.',notes:'',link:'https://www.intercom.com/help/en/articles/182-sending-email-from-your-own-address'},
-    {t:'Business hours, holidays and closures',o:'Eugene',s:'Complete',d:'',week:1,tip:'Share your business hours plus any office holidays and closures so we can configure operating hours.',notes:'9 to 5, Mon to Fri, confirmed at kickoff.',link:''},
-    {t:'Initiate number port with your current carrier',o:'Eugene',s:'Pending',d:'',week:1,tip:'Open the number port request with your current carrier as early as possible. Porting can take three to four weeks, so starting now protects the go-live date.',notes:'',link:''},
-    {t:'Genie contact field mapping confirmed',o:'Eugene',s:'Pending',d:'',week:1,tip:'Confirm which Genie member fields should sync to Intercom contact records so agents and Fin have the right context.',notes:'',link:''},
-    {t:'Amplitude owner confirmed for CSAT integration',o:'Eugene',s:'Pending',d:'',week:1,tip:'Nominate the Amplitude owner so we can connect CSAT ratings into your Amplitude analytics.',notes:'',link:''},
-    {t:'Install the Messenger code snippet on the member portal',o:'Eugene',s:'Pending',d:'',week:2,tip:'Your developer adds the Intercom code snippet to the member portal so the Messenger can appear. The guide has the exact code, and we can join a call if they hit any issues.',notes:'',link:'https://developers.intercom.com/installing-intercom/web/installation'},
-    {t:'Secure the Messenger with identity verification (JWT)',o:'Eugene',s:'Pending',d:'',week:2,tip:'Your developer sets up JSON Web Tokens so Intercom can verify who each logged-in member really is. This stops anyone impersonating your customers in chat and should be live before launch.',notes:'',link:'https://developers.intercom.com/installing-intercom/web/identity-verification'},
-    {t:'Pass logged-in user attributes to the Messenger',o:'Eugene',s:'Pending',d:'',week:2,tip:'Your developer sends basic member details (name, email, user ID and any useful custom fields) into the Messenger so conversations arrive with context and Fin can personalise answers.',notes:'',link:'https://developers.intercom.com/installing-intercom/web/attributes-objects'},
-    {t:'Inbox structure and routing approval',o:'Eugene',s:'Pending',d:'',week:2,kind:'milestone',tip:'Review and confirm the inbox and routing setup before we finalise assignment rules.',notes:'',link:''},
-    {t:'SLA targets per channel confirmed',o:'Eugene',s:'Pending',d:'',week:2,tip:'Confirm target response times per channel so we can set inbox SLAs and alerts.',notes:'',link:''},
-  ]},
-  fin:{sabel:[
-    {t:'Audit articles: gaps, duplicates, outdated',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
-    {t:'Restructure collections and categories for Fin readability',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
-    {t:'Publish cleaned article set in the Help Centre',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
-    {t:'Fin policy: responses, no-answer topics, clinical escalation triggers',o:'Chris',s:'Pending',d:'',week:2,notes:'',link:''},
-    {t:'Configure Fin across the web Messenger and member portal',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
-    {t:'Configure Fin escalation, handover and fallback for clinical queries',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
-    {t:'Configure Fin persona and tone to brand voice',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
-    {t:'Test Fin sample queries and iterate during build',o:'Chris',s:'Pending',d:'',week:2,wkEnd:3,notes:'',link:''},
-    {t:'Live team training, inbox and Fin handover',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
-  ],client:[
-    {t:'Provide FAQ, clinical process docs and escalation policy',o:'Eugene',s:'Pending',d:'',week:2,tip:'Share your customer FAQ, clinical process documentation and escalation policy so Fin resolves common queries and always escalates clinical or sensitive ones.',notes:'',link:''},
-    {t:'Tone-of-voice guide and 3-5 approved response examples',o:'Eugene',s:'Pending',d:'',week:2,tip:'Share tone-of-voice guidance and a few example responses you are happy with so Fin mirrors your brand language.',notes:'',link:''},
-    {t:'Help Centre owner confirmed for ongoing maintenance',o:'Eugene',s:'Pending',d:'',week:2,tip:'Nominate your internal Help Centre owner to maintain content after handover.',notes:'',link:''},
-  ]},
-  migration:{sabel:[
-    {t:'Map Zendesk tickets, contacts, agents, statuses, tags and fields',o:'Greg',s:'In Progress',d:'',week:1,notes:'',link:''},
-    {t:'Run 100-ticket sample migration and validate vs Zendesk',o:'Greg',s:'Pending',d:'',week:2,notes:'',link:''},
-    {t:'Execute full historical migration (82,267 tickets)',o:'Greg',s:'Pending',d:'',week:2,notes:'',link:''},
-    {t:'Sample-based QA on the migrated dataset',o:'Greg',s:'Pending',d:'',week:3,notes:'',link:''},
-    {t:'Delta migration to capture build-phase tickets',o:'Greg',s:'Pending',d:'',week:3,notes:'Runs at cutover on 12 Aug.',link:''},
-  ],client:[
-    {t:'Confirm Zendesk export access and agent count transferring',o:'Eugene',s:'Pending',d:'',week:1,tip:'Confirm ticket export access and how many agents transfer so we can map them to Intercom seats.',notes:'',link:''},
-    {t:'Migration mapping sign-off',o:'Eugene',s:'Pending',d:'',week:2,kind:'milestone',tip:'Review and sign off the migration mapping before we run the full migration.',notes:'',link:''},
-    {t:'Migrated dataset sign-off',o:'Eugene',s:'Pending',d:'',week:3,kind:'milestone',tip:'Review the QA sample and approve the full production migration.',notes:'',link:''},
-  ]},
-  uat:{sabel:[
-    {t:'E2E testing across channels, Fin workflows and connectors',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
-    {t:'Run Fin UAT scenarios and iterate configuration',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
-    {t:'Sabel go-live readiness checklist completed',o:'Richard',s:'Pending',d:'',week:3,notes:'',link:''},
-  ],client:[
-    {t:'Test accounts in the member portal provided',o:'Eugene',s:'Pending',d:'',week:3,tip:'Provide test accounts in the member portal so we can run end-to-end testing across all channels and Fin.',notes:'',link:''},
-    {t:'UAT testers confirmed and available',o:'Eugene',s:'Pending',d:'',week:3,tip:'Identify testers to run end-to-end testing across all channels and Fin before go-live.',notes:'',link:''},
-    {t:'Go-live readiness sign-off',o:'Eugene',s:'Pending',d:'',week:3,kind:'milestone',tip:'Provide written sign-off that the platform is ready before we switch live traffic.',notes:'',link:''},
-  ]},
-  golive:{sabel:[
-    {t:'Zendesk closes inbound channels (cutover)',o:'Greg',s:'Pending',d:'',week:3,notes:'',link:''},
-    {t:'Open Intercom to inbound across all channels',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
-    {t:'Activate Fin AI Agent on all configured channels',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
-    {t:'Sabel on standby for go-live support',o:'Chris',s:'Pending',d:'',week:3,notes:'',link:''},
-  ],client:[
-    {t:'Team comms sent re: Intercom go-live',o:'Eugene',s:'Pending',d:'',week:3,tip:'Let your wider team know Intercom is live and when, so agents are ready before the first customer conversation.',notes:'',link:''},
-  ]},
-  post:{sabel:[
-    {t:'Week 1 health check: Fin deflection, resolution, CSAT',o:'Chris',s:'Pending',d:'',week:4,notes:'',link:''},
-    {t:'Fin tuning and quality loop: low-confidence topics and escalations',o:'Chris',s:'Pending',d:'',week:4,notes:'',link:''},
-    {t:'Cut over telephony to ported lines once the port completes',o:'Greg',s:'Pending',d:'',week:4,notes:'Interim number covers until the carrier completes the port (3-4 weeks).',link:''},
-    {t:'Open items and snag list resolved',o:'Chris',s:'Pending',d:'',week:4,notes:'',link:''},
-    {t:'Final handover docs and Slack channel wind-down',o:'Richard',s:'Pending',d:'',week:4,notes:'',link:''},
-  ],client:[
-    {t:'Feedback on Week 1 agent experience',o:'Eugene',s:'Pending',d:'',week:4,tip:'After the first week live, share agent feedback to guide the Fin tuning pass.',notes:'',link:''},
-    {t:'Follow-on phase decision',o:'Eugene',s:'Pending',d:'',week:0,tip:'Decide whether to pick up the deferred items as a later phase: proactive Genie notifications and Series, and the Shopify integration.',notes:'',link:''},
-  ]},
-};
+const T={"setup":{"sabel":[{"t":"Create Slack project channel and share with the Eugene team","o":"Chris","s":"Complete","d":"","week":1,"notes":"Eugene team added to the channel.","link":""},{"t":"Share pre-call context and SOW with client champion","o":"Richard","s":"Complete","d":"","week":1,"notes":"Shared with Gabi.","link":""},{"t":"Kick-off call: scope, contacts and ways of working","o":"Chris","s":"Complete","d":"","week":1,"notes":"Held 23 Jul.","link":""}],"client":[{"t":"Intercom workspace admin access","o":"Eugene","s":"Complete","d":"","week":1,"tip":"Grant the Sabel team admin access to your Intercom workspace so we can configure on your behalf.","notes":"Confirmed at kickoff.","link":"https://app.au.intercom.com/a/apps/_/settings/workspace/teammates"},{"t":"Zendesk read access for migration mapping","o":"Eugene","s":"Complete","d":"","week":1,"tip":"Give us read access to your Zendesk so we can map tickets, contacts and fields for the migration.","notes":"Zendesk admin access confirmed.","link":""},{"t":"Brand assets pack (logos, sender names, reply addresses)","o":"Eugene","s":"Complete","d":"","week":1,"tip":"Send logo files, sender names and reply-address preferences so we can brand the workspace and Messenger.","notes":"Files in Client Input folder - also use our website as a reference https://eugenelabs.com/","link":"https://drive.google.com/drive/folders/1JwCGonyOWhDBe6CwGQe4-Fhy5tjPvaOe"}]},"foundations":{"sabel":[{"t":"Workspace and brand config, region, hours, seats","o":"Chris","s":"In Progress","d":"","week":1,"notes":"","link":""},{"t":"Roles and permissions: agent, admin and team-lead","o":"Chris","s":"Pending","d":"","week":1,"notes":"","link":""},{"t":"Day-one automation and hygiene rules: spam, AI summaries, auto-assignment","o":"Chris","s":"Pending","d":"","week":1,"notes":"","link":""},{"t":"Issue email domain DNS records to Eugene and verify once added","o":"Chris","s":"Pending","d":"","week":1,"notes":"","link":"","gate":true},{"t":"Configure Messenger for web and the member portal","o":"Chris","s":"Pending","d":"","week":2,"notes":"","link":""},{"t":"Stand up interim Intercom number and call forwarding","o":"Greg","s":"Pending","d":"","week":1,"notes":"Covers calls until the carrier completes the port.","link":""},{"t":"Build and test inbound call workflow with welcome message","o":"Greg","s":"Pending","d":"","week":2,"notes":"","link":""},{"t":"Inbox views and team inboxes","o":"Chris","s":"Pending","d":"","week":2,"notes":"","link":""},{"t":"Routing model: support, clinical, results and appointments","o":"Chris","s":"Pending","d":"","week":2,"notes":"","link":""},{"t":"Ticket types, statuses and SLA targets","o":"Chris","s":"Pending","d":"","week":2,"notes":"","link":""},{"t":"CSAT collection with Amplitude integration","o":"Chris","s":"Pending","d":"","week":2,"notes":"","link":""},{"t":"Reporting dashboards: response time, resolution rate and CSAT","o":"Chris","s":"Pending","d":"","week":2,"notes":"","link":""}],"client":[{"t":"Add email DNS records (SPF, DKIM, DMARC) at your domain host","o":"Eugene","s":"Pending","d":"","week":1,"tip":"We will send you the exact records. Your IT or domain admin adds them at your domain host. Intercom cannot send email as your brand until these are in place, so this is a Week 1 priority.","notes":"","link":"https://www.intercom.com/help/en/articles/182-sending-email-from-your-own-address","gate":true},{"t":"Business hours, holidays and closures","o":"Eugene","s":"Complete","d":"","week":1,"tip":"Share your business hours plus any office holidays and closures so we can configure operating hours.","notes":"9 to 5 AEST, Mon to Fri, confirmed at kickoff (I added hours in Intercom settings, Gaby)","link":""},{"t":"Initiate number port with your current carrier","o":"Eugene","s":"In Progress","d":"","week":1,"tip":"Open the number port request with your current carrier as early as possible. Porting can take three to four weeks, so starting now protects the go-live date.","notes":"Owner: Gaby\nCurrently waiting for temporary phone line/s \nPorting to be requested on Fri 7/8","link":""},{"t":"Genie contact field mapping confirmed","o":"Eugene","s":"Pending","d":"","week":1,"tip":"Confirm which Genie member fields should sync to Intercom contact records so agents and Fin have the right context.","notes":"","link":""},{"t":"Amplitude owner confirmed for CSAT integration","o":"Eugene","s":"Pending","d":"","week":1,"tip":"Nominate the Amplitude owner so we can connect CSAT ratings into your Amplitude analytics.","notes":"Owner: Gaby","link":""},{"t":"Install the Messenger code snippet on the member portal","o":"Eugene","s":"Pending","d":"","week":2,"tip":"Your developer adds the Intercom code snippet to the member portal so the Messenger can appear. The guide has the exact code, and we can join a call if they hit any issues.","notes":"","link":"https://developers.intercom.com/installing-intercom/web/installation","gate":true},{"t":"Secure the Messenger with identity verification (JWT)","o":"Eugene","s":"Pending","d":"","week":2,"tip":"Your developer sets up JSON Web Tokens so Intercom can verify who each logged-in member really is. This stops anyone impersonating your customers in chat and should be live before launch.","notes":"","link":"https://developers.intercom.com/installing-intercom/web/identity-verification","gate":true},{"t":"Pass logged-in user attributes to the Messenger","o":"Eugene","s":"Pending","d":"","week":2,"tip":"Your developer sends basic member details (name, email, user ID and any useful custom fields) into the Messenger so conversations arrive with context and Fin can personalise answers.","notes":"","link":"https://developers.intercom.com/installing-intercom/web/attributes-objects"},{"t":"Inbox structure and routing approval","o":"Eugene","s":"Pending","d":"","week":2,"kind":"milestone","tip":"Review and confirm the inbox and routing setup before we finalise assignment rules.","notes":"","link":""},{"t":"SLA targets per channel confirmed","o":"Eugene","s":"Pending","d":"","week":2,"tip":"Confirm target response times per channel so we can set inbox SLAs and alerts.","notes":"","link":""}]},"fin":{"sabel":[{"t":"Audit articles: gaps, duplicates, outdated","o":"Chris","s":"Pending","d":"","week":2,"notes":"","link":""},{"t":"Restructure collections and categories for Fin readability","o":"Chris","s":"Pending","d":"","week":2,"notes":"","link":""},{"t":"Publish cleaned article set in the Help Centre","o":"Chris","s":"Pending","d":"","week":2,"notes":"","link":""},{"t":"Fin policy: responses, no-answer topics, clinical escalation triggers","o":"Chris","s":"Pending","d":"","week":2,"notes":"","link":""},{"t":"Configure Fin across the web Messenger and member portal","o":"Chris","s":"Pending","d":"","week":3,"notes":"","link":""},{"t":"Configure Fin escalation, handover and fallback for clinical queries","o":"Chris","s":"Pending","d":"","week":3,"notes":"","link":""},{"t":"Configure Fin persona and tone to brand voice","o":"Chris","s":"Pending","d":"","week":3,"notes":"","link":""},{"t":"Test Fin sample queries and iterate during build","o":"Chris","s":"Pending","d":"","week":2,"wkEnd":3,"notes":"","link":""},{"t":"Live team training, inbox and Fin handover","o":"Chris","s":"Pending","d":"","week":3,"notes":"","link":""}],"client":[{"t":"Provide FAQ, clinical process docs and escalation policy","o":"Eugene","s":"Pending","d":"","week":2,"tip":"Share your customer FAQ, clinical process documentation and escalation policy so Fin resolves common queries and always escalates clinical or sensitive ones.","notes":"All info here https://drive.google.com/drive/folders/1v68vh6U7_-LkhT7lYIofNz7yNJykERGm","link":"https://drive.google.com/drive/folders/1HIQ6uM1c77UVg4-HpBQqxLgCmqmQQkPG"},{"t":"Tone-of-voice guide and 3-5 approved response examples","o":"Eugene","s":"Pending","d":"","week":2,"tip":"Share tone-of-voice guidance and a few example responses you are happy with so Fin mirrors your brand language.","notes":"","link":"https://drive.google.com/drive/folders/1v68vh6U7_-LkhT7lYIofNz7yNJykERGm"},{"t":"Help Centre owner confirmed for ongoing maintenance","o":"Eugene","s":"Pending","d":"","week":2,"tip":"Nominate your internal Help Centre owner to maintain content after handover.","notes":"Alankruthi Prakash","link":""}]},"migration":{"sabel":[{"t":"Map Zendesk tickets, contacts, agents, statuses, tags and fields","o":"Richard","s":"In Progress","d":"","week":1,"notes":"","link":""},{"t":"Run 100-ticket sample migration and validate vs Zendesk","o":"Richard","s":"Pending","d":"","week":2,"notes":"","link":""},{"t":"Execute full historical migration (82,267 tickets)","o":"Richard","s":"Pending","d":"","week":2,"notes":"","link":""},{"t":"Sample-based QA on the migrated dataset","o":"Richard","s":"Pending","d":"","week":3,"notes":"","link":""},{"t":"Delta migration to capture build-phase tickets","o":"Richard","s":"Pending","d":"","week":3,"notes":"Runs at cutover on 12 Aug.","link":"","gate":"day","dayOff":-120}],"client":[{"t":"Confirm Zendesk export access and agent count transferring","o":"Eugene","s":"Pending","d":"","week":1,"tip":"Confirm ticket export access and how many agents transfer so we can map them to Intercom seats.","notes":"","link":""},{"t":"Migration mapping sign-off","o":"Eugene","s":"Pending","d":"","week":2,"kind":"milestone","tip":"Review and sign off the migration mapping before we run the full migration.","notes":"","link":""},{"t":"Migrated dataset sign-off","o":"Eugene","s":"Pending","d":"","week":3,"kind":"milestone","tip":"Review the QA sample and approve the full production migration.","notes":"","link":"","gate":true}]},"uat":{"sabel":[{"t":"E2E testing across channels, Fin workflows and connectors","o":"Chris","s":"Pending","d":"","week":3,"notes":"","link":""},{"t":"Run Fin UAT scenarios and iterate configuration","o":"Chris","s":"Pending","d":"","week":3,"notes":"","link":""},{"t":"Sabel go-live readiness checklist completed","o":"Richard","s":"Pending","d":"","week":3,"notes":"","link":"","gate":true}],"client":[{"t":"Test accounts in the member portal provided","o":"Eugene","s":"Pending","d":"","week":3,"tip":"Provide test accounts in the member portal so we can run end-to-end testing across all channels and Fin.","notes":"","link":""},{"t":"UAT testers confirmed and available","o":"Eugene","s":"Pending","d":"","week":3,"tip":"Identify testers to run end-to-end testing across all channels and Fin before go-live.","notes":"","link":""},{"t":"Go-live readiness sign-off","o":"Eugene","s":"Pending","d":"","week":3,"kind":"milestone","tip":"Provide written sign-off that the platform is ready before we switch live traffic.","notes":"","link":"","gate":true}]},"golive":{"sabel":[{"t":"Go-live meeting: cutover coordination call","o":"Richard","s":"Pending","d":"","week":3,"gate":"day","dayOff":0,"notes":"The go-live moment. Any delta migration must have completed about two hours before this call.","link":""},{"t":"Zendesk closes inbound channels (cutover)","o":"Greg","s":"Pending","d":"","week":3,"notes":"","link":"","gate":"day","dayOff":0},{"t":"Open Intercom to inbound across all channels","o":"Chris","s":"Pending","d":"","week":3,"notes":"","link":"","gate":"day","dayOff":0},{"t":"Activate Fin AI Agent on all configured channels","o":"Chris","s":"Pending","d":"","week":3,"notes":"","link":"","gate":"day","dayOff":30},{"t":"Sabel on standby for go-live support","o":"Chris","s":"Pending","d":"","week":3,"notes":"","link":"","gate":"day","dayOff":60}],"client":[{"t":"Team comms sent re: Intercom go-live","o":"Eugene","s":"Pending","d":"","week":3,"tip":"Let your wider team know Intercom is live and when, so agents are ready before the first customer conversation.","notes":"","link":"","gate":"day","dayOff":-60}]},"post":{"sabel":[{"t":"Week 1 health check: Fin deflection, resolution, CSAT","o":"Chris","s":"Pending","d":"","week":4,"notes":"","link":""},{"t":"Fin tuning and quality loop: low-confidence topics and escalations","o":"Chris","s":"Pending","d":"","week":4,"notes":"","link":""},{"t":"Cut over telephony to ported lines once the port completes","o":"Greg","s":"Pending","d":"","week":4,"notes":"Interim number covers until the carrier completes the port (3-4 weeks).","link":""},{"t":"Open items and snag list resolved","o":"Chris","s":"Pending","d":"","week":4,"notes":"","link":""},{"t":"Final handover docs and Slack channel wind-down","o":"Richard","s":"Pending","d":"","week":4,"notes":"","link":""}],"client":[{"t":"Feedback on Week 1 agent experience","o":"Eugene","s":"Pending","d":"","week":4,"tip":"After the first week live, share agent feedback to guide the Fin tuning pass.","notes":"","link":""},{"t":"Follow-on phase decision","o":"Eugene","s":"Pending","d":"","week":0,"tip":"Decide whether to pick up the deferred items as a later phase: proactive Genie notifications and Series, and the Shopify integration.","notes":"","link":""}]}};
 
 // ── Standard task library ─────────────────────────────────────────────────────
 // [CLIENT] The Sabel standard subset per pillar. These appear in the "+ Add"
 // menu on each column so tasks can be added back manually as required.
 // Keep keys aligned with this client's phase ids. The human-editable master
 // list lives in references/standard-tasks.md; mirror any changes here.
-const STD={
-  setup:{sabel:[
-    {t:'Create Slack project channel and share with client team',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Share pre-call context and SOW with client champion',o:'Richard',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Kick-off call, scope, contacts and migration mapping',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-  ],client:[
-    {t:'Intercom workspace admin access',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Grant the Sabel team admin access to your Intercom workspace so we can configure on your behalf.',notes:'',link:''},
-    {t:'Source platform read access for migration mapping',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Give us read access to your current platform so we can map tickets, contacts and fields for the migration.',notes:'',link:''},
-    {t:'Brand assets and tone-of-voice guide',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Send logo files, sender names, reply-address preferences and any tone-of-voice guidance.',notes:'',link:''},
-  ]},
-  foundations:{sabel:[
-    {t:'Workspace and brand config, region, hours, seats',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Connect and verify email domain (SPF, DKIM, DMARC)',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:'https://www.intercom.com/help/en/articles/182-sending-email-from-your-own-address'},
-    {t:'Configure Messenger for web',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:'https://www.intercom.com/help/en/articles/167-install-intercom-in-your-product-for-visitors-and-leads'},
-    {t:'Inbox views and team inboxes',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Routing rules by language, channel and topic',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Ticket types, statuses and SLA targets',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-  ],client:[
-    {t:'Inbox structure and routing approval',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Review and confirm the inbox and routing setup before we finalise assignment rules.',notes:'',link:''},
-    {t:'Business hours, holidays and closures',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Share your business hours plus any office holidays and closures so we can configure operating hours.',notes:'',link:''},
-    {t:'SLA targets per channel confirmed',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Confirm target response times per channel so we can set inbox SLAs and alerts.',notes:'',link:''},
-  ]},
-  fin:{sabel:[
-    {t:'Audit articles, gaps, duplicates, outdated',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:'https://www.intercom.com/help/en/articles/56644-customize-your-help-center'},
-    {t:'Restructure collections and categories for Fin readability',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Publish cleaned article set in Help Centre',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Configure Fin across all connected channels',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Configure Fin escalation, handover and fallback',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Configure Fin persona and tone to brand voice',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Test Fin sample queries, iterate on output',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:'https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live'},
-    {t:'Live team training, inbox and Fin handover',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-  ],client:[
-    {t:'Brand tone guide and approved response examples',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Share tone-of-voice guidance and 3-5 example responses you are happy with so Fin mirrors your brand language.',notes:'',link:''},
-    {t:'Help Centre owner confirmed for ongoing maintenance',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Nominate your internal Help Centre owner to maintain content after handover.',notes:'',link:''},
-    {t:'Language / dialect handling preference confirmed',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Confirm whether Fin should detect language automatically or use profile language.',notes:'',link:''},
-  ]},
-  migration:{sabel:[
-    {t:'Map tickets, contacts, agents, statuses, tags, fields',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:'https://www.intercom.com/help/en/articles/177-import-your-user-data-into-intercom'},
-    {t:'Run sample migration batch, validate vs source records',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Execute full historical migration',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Sample-based QA on migrated dataset',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Delta migration to capture build-phase tickets',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
-  ],client:[
-    {t:'Migration mapping sign-off',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Review and sign off the migration mapping before we run the full migration.',notes:'',link:''},
-    {t:'Confirm agent count transferring from source platform',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Confirm how many agents transfer so we can map them to Intercom seats.',notes:'',link:''},
-    {t:'Migrated dataset sign-off',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Review the QA sample and approve the full production migration.',notes:'',link:''},
-  ]},
-  uat:{sabel:[
-    {t:'E2E testing, channels, Fin workflows and connectors',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:'https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live'},
-    {t:'Fin test conversations across priority scenarios',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Iterate Fin configuration based on test results',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Sabel go-live readiness checklist completed',o:'Richard',s:'Pending',d:'',week:0,notes:'',link:''},
-  ],client:[
-    {t:'UAT testers confirmed and available',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Identify testers to run end-to-end testing across all channels and Fin before go-live.',notes:'',link:''},
-    {t:'Go-live readiness sign-off',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Provide written sign-off that the platform is ready before we switch live traffic.',notes:'',link:''},
-  ]},
-  golive:{sabel:[
-    {t:'Source platform closes inbound channels (cutover)',o:'Greg',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Open Intercom to inbound across all channels',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Activate Fin AI Agent on all configured channels',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Sabel on standby for go-live support',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-  ],client:[
-    {t:'Team comms sent re: Intercom go-live',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Let your wider team know Intercom is live and when, so agents are ready before the first customer conversation.',notes:'',link:''},
-  ]},
-  post:{sabel:[
-    {t:'Week 1 health check, Fin deflection, resolution, CSAT',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Fin tuning pass, low-confidence topics and escalations',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Open items and snag list resolved',o:'Chris',s:'Pending',d:'',week:0,notes:'',link:''},
-    {t:'Final handover docs and Slack channel wind-down',o:'Richard',s:'Pending',d:'',week:0,notes:'',link:''},
-  ],client:[
-    {t:'Feedback on Week 1 agent experience',o:'Eugene',s:'Dependency',d:'',week:0,tip:'After the first week live, share agent feedback to guide the Fin tuning pass.',notes:'',link:''},
-    {t:'Localisation / follow-on phase decision',o:'Eugene',s:'Dependency',d:'',week:0,tip:'Decide whether to add any follow-on phase work.',notes:'',link:''},
-  ]},
-};
+const STD={"setup":{"sabel":[{"t":"Create Slack project channel and share with client team","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Share pre-call context and SOW with client champion","o":"Richard","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Kick-off call, scope, contacts and migration mapping","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""}],"client":[{"t":"Intercom workspace admin access","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Grant the Sabel team admin access to your Intercom workspace so we can configure on your behalf.","notes":"","link":""},{"t":"Source platform read access for migration mapping","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Give us read access to your current platform so we can map tickets, contacts and fields for the migration.","notes":"","link":""},{"t":"Brand assets and tone-of-voice guide","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Send logo files, sender names, reply-address preferences and any tone-of-voice guidance.","notes":"","link":""}]},"foundations":{"sabel":[{"t":"Workspace and brand config, region, hours, seats","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Connect and verify email domain (SPF, DKIM, DMARC)","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":"https://www.intercom.com/help/en/articles/182-sending-email-from-your-own-address"},{"t":"Configure Messenger for web","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":"https://www.intercom.com/help/en/articles/167-install-intercom-in-your-product-for-visitors-and-leads"},{"t":"Inbox views and team inboxes","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Routing rules by language, channel and topic","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Ticket types, statuses and SLA targets","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""}],"client":[{"t":"Inbox structure and routing approval","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Review and confirm the inbox and routing setup before we finalise assignment rules.","notes":"","link":""},{"t":"Business hours, holidays and closures","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Share your business hours plus any office holidays and closures so we can configure operating hours.","notes":"","link":""},{"t":"SLA targets per channel confirmed","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Confirm target response times per channel so we can set inbox SLAs and alerts.","notes":"","link":""}]},"fin":{"sabel":[{"t":"Audit articles, gaps, duplicates, outdated","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":"https://www.intercom.com/help/en/articles/56644-customize-your-help-center"},{"t":"Restructure collections and categories for Fin readability","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Publish cleaned article set in Help Centre","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Configure Fin across all connected channels","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Configure Fin escalation, handover and fallback","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Configure Fin persona and tone to brand voice","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Test Fin sample queries, iterate on output","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":"https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"},{"t":"Live team training, inbox and Fin handover","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""}],"client":[{"t":"Brand tone guide and approved response examples","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Share tone-of-voice guidance and 3-5 example responses you are happy with so Fin mirrors your brand language.","notes":"","link":""},{"t":"Help Centre owner confirmed for ongoing maintenance","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Nominate your internal Help Centre owner to maintain content after handover.","notes":"","link":""},{"t":"Language / dialect handling preference confirmed","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Confirm whether Fin should detect language automatically or use profile language.","notes":"","link":""}]},"migration":{"sabel":[{"t":"Map tickets, contacts, agents, statuses, tags, fields","o":"Greg","s":"Pending","d":"","week":0,"notes":"","link":"https://www.intercom.com/help/en/articles/177-import-your-user-data-into-intercom"},{"t":"Run sample migration batch, validate vs source records","o":"Greg","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Execute full historical migration","o":"Greg","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Sample-based QA on migrated dataset","o":"Greg","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Delta migration to capture build-phase tickets","o":"Greg","s":"Pending","d":"","week":0,"notes":"","link":""}],"client":[{"t":"Migration mapping sign-off","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Review and sign off the migration mapping before we run the full migration.","notes":"","link":""},{"t":"Confirm agent count transferring from source platform","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Confirm how many agents transfer so we can map them to Intercom seats.","notes":"","link":""},{"t":"Migrated dataset sign-off","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Review the QA sample and approve the full production migration.","notes":"","link":""}]},"uat":{"sabel":[{"t":"E2E testing, channels, Fin workflows and connectors","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":"https://www.intercom.com/help/en/articles/7321743-best-practices-for-testing-intercom-before-going-live"},{"t":"Fin test conversations across priority scenarios","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Iterate Fin configuration based on test results","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Sabel go-live readiness checklist completed","o":"Richard","s":"Pending","d":"","week":0,"notes":"","link":""}],"client":[{"t":"UAT testers confirmed and available","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Identify testers to run end-to-end testing across all channels and Fin before go-live.","notes":"","link":""},{"t":"Go-live readiness sign-off","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Provide written sign-off that the platform is ready before we switch live traffic.","notes":"","link":""}]},"golive":{"sabel":[{"t":"Source platform closes inbound channels (cutover)","o":"Greg","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Open Intercom to inbound across all channels","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Activate Fin AI Agent on all configured channels","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Sabel on standby for go-live support","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""}],"client":[{"t":"Team comms sent re: Intercom go-live","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Let your wider team know Intercom is live and when, so agents are ready before the first customer conversation.","notes":"","link":""}]},"post":{"sabel":[{"t":"Week 1 health check, Fin deflection, resolution, CSAT","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Fin tuning pass, low-confidence topics and escalations","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Open items and snag list resolved","o":"Chris","s":"Pending","d":"","week":0,"notes":"","link":""},{"t":"Final handover docs and Slack channel wind-down","o":"Richard","s":"Pending","d":"","week":0,"notes":"","link":""}],"client":[{"t":"Feedback on Week 1 agent experience","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"After the first week live, share agent feedback to guide the Fin tuning pass.","notes":"","link":""},{"t":"Localisation / follow-on phase decision","o":"Eugene","s":"Dependency","d":"","week":0,"tip":"Decide whether to add any follow-on phase work.","notes":"","link":""}]}};
 
 let cur='overview';
 let cardNotes={};
@@ -438,7 +270,7 @@ function closeStatusPicker(){
   document.getElementById('status-picker').style.display='none';
   pickerCid=null;
 }
-document.addEventListener('click',()=>{closeStatusPicker();closeOwnerPicker();closeAddMenu();});
+document.addEventListener('click',()=>{closeStatusPicker();closeOwnerPicker();closeAddMenu();closeRunwayPop();closeActionsPop();});
 
 // ── Owner picker (Sabel tasks) ────────────────────────────────────────────────
 function openOwnerPicker(e,cid){
@@ -665,6 +497,374 @@ function focusWeek(){
   for(let n=Math.max(cw,0)+1;n<=mx+8;n++){ if(has(n))return{n,now:false}; }
   return{n:cw<1?1:cw,now:cw>=1};
 }
+// ── Go-live runway (overview) ─────────────────────────────────────────────────
+// The runway shows every go-live blocker as an obstacle between today and the
+// go-live date. Blockers are tasks flagged gate:true (anything that makes
+// landing unsafe if not done) plus every task in the go-live pillar, which are
+// runway items by definition. Cleared obstacles fade into the tarmac; open ones
+// stand on it at their scheduled position. Hidden until a go-live date is set.
+let runwayOpen=false; // checklist collapsed by default; the strip is always visible
+function toggleRunway(){runwayOpen=!runwayOpen;renderMain();}
+function gateItems(){
+  // Two kinds of runway item: PRE-FLIGHT blockers (gate:true, must be cleared
+  // before the day) and ON-THE-DAY cutover actions (gate:'day', or any task in
+  // the go-live pillar: channel switches, DNS cutover, phones). Day-of items
+  // cluster at the rocket and are never "late" for sitting in go-live week.
+  const out=[];
+  P.forEach(p=>['sabel','client'].forEach(g=>(T[p.id]&&T[p.id][g]||[]).forEach((t,i)=>{
+    if(t.gate||p.id==='golive') out.push({t,p,cid:p.id+'-'+(g==='sabel'?'s':'c')+'-'+i,day:(p.id==='golive'||t.gate==='day')});
+  })));
+  // Pre-flight items order by schedule; day-of items order as a RUN SHEET by
+  // their time offset relative to go-live (dayOff minutes, negative = before,
+  // e.g. delta migration at T-2h). Untimed day items sink to the end.
+  const key=o=>o.day?(100000+(o.t.dayOff!==undefined?o.t.dayOff:9999)):(endWeek(o.t)||99);
+  out.sort((a,b)=>key(a)-key(b));
+  return out;
+}
+function fmtOff(m){
+  if(m===undefined||m===null)return 'Time TBC';
+  if(m===0)return 'At go-live';
+  const a=Math.abs(m), txt=a>=60?(a/60)+'h':a+'m';
+  return (m<0?'T−':'T+')+txt;
+}
+function setTaskWhen(cid,val){
+  const t=resolveTask(cid);if(!t)return;
+  const n=parseInt(val,10);
+  if(isNaN(n))delete t.dayOff; else t.dayOff=n;
+  renderMain(); scheduleAutoSave();
+}
+function gateState(o){
+  if(o.t.s==='Complete')return 'cleared';
+  if(o.day)return isOverdue(o.t)?'risk':'day';
+  if(!goLiveDate)return 'approach';
+  const gl=new Date(goLiveDate+'T00:00:00');
+  let e=null;
+  if(o.t.week&&o.t.week>=1){e=new Date(weekStartDate(endWeek(o.t)).getTime());e.setDate(e.getDate()+6);}
+  if(isOverdue(o.t)||(e&&!isNaN(gl.getTime())&&e>gl))return 'risk';
+  return 'approach';
+}
+function closeRunwayPop(){const p=document.getElementById('runway-pop');if(p)p.style.display='none';}
+function openRunwayPop(e,cid){
+  // Clicking a flag on the strip pops up the blocker's details with a
+  // "Go to task" button, rather than jumping straight away.
+  e.stopPropagation();
+  closeStatusPicker();closeOwnerPicker();closeAddMenu();
+  const o=gateItems().find(x=>x.cid===cid); if(!o)return;
+  const st=gateState(o);
+  const stTxt=st==='cleared'?'Cleared':st==='risk'?'At risk':st==='day'?'On the day':'On approach';
+  const stClr=st==='cleared'?'#4ADE80':st==='risk'?'#F87171':st==='day'?'#E10600':'#FB923C';
+  const ow=OW[o.t.o]||OW.Chris;
+  const sc=SC[o.t.s]||SC.Pending;
+  const pop=document.getElementById('runway-pop');
+  pop.innerHTML=`
+    <div style="font-size:12px;font-weight:600;color:#E2E8F0;line-height:1.45;margin-bottom:7px">${esc(o.t.t)}</div>
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#94A3B8"><span style="width:7px;height:7px;border-radius:50%;background:${o.p.c};display:inline-block"></span>${esc(o.p.l)}</span>
+      <span style="font-size:10px;color:${ow.c};background:${ow.bg};border-radius:20px;padding:1px 7px">${esc(o.t.o)}</span>
+      <span style="font-size:10px;color:${sc.c};background:${sc.bg};border-radius:20px;padding:1px 7px">${o.t.s}</span>
+    </div>
+    <div style="font-size:10px;color:${stClr};margin-bottom:9px">${stTxt}${o.day?' · '+fmtOff(o.t.dayOff):(o.t.week?' · '+spanWeeksText(o.t):'')}</div>
+    <button onclick="gotoTask('${cid}')" style="width:100%;background:rgba(251,146,60,.12);border:1px solid #FB923C55;color:#FB923C;font-size:11px;font-weight:600;font-family:inherit;border-radius:6px;padding:6px 10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px">Go to task <i class="ti ti-arrow-right" style="font-size:11px"></i></button>`;
+  const rect=e.currentTarget.getBoundingClientRect();
+  pop.style.left=Math.max(8,Math.min(rect.left-120,window.innerWidth-290))+'px';
+  pop.style.top=(rect.bottom+8)+'px';
+  pop.style.display='block';
+}
+function gotoTask(cid){
+  // Navigate to the task's pillar, scroll it into view and flash-highlight it.
+  closeRunwayPop();
+  const parts=cid.split('-');
+  const phId=parts.slice(0,-2).join('-');
+  setGroupBy('pillar');setP(phId);
+  setTimeout(()=>{
+    const el=document.getElementById('card-'+cid);
+    if(el){
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      el.classList.add('card-flash');
+      setTimeout(()=>el.classList.remove('card-flash'),2400);
+    }
+  },80);
+}
+function runwayPanel(){
+  if(!goLiveDate)return '';
+  const gl=new Date(goLiveDate+'T00:00:00'); if(isNaN(gl.getTime()))return '';
+  const items=gateItems(); if(!items.length)return '';
+  const pre=items.filter(o=>!o.day), dayItems=items.filter(o=>o.day);
+  const open=pre.filter(o=>o.t.s!=='Complete').length;
+  const dayOpen=dayItems.filter(o=>o.t.s!=='Complete').length;
+  const risk=items.filter(o=>gateState(o)==='risk').length;
+  const now=new Date(); now.setHours(0,0,0,0);
+  const span=Math.max(gl-now,86400000);
+  const posOf=o=>{
+    let e=now;
+    if(o.t.week&&o.t.week>=1){e=new Date(weekStartDate(endWeek(o.t)).getTime());e.setDate(e.getDate()+4);}
+    let f=(e-now)/span; if(f<0)f=0; if(f>1)f=1;
+    return 3+f*88; // % along the strip, padded so markers never sit under the rocket
+  };
+  const marker=o=>{
+    const st=gateState(o);
+    const clr=st==='cleared'?'#4ADE80':st==='risk'?'#F87171':'#FB923C';
+    const icon=st==='cleared'?'ti-circle-check-filled':'ti-flag-filled';
+    return`<span onclick="openRunwayPop(event,'${o.cid}')" title="${esc(o.t.t)} · ${st==='cleared'?'cleared':st==='risk'?'at risk':'on approach'} · click for details" style="position:absolute;left:${posOf(o)}%;top:50%;transform:translate(-50%,-50%);cursor:pointer;opacity:${st==='cleared'?'.4':'1'};z-index:1"><i class="ti ${icon}" style="font-size:${st==='cleared'?'13':'16'}px;color:${clr}"></i></span>`;
+  };
+  const row=o=>{
+    // Checklist-style row: tick it off right here (same completion logic as the
+    // task card, so the pillar, milestones and buffer all update), and clicking
+    // the rest of the row still jumps to the task's place in the tracker.
+    const st=gateState(o);
+    const done=st==='cleared';
+    const ow=OW[o.t.o]||OW.Chris;
+    return`<div onclick="setGroupBy('pillar');setP('${o.p.id}')" style="display:flex;align-items:center;gap:8px;padding:6px 2px;border-top:1px solid #1E2433;cursor:pointer">
+      <button class="chk-btn" onclick="toggleComplete(event,'${o.cid}')" title="${done?'Mark incomplete':'Mark complete'}" style="flex-shrink:0;display:inline-flex;align-items:center">
+        <i class="ti ti-${done?'circle-check-filled':'circle'}" style="font-size:16px;color:${done?'#4ADE80':'#334155'}"></i>
+      </button>
+      <span style="width:7px;height:7px;border-radius:50%;background:${o.p.c};flex-shrink:0" title="${esc(o.p.l)}"></span>
+      <span style="font-size:12px;color:${done?'#475569':'#E2E8F0'};${done?'text-decoration:line-through':''};flex:1;min-width:0;line-height:1.4">${esc(o.t.t)}</span>
+      ${st==='risk'?`<i class="ti ti-alert-triangle" title="At risk" style="font-size:13px;color:#F87171;flex-shrink:0"></i>`:''}
+      ${o.day?`<span style="font-size:10px;font-weight:600;color:#E10600;background:rgba(225,6,0,.1);border-radius:4px;padding:1px 6px;white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums">${fmtOff(o.t.dayOff)}</span>`:''}
+      <span style="font-size:10px;color:${ow.c};background:${ow.bg};border-radius:20px;padding:1px 7px;white-space:nowrap;flex-shrink:0">${o.t.o}</span>
+      <span style="font-size:10px;color:#64748B;white-space:nowrap;flex-shrink:0">${o.day?'':spanWeeksText(o.t)}</span>
+    </div>`;
+  };
+  const headline=(open===0
+    ?`<span style="color:#4ADE80">Runway clear · ready to land</span>`
+    :`<span style="color:${risk>0?'#F87171':'#FB923C'}">${open} obstacle${open===1?'':'s'} to clear before landing</span>`)
+    +(dayOpen?`<span style="color:#94A3B8;font-weight:400"> · ${dayOpen} on the day</span>`:'');
+  const glTxt=gl.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  return`<div style="background:#12151D;border:1px solid #1E2433;border-radius:10px;padding:14px 16px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569">Go-live runway</span>
+        <i class="ti ti-info-circle" onmouseenter="showTip(event,'Everything flagged as a go-live blocker, laid out between today and the go-live date. All obstacles must be cleared before launch. Flag a task as a blocker from its expanded card.')" onmousemove="moveTip(event)" onmouseleave="hideTip()" style="font-size:13px;color:#475569;cursor:help"></i>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;font-weight:600">${headline}</span>
+        <button onclick="exportRunway()" title="Export a one-page branded checklist. Choose 'Save as PDF' in the print dialog" style="background:transparent;border:1px solid #2A3145;color:#94A3B8;font-size:11px;font-family:inherit;border-radius:6px;padding:3px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:5px"><i class="ti ti-file-download" style="font-size:12px"></i>Export PDF</button>
+      </div>
+    </div>
+    <div style="position:relative;height:34px;background:linear-gradient(90deg,#161B26,#1a1420);border:1px solid #1E2433;border-radius:8px;margin-bottom:4px">
+      <div style="position:absolute;left:3%;right:9%;top:50%;height:2px;background:repeating-linear-gradient(90deg,#2A3145 0 14px,transparent 14px 24px);transform:translateY(-50%)"></div>
+      ${pre.map(marker).join('')}
+      <span title="Go-live ${glTxt}${dayOpen?' · '+dayOpen+' cutover action'+(dayOpen===1?'':'s')+' happen on the day':''}" style="position:absolute;right:1.5%;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center">
+        <i class="ti ti-rocket" style="font-size:18px;color:#E10600"></i>
+        ${dayOpen?`<span style="font-size:9px;font-weight:700;color:#FFF;background:#E10600;border-radius:50%;min-width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;margin-left:2px;padding:0 2px">${dayOpen}</span>`:''}
+      </span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:#475569"><span>Today</span><span>Go-live · ${glTxt}</span></div>
+    ${runwayOpen?`<div style="margin-top:8px">
+      ${pre.length?`<div style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#64748B;margin-bottom:2px;display:flex;align-items:center;gap:4px"><i class="ti ti-flag" style="font-size:10px;color:#FB923C"></i>Clear before the day</div>${pre.map(row).join('')}`:''}
+      ${dayItems.length?`<div style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#64748B;margin:10px 0 2px;display:flex;align-items:center;gap:4px"><i class="ti ti-rocket" style="font-size:10px;color:#E10600"></i>On the day · run sheet</div>${dayItems.map(row).join('')}`:''}
+    </div>`:''}
+    <div onclick="toggleRunway()" style="display:flex;align-items:center;justify-content:center;gap:5px;padding-top:8px;margin-top:8px;border-top:1px solid #1E2433;cursor:pointer;font-size:11px;color:#94A3B8;user-select:none">
+      ${runwayOpen?'Hide checklist':'View checklist ('+items.length+')'}
+      <i class="ti ti-chevron-${runwayOpen?'up':'down'}" style="font-size:12px"></i>
+    </div>
+  </div>`;
+}
+
+function exportRunway(){
+  // One-page branded go-live checklist in the Sabel PDF standard (black page,
+  // centred logo, faint red centre stem, dark cards, mono footer). Opens a
+  // print-ready window; the browser's Save as PDF produces the document.
+  const items=gateItems(); if(!items.length){showToast('Nothing on the runway yet');return;}
+  const pre=items.filter(o=>!o.day), day=items.filter(o=>o.day);
+  const gl=goLiveDate?new Date(goLiveDate+'T00:00:00'):null;
+  const glTxt=(gl&&!isNaN(gl.getTime()))?gl.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'date to be confirmed';
+  const today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+  const box=o=>gateState(o)==='cleared'
+    ?'<span style="display:inline-flex;width:11px;height:11px;border:1.5px solid #4ADE80;border-radius:3px;align-items:center;justify-content:center;color:#4ADE80;font-size:9px;line-height:1">&#10003;</span>'
+    :'<span style="display:inline-block;width:11px;height:11px;border:1.5px solid #94A3B8;border-radius:3px"></span>';
+  const row=(o,withTime)=>{const done=gateState(o)==='cleared';return`<tr>
+      <td style="padding:5px 8px 5px 0;vertical-align:top;width:14px">${box(o)}</td>
+      ${withTime?`<td style="padding:5px 10px 5px 0;white-space:nowrap;font-family:monospace;font-size:9.5px;color:#E10600;vertical-align:top">${fmtOff(o.t.dayOff)}</td>`:''}
+      <td style="padding:5px 10px 5px 0;font-size:10.5px;color:${done?'#64748B':'#E2E8F0'};${done?'text-decoration:line-through;':''}line-height:1.45">${esc(o.t.t)}</td>
+      <td style="padding:5px 0;white-space:nowrap;font-size:9.5px;color:#94A3B8;vertical-align:top;text-align:right">${esc(o.t.o)}${withTime?'':' · '+spanWeeksText(o.t)}</td>
+    </tr>`;};
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Go-Live Checklist · ${esc(CLIENT_NAME)}</title>
+  <style>
+    @page{size:A4;margin:0}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact;box-sizing:border-box;margin:0;padding:0}
+    body{background:#0B0B0C;color:#E2E8F0;font-family:Arial,Helvetica,sans-serif;width:210mm;min-height:296mm;position:relative;padding:34pt 44pt 60pt}
+    .stem{position:fixed;left:50%;top:0;bottom:0;width:0.7pt;background:rgba(225,6,0,.22)}
+    table{border-collapse:collapse;width:100%}
+    .card{background:#161618;border:1px solid #2A3547;border-radius:8px;padding:12pt 14pt;margin-bottom:12pt;position:relative;z-index:1}
+    .sec{font-family:monospace;font-size:8.5px;letter-spacing:.12em;color:#E10600;margin-bottom:6pt}
+    .footer{position:fixed;left:44pt;right:44pt;bottom:26pt;font-family:monospace;font-size:7.5px;color:#64748B;display:flex;justify-content:space-between;z-index:1}
+  </style></head><body>
+  <div class="stem"></div>
+  <div style="text-align:center;margin-bottom:6pt;position:relative;z-index:1"><img src="${LOGO}" style="height:42pt"></div>
+  <div style="font-family:monospace;font-size:8.5px;color:#94A3B8;letter-spacing:.1em;margin-bottom:18pt;position:relative;z-index:1">${today}</div>
+  <div style="position:relative;z-index:1;margin-bottom:16pt">
+    <div style="font-size:22px;font-weight:bold;color:#FFFFFF">Go-Live Checklist</div>
+    <div style="width:34pt;height:2.5pt;background:#E10600;margin:6pt 0 8pt"></div>
+    <div style="font-size:11px;color:#94A3B8">${esc(CLIENT_NAME)} · Go-live ${glTxt}</div>
+  </div>
+  ${pre.length?`<div class="card"><div class="sec">CLEAR BEFORE THE DAY</div><table>${pre.map(o=>row(o,false)).join('')}</table></div>`:''}
+  ${day.length?`<div class="card"><div class="sec">ON THE DAY · RUN SHEET &nbsp;(T = GO-LIVE)</div><table>${day.map(o=>row(o,true)).join('')}</table></div>`:''}
+  <div class="footer"><span>PERFECT MADE POSSIBLE&nbsp;&nbsp;·&nbsp;&nbsp;sabelcustomersuccess.com</span><span>Generated ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</span></div>
+  </body></html>`;
+  const w=window.open('','_blank');
+  if(!w){showToast('Allow pop-ups for this site to export the checklist');return;}
+  w.document.write(html);w.document.close();
+  setTimeout(()=>{try{w.focus();w.print();}catch(e){}},450);
+}
+
+// ── Call actions (overview) ───────────────────────────────────────────────────
+// Actions agreed on the weekly calls. They are ordinary pillar tasks carrying a
+// call date (t.call = 'YYYY-MM-DD'), so they count in pillar completion and
+// milestones like any other work; this panel is the aggregated view, grouped by
+// call, newest first. Quick-add captures actions live during the call.
+let callOpen=false; // call action rows collapsed by default; header, count and quick-add stay visible
+function toggleCallActions(){callOpen=!callOpen;renderMain();}
+let odOpen=false;   // overdue carry-over rows collapsed to a one-line summary by default
+function toggleOverdue(){odOpen=!odOpen;renderMain();}
+function fmtCallDate(s){const d=new Date(s+'T00:00:00');return isNaN(d.getTime())?s:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
+function setTaskCall(cid,val){
+  const t=resolveTask(cid);if(!t)return;
+  if(val)t.call=val; else delete t.call;
+  renderMain(); scheduleAutoSave();
+}
+function callItems(){
+  const out=[];
+  P.forEach(p=>['sabel','client'].forEach(g=>(T[p.id]&&T[p.id][g]||[]).forEach((t,i)=>{
+    if(t.call)out.push({t,p,cid:p.id+'-'+(g==='sabel'?'s':'c')+'-'+i});
+  })));
+  return out;
+}
+function addCallAction(){
+  const ti=document.getElementById('ca-title');
+  const v=(ti&&ti.value||'').trim();
+  if(!v){showToast('Give the action a short title first');return;}
+  const pid=document.getElementById('ca-pillar').value;
+  const side=document.getElementById('ca-side').value;
+  const grp=side==='client'?'client':'sabel';
+  if(!T[pid]){showToast('Pick a pillar');return;}
+  const cd=document.getElementById('ca-date');
+  const callDate=(cd&&cd.value)?cd.value:isoDate(new Date());
+  const nt={t:v,o:grp==='client'?CLIENT_LABEL:'Chris',s:'Pending',d:'',week:Math.max(currentWeek(),1),call:callDate,notes:'',link:''};
+  if(grp==='client')nt.tip='Action agreed on the weekly call.';
+  T[pid][grp].push(nt);
+  const tp=P.find(p=>p.id===pid);
+  callOpen=true; // show the list so the new action is visibly there
+  showToast('Call action added to '+(tp?tp.l:pid));
+  render(); scheduleAutoSave();
+}
+function callActionsPanel(){
+  const items=callItems();
+  const open=items.filter(o=>o.t.s!=='Complete').length;
+  const doneN=items.length-open;
+  const byDate={};
+  items.forEach(o=>{(byDate[o.t.call]=byDate[o.t.call]||[]).push(o);});
+  const dates=Object.keys(byDate).sort().reverse();
+  const row=o=>{const done=o.t.s==='Complete';const sc=SC[o.t.s]||SC.Pending;const ow=OW[o.t.o]||OW.Chris;
+    return`<div onclick="setGroupBy('pillar');setP('${o.p.id}')" style="display:flex;align-items:center;gap:8px;padding:6px 2px;border-top:1px solid #1E2433;cursor:pointer">
+      <button class="chk-btn" onclick="toggleComplete(event,'${o.cid}')" title="${done?'Mark incomplete':'Mark complete'}" style="flex-shrink:0;display:inline-flex;align-items:center">
+        <i class="ti ti-${done?'circle-check-filled':'circle'}" style="font-size:16px;color:${done?'#4ADE80':'#334155'}"></i>
+      </button>
+      <span style="width:7px;height:7px;border-radius:50%;background:${o.p.c};flex-shrink:0" title="${esc(o.p.l)}"></span>
+      <span style="font-size:12px;color:${done?'#475569':'#E2E8F0'};${done?'text-decoration:line-through':''};flex:1;min-width:0;line-height:1.4">${esc(o.t.t)}</span>
+      <span style="font-size:10px;color:${ow.c};background:${ow.bg};border-radius:20px;padding:1px 7px;white-space:nowrap;flex-shrink:0">${o.t.o}</span>
+      <span style="font-size:10px;color:#64748B;white-space:nowrap;flex-shrink:0">${spanWeeksText(o.t)}</span>
+      <span style="font-size:10px;color:${sc.c};background:${sc.bg};border-radius:20px;padding:1px 7px;white-space:nowrap;flex-shrink:0">${o.t.s}</span>
+    </div>`;};
+  const groups=dates.map(d=>`<div style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#64748B;margin:10px 0 2px;display:flex;align-items:center;gap:4px"><i class="ti ti-phone" style="font-size:10px;color:#2DD4BF"></i>Call · ${fmtCallDate(d)}</div>${byDate[d].map(row).join('')}`).join('');
+  const quickAdd=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:${items.length?'10':'2'}px" onclick="event.stopPropagation()">
+      <input id="ca-title" type="text" placeholder="New action from today's call..." style="flex:2;min-width:170px;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit">
+      <select id="ca-pillar" style="flex:1;min-width:110px;font-size:11px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 8px;font-family:inherit">${P.map(p=>`<option value="${p.id}">${p.l}</option>`).join('')}</select>
+      <select id="ca-side" style="font-size:11px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 8px;font-family:inherit">
+        <option value="sabel">Sabel action</option>
+        <option value="client">Client action</option>
+      </select>
+      <input id="ca-date" type="date" value="${isoDate(new Date())}" onclick="openPicker(event,this)" title="Which call this action came from (defaults to today; change it when minuting yesterday's call)" style="font-size:11px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:5px 8px;font-family:inherit">
+      <button onclick="addCallAction()" style="background:transparent;border:1px solid #2DD4BF55;color:#2DD4BF;font-size:11px;font-family:inherit;border-radius:6px;padding:6px 12px;cursor:pointer"><i class="ti ti-plus" style="font-size:11px"></i> Add</button>
+    </div>`;
+  return`<div style="background:#12151D;border:1px solid #1E2433;border-radius:10px;padding:14px 16px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#475569">Call actions</span>
+        <i class="ti ti-info-circle" onmouseenter="showTip(event,'Actions agreed on the weekly calls, grouped by call. Each one also lives in its pillar and counts towards that pillar\\'s milestone. Add them here during the call, or flag any task with a call date from its expanded card.')" onmousemove="moveTip(event)" onmouseleave="hideTip()" style="font-size:13px;color:#475569;cursor:help"></i>
+      </div>
+      <span style="font-size:12px;font-weight:600;color:${items.length?(open>0?'#94A3B8':'#4ADE80'):'#475569'}">${items.length?(open>0?open+' open':'All done')+(doneN?' · '+doneN+' completed':''):'No call actions yet'}</span>
+    </div>
+    ${items.length&&callOpen?groups:''}
+    ${items.length?`<div onclick="toggleCallActions()" style="display:flex;align-items:center;justify-content:center;gap:5px;padding-top:8px;margin-top:8px;border-top:1px solid #1E2433;cursor:pointer;font-size:11px;color:#94A3B8;user-select:none">${callOpen?'Hide actions':'View actions ('+items.length+')'}<i class="ti ti-chevron-${callOpen?'up':'down'}" style="font-size:12px"></i></div>`:''}
+    ${quickAdd}
+  </div>`;
+}
+
+// ── Export actions table ──────────────────────────────────────────────────────
+// Every action in the plan as a flat table anyone can drop into a spreadsheet:
+// CSV download or copy-as-TSV, filtered to Client / Sabel / both, sorted by due
+// date (Friday of each task's final week) then pillar order. Includes an
+// Urgency column (Overdue / Due this week / Go-live day / Upcoming / Done) so
+// the table filters by urgency out of the box.
+function closeActionsPop(){const p=document.getElementById('actions-pop');if(p)p.style.display='none';}
+function openActionsPop(e){
+  e.stopPropagation();
+  closeStatusPicker();closeOwnerPicker();closeAddMenu();closeRunwayPop();
+  const pop=document.getElementById('actions-pop');
+  pop.innerHTML=`
+    <div style="font-size:12px;font-weight:600;color:#E2E8F0;margin-bottom:8px">Export actions table</div>
+    <select id="exp-side" style="width:100%;font-size:11px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 8px;font-family:inherit">
+      <option value="all">Client + Sabel actions</option>
+      <option value="client">Client actions only</option>
+      <option value="sabel">Sabel actions only</option>
+    </select>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button onclick="exportActionsCSV()" style="flex:1;background:rgba(74,222,128,.1);border:1px solid #4ADE8055;color:#4ADE80;font-size:11px;font-weight:600;font-family:inherit;border-radius:6px;padding:6px 8px;cursor:pointer">Download CSV</button>
+      <button onclick="copyActionsTable()" style="flex:1;background:transparent;border:1px solid #2A3145;color:#94A3B8;font-size:11px;font-family:inherit;border-radius:6px;padding:6px 8px;cursor:pointer">Copy for sheet</button>
+    </div>
+    <div style="font-size:10px;color:#64748B;margin-top:7px;line-height:1.4">Sorted by due date, then pillar. Urgency column included for filtering.</div>`;
+  const rect=e.currentTarget.getBoundingClientRect();
+  pop.style.left=Math.max(8,Math.min(rect.left,window.innerWidth-285))+'px';
+  pop.style.top=Math.min(rect.bottom+6,window.innerHeight-190)+'px';
+  pop.style.display='block';
+}
+function actionRows(side){
+  const rows=[];
+  P.forEach((p,pi)=>['client','sabel'].forEach(g=>{
+    if(side==='client'&&g!=='client')return;
+    if(side==='sabel'&&g!=='sabel')return;
+    (T[p.id]&&T[p.id][g]||[]).forEach(t=>{
+      const ew=endWeek(t);
+      let due='';
+      if(ew&&ew>=1){const d=new Date(weekStartDate(ew));d.setDate(d.getDate()+4);due=isoDate(d);}
+      let urg='Upcoming';
+      if(t.s==='Complete')urg='Done';
+      else if(isOverdue(t))urg='Overdue';
+      else if(t.gate==='day'||p.id==='golive')urg='Go-live day';
+      else if(ew&&ew===currentWeek())urg='Due this week';
+      const flags=[t.kind==='milestone'?'Milestone':'',t.gate===true?'Blocker':'',t.gate==='day'?'On the day':'',t.call?('Call '+t.call):''].filter(Boolean).join('; ');
+      rows.push({pi,cells:[t.t,p.l,g==='client'?'Client':'Sabel',t.o,t.week?spanWeeksText(t):'Unscheduled',due,urg,t.s,flags],due});
+    });
+  }));
+  rows.sort((a,b)=>((a.due||'9999')).localeCompare(b.due||'9999')||a.pi-b.pi);
+  return rows;
+}
+function actionMatrix(side){
+  const clean=v=>String(v==null?'':v).replace(/[\t\r\n]+/g,' ');
+  return [['Task','Pillar','Action for','Owner','Week(s)','Due date','Urgency','Status','Flags']]
+    .concat(actionRows(side).map(r=>r.cells.map(clean)));
+}
+function exportActionsCSV(){
+  const side=(document.getElementById('exp-side')||{}).value||'all';
+  const escC=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const csv='﻿'+actionMatrix(side).map(r=>r.map(escC).join(',')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=KEY+'-actions-'+side+'-'+isoDate(new Date())+'.csv';
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href);
+  closeActionsPop();showToast('Actions table downloaded');
+}
+function copyActionsTable(){
+  const side=(document.getElementById('exp-side')||{}).value||'all';
+  const tsv=actionMatrix(side).map(r=>r.join('\t')).join('\n');
+  const fin=()=>{closeActionsPop();showToast('Copied. Paste straight into a spreadsheet');};
+  const fallback=()=>{const ta=document.createElement('textarea');ta.value=tsv;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(err){}ta.remove();fin();};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(tsv).then(fin,fallback);
+  else fallback();
+}
+
 // ── Key milestones chart (overview) ───────────────────────────────────────────
 // The milestones are the PILLARS: each pillar is one entry, Complete only when
 // every task in it is Complete. If a pillar has milestone-flagged tasks (kind:
@@ -796,7 +996,7 @@ function thisWeekPanel(){
   // planned multi-week work rather than something stuck.
   const col=(title,icon,colour,items,empty)=>{
     const singles=items.filter(o=>!isSpan(o.t)), spans=items.filter(o=>isSpan(o.t));
-    const spanBlock=spans.length?`<p style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#38BDF8;margin:8px 0 2px;display:flex;align-items:center;gap:4px"><i class="ti ti-arrows-horizontal" style="font-size:10px"></i>Ongoing this week</p>${spans.map(row).join('')}`:'';
+    const spanBlock=spans.length?`<p style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#64748B;margin:8px 0 2px;display:flex;align-items:center;gap:4px"><i class="ti ti-arrows-horizontal" style="font-size:10px;color:#38BDF8"></i>Ongoing this week</p>${spans.map(row).join('')}`:'';
     return `<div>
       <p class="col-head" style="color:${colour}"><i class="ti ${icon}" style="font-size:12px"></i>${title} <span style="font-size:10px;color:#475569;font-weight:400;margin-left:4px">${items.filter(o=>o.t.s!=='Complete').length} to do</span></p>
       ${items.length?(singles.map(row).join('')+spanBlock):`<div style="font-size:11px;color:#334155;padding:8px 0">${empty}</div>`}
@@ -823,8 +1023,13 @@ function thisWeekPanel(){
       <p class="col-head" style="color:#F87171"><i class="ti ti-alert-triangle" style="font-size:12px"></i>${title} <span style="font-size:10px;color:#F87171;font-weight:400;margin-left:4px">${items.length} overdue</span></p>
       ${items.map(odRow).join('')}
     </div>`:'';
-  const odSection=odTotal?`<div style="border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.04);border-radius:10px;padding:10px 12px;margin-bottom:12px">
-      <div class="phase-cols">${odCol('Your overdue actions',od.client)}${odCol('Sabel overdue',od.sabel)}</div>
+  const odSection=odTotal?`<div style="border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.04);border-radius:10px;padding:8px 12px;margin-bottom:12px">
+      <div onclick="toggleOverdue()" style="display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none">
+        <i class="ti ti-alert-triangle" style="font-size:13px;color:#F87171"></i>
+        <span style="font-size:12px;font-weight:600;color:#F87171">${odTotal} overdue action${odTotal===1?'':'s'} carried over</span>
+        <span style="font-size:11px;color:#94A3B8;margin-left:auto;display:inline-flex;align-items:center;gap:4px">${odOpen?'Hide':'View'}<i class="ti ti-chevron-${odOpen?'up':'down'}" style="font-size:12px"></i></span>
+      </div>
+      ${odOpen?`<div class="phase-cols" style="margin-top:8px">${odCol('Your overdue actions',od.client)}${odCol('Sabel overdue',od.sabel)}</div>`:''}
     </div>`:'';
   return `<div style="background:#12151D;border:1px solid #1E2433;border-radius:12px;padding:14px;margin-bottom:1rem">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap">
@@ -1003,6 +1208,30 @@ function onDrop(e,tPhId,tGrp){
   scheduleAutoSave();
 }
 
+function moveTaskToPillar(cid,pid){
+  // Move a task to another pillar, keeping its group (client/Sabel), status,
+  // schedule, notes and links. Reuses the same state migration as drag moves.
+  const parts=cid.split('-');
+  const idx=parseInt(parts[parts.length-1],10);
+  const gs=parts[parts.length-2];
+  const grp=gs==='s'?'sabel':'client';
+  const phId=parts.slice(0,-2).join('-');
+  if(!pid||pid===phId||!T[pid]||!T[phId]||!T[phId][grp][idx]){renderMain();return;}
+  const keepNotes=cardNotes[cid],keepLink=cardLinks[cid],keepOrig=origStatus[cid],wasOpen=expandedCards.has(cid);
+  const task={...T[phId][grp][idx]};
+  remapCids(phId,grp,idx);
+  T[phId][grp].splice(idx,1);
+  T[pid][grp].push(task);
+  const tCid=pid+'-'+gs+'-'+(T[pid][grp].length-1);
+  if(keepNotes!==undefined)cardNotes[tCid]=keepNotes;
+  if(keepLink!==undefined)cardLinks[tCid]=keepLink;
+  if(keepOrig!==undefined)origStatus[tCid]=keepOrig;
+  if(wasOpen)expandedCards.add(tCid);
+  const tp=P.find(p=>p.id===pid);
+  showToast('Moved to '+(tp?tp.l:pid));
+  render();scheduleAutoSave();
+}
+
 // ── Expand/collapse ───────────────────────────────────────────────────────────
 function tog(cid){
   if(expandedCards.has(cid)) expandedCards.delete(cid);
@@ -1039,6 +1268,13 @@ function setTaskWeekEnd(cid,val){
 function setTaskKind(cid,on){
   const t=resolveTask(cid);if(!t)return;
   if(on)t.kind='milestone'; else delete t.kind;
+  renderMain(); scheduleAutoSave();
+}
+function setTaskGate(cid,val){
+  const t=resolveTask(cid);if(!t)return;
+  if(val==='day')t.gate='day';
+  else if(val==='pre'||val===true)t.gate=true;
+  else delete t.gate;
   renderMain(); scheduleAutoSave();
 }
 function setTaskWeekByDate(cid,val){
@@ -1104,7 +1340,7 @@ function makeCard(t,cid,isClient,ctx){
     :`<input type="url" value="${esc(curLink)}" style="width:100%;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit;box-sizing:border-box" placeholder="Paste a link..." onchange="saveLink('${cid}',this.value)">`;
   const safeTitle=esc(t.t);
   const late=isOverdue(t);
-  return`<div class="${isClient?'task-client':'task'}${done?' done':''}${late?' overdue':''}" draggable="${ctx&&ctx.noDrag?'false':'true'}" ondragstart="onDragStart(event,'${_ph}','${_grp}',${_idx})" ondragend="onDragEnd(event)">
+  return`<div id="card-${cid}" class="${isClient?'task-client':'task'}${done?' done':''}${late?' overdue':''}" draggable="${ctx&&ctx.noDrag?'false':'true'}" ondragstart="onDragStart(event,'${_ph}','${_grp}',${_idx})" ondragend="onDragEnd(event)">
     <div class="task-inner">
       <div class="task-head" onclick="tog('${cid}')">
         <div style="display:flex;align-items:flex-start;gap:8px">
@@ -1130,6 +1366,9 @@ function makeCard(t,cid,isClient,ctx){
               <span style="font-size:11px;color:${late?'#F87171':'#475569'}">${taskDatesText(t)}</span>
               ${isSpan(t)&&!done?`<span title="Level-of-effort work running across Weeks ${t.week}–${t.wkEnd}" style="font-size:10px;font-weight:600;color:#38BDF8;background:rgba(56,189,248,.12);padding:1px 6px;border-radius:3px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-arrows-horizontal" style="font-size:10px"></i>Ongoing</span>`:''}
               ${t.kind==='milestone'&&!done?`<span title="Checkpoint task: a sign-off or approval" style="font-size:10px;font-weight:600;color:#C084FC;background:rgba(192,132,252,.12);padding:1px 6px;border-radius:3px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-diamonds" style="font-size:10px"></i>Milestone</span>`:''}
+              ${t.gate&&t.gate!=='day'&&!done?`<span title="Must be cleared before go-live (shows on the runway)" style="font-size:10px;font-weight:600;color:#FB923C;background:rgba(251,146,60,.12);padding:1px 6px;border-radius:3px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-flag" style="font-size:10px"></i>Blocker</span>`:''}
+              ${t.gate==='day'&&!done?`<span title="Cutover action: happens on go-live day (channel switch, DNS, phones)" style="font-size:10px;font-weight:600;color:#E10600;background:rgba(225,6,0,.12);padding:1px 6px;border-radius:3px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-rocket" style="font-size:10px"></i>On the day</span>`:''}
+              ${t.call&&!done?`<span title="Action from the call on ${fmtCallDate(t.call)}" style="font-size:10px;font-weight:600;color:#2DD4BF;background:rgba(45,212,191,.12);padding:1px 6px;border-radius:3px;display:inline-flex;align-items:center;gap:3px"><i class="ti ti-phone" style="font-size:10px"></i>Call · ${fmtCallDate(t.call)}</span>`:''}
               ${late?`<span style="font-size:10px;font-weight:600;color:#F87171;background:rgba(248,113,113,.12);padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em">Overdue</span>`:''}
               ${ctx&&ctx.l?`<span style="font-size:10px;color:#475569">· ${esc(ctx.l)}</span>`:''}
               ${hasNote&&!done?`<span style="font-size:10px;color:#475569;background:#1E2433;padding:1px 5px;border-radius:3px">note</span>`:''}
@@ -1158,11 +1397,45 @@ function makeCard(t,cid,isClient,ctx){
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;flex-wrap:wrap">
             <span style="font-size:10px;color:#475569">${t.week?(spanWeeksText(t)+' · '+ (isSpan(t)?taskDatesText(t).split('·')[1].trim():weekRangeLabel(t.week))):'Not scheduled to a week yet'}</span>
+            <span style="display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap">
             <label onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#C084FC;cursor:pointer;user-select:none">
               <input type="checkbox" ${t.kind==='milestone'?'checked':''} onchange="setTaskKind('${cid}',this.checked)" style="accent-color:#C084FC;width:12px;height:12px">
               Milestone (checkpoint / sign-off)
             </label>
+            <label onclick="event.stopPropagation()" title="Blockers appear on the go-live runway. 'Before the day' must be cleared ahead of launch; 'On the day' are cutover actions (channel switches, DNS, phones) done at go-live" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#FB923C;cursor:pointer;user-select:none">
+              Go-live:
+              <select onchange="setTaskGate('${cid}',this.value)" style="font-size:11px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:3px 6px;font-family:inherit">
+                <option value=""${!t.gate?' selected':''}>Not a blocker</option>
+                <option value="pre"${(t.gate===true||t.gate==='pre')?' selected':''}>Blocker · before the day</option>
+                <option value="day"${t.gate==='day'?' selected':''}>Cutover · on the day</option>
+              </select>
+            </label>
+            ${(t.gate==='day'||_ph==='golive')?`<label onclick="event.stopPropagation()" title="When on go-live day this happens, relative to the go-live moment (e.g. the delta migration runs at T−2h)" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#E10600;cursor:pointer;user-select:none">
+              When:
+              <select onchange="setTaskWhen('${cid}',this.value)" style="font-size:11px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:3px 6px;font-family:inherit">
+                <option value=""${t.dayOff===undefined?' selected':''}>Time TBC</option>
+                <option value="-240"${t.dayOff===-240?' selected':''}>T−4h</option>
+                <option value="-120"${t.dayOff===-120?' selected':''}>T−2h</option>
+                <option value="-60"${t.dayOff===-60?' selected':''}>T−1h</option>
+                <option value="-30"${t.dayOff===-30?' selected':''}>T−30m</option>
+                <option value="0"${t.dayOff===0?' selected':''}>At go-live</option>
+                <option value="30"${t.dayOff===30?' selected':''}>T+30m</option>
+                <option value="60"${t.dayOff===60?' selected':''}>T+1h</option>
+                <option value="120"${t.dayOff===120?' selected':''}>T+2h</option>
+              </select>
+            </label>`:''}
+            <label onclick="event.stopPropagation()" title="Flag this task as an action from a weekly call; it will appear in the Call actions panel on the overview" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#2DD4BF;cursor:pointer;user-select:none">
+              From call:
+              <input type="date" value="${t.call||''}" onclick="openPicker(event,this)" onchange="setTaskCall('${cid}',this.value)" style="font-size:11px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:3px 6px;font-family:inherit">
+            </label>
+            </span>
           </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <label>Pillar</label>
+          <select onclick="event.stopPropagation()" onchange="moveTaskToPillar('${cid}',this.value)" title="Move this task to a different pillar (notes, links and schedule move with it)" style="width:100%;font-size:12px;color:#E2E8F0;background:#161B26;border:1px solid #2A3145;border-radius:6px;padding:6px 10px;font-family:inherit;box-sizing:border-box">
+            ${P.map(p=>`<option value="${p.id}"${p.id===_ph?' selected':''}>${p.l}</option>`).join('')}
+          </select>
         </div>
         <div style="margin-bottom:10px">
           <label>Notes</label>
@@ -1304,7 +1577,8 @@ function renderSidebar(){
       ${goLiveDate?`<div title="Target go-live date" style="font-size:11px;font-weight:600;color:#E10600;margin-top:6px;display:flex;align-items:center;gap:5px"><i class="ti ti-rocket" style="font-size:12px"></i>Go-live ${new Date(goLiveDate+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>`:''}
     </div>
     ${toggle}${ovBtn}<div class="sb-sec">${secLabel}</div>${groupBtns}
-    <button onclick="downloadSnapshot()" title="Download the current plan state as a JSON backup" style="margin-top:14px;width:100%;background:transparent;border:1px solid #1E2433;color:#64748B;font-size:11px;font-family:inherit;border-radius:6px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-download" style="font-size:12px"></i>Download snapshot</button>`;
+    <button onclick="openActionsPop(event)" title="Export every action as a table (CSV or copy-paste) filtered to Client, Sabel or both" style="margin-top:14px;width:100%;background:transparent;border:1px solid #1E2433;color:#64748B;font-size:11px;font-family:inherit;border-radius:6px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-table-export" style="font-size:12px"></i>Export actions</button>
+    <button onclick="downloadSnapshot()" title="Download the current plan state as a JSON backup" style="margin-top:8px;width:100%;background:transparent;border:1px solid #1E2433;color:#64748B;font-size:11px;font-family:inherit;border-radius:6px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-download" style="font-size:12px"></i>Download snapshot</button>`;
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -1420,7 +1694,8 @@ function renderMain(){
     html=`<p style="font-size:11px;color:#475569;margin-bottom:3px">Jul 2026 - Sep 2026</p>
       <p style="font-size:18px;font-weight:600;color:#E2E8F0;margin-bottom:1rem">Project overview</p>
       ${ovMetrics(gs)}
-      <div class="ov-two">${milestonesCard()}${thisWeekPanel()}</div>`;
+      <div class="ov-two">${milestonesCard()}<div style="min-width:0">${runwayPanel()}${callActionsPanel()}</div></div>
+      ${thisWeekPanel()}`;
   } else if(groupBy==='week'){
     const ws=weekStats(cur);
     const wpct=ws.total>0?Math.round(ws.done/ws.total*100):0;
