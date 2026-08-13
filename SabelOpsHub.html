@@ -164,6 +164,17 @@
 
 <script>
   var VIEWS = ['home','portal','dashboard','contracts','weekly','feedback'];
+
+  // Each tab is a separate page in an iframe, with its own cache entry — so
+  // refreshing the hub does not necessarily re-fetch the tool inside it, and a
+  // freshly deployed page can keep showing the old version for as long as the
+  // browser holds it. Stamping the version onto the src makes it a new URL, so
+  // a deploy is picked up immediately.
+  // BUMP THIS whenever you push a new version of any tab's page.
+  var ASSET_V = '2026-08-13a';
+  function versioned(src){
+    return src + (src.indexOf('?') > -1 ? '&' : '?') + 'v=' + ASSET_V;
+  }
   function show(view){
     VIEWS.forEach(function(v){
       document.getElementById(v).classList.toggle('on', v===view);
@@ -173,7 +184,7 @@
     // Lazy-load iframes on first open (keeps startup fast; each tool only goes live when viewed)
     if (view!=='home'){
       var f = document.getElementById('frame-'+view);
-      if (f && !f.src){ f.src = f.getAttribute('data-src'); }
+      if (f && !f.src){ f.src = versioned(f.getAttribute('data-src')); }
     }
     if (window.location.hash.replace('#','') !== view){
       history.replaceState(null, '', '#'+view);
