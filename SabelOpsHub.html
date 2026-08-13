@@ -66,6 +66,7 @@
       <button class="tab on" id="t-home"      onclick="show('home')">Home</button>
       <button class="tab"    id="t-portal"    onclick="show('portal')">Onboarding / Offboarding</button>
       <button class="tab"    id="t-dashboard" onclick="show('dashboard')">Project Dashboard</button>
+      <button class="tab"    id="t-contracts" onclick="show('contracts')">Client Contracts</button>
       <button class="tab"    id="t-weekly"    onclick="show('weekly')">Weekly Updates</button>
       <button class="tab"    id="t-feedback"  onclick="show('feedback')">Feedback Dashboard</button>
     </nav>
@@ -95,8 +96,16 @@
           <div class="ico">&#9636;</div>
           <h2>Project Tracker Dashboard</h2>
           <div class="sub">Where every client tracker is at — live</div>
-          <p>A single team view across all client project trackers: live task progress, blockers, go-live timeline and owner workload — pulled straight from the trackers themselves.</p>
+          <p>A single team view across all client project trackers: run sheet, stage board and command table — live task progress, blockers and owner workload pulled straight from the trackers themselves.</p>
           <span class="go">Open dashboard <span class="arrow">&rarr;</span></span>
+        </button>
+        <button class="pillar" onclick="show('contracts')">
+          <span class="badge internal">Internal</span>
+          <div class="ico">&#128196;</div>
+          <h2>Client Contracts</h2>
+          <div class="sub">Scope, go-live timeline &amp; expiry watch</div>
+          <p>Hours, scope, migration and key dates from each client's SOW. Plus the go-live timeline with its pinch points, and the expiry watch for anyone in the final three months of their term.</p>
+          <span class="go">Open contracts <span class="arrow">&rarr;</span></span>
         </button>
         <button class="pillar" onclick="show('weekly')">
           <span class="badge internal">Internal</span>
@@ -118,6 +127,7 @@
       <div class="foot-note">
         <b>Onboarding / Offboarding Portal</b> &mdash; your checklists to set clients up and close them out.<br>
         <b>Project Tracker Dashboard</b> &mdash; the team view of where all the client trackers stand.<br>
+        <b>Client Contracts</b> &mdash; scope and hours per client, the go-live timeline and the expiry watch.<br>
         <b>Weekly Client Updates</b> &mdash; draft and approve the Monday and Friday client messages.<br>
         <b>Feedback Dashboard</b> &mdash; what clients are telling us, pulled live from the feedback webhook.
       </div>
@@ -131,7 +141,14 @@
 
   <!-- DASHBOARD -->
   <section class="view" id="dashboard">
-    <iframe id="frame-dashboard" data-src="SabelPortfolioDashboard.html" title="Project Tracker Dashboard"></iframe>
+    <iframe id="frame-dashboard" data-src="SabelPortfolioDashboard_v2.html" title="Project Tracker Dashboard"></iframe>
+  </section>
+
+  <!-- CLIENT CONTRACTS -->
+  <!-- Same file as the old dashboard, served in its ?view=contracts preset so the
+       contract widgets keep one home. See VIEW_PRESETS in SabelPortfolioDashboard.html. -->
+  <section class="view" id="contracts">
+    <iframe id="frame-contracts" data-src="SabelPortfolioDashboard.html?view=contracts" title="Client Contracts"></iframe>
   </section>
 
   <!-- WEEKLY UPDATES -->
@@ -146,7 +163,7 @@
 </div>
 
 <script>
-  var VIEWS = ['home','portal','dashboard','weekly','feedback'];
+  var VIEWS = ['home','portal','dashboard','contracts','weekly','feedback'];
   function show(view){
     VIEWS.forEach(function(v){
       document.getElementById(v).classList.toggle('on', v===view);

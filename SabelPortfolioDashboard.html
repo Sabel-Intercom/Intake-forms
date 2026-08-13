@@ -454,6 +454,21 @@ var WIDGETS = [
   {id:'w-contracts',label:'Contract expiry'}
 ];
 
+// FOCUSED VIEWS — this same page can be served as a narrower, single-purpose
+// screen by adding ?view=<name>. The Ops Hub uses this to give the contract
+// widgets their own tab without forking the file: CONTRACTS, CLIENT_INFO and
+// the shared go-live overrides all stay here, edited in one place.
+// A preset fixes the widget set for that URL (the ⚙ menu and the saved
+// per-browser preferences are bypassed, not overwritten).
+var VIEW_PRESETS = {
+  contracts: {
+    title: 'Client Contracts &amp; Go-Live',
+    widgets: ['w-clientinfo','w-timeline','w-contracts'],
+    open: ['w-clientinfo']   // <details> widgets to expand on open
+  }
+};
+var VIEW_MODE = VIEW_PRESETS[(new URLSearchParams(location.search).get('view')||'').toLowerCase()] || null;
+
 // UI state (persisted)
 var NT_REMOVED = JSON.parse(localStorage.getItem('sabel_nt_removed')||'[]');
 var DENSITY = localStorage.getItem('sabel_density')||'compact';
@@ -1251,10 +1266,31 @@ function updateDensityBtn(){
 }
 
 // ── Widget visibility config ──
+function widgetVisible(id){
+  return VIEW_MODE ? VIEW_MODE.widgets.indexOf(id)!==-1 : WIDGET_HIDDEN.indexOf(id)===-1;
+}
 function applyWidgets(){
   WIDGETS.forEach(function(w){
     var el=document.getElementById(w.id);
-    if(el) el.style.display = WIDGET_HIDDEN.indexOf(w.id)===-1 ? '' : 'none';
+    if(el) el.style.display = widgetVisible(w.id) ? '' : 'none';
+  });
+  // w-active and w-offb share a grid wrapper — drop it too when both are gone,
+  // otherwise the empty grid leaves a gap between the widgets either side.
+  var lay=document.querySelector('.layout');
+  if(lay) lay.style.display = (widgetVisible('w-active')||widgetVisible('w-offb')) ? '' : 'none';
+}
+// Apply a ?view= preset: retitle, expand its widgets, and hide the ⚙ menu
+// (the URL owns the widget set in this mode, so the toggles would be a lie).
+function applyViewMode(){
+  if(!VIEW_MODE) return;
+  var h=document.querySelector('header.header h1');
+  if(h) h.innerHTML = VIEW_MODE.title;
+  if(VIEW_MODE.title) document.title = VIEW_MODE.title.replace(/&amp;/g,'&') + ' · Sabel';
+  var cfg=document.querySelector('.cfg-wrap');
+  if(cfg) cfg.style.display='none';
+  (VIEW_MODE.open||[]).forEach(function(id){
+    var d=document.querySelector('#'+id+' details.wk-drop');
+    if(d) d.open=true;
   });
 }
 function setWidget(id,show){
@@ -1540,6 +1576,7 @@ function loadClientInfo(){
 updateDensityBtn();
 buildConfigPanel();
 render();                                   // paint shell immediately
+applyViewMode();                            // ?view= preset: retitle + fix the widget set
 applyWidgets();                             // honour saved widget visibility
 renderClientInfo();                         // client contracts widget (instant from baked data)
 loadNotes();                                // pull the team's shared notes

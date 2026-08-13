@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sabel Project Dashboard</title>
+<style>
+  :root{
+    --bg:#0B0B0C; --surface:#0F1113; --card:#141618; --card2:#191C20; --card3:#1E2228;
+    --border:#2A3547; --border2:#1A2232; --red:#E10600;
+    --w:#FFFFFF; --body:#E2E8F0; --muted:#94A3B8; --mono:#64748B; --dim:#3F4756;
+    --green:#4ADE80; --blue:#60A5FA; --amber:#FBBF24; --purple:#C084FC; --redText:#F87171;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--body);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:40px;}
+  a{color:#FCA5A5;text-decoration:none;}
+  a:hover{color:#fff;text-decoration:underline;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  select{font-family:inherit;}
+  ::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}::-webkit-scrollbar-track{background:transparent;}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+
+  /* header */
+  .header{display:flex;align-items:center;gap:16px;padding:15px 28px;border-bottom:1px solid var(--border2);background:rgba(11,11,12,.94);position:sticky;top:0;z-index:40;min-width:1180px;backdrop-filter:blur(6px);}
+  .logo-img{height:26px;width:auto;display:block;}
+  .tag{font-size:8px;letter-spacing:.2em;color:var(--mono);text-transform:uppercase;}
+  .header h1{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--w);text-transform:uppercase;margin-left:6px;}
+  .hright{margin-left:auto;display:flex;align-items:center;gap:12px;}
+  .stamp{font-size:10px;color:var(--mono);letter-spacing:.04em;}
+  .stamp b{color:var(--green);}
+  .chip-week{font-size:10px;color:var(--mono);letter-spacing:.04em;border:1px solid var(--border2);background:var(--card2);border-radius:5px;padding:6px 11px;}
+  .tabs{display:flex;gap:4px;background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:3px;}
+  .tab{border-radius:5px;padding:7px 13px;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);transition:.14s;}
+  .tab:hover{color:var(--w);}
+  .tab.on{background:var(--red);color:#fff;}
+
+  .wrap{max-width:1240px;min-width:1180px;margin:0 auto;padding:22px 28px 0;}
+
+  /* kpis */
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px;}
+  .kpi{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;}
+  .kpi .l{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mono);margin-bottom:7px;}
+  .kpi .v{font-size:27px;font-weight:800;line-height:1;color:var(--w);}
+  .kpi .s{font-size:10px;color:var(--mono);margin-top:5px;}
+
+  .panel{background:var(--card);border:1px solid var(--border2);border-radius:12px;}
+  .hero{background:linear-gradient(160deg,rgba(225,6,0,.08),var(--card));border:1px solid rgba(225,6,0,.30);border-radius:12px;padding:16px 18px;margin-bottom:22px;}
+  .sec-h{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:9px;}
+  .count{font-size:9px;color:var(--mono);background:var(--card2);border:1px solid var(--border2);padding:1px 8px;border-radius:20px;}
+  h2.big{font-size:14px;font-weight:800;letter-spacing:.03em;color:var(--w);text-transform:uppercase;}
+  .sub{font-size:10px;color:var(--mono);}
+
+  .pill{border-radius:5px;padding:6px 11px;font-size:10px;font-weight:700;letter-spacing:.03em;background:var(--surface);border:1px solid var(--border2);color:var(--muted);transition:.14s;}
+  .pill:hover{color:var(--w);border-color:var(--border);}
+  .pill.on{background:rgba(225,6,0,.16);border-color:rgba(225,6,0,.55);color:#FCA5A5;}
+  .btn-red{background:var(--red);border:1px solid var(--red);color:#fff;border-radius:6px;padding:7px 15px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;}
+  .btn-red:hover{background:#FF2A24;}
+  .btn-ghost{background:var(--card2);border:1px solid var(--border);color:var(--body);border-radius:6px;padding:8px 15px;font-size:12px;font-weight:700;}
+  .btn-ghost:hover{color:var(--w);border-color:var(--mono);}
+
+  /* stage lanes */
+  .lanes{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;align-items:start;}
+  .lane-h{display:flex;align-items:center;gap:6px;padding-bottom:7px;margin-bottom:8px;border-bottom:2px solid var(--mono);}
+  .lane-h .nm{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+  .lane-h .n{font-size:9px;color:var(--mono);margin-left:auto;}
+  .lane-c{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:5px 7px;border-radius:5px;background:var(--surface);cursor:pointer;}
+  .lane-c:hover{background:var(--card3);}
+  .lane-c .nm{font-size:10.5px;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lane-c .d{font-size:9px;white-space:nowrap;}
+
+  /* run sheet rows */
+  .arow{background:var(--card2);border:1px solid var(--border2);border-left-width:3px;border-radius:8px;overflow:hidden;}
+  .ahead{display:grid;grid-template-columns:64px minmax(230px,1fr) minmax(0,auto) 118px 16px;gap:14px;align-items:center;padding:11px 14px;cursor:pointer;}
+  .ahead:hover{background:var(--card3);}
+  .ad1{font-size:17px;font-weight:800;line-height:1;}
+  .ad2{font-size:7.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mono);margin-top:4px;}
+  .anm{font-size:13px;font-weight:700;color:var(--w);}
+  .ameta{font-size:9.5px;color:var(--mono);margin-top:4px;}
+  .stg{font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:20px;white-space:nowrap;}
+  .cchip{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;}
+  .bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .bar > i{display:block;height:100%;}
+  .abody{border-top:1px solid var(--border2);background:var(--surface);padding:4px 14px 11px;}
+  .trow{display:grid;grid-template-columns:18px 8px 1fr 78px 92px 74px 22px;gap:11px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border2);}
+  .trow:last-of-type{border-bottom:none;}
+  .tick{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--dim);color:var(--green);font-size:9px;line-height:12px;text-align:center;cursor:pointer;background:none;padding:0;}
+  .tick.on{border-color:var(--green);background:rgba(74,222,128,.16);}
+  .dot{width:8px;height:8px;border-radius:2px;}
+  .ttx{font-size:12px;line-height:1.35;text-wrap:pretty;}
+  .ttx.done{color:#4E5768;text-decoration:line-through;}
+
+  /* ── all-hands capture ── */
+  .tw{border-radius:7px;transition:background .12s;}
+  .tw .grow,.tw .trow{cursor:pointer;padding:2px 4px;border-radius:7px;}
+  .tw .grow:hover,.tw .trow:hover{background:rgba(255,255,255,.028);}
+  .tw.cap{background:rgba(225,6,0,.05);box-shadow:inset 2px 0 0 var(--red);}
+  .tick.cap{border-color:var(--border);color:var(--mono);font-size:10px;}
+  .tick.cap.on{background:rgba(225,6,0,.16);border-color:var(--red);color:#FCA5A5;}
+  .tick.cap.open{border-color:#FCA5A5;}
+  .cmark{font-size:9.5px;font-weight:700;letter-spacing:.03em;padding:1px 6px;border-radius:4px;background:var(--card3);}
+  .cmark.ch{color:#FBBF24;background:rgba(251,191,36,.14);}
+  .cmark.nt{color:var(--muted);cursor:help;}
+
+  .cpanel{margin:8px 0 4px 30px;padding:12px 13px;background:var(--card);border:1px solid var(--border2);border-radius:9px;display:flex;flex-direction:column;gap:9px;cursor:default;}
+  .crow{display:flex;align-items:flex-start;gap:10px;}
+  .clab{flex:0 0 84px;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);padding-top:6px;}
+  .cbtns{flex:1;display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
+  .cbtn{font-size:10.5px;font-weight:700;padding:5px 10px;border-radius:5px;border:1px solid var(--border2);background:var(--card2);color:var(--muted);transition:.12s;}
+  .cbtn:hover{color:var(--w);border-color:var(--border);}
+  .cbtn.on{color:#fff;}
+  .cbtn.chase.on{color:#FBBF24;background:rgba(251,191,36,.16);border-color:#FBBF24;}
+  .cbtn.clr{color:var(--mono);}
+  .cbtn.clr:hover{color:#F87171;border-color:#F87171;}
+  .cnote{flex:1;background:var(--card2);border:1px solid var(--border2);border-radius:6px;color:var(--body);font:12px/1.45 inherit;padding:7px 9px;resize:vertical;min-height:38px;}
+  .cnote:focus{outline:none;border-color:var(--red);}
+  .cwas{font-size:9.5px;color:var(--mono);margin-left:auto;letter-spacing:.03em;}
+
+  .capbtn.has{background:rgba(225,6,0,.16);color:#FCA5A5;}
+  .capn{display:inline-block;min-width:15px;padding:0 4px;margin-left:3px;border-radius:8px;background:var(--red);color:#fff;font-size:9px;line-height:15px;text-align:center;}
+
+  /* post-call summary overlay */
+  .sum{position:fixed;inset:0;z-index:60;background:rgba(6,6,7,.78);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:34px;}
+  .sum.on{display:flex;}
+  .sum-box{width:min(820px,100%);max-height:100%;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border2);border-radius:14px;overflow:hidden;}
+  .sum-h{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid var(--border2);}
+  .sum-h h2{font-size:15px;font-weight:800;color:var(--w);letter-spacing:.01em;}
+  .sum-sub{font-size:11px;color:var(--muted);margin-top:4px;max-width:52ch;line-height:1.5;}
+  .sum-count{color:#FCA5A5;font-weight:700;}
+  .share-note{display:block;margin-top:5px;font-size:10px;letter-spacing:.03em;}
+  .sum-b{overflow-y:auto;padding:6px 20px 20px;}
+  .sgrp{margin-top:16px;}
+  .sgrp-h{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-bottom:7px;border-bottom:1px solid var(--border2);}
+  .sgrp-h span{margin-left:auto;color:var(--mono);}
+  .srow{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);}
+  .srow .m{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px;font-size:10px;}
+  .snote{margin-top:6px;padding:7px 9px;background:var(--card);border-left:2px solid var(--border);border-radius:0 5px 5px 0;font-size:11.5px;line-height:1.5;color:var(--muted);white-space:pre-wrap;}
+  .badge{font-size:9px;font-weight:700;text-align:center;padding:3px 0;border-radius:4px;}
+  .due{font-size:9.5px;text-align:right;}
+  .flag{font-size:12px;text-align:right;color:#2F3644;cursor:pointer;background:none;border:none;}
+  .flag.on{color:var(--amber);}
+  .tfoot{display:flex;align-items:center;justify-content:space-between;padding-top:10px;}
+  .tfoot span{font-size:10px;color:var(--mono);}
+  .tfoot a{font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;}
+
+  /* board cards */
+  .board{display:grid;grid-template-columns:repeat(8,1fr);gap:9px;align-items:start;margin-bottom:22px;}
+  .bcol{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:10px;}
+  .bcard{background:var(--card);border:1px solid var(--border2);border-left-width:3px;border-radius:7px;padding:9px 10px;cursor:pointer;}
+  .bcard:hover{border-color:var(--border);}
+  .bcard .nm{font-size:11.5px;font-weight:700;color:var(--w);line-height:1.25;}
+  .bchip{font-size:8.5px;font-weight:700;padding:2px 6px;border-radius:4px;}
+
+  /* groups */
+  .grp{background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:12px 13px;}
+  .grp-h{font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;margin-bottom:11px;}
+  .grow{display:flex;align-items:flex-start;gap:9px;}
+  .grow .m{display:flex;align-items:center;gap:9px;margin-top:5px;}
+  .grow .m span{font-size:9px;}
+  .empty{font-size:11px;color:var(--dim);}
+
+  /* table */
+  .tbl{background:var(--card);border:1px solid var(--border2);border-radius:11px;overflow:hidden;}
+  .thead,.tr{display:grid;grid-template-columns:minmax(170px,1.4fr) 96px 76px minmax(110px,1fr) 132px;gap:12px;padding:10px 15px;border-bottom:1px solid var(--border2);}
+  .thead{background:var(--surface);}
+  .thead span{font-size:8.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mono);}
+  .tr{cursor:pointer;border-left:3px solid transparent;}
+  .tr:hover{background:var(--card3);}
+  .tr.sel{background:var(--card3);border-left-color:var(--red);}
+
+  /* presenter */
+  .pres{position:fixed;inset:0;z-index:90;background:var(--bg);display:none;flex-direction:column;}
+  .pres.on{display:flex;}
+  .pres-h{display:flex;align-items:center;justify-content:space-between;padding:18px 40px;border-bottom:1px solid var(--border2);}
+  .pres-b{flex:1;overflow:auto;padding:40px;}
+  footer{margin-top:26px;padding:15px 0 0;border-top:1px solid var(--border2);display:flex;justify-content:space-between;gap:10px;font-size:9px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+
+
+<header class="header">
+  <div style="display:flex;align-items:center;gap:9px">
+    <img class="logo-img" src="data:image/png;base64,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" alt="Sabel">
+    <span class="tag">Ops Hub</span>
+  </div>
+  <h1>Project Tracker Dashboard</h1>
+  <div class="hright">
+    <span class="stamp">Live · <b id="stamp">—</b></span>
+    <button class="tab" id="refreshBtn" onclick="loadAll(true)" title="Re-read the trackers now">&#8635;</button>
+    <button class="tab capbtn" id="capBtn" onclick="openSummary()" title="Everything captured on this call">&#9998; Call capture</button>
+    <span class="chip-week" id="weekLabel"></span>
+    <div class="tabs">
+      <button class="tab" id="tab-a" onclick="setView('a')">1a · Run sheet</button>
+      <button class="tab" id="tab-b" onclick="setView('b')">1b · Stage board</button>
+      <button class="tab" id="tab-c" onclick="setView('c')">1c · Command table</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+  <div id="view"></div>
+  <footer>
+    <span>Internal use only · live from GitHub trackers via Sabel webhook</span>
+    <span>Stage feed: client-portal-v1 · tasks: [client]-tracker-v1</span>
+  </footer>
+</div>
+
+<!-- Post-call summary: what to go and apply in the trackers. -->
+<div class="sum" id="sum">
+  <div class="sum-box">
+    <div class="sum-h">
+      <div>
+        <h2>Post-call actions</h2>
+        <div class="sum-sub">Captured on the call. Nothing here has been written to a tracker &mdash; this is the list to go and apply. <span id="sumCount" class="sum-count"></span>
+          <span id="shareNote" class="share-note"></span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="cbtn" id="copyBtn" onclick="copySummary()">Copy all</button>
+        <button class="cbtn clr" onclick="capClearAll()">Clear session</button>
+        <button style="color:var(--mono);font-size:20px;padding:0 4px" onclick="closeSummary()">&times;</button>
+      </div>
+    </div>
+    <div class="sum-b" id="sumBody"></div>
+  </div>
+</div>
+
+<div class="pres" id="pres">
+  <div class="pres-h">
+    <div style="display:flex;align-items:center;gap:12px">
+      <img class="logo-img" src="data:image/png;base64,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" alt="Sabel" style="height:22px">
+      <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mono)">All-hands run sheet</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="mono" style="font-size:11px;color:var(--mono)" id="presCount"></span>
+      <button class="btn-ghost" onclick="presMove(-1)">← Back</button>
+      <button class="btn-red" style="padding:8px 17px;font-size:12px" onclick="presMove(1)">Next client →</button>
+      <button style="color:var(--mono);font-size:20px;padding:0 4px" onclick="stopPresent()">×</button>
+    </div>
+  </div>
+  <div class="pres-b" id="presBody"></div>
+</div>
+
+<script>
+/* ──────────────────────────────────────────────────────────────
+   SABEL PROJECT DASHBOARD
+   Three candidate layouts behind one switcher (1a / 1b / 1c).
+
+   DATA WIRING — two feeds to connect when you are ready:
+     1. Stage + go-live per client  → webhook key 'client-portal-v1'
+        (the Onboarding / Offboarding portal saves the client list there).
+        Portal STAGE_ORDER today is Discovery / Onboarding / Active /
+        Offboarding / Complete. Extend it to the eight stages below so the
+        two screens speak the same language.
+     2. Tasks, owners, due dates, statuses → '[client]-tracker-v1' per tracker,
+        same as SabelPortfolioDashboard.html already does.
+   Until then CLIENTS below is the single place to edit. Keep the shape and
+   the whole dashboard follows.
+   ────────────────────────────────────────────────────────────── */
+
+var BASE = 'https://sabel-intercom.github.io/Intake-forms/';
+var GO_LIVE_HORIZON = 30;   // "landing soon" window in days
+
+var OW = {
+  Chris:   {c:'#60A5FA', bg:'rgba(96,165,250,.14)'},
+  Richard: {c:'#C084FC', bg:'rgba(192,132,252,.14)'},
+  Greg:    {c:'#34D399', bg:'rgba(52,211,153,.14)'},
+  Client:  {c:'#FBBF24', bg:'rgba(251,191,36,.14)'}
+};
+/* Owners come from the trackers, so the list above won't cover everyone. Unknown
+   names get neutral grey — they must not inherit Client amber and read as
+   client-side actions on the call. */
+var OW_DEFAULT = {c:'#94A3B8', bg:'rgba(148,163,184,.12)'};
+var SC = {
+  'Complete':    {c:'#4ADE80', bg:'rgba(74,222,128,.12)'},
+  'In Progress': {c:'#60A5FA', bg:'rgba(96,165,250,.12)'},
+  'Pending':     {c:'#94A3B8', bg:'rgba(148,163,184,.10)'},
+  'Blocked':     {c:'#F87171', bg:'rgba(248,113,113,.12)'},
+  'Dependency':  {c:'#FBBF24', bg:'rgba(251,191,36,.12)'}
+};
+/* Pillar colours are keyed on the tracker's own phase ids. Trackers don't all use
+   the same set, so anything unlisted falls back to grey rather than going missing. */
+var PL = {setup:'#38BDF8', blueprint:'#38BDF8', foundations:'#A78BFA', automation:'#818CF8',
+          fin:'#F472B6', migration:'#FB923C', uat:'#34D399', golive:'#F87171', post:'#94A3B8'};
+/* 'Active' is the portal's catch-all working stage. Build / Testing / Go-live / On hold
+   stay listed so they light up automatically if the portal ever records them —
+   empty stages aren't rendered, so carrying them costs nothing. */
+var STAGE_ORDER = ['Scoping','Onboarding','Active','Build','Testing','Go-live','Offboarding','Complete','On hold'];
+var STAGE_C = {'Scoping':'#94A3B8','Onboarding':'#FBBF24','Active':'#60A5FA','Build':'#38BDF8','Testing':'#A78BFA','Go-live':'#F87171','Offboarding':'#FB923C','Complete':'#4ADE80','On hold':'#64748B'};
+var STAGE_BG = {'Scoping':'rgba(148,163,184,.12)','Onboarding':'rgba(251,191,36,.12)','Active':'rgba(96,165,250,.12)','Build':'rgba(56,189,248,.12)','Testing':'rgba(167,139,250,.12)','Go-live':'rgba(248,113,113,.14)','Offboarding':'rgba(251,146,60,.12)','Complete':'rgba(74,222,128,.12)','On hold':'rgba(100,116,139,.14)'};
+
+/* ──────────────────────────────────────────────────────────────
+   LIVE DATA
+   Nothing about the portfolio is hardcoded. Four feeds, all read-only:
+     1. trackers.json           — the registry: name, Upstash key, file, SOW hours
+     2. <tracker key>           — each tracker's saved state via the webhook. For
+                                  skill-format trackers this taskData blob is the
+                                  authoritative plan, not the seed data in the HTML.
+     3. client-portal-v1        — stage, lead and go-live from the on/offboarding portal
+     4. sabel-golive-overrides-v1 — shared with SabelPortfolioDashboard.html, so a
+                                  go-live set on one screen shows on the other.
+
+   Everything lands in CLIENTS in the shape the rest of this file already renders:
+     {id, n, st, gl, lead, f, p, t:[[title, owner, pillar, due, status], ...]}
+   This dashboard never writes to a tracker. See the capture panel further down for
+   how call decisions are collected instead.
+   ────────────────────────────────────────────────────────────── */
+var API = 'https://sabel-webhook.vercel.app/api/tracker';
+var PORTAL_KEY = 'client-portal-v1';
+var OVERRIDES_KEY = 'sabel-golive-overrides-v1';
+var REFRESH_MS = 5 * 60 * 1000;
+
+var CLIENTS = [];
+var REGISTRY = [];
+var LIVE = {ok:0, total:0, at:null, state:'loading'};   // state: loading | live | partial | offline
+
+/* The portal's stage vocabulary is narrower than this board's. Map what it has and
+   let the rest pass through, so the board gains the finer stages for free the day
+   the portal starts recording them. */
+var PORTAL_STAGE = {'Discovery':'Scoping','Onboarding':'Onboarding','Active':'Active',
+                    'Offboarding':'Offboarding','Complete':'Complete','On hold':'On hold'};
+
+/* The portal, the registry and the trackers spell some clients differently.
+   Matching is on a normalised name, with these for the ones normalising can't reach. */
+var ALIAS = {
+  'yfood labs':'yfood', 'tulka oy':'tulka', 'herotolk tulka':'tulka',
+  'huuuge global':'huuuge', 'cronos particle research ltd':'cronos particle research',
+  'cannabis clinic renewal':'cannabis clinic'
+};
+function normName(n){
+  var s = String(n||'').toLowerCase()
+    .replace(/[().,'"&]/g,' ')
+    .replace(/\b(ltd|limited|inc|oy|ab|pty|nz|usa|global|labs?)\b/g,' ')
+    .replace(/\s+/g,' ').trim();
+  return ALIAS[s] || s;
+}
+function slug(n){ return String(n||'').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,18) || 'client'; }
+
+/* ── tracker payload parsing ── */
+var SKILL_MONTHS = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+/* Skill-format trackers store human date ranges ("Jul 7-9"); take the last date.
+   Year is assumed current — these trackers don't record one. */
+function skillDate(d){
+  if(!d) return '';
+  var ms = String(d).match(/([A-Z][a-z]{2})\s*(\d{1,2})/g);
+  if(!ms) return '';
+  var m = ms[ms.length-1].match(/([A-Z][a-z]{2})\s*(\d{1,2})/);
+  var mo = SKILL_MONTHS[m[1]]; if(mo==null) return '';
+  return TODAY.getFullYear()+'-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
+}
+/* Trackers exist in three shapes. Normalise all of them to
+   [{id, tasks:[{task, owner, status, end, dep}]}]. */
+function phasesFrom(data){
+  if(!data) return null;
+  // 1. Skill format: {taskData:{phase:{sabel:[],client:[]}}, statuses:{phase-s-0:'…'}}
+  if(data.taskData && typeof data.taskData==='object'){
+    var st = data.statuses || {};
+    return Object.keys(data.taskData).map(function(pid){
+      var grp = data.taskData[pid] || {}, tasks = [];
+      (grp.sabel||[]).forEach(function(t,i){
+        tasks.push({task:t.t, owner:t.o, status: st[pid+'-s-'+i] || t.s, end: skillDate(t.d), dep:false});
+      });
+      (grp.client||[]).forEach(function(t,i){
+        tasks.push({task:t.t, owner:t.o, status: st[pid+'-c-'+i] || t.s, end: skillDate(t.d), dep:true});
+      });
+      return {id:pid, tasks:tasks};
+    });
+  }
+  // 2. Phase format: [...] or {phases:[...]}
+  var ph = Array.isArray(data) ? data : (Array.isArray(data.phases) ? data.phases : null);
+  if(ph) return ph.map(function(p){
+    return {id:p.id, tasks:(p.tasks||[]).map(function(k){
+      return {task:k.task, owner:k.owner, status:k.status, end:k.end||k.start||'', dep:!!k.dep};
+    })};
+  });
+  // 3. Older groups board (BTS)
+  if(Array.isArray(data.groups)) return data.groups.map(function(g,i){
+    return {id:g.id||('phase'+i), tasks:(g.items||[]).map(function(it){
+      return {task:it.task, owner:it.owner, end:it.iso||it.date||'', dep:!!it.dep,
+        status: it.done ? 'Complete' : it.status==='red' ? 'Blocked' : 'In Progress'};
+    })};
+  });
+  return null;
+}
+function tallyOf(phases){
+  var n=0, done=0;
+  phases.forEach(function(p){ (p.tasks||[]).forEach(function(k){
+    n++; var s=(k.status||'').toLowerCase();
+    if(s==='complete'||s==='done') done++;
+  });});
+  return {total:n, done:done};
+}
+function deriveGoLive(phases){
+  var gl=[], all=[];
+  phases.forEach(function(p){ (p.tasks||[]).forEach(function(k){
+    if(!k.end) return; all.push(k.end);
+    if(/go[\s-]?live/i.test(k.task||'')) gl.push(k.end);
+  });});
+  if(gl.length) return gl.sort().pop();
+  if(all.length) return all.sort().pop();
+  return null;
+}
+
+/* ── fetch ── */
+function fetchKey(key){
+  return fetchKeyMeta(key).then(function(m){ return m.data; });
+}
+/* A tracker that answers with no saved state is a registered-but-unused tracker,
+   not a failure. Keep the two apart so an empty tracker doesn't flag the whole
+   board as degraded. */
+function fetchKeyMeta(key){
+  return fetch(API+'?key='+encodeURIComponent(key)+'&_t='+Date.now(), {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ return j && j.ok ? {reached:true, data:j.data} : {reached:false, data:null}; })
+    .catch(function(){ return {reached:false, data:null}; });
+}
+
+/* Build CLIENTS from the portal (who our clients are and what stage they're at)
+   joined to the registry + tracker payloads (what the actual work is). */
+function buildClients(portal, overrides){
+  var byKey={}, byNorm={};
+  REGISTRY.forEach(function(t){ if(t.key) byKey[t.key]=t; byNorm[normName(t.name)]=t; });
+
+  function regFor(pc){
+    return (pc.trackerKey && byKey[pc.trackerKey]) || byNorm[normName(pc.name)] || null;
+  }
+  function make(name, stage, lead, portalGl, reg){
+    var phases = reg && reg._data ? phasesFrom(reg._data) : null;
+    var tasks = [], p = 0, nd = true, auto = null;
+    if(phases){
+      nd = false;
+      phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
+        tasks.push([k.task, k.dep ? 'Client' : (k.owner||'Sabel'), ph.id || 'other',
+                    k.end || '', k.status || 'Pending']);
+      });});
+      var tl = tallyOf(phases);
+      p = tl.total ? Math.round(tl.done/tl.total*100) : 0;
+      auto = deriveGoLive(phases);
+    }
+    var trackerGl = reg && reg._data && reg._data.goLive ? reg._data.goLive : null;
+    var gl = overrides[name] || (reg ? overrides[reg.name] : null) || portalGl || trackerGl || auto || '';
+    return {id:slug(name), n:name, st:stage, gl:gl, lead:lead||'—',
+            f:(reg && reg.file) || '', p:p, nd:nd, t:tasks};
+  }
+
+  var out=[], used={};
+  portal.forEach(function(pc){
+    var reg = regFor(pc);
+    // Complete clients only stay on the board while their tracker is still active,
+    // otherwise the Complete column fills with years of finished work.
+    if(pc.stage==='Complete' && !(reg && reg.active)) return;
+    if(reg) used[reg.key||reg.name]=1;
+    out.push(make(pc.name, PORTAL_STAGE[pc.stage] || pc.stage || 'Active',
+                  pc.owner, pc.goLiveDate, reg));
+  });
+  // An active tracker the portal doesn't know about still deserves a card.
+  REGISTRY.forEach(function(t){
+    if(!t.active || used[t.key||t.name]) return;
+    out.push(make(t.name, 'Active', '', null, t));
+  });
+  return out;
+}
+
+function setStamp(){
+  var el = document.getElementById('stamp'); if(!el) return;
+  var wrap = el.parentNode;
+  if(LIVE.state==='loading'){ el.textContent='loading…'; wrap.firstChild.textContent='Live · '; return; }
+  var when = LIVE.at ? LIVE.at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
+  if(LIVE.state==='offline'){
+    wrap.firstChild.textContent='Offline · ';
+    el.textContent='no data · last tried '+when;
+    el.style.color='#F87171';
+  } else {
+    wrap.firstChild.textContent = LIVE.state==='partial' ? 'Partial · ' : 'Live · ';
+    el.textContent = LIVE.ok+'/'+LIVE.total+' trackers'+(LIVE.empty?' ('+LIVE.empty+' not started)':'')+' · '+when;
+    el.style.color = LIVE.state==='partial' ? '#FBBF24' : '';
+    el.title = LIVE.empty ? LIVE.empty+' registered tracker(s) have no saved plan yet' : '';
+  }
+}
+
+function loadAll(manual){
+  var btn=document.getElementById('refreshBtn'); if(btn) btn.classList.add('spin');
+  if(!CLIENTS.length) LIVE.state='loading';
+  setStamp();
+  return Promise.all([
+    fetch(BASE+'trackers.json',{cache:'no-store'})
+      .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+    fetchKey(PORTAL_KEY),
+    fetchKey(OVERRIDES_KEY)
+  ]).then(function(res){
+    REGISTRY = Array.isArray(res[0]) ? res[0].slice() : [];
+    var portal = (res[1] && Array.isArray(res[1].clients)) ? res[1].clients : [];
+    var overrides = (res[2] && typeof res[2]==='object') ? res[2] : {};
+    var keyed = REGISTRY.filter(function(t){ return t.key; });
+    LIVE.total = keyed.length; LIVE.ok = 0; LIVE.empty = 0;
+    return Promise.all(keyed.map(function(t){
+      return fetchKeyMeta(t.key).then(function(m){
+        t._data = m.data;
+        if(m.reached){ LIVE.ok++; if(!m.data) LIVE.empty++; }
+      });
+    })).then(function(){
+      CLIENTS = buildClients(portal, overrides);
+      LIVE.at = new Date();
+      LIVE.state = !CLIENTS.length ? 'offline' : (LIVE.ok < LIVE.total ? 'partial' : 'live');
+      if(btn) btn.classList.remove('spin');
+      setStamp(); safeRender();
+    });
+  }).catch(function(){
+    LIVE.at=new Date(); LIVE.state='offline';
+    if(btn) btn.classList.remove('spin');
+    setStamp(); safeRender();
+  });
+}
+
+/* Scoping pipeline and what starts next — edit freely. */
+var KICKOFFS = [
+  {name:'Spartans',         note:'Kick-off call 18 Aug · Chris leading', tag:'Kick-off'},
+  {name:'WPT Global',       note:'Kick-off week of 24 Aug · Greg leading', tag:'Kick-off'},
+  {name:'RMS Cloud',        note:'Pre-contract · board paper mid-Aug, Oct renewal deadline', tag:'Scoping'},
+  {name:'Mambu',            note:'Advisory paused · awaiting client reschedule', tag:'On hold'},
+  {name:'Ainslie (Encum)',  note:'Paused · awaiting client resourcing decision', tag:'On hold'}
+];
+
+var FILTERS = ['All open','Overdue','Due this week','Blocked'];
+var MS = 86400000;
+var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ── state (persisted) ── */
+var PK = 'sabel_dash_refresh_v1';
+var S = {view:'a', open:{}, sel:'', filter:'All open', cap:{}, capOpen:'', pIdx:0};
+try{ var saved = JSON.parse(localStorage.getItem(PK)||'null'); if(saved) for(var k in saved) S[k]=saved[k]; }catch(e){}
+if(!S.cap || typeof S.cap!=='object') S.cap={};
+function save(){ try{ localStorage.setItem(PK, JSON.stringify(S)); }catch(e){} }
+/* Stable per-task key: the title, normalised. */
+function tkey(title){ return String(title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60); }
+
+/* ── dates ── */
+function today(){ var d=new Date(); d.setHours(0,0,0,0); return d; }
+function weekEnd(){ var d=today(); var dow=(d.getDay()+6)%7; var e=new Date(d.getTime()+(6-dow)*MS); return e; }
+var TODAY=today(), WK_END=weekEnd();
+function weekStart(){ var d=today(); var dow=(d.getDay()+6)%7; return new Date(d.getTime()-dow*MS); }
+function fmt(iso){ if(!iso) return 'TBC'; var d=new Date(iso+'T00:00:00'); return d.getDate()+' '+MON[d.getMonth()]; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── derive ── */
+function urgency(t,id){
+  if(t[4]==='Complete') return 'done';
+  if(t[4]==='Blocked' || t[4]==='Dependency') return 'blocked';
+  if(!t[3]) return 'later';
+  var d=new Date(t[3]+'T00:00:00');
+  if(d<TODAY) return 'overdue';
+  if(d<=WK_END) return 'week';
+  return 'later';
+}
+function enrich(c){
+  var tasks=c.t.map(function(t,i){
+    // Keyed on the task title, not its index, so a capture stays attached to its
+    // task when the tracker is re-ordered or a task is inserted above it.
+    var id=c.id+'::'+tkey(t[0]), cap=S.cap[id]||null;
+    // The tracker's status is the truth; a capture is only what we intend to
+    // change it to. Showing the captured value keeps the board honest during the
+    // call, and the summary carries both so the update is unambiguous afterwards.
+    var live=t[4]||'Pending', eff=(cap&&cap.status)||live;
+    var u=urgency([t[0],t[1],t[2],t[3],eff],id), done=eff==='Complete';
+    var ow=OW[t[1]]||OW_DEFAULT, st=SC[eff]||SC.Pending;
+    return {id:id, t:t[0], o:t[1], s:eff, liveStatus:live, u:u, pillar:t[2],
+      pillarColor:PL[t[2]]||'#94A3B8', ownerColor:ow.c, ownerBg:ow.bg,
+      statusColor:st.c, statusBg:st.bg, done:done,
+      cap:cap, capStatus:(cap&&cap.status)||'', capNote:(cap&&cap.note)||'',
+      chase:!!(cap&&cap.chase), captured:!!cap,
+      dueLabel:fmt(t[3])+(u==='overdue'?' !':''), due:t[3],
+      dueColor:u==='overdue'?'#F87171':(u==='week'?'#FBBF24':'#64748B'),
+      client:c.n, clientId:c.id};
+  });
+  var out=tasks.filter(function(t){return t.u!=='done';});
+  var overdue=out.filter(function(t){return t.u==='overdue';}).length;
+  var week=out.filter(function(t){return t.u==='week';}).length;
+  var blocked=out.filter(function(t){return t.u==='blocked';}).length;
+  var clientSide=out.filter(function(t){return t.o==='Client';}).length;
+
+  var days=null, key=9999;
+  if(c.gl){ days=Math.round((new Date(c.gl+'T00:00:00')-TODAY)/MS); key=days>=0?days:400-days; }
+  if(c.st==='Scoping') key=700;
+  if(c.st==='On hold') key=800;
+  if(c.st==='Complete') key=900;
+
+  var daysNum='—', daysUnit='go-live TBC', shortDays='TBC', daysColor='#64748B';
+  if(days!==null && days>=0){
+    daysNum=String(days); daysUnit=days===1?'day to go-live':'days to go-live';
+    shortDays='T\u2011'+days+'d';
+    daysColor=days<=7?'#F87171':(days<=21?'#FBBF24':'#4ADE80');
+  } else if(days!==null){
+    daysNum=String(-days); daysUnit='days since go-live'; shortDays='+'+(-days)+'d'; daysColor='#94A3B8';
+  }
+
+  var chips=[];
+  if(overdue) chips.push({label:overdue+' overdue', short:overdue+' od', c:'#F87171', bg:'rgba(248,113,113,.12)'});
+  if(blocked) chips.push({label:blocked+' blocked', short:blocked+' bl', c:'#FBBF24', bg:'rgba(251,191,36,.12)'});
+  if(week)    chips.push({label:week+' due', short:week+' due', c:'#60A5FA', bg:'rgba(96,165,250,.12)'});
+  if(!chips.length) chips.push({label:'clear', short:'clear', c:'#4ADE80', bg:'rgba(74,222,128,.12)'});
+
+  var pillars=[]; out.forEach(function(t){ if(pillars.indexOf(t.pillar)<0) pillars.push(t.pillar); });
+  var glTxt = c.gl ? (days>=0 ? 'Go-live '+fmt(c.gl) : 'Live since '+fmt(c.gl)) : 'No go-live set';
+
+  return {id:c.id, name:c.n, stage:c.st, lead:c.lead, stageColor:STAGE_C[c.st], stageBg:STAGE_BG[c.st],
+    prog:c.p, progPct:c.p+'%', meta:glTxt+' · lead '+c.lead+' · '+out.length+' open',
+    daysNum:daysNum, daysUnit:daysUnit, shortDays:shortDays, daysColor:daysColor, key:key, days:days,
+    overdue:overdue, week:week, blocked:blocked, clientSide:clientSide, chips:chips,
+    outstanding:out.length, allTasks:tasks, outTasks:out,
+    trackerUrl: c.f ? BASE+c.f : '',
+    noData: !!c.nd,
+    pillarNote: c.nd ? 'No tracker connected yet' : (pillars.length ? 'Open across '+pillars.join(', ') : 'Nothing outstanding'),
+    foot: c.nd ? 'No tracker connected' : out.length+' open · '+c.p+'% complete'};
+}
+function applyFilter(list){
+  if(S.filter==='Overdue') return list.filter(function(t){return t.u==='overdue';});
+  if(S.filter==='Due this week') return list.filter(function(t){return t.u==='week'||t.u==='overdue';});
+  if(S.filter==='Blocked') return list.filter(function(t){return t.u==='blocked';});
+  return list;
+}
+function groupsFor(c){
+  return [
+    {label:'Overdue', color:'#F87171', tasks:c.outTasks.filter(function(t){return t.u==='overdue';})},
+    {label:'Due this week', color:'#60A5FA', tasks:c.outTasks.filter(function(t){return t.u==='week';})},
+    {label:'Blocked & waiting', color:'#FBBF24', tasks:c.outTasks.filter(function(t){return t.u==='blocked';})},
+    {label:'Coming up', color:'#64748B', tasks:c.outTasks.filter(function(t){return t.u==='later';})}
+  ];
+}
+function all(){ return CLIENTS.map(enrich).sort(function(a,b){return a.key-b.key;}); }
+function find(list,id){ for(var i=0;i<list.length;i++) if(list[i].id===id) return list[i]; return list[0]; }
+
+/* ── actions ── */
+function setView(v){ S.view=v; save(); render(); }
+function toggleOpen(id){ S.open[id]=!S.open[id]; S.sel=id; save(); render(); }
+function focusClient(id){ S.sel=id; S.open[id]=true; save(); render(); }
+function setFilter(f){ S.filter=f; save(); render(); }
+function toggleAll(){
+  var any=Object.keys(S.open).some(function(k){return S.open[k];});
+  if(any){ S.open={}; } else { CLIENTS.forEach(function(c){ S.open[c.id]=true; }); }
+  save(); render();
+}
+function pickClient(v){ S.sel=v; save(); render(); }
+function stepClient(d){ var L=all(); var i=L.findIndex(function(c){return c.id===S.sel;}); S.sel=L[Math.max(0,Math.min(L.length-1,i+d))].id; save(); render(); }
+function startPresent(){ S.pIdx=0; save(); document.getElementById('pres').classList.add('on'); renderPres(); }
+function stopPresent(){ document.getElementById('pres').classList.remove('on'); }
+function presMove(d){ var L=all(); S.pIdx=Math.max(0,Math.min(L.length-1,S.pIdx+d)); save(); renderPres(); }
+
+/* ──────────────────────────────────────────────────────────────
+   ALL-HANDS CAPTURE
+   This dashboard is read-only against the trackers. Nothing here ever writes to
+   a client's tracker — a capture records what we DECIDED on the call, and the
+   post-call summary is the list of updates to go and make.
+
+   A capture holds up to three things per task: the status it should move to, a
+   note, and whether the client needs chasing. Captures sync to a shared key so
+   whoever runs the call and whoever does the updates see the same list.
+   ────────────────────────────────────────────────────────────── */
+var CAPTURE_KEY = 'sabel-allhands-v1';
+var CAP_STATUSES = ['Complete','In Progress','Blocked','Dependency','Pending'];
+var capSyncTimer = null, CAP_SYNCED = null, CAP_SHARED = null;   // null = not tried yet
+
+function capOf(id){ return S.cap[id] || null; }
+function capCount(){ return Object.keys(S.cap).length; }
+function capEnsure(id, t){
+  if(!S.cap[id]) S.cap[id] = {status:'', note:'', chase:false,
+    task:t?t.t:'', client:t?t.client:'', clientId:t?t.clientId:'',
+    owner:t?t.o:'', was:t?t.liveStatus:'', due:t?t.due:'', at:Date.now()};
+  return S.cap[id];
+}
+function capPrune(id){
+  var c=S.cap[id];
+  if(c && !c.status && !c.note && !c.chase) delete S.cap[id];
+}
+function capOpen(id, ev){
+  if(ev) ev.stopPropagation();
+  S.capOpen = (S.capOpen===id) ? '' : id;
+  save(); render();
+}
+function capSetStatus(id, st, ev){
+  if(ev) ev.stopPropagation();
+  var L=all(), t=capFindTask(L,id); var c=capEnsure(id,t);
+  c.status = (c.status===st) ? '' : st;      // click the active one again to clear
+  c.at = Date.now();
+  capPrune(id); save(); capSync(); render();
+}
+function capSetNote(id, val){
+  var L=all(), t=capFindTask(L,id); var c=capEnsure(id,t);
+  c.note = val; c.at = Date.now();
+  capPrune(id); save(); capSync();
+  capBadge();   // refresh the counter without re-rendering under the cursor
+}
+function capToggleChase(id, ev){
+  if(ev) ev.stopPropagation();
+  var L=all(), t=capFindTask(L,id); var c=capEnsure(id,t);
+  c.chase = !c.chase; c.at = Date.now();
+  capPrune(id); save(); capSync(); render();
+}
+function capClearOne(id, ev){
+  if(ev) ev.stopPropagation();
+  delete S.cap[id]; save(); capSync(); render();
+}
+function capClearAll(){
+  if(!capCount()) return;
+  if(!confirm('Clear all '+capCount()+' captured items?\n\nDo this once the tracker updates are done — it cannot be undone.')) return;
+  S.cap={}; S.capOpen=''; save(); capSync(); render(); renderSummary();
+}
+function capFindTask(L,id){
+  for(var i=0;i<L.length;i++){
+    var ts=L[i].allTasks;
+    for(var j=0;j<ts.length;j++) if(ts[j].id===id) return ts[j];
+  }
+  return null;
+}
+
+/* ── capture persistence ──
+   Captures are written to localStorage immediately and pushed to a shared key so
+   whoever runs the call and whoever applies the updates see the same list.
+
+   The webhook only accepts keys on its allowlist. Until 'sabel-allhands-v1' is
+   added to it in the sabel-webhook project, the POST returns 404 and captures
+   stay on this browser only — which the summary says out loud rather than
+   pretending the team can see them. */
+function capSync(){
+  if(capSyncTimer) clearTimeout(capSyncTimer);
+  capSyncTimer = setTimeout(function(){
+    fetch(API+'?key='+encodeURIComponent(CAPTURE_KEY)+'&_t='+Date.now(), {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({data:{cap:S.cap, at:Date.now()}})
+    }).then(function(r){
+      CAP_SHARED = r.ok;
+      if(r.ok) CAP_SYNCED = Date.now();
+      capShareNote();
+    }).catch(function(){ CAP_SHARED=false; capShareNote(); });
+  }, 1200);
+}
+function capShareNote(){
+  var el=document.getElementById('shareNote'); if(!el) return;
+  if(CAP_SHARED===true){
+    el.textContent='Shared with the team.'; el.style.color='var(--green)';
+  } else if(CAP_SHARED===false){
+    el.textContent='Saved on this browser only — the shared key is not enabled yet.';
+    el.style.color='#FBBF24';
+  } else { el.textContent=''; }
+}
+function loadCapture(){
+  return fetchKey(CAPTURE_KEY).then(function(d){
+    if(!d || !d.cap || typeof d.cap!=='object') return;
+    // Merge rather than replace: whoever is mid-call keeps their unsynced edits.
+    Object.keys(d.cap).forEach(function(k){
+      var mine=S.cap[k], theirs=d.cap[k];
+      if(!mine || (theirs.at||0) > (mine.at||0)) S.cap[k]=theirs;
+    });
+    CAP_SYNCED=Date.now(); save(); safeRender();
+  });
+}
+
+/* ── capture UI ── */
+function capBadge(){
+  var b=document.getElementById('capBtn'); if(!b) return;
+  var n=capCount();
+  b.innerHTML = '&#9998; Call capture'+(n?' <span class="capn">'+n+'</span>':'');
+  b.classList.toggle('has', n>0);
+}
+function capMarkHTML(t){
+  if(!t.captured) return '';
+  var bits=[];
+  if(t.capStatus) bits.push('<span class="cmark st" style="color:'+(SC[t.capStatus]||SC.Pending).c+'">&rarr; '+esc(t.capStatus)+'</span>');
+  if(t.chase) bits.push('<span class="cmark ch">chase client</span>');
+  if(t.capNote) bits.push('<span class="cmark nt" title="'+esc(t.capNote)+'">note</span>');
+  return bits.join('');
+}
+function capBtnHTML(t){
+  var cls = 'tick cap' + (t.captured?' on':'') + (S.capOpen===t.id?' open':'');
+  var glyph = t.captured ? '&#9998;' : '';
+  return '<button class="'+cls+'" title="Capture a decision for this task" '+
+         'onclick="capOpen(\''+t.id+'\',event)">'+glyph+'</button>';
+}
+function capPanelHTML(t){
+  if(S.capOpen!==t.id) return '';
+  var c = capOf(t.id) || {status:'',note:'',chase:false};
+  var btns = CAP_STATUSES.map(function(st){
+    var on = c.status===st, col=(SC[st]||SC.Pending);
+    return '<button class="cbtn'+(on?' on':'')+'" '+
+      (on?'style="color:'+col.c+';background:'+col.bg+';border-color:'+col.c+'"':'')+
+      ' onclick="capSetStatus(\''+t.id+'\',\''+st+'\',event)">'+esc(st)+'</button>';
+  }).join('');
+  return '<div class="cpanel" onclick="event.stopPropagation()">'+
+    '<div class="crow"><span class="clab">Move status to</span><div class="cbtns">'+btns+'</div></div>'+
+    '<div class="crow"><span class="clab">Note</span>'+
+      '<textarea class="cnote" rows="2" placeholder="What was decided, what changed, who owns it…" '+
+      'oninput="capSetNote(\''+t.id+'\',this.value)">'+esc(c.note||'')+'</textarea></div>'+
+    '<div class="crow"><span class="clab"></span><div class="cbtns">'+
+      '<button class="cbtn chase'+(c.chase?' on':'')+'" onclick="capToggleChase(\''+t.id+'\',event)">&#9873; Chase client</button>'+
+      (t.captured?'<button class="cbtn clr" onclick="capClearOne(\''+t.id+'\',event)">Clear</button>':'')+
+      '<span class="cwas">tracker says '+esc(t.liveStatus||'—')+'</span>'+
+    '</div></div></div>';
+}
+
+/* ── post-call summary ── */
+function capItems(){
+  return Object.keys(S.cap).map(function(id){
+    var c=S.cap[id]; return {id:id, c:c};
+  }).sort(function(a,b){
+    var an=a.c.client||'', bn=b.c.client||'';
+    return an<bn?-1:an>bn?1:(a.c.at||0)-(b.c.at||0);
+  });
+}
+function openSummary(){ document.getElementById('sum').classList.add('on'); renderSummary(); }
+function closeSummary(){ document.getElementById('sum').classList.remove('on'); }
+function summaryText(){
+  var items=capItems();
+  if(!items.length) return 'Nothing captured.';
+  var out=['Sabel all-hands — actions to apply', new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}), ''];
+  var cur='';
+  items.forEach(function(it){
+    var c=it.c;
+    if(c.client!==cur){ cur=c.client; out.push(''); out.push(cur.toUpperCase()); }
+    var line='  • '+c.task;
+    if(c.status) line+='  [status: '+(c.was||'—')+' → '+c.status+']';
+    if(c.chase) line+='  [CHASE CLIENT]';
+    out.push(line);
+    if(c.note) out.push('      note: '+c.note);
+  });
+  out.push(''); out.push('Apply these in each client tracker — this board does not write to them.');
+  return out.join('\n');
+}
+function copySummary(){
+  var txt=summaryText();
+  var btn=document.getElementById('copyBtn');
+  function done(ok){ if(btn){ btn.textContent = ok?'Copied':'Copy failed'; setTimeout(function(){ btn.textContent='Copy all'; },1600); } }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){done(true);},function(){done(false);});
+  } else {
+    var ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select();
+    var ok=false; try{ ok=document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta); done(ok);
+  }
+}
+function renderSummary(){
+  var box=document.getElementById('sumBody'); if(!box) return;
+  var items=capItems();
+  document.getElementById('sumCount').textContent = items.length ? items.length+' to apply' : '';
+  capShareNote();
+  if(!items.length){
+    box.innerHTML='<div class="empty" style="padding:40px;text-align:center">Nothing captured yet.<br><span style="font-size:11px">Click any task on the board to record a status change, a note or a client chase.</span></div>';
+    return;
+  }
+  var byClient={}, order=[];
+  items.forEach(function(it){
+    var n=it.c.client||'—';
+    if(!byClient[n]){ byClient[n]=[]; order.push(n); }
+    byClient[n].push(it);
+  });
+  box.innerHTML = order.map(function(n){
+    return '<div class="sgrp"><div class="sgrp-h">'+esc(n)+'<span>'+byClient[n].length+'</span></div>'+
+      byClient[n].map(function(it){
+        var c=it.c, bits=[];
+        if(c.status) bits.push('<span class="cmark st" style="color:'+(SC[c.status]||SC.Pending).c+'">'+esc(c.was||'—')+' &rarr; '+esc(c.status)+'</span>');
+        if(c.chase) bits.push('<span class="cmark ch">chase client</span>');
+        return '<div class="srow"><div style="flex:1;min-width:0">'+
+          '<div class="ttx">'+esc(c.task)+'</div>'+
+          '<div class="m"><span style="color:var(--mono)">'+esc(c.owner||'—')+'</span>'+bits.join('')+'</div>'+
+          (c.note?'<div class="snote">'+esc(c.note)+'</div>':'')+
+          '</div><button class="cbtn clr" onclick="capClearOne(\''+it.id+'\',event);renderSummary()">&times;</button></div>';
+      }).join('')+'</div>';
+  }).join('');
+}
+
+/* ── shared partials ── */
+function chipHTML(ch,cls){ return '<span class="'+(cls||'cchip')+'" style="color:'+ch.c+';background:'+ch.bg+'">'+esc(ch.label)+'</span>'; }
+function tickHTML(t){ return capBtnHTML(t); }
+function groupHTML(g){
+  var rows = g.tasks.map(function(t){
+    return '<div class="tw'+(t.captured?' cap':'')+'">'+
+      '<div class="grow" onclick="capOpen(\''+t.id+'\',event)">'+tickHTML(t)+
+      '<div style="flex:1;min-width:0"><div class="ttx'+(t.done?' done':'')+'">'+esc(t.t)+'</div>'+
+      '<div class="m"><span style="font-weight:700;color:'+t.ownerColor+'">'+esc(t.o)+'</span>'+
+      '<span style="color:var(--mono)">'+esc(t.pillar)+'</span>'+
+      '<span class="mono" style="color:'+t.dueColor+'">'+esc(t.dueLabel)+'</span>'+capMarkHTML(t)+'</div></div></div>'+
+      capPanelHTML(t)+'</div>';
+  }).join('');
+  return '<div class="grp"><div class="grp-h" style="color:'+g.color+'">'+esc(g.label)+'</div>'+
+    '<div style="display:flex;flex-direction:column;gap:11px">'+(rows||'<span class="empty">Nothing here</span>')+'</div></div>';
+}
+function lanesHTML(L,cardMode){
+  return STAGE_ORDER.map(function(st){
+    var cs=L.filter(function(c){return c.stage===st;});
+    if(!cs.length) return '';
+    var col=STAGE_C[st];
+    if(cardMode){
+      return '<div class="bcol"><div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">'+
+        '<span style="width:7px;height:7px;border-radius:50%;background:'+col+';display:block"></span>'+
+        '<span style="font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">'+esc(st)+'</span>'+
+        '<span style="font-size:9px;color:var(--mono);margin-left:auto">'+cs.length+'</span></div>'+
+        '<div style="display:flex;flex-direction:column;gap:7px">'+cs.map(function(c){
+          return '<div class="bcard" style="border-left-color:'+(c.id===S.sel?'#E10600':c.stageColor)+'" onclick="focusClient(\''+c.id+'\')">'+
+            '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">'+
+            '<span class="nm">'+esc(c.name)+'</span>'+
+            '<span class="mono" style="font-size:9.5px;white-space:nowrap;color:'+c.daysColor+'">'+c.shortDays+'</span></div>'+
+            '<div class="bar" style="height:3px;margin:9px 0 7px"><i style="background:'+c.stageColor+';width:'+c.progPct+'"></i></div>'+
+            '<div style="display:flex;gap:4px;flex-wrap:wrap">'+c.chips.map(function(ch){return chipHTML(ch,'bchip');}).join('')+'</div></div>';
+        }).join('')+'</div></div>';
+    }
+    return '<div><div class="lane-h" style="border-bottom-color:'+col+'">'+
+      '<span class="nm" style="color:'+col+'">'+esc(st)+'</span><span class="n">'+cs.length+'</span></div>'+
+      '<div style="display:flex;flex-direction:column;gap:3px">'+cs.map(function(c){
+        return '<div class="lane-c" onclick="focusClient(\''+c.id+'\')"><span class="nm">'+esc(c.name)+'</span>'+
+          '<span class="d mono" style="color:'+c.daysColor+'">'+c.shortDays+'</span></div>';
+      }).join('')+'</div></div>';
+  }).join('');
+}
+function filtersHTML(){
+  return FILTERS.map(function(f){
+    return '<button class="pill'+(S.filter===f?' on':'')+'" onclick="setFilter(\''+f+'\')">'+esc(f)+'</button>';
+  }).join('');
+}
+
+/* ── views ── */
+function viewA(L){
+  var agenda=L.filter(function(c){return c.outstanding>0;});
+  var rows=agenda.map(function(c){
+    var tasks=applyFilter(c.outTasks);
+    if(S.filter!=='All open' && !tasks.length) return '';
+    var body='';
+    if(S.open[c.id]){
+      body='<div class="abody">'+tasks.map(function(t){
+        return '<div class="tw'+(t.captured?' cap':'')+'">'+
+          '<div class="trow" onclick="capOpen(\''+t.id+'\',event)">'+tickHTML(t)+
+          '<span class="dot" style="background:'+t.pillarColor+'"></span>'+
+          '<span class="ttx'+(t.done?' done':'')+'">'+esc(t.t)+'</span>'+
+          '<span class="badge" style="color:'+t.ownerColor+';background:'+t.ownerBg+'">'+esc(t.o)+'</span>'+
+          '<span class="badge" style="color:'+t.statusColor+';background:'+t.statusBg+'">'+esc(t.s)+'</span>'+
+          '<span class="due mono" style="color:'+t.dueColor+'">'+esc(t.dueLabel)+'</span>'+
+          '<button class="flag'+(t.chase?' on':'')+'" title="Chase client" onclick="capToggleChase(\''+t.id+'\',event)">&#9873;</button></div>'+
+          capPanelHTML(t)+'</div>';
+      }).join('')+
+      '<div class="tfoot"><span>'+esc(c.pillarNote)+'</span>'+
+      (c.trackerUrl?'<a href="'+c.trackerUrl+'" target="_blank">Open '+esc(c.name)+' tracker &rarr;</a>':'<span>No tracker deployed yet</span>')+
+      '</div></div>';
+    }
+    return '<div class="arow" style="border-left-color:'+c.stageColor+'">'+
+      '<div class="ahead" onclick="toggleOpen(\''+c.id+'\')">'+
+        '<div><div class="ad1 mono" style="color:'+c.daysColor+'">'+c.daysNum+'</div><div class="ad2">'+esc(c.daysUnit)+'</div></div>'+
+        '<div><div style="display:flex;align-items:center;gap:8px"><span class="anm">'+esc(c.name)+'</span>'+
+          '<span class="stg" style="color:'+c.stageColor+';background:'+c.stageBg+'">'+esc(c.stage)+'</span></div>'+
+          '<div class="ameta">'+esc(c.meta)+'</div></div>'+
+        '<div style="display:flex;gap:5px">'+c.chips.map(function(ch){return chipHTML(ch);}).join('')+'</div>'+
+        '<div><div class="bar"><i style="background:'+c.stageColor+';width:'+c.progPct+'"></i></div>'+
+          '<div class="mono" style="font-size:9px;color:var(--mono);margin-top:5px">'+c.progPct+' done</div></div>'+
+        '<div style="color:var(--mono);font-size:11px;text-align:right">'+(S.open[c.id]?'&#9650;':'&#9660;')+'</div>'+
+      '</div>'+body+'</div>';
+  }).join('');
+
+  var risks=[];
+  L.forEach(function(c){ c.outTasks.forEach(function(t){
+    if(t.u==='blocked') risks.push({client:c.name, t:t.t, tag:t.s==='Blocked'?'Blocked':'Waiting',
+      meta:t.o+' · '+t.pillar+' · '+t.dueLabel,
+      tagColor:t.s==='Blocked'?'#F87171':'#FBBF24', tagBg:t.s==='Blocked'?'rgba(248,113,113,.14)':'rgba(251,191,36,.14)'});
+  });});
+
+  var flagged=[]; L.forEach(function(c){ c.allTasks.forEach(function(t){ if(t.chase) flagged.push(t); }); });
+  var ticked=capCount();
+  var anyOpen=Object.keys(S.open).some(function(k){return S.open[k];});
+
+  return ''+
+  '<div class="panel" style="padding:16px 18px 12px;margin-bottom:22px">'+
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'+
+      '<span class="sec-h">Every client, by stage</span><span class="count">'+L.length+'</span>'+
+      '<span class="sub" style="margin-left:auto">Stage &amp; go-live sync from the Onboarding / Offboarding portal · key <span class="mono">client-portal-v1</span></span>'+
+    '</div><div class="lanes">'+lanesHTML(L,false)+'</div></div>'+
+
+  '<div class="hero">'+
+    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px">'+
+      '<h2 class="big">Run the room</h2><span class="sub">go-live first · overdue, due this week and blocked</span>'+
+      '<div style="margin-left:auto;display:flex;align-items:center;gap:6px">'+filtersHTML()+
+        '<button class="pill" style="margin-left:4px" onclick="toggleAll()">'+(anyOpen?'Collapse all':'Expand all')+'</button></div>'+
+    '</div>'+
+    '<div class="sub" style="margin-bottom:14px">Click any task to record what was decided &mdash; a status change, a note, or a client to chase. Nothing is written to the client tracker: it collects into <b>Call capture</b> for you to apply afterwards.</div>'+
+    '<div style="display:flex;flex-direction:column;gap:7px">'+(rows||'<div class="empty">Nothing matches this filter.</div>')+'</div>'+
+  '</div>'+
+
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px">'+
+    '<div class="panel" style="padding:15px 17px">'+
+      '<div class="sec-h" style="margin-bottom:4px">Blockers &amp; risks <span class="count">'+risks.length+'</span></div>'+
+      '<div class="sub" style="margin-bottom:11px">Anything hindering the work</div>'+
+      (risks.map(function(r){
+        return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2)">'+
+          '<span class="stg" style="color:'+r.tagColor+';background:'+r.tagBg+'">'+esc(r.tag)+'</span>'+
+          '<div style="flex:1;min-width:0"><div style="font-size:12px;line-height:1.4;text-wrap:pretty"><b style="color:var(--w)">'+esc(r.client)+'</b> '+esc(r.t)+'</div>'+
+          '<div style="font-size:9px;color:var(--mono);margin-top:3px;letter-spacing:.04em;text-transform:uppercase">'+esc(r.meta)+'</div></div></div>';
+      }).join('') || '<div class="empty">Nothing blocked. Rare and excellent.</div>')+
+    '</div>'+
+    '<div class="panel" style="padding:15px 17px">'+
+      '<div class="sec-h" style="margin-bottom:4px">Scoping &amp; upcoming kick-offs <span class="count">'+KICKOFFS.length+'</span></div>'+
+      '<div class="sub" style="margin-bottom:11px">New clients being scoped and what starts next</div>'+
+      KICKOFFS.map(function(p){
+        var col = p.tag==='Kick-off' ? '#4ADE80' : (p.tag==='Scoping' ? '#94A3B8' : '#64748B');
+        var bg  = p.tag==='Kick-off' ? 'rgba(74,222,128,.12)' : 'rgba(148,163,184,.12)';
+        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2)">'+
+          '<div style="min-width:0"><div style="font-size:12.5px;font-weight:600;color:var(--w)">'+esc(p.name)+'</div>'+
+          '<div style="font-size:9px;color:var(--mono);margin-top:3px">'+esc(p.note)+'</div></div>'+
+          '<span class="stg" style="color:'+col+';background:'+bg+'">'+esc(p.tag)+'</span></div>';
+      }).join('')+
+    '</div>'+
+  '</div>'+
+
+  '<div class="panel" style="padding:14px 17px;border-left:3px solid var(--amber)">'+
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">'+
+      '<span class="sec-h" style="color:var(--amber)">Actions I&rsquo;m taking away</span><span class="count">'+flagged.length+'</span>'+
+      '<span class="sub" style="margin-left:auto">'+(ticked?ticked+' captured on this call':'Nothing captured yet')+'</span>'+
+      (ticked?'<button class="pill" style="margin-left:10px" onclick="openSummary()">Post-call actions &rarr;</button>':'')+'</div>'+
+    '<div style="display:flex;flex-direction:column;gap:7px">'+
+    (flagged.map(function(f){
+      return '<div style="display:flex;align-items:center;gap:10px;font-size:12px">'+
+        '<span style="color:var(--amber)">&#9873;</span><b style="color:var(--w)">'+esc(f.client)+'</b>'+
+        '<span style="flex:1;min-width:0;text-wrap:pretty">'+esc(f.t)+'</span>'+
+        '<span class="mono" style="font-size:9.5px;color:var(--mono)">'+esc(f.o)+' · '+esc(f.dueLabel)+'</span></div>';
+    }).join('') || '<span class="empty">No client chases yet — open any task and hit Chase client as you run the room.</span>')+
+    '</div></div>';
+}
+
+function viewB(L){
+  var c=find(L,S.sel), idx=L.findIndex(function(x){return x.id===S.sel;});
+  var opts=L.map(function(x,i){
+    return '<option value="'+x.id+'"'+(x.id===S.sel?' selected':'')+'>'+esc((i+1)+'. '+x.name+'  ·  '+x.shortDays+'  ·  '+x.outstanding+' open')+'</option>';
+  }).join('');
+  return ''+
+  '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'+
+    '<h2 class="big">Delivery pipeline</h2><span class="sub">every client on one board, stage straight from the portal</span>'+
+    '<span class="sub" style="margin-left:auto">T&#8209;number is days to go-live</span></div>'+
+  '<div class="board">'+lanesHTML(L,true)+'</div>'+
+  '<div class="hero">'+
+    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:13px">'+
+      '<h2 class="big">Monday agenda</h2>'+
+      '<span class="sub">'+(idx+1)+' of '+L.length+' · ordered by go-live urgency</span>'+
+      '<div style="margin-left:auto;display:flex;align-items:center;gap:8px">'+
+        '<button class="btn-ghost" style="padding:6px 11px;font-size:11px" onclick="stepClient(-1)">&larr;</button>'+
+        '<select onchange="pickClient(this.value)" style="background:var(--card2);border:1px solid var(--border);color:var(--w);font-size:12px;font-weight:700;padding:7px 10px;border-radius:6px;min-width:280px">'+opts+'</select>'+
+        '<button class="btn-ghost" style="padding:6px 11px;font-size:11px" onclick="stepClient(1)">&rarr;</button>'+
+      '</div></div>'+
+    '<div style="display:grid;grid-template-columns:220px 1fr;gap:18px;align-items:start">'+
+      '<div style="background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:14px">'+
+        '<div class="mono" style="font-size:34px;font-weight:800;line-height:1;color:'+c.daysColor+'">'+c.daysNum+'</div>'+
+        '<div style="font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);margin-top:6px">'+esc(c.daysUnit)+'</div>'+
+        '<div style="height:1px;background:var(--border2);margin:13px 0"></div>'+
+        '<div style="font-size:14px;font-weight:800;color:var(--w)">'+esc(c.name)+'</div>'+
+        '<div style="font-size:10px;color:var(--mono);margin-top:5px;line-height:1.5">'+esc(c.meta)+'</div>'+
+        '<div style="margin-top:12px;display:flex;gap:5px;flex-wrap:wrap">'+c.chips.map(function(ch){return chipHTML(ch);}).join('')+'</div>'+
+        (c.trackerUrl?'<div style="margin-top:13px"><a href="'+c.trackerUrl+'" target="_blank" style="font-size:10px;font-weight:700;text-transform:uppercase">Open tracker &rarr;</a></div>':'')+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px">'+groupsFor(c).map(groupHTML).join('')+'</div>'+
+    '</div></div>';
+}
+
+function viewC(L){
+  var c=find(L,S.sel);
+  var rows=L.map(function(x){
+    return '<div class="tr'+(x.id===S.sel?' sel':'')+'" onclick="focusClient(\''+x.id+'\')">'+
+      '<div><div style="font-size:12.5px;font-weight:700;color:var(--w)">'+esc(x.name)+'</div>'+
+        '<div style="font-size:9px;color:var(--mono);margin-top:2px">Lead '+esc(x.lead)+'</div></div>'+
+      '<div style="display:flex;align-items:center"><span class="stg" style="color:'+x.stageColor+';background:'+x.stageBg+'">'+esc(x.stage)+'</span></div>'+
+      '<div class="mono" style="display:flex;align-items:center;font-size:11px;color:'+x.daysColor+'">'+x.shortDays+'</div>'+
+      '<div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i style="background:'+x.stageColor+';width:'+x.progPct+'"></i></div>'+
+        '<span class="mono" style="font-size:10px;color:var(--mono);width:32px;text-align:right">'+x.progPct+'</span></div>'+
+      '<div style="display:flex;align-items:center;justify-content:flex-end;gap:4px">'+
+        x.chips.map(function(ch){return '<span class="bchip" style="color:'+ch.c+';background:'+ch.bg+'">'+esc(ch.short)+'</span>';}).join('')+'</div></div>';
+  }).join('');
+  var groups=groupsFor(c).map(function(g){
+    var rws=g.tasks.map(function(t){
+      return '<div class="tw'+(t.captured?' cap':'')+'">'+
+        '<div class="grow" onclick="capOpen(\''+t.id+'\',event)">'+tickHTML(t)+
+        '<div style="flex:1;min-width:0"><div class="ttx'+(t.done?' done':'')+'">'+esc(t.t)+'</div>'+
+        '<div class="m"><span style="font-weight:700;color:'+t.ownerColor+'">'+esc(t.o)+'</span>'+
+        '<span style="color:var(--mono)">'+esc(t.pillar)+'</span>'+
+        '<span class="mono" style="color:'+t.dueColor+'">'+esc(t.dueLabel)+'</span>'+capMarkHTML(t)+'</div></div>'+
+        '<span class="bchip" style="color:'+t.statusColor+';background:'+t.statusBg+'">'+esc(t.s)+'</span></div>'+
+        capPanelHTML(t)+'</div>';
+    }).join('');
+    return '<div style="padding:12px 16px;border-bottom:1px solid var(--border2)">'+
+      '<div class="grp-h" style="color:'+g.color+'">'+esc(g.label)+'</div>'+
+      '<div style="display:flex;flex-direction:column;gap:10px">'+(rws||'<span class="empty">Nothing here</span>')+'</div></div>';
+  }).join('');
+
+  return ''+
+  '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">'+
+    '<h2 class="big">Portfolio table</h2><span class="sub">'+L.length+' clients, go-live first</span>'+
+    '<div style="margin-left:auto;display:flex;align-items:center;gap:6px">'+filtersHTML()+
+      '<button class="btn-red" style="margin-left:6px" onclick="startPresent()">Run all-hands &rarr;</button></div></div>'+
+  '<div style="display:grid;grid-template-columns:1fr 400px;gap:18px;align-items:start">'+
+    '<div class="tbl"><div class="thead"><span>Client</span><span>Stage</span><span>Go-live</span><span>Progress</span><span style="text-align:right">Open actions</span></div>'+rows+'</div>'+
+    '<div class="panel" style="position:sticky;top:88px;overflow:hidden">'+
+      '<div style="padding:15px 16px;border-bottom:1px solid var(--border2)">'+
+        '<div style="display:flex;align-items:center;gap:9px">'+
+          '<span style="width:8px;height:8px;border-radius:50%;background:'+c.stageColor+';display:block"></span>'+
+          '<span style="font-size:15px;font-weight:800;color:var(--w)">'+esc(c.name)+'</span>'+
+          '<span class="mono" style="font-size:12px;margin-left:auto;color:'+c.daysColor+'">'+c.shortDays+'</span></div>'+
+        '<div style="font-size:10px;color:var(--mono);margin-top:6px;line-height:1.5">'+esc(c.meta)+'</div></div>'+
+      '<div style="max-height:520px;overflow:auto">'+groups+'</div>'+
+      '<div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between">'+
+        '<span class="sub">'+esc(c.foot)+'</span>'+
+        (c.trackerUrl?'<a href="'+c.trackerUrl+'" target="_blank" style="font-size:10px;font-weight:700;text-transform:uppercase">Open tracker &rarr;</a>':'<span class="sub">No tracker yet</span>')+
+      '</div></div></div>';
+}
+
+function renderPres(){
+  var L=all(), c=L[Math.max(0,Math.min(S.pIdx,L.length-1))];
+  document.getElementById('presCount').textContent=(S.pIdx+1)+' / '+L.length;
+  document.getElementById('presBody').innerHTML=
+    '<div style="max-width:1100px;margin:0 auto">'+
+      '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap;margin-bottom:28px">'+
+        '<div><div style="display:flex;align-items:center;gap:11px;margin-bottom:12px">'+
+          '<span class="stg" style="font-size:9px;padding:4px 11px;color:'+c.stageColor+';background:'+c.stageBg+'">'+esc(c.stage)+'</span>'+
+          '<span class="sub" style="font-size:11px">'+esc(c.meta)+'</span></div>'+
+          '<h2 style="font-size:42px;font-weight:800;letter-spacing:-.02em;color:var(--w)">'+esc(c.name)+'</h2></div>'+
+        '<div style="text-align:right"><div class="mono" style="font-size:58px;font-weight:800;line-height:1;color:'+c.daysColor+'">'+c.daysNum+'</div>'+
+          '<div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mono);margin-top:7px">'+esc(c.daysUnit)+'</div></div></div>'+
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:13px">'+groupsFor(c).map(groupHTML).join('')+'</div></div>';
+}
+
+function renderKpis(L){
+  var od=0,bl=0,wk=0,cl=0;
+  L.forEach(function(c){ od+=c.overdue; bl+=c.blocked; wk+=c.week; cl+=c.clientSide; });
+  var inFlight=L.filter(function(c){return ['Onboarding','Active','Build','Testing','Go-live'].indexOf(c.stage)>-1;}).length;
+  var soon=L.filter(function(c){return c.days!==null && c.days>=0 && c.days<=GO_LIVE_HORIZON;}).length;
+  var K=[
+    {l:'In delivery', v:inFlight, s:'of '+L.length+' clients', c:'#FFFFFF'},
+    {l:'Go-live \u2264 '+GO_LIVE_HORIZON+'d', v:soon, s:'clients landing', c:'#FBBF24'},
+    {l:'Overdue', v:od, s:'actions past due', c:od?'#F87171':'#4ADE80'},
+    {l:'Due this week', v:wk, s:'across portfolio', c:'#60A5FA'},
+    {l:'Blocked', v:bl, s:'need a decision', c:bl?'#FBBF24':'#4ADE80'},
+    {l:'On the client', v:cl, s:'waiting on them', c:'#FBBF24'}
+  ];
+  document.getElementById('kpis').innerHTML=K.map(function(k){
+    return '<div class="kpi"><div class="l">'+k.l+'</div><div class="v" style="color:'+k.c+'">'+k.v+'</div><div class="s">'+esc(k.s)+'</div></div>';
+  }).join('');
+}
+
+/* The 5-minute auto-refresh must never yank a half-typed note out from under
+   whoever is running the call. If a note has focus, wait for them to leave it. */
+function safeRender(){
+  var el=document.activeElement;
+  if(el && el.classList && el.classList.contains('cnote')){
+    el.addEventListener('blur', function h(){ el.removeEventListener('blur',h); render(); });
+    capBadge();
+    return;
+  }
+  render();
+}
+function render(){
+  var L=all();
+  capBadge();
+  if(document.getElementById('sum').classList.contains('on')) renderSummary();
+  ['a','b','c'].forEach(function(v){ document.getElementById('tab-'+v).classList.toggle('on', S.view===v); });
+  // Nothing to draw until the first fetch lands — the views index into the client
+  // list, so painting them empty would throw.
+  if(!L.length){
+    document.getElementById('kpis').innerHTML='';
+    document.getElementById('view').innerHTML =
+      '<div class="empty" style="padding:60px;text-align:center">'+
+      (LIVE.state==='offline'
+        ? 'Could not reach the trackers. Check the connection and hit &#8635; to retry.'
+        : 'Reading the trackers…')+'</div>';
+    return;
+  }
+  renderKpis(L);
+  document.getElementById('view').innerHTML = S.view==='b' ? viewB(L) : (S.view==='c' ? viewC(L) : viewA(L));
+  if(document.getElementById('pres').classList.contains('on')) renderPres();
+}
+
+/* boot */
+(function(){
+  var ws=weekStart(), we=WK_END;
+  document.getElementById('weekLabel').textContent =
+    'Mon '+ws.getDate()+' \u2013 Sun '+we.getDate()+' '+MON[we.getMonth()]+' '+we.getFullYear();
+  document.addEventListener('keydown', function(e){
+    if(!document.getElementById('pres').classList.contains('on')) return;
+    if(e.key==='ArrowRight') presMove(1);
+    if(e.key==='ArrowLeft') presMove(-1);
+    if(e.key==='Escape') stopPresent();
+  });
+  render();                     // paint the shell straight away
+  loadCapture();                // the team's in-flight all-hands session
+  loadAll(false);               // then the trackers
+  setInterval(function(){ loadAll(false); }, REFRESH_MS);
+})();
+</script>
+
+
+</body></html>
