@@ -348,20 +348,71 @@ function skillDate(d){
   var mo = SKILL_MONTHS[m[1]]; if(mo==null) return '';
   return TODAY.getFullYear()+'-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
 }
+/* ── the week grid ──────────────────────────────────────────────
+   Trackers schedule work two ways. A task can carry a plain date string in `d`
+   ("Jul 7-9"), or it can be pinned to a week number. The tracker's own
+   taskDatesText() uses `d` ONLY when there is no week — once a task has one,
+   the displayed date is computed from the week grid: WEEK1_START plus any
+   per-week overrides in weekStarts. Shifting a week moves every task in it and
+   after, and leaves every `d` string untouched.
+
+   So reading `d` alone shows the plan as first written, not as it stands now.
+   WEEK1_START lives in the tracker's HTML rather than its saved state, so it is
+   read from the file once per tracker and cached. */
+var WEEK1 = {};                       // trackerKey -> 'YYYY-MM-DD' | null
+function isoOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function hasWeeks(data){
+  if(!data || !data.taskData) return false;
+  return Object.keys(data.taskData).some(function(pid){
+    var g=data.taskData[pid]||{};
+    return ['sabel','client'].some(function(side){
+      return (g[side]||[]).some(function(t){ return t && t.week; });
+    });
+  });
+}
+function loadWeek1(tr){
+  if(WEEK1[tr.key]!==undefined) return Promise.resolve();       // cached, including null
+  if(!tr.file){ WEEK1[tr.key]=null; return Promise.resolve(); }
+  return fetch(BASE+tr.file,{cache:'no-store'})
+    .then(function(r){ return r.ok?r.text():''; })
+    .then(function(txt){
+      var m=txt.match(/WEEK1_START\s*=\s*['"]([\d-]{10})['"]/);
+      WEEK1[tr.key]= m ? m[1] : null;
+    })
+    .catch(function(){ WEEK1[tr.key]=null; });
+}
+/* The Sunday of week n — a task pinned to a week is not late until that week is out. */
+function weekEndDate(n, week1, weekStarts){
+  var d;
+  if(weekStarts && weekStarts[n]) d=new Date(weekStarts[n]+'T00:00:00');
+  else { d=new Date(week1+'T00:00:00'); d.setDate(d.getDate()+(n-1)*7); }
+  if(isNaN(d.getTime())) return '';
+  d.setDate(d.getDate()+6);
+  return isoOf(d);
+}
+function taskDue(t, week1, weekStarts){
+  if(t.week && t.week>=1 && week1){
+    var wk = (t.wkEnd && t.wkEnd>t.week) ? t.wkEnd : t.week;   // a span ends in its last week
+    return weekEndDate(wk, week1, weekStarts);
+  }
+  return skillDate(t.d);
+}
+
 /* Trackers exist in three shapes. Normalise all of them to
    [{id, tasks:[{task, owner, status, end, dep}]}]. */
-function phasesFrom(data){
+function phasesFrom(data, key){
   if(!data) return null;
   // 1. Skill format: {taskData:{phase:{sabel:[],client:[]}}, statuses:{phase-s-0:'…'}}
   if(data.taskData && typeof data.taskData==='object'){
     var st = data.statuses || {};
+    var w1 = WEEK1[key] || null, ws = data.weekStarts || {};
     return Object.keys(data.taskData).map(function(pid){
       var grp = data.taskData[pid] || {}, tasks = [];
       (grp.sabel||[]).forEach(function(t,i){
-        tasks.push({task:t.t, owner:t.o, status: st[pid+'-s-'+i] || t.s, end: skillDate(t.d), dep:false});
+        tasks.push({task:t.t, owner:t.o, status: st[pid+'-s-'+i] || t.s, end: taskDue(t,w1,ws), dep:false});
       });
       (grp.client||[]).forEach(function(t,i){
-        tasks.push({task:t.t, owner:t.o, status: st[pid+'-c-'+i] || t.s, end: skillDate(t.d), dep:true});
+        tasks.push({task:t.t, owner:t.o, status: st[pid+'-c-'+i] || t.s, end: taskDue(t,w1,ws), dep:true});
       });
       return {id:pid, tasks:tasks};
     });
@@ -425,7 +476,7 @@ function buildClients(portal, overrides){
     return (pc.trackerKey && byKey[pc.trackerKey]) || byNorm[normName(pc.name)] || null;
   }
   function make(name, stage, lead, portalGl, reg){
-    var phases = reg && reg._data ? phasesFrom(reg._data) : null;
+    var phases = reg && reg._data ? phasesFrom(reg._data, reg.key) : null;
     var tasks = [], p = 0, nd = true, auto = null;
     if(phases){
       nd = false;
@@ -497,6 +548,9 @@ function loadAll(manual){
       return fetchKeyMeta(t.key).then(function(m){
         t._data = m.data;
         if(m.reached){ LIVE.ok++; if(!m.data) LIVE.empty++; }
+        // Only trackers that actually pin work to weeks need their HTML read,
+        // and only once — most refreshes fetch nothing extra.
+        return hasWeeks(m.data) ? loadWeek1(t) : null;
       });
     })).then(function(){
       CLIENTS = buildClients(portal, overrides);
@@ -513,13 +567,18 @@ function loadAll(manual){
 }
 
 /* Scoping pipeline and what starts next — edit freely. */
-var KICKOFFS = [
-  {name:'Spartans',         note:'Kick-off call 18 Aug · Chris leading', tag:'Kick-off'},
-  {name:'WPT Global',       note:'Kick-off week of 24 Aug · Greg leading', tag:'Kick-off'},
-  {name:'RMS Cloud',        note:'Pre-contract · board paper mid-Aug, Oct renewal deadline', tag:'Scoping'},
-  {name:'Mambu',            note:'Advisory paused · awaiting client reschedule', tag:'On hold'},
-  {name:'Ainslie (Encum)',  note:'Paused · awaiting client resourcing decision', tag:'On hold'}
-];
+/* The pipeline panel is derived from the portal, not hand-kept. It used to be a
+   typed list with its own notes, which went stale the moment a stage changed —
+   it was still calling finished and cancelled engagements "upcoming". Reading
+   the stage means the panel cannot contradict the portal, because it is the
+   portal. Set a client's stage there and this follows. */
+function pipelineFor(L){
+  return L.filter(function(c){ return c.stage==='Scoping' || c.stage==='Onboarding'; })
+          .sort(function(a,b){
+            if(a.stage!==b.stage) return a.stage==='Onboarding'?-1:1;   // nearest to starting first
+            return a.name.toLowerCase()<b.name.toLowerCase()?-1:1;
+          });
+}
 
 var FILTERS = ['All open','Overdue','Due this week','Blocked'];
 var MS = 86400000;
@@ -958,6 +1017,7 @@ function viewA(L){
       tagColor:t.s==='Blocked'?'#F87171':'#FBBF24', tagBg:t.s==='Blocked'?'rgba(248,113,113,.14)':'rgba(251,191,36,.14)'});
   });});
 
+  var pipe=pipelineFor(L);
   var flagged=[]; L.forEach(function(c){ c.allTasks.forEach(function(t){ if(t.chase) flagged.push(t); }); });
   var ticked=capCount();
   var anyOpen=Object.keys(S.open).some(function(k){return S.open[k];});
@@ -991,16 +1051,20 @@ function viewA(L){
       }).join('') || '<div class="empty">Nothing blocked. Rare and excellent.</div>')+
     '</div>'+
     '<div class="panel" style="padding:15px 17px">'+
-      '<div class="sec-h" style="margin-bottom:4px">Scoping &amp; upcoming kick-offs <span class="count">'+KICKOFFS.length+'</span></div>'+
-      '<div class="sub" style="margin-bottom:11px">New clients being scoped and what starts next</div>'+
-      KICKOFFS.map(function(p){
-        var col = p.tag==='Kick-off' ? '#4ADE80' : (p.tag==='Scoping' ? '#94A3B8' : '#64748B');
-        var bg  = p.tag==='Kick-off' ? 'rgba(74,222,128,.12)' : 'rgba(148,163,184,.12)';
+      '<div class="sec-h" style="margin-bottom:4px">Pipeline &mdash; scoping &amp; onboarding <span class="count">'+pipe.length+'</span></div>'+
+      '<div class="sub" style="margin-bottom:11px">Live from the portal &middot; set a client&rsquo;s stage there and it moves here</div>'+
+      (pipe.map(function(c){
+        var col=STAGE_C[c.stage]||'#94A3B8', bg=STAGE_BG[c.stage]||'rgba(148,163,184,.12)';
+        var sub=[];
+        if(c.lead && c.lead!=='—') sub.push('lead '+c.lead);
+        if(c.gl) sub.push(c.days>=0 ? 'go-live '+fmt(c.gl) : 'go-live was '+fmt(c.gl));
+        if(!c.noData) sub.push(c.outstanding+' open');
+        else sub.push('no tracker yet');
         return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2)">'+
-          '<div style="min-width:0"><div style="font-size:12.5px;font-weight:600;color:var(--w)">'+esc(p.name)+'</div>'+
-          '<div style="font-size:9px;color:var(--mono);margin-top:3px">'+esc(p.note)+'</div></div>'+
-          '<span class="stg" style="color:'+col+';background:'+bg+'">'+esc(p.tag)+'</span></div>';
-      }).join('')+
+          '<div style="min-width:0"><div style="font-size:12.5px;font-weight:600;color:var(--w)">'+esc(c.name)+'</div>'+
+          '<div style="font-size:9px;color:var(--mono);margin-top:3px">'+esc(sub.join(' · '))+'</div></div>'+
+          '<span class="stg" style="color:'+col+';background:'+bg+'">'+esc(c.stage)+'</span></div>';
+      }).join('') || '<div class="empty">Nothing in scoping or onboarding right now.</div>')+
     '</div>'+
   '</div>'+
 

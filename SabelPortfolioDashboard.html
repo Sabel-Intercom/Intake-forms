@@ -746,10 +746,27 @@ function parseSkillHtml(html, saved){
   if(!P || !T) return null;
   var totalH=(html.match(/const TOTAL_H=(\d+)/)||[])[1];
   var st=(saved && saved.statuses) ? saved.statuses : {};   // saved status overrides
+  // A task pinned to a week takes its date from the week grid, not its `d`
+  // string — the tracker only falls back to `d` when there is no week, and
+  // shifting a week never rewrites `d`. WEEK1_START is in this HTML; the
+  // per-week overrides come from saved state.
+  var w1=(html.match(/WEEK1_START\s*=\s*['"]([\d-]{10})['"]/)||[])[1] || null;
+  var ws=(saved && saved.weekStarts) ? saved.weekStarts : {};
+  function due(t){
+    if(t.week && t.week>=1 && w1){
+      var n=(t.wkEnd && t.wkEnd>t.week) ? t.wkEnd : t.week;
+      var d = ws[n] ? new Date(ws[n]+'T00:00:00')
+                    : new Date(new Date(w1+'T00:00:00').getTime() + (n-1)*7*86400000);
+      if(isNaN(d.getTime())) return skillDate(t.d);
+      d.setDate(d.getDate()+6);                              // the week's Sunday
+      return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    }
+    return skillDate(t.d);
+  }
   var phases=P.map(function(ph){
     var grp=T[ph.id]||{}, tasks=[];
-    (grp.sabel||[]).forEach(function(t,i){ tasks.push({task:t.t, owner:t.o, status: st[ph.id+'-s-'+i]||t.s, end:skillDate(t.d), dep:false}); });
-    (grp.client||[]).forEach(function(t,i){ tasks.push({task:t.t, owner:t.o, status: st[ph.id+'-c-'+i]||t.s, end:skillDate(t.d), dep:true}); });
+    (grp.sabel||[]).forEach(function(t,i){ tasks.push({task:t.t, owner:t.o, status: st[ph.id+'-s-'+i]||t.s, end:due(t), dep:false}); });
+    (grp.client||[]).forEach(function(t,i){ tasks.push({task:t.t, owner:t.o, status: st[ph.id+'-c-'+i]||t.s, end:due(t), dep:true}); });
     return {id:ph.id, tasks:tasks};
   });
   return {phases:phases, totalHours: totalH ? +totalH : null};

@@ -253,20 +253,62 @@ function skillDate(d){
   var mo=SKILL_MONTHS[m[1]]; if(mo==null) return '';
   return new Date().getFullYear()+'-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
 }
+/* ── the week grid ──
+   A task pinned to a week takes its date from the week grid (WEEK1_START plus
+   any weekStarts overrides), not from its `d` string — the tracker's own
+   taskDatesText() falls back to `d` only when there is no week, and shifting a
+   week never rewrites `d`. WEEK1_START sits in the tracker's HTML, so it is
+   read once per tracker and cached. */
+var WEEK1 = {};
+function isoOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function hasWeeks(data){
+  if(!data || !data.taskData) return false;
+  return Object.keys(data.taskData).some(function(pid){
+    var g=data.taskData[pid]||{};
+    return ['sabel','client'].some(function(s){ return (g[s]||[]).some(function(t){ return t && t.week; }); });
+  });
+}
+function loadWeek1(c){
+  if(WEEK1[c.key]!==undefined) return Promise.resolve();
+  if(!c.file){ WEEK1[c.key]=null; return Promise.resolve(); }
+  return fetch(BASE+c.file,{cache:'no-store'})
+    .then(function(r){ return r.ok?r.text():''; })
+    .then(function(txt){
+      var m=txt.match(/WEEK1_START\s*=\s*['"]([\d-]{10})['"]/);
+      WEEK1[c.key]= m ? m[1] : null;
+    }).catch(function(){ WEEK1[c.key]=null; });
+}
+function weekEndDate(n, week1, weekStarts){
+  var d;
+  if(weekStarts && weekStarts[n]) d=new Date(weekStarts[n]+'T00:00:00');
+  else { d=new Date(week1+'T00:00:00'); d.setDate(d.getDate()+(n-1)*7); }
+  if(isNaN(d.getTime())) return '';
+  d.setDate(d.getDate()+6);
+  return isoOf(d);
+}
+function taskDue(t, week1, weekStarts){
+  if(t.week && t.week>=1 && week1){
+    var wk=(t.wkEnd && t.wkEnd>t.week) ? t.wkEnd : t.week;
+    return weekEndDate(wk, week1, weekStarts);
+  }
+  return skillDate(t.d);
+}
+
 /* Returns [{taskKey, task, owner, status, end, clientSide}] — taskKey matches
    the '<phase>-s|c-<n>' half of Notion's 'Tracker task id'. */
-function tasksFrom(data){
+function tasksFrom(data, key){
   if(!data) return [];
   var out=[];
   if(data.taskData && typeof data.taskData==='object'){
     var st=data.statuses||{};
+    var w1=WEEK1[key]||null, ws=data.weekStarts||{};
     Object.keys(data.taskData).forEach(function(pid){
       var g=data.taskData[pid]||{};
       (g.sabel||[]).forEach(function(t,i){
-        out.push({taskKey:pid+'-s-'+i, task:t.t, owner:t.o, status:st[pid+'-s-'+i]||t.s, end:skillDate(t.d), clientSide:false});
+        out.push({taskKey:pid+'-s-'+i, task:t.t, owner:t.o, status:st[pid+'-s-'+i]||t.s, end:taskDue(t,w1,ws), clientSide:false});
       });
       (g.client||[]).forEach(function(t,i){
-        out.push({taskKey:pid+'-c-'+i, task:t.t, owner:t.o, status:st[pid+'-c-'+i]||t.s, end:skillDate(t.d), clientSide:true});
+        out.push({taskKey:pid+'-c-'+i, task:t.t, owner:t.o, status:st[pid+'-c-'+i]||t.s, end:taskDue(t,w1,ws), clientSide:true});
       });
     });
     return out;
@@ -351,7 +393,12 @@ function loadAll(manual){
 
     LIVE.total=picked.length; LIVE.ok=0;
     return Promise.all(picked.map(function(c){
-      return fetchKey(c.key).then(function(d){ c.tasks=tasksFrom(d); if(d) LIVE.ok++; });
+      return fetchKey(c.key).then(function(d){
+        if(d) LIVE.ok++;
+        // Week-pinned trackers need WEEK1_START from their HTML — fetched once each.
+        return (hasWeeks(d) ? loadWeek1(c) : Promise.resolve())
+          .then(function(){ c.tasks=tasksFrom(d, c.key); });
+      });
     })).then(function(){
       CLIENTS=picked.sort(function(a,b){ return a.name.toLowerCase()<b.name.toLowerCase()?-1:1; });
       LIVE.at=new Date(); render();
