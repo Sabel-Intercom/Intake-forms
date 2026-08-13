@@ -1,994 +1,588 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Sabel Weekly Updates</title>
+<title>Weekly Client Updates</title>
 <style>
   :root{
-    --bg:#0B0B0C; --surface:#0F1113; --card:#141618; --card2:#191C20;
-    --border:#2A3547; --border2:#1A2232; --red:#E10600; --redDim:rgba(225,6,0,.14);
+    --bg:#0B0B0C; --surface:#0F1113; --card:#141618; --card2:#191C20; --card3:#1E2228;
+    --border:#2A3547; --border2:#1A2232; --red:#E10600;
     --w:#FFFFFF; --body:#E2E8F0; --muted:#94A3B8; --mono:#64748B;
-    --green:#4ADE80; --blue:#60A5FA; --amber:#FBBF24; --redText:#F87171;
+    --green:#4ADE80; --blue:#60A5FA; --amber:#FBBF24; --purple:#C084FC; --redText:#F87171;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--body);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+  body{background:var(--bg);color:var(--body);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:60px;}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
-  select{font-family:inherit;}
-  ::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}::-webkit-scrollbar-track{background:transparent;}
+  select,textarea,input{font-family:inherit;}
+  a{color:#FCA5A5;text-decoration:none;} a:hover{color:#fff;text-decoration:underline;}
+  ::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
 
-  .header{display:flex;align-items:center;gap:16px;padding:15px 28px;border-bottom:1px solid var(--border2);background:rgba(11,11,12,.9);flex-wrap:wrap;}
-  .brand{display:flex;align-items:baseline;gap:9px;}
-  .brand .logo{font-size:16px;font-weight:800;letter-spacing:.32em;color:var(--w);text-transform:uppercase;}
-  .brand .logo .dot{color:var(--red);}
-  .brand .tag{font-size:8px;letter-spacing:.2em;color:var(--mono);text-transform:uppercase;}
-  .header h1{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--w);text-transform:uppercase;margin-left:6px;}
-  .brand-logo{height:26px;width:auto;display:block;}
-  .header .right{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-  .stamp{font-size:10px;color:var(--mono);letter-spacing:.04em;}
+  /* header */
+  .header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    padding:13px 22px;background:rgba(11,11,12,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--border2);}
+  .logo-img{height:24px;width:auto;display:block;}
+  .tag{font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mono);}
+  h1{font-size:15px;font-weight:800;color:var(--w);letter-spacing:-.01em;}
+  .hright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .stamp{font-size:10px;color:var(--mono);letter-spacing:.03em;}
   .stamp b{color:var(--green);}
-  .stamp b.off{color:var(--amber);}
-  .who{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--mono);}
-  .who input{width:74px;background:var(--card2);border:1px solid var(--border);border-radius:5px;color:var(--w);font-size:11px;padding:5px 8px;outline:none;font-family:inherit;}
-  .who input:focus{border-color:var(--blue);}
-  .hbtn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:5px;background:var(--card2);border:1px solid var(--border);color:var(--body);font-size:10px;font-weight:700;letter-spacing:.04em;transition:.14s;}
-  .hbtn:hover{border-color:var(--mono);color:var(--w);}
+  .btn{font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;border:1px solid var(--border2);
+    background:var(--card);color:var(--muted);transition:.12s;}
+  .btn:hover{color:var(--w);border-color:var(--border);}
+  .btn.on{background:var(--red);color:#fff;border-color:var(--red);}
+  .wknav{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--border2);border-radius:7px;padding:3px;}
+  .wknav button{font-size:12px;padding:3px 8px;border-radius:4px;color:var(--muted);}
+  .wknav button:hover{color:var(--w);background:var(--card3);}
+  .wklab{font-size:11px;font-weight:700;color:var(--body);padding:0 6px;white-space:nowrap;}
+  .who{font-size:11px;background:var(--card);border:1px solid var(--border2);color:var(--body);border-radius:6px;padding:6px 8px;}
 
-  .wrap{max-width:1240px;margin:0 auto;padding:22px 28px 70px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:22px;}
 
-  .banner{display:none;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.35);border-radius:9px;padding:11px 15px;font-size:11.5px;color:var(--amber);line-height:1.5;margin-bottom:18px;}
-  .banner.show{display:block;}
+  /* progress strip */
+  .strip{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border2);
+    border-radius:11px;padding:14px 17px;margin-bottom:18px;}
+  .strip .lead{font-size:12.5px;color:var(--muted);}
+  .strip b{color:var(--w);}
+  .bar{flex:1;min-width:140px;height:5px;background:var(--card3);border-radius:3px;overflow:hidden;}
+  .bar i{display:block;height:100%;background:var(--green);border-radius:3px;transition:width .3s;}
 
-  .weekbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
-  .week-nav{display:flex;align-items:center;gap:8px;}
-  .wk-btn{padding:6px 12px;border-radius:6px;background:var(--card2);border:1px solid var(--border);color:var(--body);font-size:11px;font-weight:700;}
-  .wk-btn:hover{border-color:var(--mono);color:var(--w);}
-  .wk-today{color:#FCA5A5;}
-  .wk-label{font-size:12px;font-weight:800;color:var(--w);min-width:180px;text-align:center;letter-spacing:.02em;}
-  .legend{font-size:10px;color:var(--mono);line-height:1.5;}
+  /* client tiles */
+  .list{display:flex;flex-direction:column;gap:9px;}
+  details.tile{background:var(--card);border:1px solid var(--border2);border-radius:11px;overflow:hidden;}
+  details.tile[open]{border-color:var(--border);}
+  details.tile.sent{border-left:3px solid var(--green);}
+  details.tile.review{border-left:3px solid var(--amber);}
+  summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:14px 17px;}
+  summary::-webkit-details-marker{display:none;}
+  summary:hover{background:var(--card2);}
+  .chev{color:var(--mono);font-size:11px;transition:transform .15s;}
+  details[open] .chev{transform:rotate(90deg);}
+  .cname{font-size:14px;font-weight:700;color:var(--w);}
+  .pill{font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:5px;white-space:nowrap;}
+  .pill.stage{color:var(--blue);background:rgba(96,165,250,.13);}
+  .pill.draft{color:var(--mono);background:var(--card3);}
+  .pill.review{color:var(--amber);background:rgba(251,191,36,.13);}
+  .pill.sent{color:var(--green);background:rgba(74,222,128,.13);}
+  .sright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .rev{font-size:10px;color:var(--mono);letter-spacing:.03em;}
+  .rev b{color:var(--body);}
 
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
-  @media(max-width:920px){.cols{grid-template-columns:1fr;}}
-  .col-h{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;flex-wrap:wrap;}
-  .col-h h2{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--w);}
-  .col-h .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;position:relative;top:-1px;}
-  .col-prog{font-size:10px;color:var(--muted);margin-bottom:12px;}
-  .col-prog b{color:var(--w);}
+  .body{padding:2px 17px 17px;border-top:1px solid var(--border2);}
+  .row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:14px 0;}
+  .lab{font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mono);flex:0 0 92px;}
+  .modes{display:flex;gap:5px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:4px;}
+  .modes button{font-size:11.5px;font-weight:700;padding:7px 14px;border-radius:5px;color:var(--muted);}
+  .modes button:hover{color:var(--w);}
+  .modes button.on{background:var(--red);color:#fff;}
+  select.pick{font-size:11.5px;background:var(--card2);border:1px solid var(--border2);color:var(--body);
+    border-radius:6px;padding:7px 10px;min-width:120px;}
+  select.pick:focus{outline:none;border-color:var(--red);}
 
-  /* draft cards */
-  .dcard{background:var(--card);border:1px solid var(--border2);border-left-width:3px;border-radius:11px;padding:13px 16px;margin-bottom:12px;}
-  .dcard.st-draft{border-left-color:var(--amber);}
-  .dcard.st-reviewed{border-left-color:var(--blue);}
-  .dcard.st-sent{border-left-color:var(--green);}
-  .d-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .d-name{font-size:14px;font-weight:800;color:var(--w);}
-  .d-status{font-size:8.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:20px;cursor:pointer;border:1px solid transparent;}
-  .d-status.draft{background:rgba(251,191,36,.12);color:var(--amber);border-color:rgba(251,191,36,.3);}
-  .d-status.reviewed{background:rgba(96,165,250,.14);color:var(--blue);border-color:rgba(96,165,250,.35);}
-  .d-status.sent{background:rgba(74,222,128,.14);color:var(--green);border-color:rgba(74,222,128,.35);}
-  /* status as a dropdown (replaces the click-through pill) */
-  .d-status-sel{font-size:8.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 20px 3px 10px;border-radius:20px;border:1px solid transparent;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-repeat:no-repeat;background-position:right 7px center;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%2394A3B8' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E");}
-  .d-status-sel.draft{background-color:rgba(251,191,36,.12);color:var(--amber);border-color:rgba(251,191,36,.3);}
-  .d-status-sel.reviewed{background-color:rgba(96,165,250,.14);color:var(--blue);border-color:rgba(96,165,250,.35);}
-  .d-status-sel.sent{background-color:rgba(74,222,128,.14);color:var(--green);border-color:rgba(74,222,128,.35);}
-  .d-status-sel option{background:var(--card2);color:var(--body);}
-  /* collapsible cards */
-  .d-chev{color:var(--mono);font-size:11px;padding:0 4px;transition:transform .15s;cursor:pointer;user-select:none;}
-  .dcard:not(.collapsed) .d-chev{transform:rotate(90deg);}
-  .d-name{cursor:pointer;}
-  .dcard.collapsed .d-msg,.dcard.collapsed .d-text,.dcard.collapsed .d-comments,.dcard.collapsed .d-actions{display:none;}
-  .d-rev{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--mono);margin-left:auto;}
-  .d-rev select{background:var(--card2);border:1px solid var(--border);border-radius:5px;color:var(--body);font-size:10px;padding:3px 6px;outline:none;cursor:pointer;}
-  .d-rev select:focus{border-color:var(--blue);}
+  .note{font-size:11.5px;color:var(--mono);line-height:1.55;margin:2px 0 10px;}
+  .note b{color:var(--muted);}
+  textarea.draft{width:100%;min-height:190px;background:var(--surface);border:1px solid var(--border2);border-radius:9px;
+    color:var(--body);font:13px/1.65 inherit;padding:13px 15px;resize:vertical;}
+  textarea.draft:focus{outline:none;border-color:var(--red);}
+  .acts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .src{font-size:10px;color:var(--mono);margin-left:auto;letter-spacing:.03em;}
+  .src.warn{color:var(--amber);}
+  .empty{font-size:12px;color:var(--mono);padding:18px 0;}
 
-  /* message preview */
-  .d-msg{background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:11px 14px;margin-top:10px;font-size:12.5px;line-height:1.6;color:var(--body);white-space:pre-wrap;word-break:break-word;}
-  .d-msg.empty-msg{color:var(--mono);font-style:italic;}
-  .d-text{display:none;width:100%;background:var(--surface);border:1px solid var(--blue);border-radius:9px;color:var(--body);font-family:inherit;font-size:12.5px;line-height:1.6;padding:11px 14px;resize:vertical;min-height:130px;overflow:hidden;margin-top:10px;}
-  .d-text:focus{outline:none;}
-  .dcard.editing .d-msg{display:none;}
-  .dcard.editing .d-text{display:block;}
-
-  .d-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px;}
-  .abtn{font-size:9.5px;font-weight:700;letter-spacing:.03em;color:var(--muted);background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:4px 11px;transition:.12s;}
-  .abtn:hover{border-color:var(--mono);color:var(--w);}
-  .abtn.approve{color:var(--blue);border-color:rgba(96,165,250,.35);}
-  .abtn.approve:hover{background:rgba(96,165,250,.12);color:#fff;}
-  .abtn.ok{color:var(--green);border-color:rgba(74,222,128,.4);}
-  .d-meta{font-size:9px;color:var(--mono);margin-left:auto;letter-spacing:.03em;text-align:right;}
-  .d-meta b{color:var(--muted);font-weight:600;}
-
-  /* comments */
-  .d-comments{margin-top:8px;}
-  .cm{border-left:2px solid var(--blue);background:var(--surface);border-radius:0 6px 6px 0;padding:6px 10px;margin-top:6px;font-size:11px;line-height:1.5;color:var(--body);}
-  .cm .cm-by{font-size:9px;color:var(--mono);margin-top:2px;}
-  .cm-add{display:none;gap:8px;align-items:flex-start;margin-top:8px;}
-  .cm-add.show{display:flex;}
-  .cm-add input{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--body);font-family:inherit;font-size:11.5px;padding:7px 10px;outline:none;}
-  .cm-add input:focus{border-color:var(--blue);}
-  .cm-add button{font-size:10px;font-weight:700;color:var(--blue);background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.35);border-radius:6px;padding:7px 12px;white-space:nowrap;}
-
-  /* no-draft rows */
-  .nd-h{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);margin:14px 0 8px;}
-  .nd-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:8px 14px;margin-bottom:7px;}
-  .nd-name{font-size:12px;font-weight:600;color:var(--muted);}
-  .empty{font-size:11.5px;color:var(--mono);padding:12px 2px;line-height:1.6;}
-
-  /* call notes */
-  .notes-sec{margin-top:30px;}
-  .notes-sub{font-size:10.5px;color:var(--mono);margin-bottom:14px;line-height:1.6;}
-  .ncard{background:var(--card);border:1px solid var(--border2);border-radius:11px;margin-bottom:10px;overflow:hidden;}
-  .ncard > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 16px;}
-  .ncard > summary::-webkit-details-marker{display:none;}
-  .n-chev{color:var(--mono);font-size:11px;transition:transform .15s;}
-  .ncard[open] .n-chev{transform:rotate(90deg);}
-  .n-name{font-size:13px;font-weight:800;color:var(--w);}
-  .n-count{font-size:9px;color:var(--mono);background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1px 8px;}
-  .n-inner{padding:2px 16px 14px;}
-  .n-item{border-left:2px solid var(--amber);background:var(--surface);border-radius:0 6px 6px 0;padding:8px 11px;margin-bottom:8px;}
-  .n-item .n-tx{font-size:12px;line-height:1.5;color:var(--body);white-space:pre-wrap;word-break:break-word;}
-  .n-item .n-meta{font-size:9px;color:var(--mono);margin-top:4px;}
-  .n-del{float:right;color:var(--mono);font-size:13px;padding:0 4px;line-height:1;}
-  .n-del:hover{color:var(--redText);}
-  .n-add{display:flex;gap:8px;align-items:flex-start;margin-top:4px;}
-  .n-add textarea{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--body);font-family:inherit;font-size:12px;line-height:1.5;padding:8px 10px;resize:vertical;min-height:44px;}
-  .n-add textarea:focus{outline:none;border-color:var(--amber);}
-  .n-add button{font-size:10px;font-weight:700;color:var(--amber);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35);border-radius:6px;padding:8px 13px;white-space:nowrap;}
-  .n-add button:hover{background:rgba(251,191,36,.2);color:#fff;}
-  /* ad-hoc delivered log */
-  .ah-h{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin:14px 0 8px;}
-  .n-item.ah{border-left-color:var(--green);}
-  .ah-scope{font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--amber);background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:1px 7px;margin-left:6px;vertical-align:middle;}
-  .ah-add{display:flex;gap:8px;align-items:flex-start;margin-top:4px;flex-wrap:wrap;}
-  .ah-add textarea{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--body);font-family:inherit;font-size:12px;line-height:1.5;padding:8px 10px;resize:vertical;min-height:44px;}
-  .ah-add textarea:focus{outline:none;border-color:var(--green);}
-  .ah-add label{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);cursor:pointer;white-space:nowrap;padding-top:10px;}
-  .ah-add input[type=checkbox]{accent-color:var(--amber);width:13px;height:13px;cursor:pointer;}
-  .ah-add button{font-size:10px;font-weight:700;color:var(--green);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.35);border-radius:6px;padding:8px 13px;white-space:nowrap;}
-  .ah-add button:hover{background:rgba(74,222,128,.2);color:#fff;}
-
-  footer{margin-top:34px;padding:16px 0 0;border-top:1px solid var(--border2);font-size:9px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
-
-  /* modals */
-  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;}
-  .modal{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:640px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.6);}
-  .modal h3{font-size:13px;font-weight:800;color:var(--w);letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;}
-  .modal p{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
-  .modal textarea{width:100%;min-height:180px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--body);font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.5;padding:10px 12px;resize:vertical;}
-  .modal textarea:focus{outline:none;border-color:var(--blue);}
-  .modal .m-err{font-size:11px;color:var(--redText);margin-top:8px;min-height:16px;}
-  .modal .m-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px;}
-  .modal .m-go{font-size:11px;font-weight:700;color:#fff;background:var(--red);border-radius:6px;padding:8px 16px;}
-  .modal .m-cancel{font-size:11px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:8px 14px;}
-  .rr-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:10px 13px;margin-bottom:8px;}
-  .rr-who{font-size:12px;font-weight:700;color:var(--w);}
-  .rr-list{font-size:10px;color:var(--muted);margin-top:2px;}
+  footer{max-width:1080px;margin:26px auto 0;padding:16px 22px 0;border-top:1px solid var(--border2);
+    font-size:9px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 </style>
 </head>
 <body>
 
 <header class="header">
-  <div class="brand"><img src="data:image/png;base64,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" alt="Sabel" class="brand-logo"></div>
+  <img class="logo-img" src="data:image/png;base64,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" alt="Sabel">
+  <span class="tag">Ops Hub</span>
   <h1>Weekly Client Updates</h1>
-  <div class="right">
-    <span class="who">You are: <input id="whoInput" placeholder="e.g. Nikki" maxlength="12"></span>
-    <span class="stamp" id="stamp">Loading&hellip;</span>
-    <button class="hbtn" onclick="openRequest()">&#128276; Request reviews</button>
-    <button class="hbtn" onclick="openImport()">&#8681; Import drafts</button>
-    <button class="hbtn" onclick="loadAll(true)">&#8635; Refresh</button>
+  <div class="hright">
+    <span class="stamp">Live &middot; <b id="stamp">&mdash;</b></span>
+    <div class="wknav">
+      <button onclick="shiftWeek(-1)" title="Previous week">&#8592;</button>
+      <span class="wklab" id="wkLabel"></span>
+      <button onclick="shiftWeek(1)" title="Next week">&#8594;</button>
+      <button onclick="shiftWeek(0,true)" title="Back to this week">Today</button>
+    </div>
+    <select class="who" id="whoSel" onchange="setWho(this.value)" title="Who is working on these"></select>
+    <button class="btn" onclick="loadAll(true)" title="Re-read the trackers and Notion">&#8635;</button>
   </div>
 </header>
 
 <div class="wrap">
-
-  <div class="banner" id="storeBanner">
-    <b>Shared store not reachable.</b> Everything is saving to this browser only and will sync automatically once
-    <b>sabel-weekly-updates-v1</b> is live in the webhook's ALLOWED_KEYS (check the Vercel deployment succeeded), then press Refresh.
+  <div class="strip">
+    <span class="lead" id="progLead">Loading&hellip;</span>
+    <div class="bar"><i id="progBar" style="width:0%"></i></div>
   </div>
-
-  <div class="weekbar">
-    <div class="week-nav">
-      <button class="wk-btn" onclick="shiftWeek(-1)" title="Previous week">&#8592;</button>
-      <span class="wk-label" id="wkLabel"></span>
-      <button class="wk-btn" onclick="shiftWeek(1)" title="Next week">&#8594;</button>
-      <button class="wk-btn wk-today" onclick="shiftWeek(0,true)">This week</button>
-    </div>
-    <div class="legend">
-      Read each message, then <b>&#10003; Looks good</b> to approve, or leave a comment.<br>
-      Copying a message offers to mark it Sent, so the board stays honest.
-    </div>
-  </div>
-
-  <div class="cols">
-    <div>
-      <div class="col-h"><span class="dot" style="background:var(--blue)"></span><h2>Monday &mdash; coming up this week</h2>
-        <button class="hbtn" style="margin-left:auto;" onclick="generate('monday',this)">&#9889; Generate Monday drafts</button></div>
-      <div class="col-prog" id="mondayProg"></div>
-      <div id="mondayCol"></div>
-    </div>
-    <div>
-      <div class="col-h"><span class="dot" style="background:var(--green)"></span><h2>Friday &mdash; week wrap-up</h2>
-        <button class="hbtn" style="margin-left:auto;" onclick="generate('friday',this)">&#9889; Generate Friday drafts</button></div>
-      <div class="col-prog" id="fridayProg"></div>
-      <div id="fridayCol"></div>
-    </div>
-  </div>
-
-  <div class="notes-sec" id="motionSec">
-    <div class="col-h"><span class="dot" style="background:var(--blue)"></span><h2>Completed in Motion this week</h2>
-      <button class="hbtn" style="margin-left:auto;" onclick="loadMotion(true)">&#8635; Pull from Motion</button></div>
-    <div class="notes-sub">Pull any time for the latest Motion completions — nothing is sent to clients from here. <b>Add</b> queues a line for that client's Friday draft, <b>Add as scope</b> also counts it as added scope, <b>Ignore</b> hides internal noise. Each client card also shows what's queued for the draft (deletable) and a manual add box for work not in Motion. Decisions sync to the whole team.</div>
-    <div id="motionCol"><div class="empty">Loading Motion&hellip;</div></div>
-  </div>
-
-  <footer>
-    <span>Internal use only &middot; shared via Sabel webhook &middot; key sabel-weekly-updates-v1</span>
-    <span id="footNote"></span>
-  </footer>
+  <div class="list" id="list"><div class="empty">Reading the trackers&hellip;</div></div>
 </div>
 
-<script>
-// ─────────────────────────────────────────────────────────────
-// CONFIG
-// ─────────────────────────────────────────────────────────────
-var API = 'https://sabel-webhook.vercel.app/api/tracker';
-var BASE = 'https://sabel-intercom.github.io/Intake-forms/';
-var STORE_KEY = 'sabel-weekly-updates-v1';       // must be in ALLOWED_KEYS on the backend
-var MOTION_API = 'https://sabel-webhook.vercel.app/api/motion';
-var REFRESH_MS = 5 * 60 * 1000;
-var TEAM = ['Chris','Greg','Richard','Nikki'];
+<footer>
+  <span>Internal use only &middot; drafts shared via the Sabel webhook</span>
+  <span id="srcNote"></span>
+</footer>
 
-// Store shape:
-// { weeks: { '2026-07-13': { monday:{Client:{text,status,by,at,comments:[{at,by,text}]}}, friday:{...} } },
-//   callNotes: { Client: [ {at, by, text} ] },
-//   reviewers: { Client: 'Chris' } }          // persistent default reviewer per client
-var STORE = JSON.parse(localStorage.getItem('sabel_weekly_updates')||'{"weeks":{},"callNotes":{},"reviewers":{}}');
-var CLIENTS = [];
+<script>
+/* ──────────────────────────────────────────────────────────────
+   WEEKLY CLIENT UPDATES
+
+   One list. Every active client is a tile; open a tile and you get the two
+   things you actually do each week:
+
+     Monday check-in  — what we need FROM the client this coming week
+     Friday recap     — what got DONE this week, from Notion and the tracker,
+                        merged into one editable draft
+
+   Plus a reviewer to check with before it goes out, and a status to mark it
+   sent. Nothing here writes to a client tracker or to Notion — the draft is
+   yours to edit and send.
+
+   SOURCES
+     trackers.json          the registry of client trackers
+     client-portal-v1       which clients are active, and their stage
+     <client>-tracker-v1    the plan: tasks, owners, statuses, dates
+     /api/notion            tasks completed this week (replaces /api/motion)
+     sabel-weekly-updates-v1  the drafts, shared across the team
+
+   Notion and the trackers describe the same work. Every Notion task carries a
+   'Tracker task id' of the form '<key>:<phase>-s|c-<n>', which is exactly the
+   tracker's own task key — so the merge de-duplicates exactly, and '-c-'
+   tells us a task sits with the client rather than with us.
+   ────────────────────────────────────────────────────────────── */
+
+var API        = 'https://sabel-webhook.vercel.app/api/tracker';
+var NOTION_API = 'https://sabel-webhook.vercel.app/api/notion';
+var BASE       = 'https://sabel-intercom.github.io/Intake-forms/';
+var STORE_KEY  = 'sabel-weekly-updates-v1';
+var PORTAL_KEY = 'client-portal-v1';
+var REFRESH_MS = 5 * 60 * 1000;
+
+var TEAM      = ['Chris','Richard','Greg','Nikki'];
+var REVIEWERS = ['Chris','Richard','Greg'];
+var STATUSES  = ['Draft','With reviewer','Sent'];
+/* Portal stages we consider worth a weekly update. */
+var ACTIVE_STAGES = ['Active','Onboarding','Build','Testing','Go-live'];
+
+var CLIENTS = [];          // [{key,name,file,stage,lead,tasks:[...]}]
+var NOTION  = {tasks:[], ok:null, err:''};
 var WEEK_OFFSET = 0;
-var EDITING = false;
-var EXPANDED = {};          // which draft cards are expanded (collapsed by default)
-var REMOTE_OK = false;
-var WHO = localStorage.getItem('sabel_who')||'';
+var WHO = localStorage.getItem('sabel_who') || '';
+var LIVE = {at:null, ok:0, total:0};
+
+/* The v2 store lives beside the old one so nothing already written is lost.
+   { v2: { weeks: { '<mon>': { '<key>': { mode, monday:{...}, friday:{...} } } },
+           reviewers: { '<key>': 'Chris' } } }                                  */
+var STORE = {v2:{weeks:{},reviewers:{}}};
+var SAVE_T = null, TYPING = false;
 
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ── the week ── */
 function weekStart(offset){
   var d=new Date(); d.setHours(0,0,0,0);
-  var day=(d.getDay()+6)%7;                       // Monday = 0
-  d.setDate(d.getDate()-day + (offset||0)*7);
+  d.setDate(d.getDate() - ((d.getDay()+6)%7) + (offset||0)*7);
   return d;
 }
-function weekKey(offset){ return weekStart(offset).toISOString().slice(0,10); }
-function fmtD(d){ return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}); }
-function nowStamp(){ return new Date().toISOString(); }
-function fmtStamp(iso){
-  if(!iso) return '';
-  var d=new Date(iso);
-  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function wkKey(){ return iso(weekStart(WEEK_OFFSET)); }
+function wkEnd(){ var d=weekStart(WEEK_OFFSET); d.setDate(d.getDate()+6); return d; }
+function fmtDay(d){ return d.getDate()+' '+MON[d.getMonth()]; }
+function inThisWeek(isoDate){
+  if(!isoDate) return false;
+  var s=iso(weekStart(WEEK_OFFSET)), e=iso(wkEnd());
+  var d=String(isoDate).slice(0,10);
+  return d>=s && d<=e;
 }
-function ensure(){
-  if(!STORE.weeks) STORE.weeks={};
-  if(!STORE.callNotes) STORE.callNotes={};
-  if(!STORE.reviewers) STORE.reviewers={};
-  if(!STORE.adhoc) STORE.adhoc={};
-  if(!STORE.motionHandled) STORE.motionHandled={};
-  var wk=weekKey(WEEK_OFFSET);
-  if(!STORE.weeks[wk]) STORE.weeks[wk]={monday:{},friday:{}};
-  if(!STORE.weeks[wk].monday) STORE.weeks[wk].monday={};
-  if(!STORE.weeks[wk].friday) STORE.weeks[wk].friday={};
-  return STORE.weeks[wk];
-}
-function saveLocal(){ localStorage.setItem('sabel_weekly_updates', JSON.stringify(STORE)); }
+function shiftWeek(n,today){ WEEK_OFFSET = today ? 0 : WEEK_OFFSET+n; render(); loadNotion(); }
 
-// ─────────────────────────────────────────────────────────────
-// SHARED STORE — merge-safe: pull remote, overlay local edits, push
-// ─────────────────────────────────────────────────────────────
-function fetchStore(){
-  return fetch(API+'?key='+encodeURIComponent(STORE_KEY)+'&_t='+Date.now(),{cache:'no-store'})
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(j){ return (j&&j.ok) ? {ok:true, data:(j.data&&typeof j.data==='object')?j.data:null} : null; });
+/* ── store ── */
+function bucket(){
+  var w=wkKey();
+  if(!STORE.v2) STORE.v2={weeks:{},reviewers:{}};
+  if(!STORE.v2.weeks[w]) STORE.v2.weeks[w]={};
+  return STORE.v2.weeks[w];
 }
-function unionByAtText(a,b){
-  // Union two entry lists. Deleted "tombstones" win over live copies of the
-  // same entry, and are KEPT in the result so a deletion can never be
-  // resurrected by another browser pushing its stale copy.
-  var seen={}, out=[];
-  (a||[]).concat(b||[]).forEach(function(x){
-    if(!x) return;
-    var id=(x.at||'')+'|'+(x.text||'');
-    if(seen[id]!==undefined){ if(x.deleted && !out[seen[id]].deleted) out[seen[id]]=x; return; }
-    seen[id]=out.length; out.push(x);
-  });
-  out.sort(function(x,y){ return (x.at||'')<(y.at||'')?-1:1; });
-  return out;
+function entry(key){
+  var b=bucket();
+  if(!b[key]) b[key]={mode:defaultMode(), monday:blank(), friday:blank()};
+  return b[key];
 }
-function mergeEntry(re,le){
-  if(re&&le){
-    var win = ((le.at||'')>=(re.at||'')) ? Object.assign({},le) : Object.assign({},re);
-    win.comments = unionByAtText(re.comments, le.comments);
-    return win;
-  }
-  return le||re;
-}
-function mergeStores(remote, local){
-  remote=remote||{}; local=local||{};
-  var out={weeks:{},callNotes:{},adhoc:{},reviewers:Object.assign({},remote.reviewers||{},local.reviewers||{}),snapshots:{},
-    motionHandled:Object.assign({},remote.motionHandled||{},local.motionHandled||{})};
-  // snapshots: newest wins per client
-  var snNames={}; Object.keys(remote.snapshots||{}).concat(Object.keys(local.snapshots||{})).forEach(function(n){ snNames[n]=1; });
-  Object.keys(snNames).forEach(function(n){
-    var rs=(remote.snapshots||{})[n], ls=(local.snapshots||{})[n];
-    out.snapshots[n] = (rs&&ls) ? (((ls.at||'')>=(rs.at||''))?ls:rs) : (ls||rs);
-  });
-  var wkKeys={}; [remote,local].forEach(function(s){ Object.keys((s&&s.weeks)||{}).forEach(function(k){ wkKeys[k]=1; }); });
-  Object.keys(wkKeys).forEach(function(k){
-    var r=(remote.weeks||{})[k]||{}, l=(local.weeks||{})[k]||{};
-    out.weeks[k]={monday:{},friday:{}};
-    ['monday','friday'].forEach(function(sec){
-      var names={}; Object.keys(r[sec]||{}).concat(Object.keys(l[sec]||{})).forEach(function(n){ names[n]=1; });
-      Object.keys(names).forEach(function(n){
-        out.weeks[k][sec][n] = mergeEntry((r[sec]||{})[n], (l[sec]||{})[n]);
-      });
-    });
-  });
-  // call notes + ad-hoc log: union keeps tombstones (deleted entries) so
-  // deletions stick across every browser. Filtering happens at render time.
-  var names={}; Object.keys(remote.callNotes||{}).concat(Object.keys(local.callNotes||{})).forEach(function(n){ names[n]=1; });
-  Object.keys(names).forEach(function(n){
-    out.callNotes[n]=unionByAtText((remote.callNotes||{})[n], (local.callNotes||{})[n]);
-  });
-  var anames={}; Object.keys(remote.adhoc||{}).concat(Object.keys(local.adhoc||{})).forEach(function(n){ anames[n]=1; });
-  Object.keys(anames).forEach(function(n){
-    out.adhoc[n]=unionByAtText((remote.adhoc||{})[n], (local.adhoc||{})[n]);
-  });
-  return out;
-}
-function pushStore(){
-  return fetchStore().then(function(res){
-    STORE = mergeStores(res?res.data:null, STORE);
-    saveLocal();
-    return fetch(API+'?key='+encodeURIComponent(STORE_KEY),{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({data:STORE})
-    });
-  }).then(function(r){ setRemote(!!(r&&r.ok)); })
-    .catch(function(){ setRemote(false); });
-}
-function setRemote(ok){
-  REMOTE_OK=ok;
-  var s=document.getElementById('stamp');
-  var t=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-  s.innerHTML = ok ? '<b>&#9679; Shared</b> &middot; synced '+t : '<b class="off">&#9679; Local only</b> &middot; '+t;
-  document.getElementById('storeBanner').classList.toggle('show', !ok);
-}
+function blank(){ return {text:'', status:'Draft', by:'', at:0, generated:false}; }
+/* Before Wednesday the week is still ahead of you, so the check-in is the
+   likely job; from Wednesday on you are heading for the recap. */
+function defaultMode(){ var d=new Date().getDay(); return (d>=3 || d===0) ? 'friday' : 'monday'; }
+function reviewerFor(key){ return (STORE.v2 && STORE.v2.reviewers && STORE.v2.reviewers[key]) || ''; }
 
-// ─────────────────────────────────────────────────────────────
-// CLIENT LIST — live from the tracker registry
-// ─────────────────────────────────────────────────────────────
-// Motion-only clients: appear in Weekly Updates (Motion triage + Friday drafts)
-// but have NO project tracker. Their Friday draft is built purely from what you
-// queue via Motion / the manual add box.
-var EXTRA_CLIENTS = [
-  {name:'Bulk Nutrients', key:null, file:null}
-];
-function loadClients(){
-  return fetch(BASE+'trackers.json',{cache:'no-store'})
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(j){
-      if(Array.isArray(j)) CLIENTS=j.filter(function(t){ return t.active!==false; });
-    }).catch(function(){})
-    .then(function(){
-      EXTRA_CLIENTS.forEach(function(x){
-        if(!CLIENTS.some(function(c){ return c.name===x.name; })) CLIENTS.push(x);
-      });
-    });
-}
-function clientNames(){ return CLIENTS.map(function(c){ return c.name; }); }
-
-// ─────────────────────────────────────────────────────────────
-// RENDER
-// ─────────────────────────────────────────────────────────────
-function shiftWeek(delta,reset){ WEEK_OFFSET = reset?0:WEEK_OFFSET+delta; render(); }
-function statusLbl(s){ return s==='reviewed'?'Reviewed':s==='sent'?'Sent':'Draft'; }
-function statusOrder(s){ return s==='sent'?2:s==='reviewed'?1:0; }
-
-function draftCard(sec, name, e){
-  var st=e.status||'draft';
-  var enc=encodeURIComponent(sec+'||'+name);
-  var meta='';
-  if(st==='reviewed'&&e.by) meta='Approved by <b>'+esc(e.by)+'</b> '+fmtStamp(e.at);
-  else if(st==='sent'&&e.by) meta='Sent &middot; <b>'+esc(e.by)+'</b> '+fmtStamp(e.at);
-  else if(e.at) meta=(e.by?'By <b>'+esc(e.by)+'</b> ':'')+fmtStamp(e.at);
-  var comments=(e.comments||[]).map(function(c){
-    return '<div class="cm">'+esc(c.text)+'<div class="cm-by">'+esc(c.by||'')+' &middot; '+fmtStamp(c.at)+'</div></div>';
-  }).join('');
-  var revOpts='<option value="">reviewer&hellip;</option>'+TEAM.map(function(t){
-    return '<option value="'+t+'"'+((STORE.reviewers||{})[name]===t?' selected':'')+'>'+t+'</option>';
-  }).join('');
-  return '<div class="dcard st-'+st+(EXPANDED[enc]?'':' collapsed')+'" data-key="'+enc+'">'
-    + '<div class="d-top"><span class="d-chev" onclick="toggleCard(\''+enc+'\')">&#9656;</span>'
-    +   '<span class="d-name" onclick="toggleCard(\''+enc+'\')">'+esc(name)+'</span>'
-    +   '<select class="d-status-sel '+st+'" onchange="setStatus(\''+enc+'\',this.value)" title="Set status">'
-    +     '<option value="draft"'+(st==='draft'?' selected':'')+'>Draft</option>'
-    +     '<option value="reviewed"'+(st==='reviewed'?' selected':'')+'>Reviewed</option>'
-    +     '<option value="sent"'+(st==='sent'?' selected':'')+'>Sent</option>'
-    +   '</select>'
-    +   '<span class="d-rev">&#128100; <select onchange="setReviewer(\''+encodeURIComponent(name)+'\',this.value)">'+revOpts+'</select></span></div>'
-    + (e.text
-        ? '<div class="d-msg" onclick="startEdit(\''+enc+'\')" title="Click to edit">'+esc(e.text)+'</div>'
-        : '<div class="d-msg empty-msg" onclick="startEdit(\''+enc+'\')">Nothing written yet. Click here to write it.</div>')
-    + '<textarea class="d-text" oninput="autoGrow(this)" onfocus="EDITING=true" onblur="saveDraft(\''+enc+'\',this)">'+esc(e.text||'')+'</textarea>'
-    + '<div class="d-comments">'+comments
-    +   '<div class="cm-add" id="cmadd-'+enc+'"><input placeholder="Suggest a change without rewriting&hellip;" onfocus="EDITING=true" onblur="EDITING=false" onkeydown="if(event.key===\'Enter\')addComment(\''+enc+'\',this)"><button onclick="addComment(\''+enc+'\',this.parentNode.querySelector(\'input\'))">Comment</button></div>'
-    + '</div>'
-    + '<div class="d-actions">'
-    +   (st==='draft'?'<button class="abtn approve" onclick="approve(\''+enc+'\')">&#10003; Looks good</button>':'')
-    +   '<button class="abtn" onclick="startEdit(\''+enc+'\')">&#9998; Edit</button>'
-    +   '<button class="abtn" onclick="toggleComment(\''+enc+'\')">&#128172; Comment</button>'
-    +   '<button class="abtn" onclick="copyDraft(\''+enc+'\',this)">&#10697; Copy for Slack</button>'
-    +   '<span class="d-meta">'+meta+'</span>'
-    + '</div></div>';
-}
-
-function render(){
-  if(EDITING) return;
-  var ws=weekStart(WEEK_OFFSET), we=new Date(ws); we.setDate(ws.getDate()+4);
-  document.getElementById('wkLabel').textContent =
-    fmtD(ws)+' – '+fmtD(we)+(WEEK_OFFSET===0?' · this week':WEEK_OFFSET===1?' · next week':WEEK_OFFSET===-1?' · last week':'');
-  var wk=ensure();
-  ['monday','friday'].forEach(function(sec){
-    var col=document.getElementById(sec+'Col');
-    var withDraft=[], without=[];
-    var names={}; clientNames().forEach(function(n){ names[n]=1; });
-    Object.keys(wk[sec]||{}).forEach(function(n){ names[n]=1; });
-    Object.keys(names).forEach(function(n){
-      var e=(wk[sec]||{})[n];
-      if(e) withDraft.push({name:n, e:e}); else without.push(n);
-    });
-    withDraft.sort(function(a,b){
-      var d=statusOrder(a.e.status)-statusOrder(b.e.status);
-      return d!==0?d:(a.name<b.name?-1:1);
-    });
-    var approved=withDraft.filter(function(x){ return x.e.status==='reviewed'; }).length;
-    var sent=withDraft.filter(function(x){ return x.e.status==='sent'; }).length;
-    var waiting=withDraft.length-approved-sent;
-    document.getElementById(sec+'Prog').innerHTML = withDraft.length
-      ? '<b>'+waiting+'</b> waiting review &middot; <b>'+approved+'</b> approved &middot; <b>'+sent+'</b> sent'
-      : 'No drafts yet this week. The automation fills these in, or use Import drafts.';
-    var html=withDraft.map(function(x){ return draftCard(sec,x.name,x.e); }).join('');
-    if(without.length){
-      html+='<div class="nd-h">No draft yet</div>'+without.sort().map(function(n){
-        return '<div class="nd-row"><span class="nd-name">'+esc(n)+'</span>'
-          + '<button class="abtn" onclick="writeNew(\''+encodeURIComponent(sec+'||'+n)+'\')">&#43; Write draft</button></div>';
-      }).join('');
-    }
-    col.innerHTML = html || '<div class="empty">No active clients found in the tracker registry yet.</div>';
-  });
-  renderMotion();
-  document.getElementById('footNote').textContent='Week key '+weekKey(WEEK_OFFSET);
-}
-
-
-// ─────────────────────────────────────────────────────────────
-// DRAFT ACTIONS
-// ─────────────────────────────────────────────────────────────
-function whoAmI(){
-  var v=document.getElementById('whoInput').value.trim();
-  if(v){ WHO=v; localStorage.setItem('sabel_who',v); }
-  return WHO;
-}
-function needName(){
-  if(whoAmI()) return false;
-  alert('Pop your name in the "You are" box (top right) first, so approvals and comments carry your name.');
-  document.getElementById('whoInput').focus();
-  return true;
-}
-function keyParts(enc){ var p=decodeURIComponent(enc).split('||'); return {sec:p[0], name:p[1]}; }
-function getEntry(enc){
-  var k=keyParts(enc), wk=ensure();
-  if(!wk[k.sec][k.name]) wk[k.sec][k.name]={text:'',status:'draft',comments:[]};
-  return wk[k.sec][k.name];
-}
-function startEdit(enc){
-  var card=document.querySelector('.dcard[data-key="'+enc+'"]'); if(!card) return;
-  EXPANDED[enc]=true; card.classList.remove('collapsed');
-  card.classList.add('editing'); EDITING=true;
-  var ta=card.querySelector('.d-text'); autoGrow(ta); ta.focus();
-}
-function autoGrow(el){ if(!el) return; el.style.height='auto'; el.style.height=(el.scrollHeight+2)+'px'; }
-function toggleCard(enc){
-  EXPANDED[enc]=!EXPANDED[enc];
-  var card=document.querySelector('.dcard[data-key="'+enc+'"]');
-  if(card) card.classList.toggle('collapsed', !EXPANDED[enc]);
-}
-function saveDraft(enc, ta){
-  EDITING=false;
-  var e=getEntry(enc);
-  if(ta.value!==(e.text||'')){
-    e.text=ta.value; e.by=whoAmI()||e.by||''; e.at=nowStamp();
-    if(e.status==='sent') e.status='reviewed';   // edited after sending? needs another look
-    saveLocal(); pushStore().then(render); return;
-  }
-  render();
-}
-function writeNew(enc){
-  getEntry(enc); saveLocal(); render();
-  startEdit(enc);
-}
-function approve(enc){
-  if(needName()) return;
-  var e=getEntry(enc);
-  e.status='reviewed'; e.by=whoAmI(); e.at=nowStamp();
-  saveLocal(); pushStore().then(render);
-}
-function setStatus(enc, val){
-  var e=getEntry(enc);
-  if((val==='reviewed'||val==='sent') && needName()){ render(); return; }   // carry a name on approve/send
-  e.status=val; e.by=whoAmI()||e.by||''; e.at=nowStamp();
-  saveLocal(); pushStore().then(render);
-}
-function toggleComment(enc){
-  var box=document.getElementById('cmadd-'+enc); if(!box) return;
-  box.classList.toggle('show');
-  if(box.classList.contains('show')) box.querySelector('input').focus();
-}
-function addComment(enc, input){
-  if(needName()) return;
-  var text=input.value.trim(); if(!text) return;
-  var e=getEntry(enc);
-  if(!e.comments) e.comments=[];
-  e.comments.push({at:nowStamp(), by:whoAmI(), text:text});
-  input.value=''; EDITING=false;
-  saveLocal(); pushStore().then(render);
-}
-function copyDraft(enc, btn){
-  var e=getEntry(enc);
-  navigator.clipboard.writeText(e.text||'').then(function(){
-    btn.classList.add('ok'); btn.innerHTML='&#10003; Copied';
-    setTimeout(function(){ btn.classList.remove('ok'); btn.innerHTML='&#10697; Copy for Slack'; },1600);
-    if(e.status!=='sent' && confirm('Copied. Mark this one as Sent?')){
-      e.status='sent'; e.by=whoAmI()||e.by||''; e.at=nowStamp();
-      saveLocal(); pushStore().then(render);
-    }
-  });
-}
-function setReviewer(encName, val){
-  var name=decodeURIComponent(encName);
-  if(!STORE.reviewers) STORE.reviewers={};
-  if(val) STORE.reviewers[name]=val; else delete STORE.reviewers[name];
-  saveLocal(); pushStore();
-}
-
-// ─────────────────────────────────────────────────────────────
-// CALL NOTES
-// ─────────────────────────────────────────────────────────────
-function addAdhoc(encName, btn){
-  var name=decodeURIComponent(encName);
-  var box=btn.parentNode;
-  var ta=box.querySelector('textarea');
-  var cb=box.querySelector('input[type=checkbox]');
-  var text=ta.value.trim(); if(!text) return;
-  if(!STORE.adhoc) STORE.adhoc={};
-  if(!STORE.adhoc[name]) STORE.adhoc[name]=[];
-  STORE.adhoc[name].push({at:nowStamp(), by:whoAmI(), text:text, scope:!!(cb&&cb.checked)});
-  ta.value=''; if(cb) cb.checked=false; EDITING=false;
-  saveLocal(); pushStore().then(render);
-}
-function delAdhoc(encName, encAt){
-  var name=decodeURIComponent(encName), at=decodeURIComponent(encAt);
-  var arr=(STORE.adhoc||{})[name]||[];
-  var hit=false;
-  arr.forEach(function(x){ if(x && x.at===at && !x.deleted){ x.deleted=true; hit=true; } });
-  if(!hit) return;
+function saveLocal(){ try{ localStorage.setItem('sabel_weekly_v2', JSON.stringify(STORE)); }catch(e){} }
+function saveStore(){
   saveLocal();
-  renderMotion();                        // reflect the delete immediately
-  pushStore().then(renderMotion);        // tombstone stays in the store, so it can't come back
+  if(SAVE_T) clearTimeout(SAVE_T);
+  SAVE_T=setTimeout(function(){
+    fetch(API+'?key='+encodeURIComponent(STORE_KEY)+'&_t='+Date.now(),{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({data:STORE})
+    }).catch(function(){ /* offline — localStorage holds it */ });
+  }, 1000);
+}
+function loadStore(){
+  return fetch(API+'?key='+encodeURIComponent(STORE_KEY)+'&_t='+Date.now(),{cache:'no-store'})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(j){
+      if(j && j.ok && j.data && typeof j.data==='object'){
+        STORE=j.data;
+        if(!STORE.v2) STORE.v2={weeks:{},reviewers:{}};        // first run on the new shape
+        if(!STORE.v2.weeks) STORE.v2.weeks={};
+        if(!STORE.v2.reviewers) STORE.v2.reviewers={};
+        saveLocal();
+      }
+    }).catch(function(){
+      try{ var l=localStorage.getItem('sabel_weekly_v2'); if(l) STORE=JSON.parse(l); }catch(e){}
+    });
 }
 
-// ─────────────────────────────────────────────────────────────
-// GENERATE — read every tracker, diff against the last snapshot,
-// and write Slack-ready drafts for all clients in one click.
-// ─────────────────────────────────────────────────────────────
-var GEN_MONTHS={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-function humanDateISO(d){
+/* ── tracker parsing (same three shapes the dashboards handle) ── */
+var SKILL_MONTHS={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function skillDate(d){
   if(!d) return '';
   var ms=String(d).match(/([A-Z][a-z]{2})\s*(\d{1,2})/g); if(!ms) return '';
   var m=ms[ms.length-1].match(/([A-Z][a-z]{2})\s*(\d{1,2})/);
-  var mo=GEN_MONTHS[m[1]]; if(mo==null) return '';
+  var mo=SKILL_MONTHS[m[1]]; if(mo==null) return '';
   return new Date().getFullYear()+'-'+String(mo+1).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0');
 }
-function stripMark(t){ return (t||'').replace(/^[■★]\s*/,'').trim(); }
-// Normalise any tracker shape to [{title, owner, client(bool), status, date(ISO)}]
-function normaliseTracker(data){
-  if(!data) return null;
+/* Returns [{taskKey, task, owner, status, end, clientSide}] — taskKey matches
+   the '<phase>-s|c-<n>' half of Notion's 'Tracker task id'. */
+function tasksFrom(data){
+  if(!data) return [];
   var out=[];
-  var phases = Array.isArray(data) ? data : (Array.isArray(data.phases) ? data.phases : null);
-  if(phases){
-    phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
-      out.push({title:stripMark(k.task), owner:k.owner||'', client:!!k.dep, status:k.status||'', date:k.end||k.start||''});
-    });});
-    return out;
-  }
-  if(data.taskData){
+  if(data.taskData && typeof data.taskData==='object'){
     var st=data.statuses||{};
     Object.keys(data.taskData).forEach(function(pid){
       var g=data.taskData[pid]||{};
-      (g.sabel||[]).forEach(function(t,i){ out.push({title:stripMark(t.t), owner:t.o||'', client:false, status:st[pid+'-s-'+i]||t.s||'', date:humanDateISO(t.d)}); });
-      (g.client||[]).forEach(function(t,i){ out.push({title:stripMark(t.t), owner:t.o||'', client:true, status:st[pid+'-c-'+i]||t.s||'', date:humanDateISO(t.d)}); });
+      (g.sabel||[]).forEach(function(t,i){
+        out.push({taskKey:pid+'-s-'+i, task:t.t, owner:t.o, status:st[pid+'-s-'+i]||t.s, end:skillDate(t.d), clientSide:false});
+      });
+      (g.client||[]).forEach(function(t,i){
+        out.push({taskKey:pid+'-c-'+i, task:t.t, owner:t.o, status:st[pid+'-c-'+i]||t.s, end:skillDate(t.d), clientSide:true});
+      });
     });
     return out;
   }
-  return null;
-}
-function isDone(s){ s=(s||'').toLowerCase(); return s==='complete'||s==='done'; }
-function isOutstanding(s){ s=(s||'').toLowerCase(); return s==='pending'||s==='dependency'||s==='blocked'; }
-function dISO(iso){ if(!iso) return null; var d=new Date(iso+'T00:00:00'); d.setHours(0,0,0,0); return d; }
-function niceDay(iso){
-  var d=dISO(iso); if(!d) return '';
-  return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
-}
-function pick(arr, seed){ return arr[seed % arr.length]; }
-function seedFor(name){ var s=0; for(var i=0;i<name.length;i++) s+=name.charCodeAt(i); s+=weekStart(0).getDate(); return s; }
-
-function buildMonday(name, tasks){
-  var today=new Date(); today.setHours(0,0,0,0);
-  var ws=weekStart(0), we=new Date(ws); we.setDate(ws.getDate()+7);
-  var soon=new Date(today); soon.setDate(today.getDate()+3);
-  var wk7=new Date(today); wk7.setDate(today.getDate()+7);
-  var ours=tasks.filter(function(t){ var d=dISO(t.date); return !t.client && !isDone(t.status) && d && d<we; })
-    .sort(function(a,b){ return a.date<b.date?-1:1; });
-  var needNow=tasks.filter(function(t){ var d=dISO(t.date); return t.client && isOutstanding(t.status) && d && d<=soon; })
-    .sort(function(a,b){ return a.date<b.date?-1:1; });
-  var needWeek=tasks.filter(function(t){ var d=dISO(t.date); return t.client && isOutstanding(t.status) && d && d>soon && d<=wk7; })
-    .sort(function(a,b){ return a.date<b.date?-1:1; });
-  if(!ours.length && !needNow.length && !needWeek.length) return null;
-  var s=seedFor(name);
-  var msg=pick(['Morning! Quick look at the week ahead.','Happy Monday! Here is what this week looks like.','Morning all! A quick heads-up on the week.','Hi team! Here is the plan for the week.'],s);
-  if(ours.length){
-    msg+='\n\nOn our side this week:\n'+ours.slice(0,4).map(function(t){
-      return '• '+t.title;
-    }).join('\n');
+  var ph = Array.isArray(data) ? data : (Array.isArray(data.phases)?data.phases:null);
+  if(ph){
+    ph.forEach(function(p,pi){
+      (p.tasks||[]).forEach(function(k,i){
+        out.push({taskKey:(p.id||('p'+pi))+'-'+(k.dep?'c':'s')+'-'+i, task:k.task, owner:k.owner,
+                  status:k.status, end:k.end||k.start||'', clientSide:!!k.dep});
+      });
+    });
+    return out;
   }
-  var asks=needNow.concat(needWeek);
-  if(asks.length){
-    msg+='\n\nWe need these items actioned on your side:\n'
-      + asks.slice(0,4).map(function(t){
-          return '• '+t.title;
-        }).join('\n');
-    if(needNow.length) msg+='\n\nThe first '+(needNow.length===1?'one is':'couple are')+' holding up our build, so '+(needNow.length===1?'that one':'those')+' first if you can.';
+  if(Array.isArray(data.groups)){
+    data.groups.forEach(function(g,gi){
+      (g.items||[]).forEach(function(it,i){
+        out.push({taskKey:(g.id||('g'+gi))+'-s-'+i, task:it.task, owner:it.owner,
+                  status: it.done?'Complete':(it.status==='red'?'Blocked':'In Progress'),
+                  end:it.iso||it.date||'', clientSide:!!it.dep});
+      });
+    });
   }
-  msg+='\n\n'+pick(['Give me a shout if anything needs juggling.','Any questions, just ping me here.','Shout if you need anything from us first.'],s+1);
-  return msg;
-}
-function buildFriday(name, tasks, snap, adhoc){
-  adhoc = adhoc || [];
-  var today=new Date(); today.setHours(0,0,0,0);
-  var ws=weekStart(0);
-  var soon=new Date(today); soon.setDate(today.getDate()+3);
-  var wk7=new Date(today); wk7.setDate(today.getDate()+7);
-  var done=tasks.filter(function(t){
-    if(!isDone(t.status)) return false;
-    if(snap && snap.statuses){ return !isDone(snap.statuses[t.title]); }   // newly ticked since last generate
-    var d=dISO(t.date); return d && d>=ws && d<=today;                      // no snapshot: fall back to dates
-  });
-  var coming=tasks.filter(function(t){ var d=dISO(t.date); return !isDone(t.status) && !t.client && d && d>today && d<=wk7; })
-    .sort(function(a,b){ return a.date<b.date?-1:1; });
-  var need=tasks.filter(function(t){ var d=dISO(t.date); return t.client && isOutstanding(t.status) && d && d<=soon; })
-    .sort(function(a,b){ return a.date<b.date?-1:1; });
-  if(!done.length && !coming.length && !need.length && !adhoc.length) return null;
-  var s=seedFor(name)+3;
-  var msg=pick(['Happy Friday! Quick rundown of the week.','That is a wrap on the week. Here is where things landed.','Friday check-in! Here is how the week went.'],s);
-  // Three fixed sections, each shown only when it has content.
-  var completed=done.slice(0,6).map(function(t){ return t.title; }).concat(adhoc).slice(0,8);
-  if(completed.length){
-    msg+='\n\nWhat we completed this week:\n'+completed.map(function(t){ return '• '+t; }).join('\n');
-  }
-  if(coming.length){
-    msg+='\n\nNext week we will:\n'+coming.slice(0,5).map(function(t){ return '• '+t.title; }).join('\n');
-  }
-  if(need.length){
-    msg+='\n\nWhat we need from '+name+':\n'
-      + need.slice(0,5).map(function(t){ return '• '+t.title; }).join('\n');
-  }
-  msg+='\n\n'+pick(['Have a lovely weekend!','Enjoy the weekend, speak Monday!','Have a good one, back at it Monday!'],s+1);
-  return msg;
-}
-function generate(sec, btn){
-  if(!CLIENTS.length){ alert('Client list has not loaded yet. Press Refresh and try again.'); return; }
-  if(!confirm('Generate '+(sec==='monday'?'Monday':'Friday')+' drafts for all clients from the live trackers?\n\nDrafts already marked Reviewed or Sent are left alone. Anything still in Draft gets rewritten.')) return;
-  var orig=btn.innerHTML; btn.innerHTML='&#8987; Reading trackers&hellip;'; btn.disabled=true;
-  if(!STORE.snapshots) STORE.snapshots={};
-  var wk=ensure(), made=0, skipped=0, noData=[];
-  Promise.all(CLIENTS.map(function(c){
-    var fetchP = c.key
-      ? fetch(API+'?key='+encodeURIComponent(c.key)+'&_t='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; })
-      : Promise.resolve(null);            // Motion-only client — no tracker to read
-    return fetchP
-      .then(function(j){
-        var tasks=normaliseTracker(j&&j.ok?j.data:null);
-        if(!tasks || !tasks.length){
-          if(c.key){ noData.push(c.name); return; }
-          tasks=[];                       // Friday draft comes from the queued items only
-        }
-        var cur=wk[sec][c.name];
-        if(cur && (cur.status==='reviewed'||cur.status==='sent')){ skipped++; }
-        else {
-          var wsIso=weekStart(0).toISOString();
-          var adhocW=((STORE.adhoc||{})[c.name]||[]).filter(function(x){ return x && !x.deleted && (x.at||'')>=wsIso; }).map(function(x){ return x.text; });
-          var notesW=((STORE.callNotes||{})[c.name]||[]).filter(function(x){ return x && !x.deleted && (x.at||'')>=wsIso; }).map(function(x){ return x.text; });
-          var text = sec==='monday' ? buildMonday(c.name,tasks) : buildFriday(c.name,tasks,STORE.snapshots[c.name],adhocW);
-          if(text){
-            // carry human comments; refresh the auto call-notes comment rather than duplicating it
-            var carried=((cur&&cur.comments)||[]).filter(function(cm){ return cm.by!=='Call notes'; });
-            if(sec==='friday' && notesW.length){
-              carried=carried.concat([{at:nowStamp(), by:'Call notes', text:'This week’s call notes (for your review, not in the message): '+notesW.join(' | ')}]);
-            }
-            wk[sec][c.name]={text:text,status:'draft',by:'Generated',at:nowStamp(),comments:carried};
-            made++;
-          }
-        }
-        // refresh the snapshot so the next Friday diff knows what was already done
-        var snap={}; tasks.forEach(function(t){ snap[t.title]=t.status; });
-        STORE.snapshots[c.name]={statuses:snap, at:nowStamp()};
-      }).catch(function(){ noData.push(c.name); });
-  })).then(function(){
-    saveLocal();
-    return pushStore();
-  }).then(function(){
-    btn.innerHTML=orig; btn.disabled=false;
-    render();
-    var m='Generated '+made+' draft'+(made===1?'':'s')+'.';
-    if(skipped) m+=' '+skipped+' left alone (already reviewed or sent).';
-    if(noData.length) m+='\n\nNo tracker data for: '+noData.join(', ')+'. Open their tracker once in a browser to initialise it.';
-    alert(m);
-  });
+  return out;
 }
 
-// ─────────────────────────────────────────────────────────────
-// REQUEST REVIEWS — one ready-to-paste Slack nudge per reviewer
-// ─────────────────────────────────────────────────────────────
-function openRequest(){
-  var wk=ensure();
-  var byRev={};
-  ['monday','friday'].forEach(function(sec){
-    Object.keys(wk[sec]||{}).forEach(function(n){
-      var e=wk[sec][n];
-      if(!e || !e.text || e.status!=='draft') return;
-      var rev=(STORE.reviewers||{})[n]||'(no reviewer set)';
-      if(!byRev[rev]) byRev[rev]={};
-      if(!byRev[rev][n]) byRev[rev][n]=[];
-      byRev[rev][n].push(sec==='monday'?'Mon':'Fri');
+/* ── loading ── */
+function fetchKey(key){
+  return fetch(API+'?key='+encodeURIComponent(key)+'&_t='+Date.now(),{cache:'no-store'})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(j){ return (j&&j.ok)?j.data:null; })
+    .catch(function(){ return null; });
+}
+function loadNotion(){
+  var since = weekStart(WEEK_OFFSET).toISOString();
+  NOTION.ok=null;
+  return fetch(NOTION_API+'?since='+encodeURIComponent(since)+'&_t='+Date.now(),{cache:'no-store'})
+    .then(function(r){
+      if(r.status===404) throw new Error('The Notion bridge is not deployed yet (api/notion).');
+      return r.json();
+    })
+    .then(function(j){
+      if(j && j.ok){ NOTION.tasks=j.tasks||[]; NOTION.ok=true; NOTION.err=''; }
+      else { NOTION.ok=false; NOTION.err=(j&&j.error)||'The Notion bridge returned an error.'; }
+      render();
+    })
+    .catch(function(e){
+      // A missing endpoint fails CORS preflight, so the browser reports a bare
+      // "Failed to fetch" — say what that actually means rather than passing it on.
+      NOTION.ok=false;
+      NOTION.err = /failed to fetch|networkerror/i.test(e.message||'')
+        ? 'bridge not deployed yet (api/notion) — Friday recaps fall back to the tracker'
+        : (e.message||'could not reach the bridge');
+      render();
+    });
+}
+function loadAll(manual){
+  return Promise.all([
+    fetch(BASE+'trackers.json',{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }),
+    fetchKey(PORTAL_KEY),
+    manual ? loadStore() : Promise.resolve()
+  ]).then(function(res){
+    var reg = Array.isArray(res[0]) ? res[0] : [];
+    var portal = (res[1] && Array.isArray(res[1].clients)) ? res[1].clients : [];
+
+    // Active clients come from the portal — it is where stage is actually set.
+    var byKey={}, byName={};
+    reg.forEach(function(t){ if(t.key) byKey[t.key]=t; byName[norm(t.name)]=t; });
+    var picked=[];
+    portal.forEach(function(pc){
+      if(ACTIVE_STAGES.indexOf(pc.stage)===-1) return;
+      var t=(pc.trackerKey&&byKey[pc.trackerKey]) || byName[norm(pc.name)] || null;
+      if(!t || !t.key) return;                       // no tracker, nothing to summarise
+      picked.push({key:t.key, name:pc.name, file:t.file, stage:pc.stage, lead:pc.owner||'', tasks:[]});
+    });
+    // An active tracker the portal has not caught up with still deserves a tile.
+    reg.forEach(function(t){
+      if(!t.active || !t.key) return;
+      if(picked.some(function(p){ return p.key===t.key; })) return;
+      picked.push({key:t.key, name:t.name, file:t.file, stage:'Active', lead:'', tasks:[]});
+    });
+
+    LIVE.total=picked.length; LIVE.ok=0;
+    return Promise.all(picked.map(function(c){
+      return fetchKey(c.key).then(function(d){ c.tasks=tasksFrom(d); if(d) LIVE.ok++; });
+    })).then(function(){
+      CLIENTS=picked.sort(function(a,b){ return a.name.toLowerCase()<b.name.toLowerCase()?-1:1; });
+      LIVE.at=new Date(); render();
     });
   });
-  var revs=Object.keys(byRev).sort();
-  var bg=document.createElement('div'); bg.className='modal-bg'; bg.id='reqModal';
-  var rows = revs.length ? revs.map(function(r){
-    var clients=Object.keys(byRev[r]).map(function(n){ return n+' ('+byRev[r][n].join(' + ')+')'; }).join(', ');
-    var msg='Hi '+(r==='(no reviewer set)'?'team':r)+', client update drafts are ready for review: '+clients
-      + '. Could you open the Ops Hub, Weekly Updates tab, and hit Looks good or leave a comment? Thanks!';
-    return '<div class="rr-row"><div><div class="rr-who">'+esc(r)+'</div><div class="rr-list">'+esc(clients)+'</div></div>'
-      + '<button class="m-go" onclick=\'copyReq(this,'+JSON.stringify(msg).replace(/'/g,"&#39;")+')\'>Copy message</button></div>';
-  }).join('') : '<p>No drafts are waiting for review this week. Anything already approved or sent is not nudged.</p>';
-  bg.innerHTML='<div class="modal"><h3>Request reviews</h3>'
-    + '<p>One message per reviewer, based on the reviewer set on each client\'s draft. Copy it and paste into their Slack DM.</p>'
-    + rows
-    + '<div class="m-actions"><button class="m-cancel" onclick="document.getElementById(\'reqModal\').remove()">Close</button></div></div>';
-  bg.addEventListener('click',function(e){ if(e.target===bg) bg.remove(); });
-  document.body.appendChild(bg);
 }
-function copyReq(btn,msg){
-  navigator.clipboard.writeText(msg).then(function(){ btn.textContent='Copied!'; setTimeout(function(){ btn.textContent='Copy message'; },1500); });
+function norm(n){
+  return String(n||'').toLowerCase().replace(/[().,'"&]/g,' ')
+    .replace(/\b(ltd|limited|inc|oy|ab|pty|nz|usa|global|labs?|renewal)\b/g,' ')
+    .replace(/\s+/g,' ').trim();
 }
 
-// ─────────────────────────────────────────────────────────────
-// IMPORT — paste the automation's draft block, fills all clients at once
-// Accepted: {"week":"YYYY-MM-DD","section":"monday"|"friday","drafts":{"Client":"text",...}}
-// ─────────────────────────────────────────────────────────────
-function openImport(){
-  var bg=document.createElement('div'); bg.className='modal-bg'; bg.id='importModal';
-  bg.innerHTML='<div class="modal"><h3>Import drafts</h3>'
-    + '<p>Paste the draft block from the Monday or Friday automation. It fills every client\'s draft for that week in one go. Anything already marked Reviewed or Sent is left alone.</p>'
-    + '<textarea id="impTa" placeholder=\'{"week":"2026-07-13","section":"monday","drafts":{"Raiz":"Morning! ..."}}\'></textarea>'
-    + '<div class="m-err" id="impErr"></div>'
-    + '<div class="m-actions"><button class="m-cancel" onclick="closeImport()">Cancel</button><button class="m-go" onclick="runImport()">Import</button></div></div>';
-  bg.addEventListener('click',function(e){ if(e.target===bg) closeImport(); });
-  document.body.appendChild(bg);
-  document.getElementById('impTa').focus();
+/* ── building the two drafts ──────────────────────────────────
+   Friday: everything finished this week. Notion is the system of record now,
+   so it leads; a tracker task that is Complete but has no Notion twin is
+   added so nothing is silently dropped while the two are still converging.
+   Monday: what sits with the client — their open tasks due soon, and anything
+   of ours that is blocked waiting on them.                                  */
+function completedFor(c){
+  var seen={}, rows=[];
+  NOTION.tasks.forEach(function(t){
+    if(t.trackerKey!==c.key) return;
+    if(!inThisWeek(t.completedAt)) return;
+    var k=(t.trackerTaskId||'').split(':')[1] || ('notion:'+t.id);
+    seen[k]=1;
+    rows.push({task:t.title, owner:t.owner, from:'Notion'});
+  });
+  c.tasks.forEach(function(t){
+    var s=(t.status||'').toLowerCase();
+    if(s!=='complete' && s!=='done') return;
+    if(seen[t.taskKey]) return;
+    if(!inThisWeek(t.end)) return;              // trackers have no completion date either
+    rows.push({task:t.task, owner:t.owner, from:'tracker'});
+  });
+  return rows;
 }
-function closeImport(){ var m=document.getElementById('importModal'); if(m) m.remove(); }
-function runImport(){
-  var err=document.getElementById('impErr');
-  var raw=document.getElementById('impTa').value.trim();
-  raw=raw.replace(/^```[a-z]*\s*/i,'').replace(/```\s*$/,'').trim();
-  var obj;
-  try{ obj=JSON.parse(raw); }catch(e){ err.textContent='That does not parse as JSON. Paste the whole block, including the outer { }.'; return; }
-  if(!obj || !obj.week || !obj.section || typeof obj.drafts!=='object'){ err.textContent='Expected {"week","section","drafts"}. Check you copied the full block.'; return; }
-  if(obj.section!=='monday'&&obj.section!=='friday'){ err.textContent='section must be "monday" or "friday".'; return; }
-  if(!STORE.weeks[obj.week]) STORE.weeks[obj.week]={monday:{},friday:{}};
-  if(!STORE.weeks[obj.week][obj.section]) STORE.weeks[obj.week][obj.section]={};
-  var target=STORE.weeks[obj.week][obj.section];
-  var added=0, skipped=0;
-  Object.keys(obj.drafts).forEach(function(name){
-    var cur=target[name];
-    if(cur && (cur.status==='reviewed'||cur.status==='sent')){ skipped++; return; }
-    target[name]={text:String(obj.drafts[name]||''), status:'draft', by:'Automation', at:nowStamp(), comments:(cur&&cur.comments)||[]};
-    added++;
+function neededFor(c){
+  var rows=[], end=iso(wkEnd()), today=iso(new Date());
+  c.tasks.forEach(function(t){
+    var s=(t.status||'').toLowerCase();
+    if(s==='complete' || s==='done') return;
+    var due=t.end||'', waiting=(s==='blocked'||s==='dependency');
+    // Dated work only counts if it lands by Sunday (overdue included — still needed).
+    // Undated work is kept but set aside: some trackers carry no dates at all, so
+    // dropping it would silently lose real asks, and lumping it in with this week's
+    // would overstate the urgency.
+    if(due && due>end) return;
+    if(t.clientSide){
+      rows.push({task:t.task, owner:t.owner, due:due, dated:!!due,
+                 why:(due && due<today)?'overdue':''});
+    } else if(waiting){
+      rows.push({task:t.task, owner:t.owner, due:due, dated:!!due,
+                 why:s==='blocked'?'blocked on them':'waiting on them'});
+    }
   });
-  saveLocal();
-  pushStore().then(function(){
-    closeImport(); render();
-    alert('Imported '+added+' draft'+(added===1?'':'s')+(skipped?' ('+skipped+' skipped - already reviewed or sent)':'')+'.');
+  // Late things first, then by date, so the ask leads with what is holding us up.
+  rows.sort(function(a,b){
+    var al=a.why==='overdue'?0:1, bl=b.why==='overdue'?0:1;
+    if(al!==bl) return al-bl;
+    return (a.due||'9999')<(b.due||'9999')?-1:1;
   });
+  return rows;
+}
+function buildDraft(c, mode){
+  var L=[];
+  if(mode==='friday'){
+    var done=completedFor(c);
+    L.push('Hi team,'); L.push('');
+    L.push('Quick wrap-up of where we got to this week on '+c.name+'.');
+    L.push('');
+    if(done.length){
+      L.push('Completed this week:');
+      done.forEach(function(r){ L.push('  • '+r.task+(r.owner?'  ('+r.owner+')':'')); });
+    } else {
+      L.push('Completed this week:');
+      L.push('  • (nothing recorded as finished this week — worth a sanity check before sending)');
+    }
+    L.push(''); L.push('Anything you would like us to prioritise next week, just say.');
+    L.push(''); L.push('Thanks,'); L.push(WHO||'');
+  } else {
+    var need=neededFor(c);
+    L.push('Hi team,'); L.push('');
+    L.push('Kicking off the week on '+c.name+'. Here is what we need from your side to keep things moving.');
+    L.push('');
+    var dated=need.filter(function(r){ return r.dated; });
+    var undated=need.filter(function(r){ return !r.dated; });
+    L.push('With you this week:');
+    if(dated.length){
+      dated.forEach(function(r){
+        L.push('  • '+r.task + (r.due?'  (due '+r.due+')':'') + (r.why?'  — '+r.why:''));
+      });
+    } else if(!undated.length){
+      L.push('  • Nothing outstanding on your side — all yours to enjoy.');
+    } else {
+      L.push('  • Nothing with a date this week, but the below is still open.');
+    }
+    if(undated.length){
+      L.push('');
+      L.push('Also still with you (no date set):');
+      undated.forEach(function(r){
+        L.push('  • '+r.task + (r.why?'  — '+r.why:''));
+      });
+    }
+    L.push(''); L.push('Shout if any of that needs a hand or a re-plan.');
+    L.push(''); L.push('Thanks,'); L.push(WHO||'');
+  }
+  return L.join('\n');
 }
 
-// ─────────────────────────────────────────────────────────────
-// MOTION — completed-this-week suggestions, matched to clients by the
-// (Client) title prefix or the Motion project name. Read-only feed;
-// Add / Ignore decisions are stored in the shared store (motionHandled).
-// ─────────────────────────────────────────────────────────────
-var MOTION_TASKS=[]; var MOTION_ERR='';
-function acronym(name){
-  return name.split(/\s+/).map(function(w){ return (w[0]||''); }).join('').toLowerCase();
+/* ── actions ── */
+function setWho(v){ WHO=v; localStorage.setItem('sabel_who',v); render(); }
+function setMode(key,m,ev){ if(ev) ev.stopPropagation(); entry(key).mode=m; saveStore(); render(); }
+function setReviewer(key,v){
+  if(!STORE.v2.reviewers) STORE.v2.reviewers={};
+  STORE.v2.reviewers[key]=v; saveStore(); render();
 }
-function motionClientFor(t){
-  var title=(t.title||'').toLowerCase();
-  var proj=(t.project||'').toLowerCase();
-  var pref=(t.title||'').match(/^\s*\(([^)]*)\)/);
-  var prefTxt=pref ? pref[1].toLowerCase() : '';
-  var names=clientNames();
-  for(var i=0;i<names.length;i++){
-    var n=names[i], nl=n.toLowerCase();
-    if(proj.indexOf(nl)!==-1) return n;                 // project contains client name
-    if(prefTxt && (prefTxt.indexOf(nl)!==-1 || nl.indexOf(prefTxt)!==-1)) return n;
-    if(prefTxt && prefTxt.replace(/[^a-z]/g,'')===acronym(n)) return n;   // (TGM) etc.
-    if(title.indexOf('('+nl)===0) return n;
+function setStatus(key,v){
+  var e=entry(key); e[e.mode].status=v; e[e.mode].by=WHO; e[e.mode].at=Date.now();
+  saveStore(); render();
+}
+function onDraft(key,val){
+  var e=entry(key); e[e.mode].text=val; e[e.mode].by=WHO; e[e.mode].at=Date.now();
+  saveStore(); progress();
+}
+function regen(key,ev){
+  if(ev) ev.stopPropagation();
+  var c=findClient(key); if(!c) return;
+  var e=entry(key);
+  if(e[e.mode].text && !confirm('Rebuild this draft from Notion and the tracker?\n\nYour edits to it will be replaced.')) return;
+  e[e.mode].text=buildDraft(c,e.mode); e[e.mode].generated=true; e[e.mode].at=Date.now();
+  saveStore(); render();
+}
+function copyDraft(key,ev){
+  if(ev) ev.stopPropagation();
+  var e=entry(key), txt=e[e.mode].text||'';
+  var btn=ev?ev.target:null;
+  function done(ok){ if(btn){ var o=btn.textContent; btn.textContent=ok?'Copied':'Copy failed'; setTimeout(function(){btn.textContent=o;},1500); } }
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function(){done(true);},function(){done(false);});
+  else done(false);
+}
+function findClient(key){ for(var i=0;i<CLIENTS.length;i++) if(CLIENTS[i].key===key) return CLIENTS[i]; return null; }
+
+/* ── render ── */
+function progress(){
+  var total=CLIENTS.length, sent=0;
+  CLIENTS.forEach(function(c){ var e=entry(c.key); if(e[e.mode].status==='Sent') sent++; });
+  var el=document.getElementById('progLead'), bar=document.getElementById('progBar');
+  if(el) el.innerHTML='<b>'+sent+'</b> of <b>'+total+'</b> active clients updated this week';
+  if(bar) bar.style.width=(total?Math.round(sent/total*100):0)+'%';
+}
+function render(){
+  var ws=weekStart(WEEK_OFFSET), we=wkEnd();
+  document.getElementById('wkLabel').textContent='Mon '+fmtDay(ws)+' – Sun '+fmtDay(we);
+  var stamp=document.getElementById('stamp');
+  stamp.textContent = LIVE.at ? (LIVE.ok+'/'+LIVE.total+' trackers · '+LIVE.at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})) : 'loading…';
+
+  var sel=document.getElementById('whoSel');
+  if(sel && !sel.options.length){
+    sel.innerHTML='<option value="">Who are you?</option>'+TEAM.map(function(n){return '<option>'+n+'</option>';}).join('');
+    sel.value=WHO;
   }
-  return null;
-}
-function stripMotionPrefix(title){
-  return (title||'').replace(/^\s*\([^)]*\)\s*/,'').replace(/^[–—\-:\s]+/,'').trim();
-}
-function loadMotion(manual){
-  var col=document.getElementById('motionCol'); if(!col) return;
-  if(manual) col.innerHTML='<div class="empty">Pulling from Motion&hellip;</div>';
-  return fetch(MOTION_API+'?since='+encodeURIComponent(weekStart(0).toISOString())+'&_t='+Date.now(),{cache:'no-store'})
-    .then(function(r){ return r.json(); })
-    .then(function(j){
-      if(j && j.ok){ MOTION_TASKS=j.tasks||[]; MOTION_ERR=''; }
-      else { MOTION_ERR=(j&&j.error)||'Motion bridge returned an error.'; }
-      renderMotion();
-    })
-    .catch(function(){ MOTION_ERR='Could not reach the Motion bridge (api/motion). Is it deployed?'; renderMotion(); });
-}
-function renderMotion(){
-  var col=document.getElementById('motionCol'); if(!col) return;
-  if(EDITING) return;
-  // keep whichever cards the user has opened; everything defaults to collapsed
-  var openSet={}; col.querySelectorAll('details.ncard[open]').forEach(function(d){ openSet[d.getAttribute('data-name')]=1; });
-  var handled=STORE.motionHandled||{};
-  var open=MOTION_TASKS.filter(function(t){ return !handled[t.id]; });
-  var groups={}, other=[];
-  open.forEach(function(t){
-    var c=motionClientFor(t);
-    if(c){ if(!groups[c]) groups[c]=[]; groups[c].push(t); }
-    else other.push(t);
-  });
-  var handledCount=MOTION_TASKS.length-open.length;
-  var wsIso=weekStart(0).toISOString();
-  // one card per active client (plus any client that has suggestions or queued lines)
-  var names={}; clientNames().forEach(function(n){ names[n]=1; });
-  Object.keys(groups).forEach(function(n){ names[n]=1; });
-  Object.keys(STORE.adhoc||{}).forEach(function(n){
-    if(((STORE.adhoc||{})[n]||[]).some(function(x){ return x && !x.deleted && (x.at||'')>=wsIso; })) names[n]=1;
-  });
-  var list=Object.keys(names).sort();
-  function suggRows(arr, clientName){
-    return arr.map(function(t){
-      var encId=encodeURIComponent(t.id), encC=encodeURIComponent(clientName||'');
-      var day=t.completedAt? new Date(t.completedAt).toLocaleDateString('en-GB',{weekday:'short'}):'';
-      return '<div class="n-item" style="border-left-color:var(--blue)">'
-        + '<div class="n-tx">'+esc(stripMotionPrefix(t.title))+'</div>'
-        + '<div class="n-meta">'+esc(t.assignee||'')+(day?' &middot; '+day:'')+(clientName?'':' &middot; '+esc(t.project||''))+'</div>'
-        + (clientName
-            ? '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">'
-              + '<button class="abtn" style="color:var(--green);border-color:rgba(74,222,128,.4)" onclick="motionAct(\''+encId+'\',\''+encC+'\',\'add\')">&#43; Add</button>'
-              + '<button class="abtn" style="color:var(--amber);border-color:rgba(251,191,36,.4)" onclick="motionAct(\''+encId+'\',\''+encC+'\',\'scope\')">&#43; Add as scope</button>'
-              + '<button class="abtn" onclick="motionAct(\''+encId+'\',\''+encC+'\',\'ignore\')">Ignore</button></div>'
-            : '<div style="display:flex;gap:6px;margin-top:6px;"><button class="abtn" onclick="motionAct(\''+encId+'\',\'\',\'ignore\')">Ignore</button></div>')
-        + '</div>';
-    }).join('');
-  }
-  var html = MOTION_ERR ? '<div class="empty">'+esc(MOTION_ERR)+'</div>' : '';
-  html += list.map(function(n){
-    var sugg=groups[n]||[];
-    var queued=((STORE.adhoc||{})[n]||[]).filter(function(x){ return x && !x.deleted && (x.at||'')>=wsIso; });
-    var scopeN=queued.filter(function(x){ return x.scope; }).length;
-    var qrows=queued.map(function(x){
-      return '<div class="n-item ah"><button class="n-del" title="Remove from the draft" onclick="delAdhoc(\''+encodeURIComponent(n)+'\',\''+encodeURIComponent(x.at||'')+'\')">&times;</button>'
-        + '<div class="n-tx">'+esc(x.text)+(x.scope?'<span class="ah-scope">added scope</span>':'')+'</div>'
-        + '<div class="n-meta">'+(x.by?esc(x.by)+' &middot; ':'')+fmtStamp(x.at)+'</div></div>';
-    }).join('');
-    var sum=(sugg.length? sugg.length+' to review':'nothing to review')+' &middot; '+queued.length+' in draft'+(scopeN?' ('+scopeN+' scope)':'');
-    return '<details class="ncard" data-name="'+esc(n)+'"'+(openSet[n]?' open':'')+'>'
-      + '<summary><span class="n-chev">&#9656;</span><span class="n-name">'+esc(n)+'</span><span class="n-count">'+sum+'</span></summary>'
-      + '<div class="n-inner">'
-      +   (sugg.length? suggRows(sugg,n) : '<div class="empty" style="padding:4px 2px 8px;">No unhandled Motion completions this week.</div>')
-      +   '<div class="ah-h" style="display:flex;align-items:center;gap:10px;">In Friday\'s draft ('+queued.length+')'
-      +     '<button class="abtn" style="margin-left:auto;color:var(--blue);border-color:rgba(96,165,250,.4)" onclick="pushDraft(\''+encodeURIComponent(n)+'\',this)">&#9889; Push to Friday draft</button></div>'
-      +   (qrows || '<div class="empty" style="padding:2px 2px 8px;">Nothing queued yet.</div>')
-      +   '<div class="ah-add"><textarea placeholder="Add work manually, e.g. Rebuilt the refund macro set&hellip;" onfocus="EDITING=true" onblur="EDITING=false"></textarea>'
-      +   '<label><input type="checkbox"> added scope</label>'
-      +   '<button onclick="addAdhoc(\''+encodeURIComponent(n)+'\',this)">Add</button></div>'
-      + '</div></details>';
+  var note=document.getElementById('srcNote');
+  if(note) note.textContent = NOTION.ok===false ? ('Notion: '+NOTION.err) : (NOTION.ok? 'Notion connected · '+NOTION.tasks.length+' completed tasks in range' : 'Notion: checking…');
+
+  var box=document.getElementById('list');
+  if(!CLIENTS.length){ box.innerHTML='<div class="empty">No active clients with a tracker. Check the portal stages and trackers.json.</div>'; progress(); return; }
+
+  // keep whichever tiles are open across a re-render
+  var open={}; box.querySelectorAll('details.tile[open]').forEach(function(d){ open[d.getAttribute('data-key')]=1; });
+
+  box.innerHTML=CLIENTS.map(function(c){
+    var e=entry(c.key), m=e.mode, d=e[m];
+    var cls = d.status==='Sent'?'sent':(d.status==='With reviewer'?'review':'');
+    var pill= d.status==='Sent'?'sent':(d.status==='With reviewer'?'review':'draft');
+    var rv  = reviewerFor(c.key);
+    var count = m==='friday' ? completedFor(c).length : neededFor(c).length;
+    var srcWarn = (m==='friday' && NOTION.ok===false);
+
+    return '<details class="tile '+cls+'" data-key="'+esc(c.key)+'"'+(open[c.key]?' open':'')+'>'+
+      '<summary>'+
+        '<span class="chev">&#9656;</span>'+
+        '<span class="cname">'+esc(c.name)+'</span>'+
+        '<span class="pill stage">'+esc(c.stage)+'</span>'+
+        '<span class="sright">'+
+          '<span class="rev">'+(rv?'check with <b>'+esc(rv)+'</b>':'<span style="color:var(--amber)">no reviewer set</span>')+'</span>'+
+          '<span class="pill '+pill+'">'+esc(d.status)+'</span>'+
+        '</span>'+
+      '</summary>'+
+      '<div class="body">'+
+        '<div class="row">'+
+          '<span class="lab">This week</span>'+
+          '<div class="modes">'+
+            '<button class="'+(m==='monday'?'on':'')+'" onclick="setMode(\''+esc(c.key)+'\',\'monday\',event)">Monday check-in</button>'+
+            '<button class="'+(m==='friday'?'on':'')+'" onclick="setMode(\''+esc(c.key)+'\',\'friday\',event)">Friday recap</button>'+
+          '</div>'+
+        '</div>'+
+        '<div class="row">'+
+          '<span class="lab">Check with</span>'+
+          '<select class="pick" onchange="setReviewer(\''+esc(c.key)+'\',this.value)">'+
+            '<option value="">&mdash; pick a reviewer &mdash;</option>'+
+            REVIEWERS.map(function(r){ return '<option'+(rv===r?' selected':'')+'>'+r+'</option>'; }).join('')+
+          '</select>'+
+          '<span class="lab" style="flex:0 0 auto;margin-left:10px">Status</span>'+
+          '<select class="pick" onchange="setStatus(\''+esc(c.key)+'\',this.value)">'+
+            STATUSES.map(function(s){ return '<option'+(d.status===s?' selected':'')+'>'+s+'</option>'; }).join('')+
+          '</select>'+
+        '</div>'+
+        '<div class="note">'+
+          (m==='friday'
+            ? '<b>'+count+'</b> task'+(count===1?'':'s')+' finished this week, from Notion and the tracker, de-duplicated.'
+            : '<b>'+count+'</b> thing'+(count===1?'':'s')+' sitting with the client — their open tasks due by Sunday, plus anything of ours blocked on them.')+
+        '</div>'+
+        '<textarea class="draft" placeholder="Write the update, or hit Build from source to start from the data."'+
+          ' oninput="onDraft(\''+esc(c.key)+'\',this.value)">'+esc(d.text)+'</textarea>'+
+        '<div class="acts">'+
+          '<button class="btn" onclick="regen(\''+esc(c.key)+'\',event)">'+(d.text?'Rebuild from source':'Build from source')+'</button>'+
+          '<button class="btn" onclick="copyDraft(\''+esc(c.key)+'\',event)">Copy</button>'+
+          (c.file?'<a class="btn" href="'+BASE+esc(c.file)+'" target="_blank" style="text-decoration:none">Open tracker</a>':'')+
+          '<span class="src'+(srcWarn?' warn':'')+'">'+
+            (srcWarn ? 'Notion unavailable — tracker only' :
+             (d.at ? 'edited '+(d.by?'by '+esc(d.by)+' ':'')+new Date(d.at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : 'not started'))+
+          '</span>'+
+        '</div>'+
+      '</div>'+
+    '</details>';
   }).join('');
-  if(other.length){
-    html+='<details class="ncard" data-name="__other"'+(openSet['__other']?' open':'')+'><summary><span class="n-chev">&#9656;</span><span class="n-name">Other (not in the registry)</span><span class="n-count">'+other.length+'</span></summary>'
-      + '<div class="n-inner">'+suggRows(other,null)+'</div></details>';
-  }
-  if(handledCount) html+='<div class="empty">'+handledCount+' Motion item'+(handledCount===1?'':'s')+' already handled this week.</div>';
-  col.innerHTML=html || '<div class="empty">No active clients found in the tracker registry yet.</div>';
-}
-function motionAct(encId, encClient, action){
-  var id=decodeURIComponent(encId), client=decodeURIComponent(encClient);
-  var t=null; for(var i=0;i<MOTION_TASKS.length;i++){ if(MOTION_TASKS[i].id===id){ t=MOTION_TASKS[i]; break; } }
-  if(!t) return;
-  if((action==='add'||action==='scope') && client){
-    if(!STORE.adhoc) STORE.adhoc={};
-    if(!STORE.adhoc[client]) STORE.adhoc[client]=[];
-    STORE.adhoc[client].push({at:nowStamp(), by:(t.assignee||whoAmI()||'').split(' ')[0], text:stripMotionPrefix(t.title), scope:action==='scope'});
-  }
-  if(!STORE.motionHandled) STORE.motionHandled={};
-  STORE.motionHandled[id]={at:nowStamp(), action:action, by:whoAmI()||''};
-  saveLocal();
-  renderMotion();                       // hide the row immediately (prevents double-clicks duplicating)
-  pushStore().then(renderMotion);
+  progress();
 }
 
-// Rebuild ONE client's Friday draft from the live tracker + everything queued
-// in the ad-hoc list — so you can triage Motion, then push, without running
-// the full Generate for every client.
-function pushDraft(encName, btn){
-  var name=decodeURIComponent(encName);
-  var c=null; CLIENTS.forEach(function(x){ if(x.name===name) c=x; });
-  if(!c){ alert('No registry entry for '+name+', so there is no tracker to build the draft from.'); return; }
-  var wk=ensure();
-  var cur=wk.friday[name];
-  if(cur && (cur.status==='reviewed'||cur.status==='sent')){
-    if(!confirm('The Friday draft for '+name+' is already '+cur.status+'. Rebuild it as a fresh Draft?')) return;
-  }
-  var orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='&#8987; Building&hellip;';
-  (c.key
-    ? fetch(API+'?key='+encodeURIComponent(c.key)+'&_t='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; })
-    : Promise.resolve(null))
-    .then(function(j){
-      var tasks=normaliseTracker(j&&j.ok?j.data:null)||[];
-      var wsIso=weekStart(0).toISOString();
-      var adhocW=((STORE.adhoc||{})[name]||[]).filter(function(x){ return x && !x.deleted && (x.at||'')>=wsIso; }).map(function(x){ return x.text; });
-      var text=buildFriday(name,tasks,(STORE.snapshots||{})[name],adhocW);
-      btn.disabled=false; btn.innerHTML=orig;
-      if(!text){ alert('Nothing to put in a draft for '+name+' yet.'); return; }
-      wk.friday[name]={text:text,status:'draft',by:'Generated',at:nowStamp(),comments:(cur&&cur.comments)||[]};
-      saveLocal();
-      pushStore().then(function(){ render(); });
-      btn.innerHTML='&#10003; Pushed';
-      setTimeout(function(){ btn.innerHTML=orig; },1600);
-    })
-    .catch(function(){ btn.disabled=false; btn.innerHTML=orig; alert('Could not reach the tracker store. Try again.'); });
-}
-
-// ─────────────────────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────────────────────
-function loadAll(manual){
-  return Promise.all([loadClients(), fetchStore().then(function(res){
-    if(res){ STORE=mergeStores(res.data,STORE); saveLocal(); setRemote(true); }
-    else setRemote(false);
-  }).catch(function(){ setRemote(false); })]).then(render);
-}
-document.getElementById('whoInput').value=WHO;
-document.getElementById('whoInput').addEventListener('blur', whoAmI);
-render();
-loadAll(false).then(function(){ loadMotion(false); });
-setInterval(function(){ if(!EDITING) loadAll(false).then(renderMotion); }, REFRESH_MS);
+/* boot */
+loadStore().then(function(){ render(); return loadAll(false); }).then(loadNotion);
+setInterval(function(){ if(!document.querySelector('textarea.draft:focus')) { loadAll(false); loadNotion(); } }, REFRESH_MS);
 </script>
-</body>
-</html>
+</body></html>
