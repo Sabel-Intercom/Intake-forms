@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Client Contracts</title>
+<style>
+  :root{
+    --bg:#0B0B0C; --surface:#0F1113; --card:#141618; --card2:#191C20; --card3:#1E2228;
+    --border:#2A3547; --border2:#1A2232; --red:#E10600;
+    --w:#FFFFFF; --body:#E2E8F0; --muted:#94A3B8; --mono:#64748B;
+    --green:#4ADE80; --blue:#60A5FA; --amber:#FBBF24; --redText:#F87171;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--body);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:60px;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  a{color:#FCA5A5;text-decoration:none;} a:hover{color:#fff;text-decoration:underline;}
+  ::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+
+  .header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:13px;flex-wrap:wrap;
+    padding:13px 24px;background:rgba(11,11,12,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--border2);}
+  .logo-img{height:24px;width:auto;display:block;}
+  .tag{font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mono);}
+  h1{font-size:15px;font-weight:800;color:var(--w);letter-spacing:-.01em;}
+  .hright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .stamp{font-size:10px;color:var(--mono);letter-spacing:.03em;}
+  .btn{font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;border:1px solid var(--border2);
+    background:var(--card);color:var(--muted);transition:.12s;text-decoration:none;display:inline-block;}
+  .btn:hover{color:var(--w);border-color:var(--border);text-decoration:none;}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:22px 26px;}
+  .panel{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin-bottom:20px;}
+  .sec-title{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--w);margin-bottom:4px;}
+  .count{font-size:10px;font-weight:700;color:var(--mono);background:var(--card3);padding:2px 8px;border-radius:10px;}
+  .sub{font-size:10.5px;color:var(--mono);margin-bottom:14px;line-height:1.55;}
+  .sub b{color:var(--muted);}
+
+  .ci-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+  .ci-select{background:var(--card2);border:1px solid var(--border2);color:var(--w);border-radius:7px;
+    padding:9px 12px;font-size:13px;font-weight:600;font-family:inherit;min-width:260px;}
+  .ci-select:focus{outline:none;border-color:var(--red);}
+  .ci-right{margin-left:auto;display:flex;gap:7px;}
+
+  .ci-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:11px;margin-bottom:14px;}
+  .ci-cell{background:var(--card2);border:1px solid var(--border2);border-radius:9px;padding:12px 14px;}
+  .ci-cell .l{font-size:8.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mono);margin-bottom:6px;}
+  .ci-cell .v{font-size:14px;font-weight:700;color:var(--w);line-height:1.3;}
+  .ci-cell .s{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.45;}
+  .ci-cell.hours .v{font-size:26px;color:var(--red);letter-spacing:-.02em;}
+  .ci-cell.mig .v.yes{color:var(--amber);} .ci-cell.mig .v.no{color:var(--green);} .ci-cell.mig .v.tbc{color:var(--muted);}
+
+  .ci-scope{background:var(--card2);border:1px solid var(--border2);border-left:3px solid var(--red);
+    border-radius:0 9px 9px 0;padding:13px 16px;margin-bottom:11px;}
+  .ci-scope .l{font-size:8.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mono);margin-bottom:7px;}
+  .ci-scope p{font-size:13px;line-height:1.65;color:var(--body);text-wrap:pretty;}
+  .ci-mignote{background:var(--card2);border:1px solid var(--border2);border-left:3px solid var(--amber);
+    border-radius:0 9px 9px 0;padding:11px 15px;font-size:12px;line-height:1.6;color:var(--muted);margin-bottom:11px;}
+  .ci-mignote b{color:var(--amber);}
+  .ci-src{font-size:9px;color:var(--mono);letter-spacing:.03em;}
+  .ci-pending{font-size:12.5px;color:var(--muted);background:var(--card2);border:1px dashed var(--border);
+    border-radius:9px;padding:20px;line-height:1.6;}
+
+  .ex-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:11px 0;border-bottom:1px solid var(--border2);}
+  .ex-row:last-child{border-bottom:none;}
+  .ex-name{font-size:13px;font-weight:600;color:var(--w);}
+  .ex-meta{font-size:9.5px;color:var(--mono);margin-top:3px;letter-spacing:.03em;}
+  .ex-tag{font-size:10px;font-weight:800;letter-spacing:.04em;white-space:nowrap;}
+  .empty{font-size:12px;color:var(--mono);padding:16px 0;line-height:1.6;}
+
+  footer{max-width:1180px;margin:20px auto 0;padding:16px 26px 0;border-top:1px solid var(--border2);
+    font-size:9px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <img class="logo-img" src="data:image/png;base64,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" alt="Sabel">
+  <span class="tag">Ops Hub</span>
+  <h1>Client Contracts</h1>
+  <div class="hright">
+    <span class="stamp" id="stamp">reading Notion&hellip;</span>
+    <button class="btn" onclick="loadProjects()" title="Re-read from Notion">&#8635; Refresh</button>
+    <a class="btn" href="https://app.notion.com/p/3b6335eed1ea81ffb67cf8ee42ec5bd0" target="_blank">&#9998; Edit in Notion</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="panel">
+    <div class="sec-title">&#128196; Contract detail <span class="count" id="ciCount">&mdash;</span></div>
+    <div class="sub">Hours, scope, migration, contact and dates, live from the <b>Sabel Ops &rsaquo; Projects</b> database in Notion. Edit a client there and it updates here &mdash; this screen is read-only.</div>
+    <div class="ci-head">
+      <select class="ci-select" id="ciSelect" onchange="ciPick(this.value)"></select>
+    </div>
+    <div id="ciBody"></div>
+  </div>
+
+  <div class="panel">
+    <div class="sec-title">&#9203; Contract expiry &mdash; final 3 months <span class="count" id="exCount">0</span></div>
+    <div class="sub">Each engagement runs 12 months from its contract start. Set <b>Contract start</b> on a client&rsquo;s row in Notion to bring it into this watch.</div>
+    <div id="exBody"></div>
+  </div>
+</div>
+
+<footer>Internal use only &middot; contract data live from Notion via the Sabel webhook</footer>
+
+<script>
+/* ──────────────────────────────────────────────────────────────
+   CLIENT CONTRACTS
+
+   Its own page now. It used to be the portfolio dashboard served with a
+   ?view=contracts preset, which meant opening the file directly showed a whole
+   different screen — confusing, and the reason this was split out.
+
+   One source: the Sabel Ops › Projects database in Notion, read through
+   /api/notion?kind=projects. Nothing about clients is hardcoded here, including
+   the expiry watch, which derives from each row's Contract start date.
+   ────────────────────────────────────────────────────────────── */
+var NOTION_API  = 'https://sabel-webhook.vercel.app/api/notion';
+var REFRESH_MS  = 5 * 60 * 1000;
+var PROJECTS    = [];
+var STATE       = {ok:null, err:'', at:null};
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(iso){
+  if(!iso) return 'TBC';
+  var d=new Date(String(iso).slice(0,10)+'T00:00:00');
+  if(isNaN(d.getTime())) return String(iso);
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function loadProjects(){
+  return fetch(NOTION_API+'?kind=projects&_t='+Date.now(), {cache:'no-store'})
+    .then(function(r){
+      if(r.status===404) throw new Error('the projects endpoint is not deployed yet');
+      return r.json();
+    })
+    .then(function(j){
+      if(j && j.ok && Array.isArray(j.projects)){
+        PROJECTS=j.projects; STATE={ok:true,err:'',at:new Date()};
+      } else if(j && j.ok){
+        // The old bridge ignores ?kind= and answers with tasks. That is ok:true
+        // with no projects, which would otherwise look like "no clients" rather
+        // than "wrong version deployed".
+        STATE={ok:false, at:new Date(),
+          err:'the bridge answered with '+(j.tasks?'tasks':'no projects')+
+              ' — api/notion.js needs updating to the version that supports ?kind=projects'};
+      } else {
+        STATE={ok:false, err:(j&&j.error)||'Notion returned an error.', at:new Date()};
+      }
+      render();
+    })
+    .catch(function(e){
+      // A missing endpoint fails CORS preflight, so the browser reports a bare
+      // "Failed to fetch" — say what that actually means.
+      STATE={ok:false, at:new Date(), err: /failed to fetch|networkerror/i.test(e.message||'')
+        ? 'the projects endpoint is not deployed yet (api/notion?kind=projects)'
+        : (e.message||'could not reach the Notion bridge')};
+      render();
+    });
+}
+
+function names(){ return PROJECTS.map(function(p){ return p.name; }); }
+function project(n){ for(var i=0;i<PROJECTS.length;i++) if(PROJECTS[i].name===n) return PROJECTS[i]; return null; }
+function selected(){
+  var ns=names(), s=localStorage.getItem('sabel_contracts_sel');
+  return (s && ns.indexOf(s)>=0) ? s : (ns[0]||null);
+}
+function ciPick(n){ localStorage.setItem('sabel_contracts_sel', n); render(); }
+
+/* ── contract detail ── */
+function renderDetail(){
+  var selEl=document.getElementById('ciSelect'), body=document.getElementById('ciBody');
+  var ns=names(), cur=selected();
+
+  if(STATE.ok===false && !ns.length){
+    document.getElementById('ciCount').textContent='—';
+    selEl.innerHTML='';
+    body.innerHTML='<div class="ci-pending">Could not read the contracts from Notion &mdash; '+esc(STATE.err)+'.</div>';
+    return;
+  }
+  if(STATE.ok===null){ body.innerHTML='<div class="ci-pending">Reading Notion&hellip;</div>'; return; }
+
+  var pending=ns.filter(function(n){ var p=project(n); return !p || !p.scope; }).length;
+  document.getElementById('ciCount').textContent = ns.length+(pending?' · '+pending+' pending':'');
+
+  selEl.innerHTML=ns.map(function(n){
+    var p=project(n);
+    return '<option value="'+esc(n)+'"'+(n===cur?' selected':'')+'>'+esc(n)+(p&&p.scope?'':' — details pending')+'</option>';
+  }).join('');
+
+  if(!cur){ body.innerHTML='<div class="ci-pending">No projects in Notion yet.</div>'; return; }
+  var p=project(cur);
+  if(!p || !p.scope){
+    body.innerHTML='<div class="ci-pending">Contract details pending for <b>'+esc(cur)+'</b>. '+
+      'Fill in Scope, Signed, Kick-off, Main contact and Migration on its row'+
+      (p&&p.url?' &mdash; <a href="'+esc(p.url)+'" target="_blank">open it in Notion</a>':'')+'.</div>';
+    return;
+  }
+
+  // Hours pair the number with its note: several engagements are phase- or
+  // volume-priced, where a bare number would imply a rate that does not exist.
+  var hours = p.hours!=null ? String(p.hours) : (p.hoursNote ? '—' : 'TBC');
+  var migCls = p.migration==='yes' ? 'yes' : (p.migration==='no' ? 'no' : 'tbc');
+
+  var h='<div class="ci-grid">';
+  h+='<div class="ci-cell hours"><div class="l">Hours contracted</div><div class="v">'+esc(hours)+'</div>'+
+     (p.hoursNote?'<div class="s">'+esc(p.hoursNote)+'</div>':'')+'</div>';
+  h+='<div class="ci-cell mig"><div class="l">Migration work</div><div class="v '+migCls+'">'+esc(p.migrationHours||'TBC')+'</div></div>';
+  h+='<div class="ci-cell"><div class="l">Main client contact</div><div class="v">'+esc(p.contact||'TBC')+'</div>'+
+     (p.contactRole?'<div class="s">'+esc(p.contactRole)+'</div>':'')+'</div>';
+  h+='<div class="ci-cell"><div class="l">Contract signed</div><div class="v">'+esc(p.signed||'TBC')+'</div>'+
+     (p.signedSource?'<div class="s">'+esc(p.signedSource)+'</div>':'')+'</div>';
+  h+='<div class="ci-cell"><div class="l">Kick-off meeting</div><div class="v">'+esc(p.kickoff||'TBC')+'</div></div>';
+  h+='</div>';
+  h+='<div class="ci-scope"><div class="l">Scope overview</div><p>'+esc(p.scope)+'</p></div>';
+  if(p.migrationNote) h+='<div class="ci-mignote"><b>Migration detail:</b> '+esc(p.migrationNote)+'</div>';
+  h+='<div class="ci-src">Source: '+esc(p.signedSource||'SOW / proposal')+' &middot; live from Sabel Ops &rsaquo; Projects'+
+     (p.trackerUrl?' &middot; <a href="'+esc(p.trackerUrl)+'" target="_blank">open tracker</a>':'')+
+     (p.url?' &middot; <a href="'+esc(p.url)+'" target="_blank">edit in Notion</a>':'')+'</div>';
+  body.innerHTML=h;
+}
+
+/* ── expiry watch: 12 months from Contract start ── */
+function renderExpiry(){
+  var box=document.getElementById('exBody');
+  var today=new Date(); today.setHours(0,0,0,0);
+  var rows=[];
+  PROJECTS.forEach(function(p){
+    if(!p.contractStart) return;
+    var exp=new Date(String(p.contractStart).slice(0,10)+'T00:00:00');
+    if(isNaN(exp.getTime())) return;
+    exp.setFullYear(exp.getFullYear()+1);
+    var days=Math.round((exp-today)/86400000);
+    if(days>92) return;                                  // only the final ~3 months
+    rows.push({name:p.name, exp:exp, days:days, url:p.url});
+  });
+  rows.sort(function(a,b){ return a.days-b.days; });
+  document.getElementById('exCount').textContent=rows.length;
+
+  if(!rows.length){
+    var withStart=PROJECTS.filter(function(p){ return p.contractStart; }).length;
+    box.innerHTML='<div class="empty">No contracts within 3 months of expiry.'+
+      (withStart? ' ('+withStart+' of '+PROJECTS.length+' have a contract start date set.)'
+                : ' No client has a <b>Contract start</b> date in Notion yet, so nothing is being watched.')+'</div>';
+    return;
+  }
+  box.innerHTML=rows.map(function(r){
+    var when = r.days<0 ? ('expired '+Math.abs(r.days)+'d ago')
+             : r.days===0 ? 'expires today' : ('~'+Math.round(r.days/7)+' wks left');
+    var tone = r.days<=30 ? 'var(--redText)' : 'var(--amber)';
+    return '<div class="ex-row"><div><div class="ex-name">'+esc(r.name)+'</div>'+
+      '<div class="ex-meta">12-month term ends '+fmtDate(r.exp.toISOString().slice(0,10))+'</div></div>'+
+      '<span class="ex-tag" style="color:'+tone+'">'+when+'</span></div>';
+  }).join('');
+}
+
+function render(){
+  var s=document.getElementById('stamp');
+  if(STATE.ok===true) s.textContent=PROJECTS.length+' clients · '+STATE.at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  else if(STATE.ok===false) s.textContent='Notion unavailable';
+  else s.textContent='reading Notion…';
+  renderDetail();
+  renderExpiry();
+}
+
+render();
+loadProjects();
+setInterval(loadProjects, REFRESH_MS);
+</script>
+</body></html>

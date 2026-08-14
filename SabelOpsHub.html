@@ -141,14 +141,12 @@
 
   <!-- DASHBOARD -->
   <section class="view" id="dashboard">
-    <iframe id="frame-dashboard" data-src="SabelPortfolioDashboard_v2.html" title="Project Tracker Dashboard"></iframe>
+    <iframe id="frame-dashboard" data-src="SabelProjectDashboard.html" title="Project Dashboard"></iframe>
   </section>
 
   <!-- CLIENT CONTRACTS -->
-  <!-- Same file as the old dashboard, served in its ?view=contracts preset so the
-       contract widgets keep one home. See VIEW_PRESETS in SabelPortfolioDashboard.html. -->
   <section class="view" id="contracts">
-    <iframe id="frame-contracts" data-src="SabelPortfolioDashboard.html?view=contracts" title="Client Contracts"></iframe>
+    <iframe id="frame-contracts" data-src="SabelClientContracts.html" title="Client Contracts"></iframe>
   </section>
 
   <!-- WEEKLY UPDATES -->
@@ -171,7 +169,7 @@
   // browser holds it. Stamping the version onto the src makes it a new URL, so
   // a deploy is picked up immediately.
   // BUMP THIS whenever you push a new version of any tab's page.
-  var ASSET_V = '2026-08-13b';
+  var ASSET_V = '2026-08-13d';
   function versioned(src){
     return src + (src.indexOf('?') > -1 ? '&' : '?') + 'v=' + ASSET_V;
   }
