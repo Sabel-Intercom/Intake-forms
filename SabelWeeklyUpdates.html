@@ -53,6 +53,9 @@
   details.tile[open]{border-color:var(--border);}
   details.tile.sent{border-left:3px solid var(--green);}
   details.tile.review{border-left:3px solid var(--amber);}
+  details.tile.skip{opacity:.5;border-left:3px solid var(--border);}
+  details.tile.skip:hover,details.tile.skip[open]{opacity:1;}
+  .pill.skip{color:var(--mono);background:var(--card3);}
   summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:14px 17px;}
   summary::-webkit-details-marker{display:none;}
   summary:hover{background:var(--card2);}
@@ -163,14 +166,15 @@ var REFRESH_MS = 5 * 60 * 1000;
 var TEAM      = ['Chris','Richard','Greg','Nikki'];
 var REVIEWERS = ['Chris','Richard','Greg'];
 var STATUSES  = ['Draft','With reviewer','Sent'];
-/* Portal stages we consider worth a weekly update. */
-var ACTIVE_STAGES = ['Active','Onboarding','Build','Testing','Go-live'];
+/* Stage is shown on the tile for context only. Whether a client appears is
+   decided by Status = Active in Notion, not by stage. */
 
 var CLIENTS = [];          // [{key,name,file,stage,lead,tasks:[...]}]
 var NOTION  = {tasks:[], ok:null, err:''};
 var WEEK_OFFSET = 0;
 var WHO = localStorage.getItem('sabel_who') || '';
 var LIVE = {at:null, ok:0, total:0};
+var PROJECTS_OK = null;   // did the Notion client list load?
 
 /* The v2 store lives beside the old one so nothing already written is lost.
    { v2: { weeks: { '<mon>': { '<key>': { mode, monday:{...}, friday:{...} } } },
@@ -208,7 +212,7 @@ function bucket(){
 }
 function entry(key){
   var b=bucket();
-  if(!b[key]) b[key]={mode:defaultMode(), monday:blank(), friday:blank()};
+  if(!b[key]) b[key]={mode:defaultMode(), monday:blank(), friday:blank(), skip:false};
   return b[key];
 }
 function blank(){ return {text:'', status:'Draft', by:'', at:0, generated:false}; }
@@ -216,6 +220,35 @@ function blank(){ return {text:'', status:'Draft', by:'', at:0, generated:false}
    likely job; from Wednesday on you are heading for the recap. */
 function defaultMode(){ var d=new Date().getDay(); return (d>=3 || d===0) ? 'friday' : 'monday'; }
 function reviewerFor(key){ return (STORE.v2 && STORE.v2.reviewers && STORE.v2.reviewers[key]) || ''; }
+
+/* A client can be marked not-required for THIS WEEK — nothing to say, handled on
+   a call, paused. It is a per-week decision, so it clears when the week rolls
+   over and you make the call again with fresh eyes.
+
+   They stay on the list rather than being hidden, because the point of the list
+   is knowing you have accounted for everyone on the radar. They just drop out of
+   the count and sit at the bottom. Stored in the week's bucket and shared, so
+   whoever picks the week up sees the same calls. */
+function skipFor(key){ return !!entry(key).skip; }
+function toggleSkip(key,ev){
+  if(ev) ev.stopPropagation();
+  var e=entry(key);
+  if(e.skip){
+    e.skip=false;
+  } else {
+    e.skip=true;
+    // Collapse it first. render() carries open tiles across a re-render, so
+    // without this the tile drops to the bottom of the list still expanded and
+    // has to be chased down and closed by hand.
+    // Matched by attribute rather than a selector: keys contain colons and
+    // spaces ("notracker:the foot hub") that would need escaping.
+    var tiles=document.querySelectorAll('details.tile');
+    for(var i=0;i<tiles.length;i++){
+      if(tiles[i].getAttribute('data-key')===key) tiles[i].open=false;
+    }
+  }
+  saveStore(); render();
+}
 
 function saveLocal(){ try{ localStorage.setItem('sabel_weekly_v2', JSON.stringify(STORE)); }catch(e){} }
 function saveStore(){
@@ -227,6 +260,19 @@ function saveStore(){
       body: JSON.stringify({data:STORE})
     }).catch(function(){ /* offline — localStorage holds it */ });
   }, 1000);
+}
+/* The first version of this stored not-required permanently per client. Carry
+   those marks into the current week once, so nobody's calls are lost, then leave
+   the old key alone. */
+function migrateSkips(){
+  if(!STORE.v2 || !STORE.v2.skip || STORE.v2.skipMigrated) return;
+  var b=bucket(), n=0;
+  Object.keys(STORE.v2.skip).forEach(function(k){
+    if(!STORE.v2.skip[k]) return;
+    entry(k).skip=true; n++;
+  });
+  STORE.v2.skipMigrated=true;
+  if(n) saveStore();
 }
 function loadStore(){
   return fetch(API+'?key='+encodeURIComponent(STORE_KEY)+'&_t='+Date.now(),{cache:'no-store'})
@@ -365,34 +411,72 @@ function loadNotion(){
       render();
     });
 }
+/* Every client on this page comes from ONE list: the Sabel Ops › Projects
+   database in Notion, filtered to Status = Active. Add a client there and a tile
+   appears here on the next refresh; mark it Done and the tile goes.
+
+   This used to be driven by the portal intersected with trackers.json, which
+   silently dropped any client without a deployed tracker — Bulk Nutrients,
+   Cannabis Clinic, RMS Cloud and the rest never showed up. A client still needs
+   an update written whether or not a tracker exists, so the tracker is now
+   optional: it fills the draft in automatically when present, and you write the
+   update by hand when it is not. */
+function loadProjects(){
+  return fetch(NOTION_API+'?kind=projects&_t='+Date.now(),{cache:'no-store'})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(j){ return (j && j.ok && Array.isArray(j.projects)) ? j.projects : null; })
+    .catch(function(){ return null; });
+}
 function loadAll(manual){
   return Promise.all([
     fetch(BASE+'trackers.json',{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }),
     fetchKey(PORTAL_KEY),
+    loadProjects(),
     manual ? loadStore() : Promise.resolve()
   ]).then(function(res){
-    var reg = Array.isArray(res[0]) ? res[0] : [];
+    var reg    = Array.isArray(res[0]) ? res[0] : [];
     var portal = (res[1] && Array.isArray(res[1].clients)) ? res[1].clients : [];
+    var projs  = res[2];
 
-    // Active clients come from the portal — it is where stage is actually set.
-    var byKey={}, byName={};
+    var byKey={}, byName={}, byPortal={};
     reg.forEach(function(t){ if(t.key) byKey[t.key]=t; byName[norm(t.name)]=t; });
-    var picked=[];
-    portal.forEach(function(pc){
-      if(ACTIVE_STAGES.indexOf(pc.stage)===-1) return;
-      var t=(pc.trackerKey&&byKey[pc.trackerKey]) || byName[norm(pc.name)] || null;
-      if(!t || !t.key) return;                       // no tracker, nothing to summarise
-      picked.push({key:t.key, name:pc.name, file:t.file, stage:pc.stage, lead:pc.owner||'', tasks:[]});
-    });
-    // An active tracker the portal has not caught up with still deserves a tile.
-    reg.forEach(function(t){
-      if(!t.active || !t.key) return;
-      if(picked.some(function(p){ return p.key===t.key; })) return;
-      picked.push({key:t.key, name:t.name, file:t.file, stage:'Active', lead:'', tasks:[]});
-    });
+    portal.forEach(function(pc){ byPortal[norm(pc.name)]=pc; });
 
-    LIVE.total=picked.length; LIVE.ok=0;
+    var picked=[];
+    if(projs){
+      PROJECTS_OK=true;
+      projs.forEach(function(p){
+        if((p.status||'')!=='Active') return;
+        // The tracker is looked up by key first, then by name — a project can be
+        // live in Notion before anyone has registered its tracker.
+        var t=(p.trackerKey&&byKey[p.trackerKey]) || byName[norm(p.name)] || null;
+        var pc=byPortal[norm(p.name)] || null;
+        picked.push({
+          key: (t&&t.key) || p.trackerKey || ('notracker:'+norm(p.name)),
+          hasTracker: !!(t&&t.key) || !!p.trackerKey,
+          name: p.name,
+          file: (t&&t.file) || '',
+          trackerUrl: p.trackerUrl || ((t&&t.file) ? BASE+t.file : ''),
+          stage: (pc&&pc.stage) || 'Active',
+          lead: (pc&&pc.owner) || '',
+          tasks: []
+        });
+      });
+    } else {
+      // Notion unreachable — fall back to the registry so the page still works.
+      PROJECTS_OK=false;
+      reg.forEach(function(t){
+        if(!t.active || !t.key) return;
+        var pc=byPortal[norm(t.name)] || null;
+        picked.push({key:t.key, hasTracker:true, name:t.name, file:t.file,
+                     trackerUrl:BASE+t.file, stage:(pc&&pc.stage)||'Active',
+                     lead:(pc&&pc.owner)||'', tasks:[]});
+      });
+    }
+
+    LIVE.total=picked.filter(function(c){ return c.hasTracker; }).length; LIVE.ok=0;
     return Promise.all(picked.map(function(c){
+      if(!c.hasTracker) return Promise.resolve();      // nothing to fetch; tile still shows
       return fetchKey(c.key).then(function(d){
         if(d) LIVE.ok++;
         // Week-pinned trackers need WEEK1_START from their HTML — fetched once each.
@@ -543,11 +627,16 @@ function findClient(key){ for(var i=0;i<CLIENTS.length;i++) if(CLIENTS[i].key===
 
 /* ── render ── */
 function progress(){
-  var total=CLIENTS.length, sent=0;
-  CLIENTS.forEach(function(c){ var e=entry(c.key); if(e[e.mode].status==='Sent') sent++; });
+  var due=0, sent=0, skipped=0;
+  CLIENTS.forEach(function(c){
+    if(skipFor(c.key)){ skipped++; return; }      // not counted either way
+    due++;
+    var e=entry(c.key); if(e[e.mode].status==='Sent') sent++;
+  });
   var el=document.getElementById('progLead'), bar=document.getElementById('progBar');
-  if(el) el.innerHTML='<b>'+sent+'</b> of <b>'+total+'</b> active clients updated this week';
-  if(bar) bar.style.width=(total?Math.round(sent/total*100):0)+'%';
+  if(el) el.innerHTML='<b>'+sent+'</b> of <b>'+due+'</b> clients updated this week'+
+    (skipped?' <span style="color:var(--mono)">&middot; '+skipped+' not required this week</span>':'');
+  if(bar) bar.style.width=(due?Math.round(sent/due*100):0)+'%';
 }
 function render(){
   var ws=weekStart(WEEK_OFFSET), we=wkEnd();
@@ -569,9 +658,17 @@ function render(){
   // keep whichever tiles are open across a re-render
   var open={}; box.querySelectorAll('details.tile[open]').forEach(function(d){ open[d.getAttribute('data-key')]=1; });
 
-  box.innerHTML=CLIENTS.map(function(c){
+  // Not-required clients sink to the bottom but stay visible — the list is the
+  // check that nobody on the radar has been missed.
+  var ordered=CLIENTS.slice().sort(function(a,b){
+    var sa=skipFor(a.key)?1:0, sb=skipFor(b.key)?1:0;
+    if(sa!==sb) return sa-sb;
+    return a.name.toLowerCase()<b.name.toLowerCase()?-1:1;
+  });
+  box.innerHTML=ordered.map(function(c){
     var e=entry(c.key), m=e.mode, d=e[m];
-    var cls = d.status==='Sent'?'sent':(d.status==='With reviewer'?'review':'');
+    var skip = skipFor(c.key);
+    var cls = skip?'skip':(d.status==='Sent'?'sent':(d.status==='With reviewer'?'review':''));
     var pill= d.status==='Sent'?'sent':(d.status==='With reviewer'?'review':'draft');
     var rv  = reviewerFor(c.key);
     var count = m==='friday' ? completedFor(c).length : neededFor(c).length;
@@ -582,9 +679,11 @@ function render(){
         '<span class="chev">&#9656;</span>'+
         '<span class="cname">'+esc(c.name)+'</span>'+
         '<span class="pill stage">'+esc(c.stage)+'</span>'+
+        (c.hasTracker?'':'<span class="pill draft" title="No tracker deployed for this client">no tracker</span>')+
         '<span class="sright">'+
           '<span class="rev">'+(rv?'check with <b>'+esc(rv)+'</b>':'<span style="color:var(--amber)">no reviewer set</span>')+'</span>'+
-          '<span class="pill '+pill+'">'+esc(d.status)+'</span>'+
+          (skip?'<span class="pill skip">not required</span>'
+                :'<span class="pill '+pill+'">'+esc(d.status)+'</span>')+
         '</span>'+
       '</summary>'+
       '<div class="body">'+
@@ -602,21 +701,26 @@ function render(){
             REVIEWERS.map(function(r){ return '<option'+(rv===r?' selected':'')+'>'+r+'</option>'; }).join('')+
           '</select>'+
           '<span class="lab" style="flex:0 0 auto;margin-left:10px">Status</span>'+
-          '<select class="pick" onchange="setStatus(\''+esc(c.key)+'\',this.value)">'+
+          '<select class="pick" onchange="setStatus(\''+esc(c.key)+'\',this.value)"'+(skip?' disabled':'')+'>'+
             STATUSES.map(function(s){ return '<option'+(d.status===s?' selected':'')+'>'+s+'</option>'; }).join('')+
           '</select>'+
+          '<button class="btn'+(skip?' on':'')+'" style="margin-left:auto" onclick="toggleSkip(\''+esc(c.key)+'\',event)" '+
+            'title="Skip this client for this week only — clears when the week rolls over">'+
+            (skip?'&#10003; Not required this week':'Not required this week')+'</button>'+
         '</div>'+
         '<div class="note">'+
-          (m==='friday'
-            ? '<b>'+count+'</b> task'+(count===1?'':'s')+' finished this week, from Notion and the tracker, de-duplicated.'
-            : '<b>'+count+'</b> thing'+(count===1?'':'s')+' sitting with the client — their open tasks due by Sunday, plus anything of ours blocked on them.')+
+          (!c.hasTracker
+            ? 'No tracker for this client, so there is nothing to build a draft from &mdash; write the update by hand. It will still be saved, reviewed and marked sent like any other.'
+            : (m==='friday'
+              ? '<b>'+count+'</b> task'+(count===1?'':'s')+' finished this week, from Notion and the tracker, de-duplicated.'
+              : '<b>'+count+'</b> thing'+(count===1?'':'s')+' sitting with the client — their open tasks due by Sunday, plus anything of ours blocked on them.'))+
         '</div>'+
         '<textarea class="draft" placeholder="Write the update, or hit Build from source to start from the data."'+
           ' oninput="onDraft(\''+esc(c.key)+'\',this.value)">'+esc(d.text)+'</textarea>'+
         '<div class="acts">'+
-          '<button class="btn" onclick="regen(\''+esc(c.key)+'\',event)">'+(d.text?'Rebuild from source':'Build from source')+'</button>'+
+          (c.hasTracker?'<button class="btn" onclick="regen(\''+esc(c.key)+'\',event)">'+(d.text?'Rebuild from source':'Build from source')+'</button>':'')+
           '<button class="btn" onclick="copyDraft(\''+esc(c.key)+'\',event)">Copy</button>'+
-          (c.file?'<a class="btn" href="'+BASE+esc(c.file)+'" target="_blank" style="text-decoration:none">Open tracker</a>':'')+
+          (c.trackerUrl?'<a class="btn" href="'+esc(c.trackerUrl)+'" target="_blank" style="text-decoration:none">Open tracker</a>':'')+
           '<span class="src'+(srcWarn?' warn':'')+'">'+
             (srcWarn ? 'Notion unavailable — tracker only' :
              (d.at ? 'edited '+(d.by?'by '+esc(d.by)+' ':'')+new Date(d.at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : 'not started'))+
@@ -629,7 +733,7 @@ function render(){
 }
 
 /* boot */
-loadStore().then(function(){ render(); return loadAll(false); }).then(loadNotion);
+loadStore().then(function(){ migrateSkips(); render(); return loadAll(false); }).then(loadNotion);
 setInterval(function(){ if(!document.querySelector('textarea.draft:focus')) { loadAll(false); loadNotion(); } }, REFRESH_MS);
 </script>
 </body></html>
