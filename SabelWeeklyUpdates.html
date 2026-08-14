@@ -194,6 +194,11 @@ function weekStart(offset){
 function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function wkKey(){ return iso(weekStart(WEEK_OFFSET)); }
 function wkEnd(){ var d=weekStart(WEEK_OFFSET); d.setDate(d.getDate()+6); return d; }
+/* Monday-to-Sunday bounds of any week, relative to the one being viewed. */
+function weekRange(offset){
+  var s=weekStart(offset), e=new Date(s.getTime()); e.setDate(e.getDate()+6);
+  return {s:iso(s), e:iso(e), from:s, to:e};
+}
 function fmtDay(d){ return d.getDate()+' '+MON[d.getMonth()]; }
 function inThisWeek(isoDate){
   if(!isoDate) return false;
@@ -351,10 +356,10 @@ function tasksFrom(data, key){
     Object.keys(data.taskData).forEach(function(pid){
       var g=data.taskData[pid]||{};
       (g.sabel||[]).forEach(function(t,i){
-        out.push({taskKey:pid+'-s-'+i, task:t.t, owner:t.o, status:st[pid+'-s-'+i]||t.s, end:taskDue(t,w1,ws), clientSide:false});
+        out.push({taskKey:pid+'-s-'+i, task:t.t, owner:t.o, status:st[pid+'-s-'+i]||t.s, end:taskDue(t,w1,ws), clientSide:false, note:(t.notes||'').trim()});
       });
       (g.client||[]).forEach(function(t,i){
-        out.push({taskKey:pid+'-c-'+i, task:t.t, owner:t.o, status:st[pid+'-c-'+i]||t.s, end:taskDue(t,w1,ws), clientSide:true});
+        out.push({taskKey:pid+'-c-'+i, task:t.t, owner:t.o, status:st[pid+'-c-'+i]||t.s, end:taskDue(t,w1,ws), clientSide:true, note:(t.notes||'').trim()});
       });
     });
     return out;
@@ -399,6 +404,7 @@ function loadNotion(){
     .then(function(j){
       if(j && j.ok){ NOTION.tasks=j.tasks||[]; NOTION.ok=true; NOTION.err=''; }
       else { NOTION.ok=false; NOTION.err=(j&&j.error)||'The Notion bridge returned an error.'; }
+      stampCompletions();
       render();
     })
     .catch(function(e){
@@ -485,6 +491,7 @@ function loadAll(manual){
       });
     })).then(function(){
       CLIENTS=picked.sort(function(a,b){ return a.name.toLowerCase()<b.name.toLowerCase()?-1:1; });
+      stampCompletions();          // record anything newly complete against this week
       LIVE.at=new Date(); render();
     });
   });
@@ -501,22 +508,85 @@ function norm(n){
    added so nothing is silently dropped while the two are still converging.
    Monday: what sits with the client — their open tasks due soon, and anything
    of ours that is blocked waiting on them.                                  */
-function completedFor(c){
-  var seen={}, rows=[];
-  NOTION.tasks.forEach(function(t){
-    if(t.trackerKey!==c.key) return;
-    if(!inThisWeek(t.completedAt)) return;
-    var k=(t.trackerTaskId||'').split(':')[1] || ('notion:'+t.id);
-    seen[k]=1;
-    rows.push({task:t.title, owner:t.owner, from:'Notion'});
-  });
+/* ── when did a task actually get done? ────────────────────────
+   Neither source records it. Notion's Tasks database has no completion date,
+   and the tracker has none either — so we were using Notion's last_edited_time
+   as a proxy. That broke: a bulk sync on 10 Aug re-stamped 14 Eugene Labs tasks
+   at the same minute, and a kick-off held on 23 Jul turned up in this week's
+   recap.
+
+   So the page keeps its own record instead. Every load, any task that is
+   complete and has not been seen complete before is stamped with the current
+   week. "Completed this week" is then simply the tasks stamped with this week —
+   no guessing, and it works the same for Notion and tracker completions.
+
+   The first time a client is seen, everything already complete is stamped 'pre'
+   rather than this week, so history does not dump itself into one recap. That
+   does mean genuinely-new completions in that first hour are missed once. */
+function doneWeeks(){ if(!STORE.v2.done) STORE.v2.done={}; return STORE.v2.done; }
+
+/* Tasks currently complete for a client, from EITHER source, keyed by the
+   tracker's task key so the two de-duplicate exactly. */
+function completeNow(c){
+  var out={};
   c.tasks.forEach(function(t){
     var s=(t.status||'').toLowerCase();
-    if(s!=='complete' && s!=='done') return;
-    if(seen[t.taskKey]) return;
-    if(!inThisWeek(t.end)) return;              // trackers have no completion date either
-    rows.push({task:t.task, owner:t.owner, from:'tracker'});
+    if(s==='complete'||s==='done') out[t.taskKey]={task:t.task, owner:t.owner, note:t.note||''};
   });
+  NOTION.tasks.forEach(function(t){
+    if(t.trackerKey!==c.key) return;
+    var s=(t.status||'').toLowerCase();
+    if(s!=='complete' && s!=='done') return;
+    var k=(t.trackerTaskId||'').split(':')[1] || ('notion:'+t.id);
+    if(!out[k]) out[k]={task:t.title, owner:t.owner, note:''};
+  });
+  return out;
+}
+/* Only ever stamps the live week — browsing back through history must not
+   rewrite when things were done. */
+function doneBase(){ if(!STORE.v2.doneBase) STORE.v2.doneBase={}; return STORE.v2.doneBase; }
+function stampCompletions(){
+  if(WEEK_OFFSET!==0) return;
+  var d=doneWeeks(), b=doneBase(), wk=wkKey(), changed=false;
+  CLIENTS.forEach(function(c){
+    // The week a client was first watched is recorded explicitly. Everything
+    // found complete during that week counts as history, not as this week's
+    // work — including completions that only Notion knows about, which arrive a
+    // moment after the tracker and would otherwise look brand new.
+    if(!b[c.key]){ b[c.key]=wk; changed=true; }
+    var baselineWeek = b[c.key]===wk;
+    var m = d[c.key] = d[c.key] || {};
+    var now = completeNow(c);
+    Object.keys(now).forEach(function(k){
+      if(m[k]) return;
+      m[k] = baselineWeek ? 'pre' : wk;   // 'pre' = done before we started watching
+      changed=true;
+    });
+  });
+  if(changed) saveStore();
+}
+function completedFor(c){
+  var m=(doneWeeks()[c.key])||{}, wk=wkKey(), now=completeNow(c), rows=[];
+  Object.keys(now).forEach(function(k){
+    if(m[k]!==wk) return;
+    rows.push({task:now[k].task, owner:now[k].owner, note:now[k].note, from:'tracker'});
+  });
+  return rows;
+}
+/* What is scheduled for the week AFTER the one being viewed. Strictly by date —
+   undated work is left out, because "coming up next week" is a commitment and an
+   undated task is not one. Client-owned items are marked, since those are the
+   asks rather than the promises. */
+function upcomingFor(c){
+  var r=weekRange(WEEK_OFFSET+1), rows=[];
+  c.tasks.forEach(function(t){
+    var s=(t.status||'').toLowerCase();
+    if(s==='complete' || s==='done') return;
+    var due=t.end||'';
+    if(!due || due<r.s || due>r.e) return;
+    rows.push({task:t.task, owner:t.owner, due:due, clientSide:t.clientSide, note:t.note||''});
+  });
+  rows.sort(function(a,b){ return a.due<b.due?-1:(a.due>b.due?1:0); });
   return rows;
 }
 function neededFor(c){
@@ -555,12 +625,39 @@ function buildDraft(c, mode){
     L.push('');
     if(done.length){
       L.push('Completed this week:');
-      done.forEach(function(r){ L.push('  • '+r.task+(r.owner?'  ('+r.owner+')':'')); });
+      done.forEach(function(r){
+        L.push('  • '+r.task);
+        // The team's own note on the task — the bit that usually costs you a
+        // follow-up question. Indented so it reads as detail, and easy to cut.
+        if(r.note) L.push('      '+r.note);
+      });
+      var missing=done.filter(function(r){ return !r.note; }).length;
+      if(missing){
+        L.push('');
+        L.push('  [ '+missing+' of '+done.length+' completed tasks had no note in the tracker —');
+        L.push('    check those before sending, or ask the owner to add one next time. ]');
+      }
     } else {
       L.push('Completed this week:');
       L.push('  • (nothing recorded as finished this week — worth a sanity check before sending)');
     }
-    L.push(''); L.push('Anything you would like us to prioritise next week, just say.');
+    var next=upcomingFor(c), nr=weekRange(WEEK_OFFSET+1);
+    L.push('');
+    L.push('Coming up next week ('+fmtDay(nr.from)+' – '+fmtDay(nr.to)+'):');
+    if(next.length){
+      // No dates and no owner names — the week grid resolves everything in a week
+      // to that week's Sunday, so per-task dates all read the same and invite
+      // questions; internal owners are not the client's concern. The one thing
+      // kept is whether an item sits with them.
+      next.forEach(function(r){
+        L.push('  • '+r.task+(r.clientSide?'  (with you)':''));
+      });
+      var asks=next.filter(function(r){ return r.clientSide; }).length;
+      if(asks) L.push('  '+asks+' of these '+(asks===1?'is':'are')+' with you — flagged above.');
+    } else {
+      L.push('  • Nothing scheduled to a date next week.');
+    }
+    L.push(''); L.push('Please reach out if anything above needs clarification. Have a lovely weekend.');
     L.push(''); L.push('Thanks,'); L.push(WHO||'');
   } else {
     var need=neededFor(c);
@@ -712,7 +809,7 @@ function render(){
           (!c.hasTracker
             ? 'No tracker for this client, so there is nothing to build a draft from &mdash; write the update by hand. It will still be saved, reviewed and marked sent like any other.'
             : (m==='friday'
-              ? '<b>'+count+'</b> task'+(count===1?'':'s')+' finished this week, from Notion and the tracker, de-duplicated.'
+              ? '<b>'+count+'</b> task'+(count===1?'':'s')+' finished this week &middot; <b>'+upcomingFor(c).length+'</b> scheduled for next week.'
               : '<b>'+count+'</b> thing'+(count===1?'':'s')+' sitting with the client — their open tasks due by Sunday, plus anything of ours blocked on them.'))+
         '</div>'+
         '<textarea class="draft" placeholder="Write the update, or hit Build from source to start from the data."'+
