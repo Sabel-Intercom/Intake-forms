@@ -57,6 +57,13 @@
   .ci-mignote{background:var(--card2);border:1px solid var(--border2);border-left:3px solid var(--amber);
     border-radius:0 9px 9px 0;padding:11px 15px;font-size:12px;line-height:1.6;color:var(--muted);margin-bottom:11px;}
   .ci-mignote b{color:var(--amber);}
+  .ci-docs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:11px;}
+  .ci-docs .l{font-size:8.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mono);margin-right:2px;}
+  .ci-docs .none{font-size:10.5px;color:var(--mono);line-height:1.5;}
+  .ci-docs .none b{color:var(--muted);}
+  .doc{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:6px 11px;border-radius:6px;
+    border:1px solid var(--border2);background:var(--card2);color:#FCA5A5;text-decoration:none;transition:.12s;}
+  .doc:hover{color:var(--w);border-color:var(--red);text-decoration:none;}
   .ci-src{font-size:9px;color:var(--mono);letter-spacing:.03em;}
   .ci-pending{font-size:12.5px;color:var(--muted);background:var(--card2);border:1px dashed var(--border);
     border-radius:9px;padding:20px;line-height:1.6;}
@@ -214,6 +221,20 @@ function renderDetail(){
      (p.signedSource?'<div class="s">'+esc(p.signedSource)+'</div>':'')+'</div>';
   h+='<div class="ci-cell"><div class="l">Kick-off meeting</div><div class="v">'+esc(p.kickoff||'TBC')+'</div></div>';
   h+='</div>';
+
+  // Signed paperwork. Two documents can exist per client — the Sabel-branded
+  // proposal or SOW, and Intercom's own Professional Services SOW on partner
+  // deals — and which one is "the contract" varies, so link whichever are set
+  // rather than picking for the reader. Both come from URL properties on the
+  // client's row in Notion; nothing is hardcoded here.
+  var docs=[];
+  if(p.sabelDoc)    docs.push('<a class="doc" href="'+esc(p.sabelDoc)+'" target="_blank" rel="noopener">&#128196; Sabel proposal / SOW</a>');
+  if(p.intercomSow) docs.push('<a class="doc" href="'+esc(p.intercomSow)+'" target="_blank" rel="noopener">&#128196; Intercom SOW</a>');
+  h+='<div class="ci-docs"><span class="l">Signed paperwork</span>'+
+     (docs.length ? docs.join('')
+                  : '<span class="none">No signed document linked &mdash; set <b>Sabel doc</b> or <b>Intercom SOW</b> on this client&rsquo;s row in Notion.</span>')+
+     '</div>';
+
   h+='<div class="ci-scope"><div class="l">Scope overview</div><p>'+esc(p.scope)+'</p></div>';
   if(p.migrationNote) h+='<div class="ci-mignote"><b>Migration detail:</b> '+esc(p.migrationNote)+'</div>';
   h+='<div class="ci-src">Source: '+esc(p.signedSource||'SOW / proposal')+' &middot; live from Sabel Ops &rsaquo; Projects'+
