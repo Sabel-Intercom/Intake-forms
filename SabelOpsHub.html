@@ -96,7 +96,7 @@
           <div class="ico">&#9636;</div>
           <h2>Project Tracker Dashboard</h2>
           <div class="sub">Where every client tracker is at — live</div>
-          <p>A single team view across all client project trackers: run sheet, stage board and command table — live task progress, blockers and owner workload pulled straight from the trackers themselves.</p>
+          <p>The command table for running a call: every client go-live first, their open actions beside them, plus the go-live timeline, blockers and the pipeline — pulled straight from the trackers themselves.</p>
           <span class="go">Open dashboard <span class="arrow">&rarr;</span></span>
         </button>
         <button class="pillar" onclick="show('contracts')">
@@ -126,7 +126,7 @@
       </div>
       <div class="foot-note">
         <b>Onboarding / Offboarding Portal</b> &mdash; your checklists to set clients up and close them out.<br>
-        <b>Project Tracker Dashboard</b> &mdash; the team view of where all the client trackers stand.<br>
+        <b>Project Tracker Dashboard</b> &mdash; the command table you run the all-hands call from.<br>
         <b>Client Contracts</b> &mdash; scope and hours per client, the go-live timeline and the expiry watch.<br>
         <b>Weekly Client Updates</b> &mdash; draft and approve the Monday and Friday client messages.<br>
         <b>Feedback Dashboard</b> &mdash; what clients are telling us, pulled live from the feedback webhook.
@@ -169,7 +169,7 @@
   // browser holds it. Stamping the version onto the src makes it a new URL, so
   // a deploy is picked up immediately.
   // BUMP THIS whenever you push a new version of any tab's page.
-  var ASSET_V = '2026-08-14g';
+  var ASSET_V = '2026-08-17a';
   function versioned(src){
     return src + (src.indexOf('?') > -1 ? '&' : '?') + 'v=' + ASSET_V;
   }

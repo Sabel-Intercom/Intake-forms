@@ -57,34 +57,11 @@
   .btn-ghost{background:var(--card2);border:1px solid var(--border);color:var(--body);border-radius:6px;padding:8px 15px;font-size:12px;font-weight:700;}
   .btn-ghost:hover{color:var(--w);border-color:var(--mono);}
 
-  /* stage lanes */
-  .lanes{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;align-items:start;}
-  .lane-h{display:flex;align-items:center;gap:6px;padding-bottom:7px;margin-bottom:8px;border-bottom:2px solid var(--mono);}
-  .lane-h .nm{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
-  .lane-h .n{font-size:9px;color:var(--mono);margin-left:auto;}
-  .lane-c{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:5px 7px;border-radius:5px;background:var(--surface);cursor:pointer;}
-  .lane-c:hover{background:var(--card3);}
-  .lane-c .nm{font-size:10.5px;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .lane-c .d{font-size:9px;white-space:nowrap;}
-
-  /* run sheet rows */
-  .arow{background:var(--card2);border:1px solid var(--border2);border-left-width:3px;border-radius:8px;overflow:hidden;}
-  .ahead{display:grid;grid-template-columns:64px minmax(230px,1fr) minmax(0,auto) 118px 16px;gap:14px;align-items:center;padding:11px 14px;cursor:pointer;}
-  .ahead:hover{background:var(--card3);}
-  .ad1{font-size:17px;font-weight:800;line-height:1;}
-  .ad2{font-size:7.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mono);margin-top:4px;}
-  .anm{font-size:13px;font-weight:700;color:var(--w);}
-  .ameta{font-size:9.5px;color:var(--mono);margin-top:4px;}
   .stg{font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:20px;white-space:nowrap;}
-  .cchip{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;}
   .bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
   .bar > i{display:block;height:100%;}
-  .abody{border-top:1px solid var(--border2);background:var(--surface);padding:4px 14px 11px;}
-  .trow{display:grid;grid-template-columns:18px 8px 1fr 78px 92px 74px 22px;gap:11px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border2);}
-  .trow:last-of-type{border-bottom:none;}
   .tick{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--dim);color:var(--green);font-size:9px;line-height:12px;text-align:center;cursor:pointer;background:none;padding:0;}
   .tick.on{border-color:var(--green);background:rgba(74,222,128,.16);}
-  .dot{width:8px;height:8px;border-radius:2px;}
   .ttx{font-size:12px;line-height:1.35;text-wrap:pretty;}
   .ttx.done{color:#4E5768;text-decoration:line-through;}
 
@@ -95,22 +72,35 @@
   .tlkey{margin-left:auto;display:flex;gap:12px;align-items:center;}
   .tlkey span{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--mono);letter-spacing:.04em;text-transform:uppercase;}
   .tlkey i{width:7px;height:7px;border-radius:50%;display:block;}
-  .tl{position:relative;height:74px;margin:10px 2px 0;}
+  .tl{position:relative;height:78px;margin:10px 2px 0;}
   .tl-axis{position:absolute;left:0;right:0;bottom:22px;height:1px;background:var(--border);}
-  .tl-band{position:absolute;top:2px;bottom:22px;background:rgba(225,6,0,.13);border-left:1px solid rgba(225,6,0,.35);border-right:1px solid rgba(225,6,0,.35);border-radius:2px;}
-  .tl-tick{position:absolute;bottom:0;transform:translateX(-50%);font-size:8.5px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;}
-  .tl-grid{position:absolute;top:2px;bottom:22px;width:1px;background:rgba(255,255,255,.045);}
-  .tl-dot{position:absolute;bottom:22px;transform:translate(-50%,50%);width:11px;height:11px;border-radius:50%;border:2px solid var(--bg);cursor:pointer;z-index:3;transition:transform .12s;}
-  .tl-dot:hover{transform:translate(-50%,50%) scale(1.45);}
-  .tl-lab{position:absolute;transform:translateX(-50%);font-size:9px;white-space:nowrap;color:var(--muted);cursor:pointer;z-index:2;}
-  .tl-lab:hover{color:var(--w);}
-  .tl-today{position:absolute;top:0;bottom:22px;width:1px;background:var(--red);opacity:.55;z-index:1;}
+  .tl-band{position:absolute;top:2px;bottom:22px;background:rgba(225,6,0,.13);border-left:1px solid rgba(225,6,0,.35);border-right:1px solid rgba(225,6,0,.35);border-radius:2px;pointer-events:none;}
+  .tl-tick{position:absolute;bottom:0;transform:translateX(-50%);font-size:8.5px;color:var(--mono);letter-spacing:.06em;text-transform:uppercase;pointer-events:none;}
+  .tl-grid{position:absolute;top:2px;bottom:22px;width:1px;background:rgba(255,255,255,.045);pointer-events:none;}
+  /* The hit area is the target, not the dot. Its width is set per dot from the
+     gap to its nearest neighbour, so a generous target never covers the one
+     next door — which is what made some go-lives unreachable. */
+  .tl-hit{position:absolute;bottom:14px;transform:translateX(-50%);height:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;}
+  .tl-dot{width:11px;height:11px;border-radius:50%;border:2px solid var(--bg);display:block;transition:transform .12s;}
+  .tl-hit:hover .tl-dot,.tl-hit.on .tl-dot{transform:scale(1.5);}
+  .tl-lab{position:absolute;transform:translateX(-50%);font-size:9px;white-space:nowrap;color:var(--muted);cursor:pointer;z-index:2;padding:2px 3px;border-radius:3px;}
+  .tl-lab:hover,.tl-lab.on{color:var(--w);background:rgba(255,255,255,.07);}
+  .tl-today{position:absolute;top:0;bottom:22px;width:1px;background:var(--red);opacity:.55;z-index:1;pointer-events:none;}
   .tl-today b{position:absolute;top:-2px;left:3px;font-size:8px;color:#FCA5A5;letter-spacing:.06em;text-transform:uppercase;font-weight:800;}
+  /* Fixed to the viewport rather than the box, so it is never clipped by the
+     timeline's own bounds and needs no containment maths. */
+  #tltip{position:fixed;display:none;z-index:70;pointer-events:none;max-width:330px;
+    background:var(--card3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;
+    box-shadow:0 12px 34px rgba(0,0,0,.55);font-size:11px;line-height:1.5;}
+  #tltip b{display:block;font-size:12.5px;color:var(--w);margin-bottom:3px;}
+  #tltip .r1{display:block;color:var(--body);}
+  #tltip .r2{display:block;color:var(--mono);font-size:10px;}
+  #tltip .r3{display:block;margin-top:5px;font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:#FCA5A5;}
 
   /* ── all-hands capture ── */
   .tw{border-radius:7px;transition:background .12s;}
-  .tw .grow,.tw .trow{cursor:pointer;padding:2px 4px;border-radius:7px;}
-  .tw .grow:hover,.tw .trow:hover{background:rgba(255,255,255,.028);}
+  .tw .grow{cursor:pointer;padding:2px 4px;border-radius:7px;}
+  .tw .grow:hover{background:rgba(255,255,255,.028);}
   .tw.cap{background:rgba(225,6,0,.05);box-shadow:inset 2px 0 0 var(--red);}
   .tick.cap{border-color:var(--border);color:var(--mono);font-size:10px;}
   .tick.cap.on{background:rgba(225,6,0,.16);border-color:var(--red);color:#FCA5A5;}
@@ -132,6 +122,15 @@
   .cnote{flex:1;background:var(--card2);border:1px solid var(--border2);border-radius:6px;color:var(--body);font:12px/1.45 inherit;padding:7px 9px;resize:vertical;min-height:38px;}
   .cnote:focus{outline:none;border-color:var(--red);}
   .cwas{font-size:9.5px;color:var(--mono);margin-left:auto;letter-spacing:.03em;}
+  .cbtn[disabled]{opacity:.45;cursor:default;}
+  .cwk{background:var(--card2);border:1px solid var(--border2);color:var(--body);font:11px inherit;
+    border-radius:5px;padding:5px 7px;max-width:240px;cursor:pointer;}
+  .cwk:focus{outline:none;border-color:var(--red);}
+  /* Date shifts are the one thing this board writes back, so they say so. */
+  .cwrite{font-size:9.5px;letter-spacing:.04em;color:var(--mono);}
+  .cwrite.busy{color:var(--blue);}
+  .cwrite.ok{color:var(--green);}
+  .cwrite.bad{color:var(--redText);}
 
   .capbtn.has{background:rgba(225,6,0,.16);color:#FCA5A5;}
   .capn{display:inline-block;min-width:15px;padding:0 4px;margin-left:3px;border-radius:8px;background:var(--red);color:#fff;font-size:9px;line-height:15px;text-align:center;}
@@ -152,38 +151,59 @@
   .srow{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);}
   .srow .m{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px;font-size:10px;}
   .snote{margin-top:6px;padding:7px 9px;background:var(--card);border-left:2px solid var(--border);border-radius:0 5px 5px 0;font-size:11.5px;line-height:1.5;color:var(--muted);white-space:pre-wrap;}
-  .badge{font-size:9px;font-weight:700;text-align:center;padding:3px 0;border-radius:4px;}
-  .due{font-size:9.5px;text-align:right;}
-  .flag{font-size:12px;text-align:right;color:#2F3644;cursor:pointer;background:none;border:none;}
-  .flag.on{color:var(--amber);}
-  .tfoot{display:flex;align-items:center;justify-content:space-between;padding-top:10px;}
-  .tfoot span{font-size:10px;color:var(--mono);}
-  .tfoot a{font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;}
-
-  /* board cards */
-  .board{display:grid;grid-template-columns:repeat(8,1fr);gap:9px;align-items:start;margin-bottom:22px;}
-  .bcol{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:10px;}
-  .bcard{background:var(--card);border:1px solid var(--border2);border-left-width:3px;border-radius:7px;padding:9px 10px;cursor:pointer;}
-  .bcard:hover{border-color:var(--border);}
-  .bcard .nm{font-size:11.5px;font-weight:700;color:var(--w);line-height:1.25;}
   .bchip{font-size:8.5px;font-weight:700;padding:2px 6px;border-radius:4px;}
+  .reb{margin-left:7px;font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    padding:1px 6px;border-radius:20px;color:var(--amber);background:rgba(251,191,36,.13);cursor:help;vertical-align:1px;}
 
   /* groups */
   .grp{background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:12px 13px;}
   .grp-h{font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;margin-bottom:11px;}
+
+  /* all-hands, split by owner — one column per person, so the call can go round
+     the room rather than round the urgency buckets */
+  .owngrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:13px;align-items:start;}
+  .preshead{margin-bottom:11px;}
+  .grp-h.own{display:flex;align-items:center;gap:9px;margin-bottom:9px;text-transform:none;letter-spacing:0;}
+  .oav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;flex:none;}
+  .onm{font-size:14px;font-weight:800;letter-spacing:-.01em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ocount{margin-left:auto;font-size:10px;font-weight:700;color:var(--mono);background:var(--card2);
+    border:1px solid var(--border2);padding:1px 8px;border-radius:20px;}
+  .obits{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px;}
+  .obadge{font-size:8.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:20px;}
   .grow{display:flex;align-items:flex-start;gap:9px;}
   .grow .m{display:flex;align-items:center;gap:9px;margin-top:5px;}
   .grow .m span{font-size:9px;}
   .empty{font-size:11px;color:var(--dim);}
 
   /* table */
-  .tbl{background:var(--card);border:1px solid var(--border2);border-radius:11px;overflow:hidden;}
+  /* No overflow:hidden here — it would make the box its own scrollport and the
+     sticky header would pin 57px DOWN inside it, on top of the first row. The
+     corners are rounded on the first and last children instead. */
+  .tbl{background:var(--card);border:1px solid var(--border2);border-radius:11px;}
   .thead,.tr{display:grid;grid-template-columns:minmax(170px,1.4fr) 96px 76px minmax(110px,1fr) 132px;gap:12px;padding:10px 15px;border-bottom:1px solid var(--border2);}
-  .thead{background:var(--surface);}
+  .thead{background:var(--surface);position:sticky;top:57px;z-index:5;border-radius:10px 10px 0 0;}
+  .tbl .tr:last-child{border-bottom:none;border-radius:0 0 10px 10px;}
   .thead span{font-size:8.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mono);}
-  .tr{cursor:pointer;border-left:3px solid transparent;}
+  .tr{cursor:pointer;border-left:3px solid transparent;scroll-margin-top:120px;}
   .tr:hover{background:var(--card3);}
   .tr.sel{background:var(--card3);border-left-color:var(--red);}
+  /* Arriving from a go-live on the timeline: say where you landed. */
+  @keyframes trflash{0%,100%{background:var(--card3);}35%{background:rgba(225,6,0,.20);}}
+  .tr.flash{animation:trflash 1.3s ease-in-out;}
+
+  /* client detail panel — the list of actions you work down on a call */
+  .dpanel{position:sticky;top:88px;display:flex;flex-direction:column;max-height:calc(100vh - 112px);overflow:hidden;}
+  .dhead{padding:14px 16px;border-bottom:1px solid var(--border2);background:linear-gradient(160deg,rgba(225,6,0,.10),var(--card));flex:none;}
+  .dnm{font-size:16px;font-weight:800;color:var(--w);letter-spacing:-.01em;line-height:1.2;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .dbody{flex:1;min-height:0;overflow:auto;}
+  .gsec{border-bottom:1px solid var(--border2);}
+  /* Group headings stay put as you scroll a long list, so an action always has
+     a heading above it and the client name above that. */
+  .gstick{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;margin:0;
+    padding:9px 16px;background:var(--surface);border-bottom:1px solid var(--border2);}
+  .gstick .gn{margin-left:auto;color:var(--mono);font-size:9px;}
 
   /* presenter */
   .pres{position:fixed;inset:0;z-index:90;background:var(--bg);display:none;flex-direction:column;}
@@ -208,11 +228,6 @@
     <button class="tab" id="refreshBtn" onclick="loadAll(true)" title="Re-read the trackers now">&#8635;</button>
     <button class="tab capbtn" id="capBtn" onclick="openSummary()" title="Everything captured on this call">&#9998; Call capture</button>
     <span class="chip-week" id="weekLabel"></span>
-    <div class="tabs">
-      <button class="tab" id="tab-a" onclick="setView('a')">1a · Run sheet</button>
-      <button class="tab" id="tab-b" onclick="setView('b')">1b · Stage board</button>
-      <button class="tab" id="tab-c" onclick="setView('c')">1c · Command table</button>
-    </div>
   </div>
 </header>
 
@@ -249,7 +264,7 @@
   <div class="pres-h">
     <div style="display:flex;align-items:center;gap:12px">
       <img class="logo-img" src="data:image/png;base64,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" alt="Sabel" style="height:22px">
-      <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mono)">All-hands run sheet</span>
+      <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mono)">All-hands &middot; by owner</span>
     </div>
     <div style="display:flex;align-items:center;gap:12px">
       <span class="mono" style="font-size:11px;color:var(--mono)" id="presCount"></span>
@@ -261,10 +276,16 @@
   <div class="pres-b" id="presBody"></div>
 </div>
 
+<div id="tltip"></div>
+
 <script>
 /* ──────────────────────────────────────────────────────────────
    SABEL PROJECT DASHBOARD
-   Three candidate layouts behind one switcher (1a / 1b / 1c).
+   One screen: the command table. It started as three candidate layouts behind a
+   switcher (run sheet / stage board / command table); the command table is the
+   one that held up on a live call, so the other two are gone and the pieces only
+   they carried — go-live timeline, blockers, pipeline, takeaway actions — moved
+   onto it.
 
    DATA WIRING — two feeds to connect when you are ready:
      1. Stage + go-live per client  → webhook key 'client-portal-v1'
@@ -379,27 +400,88 @@ function skillDate(d){
    So reading `d` alone shows the plan as first written, not as it stands now.
    WEEK1_START lives in the tracker's HTML rather than its saved state, so it is
    read from the file once per tracker and cached. */
-var WEEK1 = {};                       // trackerKey -> 'YYYY-MM-DD' | null
+/* Each tracker's HTML holds things its saved state does not: the week-grid
+   anchor, the build stamp, and the freshly built plan itself. Read once per
+   tracker per session and cached — a redeploy mid-session is picked up on the
+   next page reload, not on the 5-minute refresh. */
+var TRK = {};   // trackerKey -> {week1, buildV, goLive, seed, weekStarts}
+var TRK_EMPTY = {week1:null, buildV:null, goLive:null, seed:null, weekStarts:null};
 function isoOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function hasWeeks(data){
-  if(!data || !data.taskData) return false;
-  return Object.keys(data.taskData).some(function(pid){
-    var g=data.taskData[pid]||{};
-    return ['sabel','client'].some(function(side){
-      return (g[side]||[]).some(function(t){ return t && t.week; });
-    });
-  });
+
+/* Pull one balanced {...} literal out of a source file, starting at `from`.
+   String-aware, so a brace inside a task title cannot end the object early. */
+function braceBlock(src, from){
+  var i = src.indexOf('{', from);
+  if(i < 0) return '';
+  var depth=0, q='', esc=false;
+  for(var j=i; j<src.length; j++){
+    var ch = src.charAt(j);
+    if(q){
+      if(esc) esc=false;
+      else if(ch==='\\') esc=true;
+      else if(ch===q) q='';
+      continue;
+    }
+    if(ch==='"'||ch==="'"||ch==='`'){ q=ch; continue; }
+    if(ch==='{') depth++;
+    else if(ch==='}'){ depth--; if(!depth) return src.slice(i, j+1); }
+  }
+  return '';
 }
-function loadWeek1(tr){
-  if(WEEK1[tr.key]!==undefined) return Promise.resolve();       // cached, including null
-  if(!tr.file){ WEEK1[tr.key]=null; return Promise.resolve(); }
+/* Trackers built by the current skill write their plan as JSON. Older ones write
+   a JS object literal — unquoted keys, single quotes — which JSON.parse cannot
+   read. The source is our own tracker file, from our own Pages origin, already
+   fetched above; evaluating just the literal is the only way to read that shape. */
+function parseObjLiteral(src){
+  if(!src) return null;
+  try{ return JSON.parse(src); }catch(e){}
+  try{ return (new Function('return ('+src+');'))(); }catch(e){}
+  return null;
+}
+function loadTracker(tr){
+  if(TRK[tr.key]) return Promise.resolve();                     // cached
+  if(!tr.file){ TRK[tr.key]=TRK_EMPTY; return Promise.resolve(); }
   return fetch(BASE+tr.file,{cache:'no-store'})
     .then(function(r){ return r.ok?r.text():''; })
     .then(function(txt){
-      var m=txt.match(/WEEK1_START\s*=\s*['"]([\d-]{10})['"]/);
-      WEEK1[tr.key]= m ? m[1] : null;
+      var w1  = txt.match(/WEEK1_START\s*=\s*['"]([\d-]{10})['"]/);
+      var bv  = txt.match(/BUILD_V\s*=\s*['"]?(\d+)/);
+      var gl  = txt.match(/GO_LIVE\s*=\s*['"]([\d-]{10})['"]/);
+      var tm  = txt.match(/(?:const|var|let)\s+T\s*=\s*\{/);
+      var wsm = txt.match(/WEEK_STARTS_DEFAULT\s*=\s*\{/);
+      TRK[tr.key] = {
+        week1:  w1 ? w1[1] : null,
+        buildV: bv ? bv[1] : null,
+        goLive: gl ? gl[1] : null,
+        seed:   tm  ? parseObjLiteral(braceBlock(txt, tm.index))  : null,
+        weekStarts: wsm ? (parseObjLiteral(braceBlock(txt, wsm.index)) || null) : null
+      };
     })
-    .catch(function(){ WEEK1[tr.key]=null; });
+    .catch(function(){ TRK[tr.key]=TRK_EMPTY; });
+}
+
+/* ── which plan to believe ──────────────────────────────────────
+   A tracker stamps BUILD_V into its saved state. Rebuild and redeploy the file
+   and that stamp moves on — at which point the tracker itself throws its whole
+   saved state away on load and shows the freshly built plan instead
+   (its loadInitial: `if(d.buildV!==BUILD_V) return`).
+
+   This board has to make the same call. It used to read the saved state
+   unconditionally, so for any tracker rebuilt since its last save it reported a
+   plan the tracker no longer shows: superseded owners (tasks reassigned to
+   Richard still reading Chris), superseded dates, and tasks that had been added
+   or removed. Same rule, same answer, both screens. */
+function planFor(reg){
+  var trk = TRK[reg.key] || TRK_EMPTY, saved = reg._data;
+  // Only a build stamp we could actually read can invalidate anything. If the
+  // file did not load, trust the saved state as before.
+  var rebuilt = !!(trk.buildV && saved && saved.buildV!==undefined &&
+                   String(saved.buildV) !== String(trk.buildV));
+  if(trk.seed && (!saved || rebuilt)){
+    return {data:{taskData:trk.seed, weekStarts:trk.weekStarts||{}, goLive:trk.goLive||''},
+            rebuilt:rebuilt, seeded:true};
+  }
+  return {data:saved, rebuilt:false, seeded:false};
 }
 /* The Sunday of week n — a task pinned to a week is not late until that week is out. */
 function weekEndDate(n, week1, weekStarts){
@@ -419,20 +501,25 @@ function taskDue(t, week1, weekStarts){
 }
 
 /* Trackers exist in three shapes. Normalise all of them to
-   [{id, tasks:[{task, owner, status, end, dep}]}]. */
+   [{id, tasks:[{task, owner, status, end, dep}]}].
+   Skill-format tasks also carry where they live in the tracker — phase, side and
+   index — which is what lets a date shift be written back to the right slot. */
 function phasesFrom(data, key){
   if(!data) return null;
   // 1. Skill format: {taskData:{phase:{sabel:[],client:[]}}, statuses:{phase-s-0:'…'}}
   if(data.taskData && typeof data.taskData==='object'){
     var st = data.statuses || {};
-    var w1 = WEEK1[key] || null, ws = data.weekStarts || {};
+    var trk = TRK[key] || TRK_EMPTY;
+    var w1 = trk.week1 || null, ws = data.weekStarts || {};
     return Object.keys(data.taskData).map(function(pid){
       var grp = data.taskData[pid] || {}, tasks = [];
-      (grp.sabel||[]).forEach(function(t,i){
-        tasks.push({task:t.t, owner:t.o, status: st[pid+'-s-'+i] || t.s, end: taskDue(t,w1,ws), dep:false});
-      });
-      (grp.client||[]).forEach(function(t,i){
-        tasks.push({task:t.t, owner:t.o, status: st[pid+'-c-'+i] || t.s, end: taskDue(t,w1,ws), dep:true});
+      ['sabel','client'].forEach(function(side){
+        var sfx = side==='sabel' ? '-s-' : '-c-';
+        (grp[side]||[]).forEach(function(t,i){
+          tasks.push({task:t.t, owner:t.o, status: st[pid+sfx+i] || t.s,
+            end: taskDue(t,w1,ws), dep: side==='client',
+            at:{key:key, pid:pid, side:side, idx:i, week:t.week||0, wkEnd:t.wkEnd||0}});
+        });
       });
       return {id:pid, tasks:tasks};
     });
@@ -496,22 +583,36 @@ function buildClients(portal, overrides){
     return (pc.trackerKey && byKey[pc.trackerKey]) || byNorm[normName(pc.name)] || null;
   }
   function make(name, stage, lead, portalGl, reg){
-    var phases = reg && reg._data ? phasesFrom(reg._data, reg.key) : null;
+    var pl = reg ? planFor(reg) : {data:null, rebuilt:false};
+    var phases = pl.data ? phasesFrom(pl.data, reg.key) : null;
     var tasks = [], p = 0, nd = true, auto = null;
     if(phases){
       nd = false;
       phases.forEach(function(ph){ (ph.tasks||[]).forEach(function(k){
         tasks.push([k.task, k.dep ? 'Client' : (k.owner||'Sabel'), ph.id || 'other',
-                    k.end || '', k.status || 'Pending']);
+                    k.end || '', k.status || 'Pending', k.at || null]);
       });});
       var tl = tallyOf(phases);
       p = tl.total ? Math.round(tl.done/tl.total*100) : 0;
       auto = deriveGoLive(phases);
+      // The week grid this tracker is actually running on, so the date-shift
+      // controls can label weeks with real dates and offer a sensible range.
+      if(reg.key){
+        WS[reg.key] = pl.data.weekStarts || {};
+        var mw = 0;
+        tasks.forEach(function(row){
+          var a = row[5]; if(!a) return;
+          var e = (a.wkEnd && a.wkEnd>a.week) ? a.wkEnd : a.week;
+          if(e > mw) mw = e;
+        });
+        MAXW[reg.key] = mw;
+      }
     }
-    var trackerGl = reg && reg._data && reg._data.goLive ? reg._data.goLive : null;
+    var trackerGl = pl.data && pl.data.goLive ? pl.data.goLive : null;
     var gl = overrides[name] || (reg ? overrides[reg.name] : null) || portalGl || trackerGl || auto || '';
     return {id:slug(name), n:name, st:stage, gl:gl, lead:lead||'—',
-            f:(reg && reg.file) || '', p:p, nd:nd, t:tasks};
+            f:(reg && reg.file) || '', p:p, nd:nd, t:tasks,
+            key:(reg && reg.key) || '', rebuilt:!!pl.rebuilt};
   }
 
   var out=[], used={};
@@ -568,9 +669,11 @@ function loadAll(manual){
       return fetchKeyMeta(t.key).then(function(m){
         t._data = m.data;
         if(m.reached){ LIVE.ok++; if(!m.data) LIVE.empty++; }
-        // Only trackers that actually pin work to weeks need their HTML read,
-        // and only once — most refreshes fetch nothing extra.
-        return hasWeeks(m.data) ? loadWeek1(t) : null;
+        // Every tracker's HTML is read once — it carries the build stamp that
+        // says whether the saved state is still the live plan, the week-grid
+        // anchor, and the plan itself as a fallback. Cached, so later refreshes
+        // fetch nothing extra.
+        return loadTracker(t);
       });
     })).then(function(){
       CLIENTS = buildClients(portal, overrides);
@@ -606,7 +709,7 @@ var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','De
 
 /* ── state (persisted) ── */
 var PK = 'sabel_dash_refresh_v1';
-var S = {view:'a', open:{}, sel:'', filter:'All open', cap:{}, capOpen:'', pIdx:0};
+var S = {sel:'', filter:'All open', cap:{}, capOpen:'', pIdx:0};
 try{ var saved = JSON.parse(localStorage.getItem(PK)||'null'); if(saved) for(var k in saved) S[k]=saved[k]; }catch(e){}
 if(!S.cap || typeof S.cap!=='object') S.cap={};
 function save(){ try{ localStorage.setItem(PK, JSON.stringify(S)); }catch(e){} }
@@ -649,6 +752,9 @@ function enrich(c){
       chase:!!(cap&&cap.chase), captured:!!cap,
       dueLabel:fmt(t[3])+(u==='overdue'?' !':''), due:t[3],
       dueColor:u==='overdue'?'#F87171':(u==='week'?'#FBBF24':'#64748B'),
+      // Where this task sits in its tracker, so a date shift can be written
+      // back to the right slot. Absent on the older tracker shapes.
+      at:t[5]||null, trackerKey:c.key||'',
       client:c.n, clientId:c.id};
   });
   var out=tasks.filter(function(t){return t.u!=='done';});
@@ -681,7 +787,8 @@ function enrich(c){
   var pillars=[]; out.forEach(function(t){ if(pillars.indexOf(t.pillar)<0) pillars.push(t.pillar); });
   var glTxt = c.gl ? (days>=0 ? 'Go-live '+fmt(c.gl) : 'Live since '+fmt(c.gl)) : 'No go-live set';
 
-  return {id:c.id, name:c.n, stage:c.st, lead:c.lead, gl:c.gl, stageColor:STAGE_C[c.st], stageBg:STAGE_BG[c.st],
+  return {id:c.id, name:c.n, stage:c.st, lead:c.lead, gl:c.gl, key:c.key||'', rebuilt:!!c.rebuilt,
+    stageColor:STAGE_C[c.st], stageBg:STAGE_BG[c.st],
     prog:c.p, progPct:c.p+'%', meta:glTxt+' · lead '+c.lead+' · '+out.length+' open',
     daysNum:daysNum, daysUnit:daysUnit, shortDays:shortDays, daysColor:daysColor, key:key, days:days,
     overdue:overdue, week:week, blocked:blocked, clientSide:clientSide, chips:chips,
@@ -697,29 +804,23 @@ function applyFilter(list){
   if(S.filter==='Blocked') return list.filter(function(t){return t.u==='blocked';});
   return list;
 }
+/* The filter pills used to sit above the command table doing nothing — only the
+   run sheet honoured them. They narrow the client's list of actions. */
 function groupsFor(c){
+  var list=applyFilter(c.outTasks);
   return [
-    {label:'Overdue', color:'#F87171', tasks:c.outTasks.filter(function(t){return t.u==='overdue';})},
-    {label:'Due this week', color:'#60A5FA', tasks:c.outTasks.filter(function(t){return t.u==='week';})},
-    {label:'Blocked & waiting', color:'#FBBF24', tasks:c.outTasks.filter(function(t){return t.u==='blocked';})},
-    {label:'Coming up', color:'#64748B', tasks:c.outTasks.filter(function(t){return t.u==='later';})}
+    {label:'Overdue', color:'#F87171', tasks:list.filter(function(t){return t.u==='overdue';})},
+    {label:'Due this week', color:'#60A5FA', tasks:list.filter(function(t){return t.u==='week';})},
+    {label:'Blocked & waiting', color:'#FBBF24', tasks:list.filter(function(t){return t.u==='blocked';})},
+    {label:'Coming up', color:'#64748B', tasks:list.filter(function(t){return t.u==='later';})}
   ];
 }
 function all(){ return CLIENTS.map(enrich).sort(function(a,b){return a.key-b.key;}); }
 function find(list,id){ for(var i=0;i<list.length;i++) if(list[i].id===id) return list[i]; return list[0]; }
 
 /* ── actions ── */
-function setView(v){ S.view=v; save(); render(); }
-function toggleOpen(id){ S.open[id]=!S.open[id]; S.sel=id; save(); render(); }
-function focusClient(id){ S.sel=id; S.open[id]=true; save(); render(); }
+function focusClient(id){ S.sel=id; save(); render(); }
 function setFilter(f){ S.filter=f; save(); render(); }
-function toggleAll(){
-  var any=Object.keys(S.open).some(function(k){return S.open[k];});
-  if(any){ S.open={}; } else { CLIENTS.forEach(function(c){ S.open[c.id]=true; }); }
-  save(); render();
-}
-function pickClient(v){ S.sel=v; save(); render(); }
-function stepClient(d){ var L=all(); var i=L.findIndex(function(c){return c.id===S.sel;}); S.sel=L[Math.max(0,Math.min(L.length-1,i+d))].id; save(); render(); }
 function startPresent(){ S.pIdx=0; save(); document.getElementById('pres').classList.add('on'); renderPres(); }
 function stopPresent(){ document.getElementById('pres').classList.remove('on'); }
 function presMove(d){ var L=all(); S.pIdx=Math.max(0,Math.min(L.length-1,S.pIdx+d)); save(); renderPres(); }
@@ -752,7 +853,9 @@ function capPrune(id){
 }
 function capOpen(id, ev){
   if(ev) ev.stopPropagation();
-  S.capOpen = (S.capOpen===id) ? '' : id;
+  var closing = S.capOpen===id;
+  S.capOpen = closing ? '' : id;
+  if(closing) delete WRITE[id];        // the date-shift result was for that visit
   save(); render();
 }
 function capSetStatus(id, st, ev){
@@ -833,7 +936,199 @@ function loadCapture(){
   });
 }
 
+/* ──────────────────────────────────────────────────────────────
+   SHIFTING DATES
+   The one thing this board writes back. Everything else it collects into Call
+   capture for someone to apply by hand, but a slipped date is different: the
+   point of moving it is that the next person to open the tracker sees the new
+   one.
+
+   A skill-format tracker does not store a date on a task. It stores a WEEK, and
+   the date is derived from the week grid — WEEK1_START plus any per-week
+   overrides in weekStarts. So there are two honest ways to move a date, and they
+   are the two the tracker itself offers:
+
+     move task   one task goes to a different week. Its span length is kept and
+                 nothing else in the plan moves.
+     slip week   a week's start date moves and every later week cascades with it,
+                 for when the whole plan slides. Go-live is a commitment and
+                 deliberately stays put — the tracker's own setWeekStart() does
+                 the same, and the buffer to go-live is what absorbs the slip.
+
+   Older trackers keep their plan in a shape with no week grid and no per-task
+   address; those say so and stay read-only rather than being written blind.
+   ────────────────────────────────────────────────────────────── */
+var WS = {};        // trackerKey -> live weekStarts overrides
+var MAXW = {};      // trackerKey -> highest week used by the plan
+var WRITE = {};     // task id -> {state:'saving'|'saved'|'failed', msg}
+
+function weekStartOf(key, n){
+  var trk=TRK[key]||TRK_EMPTY, ws=WS[key]||{};
+  if(ws[n]) return new Date(ws[n]+'T00:00:00');
+  if(!trk.week1) return null;
+  var d=new Date(trk.week1+'T00:00:00'); d.setDate(d.getDate()+(n-1)*7); return d;
+}
+function weekRange(key, n){
+  var s=weekStartOf(key,n); if(!s||isNaN(s.getTime())) return '';
+  var e=new Date(s.getTime()); e.setDate(e.getDate()+6);
+  return s.getDate()+' '+MON[s.getMonth()]+' – '+e.getDate()+' '+MON[e.getMonth()];
+}
+
+/* Read the tracker fresh, apply `mutate`, write it back in the tracker's own
+   save shape. Reading immediately before writing is the conflict check: anyone
+   with the tracker open gets its "someone else has updated this" prompt on
+   their next save rather than silently overwriting this change. */
+function trackerWrite(key, mutate){
+  var trk = TRK[key] || TRK_EMPTY;
+  return fetch(API+'?key='+encodeURIComponent(key)+'&_t='+Date.now(), {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      var saved = (j && j.ok) ? j.data : null;
+      var rebuilt = !!(trk.buildV && saved && saved.buildV!==undefined &&
+                       String(saved.buildV) !== String(trk.buildV));
+      var payload;
+      if(!saved || rebuilt){
+        // The saved state has been superseded by a rebuild, so the tracker is
+        // already ignoring it. Writing into it would put the change somewhere
+        // nothing reads. Start from the built plan — what the tracker actually
+        // shows today — and stamp it with the live build.
+        if(!trk.seed) throw new Error('cannot read this tracker’s plan');
+        payload = {buildV: trk.buildV ? +trk.buildV : undefined,
+                   goLive: trk.goLive || '',
+                   weekStarts: JSON.parse(JSON.stringify(trk.weekStarts||{})),
+                   statuses:{}, notes:{}, links:{}, origStatus:{},
+                   taskData: JSON.parse(JSON.stringify(trk.seed))};
+      } else {
+        payload = JSON.parse(JSON.stringify(saved));
+        if(!payload.taskData) throw new Error('this tracker keeps no task data');
+      }
+      mutate(payload);
+      payload.savedAt = Date.now();
+      payload.savedBy = 'ops-dashboard';
+      return fetch(API, {method:'POST', headers:{'Content-Type':'application/json'},
+                         body: JSON.stringify({key:key, value: JSON.stringify(payload)})})
+        .then(function(r){ if(!r.ok) throw new Error('the tracker refused the save ('+r.status+')'); });
+    });
+}
+function rowAt(payload, a, title){
+  var grp = payload.taskData && payload.taskData[a.pid];
+  var row = grp && grp[a.side] && grp[a.side][a.idx];
+  // The index is only trustworthy while it still points at the same task. If the
+  // plan moved underneath us, stop rather than edit a neighbour by accident.
+  if(!row || row.t !== title) throw new Error('that task has moved in the tracker — hit ↻ and try again');
+  return row;
+}
+function shiftTaskWeek(t, delta, target){
+  var a = t.at;
+  return trackerWrite(a.key, function(p){
+    var row = rowAt(p, a, t.t);
+    var from = row.week || 0;
+    var to = target || Math.max(1, from + delta);
+    if(row.wkEnd && from && row.wkEnd > from) row.wkEnd = row.wkEnd + (to - from);   // keep the span length
+    row.week = to;
+    // A leftover free-text date would now contradict the week it sits in, and
+    // both the tracker and this board prefer the week. Clear it.
+    if(row.d) row.d = '';
+  });
+}
+function slipWeek(t, days){
+  var a = t.at, n = a.week;
+  return trackerWrite(a.key, function(p){
+    var trk = TRK[a.key] || TRK_EMPTY;
+    if(!trk.week1) throw new Error('this tracker has no week grid to slip');
+    var ws = p.weekStarts || (p.weekStarts = {});
+    function startOf(i){
+      if(ws[i]) return new Date(ws[i]+'T00:00:00');
+      var d=new Date(trk.week1+'T00:00:00'); d.setDate(d.getDate()+(i-1)*7); return d;
+    }
+    var mx = 0;
+    Object.keys(p.taskData||{}).forEach(function(pid){
+      ['sabel','client'].forEach(function(side){
+        ((p.taskData[pid]||{})[side]||[]).forEach(function(r){
+          var e = (r.wkEnd && r.week && r.wkEnd>r.week) ? r.wkEnd : (r.week||0);
+          if(e>mx) mx=e;
+        });
+      });
+    });
+    mx = Math.max(mx, 8) + 8;
+    for(var i=n; i<=mx; i++){
+      var d = startOf(i); d.setDate(d.getDate()+days); ws[i] = isoOf(d);
+    }
+  });
+}
+function runShift(id, fn, okMsg){
+  WRITE[id] = {state:'saving'}; render();
+  fn().then(function(){
+    WRITE[id] = {state:'saved', msg:okMsg};
+    return loadAll(true);          // re-read, so the board shows what the tracker now says
+  }).catch(function(e){
+    WRITE[id] = {state:'failed', msg:(e && e.message) || 'the write failed'};
+    render();
+  });
+}
+function shiftTask(id, delta, ev){
+  if(ev) ev.stopPropagation();
+  var t = capFindTask(all(), id); if(!t || !t.at) return;
+  var to = Math.max(1, (t.at.week||0) + delta);
+  runShift(id, function(){ return shiftTaskWeek(t, delta, 0); },
+           'Moved to week '+to+' · '+(weekRange(t.at.key, to)||'dates follow the week grid'));
+}
+function shiftTaskTo(id, val){
+  var t = capFindTask(all(), id); if(!t || !t.at || !val) return;
+  runShift(id, function(){ return shiftTaskWeek(t, 0, +val); },
+           'Moved to week '+val+' · '+(weekRange(t.at.key, +val)||'dates follow the week grid'));
+}
+function slipFrom(id, days, ev){
+  if(ev) ev.stopPropagation();
+  var t = capFindTask(all(), id); if(!t || !t.at || !t.at.week) return;
+  var dd = Math.abs(days), when = days>0 ? 'later' : 'earlier';
+  if(!confirm('Slip week '+t.at.week+' of '+t.client+' by '+dd+' day'+(dd===1?'':'s')+' '+when+'?\n\n'+
+              'Every week from '+t.at.week+' onwards moves with it, for every task in this tracker. '+
+              'Go-live stays where it is.\n\nThis writes to the live tracker.')) return;
+  runShift(id, function(){ return slipWeek(t, days); },
+           'Week '+t.at.week+' and later moved '+dd+' day'+(dd===1?'':'s')+' '+when);
+}
+
 /* ── capture UI ── */
+function weekOptsHTML(t){
+  var key=t.at.key, cur=t.at.week||0;
+  var mx=Math.max(MAXW[key]||8, (t.at.wkEnd||cur)+2, 8), o='';
+  if(!cur) o+='<option value="" selected>Put it in a week…</option>';
+  for(var n=1;n<=mx;n++){
+    var r=weekRange(key,n);
+    o+='<option value="'+n+'"'+(n===cur?' selected':'')+'>Week '+n+(r?' · '+r:'')+'</option>';
+  }
+  return o;
+}
+function shiftRowHTML(t){
+  if(!t.at || !t.at.key){
+    return '<div class="crow"><span class="clab">Dates</span>'+
+      '<span class="sub" style="padding-top:6px;line-height:1.5">This tracker keeps its plan in an older shape with no week grid, '+
+      'so dates have to be moved in the tracker itself.</span></div>';
+  }
+  var w = WRITE[t.id] || {}, busy = w.state==='saving', dis = busy?' disabled':'';
+  var cur = t.at.week||0;
+  var span = (t.at.wkEnd && t.at.wkEnd>cur) ? ' – '+t.at.wkEnd : '';
+  var note = w.state==='saving' ? '<span class="cwrite busy">saving to the tracker…</span>'
+           : w.state==='saved'  ? '<span class="cwrite ok">'+esc(w.msg||'saved')+'</span>'
+           : w.state==='failed' ? '<span class="cwrite bad">'+esc(w.msg||'failed')+'</span>'
+           : '<span class="cwrite">writes straight to the tracker</span>';
+  var move = (cur ? '<button class="cbtn"'+dis+' title="Move this task one week earlier" onclick="shiftTask(\''+t.id+'\',-1,event)">&larr; 1 wk</button>'+
+                    '<button class="cbtn"'+dis+' title="Move this task one week later" onclick="shiftTask(\''+t.id+'\',1,event)">1 wk &rarr;</button>' : '')+
+             '<select class="cwk"'+dis+' onchange="shiftTaskTo(\''+t.id+'\',this.value)">'+weekOptsHTML(t)+'</select>';
+  var slip = cur
+    ? '<div class="crow"><span class="clab">Slip plan</span><div class="cbtns">'+
+        '<button class="cbtn"'+dis+' title="Move week '+cur+' and every later week one day earlier" onclick="slipFrom(\''+t.id+'\',-1,event)">&larr; 1 day</button>'+
+        '<button class="cbtn"'+dis+' onclick="slipFrom(\''+t.id+'\',1,event)">1 day &rarr;</button>'+
+        '<button class="cbtn"'+dis+' onclick="slipFrom(\''+t.id+'\',7,event)">1 week &rarr;</button>'+
+        '<span class="sub" style="margin-left:2px">week '+cur+' onwards, whole tracker · go-live unchanged</span>'+
+      '</div></div>'
+    : '';
+  return '<div class="crow"><span class="clab">Move task</span><div class="cbtns">'+move+
+    '<span class="cwas">'+(cur?'now week '+cur+span:'unscheduled')+'</span></div></div>'+
+    slip+
+    '<div class="crow"><span class="clab"></span><div class="cbtns">'+note+'</div></div>';
+}
 function capBadge(){
   var b=document.getElementById('capBtn'); if(!b) return;
   var n=capCount();
@@ -865,6 +1160,7 @@ function capPanelHTML(t){
   }).join('');
   return '<div class="cpanel" onclick="event.stopPropagation()">'+
     '<div class="crow"><span class="clab">Move status to</span><div class="cbtns">'+btns+'</div></div>'+
+    shiftRowHTML(t)+
     '<div class="crow"><span class="clab">Note</span>'+
       '<textarea class="cnote" rows="2" placeholder="What was decided, what changed, who owns it…" '+
       'oninput="capSetNote(\''+t.id+'\',this.value)">'+esc(c.note||'')+'</textarea></div>'+
@@ -900,7 +1196,9 @@ function summaryText(){
     out.push(line);
     if(c.note) out.push('      note: '+c.note);
   });
-  out.push(''); out.push('Apply these in each client tracker — this board does not write to them.');
+  out.push('');
+  out.push('Apply these in each client tracker. Statuses, notes and chases are only captured here.');
+  out.push('Any dates shifted on the board are already in the tracker and are not listed above.');
   return out.join('\n');
 }
 function copySummary(){
@@ -946,47 +1244,70 @@ function renderSummary(){
 }
 
 /* ── shared partials ── */
-function chipHTML(ch,cls){ return '<span class="'+(cls||'cchip')+'" style="color:'+ch.c+';background:'+ch.bg+'">'+esc(ch.label)+'</span>'; }
 function tickHTML(t){ return capBtnHTML(t); }
+/* `byOwner` groups already say who owns everything in them, so the row swaps its
+   owner name for the status — the thing you actually need next to a task when
+   you are going round the room person by person. */
+function taskRowHTML(t, byOwner){
+  var lead = byOwner
+    ? '<span style="font-weight:700;color:'+t.statusColor+'">'+esc(t.s)+'</span>'
+    : '<span style="font-weight:700;color:'+t.ownerColor+'">'+esc(t.o)+'</span>';
+  return '<div class="tw'+(t.captured?' cap':'')+'">'+
+    '<div class="grow" onclick="capOpen(\''+t.id+'\',event)">'+tickHTML(t)+
+    '<div style="flex:1;min-width:0"><div class="ttx'+(t.done?' done':'')+'">'+esc(t.t)+'</div>'+
+    '<div class="m">'+lead+
+    '<span style="color:var(--mono)">'+esc(t.pillar)+'</span>'+
+    '<span class="mono" style="color:'+t.dueColor+'">'+esc(t.dueLabel)+'</span>'+capMarkHTML(t)+'</div></div></div>'+
+    capPanelHTML(t)+'</div>';
+}
 function groupHTML(g){
-  var rows = g.tasks.map(function(t){
-    return '<div class="tw'+(t.captured?' cap':'')+'">'+
-      '<div class="grow" onclick="capOpen(\''+t.id+'\',event)">'+tickHTML(t)+
-      '<div style="flex:1;min-width:0"><div class="ttx'+(t.done?' done':'')+'">'+esc(t.t)+'</div>'+
-      '<div class="m"><span style="font-weight:700;color:'+t.ownerColor+'">'+esc(t.o)+'</span>'+
-      '<span style="color:var(--mono)">'+esc(t.pillar)+'</span>'+
-      '<span class="mono" style="color:'+t.dueColor+'">'+esc(t.dueLabel)+'</span>'+capMarkHTML(t)+'</div></div></div>'+
-      capPanelHTML(t)+'</div>';
-  }).join('');
+  var rows = g.tasks.map(function(t){ return taskRowHTML(t, false); }).join('');
   return '<div class="grp"><div class="grp-h" style="color:'+g.color+'">'+esc(g.label)+'</div>'+
     '<div style="display:flex;flex-direction:column;gap:11px">'+(rows||'<span class="empty">Nothing here</span>')+'</div></div>';
 }
-function lanesHTML(L,cardMode){
-  return STAGE_ORDER.map(function(st){
-    var cs=L.filter(function(c){return c.stage===st;});
-    if(!cs.length) return '';
-    var col=STAGE_C[st];
-    if(cardMode){
-      return '<div class="bcol"><div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">'+
-        '<span style="width:7px;height:7px;border-radius:50%;background:'+col+';display:block"></span>'+
-        '<span style="font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">'+esc(st)+'</span>'+
-        '<span style="font-size:9px;color:var(--mono);margin-left:auto">'+cs.length+'</span></div>'+
-        '<div style="display:flex;flex-direction:column;gap:7px">'+cs.map(function(c){
-          return '<div class="bcard" style="border-left-color:'+(c.id===S.sel?'#E10600':c.stageColor)+'" onclick="focusClient(\''+c.id+'\')">'+
-            '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">'+
-            '<span class="nm">'+esc(c.name)+'</span>'+
-            '<span class="mono" style="font-size:9.5px;white-space:nowrap;color:'+c.daysColor+'">'+c.shortDays+'</span></div>'+
-            '<div class="bar" style="height:3px;margin:9px 0 7px"><i style="background:'+c.stageColor+';width:'+c.progPct+'"></i></div>'+
-            '<div style="display:flex;gap:4px;flex-wrap:wrap">'+c.chips.map(function(ch){return chipHTML(ch,'bchip');}).join('')+'</div></div>';
-        }).join('')+'</div></div>';
-    }
-    return '<div><div class="lane-h" style="border-bottom-color:'+col+'">'+
-      '<span class="nm" style="color:'+col+'">'+esc(st)+'</span><span class="n">'+cs.length+'</span></div>'+
-      '<div style="display:flex;flex-direction:column;gap:3px">'+cs.map(function(c){
-        return '<div class="lane-c" onclick="focusClient(\''+c.id+'\')"><span class="nm">'+esc(c.name)+'</span>'+
-          '<span class="d mono" style="color:'+c.daysColor+'">'+c.shortDays+'</span></div>';
-      }).join('')+'</div></div>';
-  }).join('');
+
+/* ── by owner ──
+   The all-hands view is a workload conversation, not a triage one: on the call
+   you go round the room person by person and ask what each of them is carrying.
+   So the presenter splits a client's open actions by owner. The client detail
+   panel stays split by urgency, which is the right cut when you are working a
+   single client's list down. */
+function ownerGroupsFor(c){
+  var by={}, order=[];
+  applyFilter(c.outTasks).forEach(function(t){
+    if(!by[t.o]){ by[t.o]=[]; order.push(t.o); }
+    by[t.o].push(t);
+  });
+  var rank={overdue:0, blocked:1, week:2, later:3};
+  return order.map(function(o){
+    var tasks=by[o].slice().sort(function(a,b){
+      var d=rank[a.u]-rank[b.u]; if(d) return d;                      // most pressing first
+      return (a.due||'9999-99-99') < (b.due||'9999-99-99') ? -1 : 1;
+    });
+    var ow=OW[o]||OW_DEFAULT;
+    return {label:o, color:ow.c, bg:ow.bg, tasks:tasks,
+      overdue:tasks.filter(function(t){return t.u==='overdue';}).length,
+      blocked:tasks.filter(function(t){return t.u==='blocked';}).length,
+      week:tasks.filter(function(t){return t.u==='week';}).length};
+  }).sort(function(a,b){
+    // Client actions are what we are chasing, not what we are doing — last.
+    if((a.label==='Client')!==(b.label==='Client')) return a.label==='Client'?1:-1;
+    if(a.overdue!==b.overdue) return b.overdue-a.overdue;             // then whoever is most behind
+    return b.tasks.length-a.tasks.length;
+  });
+}
+function ownerGroupHTML(g){
+  var bits=[];
+  if(g.overdue) bits.push('<span class="obadge" style="color:#F87171;background:rgba(248,113,113,.14)">'+g.overdue+' overdue</span>');
+  if(g.blocked) bits.push('<span class="obadge" style="color:#FBBF24;background:rgba(251,191,36,.14)">'+g.blocked+' blocked</span>');
+  if(g.week)    bits.push('<span class="obadge" style="color:#60A5FA;background:rgba(96,165,250,.14)">'+g.week+' this week</span>');
+  var rows = g.tasks.map(function(t){ return taskRowHTML(t, true); }).join('');
+  return '<div class="grp"><div class="grp-h own" style="color:'+g.color+'">'+
+    '<span class="oav" style="color:'+g.color+';background:'+g.bg+'">'+esc(g.label.slice(0,2))+'</span>'+
+    '<span class="onm">'+esc(g.label)+'</span>'+
+    '<span class="ocount">'+g.tasks.length+'</span></div>'+
+    (bits.length?'<div class="obits">'+bits.join('')+'</div>':'')+
+    '<div style="display:flex;flex-direction:column;gap:11px">'+(rows||'<span class="empty">Nothing here</span>')+'</div></div>';
 }
 function filtersHTML(){
   return FILTERS.map(function(f){
@@ -995,152 +1316,15 @@ function filtersHTML(){
 }
 
 /* ── views ── */
-function viewA(L){
-  var agenda=L.filter(function(c){return c.outstanding>0;});
-  var rows=agenda.map(function(c){
-    var tasks=applyFilter(c.outTasks);
-    if(S.filter!=='All open' && !tasks.length) return '';
-    var body='';
-    if(S.open[c.id]){
-      body='<div class="abody">'+tasks.map(function(t){
-        return '<div class="tw'+(t.captured?' cap':'')+'">'+
-          '<div class="trow" onclick="capOpen(\''+t.id+'\',event)">'+tickHTML(t)+
-          '<span class="dot" style="background:'+t.pillarColor+'"></span>'+
-          '<span class="ttx'+(t.done?' done':'')+'">'+esc(t.t)+'</span>'+
-          '<span class="badge" style="color:'+t.ownerColor+';background:'+t.ownerBg+'">'+esc(t.o)+'</span>'+
-          '<span class="badge" style="color:'+t.statusColor+';background:'+t.statusBg+'">'+esc(t.s)+'</span>'+
-          '<span class="due mono" style="color:'+t.dueColor+'">'+esc(t.dueLabel)+'</span>'+
-          '<button class="flag'+(t.chase?' on':'')+'" title="Chase client" onclick="capToggleChase(\''+t.id+'\',event)">&#9873;</button></div>'+
-          capPanelHTML(t)+'</div>';
-      }).join('')+
-      '<div class="tfoot"><span>'+esc(c.pillarNote)+'</span>'+
-      (c.trackerUrl?'<a href="'+c.trackerUrl+'" target="_blank">Open '+esc(c.name)+' tracker &rarr;</a>':'<span>No tracker deployed yet</span>')+
-      '</div></div>';
-    }
-    return '<div class="arow" style="border-left-color:'+c.stageColor+'">'+
-      '<div class="ahead" onclick="toggleOpen(\''+c.id+'\')">'+
-        '<div><div class="ad1 mono" style="color:'+c.daysColor+'">'+c.daysNum+'</div><div class="ad2">'+esc(c.daysUnit)+'</div></div>'+
-        '<div><div style="display:flex;align-items:center;gap:8px"><span class="anm">'+esc(c.name)+'</span>'+
-          '<span class="stg" style="color:'+c.stageColor+';background:'+c.stageBg+'">'+esc(c.stage)+'</span></div>'+
-          '<div class="ameta">'+esc(c.meta)+'</div></div>'+
-        '<div style="display:flex;gap:5px">'+c.chips.map(function(ch){return chipHTML(ch);}).join('')+'</div>'+
-        '<div><div class="bar"><i style="background:'+c.stageColor+';width:'+c.progPct+'"></i></div>'+
-          '<div class="mono" style="font-size:9px;color:var(--mono);margin-top:5px">'+c.progPct+' done</div></div>'+
-        '<div style="color:var(--mono);font-size:11px;text-align:right">'+(S.open[c.id]?'&#9650;':'&#9660;')+'</div>'+
-      '</div>'+body+'</div>';
-  }).join('');
-
-  var risks=[];
-  L.forEach(function(c){ c.outTasks.forEach(function(t){
-    if(t.u==='blocked') risks.push({client:c.name, t:t.t, tag:t.s==='Blocked'?'Blocked':'Waiting',
-      meta:t.o+' · '+t.pillar+' · '+t.dueLabel,
-      tagColor:t.s==='Blocked'?'#F87171':'#FBBF24', tagBg:t.s==='Blocked'?'rgba(248,113,113,.14)':'rgba(251,191,36,.14)'});
-  });});
-
-  var pipe=pipelineFor(L);
-  var flagged=[]; L.forEach(function(c){ c.allTasks.forEach(function(t){ if(t.chase) flagged.push(t); }); });
-  var ticked=capCount();
-  var anyOpen=Object.keys(S.open).some(function(k){return S.open[k];});
-
-  return ''+
-  '<div class="panel" style="padding:16px 18px 12px;margin-bottom:22px">'+
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'+
-      '<span class="sec-h">Every client, by stage</span><span class="count">'+L.length+'</span>'+
-      '<span class="sub" style="margin-left:auto">Stage &amp; go-live sync from the Onboarding / Offboarding portal · key <span class="mono">client-portal-v1</span></span>'+
-    '</div><div class="lanes">'+lanesHTML(L,false)+'</div></div>'+
-
-  '<div class="hero">'+
-    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px">'+
-      '<h2 class="big">Run the room</h2><span class="sub">go-live first · overdue, due this week and blocked</span>'+
-      '<div style="margin-left:auto;display:flex;align-items:center;gap:6px">'+filtersHTML()+
-        '<button class="pill" style="margin-left:4px" onclick="toggleAll()">'+(anyOpen?'Collapse all':'Expand all')+'</button></div>'+
-    '</div>'+
-    '<div class="sub" style="margin-bottom:14px">Click any task to record what was decided &mdash; a status change, a note, or a client to chase. Nothing is written to the client tracker: it collects into <b>Call capture</b> for you to apply afterwards.</div>'+
-    '<div style="display:flex;flex-direction:column;gap:7px">'+(rows||'<div class="empty">Nothing matches this filter.</div>')+'</div>'+
-  '</div>'+
-
-  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px">'+
-    '<div class="panel" style="padding:15px 17px">'+
-      '<div class="sec-h" style="margin-bottom:4px">Blockers &amp; risks <span class="count">'+risks.length+'</span></div>'+
-      '<div class="sub" style="margin-bottom:11px">Anything hindering the work</div>'+
-      (risks.map(function(r){
-        return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2)">'+
-          '<span class="stg" style="color:'+r.tagColor+';background:'+r.tagBg+'">'+esc(r.tag)+'</span>'+
-          '<div style="flex:1;min-width:0"><div style="font-size:12px;line-height:1.4;text-wrap:pretty"><b style="color:var(--w)">'+esc(r.client)+'</b> '+esc(r.t)+'</div>'+
-          '<div style="font-size:9px;color:var(--mono);margin-top:3px;letter-spacing:.04em;text-transform:uppercase">'+esc(r.meta)+'</div></div></div>';
-      }).join('') || '<div class="empty">Nothing blocked. Rare and excellent.</div>')+
-    '</div>'+
-    '<div class="panel" style="padding:15px 17px">'+
-      '<div class="sec-h" style="margin-bottom:4px">Pipeline &mdash; scoping &amp; onboarding <span class="count">'+pipe.length+'</span></div>'+
-      '<div class="sub" style="margin-bottom:11px">Live from the portal &middot; set a client&rsquo;s stage there and it moves here</div>'+
-      (pipe.map(function(c){
-        var col=STAGE_C[c.stage]||'#94A3B8', bg=STAGE_BG[c.stage]||'rgba(148,163,184,.12)';
-        var sub=[];
-        if(c.lead && c.lead!=='—') sub.push('lead '+c.lead);
-        if(c.gl) sub.push(c.days>=0 ? 'go-live '+fmt(c.gl) : 'go-live was '+fmt(c.gl));
-        if(!c.noData) sub.push(c.outstanding+' open');
-        else sub.push('no tracker yet');
-        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2)">'+
-          '<div style="min-width:0"><div style="font-size:12.5px;font-weight:600;color:var(--w)">'+esc(c.name)+'</div>'+
-          '<div style="font-size:9px;color:var(--mono);margin-top:3px">'+esc(sub.join(' · '))+'</div></div>'+
-          '<span class="stg" style="color:'+col+';background:'+bg+'">'+esc(c.stage)+'</span></div>';
-      }).join('') || '<div class="empty">Nothing in scoping or onboarding right now.</div>')+
-    '</div>'+
-  '</div>'+
-
-  '<div class="panel" style="padding:14px 17px;border-left:3px solid var(--amber)">'+
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">'+
-      '<span class="sec-h" style="color:var(--amber)">Actions I&rsquo;m taking away</span><span class="count">'+flagged.length+'</span>'+
-      '<span class="sub" style="margin-left:auto">'+(ticked?ticked+' captured on this call':'Nothing captured yet')+'</span>'+
-      (ticked?'<button class="pill" style="margin-left:10px" onclick="openSummary()">Post-call actions &rarr;</button>':'')+'</div>'+
-    '<div style="display:flex;flex-direction:column;gap:7px">'+
-    (flagged.map(function(f){
-      return '<div style="display:flex;align-items:center;gap:10px;font-size:12px">'+
-        '<span style="color:var(--amber)">&#9873;</span><b style="color:var(--w)">'+esc(f.client)+'</b>'+
-        '<span style="flex:1;min-width:0;text-wrap:pretty">'+esc(f.t)+'</span>'+
-        '<span class="mono" style="font-size:9.5px;color:var(--mono)">'+esc(f.o)+' · '+esc(f.dueLabel)+'</span></div>';
-    }).join('') || '<span class="empty">No client chases yet — open any task and hit Chase client as you run the room.</span>')+
-    '</div></div>';
-}
-
-function viewB(L){
-  var c=find(L,S.sel), idx=L.findIndex(function(x){return x.id===S.sel;});
-  var opts=L.map(function(x,i){
-    return '<option value="'+x.id+'"'+(x.id===S.sel?' selected':'')+'>'+esc((i+1)+'. '+x.name+'  ·  '+x.shortDays+'  ·  '+x.outstanding+' open')+'</option>';
-  }).join('');
-  return ''+
-  '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'+
-    '<h2 class="big">Delivery pipeline</h2><span class="sub">every client on one board, stage straight from the portal</span>'+
-    '<span class="sub" style="margin-left:auto">T&#8209;number is days to go-live</span></div>'+
-  '<div class="board">'+lanesHTML(L,true)+'</div>'+
-  '<div class="hero">'+
-    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:13px">'+
-      '<h2 class="big">Monday agenda</h2>'+
-      '<span class="sub">'+(idx+1)+' of '+L.length+' · ordered by go-live urgency</span>'+
-      '<div style="margin-left:auto;display:flex;align-items:center;gap:8px">'+
-        '<button class="btn-ghost" style="padding:6px 11px;font-size:11px" onclick="stepClient(-1)">&larr;</button>'+
-        '<select onchange="pickClient(this.value)" style="background:var(--card2);border:1px solid var(--border);color:var(--w);font-size:12px;font-weight:700;padding:7px 10px;border-radius:6px;min-width:280px">'+opts+'</select>'+
-        '<button class="btn-ghost" style="padding:6px 11px;font-size:11px" onclick="stepClient(1)">&rarr;</button>'+
-      '</div></div>'+
-    '<div style="display:grid;grid-template-columns:220px 1fr;gap:18px;align-items:start">'+
-      '<div style="background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:14px">'+
-        '<div class="mono" style="font-size:34px;font-weight:800;line-height:1;color:'+c.daysColor+'">'+c.daysNum+'</div>'+
-        '<div style="font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);margin-top:6px">'+esc(c.daysUnit)+'</div>'+
-        '<div style="height:1px;background:var(--border2);margin:13px 0"></div>'+
-        '<div style="font-size:14px;font-weight:800;color:var(--w)">'+esc(c.name)+'</div>'+
-        '<div style="font-size:10px;color:var(--mono);margin-top:5px;line-height:1.5">'+esc(c.meta)+'</div>'+
-        '<div style="margin-top:12px;display:flex;gap:5px;flex-wrap:wrap">'+c.chips.map(function(ch){return chipHTML(ch);}).join('')+'</div>'+
-        (c.trackerUrl?'<div style="margin-top:13px"><a href="'+c.trackerUrl+'" target="_blank" style="font-size:10px;font-weight:700;text-transform:uppercase">Open tracker &rarr;</a></div>':'')+
-      '</div>'+
-      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px">'+groupsFor(c).map(groupHTML).join('')+'</div>'+
-    '</div></div>';
-}
-
 function viewC(L){
   var c=find(L,S.sel);
   var rows=L.map(function(x){
-    return '<div class="tr'+(x.id===S.sel?' sel':'')+'" onclick="focusClient(\''+x.id+'\')">'+
-      '<div><div style="font-size:12.5px;font-weight:700;color:var(--w)">'+esc(x.name)+'</div>'+
+    // A tracker rebuilt since its last save throws that saved state away on
+    // load — statuses ticked off and notes written before the rebuild are gone
+    // from the tracker too, not just from here. Worth knowing about.
+    var reb = x.rebuilt ? '<span class="reb" title="This tracker was rebuilt after its last save, so the tracker discarded that saved state — any statuses or notes recorded before the rebuild are no longer in it. This board shows the rebuilt plan, the same one the tracker shows.">rebuilt</span>' : '';
+    return '<div class="tr'+(x.id===S.sel?' sel':'')+'" id="row-'+x.id+'" onclick="focusClient(\''+x.id+'\')">'+
+      '<div><div style="font-size:12.5px;font-weight:700;color:var(--w)">'+esc(x.name)+reb+'</div>'+
         '<div style="font-size:9px;color:var(--mono);margin-top:2px">Lead '+esc(x.lead)+'</div></div>'+
       '<div style="display:flex;align-items:center"><span class="stg" style="color:'+x.stageColor+';background:'+x.stageBg+'">'+esc(x.stage)+'</span></div>'+
       '<div class="mono" style="display:flex;align-items:center;font-size:11px;color:'+x.daysColor+'">'+x.shortDays+'</div>'+
@@ -1160,45 +1344,108 @@ function viewC(L){
         '<span class="bchip" style="color:'+t.statusColor+';background:'+t.statusBg+'">'+esc(t.s)+'</span></div>'+
         capPanelHTML(t)+'</div>';
     }).join('');
-    return '<div style="padding:12px 16px;border-bottom:1px solid var(--border2)">'+
-      '<div class="grp-h" style="color:'+g.color+'">'+esc(g.label)+'</div>'+
-      '<div style="display:flex;flex-direction:column;gap:10px">'+(rws||'<span class="empty">Nothing here</span>')+'</div></div>';
+    return '<div class="gsec">'+
+      '<div class="grp-h gstick" style="color:'+g.color+'">'+esc(g.label)+
+        '<span class="gn">'+g.tasks.length+'</span></div>'+
+      '<div style="display:flex;flex-direction:column;gap:10px;padding:0 16px 12px">'+(rws||'<span class="empty">Nothing here</span>')+'</div></div>';
   }).join('');
+
+  var risks=[];
+  L.forEach(function(x){ x.outTasks.forEach(function(t){
+    if(t.u==='blocked') risks.push({client:x.name, t:t.t, tag:t.s==='Blocked'?'Blocked':'Waiting',
+      meta:t.o+' · '+t.pillar+' · '+t.dueLabel,
+      tagColor:t.s==='Blocked'?'#F87171':'#FBBF24', tagBg:t.s==='Blocked'?'rgba(248,113,113,.14)':'rgba(251,191,36,.14)'});
+  });});
+  var pipe=pipelineFor(L);
+  var flagged=[]; L.forEach(function(x){ x.allTasks.forEach(function(t){ if(t.chase) flagged.push(t); }); });
+  var ticked=capCount();
 
   return ''+
   '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">'+
-    '<h2 class="big">Portfolio table</h2><span class="sub">'+L.length+' clients, go-live first</span>'+
+    '<h2 class="big">Command table</h2><span class="sub">'+L.length+' clients, go-live first &middot; pick a client, work its list</span>'+
     '<div style="margin-left:auto;display:flex;align-items:center;gap:6px">'+filtersHTML()+
       '<button class="btn-red" style="margin-left:6px" onclick="startPresent()">Run all-hands &rarr;</button></div></div>'+
-  '<div style="display:grid;grid-template-columns:1fr 400px;gap:18px;align-items:start">'+
+  '<div class="sub" style="margin-bottom:12px">Click any task to record what was decided &mdash; a status change, a note, or a client to chase &mdash; and it collects into <b>Call capture</b> to apply afterwards. Moving a task&rsquo;s dates is the exception: that writes to the client tracker straight away.</div>'+
+  '<div style="display:grid;grid-template-columns:1fr 430px;gap:18px;align-items:start;margin-bottom:22px">'+
     '<div class="tbl"><div class="thead"><span>Client</span><span>Stage</span><span>Go-live</span><span>Progress</span><span style="text-align:right">Open actions</span></div>'+rows+'</div>'+
-    '<div class="panel" style="position:sticky;top:88px;overflow:hidden">'+
-      '<div style="padding:15px 16px;border-bottom:1px solid var(--border2)">'+
+    '<div class="panel dpanel">'+
+      // The client name rides at the top of the list it belongs to, so scrolling
+      // a long set of actions never leaves you wondering whose they are.
+      '<div class="dhead">'+
         '<div style="display:flex;align-items:center;gap:9px">'+
-          '<span style="width:8px;height:8px;border-radius:50%;background:'+c.stageColor+';display:block"></span>'+
-          '<span style="font-size:15px;font-weight:800;color:var(--w)">'+esc(c.name)+'</span>'+
-          '<span class="mono" style="font-size:12px;margin-left:auto;color:'+c.daysColor+'">'+c.shortDays+'</span></div>'+
-        '<div style="font-size:10px;color:var(--mono);margin-top:6px;line-height:1.5">'+esc(c.meta)+'</div></div>'+
-      '<div style="max-height:520px;overflow:auto">'+groups+'</div>'+
-      '<div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between">'+
+          '<span style="width:9px;height:9px;border-radius:50%;background:'+c.stageColor+';display:block;flex:none"></span>'+
+          '<span class="dnm">'+esc(c.name)+'</span>'+
+          '<span class="stg" style="color:'+c.stageColor+';background:'+c.stageBg+'">'+esc(c.stage)+'</span>'+
+          '<span class="mono" style="font-size:12.5px;font-weight:800;margin-left:auto;color:'+c.daysColor+'">'+c.shortDays+'</span></div>'+
+        '<div style="font-size:10px;color:var(--mono);margin-top:5px;line-height:1.5">'+esc(c.meta)+'</div></div>'+
+      '<div class="dbody">'+groups+'</div>'+
+      '<div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border2)">'+
         '<span class="sub">'+esc(c.foot)+'</span>'+
         (c.trackerUrl?'<a href="'+c.trackerUrl+'" target="_blank" style="font-size:10px;font-weight:700;text-transform:uppercase">Open tracker &rarr;</a>':'<span class="sub">No tracker yet</span>')+
-      '</div></div></div>';
+      '</div></div></div>'+
+
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px">'+
+    '<div class="panel" style="padding:15px 17px">'+
+      '<div class="sec-h" style="margin-bottom:4px">Blockers &amp; risks <span class="count">'+risks.length+'</span></div>'+
+      '<div class="sub" style="margin-bottom:11px">Anything hindering the work</div>'+
+      (risks.map(function(r){
+        return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2)">'+
+          '<span class="stg" style="color:'+r.tagColor+';background:'+r.tagBg+'">'+esc(r.tag)+'</span>'+
+          '<div style="flex:1;min-width:0"><div style="font-size:12px;line-height:1.4;text-wrap:pretty"><b style="color:var(--w)">'+esc(r.client)+'</b> '+esc(r.t)+'</div>'+
+          '<div style="font-size:9px;color:var(--mono);margin-top:3px;letter-spacing:.04em;text-transform:uppercase">'+esc(r.meta)+'</div></div></div>';
+      }).join('') || '<div class="empty">Nothing blocked. Rare and excellent.</div>')+
+    '</div>'+
+    '<div class="panel" style="padding:15px 17px">'+
+      '<div class="sec-h" style="margin-bottom:4px">Pipeline &mdash; scoping &amp; onboarding <span class="count">'+pipe.length+'</span></div>'+
+      '<div class="sub" style="margin-bottom:11px">Live from the portal &middot; set a client&rsquo;s stage there and it moves here</div>'+
+      (pipe.map(function(x){
+        var col=STAGE_C[x.stage]||'#94A3B8', bg=STAGE_BG[x.stage]||'rgba(148,163,184,.12)';
+        var sub=[];
+        if(x.lead && x.lead!=='—') sub.push('lead '+x.lead);
+        if(x.gl) sub.push(x.days>=0 ? 'go-live '+fmt(x.gl) : 'go-live was '+fmt(x.gl));
+        sub.push(x.noData ? 'no tracker yet' : x.outstanding+' open');
+        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2)">'+
+          '<div style="min-width:0"><div style="font-size:12.5px;font-weight:600;color:var(--w)">'+esc(x.name)+'</div>'+
+          '<div style="font-size:9px;color:var(--mono);margin-top:3px">'+esc(sub.join(' · '))+'</div></div>'+
+          '<span class="stg" style="color:'+col+';background:'+bg+'">'+esc(x.stage)+'</span></div>';
+      }).join('') || '<div class="empty">Nothing in scoping or onboarding right now.</div>')+
+    '</div>'+
+  '</div>'+
+
+  '<div class="panel" style="padding:14px 17px;border-left:3px solid var(--amber)">'+
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">'+
+      '<span class="sec-h" style="color:var(--amber)">Actions I&rsquo;m taking away</span><span class="count">'+flagged.length+'</span>'+
+      '<span class="sub" style="margin-left:auto">'+(ticked?ticked+' captured on this call':'Nothing captured yet')+'</span>'+
+      (ticked?'<button class="pill" style="margin-left:10px" onclick="openSummary()">Post-call actions &rarr;</button>':'')+'</div>'+
+    '<div style="display:flex;flex-direction:column;gap:7px">'+
+    (flagged.map(function(f){
+      return '<div style="display:flex;align-items:center;gap:10px;font-size:12px">'+
+        '<span style="color:var(--amber)">&#9873;</span><b style="color:var(--w)">'+esc(f.client)+'</b>'+
+        '<span style="flex:1;min-width:0;text-wrap:pretty">'+esc(f.t)+'</span>'+
+        '<span class="mono" style="font-size:9.5px;color:var(--mono)">'+esc(f.o)+' · '+esc(f.dueLabel)+'</span></div>';
+    }).join('') || '<span class="empty">No client chases yet — open any task and hit Chase client as you run the room.</span>')+
+    '</div></div>';
 }
 
 function renderPres(){
   var L=all(), c=L[Math.max(0,Math.min(S.pIdx,L.length-1))];
+  var og=ownerGroupsFor(c);
   document.getElementById('presCount').textContent=(S.pIdx+1)+' / '+L.length;
   document.getElementById('presBody').innerHTML=
-    '<div style="max-width:1100px;margin:0 auto">'+
-      '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap;margin-bottom:28px">'+
+    '<div style="max-width:1240px;margin:0 auto">'+
+      '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap;margin-bottom:22px">'+
         '<div><div style="display:flex;align-items:center;gap:11px;margin-bottom:12px">'+
           '<span class="stg" style="font-size:9px;padding:4px 11px;color:'+c.stageColor+';background:'+c.stageBg+'">'+esc(c.stage)+'</span>'+
           '<span class="sub" style="font-size:11px">'+esc(c.meta)+'</span></div>'+
           '<h2 style="font-size:42px;font-weight:800;letter-spacing:-.02em;color:var(--w)">'+esc(c.name)+'</h2></div>'+
         '<div style="text-align:right"><div class="mono" style="font-size:58px;font-weight:800;line-height:1;color:'+c.daysColor+'">'+c.daysNum+'</div>'+
           '<div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mono);margin-top:7px">'+esc(c.daysUnit)+'</div></div></div>'+
-      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:13px">'+groupsFor(c).map(groupHTML).join('')+'</div></div>';
+      '<div class="preshead">'+
+        '<span class="sub">Who is carrying what &middot; '+og.length+' owner'+(og.length===1?'':'s')+' &middot; '+c.outstanding+' open'+
+        (S.filter!=='All open'?' &middot; filtered to '+esc(S.filter):'')+'</span></div>'+
+      '<div class="owngrid">'+
+        (og.map(ownerGroupHTML).join('') || '<div class="empty">Nothing outstanding for this client.</div>')+
+      '</div></div>';
 }
 
 function renderKpis(L){
@@ -1256,9 +1503,7 @@ function renderTimeline(L){
   Object.keys(weeks).forEach(function(k){
     if(weeks[k].length<2) return;
     var s=new Date(k+'T00:00:00').getTime(), e=s+7*MS;
-    bands+='<div class="tl-band" style="left:'+pct(s)+'%;width:'+Math.max(pct(e)-pct(s),1.2)+'%" '+
-           'title="'+weeks[k].length+' go-lives in the week of '+fmt(k)+': '+
-           esc(weeks[k].map(function(c){return c.name;}).join(', '))+'"></div>';
+    bands+='<div class="tl-band" style="left:'+pct(s)+'%;width:'+Math.max(pct(e)-pct(s),1.2)+'%"></div>';
   });
 
   // month ticks across the range
@@ -1271,25 +1516,83 @@ function renderTimeline(L){
     m.setMonth(m.getMonth()+1);
   }
 
-  // stagger labels over three rows so neighbours do not collide
-  live.sort(function(a,b){ return a.gl<b.gl?-1:1; }).forEach(function(c,i){
+  live.sort(function(a,b){ return a.gl<b.gl?-1:1; });
+
+  /* Two clients going live the same day used to draw one dot exactly on top of
+     another, and only the topmost could ever be hovered or clicked — the rest
+     were unreachable however carefully you aimed. Same-day go-lives now fan out
+     a few pixels either side of their date, so each one is its own target. */
+  var sameDay={};
+  live.forEach(function(c){ (sameDay[c.gl]=sameDay[c.gl]||[]).push(c.id); });
+
+  /* Labels go into whichever row is still clear at that point on the axis,
+     rather than round-robin over three rows — long names next to each other
+     used to overlap and steal one another's hover. */
+  var rowEnds=[-1e9,-1e9,-1e9];
+
+  /* Place every dot first, then size its hit area to the gap it actually has.
+     A fixed generous target is what let one client's box sit over its neighbour's
+     dot; anything closer than that just gets a narrower target of its own. */
+  var trackW = Math.max(box.clientWidth||1100, 400);
+  var pos = live.map(function(c){
+    var peers=sameDay[c.gl];
+    var x=pct(new Date(c.gl+'T00:00:00').getTime());
+    var nudge=(peers.indexOf(c.id)-(peers.length-1)/2)*13;
+    return {id:c.id, x:x, nudge:nudge, px:x/100*trackW+nudge};
+  });
+  var hitW={};
+  pos.forEach(function(p,k){
+    var gap=1e9;
+    if(k>0)          gap=Math.min(gap, Math.abs(p.px-pos[k-1].px));
+    if(k<pos.length-1) gap=Math.min(gap, Math.abs(pos[k+1].px-p.px));
+    hitW[p.id]=Math.max(11, Math.min(24, Math.round(gap)));
+  });
+
+  TLP=[];
+  live.forEach(function(c){
     var t=new Date(c.gl+'T00:00:00').getTime(), x=pct(t);
-    marks+='<div class="tl-dot" style="left:'+x+'%;background:'+c.daysColor+'" '+
-           'title="'+esc(c.name)+' · go-live '+fmt(c.gl)+' · '+c.shortDays+'" '+
-           'onclick="focusClient(\''+c.id+'\')"></div>';
-    // Long names collide and run off the ends, so they are trimmed and the
-    // outermost labels are anchored inward rather than centred on their dot.
+    var i=TLP.length;
     var short=c.name.length>17 ? c.name.slice(0,16).replace(/[\s(]+$/,'')+'…' : c.name;
+
+    // rough label width as a percentage of the track, to keep rows from colliding
+    var wPct = (short.length*5.4 + 8) / trackW * 100;
     var anchor = x>86 ? 'transform:translateX(-100%)' : (x<7 ? 'transform:translateX(0)' : '');
-    labs +='<div class="tl-lab" style="left:'+x+'%;top:'+(i%3)*16+'px;'+anchor+'" '+
-           'title="'+esc(c.name)+' · go-live '+fmt(c.gl)+'" onclick="focusClient(\''+c.id+'\')">'+esc(short)+'</div>';
+    var left = x>86 ? x-wPct : (x<7 ? x : x-wPct/2);
+    var row=0;
+    for(var r=0;r<rowEnds.length;r++){ if(left > rowEnds[r]){ row=r; break; } row=r; }
+    rowEnds[row] = left + wPct + 0.6;
+
+    var peers = sameDay[c.gl];
+    var nudge = (peers.indexOf(c.id) - (peers.length-1)/2) * 13;   // fan same-day dots apart
+
+    var counts=[];
+
+    if(c.overdue) counts.push(c.overdue+' overdue');
+    if(c.blocked) counts.push(c.blocked+' blocked');
+    if(c.week)    counts.push(c.week+' due this week');
+    TLP.push({id:c.id, html:
+      '<b>'+esc(c.name)+'</b>'+
+      '<span class="r1">Go-live '+esc(fmtFull(c.gl))+' · <i style="color:'+c.daysColor+'">'+esc(c.daysNum+' '+c.daysUnit)+'</i></span>'+
+      '<span class="r2">'+esc(c.stage)+' · lead '+esc(c.lead)+' · '+c.outstanding+' open'+
+        (counts.length?' ('+esc(counts.join(', '))+')':'')+'</span>'+
+      (peers.length>1 ? '<span class="r2">'+peers.length+' clients land this same day</span>' : '')+
+      '<span class="r3">Click to open '+esc(c.name)+' below</span>'});
+
+    marks+='<div class="tl-hit" data-tl="'+i+'" '+
+           'style="left:'+x+'%;margin-left:'+nudge.toFixed(1)+'px;width:'+(hitW[c.id]||24)+'px" '+
+           'onmouseenter="tlOver('+i+',event)" onmousemove="tlMove(event)" onmouseleave="tlOut()" '+
+           'onclick="tlGo('+i+')"><i class="tl-dot" style="background:'+c.daysColor+'"></i></div>';
+    labs +='<div class="tl-lab" data-tl="'+i+'" style="left:'+x+'%;top:'+(row*15)+'px;'+anchor+'" '+
+           'onmouseenter="tlOver('+i+',event)" onmousemove="tlMove(event)" onmouseleave="tlOut()" '+
+           'onclick="tlGo('+i+')">'+esc(short)+'</div>';
   });
 
   var pinch=Object.keys(weeks).filter(function(k){ return weeks[k].length>1; }).length;
   box.innerHTML=
     '<div class="tlbox"><div class="tlhead">'+
       '<span class="sec-h">Go-live timeline</span>'+
-      '<span class="sub">'+live.length+' dated'+(pinch?' · '+pinch+' week'+(pinch===1?'':'s')+' with two or more landing together':' · none clustered')+'</span>'+
+      '<span class="sub">'+live.length+' dated'+(pinch?' · '+pinch+' week'+(pinch===1?'':'s')+' with two or more landing together':' · none clustered')+
+        ' · hover a client for its date, click to open it</span>'+
       '<span class="tlkey">'+
         '<span><i style="background:#4ADE80"></i>comfortable</span>'+
         '<span><i style="background:#FBBF24"></i>tight</span>'+
@@ -1300,6 +1603,56 @@ function renderTimeline(L){
       '<div class="tl-today" style="left:'+pct(today)+'%"><b>today</b></div>'+
       '<div class="tl-axis"></div>'+labs+marks+ticks+
     '</div></div>';
+}
+
+/* ── timeline hover ──
+   The dots used to carry a plain `title`, which meant a second's wait for a
+   native tooltip, nothing at all on the ones that were overlapped, and no way to
+   see a go-live date without hitting an 11px circle. This is a real tooltip on a
+   real hit area, and hovering the label lights up its dot and vice versa. */
+var TLP=[];
+function fmtFull(iso){
+  if(!iso) return 'TBC';
+  var d=new Date(iso+'T00:00:00');
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear();
+}
+function tlMark(i, on){
+  var els=document.querySelectorAll('.tl [data-tl="'+i+'"]');
+  for(var k=0;k<els.length;k++) els[k].classList.toggle('on', on);
+}
+function tlOver(i, ev){
+  var p=TLP[i], box=document.getElementById('tltip');
+  if(!p || !box) return;
+  box.innerHTML=p.html; box.style.display='block';
+  tlMark(i, true); box.dataset.i=i;
+  tlMove(ev);
+}
+function tlMove(ev){
+  var box=document.getElementById('tltip');
+  if(!box || box.style.display!=='block') return;
+  var w=box.offsetWidth, h=box.offsetHeight;
+  var x=Math.max(8, Math.min(ev.clientX - w/2, window.innerWidth - w - 8));
+  var y=ev.clientY - h - 14;
+  if(y < 8) y = ev.clientY + 20;               // near the top, drop below the cursor
+  box.style.left=x+'px'; box.style.top=y+'px';
+}
+function tlOut(){
+  var box=document.getElementById('tltip'); if(!box) return;
+  box.style.display='none';
+  if(box.dataset.i) tlMark(box.dataset.i, false);
+}
+/* Clicking a go-live used to select the client and nothing appeared to happen,
+   because the client it opened was further down the page. Take the eye there. */
+function tlGo(i){
+  var p=TLP[i]; if(!p) return;
+  tlOut(); focusClient(p.id);
+  setTimeout(function(){
+    var row=document.getElementById('row-'+p.id);
+    if(!row) return;
+    row.scrollIntoView({behavior:'smooth', block:'center'});
+    row.classList.add('flash');
+    setTimeout(function(){ row.classList.remove('flash'); }, 1400);
+  }, 30);
 }
 
 /* The 5-minute auto-refresh must never yank a half-typed note out from under
@@ -1317,9 +1670,8 @@ function render(){
   var L=all();
   capBadge();
   if(document.getElementById('sum').classList.contains('on')) renderSummary();
-  ['a','b','c'].forEach(function(v){ document.getElementById('tab-'+v).classList.toggle('on', S.view===v); });
-  // Nothing to draw until the first fetch lands — the views index into the client
-  // list, so painting them empty would throw.
+  // Nothing to draw until the first fetch lands — the view indexes into the
+  // client list, so painting it empty would throw.
   if(!L.length){
     document.getElementById('kpis').innerHTML='';
     document.getElementById('tl').innerHTML='';
@@ -1332,7 +1684,7 @@ function render(){
   }
   renderKpis(L);
   renderTimeline(L);
-  document.getElementById('view').innerHTML = S.view==='b' ? viewB(L) : (S.view==='c' ? viewC(L) : viewA(L));
+  document.getElementById('view').innerHTML = viewC(L);
   if(document.getElementById('pres').classList.contains('on')) renderPres();
 }
 
