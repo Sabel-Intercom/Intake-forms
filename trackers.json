@@ -110,5 +110,12 @@
   "file": "SynchronestTracker.html",
   "sowHours": 0,
   "active": true
-  }
+  },
+{
+  "name": "Clever Cards",
+  "key": "clevercards-tracker-v1",
+  "file": "CleverCardsTracker.html",
+  "sowHours": 20,
+  "active": true
+}  
 ]
