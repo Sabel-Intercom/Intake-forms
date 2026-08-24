@@ -117,5 +117,12 @@
   "file": "CleverCardsTracker.html",
   "sowHours": 20,
   "active": true
-}  
+  },
+{
+  "name": "Cheeky Kiwi Travel",
+  "key": "cheekykiwitravel-tracker-v1",
+  "file": "CheekyKiwiTravelTracker.html",
+  "sowHours": 35,
+  "active": true
+}
 ]
