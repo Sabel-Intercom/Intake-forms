@@ -124,5 +124,12 @@
   "file": "CheekyKiwiTravelTracker.html",
   "sowHours": 35,
   "active": true
-}
+},
+  {
+  "name": "Shiftmove",
+  "key": "shiftmove-tracker-v1",
+  "file": "ShiftmoveTracker.html",
+  "sowHours": 30,
+  "active": true
+  }
 ]
