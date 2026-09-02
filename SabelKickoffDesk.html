@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sabel Kick-off Desk — internal</title>
+<!--
+  ─────────────────────────────────────────────────────────────────────────────
+  SABEL KICK-OFF DESK  ·  INTERNAL ONLY  ·  NOT CLIENT FACING
+
+  One record per client, holding everything the kick-off call exists to align:
+    1. Engagement basics and the five-pillar scope summary
+    2. Scope IN and scope OUT, plus change control
+    3. Timeline and key dates
+    4. Who is who (Sabel and client) and who does what
+    5. The live access check
+    6. Decisions the client must make
+    7. Next steps, and risks / open items
+
+  The client never touches this page. Nikki pre-populates it before the call
+  (the basics fill themselves from Notion; scope and timeline are seeded from
+  the SOW by a Claude session or typed in), it is edited live on the call, and
+  the SUMMARY button renders a light-mode, client-ready summary to print to PDF
+  and save in the client's 00_Project Admin folder.
+
+  FEEDS (read only, refreshed on load):
+    /api/notion?kind=projects   name, hours, scope, signed, contact, migration, links
+    trackers.json               tracker file and key per client
+    client-portal-v1            stage, owner, go-live
+
+  OWN STATE: saved under MY_KEY (sabel-kickoff-v1) via the tracker webhook.
+  The webhook only accepts allowlisted keys; until this one is added to
+  ALLOWED_KEYS in sabel-webhook/api/tracker.js the page saves to this browser's
+  localStorage only and says so in a banner. Nothing is lost when the key lands.
+
+  SEEDING FROM A CLAUDE SESSION: the record shape is documented at
+  `function blankRecord()` below. Once the key is registered a session can
+  GET the store, add/replace `clients[<id>]`, and POST {data: store} back.
+  Before then, use "Import JSON" on the client's record.
+  ─────────────────────────────────────────────────────────────────────────────
+-->
+<style>
+:root{
+  --bg:#0B0B0C; --card:#0F1113; --card2:#141719; --w:#FFFFFF; --red:#E10600;
+  --body:#E2E8F0; --muted:#94A3B8; --border:#2A3547; --mono:#64748B;
+  --green:#4ADE80; --amber:#FBBF24; --blue:#60A5FA; --rose:#F87171; --grey:#64748B;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --code:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--body);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--blue)}
+.wrap{max-width:1280px;margin:0 auto;padding:22px 18px 90px}
+
+header{display:flex;align-items:flex-end;gap:16px;margin-bottom:16px}
+header h1{margin:0;font-size:22px;font-weight:800;color:var(--w);display:flex;align-items:center;gap:10px}
+header h1 .bar{display:inline-block;width:4px;height:22px;background:var(--red);border-radius:2px}
+header .sub{font-size:12px;color:var(--muted);margin-top:3px}
+.spacer{flex:1}
+.stamp{font-size:11px;color:var(--mono);font-family:var(--code);display:flex;align-items:center;gap:7px}
+.dotlive{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block}
+.dotlive.warn{background:var(--amber)} .dotlive.off{background:var(--rose)}
+
+.banner{background:#1A1206;border:1px solid #5A4A1E;border-left:3px solid var(--amber);border-radius:7px;padding:10px 13px;font-size:12.5px;line-height:1.6;margin-bottom:12px;color:#F5E6B8}
+.banner.info{background:#0C1420;border-color:#1E3A5A;border-left-color:var(--blue);color:#CBE0F5}
+.banner code{font-family:var(--code);background:#000;padding:1px 5px;border-radius:4px}
+
+.layout{display:grid;grid-template-columns:280px 1fr;gap:18px;align-items:start}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+
+/* ── client list ── */
+.side{position:sticky;top:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.side .top{padding:10px 10px 8px;border-bottom:1px solid var(--border)}
+.side input.q{width:100%;background:#0A0D10;border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--body);font-size:12.5px}
+.side input.q:focus{outline:none;border-color:var(--red)}
+.side .list{max-height:calc(100vh - 200px);overflow:auto}
+.cl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:9px 12px;border-bottom:1px solid #171C22;cursor:pointer}
+.cl:hover{background:var(--card2)} .cl.on{background:#1A0E0E;border-left:3px solid var(--red);padding-left:9px}
+.cl .n{font-size:13px;color:var(--w);font-weight:600;grid-column:1}
+.cl .m{font-size:10.5px;color:var(--mono);grid-column:1}
+.cl .r{grid-column:2;grid-row:1/3;align-self:center;font-family:var(--code);font-size:10.5px;padding:2px 7px;border-radius:20px;border:1px solid var(--border);color:var(--muted)}
+.cl .r.g{border-color:#1E4A33;color:var(--green)} .cl .r.a{border-color:#5A4A1E;color:var(--amber)} .cl .r.d{border-color:#1E4A33;background:#0E2A1C;color:var(--green)}
+.side .foot{padding:9px 10px;border-top:1px solid var(--border);display:flex;gap:6px}
+.side .foot input{flex:1;background:#0A0D10;border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--body);font-size:12px;min-width:0}
+.side .foot input:focus{outline:none;border-color:var(--red)}
+
+/* ── buttons ── */
+.btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:6px 11px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.btn:hover{color:var(--w);border-color:var(--muted)}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff} .btn.primary:hover{background:#c40500}
+.btn.sm{padding:3px 8px;font-size:10.5px}
+.btn.danger{border-color:#5A2323;color:#F8ABAB} .btn.danger:hover{background:#1A0E0E;border-color:var(--rose)}
+.btn.x{border:none;color:var(--mono);padding:2px 6px;font-size:14px;line-height:1} .btn.x:hover{color:var(--rose)}
+
+/* ── record ── */
+.rec{min-width:0}
+.rhead{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.rhead .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.rhead h2{margin:0;font-size:20px;color:var(--w);font-weight:800}
+.rhead .links{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;margin-top:6px}
+.rhead .links a{color:var(--blue);text-decoration:none} .rhead .links a:hover{text-decoration:underline}
+.rhead .links span{color:var(--mono)}
+.ready{display:flex;align-items:center;gap:9px;margin-top:10px;font-size:11.5px;color:var(--muted)}
+.ready .bar{flex:1;max-width:260px;height:6px;background:#1B2129;border-radius:3px;overflow:hidden}
+.ready .bar i{display:block;height:100%;background:var(--green);border-radius:3px;transition:width .2s}
+.ready .miss{color:var(--amber)}
+.callrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12.5px}
+.callrow label{display:flex;align-items:center;gap:7px;cursor:pointer}
+.callrow input[type=checkbox]{width:15px;height:15px;accent-color:var(--red)}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:12px}
+.card .ch{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;user-select:none}
+.card .ch .num{font-family:var(--code);font-size:11px;color:var(--red);font-weight:700}
+.card .ch h3{margin:0;font-size:14px;color:var(--w);font-weight:700;flex:1}
+.card .ch .why{font-size:11px;color:var(--mono);font-style:italic}
+.card .ch .chev{color:var(--mono);font-size:11px;transition:transform .15s}
+.card.open .ch .chev{transform:rotate(90deg)}
+.card .cb{display:none;padding:4px 16px 16px;border-top:1px solid var(--border)}
+.card.open .cb{display:block}
+.hint{font-size:11.5px;color:var(--mono);margin:10px 0 8px;line-height:1.55}
+.hint b{color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 14px;margin-top:10px}
+.f label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mono);margin-bottom:3px}
+.f input,.f select,.f textarea,table.ed input,table.ed select,table.ed textarea{width:100%;background:#0A0D10;border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--body);font-size:12.5px;font-family:var(--sans)}
+.f input:focus,.f select:focus,.f textarea:focus,table.ed input:focus,table.ed select:focus,table.ed textarea:focus{outline:none;border-color:var(--red)}
+.f textarea,table.ed textarea{resize:vertical;min-height:54px;line-height:1.5}
+.f.wide{grid-column:1/-1}
+.f .sub{font-size:10.5px;color:var(--mono);margin-top:3px}
+.f .auto{color:var(--blue)}
+
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.pill{display:flex;align-items:center;gap:7px;background:#0A0D10;border:1px solid var(--border);border-radius:20px;padding:5px 11px;font-size:12px;cursor:pointer;user-select:none}
+.pill input{accent-color:var(--red);width:14px;height:14px;margin:0}
+.pill.on{border-color:var(--red);color:var(--w)}
+.pill small{color:var(--mono);font-family:var(--code);font-size:10px}
+
+h4.sh{margin:14px 0 6px;font-size:11px;letter-spacing:.9px;text-transform:uppercase;color:var(--mono);font-weight:600;display:flex;align-items:center;gap:10px}
+h4.sh .spacer{flex:1}
+table.ed{width:100%;border-collapse:collapse;margin-top:4px}
+table.ed th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mono);font-weight:600;padding:4px 6px 4px 0}
+table.ed td{padding:3px 6px 3px 0;vertical-align:top}
+table.ed td.x{width:28px;padding-right:0;padding-top:6px}
+table.ed td.n{width:26px;font-family:var(--code);font-size:11px;color:var(--mono);padding-top:9px}
+table.ed select[data-c="green"]{border-color:#1E4A33;color:var(--green)}
+table.ed select[data-c="amber"]{border-color:#5A4A1E;color:var(--amber)}
+table.ed select[data-c="red"]{border-color:#5A2323;color:var(--rose)}
+table.ed select[data-c="grey"]{color:var(--mono)}
+table.ed tr.done input{color:var(--mono);text-decoration:line-through}
+table.ed input[type=checkbox]{width:15px;height:15px;accent-color:var(--green);margin-top:9px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:900px){.two{grid-template-columns:1fr}}
+.empty{color:var(--mono);font-size:12px;font-style:italic;padding:6px 0}
+.saved{font-size:10.5px;color:var(--mono);height:14px;margin-top:6px;font-family:var(--code)}
+
+.welcome{background:var(--card);border:1px dashed var(--border);border-radius:10px;padding:40px 30px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7}
+.welcome b{color:var(--w)}
+
+/* ── import / json modal ── */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal.on{display:flex}
+.mbox{background:var(--card);border:1px solid var(--border);border-radius:10px;width:min(760px,100%);padding:18px}
+.mbox h3{margin:0 0 6px;color:var(--w);font-size:15px}
+.mbox p{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
+.mbox textarea{width:100%;min-height:300px;background:#0A0D10;border:1px solid var(--border);border-radius:7px;padding:9px;color:var(--body);font-family:var(--code);font-size:11.5px;resize:vertical}
+.mbox .mr{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.mbox .err{color:var(--rose);font-size:12px;margin-top:6px}
+
+/* ── SUMMARY (light, client-ready) ── */
+#summary{position:fixed;inset:0;background:#fff;color:#334155;z-index:60;display:none;overflow:auto;font-family:Calibri,Carlito,"Segoe UI",Helvetica,Arial,sans-serif}
+#summary.on{display:block}
+.sbar{position:sticky;top:0;background:#0B0B0C;color:#E2E8F0;display:flex;align-items:center;gap:10px;padding:10px 18px;font-family:var(--sans);font-size:12px;z-index:2}
+.sbar .btn{color:#E2E8F0;border-color:#2A3547}
+.spage{max-width:820px;margin:0 auto;padding:36px 40px 60px}
+.shead{display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px solid #E10600;padding-bottom:10px;margin-bottom:26px}
+.shead img{height:26px} .shead .hr{font-size:11px;color:#64748B}
+.seye{font-family:"Courier New",Courier,monospace;color:#E10600;font-size:11px;letter-spacing:.12em;margin-bottom:8px}
+.scover h1{margin:0;font-size:30px;color:#1E293B;font-weight:800}
+.scover .st{font-style:italic;color:#64748B;margin:6px 0 0}
+.scover .rule{width:60px;height:2px;background:#E10600;margin:14px 0 30px}
+.ssec{margin-bottom:26px;page-break-inside:avoid}
+.ssec h2{font-size:15px;color:#1E293B;font-weight:700;border-bottom:1.5px solid #E10600;padding-bottom:4px;margin:0 0 10px}
+.ssec h3{font-size:12px;color:#1E293B;font-weight:700;margin:12px 0 5px}
+.ssec p{margin:4px 0;font-size:11.5pt;line-height:1.5}
+.ssec p.mu{color:#64748B;font-style:italic;font-size:10.5pt}
+table.st{width:100%;border-collapse:collapse;font-size:10.5pt;margin-top:4px}
+table.st th{background:#E10600;color:#fff;text-align:left;padding:5px 8px;font-weight:700;font-size:10pt}
+table.st td{padding:5px 8px;border-bottom:1px solid #E2E8F0;vertical-align:top}
+table.st tr:nth-child(even) td{background:#F8FAFC}
+table.cap td:first-child{font-weight:700;color:#1E293B;width:34%;background:#F8FAFC}
+ul.sl{margin:4px 0 0;padding-left:0;list-style:none}
+ul.sl li{padding-left:16px;position:relative;margin:3px 0;font-size:11pt}
+ul.sl li::before{content:"–";color:#E10600;position:absolute;left:0;font-weight:700}
+ul.sl li small{color:#64748B}
+.sfoot{margin-top:40px;border-top:1px solid #E2E8F0;padding-top:8px;display:flex;justify-content:space-between;font-family:"Courier New",Courier,monospace;font-size:9.5px;color:#64748B;letter-spacing:.06em}
+.callout{background:#F8FAFC;border-left:3px solid #E10600;padding:8px 12px;font-style:italic;color:#64748B;font-size:10.5pt;margin:8px 0}
+.stat{display:inline-block;padding:1px 7px;border-radius:10px;font-size:9.5pt;font-weight:700}
+.stat.pass{background:#DCFCE7;color:#166534} .stat.fail{background:#FEE2E2;color:#991B1B} .stat.pending{background:#FEF3C7;color:#92400E} .stat.na{background:#F1F5F9;color:#64748B}
+
+/* ── PRESENT MODE: screen-share safe. One client, nothing else. ── */
+body.present .side,body.present #banners,body.present header .sub,body.present .hideP{display:none!important}
+body.present .layout{grid-template-columns:1fr}
+body.present .wrap{max-width:1100px}
+body.present .rhead{border-color:var(--red)}
+.presentbar{display:none;align-items:center;gap:10px;background:#1A0E0E;border:1px solid #5A2323;border-radius:7px;padding:8px 13px;margin-bottom:12px;font-size:12.5px;color:#F8ABAB}
+body.present .presentbar{display:flex}
+
+@media print{
+  body{background:#fff}
+  .wrap,.modal{display:none!important}
+  #summary{position:static;display:block!important;overflow:visible}
+  .sbar{display:none}
+  .spage{max-width:none;padding:0}
+  @page{margin:18mm 16mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1><span class="bar"></span>Kick-off Desk</h1>
+    <div class="sub">Scope in and out, timeline, who does what, next steps. One record per client · internal only, never shared with a client</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="stamp"><span id="livedot" class="dotlive warn"></span><span id="stamp">loading…</span></div>
+</header>
+
+<div id="banners"></div>
+<div class="presentbar"><b>Presenting</b><span>Only this client is on screen. The client list, internal notes and commercial details are hidden. Press Esc or Exit to get them back.</span><span class="spacer"></span><button class="btn" onclick="setPresent(false)">Exit presenting</button></div>
+
+<div class="layout">
+  <aside class="side">
+    <div class="top" style="display:flex;gap:6px"><input class="q" id="q" placeholder="Filter clients…" oninput="renderList()"><button class="btn sm" id="allBtn" onclick="toggleAll()" title="Include completed and offboarded clients">All</button></div>
+    <div class="list" id="list"></div>
+    <div class="foot"><input id="newName" placeholder="Add a client not in Notion…"><button class="btn sm" onclick="addManual()">Add</button></div>
+  </aside>
+  <main class="rec" id="rec"></main>
+</div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="mbox">
+    <h3 id="mTitle"></h3>
+    <p id="mText"></p>
+    <textarea id="mArea" spellcheck="false"></textarea>
+    <div class="err" id="mErr"></div>
+    <div class="mr"><button class="btn" onclick="closeModal()">Close</button><button class="btn primary" id="mOk" onclick="importJSON()">Import</button></div>
+  </div>
+</div>
+
+<div id="summary">
+  <div class="sbar">
+    <b>Client-ready summary</b><span style="color:#94A3B8">· light mode, no internal notes, no rates. Print or save as PDF, then drop it into the client's 00_Project Admin folder.</span>
+    <span class="spacer"></span>
+    <button class="btn" onclick="openSummaryTab()">Open in new tab</button>
+    <button class="btn primary" onclick="window.print()">Print / Save PDF</button>
+    <button class="btn" onclick="closeSummary()">Close</button>
+  </div>
+  <div class="spage" id="spage"></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   1 · FEEDS AND STORAGE
+   ══════════════════════════════════════════════════════════════════════════ */
+var BASE   = 'https://sabel-intercom.github.io/Intake-forms/';
+var API    = 'https://sabel-webhook.vercel.app/api/tracker';
+var NOTION = 'https://sabel-webhook.vercel.app/api/notion?kind=projects';
+var PORTAL_KEY = 'client-portal-v1';
+var MY_KEY    = 'sabel-kickoff-v1';
+var LOCAL_KEY = 'sabel_kickoff_desk_v1';
+var LOGO_LIGHT = 'data:image/png;base64,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';
+
+var REG=[], PORTAL=[], PROJ=[], CLIENTS=[];
+var STORE={clients:{}}, REMOTE=false, CUR=null, SAVE_T=null, LIVE={ok:0,total:3,at:null,err:[]};
+var OPEN={};   /* section open/closed state, per session */
+var SHOWALL=false;
+
+var SABEL_TEAM=[
+  ['Richard Le Bas','Founder & Director'],
+  ['Chris Singh','Senior CX Consultant'],
+  ['Greg Deng','Senior Technical Consultant'],
+  ['Nikki Coughlan','Project Coordinator']
+];
+var PILLARS=[
+  ['blueprint','01','Transformation Blueprint'],
+  ['foundations','02','Intercom Foundations'],
+  ['automation','03','Automation Engine'],
+  ['fin','04','Fin Enablement'],
+  ['migration','05','Migration Accelerator']
+];
+var OWNERS=['Sabel','Client','Richard','Chris','Greg','Nikki'];
+var ACCESS_ST=[['pending','Pending','amber'],['pass','Pass','green'],['fail','Fail','red'],['na','N/A','grey']];
+var RISK_ST=[['open','Open','red'],['watching','Watching','amber'],['closed','Closed','green']];
+var HORIZON=[['now','This week'],['w12','Weeks 1–2'],['later','Looking ahead']];
+
+function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmt(s){ if(!s) return ''; var d=new Date(s+'T00:00:00'); if(isNaN(d)) return s; return d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear(); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function norm(n){
+  return String(n||'').toLowerCase().replace(/\(.*?\)?$/,'')
+    .replace(/\bdelivery\b|\blabs?\b|\boy\b|\bltd\b|\blimited\b|\bnz\b|\bglobal\b/g,'').replace(/[^a-z0-9]/g,'');
+}
+function fetchJSON(u){ return fetch(u,{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }); }
+
+/* ── the record ─────────────────────────────────────────────────────────────
+   This is the shape a Claude session seeds from the SOW. Every field is
+   optional; lists may be empty. Dates are YYYY-MM-DD. */
+function blankRecord(name){
+  return {
+    name: name||'', created: new Date().toISOString(), seeded: '',
+    basics: { legalName:'', shortName:name||'', hours:'', hoursNote:'', subscription:'', appId:'',
+              signed:'', signedSource:'', type:'', notionId:'', notionUrl:'', trackerUrl:'', sabelDoc:'', intercomSow:'',
+              pillars:{} },
+    scope:  { summary:'', inScope:[], outScope:[],
+              changeControl:'Anything outside this scope is treated as a change request: Sabel scopes it as an add-on and agrees it with you before any work starts.' },
+    timeline:{ kickoff:'', buildStart:'', checkin:'', goLive:'', goLiveNote:'', blackout:'', phases:[] },
+    people: { sabel:{}, client:[] },
+    raci:   [ {area:'Workspace configuration and build', sabel:'Build and configure', client:'Review and approve'},
+              {area:'Content: help articles, macros, message copy', sabel:'Structure and recommend', client:'Supply and own the content'},
+              {area:'Routing, teams and inbox decisions', sabel:'Recommend', client:'Decide'},
+              {area:'Testing and UAT', sabel:'Prepare test plan and fix', client:'Test and sign off'},
+              {area:'Integration and system access', sabel:'Specify what is needed', client:'Grant access'},
+              {area:'Go-live sign-off', sabel:'Confirm readiness', client:'Approve go-live'} ],
+    access: [ {item:'Shared Google Drive folder opens for the client', status:'pending', owner:'Nikki', note:''},
+              {item:'Slack channel created and client invited', status:'pending', owner:'Nikki', note:''},
+              {item:'Sabel has Intercom admin access', status:'pending', owner:'Client', note:''},
+              {item:'Integration and system access confirmed', status:'pending', owner:'Client', note:''} ],
+    decisions:[ {topic:'Historical data', options:'A: migrate everything · B: start fresh · C: migrate a defined subset', decision:'', owner:'Client', due:''} ],
+    actions:[], risks:[],
+    notesClient:'', notesInternal:'', callDone:false, callDate:'', summaryAt:''
+  };
+}
+function rec(id){ if(!STORE.clients[id]) STORE.clients[id]=blankRecord(); return STORE.clients[id]; }
+
+function loadLocal(){
+  try{ var s=localStorage.getItem(LOCAL_KEY); if(s){ var j=JSON.parse(s); if(j&&j.clients) STORE=j; } }catch(e){}
+  if(!STORE.clients) STORE.clients={};
+}
+function saveStore(){
+  STORE.updated=new Date().toISOString();
+  try{ localStorage.setItem(LOCAL_KEY,JSON.stringify(STORE)); }catch(e){}
+  stampSaved(REMOTE?'saving…':'saved to this browser');
+  if(!REMOTE) return;
+  if(SAVE_T) clearTimeout(SAVE_T);
+  SAVE_T=setTimeout(function(){
+    fetch(API+'?key='+encodeURIComponent(MY_KEY)+'&_t='+Date.now(),{
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data:STORE})
+    }).then(function(r){ stampSaved(r.ok?'synced':'sync failed, kept in this browser'); })
+      .catch(function(){ stampSaved('sync failed, kept in this browser'); });
+  },900);
+}
+function stampSaved(t){ var el=document.getElementById('savedStamp'); if(el) el.textContent=t+' · '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
+function probeStore(){
+  return fetchJSON(API+'?key='+encodeURIComponent(MY_KEY)).then(function(j){
+    if(!j||!j.ok) return;
+    REMOTE=true;
+    var r=j.data;
+    if(r&&r.clients&&(!STORE.updated||(r.updated&&r.updated>STORE.updated))) STORE=r;
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   2 · CLIENT LIST (Notion + registry + portal + anything saved here)
+   ══════════════════════════════════════════════════════════════════════════ */
+function build(){
+  var cand={};
+  function slot(name){ var k=norm(name); if(!k) return null; if(!cand[k]) cand[k]={id:k,name:name,reg:null,portal:null,notion:null}; return cand[k]; }
+  PROJ.forEach(function(p){
+    var c=slot(p.name); if(!c) return;
+    if(!c.notion){ c.notion=JSON.parse(JSON.stringify(p)); c.name=p.name; return; }
+    Object.keys(p).forEach(function(k){ if((c.notion[k]===''||c.notion[k]==null)&&p[k]!==''&&p[k]!=null) c.notion[k]=p[k]; });
+  });
+  REG.forEach(function(r){ var c=slot(r.name); if(c){ c.reg=r; if(!c.notion) c.name=r.name; } });
+  PORTAL.forEach(function(p){ var c=slot(p.name); if(c){ c.portal=p; if(!c.notion&&!c.reg) c.name=p.name; } });
+  Object.keys(STORE.clients).forEach(function(id){
+    var r=STORE.clients[id]; if(!cand[id]) cand[id]={id:id,name:r.name||id,reg:null,portal:null,notion:null,manual:true};
+  });
+  CLIENTS=Object.keys(cand).map(function(k){ return cand[k]; });
+  CLIENTS.sort(function(a,b){
+    var ra=STORE.clients[a.id], rb=STORE.clients[b.id];
+    var sa=ra?(ra.callDone?2:0):1, sb=rb?(rb.callDone?2:0):1;   /* in progress first, untouched next, done last */
+    if(sa!==sb) return sa-sb;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+/* Readiness: the nine things the call cannot run without. */
+function readiness(r){
+  var miss=[];
+  if(!r.basics.legalName) miss.push('legal name');
+  if(!r.basics.hours) miss.push('hours');
+  if(!Object.keys(r.basics.pillars).some(function(k){return r.basics.pillars[k];})) miss.push('pillars');
+  if(!r.scope.inScope.length) miss.push('scope in');
+  if(!r.scope.outScope.length) miss.push('scope out');
+  if(!r.timeline.kickoff) miss.push('kick-off date');
+  if(!r.timeline.goLive) miss.push('go-live');
+  if(!r.people.client.length) miss.push('client contact');
+  if(!Object.keys(r.people.sabel).some(function(k){return r.people.sabel[k];})) miss.push('Sabel team');
+  return {n:9-miss.length, of:9, miss:miss};
+}
+
+/* Live = anything still in flight anywhere: portal not Complete/Offboarding, Notion Active, or a tracker still flagged active. */
+function isLive(c){
+  if(c.portal&&c.portal.stage) return !/complete|offboard/i.test(c.portal.stage);
+  if(c.notion) return /active/i.test(c.notion.status||'');
+  if(c.reg) return !!c.reg.active;
+  return true;
+}
+function toggleAll(){ SHOWALL=!SHOWALL; document.getElementById('allBtn').classList.toggle('primary',SHOWALL); renderList(); }
+function renderList(){
+  var q=(document.getElementById('q').value||'').toLowerCase();
+  var h='';
+  CLIENTS.forEach(function(c){
+    if(q&&c.name.toLowerCase().indexOf(q)<0) return;
+    var r=STORE.clients[c.id], pill, meta;
+    if(!SHOWALL&&!r&&!isLive(c)) return;
+    if(!r){ pill='<span class="r">new</span>'; meta=c.portal&&c.portal.stage?('Portal · '+esc(c.portal.stage)):(c.notion?('Notion · '+esc(c.notion.status||'')):'tracker only'); }
+    else if(r.callDone){ pill='<span class="r d">✓ held</span>'; meta='Kick-off '+(fmt(r.callDate)||'held'); }
+    else { var rd=readiness(r); pill='<span class="r '+(rd.n===9?'g':'a')+'">'+rd.n+'/'+rd.of+'</span>'; meta=r.timeline.kickoff?('Kick-off '+fmt(r.timeline.kickoff)):'kick-off date not set'; }
+    h+='<div class="cl'+(CUR===c.id?' on':'')+'" onclick="openClient(\''+c.id+'\')"><div class="n">'+esc(c.name)+'</div><div class="m">'+meta+'</div>'+pill+'</div>';
+  });
+  document.getElementById('list').innerHTML=h||'<div class="empty" style="padding:12px">No clients match'+(SHOWALL?'':' (completed clients are hidden; press All)')+'.</div>';
+}
+function addManual(){
+  var n=document.getElementById('newName').value.trim(); if(!n) return;
+  var id=norm(n); if(!id) return;
+  if(!STORE.clients[id]){ STORE.clients[id]=blankRecord(n); STORE.clients[id].basics.legalName=n; saveStore(); }
+  document.getElementById('newName').value='';
+  build(); openClient(id);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   3 · PRE-POPULATION FROM NOTION / REGISTRY / PORTAL
+   Fills EMPTY fields only. Never overwrites something typed on the call.
+   ══════════════════════════════════════════════════════════════════════════ */
+function prefill(id, report){
+  var c=CLIENTS.filter(function(x){return x.id===id;})[0]; if(!c) return [];
+  var r=rec(id), b=r.basics, n=c.notion||{}, g=c.reg||{}, p=c.portal||{}, filled=[];
+  function set(obj,k,v,label){ if(v==null||v===''||v==='Not found in Drive') return; if(obj[k]===''||obj[k]==null||obj[k]===false){ obj[k]=v; filled.push(label||k); } }
+  if(!r.name) r.name=c.name;
+  set(b,'legalName',n.name||c.name,'legal name'); set(b,'shortName',c.name,'short name');
+  set(b,'hours',n.hours||g.sowHours||'','hours'); set(b,'hoursNote',n.hoursNote,'commercial note');
+  set(b,'signed',n.signed,'signed'); set(b,'signedSource',n.signedSource,'signed via');
+  set(b,'notionId',n.id); set(b,'notionUrl',n.url); set(b,'sabelDoc',n.sabelDoc,'Sabel doc link'); set(b,'intercomSow',n.intercomSow,'Intercom SOW link');
+  set(b,'trackerUrl',n.trackerUrl||(g.file?BASE+g.file:''),'tracker link');
+  var mig=String(n.migration||'').toLowerCase();
+  if(!b.type){ if(mig==='yes'&&/entire|whole|pure|only/i.test(n.migrationHours+' '+n.scope)) b.type='Migration'; else if(mig==='yes') b.type='Both'; else if(mig==='no') b.type='Project'; if(b.type) filled.push('engagement type'); }
+  if(mig==='yes'&&!b.pillars.migration){ b.pillars.migration=true; filled.push('Migration pillar'); }
+  set(r.scope,'summary',n.scope,'scope summary from Notion');
+  /* Notion's migration note mixes scope with fees, so it goes to INTERNAL notes, never to scope. */
+  if(n.migrationNote&&!r.notesInternal){ r.notesInternal='From Notion (migration): '+n.migrationNote; filled.push('migration note (internal)'); }
+  set(r.timeline,'goLive',parseLooseDate(p.goLiveDate||''),'go-live from portal');
+  if(!b.type&&p.type){ b.type=p.type; filled.push('engagement type from portal'); }
+  if(p.owner&&!Object.keys(r.people.sabel).length){ SABEL_TEAM.forEach(function(m){ if(m[0].split(' ')[0]===p.owner){ r.people.sabel[m[0]]=true; filled.push('Sabel owner from portal'); } }); }
+  var kd=parseLooseDate(n.kickoff); set(r.timeline,'kickoff',kd,'kick-off date');
+  if(n.contact&&!/not named|tbc/i.test(n.contact)&&!r.people.client.length){
+    r.people.client.push({name:n.contact,role:n.contactRole||'',email:'',involvement:'Primary contact and approver'}); filled.push('primary contact');
+  }
+  if(!r.seeded){ r.seeded='notion '+new Date().toISOString().slice(0,10); }
+  if(report&&filled.length) alert('Filled from Notion / registry / portal (empty fields only):\n\n· '+filled.join('\n· '));
+  else if(report) alert('Nothing new to fill: every field Notion knows about already has a value here.');
+  return filled;
+}
+function parseLooseDate(s){
+  if(!s) return ''; if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  var d=new Date(s); return isNaN(d)?'':iso(d);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   4 · RENDERING THE RECORD
+   ══════════════════════════════════════════════════════════════════════════ */
+function openClient(id){
+  CUR=id; try{ history.replaceState(null,'','#'+id); }catch(e){}
+  var fresh=!STORE.clients[id];
+  var r=rec(id);
+  if(fresh){ var c=CLIENTS.filter(function(x){return x.id===id;})[0]; r.name=c?c.name:id; prefill(id,false); saveStore(); build(); }
+  renderList(); renderRec();
+  window.scrollTo(0,0);
+}
+function inp(path,val,opts){
+  opts=opts||{};
+  var t=opts.type||'text';
+  if(t==='textarea') return '<textarea data-p="'+path+'" placeholder="'+esc(opts.ph||'')+'" rows="'+(opts.rows||2)+'">'+esc(val)+'</textarea>';
+  if(t==='select'){ var h='<select data-p="'+path+'"'+(opts.colour?' data-c="'+colourOf(opts.options,val)+'"':'')+'>';
+    if(opts.blank) h+='<option value="">'+esc(opts.blank)+'</option>';
+    opts.options.forEach(function(o){ var v=typeof o==='string'?o:o[0], l=typeof o==='string'?o:o[1]; h+='<option value="'+esc(v)+'"'+(v===val?' selected':'')+'>'+esc(l)+'</option>'; });
+    return h+'</select>'; }
+  if(t==='checkbox') return '<input type="checkbox" data-p="'+path+'"'+(val?' checked':'')+'>';
+  return '<input type="'+t+'" data-p="'+path+'" value="'+esc(val)+'" placeholder="'+esc(opts.ph||'')+'"'+(opts.list?' list="'+opts.list+'"':'')+'>';
+}
+function colourOf(options,val){ for(var i=0;i<options.length;i++) if(options[i][0]===val) return options[i][2]||''; return ''; }
+function field(label,path,val,opts){ opts=opts||{}; return '<div class="f'+(opts.wide?' wide':'')+'"><label>'+label+'</label>'+inp(path,val,opts)+(opts.sub?'<div class="sub">'+opts.sub+'</div>':'')+'</div>'; }
+function card(num,title,why,body){
+  var open=OPEN[num]!==false;
+  return '<div class="card'+(open?' open':'')+'" id="card'+num+'"><div class="ch" onclick="toggleCard(\''+num+'\')"><span class="num">'+num+'</span><h3>'+title+'</h3><span class="why">'+why+'</span><span class="chev">▶</span></div><div class="cb">'+body+'</div></div>';
+}
+function toggleCard(n){ OPEN[n]=OPEN[n]===false; var el=document.getElementById('card'+n); if(el) el.classList.toggle('open',OPEN[n]!==false); }
+function rowX(fn){ return '<td class="x"><button class="btn x" title="Remove" onclick="'+fn+'">×</button></td>'; }
+
+function renderRec(){
+  var el=document.getElementById('rec');
+  if(!CUR){ el.innerHTML='<div class="welcome"><b>Pick a client on the left</b> to open their kick-off record.<br>Clients come from the Notion Projects DB, the tracker registry and the portal; anyone else can be added below the list.<br>The basics fill themselves from Notion the first time you open a client. Scope, timeline and people are seeded from the SOW or typed in, then edited live on the call.</div>'; return; }
+  var r=rec(CUR), b=r.basics, rd=readiness(r), c=CLIENTS.filter(function(x){return x.id===CUR;})[0]||{};
+  var h='';
+
+  /* header */
+  h+='<div class="rhead"><div class="row"><h2>'+esc(r.name||b.shortName||CUR)+'</h2><span class="spacer"></span>'+
+     '<button class="btn hideP" onclick="prefill(CUR,true);saveStore();renderRec()">Refresh from Notion</button>'+
+     '<button class="btn hideP" onclick="showJSON()">Copy JSON</button>'+
+     '<button class="btn hideP" onclick="showImport()">Import JSON</button>'+
+     '<button class="btn" id="presentBtn" onclick="setPresent(!document.body.classList.contains(\'present\'))">'+(document.body.classList.contains('present')?'Exit presenting':'Present')+'</button>'+
+     '<button class="btn primary" onclick="showSummary()">Summary</button></div>';
+  var links=[];
+  if(b.notionUrl) links.push('<a href="'+esc(b.notionUrl)+'" target="_blank">Notion project</a>');
+  if(b.trackerUrl) links.push('<a href="'+esc(b.trackerUrl)+'" target="_blank">Project tracker</a>');
+  if(b.sabelDoc) links.push('<a href="'+esc(b.sabelDoc)+'" target="_blank">Sabel proposal / SOW</a>');
+  if(b.intercomSow) links.push('<a href="'+esc(b.intercomSow)+'" target="_blank">Intercom SOW</a>');
+  if(r.seeded) links.push('<span class="hideP">seeded: '+esc(r.seeded)+'</span>');
+  if(links.length) h+='<div class="links">'+links.join('')+'</div>';
+  h+='<div class="ready"><span>Ready for the call</span><div class="bar"><i style="width:'+Math.round(rd.n/rd.of*100)+'%"></i></div><b>'+rd.n+'/'+rd.of+'</b>'+(rd.miss.length?'<span class="miss">still needs: '+esc(rd.miss.join(', '))+'</span>':'<span style="color:var(--green)">all set</span>')+'</div>';
+  h+='<div class="callrow"><label><input type="checkbox" data-p="callDone"'+(r.callDone?' checked':'')+'> Kick-off call held</label>'+
+     '<span style="color:var(--mono)">on</span><input type="date" data-p="callDate" value="'+esc(r.callDate)+'" style="background:#0A0D10;border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--body)">'+
+     (r.summaryAt?'<span style="color:var(--mono)">· summary last exported '+esc(r.summaryAt.slice(0,10))+'</span>':'')+
+     '<span class="spacer"></span><span class="saved" id="savedStamp"></span>'+
+     '<button class="btn danger sm hideP" onclick="removeRecord()">Remove record</button></div></div>';
+
+  /* 01 basics */
+  var pl='';
+  PILLARS.forEach(function(p){ var on=!!b.pillars[p[0]]; pl+='<label class="pill'+(on?' on':'')+'"><input type="checkbox" data-p="basics.pillars.'+p[0]+'"'+(on?' checked':'')+'><small>'+p[1]+'</small>'+p[2]+'</label>'; });
+  h+=card('01','Engagement basics','what was signed',
+    '<div class="hint hideP">Fields fill from Notion, the tracker registry and the portal the first time a client is opened, and are never overwritten after that. <b>Commercial note</b> is internal and never appears in the summary.</div>'+
+    '<div class="grid">'+
+    field('Legal name (cover)','basics.legalName',b.legalName)+field('Short name (inline)','basics.shortName',b.shortName)+
+    field('Contracted hours','basics.hours',b.hours,{type:'number'})+'<div class="hideP">'+field('Commercial note <span class="auto">· internal</span>','basics.hoursNote',b.hoursNote)+'</div>'+
+    field('Intercom subscription and seats','basics.subscription',b.subscription,{ph:'e.g. Advanced, 6 seats'})+field('Workspace App ID','basics.appId',b.appId)+
+    field('Signed','basics.signed',b.signed)+field('Signed via','basics.signedSource',b.signedSource)+
+    field('Engagement type','basics.type',b.type,{type:'select',blank:'—',options:['Project','Migration','Both','Retainer']})+
+    '</div><h4 class="sh">Scope summary: the five Sabel pillars</h4><div class="pills">'+pl+'</div>');
+
+  /* 02 scope */
+  function scopeTable(list,path,ph){
+    if(!list.length) return '<div class="empty">Nothing yet. Add a line, or seed from the SOW.</div>';
+    var t='<table class="ed"><tr><th></th><th>Deliverable</th><th style="width:38%">Detail / boundary</th><th></th></tr>';
+    list.forEach(function(x,i){ t+='<tr><td class="n">'+(i+1)+'</td><td>'+inp(path+'.'+i+'.t',x.t,{ph:ph})+'</td><td>'+inp(path+'.'+i+'.note',x.note,{ph:'optional'})+'</td>'+rowX('delRow(\''+path+'\','+i+')')+'</tr>'; });
+    return t+'</table>';
+  }
+  h+=card('02','Scope: in and out','the reason the call exists',
+    '<div class="hint">Read <b>both</b> lists aloud on the call and get a yes to each. Out-of-scope lines are the anti-scope-creep guardrail: take them from the SOW exclusions, and add anything the client asks about that is not covered.</div>'+
+    '<div class="f wide"><label>Scope in one paragraph</label>'+inp('scope.summary',r.scope.summary,{type:'textarea',rows:3,ph:'What Sabel is delivering, in plain English'})+'</div>'+
+    '<div class="two"><div><h4 class="sh">In scope<span class="spacer"></span><button class="btn sm" onclick="addRow(\'scope.inScope\',{t:\'\',note:\'\'})">+ Add</button></h4>'+scopeTable(r.scope.inScope,'scope.inScope','Deliverable Sabel will do')+'</div>'+
+    '<div><h4 class="sh">Out of scope<span class="spacer"></span><button class="btn sm" onclick="addRow(\'scope.outScope\',{t:\'\',note:\'\'})">+ Add</button></h4>'+scopeTable(r.scope.outScope,'scope.outScope','Explicitly not included')+'</div></div>'+
+    '<div class="f wide" style="margin-top:12px"><label>Change control (read on the call)</label>'+inp('scope.changeControl',r.scope.changeControl,{type:'textarea',rows:2})+'</div>');
+
+  /* 03 timeline */
+  var tl=r.timeline, ph='';
+  if(tl.phases.length){
+    ph='<table class="ed"><tr><th></th><th>Phase</th><th style="width:140px">Start</th><th style="width:140px">End</th><th style="width:30%">Milestone / note</th><th></th></tr>';
+    tl.phases.forEach(function(x,i){ ph+='<tr><td class="n">'+(i+1)+'</td><td>'+inp('timeline.phases.'+i+'.label',x.label,{ph:'e.g. Foundations'})+'</td><td>'+inp('timeline.phases.'+i+'.start',x.start,{type:'date'})+'</td><td>'+inp('timeline.phases.'+i+'.end',x.end,{type:'date'})+'</td><td>'+inp('timeline.phases.'+i+'.note',x.note,{ph:'optional'})+'</td>'+rowX('delRow(\'timeline.phases\','+i+')')+'</tr>'; });
+    ph+='</table>';
+  } else ph='<div class="empty">No phases yet. Add the tube-map stations here; they feed the tracker build.</div>';
+  h+=card('03','Timeline and key dates','feeds the tracker in week one',
+    '<div class="grid">'+
+    field('Kick-off call','timeline.kickoff',tl.kickoff,{type:'date'})+field('Build starts','timeline.buildStart',tl.buildStart,{type:'date'})+
+    field('Weekly check-in slot','timeline.checkin',tl.checkin,{ph:'e.g. Thursdays 10:00 AEST'})+field('Go-live','timeline.goLive',tl.goLive,{type:'date'})+
+    field('Go-live note','timeline.goLiveNote',tl.goLiveNote,{ph:'e.g. Cutover, Intercom opens across all channels'})+field('Client blackout dates','timeline.blackout',tl.blackout,{ph:'holidays, freezes, launches'})+
+    '</div><h4 class="sh">Phases<span class="spacer"></span><button class="btn sm" onclick="addRow(\'timeline.phases\',{label:\'\',start:\'\',end:\'\',note:\'\'})">+ Add phase</button></h4>'+ph);
+
+  /* 04 people */
+  var st='';
+  SABEL_TEAM.forEach(function(m){ var on=!!r.people.sabel[m[0]]; st+='<label class="pill'+(on?' on':'')+'"><input type="checkbox" data-p="people.sabel.'+esc(m[0])+'"'+(on?' checked':'')+'>'+esc(m[0])+'<small>'+esc(m[1])+'</small></label>'; });
+  var ct='';
+  if(r.people.client.length){
+    ct='<table class="ed"><tr><th>Name</th><th>Role / title</th><th>Email</th><th style="width:30%">Involvement</th><th></th></tr>';
+    r.people.client.forEach(function(x,i){ ct+='<tr><td>'+inp('people.client.'+i+'.name',x.name)+'</td><td>'+inp('people.client.'+i+'.role',x.role)+'</td><td>'+inp('people.client.'+i+'.email',x.email,{type:'email'})+'</td><td>'+inp('people.client.'+i+'.involvement',x.involvement,{ph:'approver, dev contact, content owner…'})+'</td>'+rowX('delRow(\'people.client\','+i+')')+'</tr>'; });
+    ct+='</table>';
+  } else ct='<div class="empty">No client contacts yet. Capture the approver, the dev contact and the content owner as a minimum.</div>';
+  var rt='<table class="ed"><tr><th>Area</th><th>Sabel</th><th>Client</th><th></th></tr>';
+  r.raci.forEach(function(x,i){ rt+='<tr><td>'+inp('raci.'+i+'.area',x.area)+'</td><td>'+inp('raci.'+i+'.sabel',x.sabel)+'</td><td>'+inp('raci.'+i+'.client',x.client)+'</td>'+rowX('delRow(\'raci\','+i+')')+'</tr>'; });
+  rt+='</table>';
+  h+=card('04','Who is who, and who does what','no unowned work',
+    '<h4 class="sh">Sabel team on this engagement</h4><div class="pills">'+st+'</div>'+
+    '<h4 class="sh">Client contacts<span class="spacer"></span><button class="btn sm" onclick="addRow(\'people.client\',{name:\'\',role:\'\',email:\'\',involvement:\'\'})">+ Add contact</button></h4>'+ct+
+    '<h4 class="sh">Who does what<span class="spacer"></span><button class="btn sm" onclick="addRow(\'raci\',{area:\'\',sabel:\'\',client:\'\'})">+ Add row</button></h4>'+rt);
+
+  /* 05 access */
+  var at='<table class="ed"><tr><th>Check (run live on the call)</th><th style="width:120px">Result</th><th style="width:120px">Follow-up owner</th><th style="width:30%">Note</th><th></th></tr>';
+  r.access.forEach(function(x,i){ at+='<tr><td>'+inp('access.'+i+'.item',x.item)+'</td><td>'+inp('access.'+i+'.status',x.status,{type:'select',options:ACCESS_ST,colour:true})+'</td><td>'+inp('access.'+i+'.owner',x.owner,{list:'owners'})+'</td><td>'+inp('access.'+i+'.note',x.note)+'</td>'+rowX('delRow(\'access\','+i+')')+'</tr>'; });
+  at+='</table>';
+  h+=card('05','Access check','a timed, live step, not a to-do',
+    '<div class="hint">Do this on the call, screen shared: the client opens the Drive folder and Slack; you confirm Intercom admin. Anything that fails gets an owner and lands in Next steps.</div>'+at+
+    '<div style="margin-top:8px"><button class="btn sm" onclick="addRow(\'access\',{item:\'\',status:\'pending\',owner:\'\',note:\'\'})">+ Add check</button></div>');
+
+  /* 06 decisions */
+  var dt='';
+  if(r.decisions.length){
+    dt='<table class="ed"><tr><th style="width:18%">Decision</th><th>Options (neutral)</th><th style="width:24%">Decision made</th><th style="width:110px">Owner</th><th style="width:130px">Due</th><th></th></tr>';
+    r.decisions.forEach(function(x,i){ dt+='<tr><td>'+inp('decisions.'+i+'.topic',x.topic)+'</td><td>'+inp('decisions.'+i+'.options',x.options,{type:'textarea',rows:2})+'</td><td>'+inp('decisions.'+i+'.decision',x.decision,{type:'textarea',rows:2,ph:'leave blank if pending'})+'</td><td>'+inp('decisions.'+i+'.owner',x.owner,{list:'owners'})+'</td><td>'+inp('decisions.'+i+'.due',x.due,{type:'date'})+'</td>'+rowX('delRow(\'decisions\','+i+')')+'</tr>'; });
+    dt+='</table>';
+  } else dt='<div class="empty">No decisions pending.</div>';
+  h+=card('06','Decisions the client needs to make','present the trade-off, never steer',
+    dt+'<div style="margin-top:8px"><button class="btn sm" onclick="addRow(\'decisions\',{topic:\'\',options:\'\',decision:\'\',owner:\'Client\',due:\'\'})">+ Add decision</button></div>');
+
+  /* 07 actions and risks */
+  var act='';
+  if(r.actions.length){
+    act='<table class="ed"><tr><th></th><th>Action</th><th style="width:120px">Owner</th><th style="width:130px">Due</th><th style="width:130px">When</th><th></th></tr>';
+    r.actions.forEach(function(x,i){ act+='<tr class="'+(x.done?'done':'')+'"><td class="x">'+inp('actions.'+i+'.done',x.done,{type:'checkbox'})+'</td><td>'+inp('actions.'+i+'.t',x.t,{ph:'What happens next'})+'</td><td>'+inp('actions.'+i+'.owner',x.owner,{list:'owners'})+'</td><td>'+inp('actions.'+i+'.due',x.due,{type:'date'})+'</td><td>'+inp('actions.'+i+'.when',x.when,{type:'select',options:HORIZON})+'</td>'+rowX('delRow(\'actions\','+i+')')+'</tr>'; });
+    act+='</table>';
+  } else act='<div class="empty">No next steps yet. Every failed access check, pending decision and week-one task belongs here, each with an owner.</div>';
+  var rk='';
+  if(r.risks.length){
+    rk='<table class="ed"><tr><th>Risk / open item</th><th style="width:120px">Owner</th><th style="width:120px">Status</th><th></th></tr>';
+    r.risks.forEach(function(x,i){ rk+='<tr><td>'+inp('risks.'+i+'.t',x.t)+'</td><td>'+inp('risks.'+i+'.owner',x.owner,{list:'owners'})+'</td><td>'+inp('risks.'+i+'.status',x.status,{type:'select',options:RISK_ST,colour:true})+'</td>'+rowX('delRow(\'risks\','+i+')')+'</tr>'; });
+    rk+='</table>';
+  } else rk='<div class="empty">Nothing open.</div>';
+  h+=card('07','Next steps, risks and open items','every line has a name on it',
+    '<h4 class="sh">Next steps<span class="spacer"></span><button class="btn sm" onclick="addRow(\'actions\',{t:\'\',owner:\'\',due:\'\',when:\'now\',done:false})">+ Add action</button></h4>'+act+
+    '<h4 class="sh">Risks and open items<span class="spacer"></span><button class="btn sm" onclick="addRow(\'risks\',{t:\'\',owner:\'\',status:\'open\'})">+ Add</button></h4>'+rk);
+
+  /* 08 notes */
+  h+=card('08','Notes','',
+    '<div class="two"><div class="f"><label>Other notes <span class="auto">· goes in the summary</span></label>'+inp('notesClient',r.notesClient,{type:'textarea',rows:6,ph:'Anything else agreed on the call that the client should see'})+'</div>'+
+    '<div class="f hideP"><label>Internal notes <span style="color:var(--amber)">· never exported</span></label>'+inp('notesInternal',r.notesInternal,{type:'textarea',rows:6,ph:'Rates, concerns, things to watch'})+'</div></div>');
+
+  h+='<datalist id="owners">'+OWNERS.map(function(o){return '<option value="'+o+'">';}).join('')+'</datalist>';
+  el.innerHTML=h;
+}
+
+/* ── binding: any input with data-p writes straight into the record ── */
+function getPath(obj,path){ return path.split('.').reduce(function(o,k){ return o==null?undefined:o[k]; },obj); }
+function setPath(obj,path,val){ var ks=path.split('.'), o=obj; for(var i=0;i<ks.length-1;i++){ if(o[ks[i]]==null) o[ks[i]]={}; o=o[ks[i]]; } o[ks[ks.length-1]]=val; }
+document.addEventListener('input',onEdit); document.addEventListener('change',onEdit);
+function onEdit(e){
+  var t=e.target, p=t.getAttribute&&t.getAttribute('data-p'); if(!p||!CUR) return;
+  var r=rec(CUR), v=t.type==='checkbox'?t.checked:t.value;
+  setPath(r,p,v);
+  if(t.tagName==='SELECT'&&t.hasAttribute('data-c')){ var opts=/status/.test(p)&&/access/.test(p)?ACCESS_ST:RISK_ST; t.setAttribute('data-c',colourOf(opts,v)); }
+  if(t.type==='checkbox'&&t.closest('.pill')) t.closest('.pill').classList.toggle('on',t.checked);
+  if(t.type==='checkbox'&&/^actions\./.test(p)) t.closest('tr').classList.toggle('done',t.checked);
+  if(p==='callDone'||p==='callDate'||p==='timeline.kickoff'||/basics\.pillars|scope\.(in|out)Scope|timeline\.goLive|basics\.(legalName|hours)|people\./.test(p)){ renderList(); refreshReady(); }
+  saveStore();
+}
+function setPresent(on){
+  if(on&&!CUR) return;
+  document.body.classList.toggle('present',on);
+  var b=document.getElementById('presentBtn'); if(b) b.textContent=on?'Exit presenting':'Present';
+  try{ sessionStorage.setItem('kickoff_present',on?'1':''); }catch(e){}
+  window.scrollTo(0,0);
+}
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&document.body.classList.contains('present')) setPresent(false); });
+function refreshReady(){ var el=document.querySelector('.ready'); if(!el) return; var rd=readiness(rec(CUR));
+  el.innerHTML='<span>Ready for the call</span><div class="bar"><i style="width:'+Math.round(rd.n/rd.of*100)+'%"></i></div><b>'+rd.n+'/'+rd.of+'</b>'+(rd.miss.length?'<span class="miss">still needs: '+esc(rd.miss.join(', '))+'</span>':'<span style="color:var(--green)">all set</span>'); }
+function addRow(path,row){ var r=rec(CUR); getPath(r,path).push(row); saveStore(); renderRec(); renderList();
+  var last=document.querySelector('[data-p^="'+path+'.'+(getPath(r,path).length-1)+'."]'); if(last) last.focus(); }
+function delRow(path,i){ var r=rec(CUR), l=getPath(r,path); var x=l[i]; var label=x&&(x.t||x.item||x.topic||x.name||x.label||x.area)||'';
+  if(label&&!confirm('Remove "'+label+'"?')) return; l.splice(i,1); saveStore(); renderRec(); renderList(); }
+function removeRecord(){ var r=rec(CUR); if(!confirm('Remove the whole kick-off record for '+(r.name||CUR)+'? This cannot be undone.')) return;
+  delete STORE.clients[CUR]; saveStore(); CUR=null; build(); renderList(); renderRec(); }
+
+/* ── JSON in / out ── */
+function showJSON(){ var r=rec(CUR); document.getElementById('mTitle').textContent='Record JSON · '+(r.name||CUR);
+  document.getElementById('mText').innerHTML='Copy this into a Claude session to have the SOW merged in, or keep it as a backup. Import it back with <b>Import JSON</b>.';
+  document.getElementById('mArea').value=JSON.stringify(r,null,2); document.getElementById('mOk').style.display='none'; document.getElementById('mErr').textContent=''; document.getElementById('modal').classList.add('on'); }
+function showImport(){ var r=rec(CUR); document.getElementById('mTitle').textContent='Import record JSON · '+(r.name||CUR);
+  document.getElementById('mText').innerHTML='Paste a full record (the shape of <b>Copy JSON</b>) or a partial one. Lists in the paste <b>replace</b> the lists here; single fields only fill where this record is blank, unless you tick overwrite.'+
+    ' <label style="margin-left:8px"><input type="checkbox" id="mOver"> overwrite filled fields</label>';
+  document.getElementById('mArea').value=''; document.getElementById('mOk').style.display=''; document.getElementById('mErr').textContent=''; document.getElementById('modal').classList.add('on'); }
+function closeModal(){ document.getElementById('modal').classList.remove('on'); }
+function importJSON(){
+  var txt=document.getElementById('mArea').value, j;
+  try{ j=JSON.parse(txt); }catch(e){ document.getElementById('mErr').textContent='That is not valid JSON: '+e.message; return; }
+  if(!j||typeof j!=='object'){ document.getElementById('mErr').textContent='Expected an object.'; return; }
+  var over=document.getElementById('mOver').checked, r=rec(CUR), n=0;
+  (function merge(dst,src){
+    Object.keys(src).forEach(function(k){
+      var v=src[k];
+      if(Array.isArray(v)){ dst[k]=v; n++; }
+      else if(v&&typeof v==='object'){ if(!dst[k]||typeof dst[k]!=='object') dst[k]={}; merge(dst[k],v); }
+      else if(over||dst[k]===''||dst[k]==null||dst[k]===false){ if(dst[k]!==v){ dst[k]=v; n++; } }
+    });
+  })(r,j);
+  if(j.scope||j.timeline) r.seeded=(r.seeded?r.seeded+' · ':'')+'import '+new Date().toISOString().slice(0,10);
+  saveStore(); closeModal(); build(); renderList(); renderRec();
+  alert('Imported: '+n+' field'+(n===1?'':'s')+' updated.');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   5 · THE CLIENT-READY SUMMARY (light mode, printable)
+   ══════════════════════════════════════════════════════════════════════════ */
+function summaryHTML(r){
+  var b=r.basics, tl=r.timeline, name=b.shortName||r.name, legal=b.legalName||name;
+  function sec(t,body){ return '<div class="ssec"><h2>'+t+'</h2>'+body+'</div>'; }
+  function tbl(head,rows){ if(!rows.length) return '<p class="mu">Nothing recorded.</p>'; return '<table class="st"><tr>'+head.map(function(x){return '<th>'+x+'</th>';}).join('')+'</tr>'+rows.map(function(rw){ return '<tr>'+rw.map(function(c){return '<td>'+c+'</td>';}).join('')+'</tr>'; }).join('')+'</table>'; }
+  function cap(rows){ return '<table class="st cap">'+rows.filter(function(x){return x[1];}).map(function(x){ return '<tr><td>'+x[0]+'</td><td>'+esc(x[1])+'</td></tr>'; }).join('')+'</table>'; }
+  function list(items,f){ if(!items.length) return '<p class="mu">None recorded.</p>'; return '<ul class="sl">'+items.map(f).join('')+'</ul>'; }
+  var h='<div class="shead"><img src="'+LOGO_LIGHT+'" alt="Sabel"><span class="hr">Kick-off Summary · '+esc(name)+'</span></div>';
+  h+='<div class="scover"><div class="seye">SABEL · KICK-OFF SUMMARY</div><h1>'+esc(legal)+'</h1><p class="st">What we agreed on the kick-off call'+(r.callDate?' on '+fmt(r.callDate):'')+': scope, timeline, who does what, and what happens next.</p><div class="rule"></div></div>';
+
+  var pill=PILLARS.map(function(p){ return [p[1]+' '+p[2], b.pillars[p[0]]?'Yes':'No']; });
+  h+=sec('01 · Engagement basics', cap([['Client',legal],['Contracted hours',b.hours?b.hours+' hours':''],['Intercom subscription',b.subscription],['Workspace App ID',b.appId],['Engagement type',b.type],['Signed',b.signed?b.signed+(b.signedSource?' via '+b.signedSource:''):'']])+
+     '<h3>Scope summary</h3>'+tbl(['Sabel pillar','In this engagement'],pill.map(function(x){return [esc(x[0]),x[1]];})));
+
+  h+=sec('02 · Scope', (r.scope.summary?'<p>'+esc(r.scope.summary)+'</p>':'')+
+     '<h3>In scope</h3>'+list(r.scope.inScope,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';})+
+     '<h3>Out of scope</h3>'+list(r.scope.outScope,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';})+
+     (r.scope.changeControl?'<div class="callout">'+esc(r.scope.changeControl)+'</div>':''));
+
+  h+=sec('03 · Timeline and key dates', cap([['Kick-off call',fmt(tl.kickoff)],['Build starts',fmt(tl.buildStart)],['Weekly check-in',tl.checkin],['Go-live',fmt(tl.goLive)+(tl.goLiveNote?' · '+tl.goLiveNote:'')],['Blackout dates',tl.blackout]])+
+     (tl.phases.length?'<h3>Phases</h3>'+tbl(['Phase','From','To','Milestone'],tl.phases.map(function(p){return [esc(p.label),fmt(p.start),fmt(p.end),esc(p.note)];})):''));
+
+  var sab=SABEL_TEAM.filter(function(m){return r.people.sabel[m[0]];});
+  h+=sec('04 · Who is who', '<h3>Your Sabel team</h3>'+tbl(['Name','Role'],sab.map(function(m){return [esc(m[0]),esc(m[1])];}))+
+     '<h3>At '+esc(name)+'</h3>'+tbl(['Name','Role','Email','Involvement'],r.people.client.map(function(p){return [esc(p.name),esc(p.role),esc(p.email),esc(p.involvement)];})));
+
+  h+=sec('05 · Who does what', tbl(['Area','Sabel','You'],r.raci.filter(function(x){return x.area;}).map(function(x){return [esc(x.area),esc(x.sabel),esc(x.client)];})));
+
+  var acc=r.access.filter(function(x){return x.item;});
+  h+=sec('06 · Access check', tbl(['Check','Result','Follow-up'],acc.map(function(x){ var s=ACCESS_ST.filter(function(o){return o[0]===x.status;})[0]||ACCESS_ST[0]; return [esc(x.item),'<span class="stat '+x.status+'">'+s[1]+'</span>',esc(x.status==='pass'||x.status==='na'?(x.note||''):((x.owner?x.owner+': ':'')+(x.note||'to resolve')))]; })));
+
+  var dec=r.decisions.filter(function(x){return x.topic;});
+  if(dec.length) h+=sec('07 · Decisions', tbl(['Decision','Options','Outcome','Owner','By'],dec.map(function(x){return [esc(x.topic),esc(x.options),x.decision?esc(x.decision):'<i>Pending</i>',esc(x.owner),fmt(x.due)];})));
+
+  var act=r.actions.filter(function(x){return x.t&&!x.done;}), ab='';
+  HORIZON.forEach(function(hz){ var xs=act.filter(function(a){return (a.when||'now')===hz[0];}); if(!xs.length) return;
+    ab+='<h3>'+hz[1]+'</h3>'+tbl(['Action','Owner','Due'],xs.map(function(a){return [esc(a.t),esc(a.owner),fmt(a.due)];})); });
+  h+=sec((dec.length?'08':'07')+' · Next steps', ab||'<p class="mu">No open actions.</p>');
+
+  var rk=r.risks.filter(function(x){return x.t&&x.status!=='closed';});
+  if(rk.length) h+=sec((dec.length?'09':'08')+' · Risks and open items', tbl(['Item','Owner','Status'],rk.map(function(x){ var s=RISK_ST.filter(function(o){return o[0]===x.status;})[0]||RISK_ST[0]; return [esc(x.t),esc(x.owner),s[1]]; })));
+  if(r.notesClient) h+=sec('Other notes','<p>'+esc(r.notesClient).replace(/\n/g,'<br>')+'</p>');
+  h+='<div class="sfoot"><span>PERFECT MADE POSSIBLE · sabelcustomersuccess.com</span><span>Prepared '+fmt(iso(new Date()))+'</span></div>';
+  return h;
+}
+var MONEY=/(?:USD|AUD|EUR|GBP|NZD|\$|£|€)\s?\d|\d\s?(?:USD|AUD|EUR|GBP|NZD)\b|\bper hour\b|\bhourly rate\b/i;
+function showSummary(){ var r=rec(CUR); r.summaryAt=new Date().toISOString(); saveStore();
+  var html=summaryHTML(r), plain=html.replace(/<[^>]+>/g,' ');
+  var w=document.getElementById('swarn'); if(w) w.remove();
+  if(MONEY.test(plain)){ var sec=[]; html.split('<div class="ssec">').slice(1).forEach(function(x){ if(MONEY.test(x.replace(/<[^>]+>/g,' '))){ var m=x.match(/<h2>(.*?)<\/h2>/); sec.push(m?m[1]:'?'); } });
+    var d=document.createElement('div'); d.id='swarn'; d.style.cssText='background:#FEE2E2;color:#991B1B;padding:8px 18px;font-size:12.5px;font-family:'+getComputedStyle(document.body).fontFamily;
+    d.innerHTML='<b>Pricing spotted in the summary</b> ('+esc(sec.join(', '))+'). Rates and fees never go to the client: edit the line, or move it to Internal notes, before printing.';
+    document.getElementById('summary').insertBefore(d,document.getElementById('spage')); }
+  document.getElementById('spage').innerHTML=html; document.getElementById('summary').classList.add('on'); document.title='Kick-off Summary · '+(r.basics.shortName||r.name); }
+function closeSummary(){ document.getElementById('summary').classList.remove('on'); document.title='Sabel Kick-off Desk — internal'; renderRec(); }
+function openSummaryTab(){
+  var r=rec(CUR), css=document.querySelector('style').textContent;
+  var doc='<!doctype html><html><head><meta charset="utf-8"><title>Kick-off Summary · '+esc(r.basics.shortName||r.name)+'</title><style>'+css+' body{background:#fff}</style></head><body><div id="summary" class="on" style="position:static"><div class="spage">'+summaryHTML(r)+'</div></div></body></html>';
+  var u=URL.createObjectURL(new Blob([doc],{type:'text/html'})); window.open(u,'_blank');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   6 · BANNERS, STAMP, LOAD
+   ══════════════════════════════════════════════════════════════════════════ */
+function banners(){
+  var h='';
+  if(!REMOTE) h+='<div class="banner"><b>Saving to this browser only.</b> The tracker webhook validates keys against a server-side allowlist and 404s anything it does not know: <code>'+MY_KEY+'</code> is not on it yet, so every record lives in this browser’s localStorage. Add the key to <code>ALLOWED_KEYS</code> in <b>sabel-webhook/api/tracker.js</b>; this page picks it up on the next load and starts syncing, with nothing lost.</div>';
+  if(LIVE.err.length) h+='<div class="banner info">Did not load: '+esc(LIVE.err.join(', '))+'. Clients from that feed will not appear until it is back; anything already saved here still shows.</div>';
+  document.getElementById('banners').innerHTML=h;
+}
+function setStamp(){
+  var el=document.getElementById('stamp'), dot=document.getElementById('livedot');
+  var t=LIVE.at?LIVE.at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'—';
+  el.textContent=LIVE.ok+'/'+LIVE.total+' feeds · '+t+(REMOTE?' · synced':' · local only');
+  dot.className='dotlive'+(LIVE.ok===LIVE.total?'':(LIVE.ok?' warn':' off'));
+}
+function loadAll(){
+  LIVE.ok=0; LIVE.err=[];
+  return Promise.all([
+    fetchJSON(NOTION+'&_t='+Date.now()).then(function(j){ PROJ=(j&&j.projects)||[]; if(PROJ.length) LIVE.ok++; else LIVE.err.push('Notion projects'); }),
+    fetchJSON(BASE+'trackers.json').then(function(j){ REG=j||[]; if(j) LIVE.ok++; else LIVE.err.push('trackers.json'); }),
+    fetchJSON(API+'?key='+PORTAL_KEY+'&_t='+Date.now()).then(function(j){ var d=j&&(j.data||j.value); PORTAL=(d&&d.clients)||[]; if(PORTAL.length) LIVE.ok++; else LIVE.err.push('client portal'); })
+  ]).then(function(){ LIVE.at=new Date(); build(); banners(); renderList(); setStamp(); });
+}
+loadLocal(); renderRec();
+probeStore().then(loadAll).then(function(){
+  var hash=(location.hash||'').replace('#',''); if(hash&&CLIENTS.some(function(c){return c.id===hash;})) openClient(hash);
+  try{ if(sessionStorage.getItem('kickoff_present')==='1'&&CUR) setPresent(true); }catch(e){}
+});
+</script>
+</body>
+</html>

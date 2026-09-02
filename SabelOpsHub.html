@@ -65,6 +65,7 @@
     <nav class="tabs">
       <button class="tab on" id="t-home"      onclick="show('home')">Home</button>
       <button class="tab"    id="t-portal"    onclick="show('portal')">Onboarding / Offboarding</button>
+      <button class="tab"    id="t-kickoff"   onclick="show('kickoff')">Kick-off Desk</button>
       <button class="tab"    id="t-dashboard" onclick="show('dashboard')">Project Dashboard</button>
       <button class="tab"    id="t-contracts" onclick="show('contracts')">Client Contracts</button>
       <button class="tab"    id="t-weekly"    onclick="show('weekly')">Weekly Updates</button>
@@ -90,6 +91,14 @@
           <div class="sub">Your client setup &amp; close-out checklists</div>
           <p>Run every client from kick-off to handover. Track each onboarding and offboarding step, stage, go-live date and tracker link in one shared, always-saved list.</p>
           <span class="go">Open portal <span class="arrow">&rarr;</span></span>
+        </button>
+        <button class="pillar" onclick="show('kickoff')">
+          <span class="badge internal">Internal</span>
+          <div class="ico">&#9673;</div>
+          <h2>Kick-off Desk</h2>
+          <div class="sub">Scope, timeline, who does what &mdash; per client</div>
+          <p>One record per client for the kick-off call: scope in and out, key dates, contacts, the live access check, decisions and next steps. Pre-filled from Notion, edited on the call, exported as a client-ready summary.</p>
+          <span class="go">Open kick-off desk <span class="arrow">&rarr;</span></span>
         </button>
         <button class="pillar" onclick="show('dashboard')">
           <span class="badge internal">Internal</span>
@@ -126,6 +135,7 @@
       </div>
       <div class="foot-note">
         <b>Onboarding / Offboarding Portal</b> &mdash; your checklists to set clients up and close them out.<br>
+        <b>Kick-off Desk</b> &mdash; the scope, dates and owners agreed on each kick-off call, with a printable summary.<br>
         <b>Project Tracker Dashboard</b> &mdash; the team view of where all the client trackers stand.<br>
         <b>Client Contracts</b> &mdash; scope and hours per client, the go-live timeline and the expiry watch.<br>
         <b>Weekly Client Updates</b> &mdash; draft and approve the Monday and Friday client messages.<br>
@@ -137,6 +147,11 @@
   <!-- PORTAL -->
   <section class="view" id="portal">
     <iframe id="frame-portal" data-src="SabelClientPortal.html" title="Onboarding / Offboarding Portal"></iframe>
+  </section>
+
+  <!-- KICK-OFF DESK -->
+  <section class="view" id="kickoff">
+    <iframe id="frame-kickoff" data-src="SabelKickoffDesk.html" title="Kick-off Desk"></iframe>
   </section>
 
   <!-- DASHBOARD -->
@@ -161,7 +176,7 @@
 </div>
 
 <script>
-  var VIEWS = ['home','portal','dashboard','contracts','weekly','feedback'];
+  var VIEWS = ['home','portal','kickoff','dashboard','contracts','weekly','feedback'];
 
   // Each tab is a separate page in an iframe, with its own cache entry — so
   // refreshing the hub does not necessarily re-fetch the tool inside it, and a
@@ -169,7 +184,7 @@
   // browser holds it. Stamping the version onto the src makes it a new URL, so
   // a deploy is picked up immediately.
   // BUMP THIS whenever you push a new version of any tab's page.
-  var ASSET_V = '2026-08-17b';
+  var ASSET_V = '2026-09-02a';
   function versioned(src){
     return src + (src.indexOf('?') > -1 ? '&' : '?') + 'v=' + ASSET_V;
   }
