@@ -198,6 +198,12 @@ ul.sl li small{color:#64748B}
 .stat{display:inline-block;padding:1px 7px;border-radius:10px;font-size:9.5pt;font-weight:700}
 .stat.pass{background:#DCFCE7;color:#166534} .stat.fail{background:#FEE2E2;color:#991B1B} .stat.pending{background:#FEF3C7;color:#92400E} .stat.na{background:#F1F5F9;color:#64748B}
 
+/* ── date fields: visible calendar button, whole field opens the picker ── */
+input[type=date]{color-scheme:dark;cursor:pointer;padding-right:30px;position:relative;min-width:150px}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(1.6);opacity:.85;cursor:pointer;width:16px;height:16px;padding:2px;border-radius:4px}
+input[type=date]::-webkit-calendar-picker-indicator:hover{opacity:1;background:rgba(225,6,0,.35)}
+input[type=date]:hover{border-color:var(--muted)}
+
 /* ── PRESENT MODE: screen-share safe. One client, nothing else. ── */
 body.present .side,body.present #banners,body.present header .sub,body.present .hideP{display:none!important}
 body.present .layout{grid-template-columns:1fr}
@@ -645,6 +651,10 @@ function onEdit(e){
   if(p==='callDone'||p==='callDate'||p==='timeline.kickoff'||/basics\.pillars|scope\.(in|out)Scope|timeline\.goLive|basics\.(legalName|hours)|people\./.test(p)){ renderList(); refreshReady(); }
   saveStore();
 }
+/* Click anywhere in a date field to open the calendar, not just the small icon. */
+document.addEventListener('click',function(e){
+  var t=e.target; if(t&&t.tagName==='INPUT'&&t.type==='date'&&typeof t.showPicker==='function'){ try{ t.showPicker(); }catch(err){} }
+});
 function setPresent(on){
   if(on&&!CUR) return;
   document.body.classList.toggle('present',on);
