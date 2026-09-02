@@ -136,6 +136,15 @@ header .sub{font-size:12px;color:var(--muted);margin-top:3px}
 .pill.on{border-color:var(--red);color:var(--w)}
 .pill small{color:var(--mono);font-family:var(--code);font-size:10px}
 
+.info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--mono);color:var(--mono);font-size:10px;font-weight:700;font-family:var(--code);cursor:help;position:relative;margin-left:2px;flex:none}
+.info:hover{border-color:var(--blue);color:var(--blue)}
+.info .tip{display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);width:300px;background:#0A0D10;border:1px solid var(--border);border-top:2px solid var(--red);border-radius:7px;padding:9px 11px;font-size:11.5px;font-weight:400;font-family:var(--sans);color:var(--body);line-height:1.5;text-align:left;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.5);cursor:default;white-space:normal}
+.info:hover .tip,.info:focus .tip{display:block}
+.pillrow{display:grid;grid-template-columns:260px 1fr;gap:8px 12px;align-items:center;margin-top:8px}
+.pillrow input.pn{width:100%;background:#0A0D10;border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--body);font-size:12px;font-family:var(--sans)}
+.pillrow input.pn:focus{outline:none;border-color:var(--red)}
+.pillrow input.pn:disabled{opacity:.35}
+@media(max-width:900px){.pillrow{grid-template-columns:1fr}}
 h4.sh{margin:14px 0 6px;font-size:11px;letter-spacing:.9px;text-transform:uppercase;color:var(--mono);font-weight:600;display:flex;align-items:center;gap:10px}
 h4.sh .spacer{flex:1}
 table.ed{width:100%;border-collapse:collapse;margin-top:4px}
@@ -198,11 +207,16 @@ ul.sl li small{color:#64748B}
 .stat{display:inline-block;padding:1px 7px;border-radius:10px;font-size:9.5pt;font-weight:700}
 .stat.pass{background:#DCFCE7;color:#166534} .stat.fail{background:#FEE2E2;color:#991B1B} .stat.pending{background:#FEF3C7;color:#92400E} .stat.na{background:#F1F5F9;color:#64748B}
 
-/* ── date fields: visible calendar button, whole field opens the picker ── */
-input[type=date]{color-scheme:dark;cursor:pointer;padding-right:30px;position:relative;min-width:150px}
-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(1.6);opacity:.85;cursor:pointer;width:16px;height:16px;padding:2px;border-radius:4px}
-input[type=date]::-webkit-calendar-picker-indicator:hover{opacity:1;background:rgba(225,6,0,.35)}
-input[type=date]:hover{border-color:var(--muted)}
+/* ── date fields: our own calendar button (Safari shows no icon, Chrome's is black) ── */
+.dw{display:inline-flex;align-items:stretch;width:100%;min-width:150px}
+.dw input[type=date]{flex:1;min-width:0;border-top-right-radius:0;border-bottom-right-radius:0;color-scheme:dark;cursor:pointer}
+.dw input[type=date]::-webkit-calendar-picker-indicator{opacity:0;width:0;margin:0;padding:0}
+.dw .cal{flex:none;width:32px;border:1px solid var(--border);border-left:none;border-radius:0 6px 6px 0;background:#141719;color:var(--w);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.dw .cal svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:1.8}
+.dw .cal:hover{background:var(--red)}
+.dw input[type=date]:focus + .cal{border-color:var(--red)}
+/* auto-growing text fields */
+textarea.grow{min-height:34px;height:34px;overflow:hidden;resize:none;line-height:1.45;padding:7px 9px}
 
 /* ── PRESENT MODE: screen-share safe. One client, nothing else. ── */
 body.present .side,body.present #banners,body.present header .sub,body.present .hideP{display:none!important}
@@ -291,12 +305,15 @@ var SABEL_TEAM=[
   ['Greg Deng','Senior Technical Consultant'],
   ['Nikki Coughlan','Project Coordinator']
 ];
+/* The five Sabel pillars, as defined in the Sabel proposal / SOW format. The fourth
+   value is the generic definition shown in the info tooltip; the per-client
+   "what it covers here" line is typed into the record (basics.pillarNotes). */
 var PILLARS=[
-  ['blueprint','01','Transformation Blueprint'],
-  ['foundations','02','Intercom Foundations'],
-  ['automation','03','Automation Engine'],
-  ['fin','04','Fin Enablement'],
-  ['migration','05','Migration Accelerator']
+  ['blueprint','01','Transformation Blueprint','Discovery and strategy. Inspection of the current set-up, a current-state map, and recommendations on how the workspace, brands and teams should be shaped. Only in scope when discovery or strategy work was sold.'],
+  ['foundations','02','Intercom Foundations','Workspace and channel set-up. Brand, teammates, teams and inboxes, attributes, business hours, SLAs, channels (email, Messenger, WhatsApp, social) and routing. Usually in scope.'],
+  ['automation','03','Automation Engine','Workflows, procedures and connectors. Assignment and routing rules, ticketing and workflow automation, integrations such as Jira, Slack or Shopify, and API or webhook connectors. Usually in scope.'],
+  ['fin','04','Fin Enablement','Help Centre, Fin AI Agent and training. Knowledge base structure and audiences, Fin configured, tuned and guard-railed, Copilot, and team training and handover. Usually in scope.'],
+  ['migration','05','Migration Accelerator','Migration of historical data from another platform, delivered through Migr8Now: field mapping, a sample batch, the full run and a delta at cutover. The pillar carries the platform fee; Sabel oversight sits in go-live. Only in scope when a migration was sold.']
 ];
 var OWNERS=['Sabel','Client','Richard','Chris','Greg','Nikki'];
 var ACCESS_ST=[['pending','Pending','amber'],['pass','Pass','green'],['fail','Fail','red'],['na','N/A','grey']];
@@ -321,7 +338,7 @@ function blankRecord(name){
     name: name||'', created: new Date().toISOString(), seeded: '',
     basics: { legalName:'', shortName:name||'', hours:'', hoursNote:'', subscription:'', appId:'',
               signed:'', signedSource:'', type:'', notionId:'', notionUrl:'', trackerUrl:'', sabelDoc:'', intercomSow:'',
-              pillars:{} },
+              pillars:{}, pillarNotes:{} },
     scope:  { summary:'', inScope:[], outScope:[],
               changeControl:'Anything outside this scope is treated as a change request: Sabel scopes it as an add-on and agrees it with you before any work starts.' },
     timeline:{ kickoff:'', buildStart:'', checkin:'', goLive:'', goLiveNote:'', blackout:'', phases:[] },
@@ -497,8 +514,15 @@ function inp(path,val,opts){
     opts.options.forEach(function(o){ var v=typeof o==='string'?o:o[0], l=typeof o==='string'?o:o[1]; h+='<option value="'+esc(v)+'"'+(v===val?' selected':'')+'>'+esc(l)+'</option>'; });
     return h+'</select>'; }
   if(t==='checkbox') return '<input type="checkbox" data-p="'+path+'"'+(val?' checked':'')+'>';
+  if(t==='date') return dateField(path,val);
+  if(t==='grow') return '<textarea class="grow" rows="1" data-p="'+path+'" placeholder="'+esc(opts.ph||'')+'">'+esc(val)+'</textarea>';
   return '<input type="'+t+'" data-p="'+path+'" value="'+esc(val)+'" placeholder="'+esc(opts.ph||'')+'"'+(opts.list?' list="'+opts.list+'"':'')+'>';
 }
+var CAL_SVG='<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
+function dateField(path,val,extra){ return '<span class="dw"><input type="date" data-p="'+path+'" value="'+esc(val)+'"'+(extra||'')+'><button type="button" class="cal" tabindex="-1" title="Open calendar" onclick="openCal(this)">'+CAL_SVG+'</button></span>'; }
+function openCal(btn){ var i=btn.previousElementSibling; if(!i) return; i.focus(); if(typeof i.showPicker==='function'){ try{ i.showPicker(); }catch(e){} } }
+function autoGrow(t){ t.style.height='auto'; t.style.height=Math.max(34,t.scrollHeight+2)+'px'; }
+function growAll(){ [].slice.call(document.querySelectorAll('textarea.grow')).forEach(autoGrow); }
 function colourOf(options,val){ for(var i=0;i<options.length;i++) if(options[i][0]===val) return options[i][2]||''; return ''; }
 function field(label,path,val,opts){ opts=opts||{}; return '<div class="f'+(opts.wide?' wide':'')+'"><label>'+label+'</label>'+inp(path,val,opts)+(opts.sub?'<div class="sub">'+opts.sub+'</div>':'')+'</div>'; }
 function card(num,title,why,body){
@@ -530,23 +554,27 @@ function renderRec(){
   if(links.length) h+='<div class="links">'+links.join('')+'</div>';
   h+='<div class="ready"><span>Ready for the call</span><div class="bar"><i style="width:'+Math.round(rd.n/rd.of*100)+'%"></i></div><b>'+rd.n+'/'+rd.of+'</b>'+(rd.miss.length?'<span class="miss">still needs: '+esc(rd.miss.join(', '))+'</span>':'<span style="color:var(--green)">all set</span>')+'</div>';
   h+='<div class="callrow"><label><input type="checkbox" data-p="callDone"'+(r.callDone?' checked':'')+'> Kick-off call held</label>'+
-     '<span style="color:var(--mono)">on</span><input type="date" data-p="callDate" value="'+esc(r.callDate)+'" style="background:#0A0D10;border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--body)">'+
+     '<span style="color:var(--mono)">on</span><span style="display:inline-block;width:190px">'+dateField('callDate',r.callDate,' style="background:#0A0D10;border:1px solid var(--border);border-radius:6px 0 0 6px;padding:4px 8px;color:var(--body)"')+'</span>'+
      (r.summaryAt?'<span style="color:var(--mono)">· summary last exported '+esc(r.summaryAt.slice(0,10))+'</span>':'')+
      '<span class="spacer"></span><span class="saved" id="savedStamp"></span>'+
      '<button class="btn danger sm hideP" onclick="removeRecord()">Remove record</button></div></div>';
 
   /* 01 basics */
   var pl='';
-  PILLARS.forEach(function(p){ var on=!!b.pillars[p[0]]; pl+='<label class="pill'+(on?' on':'')+'"><input type="checkbox" data-p="basics.pillars.'+p[0]+'"'+(on?' checked':'')+'><small>'+p[1]+'</small>'+p[2]+'</label>'; });
+  if(!b.pillarNotes) b.pillarNotes={};
+  PILLARS.forEach(function(p){ var on=!!b.pillars[p[0]];
+    pl+='<div class="pillrow"><label class="pill'+(on?' on':'')+'"><input type="checkbox" data-p="basics.pillars.'+p[0]+'"'+(on?' checked':'')+'><small>'+p[1]+'</small>'+p[2]+
+        '<span class="info" tabindex="0">i<span class="tip"><b>'+p[1]+' '+p[2]+'</b><br>'+esc(p[3])+'</span></span></label>'+
+        '<input class="pn" data-p="basics.pillarNotes.'+p[0]+'" value="'+esc(b.pillarNotes[p[0]]||'')+'" placeholder="What it covers for '+esc(b.shortName||r.name||'this client')+'"'+(on?'':' disabled')+'></div>'; });
   h+=card('01','Engagement basics','what was signed',
     '<div class="hint hideP">Fields fill from Notion, the tracker registry and the portal the first time a client is opened, and are never overwritten after that. <b>Commercial note</b> is internal and never appears in the summary.</div>'+
     '<div class="grid">'+
     field('Legal name (cover)','basics.legalName',b.legalName)+field('Short name (inline)','basics.shortName',b.shortName)+
-    field('Contracted hours','basics.hours',b.hours,{type:'number'})+'<div class="hideP">'+field('Commercial note <span class="auto">· internal</span>','basics.hoursNote',b.hoursNote)+'</div>'+
+    field('Contracted hours','basics.hours',b.hours,{type:'number'})+'<div class="hideP">'+field('Commercial note <span class="auto">· internal</span>','basics.hoursNote',b.hoursNote,{type:'grow'})+'</div>'+
     field('Intercom subscription and seats','basics.subscription',b.subscription,{ph:'e.g. Advanced, 6 seats'})+field('Workspace App ID','basics.appId',b.appId)+
-    field('Signed','basics.signed',b.signed)+field('Signed via','basics.signedSource',b.signedSource)+
+    field('Signed','basics.signed',b.signed)+field('Signed via','basics.signedSource',b.signedSource,{type:'grow'})+
     field('Engagement type','basics.type',b.type,{type:'select',blank:'—',options:['Project','Migration','Both','Retainer']})+
-    '</div><h4 class="sh">Scope summary: the five Sabel pillars</h4><div class="pills">'+pl+'</div>');
+    '</div><h4 class="sh">Scope summary: the five Sabel pillars</h4><div class="hint">Tick what the SOW covers. Hover the <b>i</b> for what each pillar means; the line beside it is what it covers for this client, and it prints in the summary.</div>'+pl);
 
   /* 02 scope */
   function scopeTable(list,path,ph){
@@ -573,7 +601,7 @@ function renderRec(){
     '<div class="grid">'+
     field('Kick-off call','timeline.kickoff',tl.kickoff,{type:'date'})+field('Build starts','timeline.buildStart',tl.buildStart,{type:'date'})+
     field('Weekly check-in slot','timeline.checkin',tl.checkin,{ph:'e.g. Thursdays 10:00 AEST'})+field('Go-live','timeline.goLive',tl.goLive,{type:'date'})+
-    field('Go-live note','timeline.goLiveNote',tl.goLiveNote,{ph:'e.g. Cutover, Intercom opens across all channels'})+field('Client blackout dates','timeline.blackout',tl.blackout,{ph:'holidays, freezes, launches'})+
+    field('Go-live note','timeline.goLiveNote',tl.goLiveNote,{type:'grow',ph:'e.g. Cutover, Intercom opens across all channels'})+field('Client blackout dates','timeline.blackout',tl.blackout,{type:'grow',ph:'holidays, freezes, launches'})+
     '</div><h4 class="sh">Phases<span class="spacer"></span><button class="btn sm" onclick="addRow(\'timeline.phases\',{label:\'\',start:\'\',end:\'\',note:\'\'})">+ Add phase</button></h4>'+ph);
 
   /* 04 people */
@@ -635,6 +663,7 @@ function renderRec(){
 
   h+='<datalist id="owners">'+OWNERS.map(function(o){return '<option value="'+o+'">';}).join('')+'</datalist>';
   el.innerHTML=h;
+  growAll();
 }
 
 /* ── binding: any input with data-p writes straight into the record ── */
@@ -643,15 +672,17 @@ function setPath(obj,path,val){ var ks=path.split('.'), o=obj; for(var i=0;i<ks.
 document.addEventListener('input',onEdit); document.addEventListener('change',onEdit);
 function onEdit(e){
   var t=e.target, p=t.getAttribute&&t.getAttribute('data-p'); if(!p||!CUR) return;
+  if(t.classList&&t.classList.contains('grow')) autoGrow(t);
   var r=rec(CUR), v=t.type==='checkbox'?t.checked:t.value;
   setPath(r,p,v);
   if(t.tagName==='SELECT'&&t.hasAttribute('data-c')){ var opts=/status/.test(p)&&/access/.test(p)?ACCESS_ST:RISK_ST; t.setAttribute('data-c',colourOf(opts,v)); }
-  if(t.type==='checkbox'&&t.closest('.pill')) t.closest('.pill').classList.toggle('on',t.checked);
+  if(t.type==='checkbox'&&t.closest('.pill')){ t.closest('.pill').classList.toggle('on',t.checked); var row=t.closest('.pillrow'); if(row){ var pn=row.querySelector('.pn'); if(pn) pn.disabled=!t.checked; } }
   if(t.type==='checkbox'&&/^actions\./.test(p)) t.closest('tr').classList.toggle('done',t.checked);
   if(p==='callDone'||p==='callDate'||p==='timeline.kickoff'||/basics\.pillars|scope\.(in|out)Scope|timeline\.goLive|basics\.(legalName|hours)|people\./.test(p)){ renderList(); refreshReady(); }
   saveStore();
 }
 /* Click anywhere in a date field to open the calendar, not just the small icon. */
+document.addEventListener('focusin',function(e){ var t=e.target; if(t&&t.classList&&t.classList.contains('grow')) autoGrow(t); });
 document.addEventListener('click',function(e){
   var t=e.target; if(t&&t.tagName==='INPUT'&&t.type==='date'&&typeof t.showPicker==='function'){ try{ t.showPicker(); }catch(err){} }
 });
@@ -711,9 +742,10 @@ function summaryHTML(r){
   var h='<div class="shead"><img src="'+LOGO_LIGHT+'" alt="Sabel"><span class="hr">Kick-off Summary · '+esc(name)+'</span></div>';
   h+='<div class="scover"><div class="seye">SABEL · KICK-OFF SUMMARY</div><h1>'+esc(legal)+'</h1><p class="st">What we agreed on the kick-off call'+(r.callDate?' on '+fmt(r.callDate):'')+': scope, timeline, who does what, and what happens next.</p><div class="rule"></div></div>';
 
-  var pill=PILLARS.map(function(p){ return [p[1]+' '+p[2], b.pillars[p[0]]?'Yes':'No']; });
+  var pn=b.pillarNotes||{};
+  var pill=PILLARS.map(function(p){ return [p[1]+' '+p[2], b.pillars[p[0]]?'Yes':'No', b.pillars[p[0]]?(pn[p[0]]||''):'']; });
   h+=sec('01 · Engagement basics', cap([['Client',legal],['Contracted hours',b.hours?b.hours+' hours':''],['Intercom subscription',b.subscription],['Workspace App ID',b.appId],['Engagement type',b.type],['Signed',b.signed?b.signed+(b.signedSource?' via '+b.signedSource:''):'']])+
-     '<h3>Scope summary</h3>'+tbl(['Sabel pillar','In this engagement'],pill.map(function(x){return [esc(x[0]),x[1]];})));
+     '<h3>Scope summary</h3>'+tbl(['Sabel pillar','In scope','What it covers here'],pill.map(function(x){return [esc(x[0]),x[1],esc(x[2])];})));
 
   h+=sec('02 · Scope', (r.scope.summary?'<p>'+esc(r.scope.summary)+'</p>':'')+
      '<h3>In scope</h3>'+list(r.scope.inScope,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';})+
