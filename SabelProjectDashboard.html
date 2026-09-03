@@ -72,6 +72,58 @@
   .tlkey{margin-left:auto;display:flex;gap:12px;align-items:center;}
   .tlkey span{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--mono);letter-spacing:.04em;text-transform:uppercase;}
   .tlkey i{width:7px;height:7px;border-radius:50%;display:block;}
+
+  /* ── go-live lanes ─────────────────────────────────────────────
+     Replaces the old ribbon. Every lane is relative to today, so a client
+     whose date has passed sits in a labelled pile asking to be closed off
+     rather than crowding the middle of an axis. */
+  .glanes{display:flex;flex-direction:column;gap:2px;padding:6px 0 10px;}
+  .glane{display:grid;grid-template-columns:152px 1fr;gap:14px;align-items:start;padding:9px 0;border-top:1px solid var(--border2);}
+  .glane:first-child{border-top:none;}
+  .glh{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:800;letter-spacing:.07em;
+       text-transform:uppercase;padding-top:5px;flex-wrap:wrap;}
+  .glh .gn{margin-left:0;color:var(--mono);font-size:9px;background:var(--card2);border:1px solid var(--border2);
+       padding:1px 7px;border-radius:20px;letter-spacing:0;}
+  .glh .ghint{flex-basis:100%;font-size:9px;font-weight:600;letter-spacing:.03em;text-transform:none;color:var(--mono);}
+  .glr{display:flex;flex-wrap:wrap;gap:7px;}
+  .glc{display:inline-flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border2);
+       border-radius:20px;padding:5px 12px 5px 9px;cursor:pointer;transition:.14s;max-width:100%;}
+  .glc:hover{border-color:var(--red);background:var(--card3);}
+  .glc.risk{border-color:rgba(248,113,113,.5);}
+  .glc i{width:7px;height:7px;border-radius:50%;display:block;flex:none;}
+  .glc .gnm{font-size:11.5px;font-weight:700;color:var(--w);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;}
+  .glc .gdt{font-size:9.5px;color:var(--mono);}
+  .glc .gdy{font-size:9.5px;font-weight:700;}
+  .glc .gpin{font-size:9px;color:#FBBF24;background:rgba(251,191,36,.14);border-radius:20px;padding:1px 6px;}
+  .glc .gpin.risky{color:#F87171;background:rgba(248,113,113,.16);font-weight:800;}
+
+  /* project type + at risk */
+  .ptb{font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:20px;white-space:nowrap;}
+  .ptb.none{color:var(--mono);background:var(--card2);border:1px dashed var(--border);}
+  .riskb{margin-left:7px;font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    color:#F87171;background:rgba(248,113,113,.14);padding:2px 7px;border-radius:20px;vertical-align:middle;}
+  .kpi.clk{cursor:pointer;transition:.14s;}
+  .kpi.clk:hover{border-color:var(--red);}
+  .tdot{width:8px;height:8px;border-radius:50%;display:block;flex:none;margin-top:5px;}
+
+  /* set the type / park, on the open client */
+  .dtools{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--border2);background:var(--card2);}
+  .dtl{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);margin-right:2px;}
+  .pill.tiny{padding:4px 9px;font-size:9px;}
+  .pill.tiny.park{color:#FBBF24;border-color:rgba(251,191,36,.35);}
+  .pill.tiny.park:hover{background:rgba(251,191,36,.12);}
+
+  /* parked */
+  .parkbox{margin-bottom:22px;overflow:hidden;}
+  .parkh{display:flex;align-items:center;gap:8px;padding:13px 17px;cursor:pointer;}
+  .parkh:hover{background:var(--card2);}
+  .parkarrow{margin-left:auto;color:var(--mono);font-size:11px;transition:transform .15s;}
+  .parkarrow.open{transform:rotate(180deg);}
+  .parkb{border-top:1px solid var(--border2);padding:4px 17px 12px;}
+  .prow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--border2);}
+  .prow:last-child{border-bottom:none;}
+  .pnm{font-size:12.5px;font-weight:700;color:var(--w);}
+  .pmt{font-size:9px;color:var(--mono);margin-top:3px;letter-spacing:.03em;}
   .tl{position:relative;height:78px;margin:10px 2px 0;}
   .tl-axis{position:absolute;left:0;right:0;bottom:22px;height:1px;background:var(--border);}
   .tl-band{position:absolute;top:2px;bottom:22px;background:rgba(225,6,0,.13);border-left:1px solid rgba(225,6,0,.35);border-right:1px solid rgba(225,6,0,.35);border-radius:2px;pointer-events:none;}
@@ -226,7 +278,6 @@
   <div class="hright">
     <span class="stamp">Live · <b id="stamp">—</b></span>
     <button class="tab" id="refreshBtn" onclick="loadAll(true)" title="Re-read the trackers now">&#8635;</button>
-    <button class="tab capbtn" id="capBtn" onclick="openSummary()" title="Everything captured on this call">&#9998; Call capture</button>
     <span class="chip-week" id="weekLabel"></span>
   </div>
 </header>
@@ -239,41 +290,6 @@
     <span>Internal use only · live from GitHub trackers via Sabel webhook</span>
     <span>Stage feed: client-portal-v1 · tasks: [client]-tracker-v1</span>
   </footer>
-</div>
-
-<!-- Post-call summary: what to go and apply in the trackers. -->
-<div class="sum" id="sum">
-  <div class="sum-box">
-    <div class="sum-h">
-      <div>
-        <h2>Post-call actions</h2>
-        <div class="sum-sub">Captured on the call. Nothing here has been written to a tracker &mdash; this is the list to go and apply. <span id="sumCount" class="sum-count"></span>
-          <span id="shareNote" class="share-note"></span></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <button class="cbtn" id="copyBtn" onclick="copySummary()">Copy all</button>
-        <button class="cbtn clr" onclick="capClearAll()">Clear session</button>
-        <button style="color:var(--mono);font-size:20px;padding:0 4px" onclick="closeSummary()">&times;</button>
-      </div>
-    </div>
-    <div class="sum-b" id="sumBody"></div>
-  </div>
-</div>
-
-<div class="pres" id="pres">
-  <div class="pres-h">
-    <div style="display:flex;align-items:center;gap:12px">
-      <img class="logo-img" src="data:image/png;base64,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" alt="Sabel" style="height:22px">
-      <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mono)">All-hands &middot; by owner</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <span class="mono" style="font-size:11px;color:var(--mono)" id="presCount"></span>
-      <button class="btn-ghost" onclick="presMove(-1)">← Back</button>
-      <button class="btn-red" style="padding:8px 17px;font-size:12px" onclick="presMove(1)">Next client →</button>
-      <button style="color:var(--mono);font-size:20px;padding:0 4px" onclick="stopPresent()">×</button>
-    </div>
-  </div>
-  <div class="pres-b" id="presBody"></div>
 </div>
 
 <div id="tltip"></div>
@@ -349,6 +365,15 @@ var STAGE_BG = {'Scoping':'rgba(148,163,184,.12)','Onboarding':'rgba(251,191,36,
 var API = 'https://sabel-webhook.vercel.app/api/tracker';
 var PORTAL_KEY = 'client-portal-v1';
 var OVERRIDES_KEY = 'sabel-golive-overrides-v1';
+/* Project type and parking. Kept here rather than in the portal so it can be set
+   from this board in one click, and read back on every load.
+   Shape: { "<client slug>": {type:'full'|'migration'|'build', parked:true,
+            parkedAt:'YYYY-MM-DD', parkNote:'...'} }
+   The webhook needs 'sabel-clientmeta-v1' on its key allowlist. Until it is
+   there, changes hold on this browser and the board says so. */
+var META_KEY = 'sabel-clientmeta-v1';
+var META = {};
+var META_SHARED = null;
 var REFRESH_MS = 5 * 60 * 1000;
 
 var CLIENTS = [];
@@ -582,7 +607,7 @@ function buildClients(portal, overrides){
   function regFor(pc){
     return (pc.trackerKey && byKey[pc.trackerKey]) || byNorm[normName(pc.name)] || null;
   }
-  function make(name, stage, lead, portalGl, reg){
+  function make(name, stage, lead, portalGl, reg, portalType){
     var pl = reg ? planFor(reg) : {data:null, rebuilt:false};
     var phases = pl.data ? phasesFrom(pl.data, reg.key) : null;
     var tasks = [], p = 0, nd = true, auto = null;
@@ -610,7 +635,7 @@ function buildClients(portal, overrides){
     }
     var trackerGl = pl.data && pl.data.goLive ? pl.data.goLive : null;
     var gl = overrides[name] || (reg ? overrides[reg.name] : null) || portalGl || trackerGl || auto || '';
-    return {id:slug(name), n:name, st:stage, gl:gl, lead:lead||'—',
+    return {id:slug(name), n:name, st:stage, gl:gl, lead:lead||'—', pt:portalType||'',
             f:(reg && reg.file) || '', p:p, nd:nd, t:tasks,
             key:(reg && reg.key) || '', rebuilt:!!pl.rebuilt};
   }
@@ -623,7 +648,7 @@ function buildClients(portal, overrides){
     if(pc.stage==='Complete' && !(reg && reg.active)) return;
     if(reg) used[reg.key||reg.name]=1;
     out.push(make(pc.name, PORTAL_STAGE[pc.stage] || pc.stage || 'Active',
-                  pc.owner, pc.goLiveDate, reg));
+                  pc.owner, pc.goLiveDate, reg, pc.type));
   });
   // An active tracker the portal doesn't know about still deserves a card.
   REGISTRY.forEach(function(t){
@@ -632,6 +657,60 @@ function buildClients(portal, overrides){
   });
   return out;
 }
+
+/* ── project type ──
+   Guessed from the pillars the tracker actually carries, then overridden by
+   whatever someone has set on the board. A guess is marked as such so nobody
+   mistakes it for a decision. */
+var BUILD_PILLARS = ['fin','automation','foundations','setup','blueprint','uat','golive','post'];
+function guessType(tasks){
+  var has={}; tasks.forEach(function(t){ has[t.pillar]=1; });
+  var mig=!!has.migration, other=false;
+  BUILD_PILLARS.forEach(function(p){ if(has[p]) other=true; });
+  if(mig && other) return 'full';
+  if(mig) return 'migration';
+  return other ? 'build' : '';
+}
+/* The onboarding portal already records this per client as Migration / Project /
+   Both, so read it rather than asking anyone to set it twice. The pillar guess
+   below is only for clients the portal has no type for. */
+var PORTAL_TYPE = {'Migration':'migration','Project':'build','Both':'full',
+                   'migration':'migration','project':'build','both':'full'};
+var TYPE_LABEL = {full:'Full project', migration:'Migration only', build:'Build only'};
+var TYPE_SHORT = {full:'Full', migration:'Migration', build:'Build'};
+var TYPE_C     = {full:'#A78BFA', migration:'#FB923C', build:'#38BDF8'};
+var TYPE_BG    = {full:'rgba(167,139,250,.14)', migration:'rgba(251,146,60,.14)', build:'rgba(56,189,248,.14)'};
+
+function metaFor(id){ return META[id] || {}; }
+function saveMeta(){
+  return fetch(API+'?key='+encodeURIComponent(META_KEY)+'&_t='+Date.now(), {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({key:META_KEY, value: JSON.stringify({clients:META, at:Date.now()})})
+  }).then(function(r){ META_SHARED = r.ok; }).catch(function(){ META_SHARED=false; });
+}
+function setType(id, t, ev){
+  if(ev) ev.stopPropagation();
+  META[id] = META[id] || {};
+  if(t) META[id].type = t; else delete META[id].type;
+  saveMeta(); render();
+}
+function parkClient(id, ev){
+  if(ev) ev.stopPropagation();
+  var why = prompt('Why is '+(find(allIncludingParked(),id)||{}).name+' being parked? (optional)') ;
+  if(why===null) return;
+  META[id] = META[id] || {};
+  META[id].parked = true;
+  META[id].parkedAt = isoOf(TODAY);
+  META[id].parkNote = why || '';
+  if(S.sel===id) S.sel='';
+  saveMeta(); save(); render();
+}
+function unparkClient(id, ev){
+  if(ev) ev.stopPropagation();
+  if(META[id]){ delete META[id].parked; delete META[id].parkedAt; delete META[id].parkNote; }
+  saveMeta(); render();
+}
+function toggleParked(){ S.showParked=!S.showParked; save(); render(); }
 
 function setStamp(){
   var el = document.getElementById('stamp'); if(!el) return;
@@ -658,8 +737,11 @@ function loadAll(manual){
     fetch(BASE+'trackers.json',{cache:'no-store'})
       .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
     fetchKey(PORTAL_KEY),
-    fetchKey(OVERRIDES_KEY)
+    fetchKey(OVERRIDES_KEY),
+    fetchKey(META_KEY)
   ]).then(function(res){
+    META = (res[3] && typeof res[3]==='object' && res[3].clients && typeof res[3].clients==='object')
+             ? res[3].clients : (META||{});
     REGISTRY = Array.isArray(res[0]) ? res[0].slice() : [];
     var portal = (res[1] && Array.isArray(res[1].clients)) ? res[1].clients : [];
     var overrides = (res[2] && typeof res[2]==='object') ? res[2] : {};
@@ -709,7 +791,7 @@ var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','De
 
 /* ── state (persisted) ── */
 var PK = 'sabel_dash_refresh_v1';
-var S = {sel:'', filter:'All open', cap:{}, capOpen:'', pIdx:0};
+var S = {sel:'', filter:'All open', cap:{}, capOpen:'', pIdx:0, showParked:false, ptFilter:''};
 try{ var saved = JSON.parse(localStorage.getItem(PK)||'null'); if(saved) for(var k in saved) S[k]=saved[k]; }catch(e){}
 if(!S.cap || typeof S.cap!=='object') S.cap={};
 function save(){ try{ localStorage.setItem(PK, JSON.stringify(S)); }catch(e){} }
@@ -787,7 +869,16 @@ function enrich(c){
   var pillars=[]; out.forEach(function(t){ if(pillars.indexOf(t.pillar)<0) pillars.push(t.pillar); });
   var glTxt = c.gl ? (days>=0 ? 'Go-live '+fmt(c.gl) : 'Live since '+fmt(c.gl)) : 'No go-live set';
 
+  var mt = metaFor(c.id);
+  var fromPortal = PORTAL_TYPE[c.pt] || '';
+  var guessed = fromPortal || guessType(tasks);
+  var ptype = mt.type || guessed || '';
+  var atRisk = (days!==null && days>=0 && days<=GO_LIVE_HORIZON && c.p<25);
+
   return {id:c.id, name:c.n, stage:c.st, lead:c.lead, gl:c.gl, key:c.key||'', rebuilt:!!c.rebuilt,
+    ptype:ptype, ptypeGuessed:!mt.type && !fromPortal && !!guessed, atRisk:atRisk,
+    parked:!!mt.parked || c.st==='On hold', parkedAt:mt.parkedAt||'', parkNote:mt.parkNote||'',
+    noLead:(!c.lead || c.lead==='\u2014'),
     stageColor:STAGE_C[c.st], stageBg:STAGE_BG[c.st],
     prog:c.p, progPct:c.p+'%', meta:glTxt+' · lead '+c.lead+' · '+out.length+' open',
     daysNum:daysNum, daysUnit:daysUnit, shortDays:shortDays, daysColor:daysColor, key:key, days:days,
@@ -815,7 +906,9 @@ function groupsFor(c){
     {label:'Coming up', color:'#64748B', tasks:list.filter(function(t){return t.u==='later';})}
   ];
 }
-function all(){ return CLIENTS.map(enrich).sort(function(a,b){return a.key-b.key;}); }
+function allIncludingParked(){ return CLIENTS.map(enrich).sort(function(a,b){return a.key-b.key;}); }
+function all(){ return allIncludingParked().filter(function(c){ return !c.parked; }); }
+function parkedList(){ return allIncludingParked().filter(function(c){ return c.parked; }); }
 function find(list,id){ for(var i=0;i<list.length;i++) if(list[i].id===id) return list[i]; return list[0]; }
 
 /* ── actions ── */
@@ -1129,13 +1222,15 @@ function shiftRowHTML(t){
     slip+
     '<div class="crow"><span class="clab"></span><div class="cbtns">'+note+'</div></div>';
 }
-function capBadge(){
+function capBadge(){ return; }
+function unusedCapBadge(){
   var b=document.getElementById('capBtn'); if(!b) return;
   var n=capCount();
   b.innerHTML = '&#9998; Call capture'+(n?' <span class="capn">'+n+'</span>':'');
   b.classList.toggle('has', n>0);
 }
-function capMarkHTML(t){
+function capMarkHTML(t){ return ''; }
+function unusedCapMarkHTML(t){
   if(!t.captured) return '';
   var bits=[];
   if(t.capStatus) bits.push('<span class="cmark st" style="color:'+(SC[t.capStatus]||SC.Pending).c+'">&rarr; '+esc(t.capStatus)+'</span>');
@@ -1149,7 +1244,8 @@ function capBtnHTML(t){
   return '<button class="'+cls+'" title="Capture a decision for this task" '+
          'onclick="capOpen(\''+t.id+'\',event)">'+glyph+'</button>';
 }
-function capPanelHTML(t){
+function capPanelHTML(t){ return ''; }
+function unusedCapPanelHTML(t){
   if(S.capOpen!==t.id) return '';
   var c = capOf(t.id) || {status:'',note:'',chase:false};
   var btns = CAP_STATUSES.map(function(st){
@@ -1244,7 +1340,9 @@ function renderSummary(){
 }
 
 /* ── shared partials ── */
-function tickHTML(t){ return capBtnHTML(t); }
+/* Read-only board: the dot shows status, it is not a control. Updates happen in
+   the client's own tracker, which is where the team actually works. */
+function tickHTML(t){ return '<span class="tdot" style="background:'+t.statusColor+'"></span>'; }
 /* `byOwner` groups already say who owns everything in them, so the row swaps its
    owner name for the status — the thing you actually need next to a task when
    you are going round the room person by person. */
@@ -1316,17 +1414,27 @@ function filtersHTML(){
 }
 
 /* ── views ── */
-function viewC(L){
+function viewC(Lall){
+  var L = S.ptFilter ? Lall.filter(function(x){ return x.ptype===S.ptFilter; }) : Lall;
+  if(!L.length) L = Lall;
   var c=find(L,S.sel);
   var rows=L.map(function(x){
     // A tracker rebuilt since its last save throws that saved state away on
     // load — statuses ticked off and notes written before the rebuild are gone
     // from the tracker too, not just from here. Worth knowing about.
     var reb = x.rebuilt ? '<span class="reb" title="This tracker was rebuilt after its last save, so the tracker discarded that saved state — any statuses or notes recorded before the rebuild are no longer in it. This board shows the rebuilt plan, the same one the tracker shows.">rebuilt</span>' : '';
+    var tb = x.ptype
+      ? '<span class="ptb" style="color:'+TYPE_C[x.ptype]+';background:'+TYPE_BG[x.ptype]+'"'+
+        (x.ptypeGuessed?' title="Worked out from the tracker\u2019s pillars because the portal has no type for this client. Open the client to set it."':' title="From the onboarding portal"')+'>'+
+        esc(TYPE_SHORT[x.ptype])+(x.ptypeGuessed?'?':'')+'</span>'
+      : '<span class="ptb none" title="Not set. Open the client to set it.">Type?</span>';
+    var risk = x.atRisk ? '<span class="riskb" title="Go-live is inside 30 days and the tracker is under a quarter done">at risk</span>' : '';
     return '<div class="tr'+(x.id===S.sel?' sel':'')+'" id="row-'+x.id+'" onclick="focusClient(\''+x.id+'\')">'+
-      '<div><div style="font-size:12.5px;font-weight:700;color:var(--w)">'+esc(x.name)+reb+'</div>'+
-        '<div style="font-size:9px;color:var(--mono);margin-top:2px">Lead '+esc(x.lead)+'</div></div>'+
-      '<div style="display:flex;align-items:center"><span class="stg" style="color:'+x.stageColor+';background:'+x.stageBg+'">'+esc(x.stage)+'</span></div>'+
+      '<div><div style="font-size:12.5px;font-weight:700;color:var(--w)">'+esc(x.name)+reb+risk+'</div>'+
+        '<div style="font-size:9px;margin-top:2px;color:'+(x.noLead?'#FBBF24':'var(--mono)')+'">'+
+          (x.noLead?'No lead set':'Lead '+esc(x.lead))+'</div></div>'+
+      '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+
+        '<span class="stg" style="color:'+x.stageColor+';background:'+x.stageBg+'">'+esc(x.stage)+'</span>'+tb+'</div>'+
       '<div class="mono" style="display:flex;align-items:center;font-size:11px;color:'+x.daysColor+'">'+x.shortDays+'</div>'+
       '<div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i style="background:'+x.stageColor+';width:'+x.progPct+'"></i></div>'+
         '<span class="mono" style="font-size:10px;color:var(--mono);width:32px;text-align:right">'+x.progPct+'</span></div>'+
@@ -1336,7 +1444,7 @@ function viewC(L){
   var groups=groupsFor(c).map(function(g){
     var rws=g.tasks.map(function(t){
       return '<div class="tw'+(t.captured?' cap':'')+'">'+
-        '<div class="grow" onclick="capOpen(\''+t.id+'\',event)">'+tickHTML(t)+
+        '<div class="grow">'+tickHTML(t)+
         '<div style="flex:1;min-width:0"><div class="ttx'+(t.done?' done':'')+'">'+esc(t.t)+'</div>'+
         '<div class="m"><span style="font-weight:700;color:'+t.ownerColor+'">'+esc(t.o)+'</span>'+
         '<span style="color:var(--mono)">'+esc(t.pillar)+'</span>'+
@@ -1363,11 +1471,10 @@ function viewC(L){
   return ''+
   '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">'+
     '<h2 class="big">Command table</h2><span class="sub">'+L.length+' clients, go-live first &middot; pick a client, work its list</span>'+
-    '<div style="margin-left:auto;display:flex;align-items:center;gap:6px">'+filtersHTML()+
-      '<button class="btn-red" style="margin-left:6px" onclick="startPresent()">Run all-hands &rarr;</button></div></div>'+
-  '<div class="sub" style="margin-bottom:12px">Click any task to record what was decided &mdash; a status change, a note, or a client to chase &mdash; and it collects into <b>Call capture</b> to apply afterwards. Moving a task&rsquo;s dates is the exception: that writes to the client tracker straight away.</div>'+
+    '<div style="margin-left:auto;display:flex;align-items:center;gap:6px">'+typeFilterHTML()+filtersHTML()+'</div></div>'+
+  '<div class="sub" style="margin-bottom:12px">Read-only. Pick a client to see its open actions; updates are made in the client&rsquo;s own tracker.</div>'+
   '<div style="display:grid;grid-template-columns:1fr 430px;gap:18px;align-items:start;margin-bottom:22px">'+
-    '<div class="tbl"><div class="thead"><span>Client</span><span>Stage</span><span>Go-live</span><span>Progress</span><span style="text-align:right">Open actions</span></div>'+rows+'</div>'+
+    '<div class="tbl"><div class="thead"><span>Client</span><span>Stage &amp; type</span><span>Go-live</span><span>Progress</span><span style="text-align:right">Open actions</span></div>'+rows+'</div>'+
     '<div class="panel dpanel">'+
       // The client name rides at the top of the list it belongs to, so scrolling
       // a long set of actions never leaves you wondering whose they are.
@@ -1379,90 +1486,88 @@ function viewC(L){
           '<span class="mono" style="font-size:12.5px;font-weight:800;margin-left:auto;color:'+c.daysColor+'">'+c.shortDays+'</span></div>'+
         '<div style="font-size:10px;color:var(--mono);margin-top:5px;line-height:1.5">'+esc(c.meta)+'</div></div>'+
       '<div class="dbody">'+groups+'</div>'+
+      '<div class="dtools">'+
+        '<span class="dtl">Project type</span>'+
+        ['full','migration','build'].map(function(t){
+          return '<button class="pill tiny'+(c.ptype===t?' on':'')+'" onclick="setType(\''+c.id+'\',\''+t+'\',event)">'+esc(TYPE_SHORT[t])+'</button>';
+        }).join('')+
+        (c.ptypeGuessed?'<span class="sub" style="font-size:9px">guessed from the tracker \u00b7 click to confirm</span>':'')+
+        (META_SHARED===false?'<span class="sub" style="font-size:9px;color:#FBBF24">not saved for the team yet \u2014 add sabel-clientmeta-v1 to the webhook key list</span>':'')+
+        '<button class="pill tiny park" style="margin-left:auto" onclick="parkClient(\''+c.id+'\',event)">Park this client</button>'+
+      '</div>'+
       '<div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border2)">'+
         '<span class="sub">'+esc(c.foot)+'</span>'+
         (c.trackerUrl?'<a href="'+c.trackerUrl+'" target="_blank" style="font-size:10px;font-weight:700;text-transform:uppercase">Open tracker &rarr;</a>':'<span class="sub">No tracker yet</span>')+
       '</div></div></div>'+
 
-  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px">'+
-    '<div class="panel" style="padding:15px 17px">'+
-      '<div class="sec-h" style="margin-bottom:4px">Blockers &amp; risks <span class="count">'+risks.length+'</span></div>'+
-      '<div class="sub" style="margin-bottom:11px">Anything hindering the work</div>'+
-      (risks.map(function(r){
-        return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2)">'+
-          '<span class="stg" style="color:'+r.tagColor+';background:'+r.tagBg+'">'+esc(r.tag)+'</span>'+
-          '<div style="flex:1;min-width:0"><div style="font-size:12px;line-height:1.4;text-wrap:pretty"><b style="color:var(--w)">'+esc(r.client)+'</b> '+esc(r.t)+'</div>'+
-          '<div style="font-size:9px;color:var(--mono);margin-top:3px;letter-spacing:.04em;text-transform:uppercase">'+esc(r.meta)+'</div></div></div>';
-      }).join('') || '<div class="empty">Nothing blocked. Rare and excellent.</div>')+
-    '</div>'+
-    '<div class="panel" style="padding:15px 17px">'+
-      '<div class="sec-h" style="margin-bottom:4px">Pipeline &mdash; scoping &amp; onboarding <span class="count">'+pipe.length+'</span></div>'+
-      '<div class="sub" style="margin-bottom:11px">Live from the portal &middot; set a client&rsquo;s stage there and it moves here</div>'+
-      (pipe.map(function(x){
-        var col=STAGE_C[x.stage]||'#94A3B8', bg=STAGE_BG[x.stage]||'rgba(148,163,184,.12)';
-        var sub=[];
-        if(x.lead && x.lead!=='—') sub.push('lead '+x.lead);
-        if(x.gl) sub.push(x.days>=0 ? 'go-live '+fmt(x.gl) : 'go-live was '+fmt(x.gl));
-        sub.push(x.noData ? 'no tracker yet' : x.outstanding+' open');
-        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2)">'+
-          '<div style="min-width:0"><div style="font-size:12.5px;font-weight:600;color:var(--w)">'+esc(x.name)+'</div>'+
-          '<div style="font-size:9px;color:var(--mono);margin-top:3px">'+esc(sub.join(' · '))+'</div></div>'+
-          '<span class="stg" style="color:'+col+';background:'+bg+'">'+esc(x.stage)+'</span></div>';
-      }).join('') || '<div class="empty">Nothing in scoping or onboarding right now.</div>')+
-    '</div>'+
-  '</div>'+
-
-  '<div class="panel" style="padding:14px 17px;border-left:3px solid var(--amber)">'+
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">'+
-      '<span class="sec-h" style="color:var(--amber)">Actions I&rsquo;m taking away</span><span class="count">'+flagged.length+'</span>'+
-      '<span class="sub" style="margin-left:auto">'+(ticked?ticked+' captured on this call':'Nothing captured yet')+'</span>'+
-      (ticked?'<button class="pill" style="margin-left:10px" onclick="openSummary()">Post-call actions &rarr;</button>':'')+'</div>'+
-    '<div style="display:flex;flex-direction:column;gap:7px">'+
-    (flagged.map(function(f){
-      return '<div style="display:flex;align-items:center;gap:10px;font-size:12px">'+
-        '<span style="color:var(--amber)">&#9873;</span><b style="color:var(--w)">'+esc(f.client)+'</b>'+
-        '<span style="flex:1;min-width:0;text-wrap:pretty">'+esc(f.t)+'</span>'+
-        '<span class="mono" style="font-size:9.5px;color:var(--mono)">'+esc(f.o)+' · '+esc(f.dueLabel)+'</span></div>';
-    }).join('') || '<span class="empty">No client chases yet — open any task and hit Chase client as you run the room.</span>')+
-    '</div></div>';
+  parkedHTML();
 }
 
-function renderPres(){
-  var L=all(), c=L[Math.max(0,Math.min(S.pIdx,L.length-1))];
-  var og=ownerGroupsFor(c);
-  document.getElementById('presCount').textContent=(S.pIdx+1)+' / '+L.length;
-  document.getElementById('presBody').innerHTML=
-    '<div style="max-width:1240px;margin:0 auto">'+
-      '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap;margin-bottom:22px">'+
-        '<div><div style="display:flex;align-items:center;gap:11px;margin-bottom:12px">'+
-          '<span class="stg" style="font-size:9px;padding:4px 11px;color:'+c.stageColor+';background:'+c.stageBg+'">'+esc(c.stage)+'</span>'+
-          '<span class="sub" style="font-size:11px">'+esc(c.meta)+'</span></div>'+
-          '<h2 style="font-size:42px;font-weight:800;letter-spacing:-.02em;color:var(--w)">'+esc(c.name)+'</h2></div>'+
-        '<div style="text-align:right"><div class="mono" style="font-size:58px;font-weight:800;line-height:1;color:'+c.daysColor+'">'+c.daysNum+'</div>'+
-          '<div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mono);margin-top:7px">'+esc(c.daysUnit)+'</div></div></div>'+
-      '<div class="preshead">'+
-        '<span class="sub">Who is carrying what &middot; '+og.length+' owner'+(og.length===1?'':'s')+' &middot; '+c.outstanding+' open'+
-        (S.filter!=='All open'?' &middot; filtered to '+esc(S.filter):'')+'</span></div>'+
-      '<div class="owngrid">'+
-        (og.map(ownerGroupHTML).join('') || '<div class="empty">Nothing outstanding for this client.</div>')+
+/* ── parked ──
+   Somewhere to put a client whose project has stopped for reasons that are not
+   ours, so it stops distorting the counts and the go-live lanes, without being
+   lost. Collapsed by default; the count is always visible. */
+function parkedHTML(){
+  var P=parkedList();
+  if(!P.length) return '';
+  var rows=P.map(function(x){
+    var since='';
+    if(x.parkedAt){
+      var wks=Math.floor((TODAY-new Date(x.parkedAt+'T00:00:00'))/MS/7);
+      since = wks<1 ? 'parked this week' : 'parked '+wks+' week'+(wks===1?'':'s')+' ago';
+    } else if(x.stage==='On hold'){ since='on hold in the portal'; }
+    return '<div class="prow">'+
+      '<div style="min-width:0"><div class="pnm">'+esc(x.name)+'</div>'+
+        '<div class="pmt">'+esc([since, x.parkNote, (x.gl?'go-live was '+fmt(x.gl):'no go-live set')]
+            .filter(Boolean).join(' \u00b7 '))+'</div></div>'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+        (x.ptype?'<span class="ptb" style="color:'+TYPE_C[x.ptype]+';background:'+TYPE_BG[x.ptype]+'">'+esc(TYPE_SHORT[x.ptype])+'</span>':'')+
+        (x.stage==='On hold' && !metaFor(x.id).parked
+          ? '<span class="sub" style="font-size:9.5px">set in the portal</span>'
+          : '<button class="pill" onclick="unparkClient(\''+x.id+'\',event)">Bring back</button>')+
       '</div></div>';
+  }).join('');
+  return '<div class="panel parkbox">'+
+    '<div class="parkh" onclick="toggleParked()">'+
+      '<span class="sec-h">Parked</span><span class="count">'+P.length+'</span>'+
+      '<span class="sub" style="margin-left:8px">Not counted, not on the go-live lanes</span>'+
+      '<span class="parkarrow'+(S.showParked?' open':'')+'">&#9662;</span></div>'+
+    (S.showParked?'<div class="parkb">'+rows+'</div>':'')+
+  '</div>';
 }
+
+function typeFilterHTML(){
+  var opts=[['','All types'],['full','Full'],['migration','Migration'],['build','Build']];
+  return opts.map(function(o){
+    return '<button class="pill'+(S.ptFilter===o[0]?' on':'')+'" onclick="setTypeFilter(\''+o[0]+'\')">'+esc(o[1])+'</button>';
+  }).join('')+'<span style="width:8px"></span>';
+}
+function setTypeFilter(t){ S.ptFilter=t; save(); render(); }
 
 function renderKpis(L){
-  var od=0,bl=0,wk=0,cl=0;
-  L.forEach(function(c){ od+=c.overdue; bl+=c.blocked; wk+=c.week; cl+=c.clientSide; });
+  var od=0,bl=0,cl=0;
+  L.forEach(function(c){ od+=c.overdue; bl+=c.blocked; cl+=c.clientSide; });
   var inFlight=L.filter(function(c){return ['Onboarding','Active','Build','Testing','Go-live'].indexOf(c.stage)>-1;}).length;
   var soon=L.filter(function(c){return c.days!==null && c.days>=0 && c.days<=GO_LIVE_HORIZON;}).length;
+  /* Close to go-live and barely started is the one combination worth being
+     shouted at about, and it was the one thing the board never said. */
+  var risk=L.filter(function(c){return c.atRisk;});
+  var pk=parkedList().length;
   var K=[
-    {l:'In delivery', v:inFlight, s:'of '+L.length+' clients', c:'#FFFFFF'},
+    {l:'In delivery', v:inFlight, s:'of '+L.length+' active'+(pk?' \u00b7 '+pk+' parked':''), c:'#FFFFFF'},
     {l:'Go-live \u2264 '+GO_LIVE_HORIZON+'d', v:soon, s:'clients landing', c:'#FBBF24'},
-    {l:'Overdue', v:od, s:'actions past due', c:od?'#F87171':'#4ADE80'},
-    {l:'Due this week', v:wk, s:'across portfolio', c:'#60A5FA'},
-    {l:'Blocked', v:bl, s:'need a decision', c:bl?'#FBBF24':'#4ADE80'},
+    {l:'At risk', v:risk.length, s:risk.length?'landing soon, barely started':'none landing under-built',
+       c:risk.length?'#F87171':'#4ADE80',
+       t:risk.length?risk.map(function(c){return c.name+' \u00b7 '+c.shortDays+' \u00b7 '+c.progPct;}).join('\n'):''},
+    {l:'Overdue', v:od, s:'actions past due \u00b7 click to filter', c:od?'#F87171':'#4ADE80', f:'Overdue'},
+    {l:'Blocked', v:bl, s:'need a decision \u00b7 click to filter', c:bl?'#FBBF24':'#4ADE80', f:'Blocked'},
     {l:'On the client', v:cl, s:'waiting on them', c:'#FBBF24'}
   ];
   document.getElementById('kpis').innerHTML=K.map(function(k){
-    return '<div class="kpi"><div class="l">'+k.l+'</div><div class="v" style="color:'+k.c+'">'+k.v+'</div><div class="s">'+esc(k.s)+'</div></div>';
+    return '<div class="kpi'+(k.f?' clk':'')+'"'+(k.f?' onclick="setFilter(\''+k.f+'\')"':'')+
+      (k.t?' title="'+esc(k.t)+'"':'')+'>'+
+      '<div class="l">'+k.l+'</div><div class="v" style="color:'+k.c+'">'+k.v+'</div>'+
+      '<div class="s">'+esc(k.s)+'</div></div>';
   }).join('');
 }
 
@@ -1478,131 +1583,82 @@ function isoWeekKey(d){
   t.setDate(t.getDate() - ((t.getDay()+6)%7));    // back to Monday
   return isoOf(t);
 }
+function endOfWeek(){ return WK_END; }
+function endOfMonth(){ var d=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0); d.setHours(0,0,0,0); return d; }
+
+/* Lanes, not a ribbon.
+   The ribbon squeezed four months into one strip, so names overlapped and were
+   unreadable, and clients whose go-live had long passed sat in the middle of it
+   making everything else harder to read. Every lane here is relative to today,
+   which removes the need for a "today" marker and turns the stale ones into a
+   labelled pile that asks to be closed off rather than clutter. */
 function renderTimeline(L){
   var box=document.getElementById('tl'); if(!box) return;
   var live=L.filter(function(c){ return c.gl && c.stage!=='Complete'; });
   if(!live.length){ box.innerHTML=''; return; }
 
-  var today=TODAY.getTime();
-  var times=live.map(function(c){ return new Date(c.gl+'T00:00:00').getTime(); });
-  var min=Math.min.apply(null,times.concat([today]));
-  var max=Math.max.apply(null,times.concat([today+21*MS]));
-  var pad=(max-min)*0.06 || MS*7;
-  min-=pad; max+=pad;
-  var span=max-min || 1;
-  function pct(t){ return ((t-min)/span*100); }
+  var wkEnd=endOfWeek().getTime(), moEnd=endOfMonth().getTime();
+  var lanes=[
+    {k:'past',  label:'Date has passed',  hint:'close off or move the date', color:'#F87171', list:[]},
+    {k:'week',  label:'This week',        hint:'', color:'#F87171', list:[]},
+    {k:'two',   label:'Next two weeks',   hint:'', color:'#FBBF24', list:[]},
+    {k:'month', label:'Rest of this month', hint:'', color:'#60A5FA', list:[]},
+    {k:'later', label:'Later',            hint:'', color:'#4ADE80', list:[]}
+  ];
+  function lane(k){ for(var i=0;i<lanes.length;i++) if(lanes[i].k===k) return lanes[i]; }
 
-  // group by the Monday of each go-live week; 2+ in a week is a pinch point
-  var weeks={};
-  live.forEach(function(c){
-    var d=new Date(c.gl+'T00:00:00'), k=isoWeekKey(d);
-    (weeks[k]=weeks[k]||[]).push(c);
-  });
-
-  var bands='', marks='', labs='', ticks='', grid='';
-  Object.keys(weeks).forEach(function(k){
-    if(weeks[k].length<2) return;
-    var s=new Date(k+'T00:00:00').getTime(), e=s+7*MS;
-    bands+='<div class="tl-band" style="left:'+pct(s)+'%;width:'+Math.max(pct(e)-pct(s),1.2)+'%"></div>';
-  });
-
-  // month ticks across the range
-  var m=new Date(min); m.setDate(1); m.setHours(0,0,0,0);
-  while(m.getTime()<=max){
-    if(m.getTime()>=min){
-      ticks+='<div class="tl-tick" style="left:'+pct(m.getTime())+'%">'+MON[m.getMonth()]+'</div>';
-      grid +='<div class="tl-grid" style="left:'+pct(m.getTime())+'%"></div>';
-    }
-    m.setMonth(m.getMonth()+1);
-  }
+  var sameDay={};
+  live.forEach(function(c){ (sameDay[c.gl]=sameDay[c.gl]||[]).push(c.name); });
 
   live.sort(function(a,b){ return a.gl<b.gl?-1:1; });
-
-  /* Two clients going live the same day used to draw one dot exactly on top of
-     another, and only the topmost could ever be hovered or clicked — the rest
-     were unreachable however carefully you aimed. Same-day go-lives now fan out
-     a few pixels either side of their date, so each one is its own target. */
-  var sameDay={};
-  live.forEach(function(c){ (sameDay[c.gl]=sameDay[c.gl]||[]).push(c.id); });
-
-  /* Labels go into whichever row is still clear at that point on the axis,
-     rather than round-robin over three rows — long names next to each other
-     used to overlap and steal one another's hover. */
-  var rowEnds=[-1e9,-1e9,-1e9];
-
-  /* Place every dot first, then size its hit area to the gap it actually has.
-     A fixed generous target is what let one client's box sit over its neighbour's
-     dot; anything closer than that just gets a narrower target of its own. */
-  var trackW = Math.max(box.clientWidth||1100, 400);
-  var pos = live.map(function(c){
-    var peers=sameDay[c.gl];
-    var x=pct(new Date(c.gl+'T00:00:00').getTime());
-    var nudge=(peers.indexOf(c.id)-(peers.length-1)/2)*13;
-    return {id:c.id, x:x, nudge:nudge, px:x/100*trackW+nudge};
-  });
-  var hitW={};
-  pos.forEach(function(p,k){
-    var gap=1e9;
-    if(k>0)          gap=Math.min(gap, Math.abs(p.px-pos[k-1].px));
-    if(k<pos.length-1) gap=Math.min(gap, Math.abs(pos[k+1].px-p.px));
-    hitW[p.id]=Math.max(11, Math.min(24, Math.round(gap)));
-  });
-
-  TLP=[];
   live.forEach(function(c){
-    var t=new Date(c.gl+'T00:00:00').getTime(), x=pct(t);
-    var i=TLP.length;
-    var short=c.name.length>17 ? c.name.slice(0,16).replace(/[\s(]+$/,'')+'…' : c.name;
-
-    // rough label width as a percentage of the track, to keep rows from colliding
-    var wPct = (short.length*5.4 + 8) / trackW * 100;
-    var anchor = x>86 ? 'transform:translateX(-100%)' : (x<7 ? 'transform:translateX(0)' : '');
-    var left = x>86 ? x-wPct : (x<7 ? x : x-wPct/2);
-    var row=0;
-    for(var r=0;r<rowEnds.length;r++){ if(left > rowEnds[r]){ row=r; break; } row=r; }
-    rowEnds[row] = left + wPct + 0.6;
-
-    var peers = sameDay[c.gl];
-    var nudge = (peers.indexOf(c.id) - (peers.length-1)/2) * 13;   // fan same-day dots apart
-
-    var counts=[];
-
-    if(c.overdue) counts.push(c.overdue+' overdue');
-    if(c.blocked) counts.push(c.blocked+' blocked');
-    if(c.week)    counts.push(c.week+' due this week');
-    TLP.push({id:c.id, html:
-      '<b>'+esc(c.name)+'</b>'+
-      '<span class="r1">Go-live '+esc(fmtFull(c.gl))+' · <i style="color:'+c.daysColor+'">'+esc(c.daysNum+' '+c.daysUnit)+'</i></span>'+
-      '<span class="r2">'+esc(c.stage)+' · lead '+esc(c.lead)+' · '+c.outstanding+' open'+
-        (counts.length?' ('+esc(counts.join(', '))+')':'')+'</span>'+
-      (peers.length>1 ? '<span class="r2">'+peers.length+' clients land this same day</span>' : '')+
-      '<span class="r3">Click to open '+esc(c.name)+' below</span>'});
-
-    marks+='<div class="tl-hit" data-tl="'+i+'" '+
-           'style="left:'+x+'%;margin-left:'+nudge.toFixed(1)+'px;width:'+(hitW[c.id]||24)+'px" '+
-           'onmouseenter="tlOver('+i+',event)" onmousemove="tlMove(event)" onmouseleave="tlOut()" '+
-           'onclick="tlGo('+i+')"><i class="tl-dot" style="background:'+c.daysColor+'"></i></div>';
-    labs +='<div class="tl-lab" data-tl="'+i+'" style="left:'+x+'%;top:'+(row*15)+'px;'+anchor+'" '+
-           'onmouseenter="tlOver('+i+',event)" onmousemove="tlMove(event)" onmouseleave="tlOut()" '+
-           'onclick="tlGo('+i+')">'+esc(short)+'</div>';
+    var t=new Date(c.gl+'T00:00:00').getTime();
+    var k = c.days<0 ? 'past' : (t<=wkEnd ? 'week' : (c.days<=14 ? 'two' : (t<=moEnd ? 'month' : 'later')));
+    lane(k).list.push(c);
   });
 
-  var pinch=Object.keys(weeks).filter(function(k){ return weeks[k].length>1; }).length;
+  var pinch=0;
+  Object.keys(sameDay).forEach(function(d){ if(sameDay[d].length>1) pinch++; });
+
+  var body=lanes.filter(function(l){ return l.list.length; }).map(function(l){
+    var chips=l.list.map(function(c){
+      var peers=sameDay[c.gl].length;
+      var bits=[];
+      if(c.overdue) bits.push(c.overdue+' overdue');
+      if(c.blocked) bits.push(c.blocked+' blocked');
+      var tip=c.name+' \u2014 go-live '+fmtFull(c.gl)+' \u00b7 '+c.stage+' \u00b7 lead '+c.lead+
+              ' \u00b7 '+c.outstanding+' open'+(bits.length?' ('+bits.join(', ')+')':'')+
+              (peers>1?' \u00b7 '+peers+' clients land this same day':'');
+      return '<button class="glc'+(c.atRisk?' risk':'')+'" title="'+esc(tip)+'" onclick="tlGo(\''+c.id+'\')">'+
+        '<i style="background:'+c.daysColor+'"></i>'+
+        '<span class="gnm">'+esc(c.name)+'</span>'+
+        '<span class="gdt mono">'+esc(fmt(c.gl))+'</span>'+
+        '<span class="gdy mono" style="color:'+c.daysColor+'">'+esc(c.shortDays)+'</span>'+
+        (peers>1?'<span class="gpin" title="More than one client lands this day">\u25cf'+peers+'</span>':'')+
+        (c.atRisk?'<span class="gpin risky" title="Landing soon and barely started">!</span>':'')+
+      '</button>';
+    }).join('');
+    return '<div class="glane"><div class="glh" style="color:'+l.color+'">'+esc(l.label)+
+      '<span class="gn">'+l.list.length+'</span>'+
+      (l.hint?'<span class="ghint">'+esc(l.hint)+'</span>':'')+'</div>'+
+      '<div class="glr">'+chips+'</div></div>';
+  }).join('');
+
+  var pastN=lane('past').list.length;
   box.innerHTML=
     '<div class="tlbox"><div class="tlhead">'+
-      '<span class="sec-h">Go-live timeline</span>'+
-      '<span class="sub">'+live.length+' dated'+(pinch?' · '+pinch+' week'+(pinch===1?'':'s')+' with two or more landing together':' · none clustered')+
-        ' · hover a client for its date, click to open it</span>'+
+      '<span class="sec-h">Go-live</span>'+
+      '<span class="sub">'+live.length+' dated'+
+        (pastN?' \u00b7 '+pastN+' past their date and still open':'')+
+        (pinch?' \u00b7 '+pinch+' day'+(pinch===1?'':'s')+' with two or more landing together':'')+
+        ' \u00b7 click a client to open it below</span>'+
       '<span class="tlkey">'+
         '<span><i style="background:#4ADE80"></i>comfortable</span>'+
         '<span><i style="background:#FBBF24"></i>tight</span>'+
-        '<span><i style="background:#F87171"></i>this week</span>'+
+        '<span><i style="background:#F87171"></i>this week or past</span>'+
       '</span>'+
     '</div>'+
-    '<div class="tl">'+grid+bands+
-      '<div class="tl-today" style="left:'+pct(today)+'%"><b>today</b></div>'+
-      '<div class="tl-axis"></div>'+labs+marks+ticks+
-    '</div></div>';
+    '<div class="glanes">'+body+'</div></div>';
 }
 
 /* ── timeline hover ──
@@ -1643,11 +1699,10 @@ function tlOut(){
 }
 /* Clicking a go-live used to select the client and nothing appeared to happen,
    because the client it opened was further down the page. Take the eye there. */
-function tlGo(i){
-  var p=TLP[i]; if(!p) return;
-  tlOut(); focusClient(p.id);
+function tlGo(id){
+  focusClient(id);
   setTimeout(function(){
-    var row=document.getElementById('row-'+p.id);
+    var row=document.getElementById('row-'+id);
     if(!row) return;
     row.scrollIntoView({behavior:'smooth', block:'center'});
     row.classList.add('flash');
@@ -1657,19 +1712,9 @@ function tlGo(i){
 
 /* The 5-minute auto-refresh must never yank a half-typed note out from under
    whoever is running the call. If a note has focus, wait for them to leave it. */
-function safeRender(){
-  var el=document.activeElement;
-  if(el && el.classList && el.classList.contains('cnote')){
-    el.addEventListener('blur', function h(){ el.removeEventListener('blur',h); render(); });
-    capBadge();
-    return;
-  }
-  render();
-}
+function safeRender(){ render(); }
 function render(){
   var L=all();
-  capBadge();
-  if(document.getElementById('sum').classList.contains('on')) renderSummary();
   // Nothing to draw until the first fetch lands — the view indexes into the
   // client list, so painting it empty would throw.
   if(!L.length){
@@ -1685,7 +1730,6 @@ function render(){
   renderKpis(L);
   renderTimeline(L);
   document.getElementById('view').innerHTML = viewC(L);
-  if(document.getElementById('pres').classList.contains('on')) renderPres();
 }
 
 /* boot */
@@ -1693,14 +1737,7 @@ function render(){
   var ws=weekStart(), we=WK_END;
   document.getElementById('weekLabel').textContent =
     'Mon '+ws.getDate()+' \u2013 Sun '+we.getDate()+' '+MON[we.getMonth()]+' '+we.getFullYear();
-  document.addEventListener('keydown', function(e){
-    if(!document.getElementById('pres').classList.contains('on')) return;
-    if(e.key==='ArrowRight') presMove(1);
-    if(e.key==='ArrowLeft') presMove(-1);
-    if(e.key==='Escape') stopPresent();
-  });
   render();                     // paint the shell straight away
-  loadCapture();                // the team's in-flight all-hands session
   loadAll(false);               // then the trackers
   setInterval(function(){ loadAll(false); }, REFRESH_MS);
 })();
