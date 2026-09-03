@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sabel Technical Readiness Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+:root{
+  --ground:#FCFCFB;--surface:#FFFFFF;--alt:#F5F6F7;
+  --ink:#14171A;--body:#3A4046;--muted:#6B7480;
+  --line:#E3E5E8;--strong:#C9CDD2;
+  --accent:#E10600;--accent-soft:#FDECEA;
+  --good:#15803D;--good-soft:#E9F5EC;
+  --warn:#B45309;--warn-soft:#FBF1E3;
+  --bad:#E10600;--bad-soft:#FDECEA;
+  --na:#6B7480;--na-soft:#F0F1F2;
+  --shadow:0 1px 2px rgba(20,23,26,.05);
+  --shadow-lift:0 2px 10px rgba(20,23,26,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--body);
+  font-family:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:800px;margin:0 auto;padding:0 22px 100px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin:0}
+.eyebrow.quiet{color:var(--muted)}
+
+/* ---- sticky bar with step rail ---- */
+.bar{position:sticky;top:0;z-index:40;background:var(--surface);border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+.bar .inner{max-width:800px;margin:0 auto;padding:11px 22px;display:flex;align-items:center;gap:16px}
+.brand{font-family:Archivo,sans-serif;font-weight:800;font-size:16px;letter-spacing:-.02em;color:var(--ink);white-space:nowrap}
+.brand em{color:var(--accent);font-style:normal}
+.rail{flex:1;display:flex;gap:3px;min-width:80px}
+.rseg{flex:1;height:5px;border-radius:2px;background:var(--line);transition:background .2s ease}
+.rseg.done{background:var(--good)}
+.rseg.now{background:var(--accent)}
+.stepno{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;color:var(--muted);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.saved{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--good);opacity:0;transition:opacity .3s;white-space:nowrap}
+.saved.on{opacity:1}
+
+/* ---- panels ---- */
+.panel{display:none;animation:in .18s ease}
+.panel.on{display:block}
+@keyframes in{from{opacity:.4}to{opacity:1}}
+
+.sechead{padding:44px 0 0}
+h1{font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(30px,5vw,44px);line-height:1.05;
+  letter-spacing:-.028em;color:var(--ink);margin:12px 0 14px;text-wrap:balance;max-width:17ch}
+h2{font-family:Archivo,sans-serif;font-weight:700;font-size:clamp(24px,3.6vw,32px);line-height:1.1;
+  letter-spacing:-.022em;color:var(--ink);margin:12px 0 12px;text-wrap:balance;max-width:20ch}
+.intro{font-size:18.5px;max-width:56ch;margin:0}
+p{margin:0 0 14px}p:last-child{margin-bottom:0}
+strong{color:var(--ink);font-weight:600}
+
+.note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 3px 3px 0;padding:19px 22px;margin:22px 0;box-shadow:var(--shadow)}
+.note p{max-width:60ch;font-size:16px}
+.note.calm{border-left-color:var(--strong)}
+.note.calm p{color:var(--muted)}
+
+/* ---- cards ---- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:4px;
+  box-shadow:var(--shadow-lift);margin-top:22px;overflow:hidden}
+.items{display:flex;flex-direction:column;gap:1px;background:var(--line)}
+.item{background:var(--surface);padding:22px 24px}
+.item .q{color:var(--ink);font-weight:600;display:block;font-size:16.5px;line-height:1.4}
+.item .why{font-size:15px;color:var(--muted);margin:5px 0 0;max-width:62ch}
+
+/* plain-English expander */
+.more{margin-top:11px}
+.more summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:7px;
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--accent)}
+.more summary::-webkit-details-marker{display:none}
+.more summary::before{content:"?";display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;border:1px solid var(--accent);font-size:10px;flex:none}
+.more[open] summary::before{content:"–"}
+.more .body{margin-top:11px;padding:15px 17px;background:var(--alt);border-radius:3px;
+  font-size:15.5px;color:var(--body);max-width:64ch}
+.more .body p{margin-bottom:10px}
+
+/* answer chips */
+.opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+.opts label{display:inline-block;cursor:pointer}
+.opts input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.opts .c{display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border-radius:2px;
+  border:1px solid var(--strong);background:var(--surface);font-size:15px;font-weight:600;
+  color:var(--body);transition:all .12s ease}
+.opts .c::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--strong);flex:none}
+.opts .good .c::before{background:var(--good)}
+.opts .warn .c::before{background:var(--warn)}
+.opts .bad .c::before{background:var(--bad)}
+.opts .na .c::before{background:var(--na)}
+.opts .good input:checked+.c{background:var(--good-soft);border-color:var(--good);box-shadow:inset 0 0 0 1px var(--good);color:var(--ink)}
+.opts .warn input:checked+.c{background:var(--warn-soft);border-color:var(--warn);box-shadow:inset 0 0 0 1px var(--warn);color:var(--ink)}
+.opts .bad  input:checked+.c{background:var(--bad-soft);border-color:var(--bad);box-shadow:inset 0 0 0 1px var(--bad);color:var(--ink)}
+.opts .na   input:checked+.c{background:var(--na-soft);border-color:var(--na);box-shadow:inset 0 0 0 1px var(--na);color:var(--ink)}
+.opts input:focus-visible+.c{outline:2px solid var(--accent);outline-offset:2px}
+
+.follow{display:none;gap:12px;margin-top:15px;flex-wrap:wrap;padding-top:15px;border-top:1px dashed var(--line)}
+.follow.on{display:flex}
+.follow .f{flex:1;min-width:165px}
+
+/* fields */
+label.lab{display:block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+input[type=text],input[type=email],input[type=date],textarea,select{
+  width:100%;font-family:inherit;font-size:15.5px;color:var(--ink);background:var(--surface);
+  border:1px solid var(--strong);border-radius:2px;padding:9px 11px;line-height:1.45}
+textarea{resize:vertical;min-height:84px}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.75}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:15px;margin-top:15px}
+.fields .full{grid-column:1/-1}
+.reveal{display:none;margin-top:14px}
+.reveal.on{display:block}
+
+/* persistent example text, so the guidance does not vanish when you type */
+.hint{margin:7px 0 0;font-size:14.5px;color:var(--muted);line-height:1.5}
+.hint b{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px}
+.hint .eg{display:block;background:var(--alt);border-radius:3px;padding:11px 13px;margin-top:5px;
+  font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.65;color:var(--body);white-space:pre-wrap}
+
+/* remembered people */
+.sugg{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:7px}
+.sugg:empty{display:none}
+.sugg .sl{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin-right:2px}
+.sugg button{font-family:inherit;font-size:13.5px;background:var(--alt);border:1px solid var(--line);
+  color:var(--body);border-radius:99px;padding:4px 11px;cursor:pointer;line-height:1.4}
+.sugg button:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
+/* checkbox group */
+.checks{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.chk{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:15.5px;color:var(--body)}
+.chk input{width:17px;height:17px;margin:3px 0 0;accent-color:var(--accent);flex:none}
+.chk span b{color:var(--ink);font-weight:600;display:block}
+.chk span i{font-style:normal;color:var(--muted);font-size:14.5px}
+
+/* repeater */
+.rep{margin-top:14px;display:flex;flex-direction:column;gap:12px}
+.reprow{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr)) 34px;gap:12px;align-items:end;
+  padding:14px;background:var(--alt);border-radius:3px}
+.reprow .x{background:transparent;border:1px solid var(--strong);color:var(--muted);border-radius:2px;
+  height:38px;width:34px;cursor:pointer;font-size:17px;line-height:1}
+.reprow .x:hover{border-color:var(--accent);color:var(--accent)}
+.addrow{align-self:flex-start;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.09em;text-transform:uppercase;background:transparent;border:1px dashed var(--strong);
+  color:var(--muted);border-radius:2px;padding:9px 15px;cursor:pointer}
+.addrow:hover{border-color:var(--accent);color:var(--accent)}
+
+/* project type picker */
+.picks{display:flex;flex-direction:column;gap:12px;margin-top:18px}
+.pick{display:block;position:relative;cursor:pointer}
+.pick input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.pick .box{display:block;border:1px solid var(--strong);border-radius:3px;padding:17px 19px;background:var(--surface);transition:all .12s ease}
+.pick .box b{display:block;color:var(--ink);font-size:17px;font-weight:600;margin-bottom:3px}
+.pick .box .d{display:block;font-size:15px;color:var(--muted);line-height:1.45}
+.pick input:checked+.box{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.pick input:focus-visible+.box{outline:2px solid var(--accent);outline-offset:2px}
+
+/* nav */
+.nav{display:flex;gap:12px;align-items:center;margin-top:30px;flex-wrap:wrap}
+.btn{font-family:Archivo,sans-serif;font-weight:700;font-size:16px;letter-spacing:-.01em;
+  background:var(--accent);color:#fff;border:0;border-radius:2px;padding:13px 28px;cursor:pointer;transition:filter .12s}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn.quiet{background:transparent;color:var(--muted);border:1px solid var(--strong);font-size:15px;padding:11px 20px}
+.btn.quiet:hover{border-color:var(--accent);color:var(--accent)}
+.spacer{flex:1}
+.errmsg{color:var(--accent);font-size:15px;font-weight:600;display:none;margin-top:12px}
+.errmsg.on{display:block}
+.err{border-color:var(--accent)!important;background:var(--bad-soft)}
+
+/* review */
+.tally{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:3px;overflow:hidden;margin-top:22px}
+.tal{background:var(--surface);padding:18px 16px}
+.tal .n{font-family:Archivo,sans-serif;font-weight:800;font-size:32px;line-height:1;color:var(--ink);
+  font-variant-numeric:tabular-nums;display:block}
+.tal .l{display:block;margin-top:6px;font-size:14px;color:var(--muted)}
+.tal.g .n{color:var(--good)}.tal.a .n{color:var(--warn)}.tal.r .n{color:var(--bad)}
+.rev{margin-top:26px}
+.revsec{border-top:1px solid var(--line);padding:16px 0}
+.revsec:first-child{border-top:0}
+.revsec .h{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.revsec .h b{color:var(--ink);font-size:16.5px}
+.revsec .edit{background:none;border:0;color:var(--accent);cursor:pointer;font-family:"IBM Plex Mono",monospace;
+  font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;padding:0}
+.revsec ul{margin:9px 0 0;padding:0;list-style:none}
+.revsec li{position:relative;padding-left:18px;font-size:15px;color:var(--muted);margin-bottom:5px}
+.revsec li::before{content:"";position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%}
+.revsec li.warn::before{background:var(--warn)}
+.revsec li.bad::before{background:var(--bad)}
+.revsec li.miss::before{background:var(--strong)}
+.allgood{color:var(--good);font-weight:600;font-size:15px;margin-top:8px}
+
+/* done */
+.tick{width:54px;height:54px;border-radius:50%;background:var(--good);display:flex;align-items:center;
+  justify-content:center;color:#fff;font-size:27px;font-weight:700;margin-bottom:20px}
+
+footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+
+@media (max-width:600px){
+  body{font-size:16px}
+  .item{padding:19px 16px}
+  .opts .c{padding:8px 12px;font-size:14.5px}
+  .nav .btn{flex:1}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="bar"><div class="inner">
+  <span class="brand">SABEL<em>.</em></span>
+  <div class="rail" id="rail"></div>
+  <span class="stepno" id="stepno"></span>
+  <span class="saved" id="sv">Saved</span>
+</div></div>
+
+<div class="wrap">
+<div id="app"></div>
+<footer><span>Perfect made possible</span><span>sabelcustomersuccess.com</span></footer>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIG
+   ===================================================================== */
+const API = 'https://sabel-webhook.vercel.app/api/readiness';
+const FORM_V = '2026-09-03b';
+const KEY = 'sabel-readiness-v2';
+
+/* =====================================================================
+   ANSWER OPTION SETS
+   Each option is [bucket, label]. Bucket drives the colour and the tally:
+   good = ready · warn = in flight · bad = not yet · na = does not apply
+   ===================================================================== */
+const O = {
+  granted: [['good','Access granted'],['warn','Requested, waiting'],['bad','Not started yet']],
+  confirm: [['good','Yes, confirmed'],['warn','Working on it'],['bad','Not yet'],['na','Does not apply to us']],
+  yes:     [['good','Yes'],['bad','No'],['warn','Not sure, I will check']],
+  willdo:  [['good','Yes, it will'],['warn','Probably, needs checking'],['bad','No, it will not'],['na','Does not apply to us']],
+  know:    [['good','Yes, I know who'],['warn','I can find out'],['bad','No idea, sorry']],
+  agreed:  [['good','Agreed'],['warn','Needs discussing'],['bad','Not thought about it yet']],
+  mailbox: [['good','Yes, all proper mailboxes'],['bad','At least one is a group address'],['warn','Not sure, I will check']],
+  sso:     [['good','No plans to change it'],['warn','Yes, planned. We will warn you'],['good','Already on, and Sabel is allowed'],['warn','Not sure, I will ask IT']],
+  legal:   [['good','Signed'],['warn','With our legal team'],['bad','Not started'],['na','Not needed on our side']],
+  ready:   [['good','Yes, ready now'],['warn','Being sorted'],['bad','Not started'],['na','Does not apply to us']]
+};
+
+/* =====================================================================
+   PROJECT TYPES — decide which questions the client sees
+   ===================================================================== */
+const TYPES = [
+  ['full',      'A full project',        'We are moving our conversations across from another system, and setting up Fin and the workspace.'],
+  ['migration', 'Migration only',        'We just need our existing conversations and data moved into Intercom. No Fin build.'],
+  ['build',     'Build only',            'We are already using Intercom. Nothing to move across, we are setting up Fin and the workspace.'],
+  ['unsure',    'I am not sure yet',     'Show me everything and we will work it out together.']
+];
+// scope tags: 'm' = only when there is a migration, 'b' = only when there is a build.
+// no tag = always shown.
+function inScope(tag){
+  const t = state.projectType;
+  if(!tag || t==='unsure' || !t) return true;
+  if(tag==='m') return t==='full' || t==='migration';
+  if(tag==='b') return t==='full' || t==='build';
+  return true;
+}
+
+/* =====================================================================
+   THE QUESTIONS
+   t:'rag'   a status answer          t:'ask' fields only
+   more:     plain-English explainer, shown behind "What does this mean?"
+   ===================================================================== */
+const SECTIONS = [
+{
+ id:'A', title:'Access and getting set up',
+ blurb:'Nothing else can start until we can get into your systems. It is rarely difficult, it just tends to sit with one busy person, so it helps to get it moving early.',
+ items:[
+  {t:'ask',id:'a1',scope:'m',q:'Which system are you moving away from, and who can let us in?',
+   why:'Add a row for each one if you use more than one. Plenty of teams do.',
+   more:'<p>To move your conversation history across we need an admin login on your current helpdesk. Please invite <strong>info+1@sabelcustomersuccess.com</strong> as an admin user on each system listed.</p><p>An admin login is the one that can see settings, not just tickets. If you are not sure whether yours is an admin, whoever set the system up will know.</p><p>Common systems people move from: Zendesk, Freshdesk, Freshservice, Help Scout, Zoho Desk, HubSpot Service Hub, Gorgias, Salesforce Service Cloud, or a shared Gmail or Outlook inbox. Yours may be something else entirely, that is fine, just type the name.</p>',
+   rep:{id:'a1r', cols:[['sys','System','text','e.g. Zendesk'],
+                        ['who','Who can grant admin access','text','Name'],
+                        ['st','Where it is up to','select','Admin access granted to info+1|Invite sent, not accepted yet|Not started yet']]}},
+
+  {t:'rag',id:'a2',opts:O.granted,q:'Admin access to your Intercom workspace, for info+1@sabelcustomersuccess.com',
+   why:'This is the account we build everything from, so please add it as an admin rather than a lighter seat.',
+   more:'<p>Intercom has different levels of seat. A lite or standard seat can read conversations but cannot change settings, build workflows or set up Fin, which is most of what we do.</p><p>Invite <strong>info+1@sabelcustomersuccess.com</strong> as a full admin. You will not be charged for it. See the note in the seats section.</p>'},
+
+  {t:'rag',id:'a3',opts:O.sso,q:'Is your team planning to turn on single sign-on during the project?',
+   why:'Not a problem at all, we just need a little warning so we do not get locked out overnight.',
+   more:'<p>Single sign-on, often shortened to SSO or SAML, is when your staff log into a tool using your company account, for example Microsoft, Google or Okta, instead of a separate password. It is a sensible thing to have and we are not suggesting you avoid it.</p><p>The catch is that when it is switched on, it usually only allows people with an address at your company. Our accounts are not, so we get locked out, sometimes in the middle of a build. It has happened to us more than once with no warning.</p><p>If your IT team has this planned, just tell us the week and make sure our account is allowed through.</p>'},
+
+  {t:'rag',id:'a4',opts:O.legal,q:'Non-disclosure agreement, data processing agreement or any other paperwork',
+   why:'Your data cannot start moving until anything like this is signed, and it is often the slowest part, so it is worth starting now.',
+   more:'<p>Some companies require a signed agreement before a supplier can touch customer data. Others do not. If yours does not, choose <em>Not needed on our side</em> and we will not chase it.</p>'},
+
+  {t:'ask',id:'a5',q:'Anything about security we should know before we start?',
+   why:'Much easier for everyone if we set this up on day one rather than tripping over it later.',
+   more:'<p>Things like two-factor authentication being required, IP address restrictions, a VPN, or a security review your team has to run on new suppliers. If none of that applies, leave it blank.</p>',
+   f:[['a5a','Anything we should know','textarea','Type here',{ex:'Two-factor authentication is required on all accounts.\nOur firewall only allows approved IP addresses.\nNew suppliers have to pass a security review, which takes about two weeks.'}]]}
+ ]
+},
+{
+ id:'B', title:'Email and web addresses',
+ blurb:'Email looks simple and almost never is. This section takes ten minutes and saves a fortnight.',
+ items:[
+  {t:'ask',id:'b1',q:'Which email addresses do your customers write to?',
+   why:'List every one, even the old ones people still use. Add a row for each.',
+   more:'<p>Anything customers might email: support@, help@, info@, hello@, orders@, plus any regional or brand-specific addresses. If an address exists and is still open, it needs to be on this list, otherwise mail could land somewhere nobody is watching after you go live.</p>',
+   rep:{id:'b1r', cols:[['addr','Email address','text','support@yourcompany.com'],
+                        ['dest','Which team should get it','text','e.g. General support'],
+                        ['kind','What kind of address is it','select','A proper mailbox we can log into|A group or distribution list|A forwarding alias|Not sure']]}},
+
+  {t:'rag',id:'b2',opts:O.mailbox,q:'Are those all proper mailboxes?',
+   why:'The most common surprise on this whole list, and much cheaper to find out now.',
+   more:'<p>A <strong>mailbox</strong> is an inbox that someone can actually log into, with its own username and password.</p><p>A <strong>group address</strong>, sometimes called a distribution list or a DL, has no inbox of its own. It just takes an email and copies it out to several people. Intercom cannot collect mail from one of those, because there is nothing to collect from.</p><p>If one of your support addresses turns out to be a group address, it is fixable, but it means work for your IT team. We would much rather find that out today than during go-live week.</p>'},
+
+  {t:'rag',id:'b3',opts:O.yes,q:'Can someone log into each of those mailboxes to click a verification link?',
+   why:'There is one confirmation email per address that has to be clicked, and it has caught a few teams out.',
+   more:'<p>To let Intercom send email as you, we verify each address by sending it a message with a link in it. Someone has to open that mailbox and click the link.</p><p>This gets stuck surprisingly often when an address is shared and nobody can actually remember the login. Worth checking before we get there.</p>'},
+
+  {t:'ask',id:'b4',q:'Who looks after your DNS settings?',
+   why:'Two small changes are needed there. It is usually a five minute job for whoever manages your website.',
+   more:'<p>DNS stands for Domain Name System. In plain terms it is the settings that tell the internet where your website lives and where your email should go. It is normally managed by whoever built or hosts your website, or by your IT provider.</p><p>We need two changes made there:</p><p><strong>One so your emails are trusted.</strong> Without it, emails Intercom sends on your behalf are more likely to land in customers spam folders.</p><p><strong>One so your help centre sits on your own address.</strong> So your articles live at help.yourcompany.com rather than a generic Intercom web address.</p><p>We will send the exact settings. We just need to know who to send them to.</p>',
+   f:[['b4a','Who manages it','text','Name, team or agency'],
+      ['b4b','How long a change usually takes','text','',{ex:'Same day if we ask nicely.\nUsually about a week, it goes through a ticket.'}]]},
+
+  {t:'ask',id:'b5',scope:'m',q:'Is anything still going to arrive in your old system after you switch?',
+   why:'Very common, and completely fine, as long as we know about it and plan for it.',
+   more:'<p>Things like a chat widget on an old page, a social media account still connected to the old helpdesk, a form that emails an old address, or an address your old provider will not let you turn off.</p><p>If any of these keep running after you move, tickets carry on arriving somewhere nobody is watching. We can put a holding message in place, but only if we know it exists.</p>',
+   f:[['b5a','Anything that will keep running','textarea','Type here',{ex:'The chat widget is still on our old marketing pages.\nOur Facebook page is still connected to the old helpdesk.\nsupport@ourcompany.freshdesk.com cannot be switched off and people still use it.'}]]},
+
+  {t:'ask',id:'b6',q:'Do you split your support by region or by brand?',
+   why:'If you do, tell us how you tell them apart. If you do not, just say no.',
+   more:'<p>For example, an Australian team and a New Zealand team, or two brands sharing one support team. If so, we need to know what decides which is which: the address they wrote to, the website they came from, or something on their account.</p><p>Getting this rule right up front is what stops a UK customer landing in the US queue after go-live, which is one of the most common complaints we see.</p>',
+   f:[['b6a','Regions or brands, and how you tell them apart','textarea','Type here',{ex:'We have an Australian team and a New Zealand team.\nYou can tell which is which by the address they emailed: support-au@ or support-nz@.\n\nWe also run two brands through the same team. The brand is decided by which website the chat was opened on.'}]]}
+ ]
+},
+{
+ id:'C', title:'How you recognise your customers',
+ blurb:'The shortest section here and the one that matters most. It is also the only one that cannot be fixed afterwards, so it is worth reading the explainers on this page.',
+ items:[
+  {t:'ask',id:'c1',q:'How do you recognise a returning customer today?',
+   why:'In other words, what is the one piece of information that tells you two conversations came from the same person.',
+   f:[['c1a','Choose the closest','select','Their email address|Their phone number|Our own customer or account number|A mix, it depends on the channel|I am not sure',
+       {on:['A mix, it depends on the channel','I am not sure'],id:'c1b',
+        label:'No problem. Tell us what you do know',
+        ph:'Type here',
+        ex:'On the website we know who they are because they are logged in.\nBy email we only have whatever address they wrote from.\nOn the phone we ask for their account number.'}]]},
+
+  {t:'rag',id:'c2',scope:'b',opts:O.willdo,q:'When a logged-in customer opens the chat on your site, will your site tell Intercom who they are?',
+   why:'This is the question that decides whether you end up with duplicate customer records. Your developer will know the answer.',
+   more:'<p>Here is what happens. Someone logs into your website and opens the chat. Your website can quietly pass their identity across to Intercom in the background, so Intercom knows this is the same person who wrote in last month.</p><p>If it does not pass anything, or if it passes a different reference each visit, Intercom creates a brand new customer record every single time. Same person, ten records.</p><p>Why that matters so much: <strong>Intercom cannot merge two customer records back together.</strong> Once they exist, they are there. We have seen a company reach four hundred thousand duplicates, which stopped them being able to use Fin at all until it was untangled.</p><p>So if you are not sure, this is the one to go and ask your developer about.</p>'},
+
+  {t:'rag',id:'c3',scope:'b',opts:O.willdo,q:'Will it also tell Intercom which company or account the person belongs to?',
+   why:'Only relevant if your customers are businesses. If you sell to individuals, choose does not apply.',
+   more:'<p>Same idea as the question above, but for the organisation rather than the person.</p><p>If your customers are businesses, you probably want to see every conversation from one company in one place, and report on how much support each account is using. That only works if your site tells Intercom which company each person belongs to.</p><p>Without it, everyone arrives as an unconnected individual, and account-level reporting is not possible.</p><p>If you sell to individual consumers, this does not apply to you.</p>'},
+
+  {t:'ask',id:'c4',q:'Do you already have the same customer in your system more than once?',
+   why:'No judgement at all, almost everyone does. It just changes what we do before we move the data.',
+   more:'<p>If duplicates already exist in your current system, moving the data across copies them over as they are. Better to know now, because we can sometimes clean them up on the way through, which is far easier than afterwards.</p>',
+   f:[['c4a','Roughly how many, and how you know','textarea','Type here',{ex:'Quite a few. Agents merge them by hand most weeks.\n\nOr: about 3,000 out of 40,000 contacts. We spotted it when the sales team ran a report.\n\nA rough guess is genuinely useful. "Quite a few" is a real answer.'}]]},
+
+  {t:'rag',id:'c5',scope:'b',opts:O.ready,q:'Will your developers switch on secure identity checking for the chat?',
+   why:'Sometimes called JWT. If that means nothing to you, open the explainer and pass it to your developer.',
+   more:'<p>By default, anyone could tell the chat widget they are any email address they like. Secure identity checking, which your developer may know as <em>identity verification</em> or <em>JWT</em>, stops that, by having your website sign a small token proving the person really is who they say.</p><p>You need it if the chat shows anything private: order details, account balances, personal information. It is a small piece of work on your side, but it is work only your developers can do, and it is a common reason go-live slips.</p><p>If your chat will only ever answer general questions, it may not be needed.</p>'}
+ ]
+},
+{
+ id:'D', title:'Your team and seats',
+ blurb:'Quick section. It is mostly about making sure everyone can get in on day one.',
+ items:[
+  {t:'rag',id:'d1',scope:'m',opts:O.ready,q:'A list of everyone who has handled tickets in your current system',
+   why:'Including people who have left. Their old conversations still need an owner.',
+   more:'<p>When we move your conversations across, each one carries the agent it belonged to. If that person does not exist in Intercom, the conversation has nowhere to go and ends up landing on one unlucky person instead.</p><p>Most helpdesks can export this list in a couple of clicks. Leavers matter as much as current staff, because their old tickets are still in the data.</p>'},
+
+  {t:'ask',id:'d2',scope:'m',q:'Who should we assign a conversation to if its original agent is not in Intercom?',
+   why:'There will almost always be a few. Naming one person now saves a scramble later.',
+   more:'<p>People leave, and their conversations remain. Rather than have those disappear or land at random, we point them all at one named person, usually a team lead, who can pick through them.</p>',
+   f:[['d2a','Name','text','',{person:'name',pair:'d2b'}],['d2b','Email address','email','']]},
+
+  {t:'ask',id:'d3',q:'How many people will need to work in Intercom?',
+   why:'Include part-timers and anyone who dips in occasionally. Do not count our team, we sort our own.',
+   more:'<p>We ask because running out of seats mid-project stops people being onboarded, usually on the morning everyone is meant to start. Knowing the number now means it can be sorted quietly in advance.</p>',
+   f:[['d3a','How many people','text','e.g. 26'],
+      ['d3b','Do you have enough full seats on your plan for them all','select','Yes, plenty|Yes, just about|No, we will need more|I am not sure how many we have']]},
+
+  {t:'note',id:'dn1',q:'You do not need to do anything about our seat',
+   why:'Intercom does not charge you for the Sabel partner seat. We arrange that with them directly using your workspace ID, so please do not spend time chasing it.'}
+ ]
+},
+{
+ id:'E', title:'Moving your existing conversations', scope:'m',
+ blurb:'This section is about the data we are bringing across from your old system.',
+ items:[
+  {t:'ask',id:'e1',q:'How many conversations or tickets are in your current system?',
+   why:'Please take this from an export or a report rather than memory. Estimates have been out by a very long way before.',
+   more:'<p>The number drives how long the move takes, and how long the move takes drives your go-live date. One client told us thirty five hours of work and then mentioned, the day before go-live, that one of their twelve inboxes held eight hundred and fifty thousand tickets.</p><p>Nobody was being difficult. They just had not looked. A rough export is all it takes.</p>',
+   f:[['e1a','Total, and the split per inbox if you have it','textarea','Type here',{ex:'About 210,000 tickets in total.\n\nGeneral support   180,000\nBilling            22,000\nPartners            8,000'}]]},
+
+  {t:'ask',id:'e2',q:'How far back should we go?',
+   why:'Moving absolutely everything is rarely the right answer, and it is usually the most expensive one.',
+   more:'<p>Most teams find that anything older than a year or two is never opened again. Bringing it all across takes longer, costs more, and makes searching noisier. A cut-off date is completely normal.</p><p>If you are not sure, say so and we will talk it through.</p>',
+   f:[['e2a','How far back','text','e.g. the last 12 months'],['e2b','Any inboxes to leave behind','text','']]},
+
+  {t:'ask',id:'e3',q:'What needs to come across with each conversation?',
+   why:'Tick anything you would miss. Each one changes how we run the move, so it is much better to decide now.',
+   more:'<p>We can bring across more than just the messages. Telling us afterwards means running the whole move again, which is why we ask up front.</p>',
+   multi:{id:'e3a', opts:[
+     ['File attachments','Documents and images customers sent in'],
+     ['Internal notes','Private notes your agents wrote to each other'],
+     ['Tags and labels','However you categorise conversations today'],
+     ['Satisfaction scores','CSAT ratings customers gave'],
+     ['Custom fields','Any extra fields you added to tickets']],
+     other:true}},
+
+  {t:'rag',id:'e4',opts:O.agreed,q:'Can we run the move outside your working hours?',
+   why:'It is much calmer for your team that way. We just need a window that suits you.',
+   more:'<p>Loading years of old conversations into a live workspace is noisy. Old tickets appear in inboxes, notifications fire at agents, and people can find themselves sorting through history while trying to help real customers.</p><p>We have had to stop a load halfway through because it was disrupting a support team mid-shift. So we run it overnight or over a weekend instead.</p><p>All we need is a window when nobody is working, and confirmation that nobody is on shift then.</p>'},
+
+  {t:'ask',id:'e4b',q:'Which window would suit you?',
+   why:'A rough answer is fine at this stage.',
+   f:[['e4c','Suggested window','text','',{ex:'Friday 6pm through to Sunday night, Sydney time.\nAny weeknight after 8pm, nobody is on shift.'}]]},
+
+  {t:'ask',id:'e5',q:'Who will check the sample before we move everything?',
+   why:'We move a small batch first so you can look at it. Catching something at that point is easy. Catching it afterwards is not.',
+   more:'<p>Before the full move we bring across a sample so you can open a few and check they look right: the right customer, the full message, attachments present, notes still private.</p><p>It takes about half an hour and it is the single best value half hour in the whole project. We just need one named person who will actually do it.</p>',
+   f:[['e5a','Name','text','',{person:'name',pair:'e5b'}],['e5b','Email address','email','']]}
+ ]
+},
+{
+ id:'F', title:'Your help content', scope:'b',
+ blurb:'Fin can only be as good as what it is allowed to read. This is the part most teams underestimate.',
+ items:[
+  {t:'ask',id:'f1',q:'Tell us about your help articles',
+   why:'Rough numbers are completely fine.',
+   more:'<p>We ask about the review date because out of date content is where confidently wrong answers come from. If an article describes a process you changed a year ago, Fin will repeat it to your customers with total confidence.</p>',
+   f:[['f1a','Roughly how many articles','text','e.g. 88'],
+      ['f1b','How many reviewed in the last year','text','A guess is fine'],
+      ['f1c','Who owns your help content','text','Name',{person:'name',pair:'f1d'}],
+      ['f1d','Their email address','email','']]},
+
+  {t:'ask',id:'f2',q:'Who are your help articles written for?',
+   why:'Tick everything that applies. Most teams have a mix without realising it.',
+   more:'<p>Every article in Intercom carries an audience, which controls who Fin will use it for. Left on the default, an article is visible to everyone, including the public.</p><p>That is how internal process notes end up being read back to a customer. It has happened, so it is worth a minute now.</p>',
+   multi:{id:'f2a', opts:[
+     ['Anyone, including the public','General help anyone can read'],
+     ['Logged-in customers only','Content only for people with an account'],
+     ['Our own staff, internal only','Process notes never meant for customers'],
+     ['Partners or resellers','Content for companies you work with, not end customers']],
+     other:true, otherLabel:'Another audience'}},
+
+  {t:'ask',id:'f3',q:'Where would you like your help centre to live?',
+   why:'On your own web address rather than a generic Intercom one, if you have a preference.',
+   more:'<p>Your help centre can sit at something like help.yourcompany.com instead of a default Intercom address. It looks better, keeps customers on your brand, and protects your search rankings.</p><p>It needs one DNS change, from the same person you named in the email section.</p>',
+   f:[['f3a','Preferred address','text','e.g. help.yourcompany.com'],
+      ['f3b','Who will make the change','text','']]},
+
+  {t:'rag',id:'f4',opts:O.confirm,q:'Do you have an existing help centre that people already link to?',
+   why:'If so we will want to send those old links to the new pages so nothing breaks.',
+   more:'<p>If customers have bookmarked your articles, or they are linked from your website, emails or Google, those links will break when the content moves. We can redirect them, we just need to know they exist.</p>'}
+ ]
+},
+{
+ id:'G', title:'Other systems Fin needs to reach', scope:'b',
+ blurb:'If you want Fin to look up an order or check an account, it has to reach the system holding that information. This is the part that depends on your developers.',
+ items:[
+  {t:'ask',id:'g1',q:'What would you like Fin to be able to look up or do?',
+   why:'Write it however makes sense to you. We will work out the technical side.',
+   more:'<p>For example: check where an order is, look up a booking, tell someone their account balance, update a delivery address, or raise a ticket in another system.</p><p>Each one means connecting to whichever system holds that information. Adding more later is possible, but it is new work, so it is worth listing everything you can think of now.</p>',
+   f:[['g1a','What Fin should be able to do','textarea','Type here, one per line',{ex:'Tell a customer where their order is\nLook up a booking by reference number\nGive someone their current account balance\nUpdate a delivery address before dispatch\nRaise a ticket in Jira when something is broken\nCheck whether an item is in stock'}]]},
+
+  {t:'rag',id:'g2',opts:O.ready,q:'Can your developers give us access to those systems?',
+   why:'API keys and a test environment. This is the most common thing that holds a build up.',
+   more:'<p>An API is the way one system lets another ask it questions. To have Fin check an order, we need a key that lets us ask your order system about it, and ideally a test environment so we are not experimenting on real customers.</p><p>This is work only your developers can do, and in our experience it is the single most common reason a build sits waiting.</p>'},
+
+  {t:'ask',id:'g3',q:'Who is your developer, and how much time do they realistically have?',
+   why:'An honest answer here is genuinely more useful than an optimistic one.',
+   more:'<p>We ask for realistic rather than ideal because a developer with two hours a week sets the pace of the entire build, and we would rather plan around the truth than be surprised by it.</p>',
+   f:[['g3a','Name','text','',{person:'name',pair:'g3b'}],['g3b','Email address','email',''],
+      ['g3c','Realistic availability','text','e.g. one day a week from mid-October']]},
+
+  {t:'ask',id:'g4',q:'Is any of that information only available on a screen, not through a system?',
+   why:'Worth flagging early, because it changes what is possible.',
+   more:'<p>Sometimes the information Fin needs only exists somewhere a person has to log in and look at, with no way for another system to ask for it.</p><p>Fin cannot read a screen. If that is the case for something on your list, we need to find another route, or agree that one is handled by a person.</p>',
+   f:[['g4a','Which ones','textarea','Type here',{ex:'Stock levels are only in our warehouse system, and you have to log in and look.\nRefund status lives in the finance team\u2019s spreadsheet.'}]]}
+ ]
+},
+{
+ id:'H', title:'What Fin is allowed to say', scope:'b',
+ blurb:'These are decisions rather than tasks, and they are yours to make. They matter more than anything else on this form.',
+ items:[
+  {t:'note',id:'hn1',q:'Why we ask this',
+   why:'Left to its own devices, an AI agent will agree to things. It will confirm a fault, offer a refund, or promise a replacement, because a customer asked and it wanted to help. Your team then has to honour it. Deciding the boundaries now is far easier than unpicking a promise already made.'},
+
+  {t:'ask',id:'h1',q:'What must Fin never promise a customer?',
+   why:'Anything it commits to, you have to deliver. Be as strict as you like here.',
+   more:'<p>Common ones: refunds, replacements, discounts, vouchers, compensation, warranty cover, return labels, cancelling a charge, or a specific delivery date.</p><p>Fin can still explain how a process works. It just will not tell a customer they are getting something.</p>',
+   f:[['h1a','Things Fin must never offer or confirm','textarea','Type here, one per line',{ex:'Refunds or partial refunds\nReplacements or exchanges\nDiscounts, vouchers or goodwill gestures\nWarranty cover\nReturn labels\nCancelling a charge\nA specific delivery date\nThat something is faulty'}]]},
+
+  {t:'ask',id:'h2',q:'What should always go straight to a person?',
+   why:'The topics where you would rather a human picked it up immediately.',
+   more:'<p>Most teams include complaints, anything legal, cancellations, and anything involving a customer who sounds distressed or vulnerable. Regulated businesses usually have more.</p>',
+   f:[['h2a','Topics that always go to a person','textarea','Type here, one per line',{ex:'Complaints\nAnything legal, or where someone mentions a lawyer\nCancellations and account closures\nAnyone who sounds distressed or vulnerable\nSuspected fraud\nMedia or press enquiries'}]]},
+
+  {t:'ask',id:'h3',q:'How many times should someone have to ask for a person before they get one?',
+   why:'There is no wrong answer. It is a balance between resolving quickly and not frustrating people.',
+   f:[['h3a','Choose','select','Straight away, the first time they ask|On the second time|On the third time|Let Fin use its judgement']]},
+
+  {t:'ask',id:'h4',q:'Which languages can your team actually support?',
+   why:'So Fin does not start a conversation nobody on your team can finish.',
+   more:'<p>If Fin answers someone in Portuguese and then hands them to a team who cannot read it, everyone has a bad day. We set Fin to answer only in languages you can back up.</p>',
+   f:[['h4a','Languages you support','text','e.g. English and German'],
+      ['h4b','Any wording your industry requires you to include','textarea','Leave blank if this does not apply to you',
+       {ex:'This is general information only and does not take your circumstances into account.\n\nWe are not able to give medical advice. Please speak to your doctor.\n\nFinancial, medical and legal businesses usually have something like this. Most others have nothing.'}]]},
+
+  {t:'ask',id:'h5',q:'Who will read through Fin answers and sign them off before go-live?',
+   why:'One named person spots more than a group review does. It usually takes an hour.',
+   f:[['h5a','Name','text','',{person:'name',pair:'h5b'}],['h5b','Email address','email','']]}
+ ]
+}
+];
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+const state = { step:0, projectType:'', data:{}, reps:{}, submitted:false, lastPayload:null };
+
+const $  = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function activeSections(){ return SECTIONS.filter(s=>inScope(s.scope)); }
+function activeItems(sec){ return sec.items.filter(i=>inScope(i.scope)); }
+function steps(){ return ['start', ...activeSections().map(s=>s.id), 'review']; }
+
+/* =====================================================================
+   FIELD RENDERERS
+   ===================================================================== */
+function fld(f){
+  const [id,label,type,ph] = f;
+  const o = f[4] || {};                 // {on,id,label,ph} = reveal · {ex} = example · {person,pair}
+  const v = esc(state.data[id]||'');
+  const hint = o.ex ? '<p class="hint"><b>For example</b><span class="eg">'+esc(o.ex)+'</span></p>' : '';
+  const sug  = o.person ? '<div class="sugg" data-sname="'+id+'"'+(o.pair?' data-semail="'+o.pair+'"':'')+'></div>' : '';
+  let html;
+
+  if(type==='textarea'){
+    html = '<div class="full"><label class="lab" for="'+id+'">'+esc(label)+'</label>'+
+      '<textarea id="'+id+'" data-f placeholder="'+esc(ph||'')+'">'+v+'</textarea>'+hint+'</div>';
+
+  } else if(type==='select'){
+    const opts = String(ph).split('|').map(x=>
+      '<option value="'+esc(x)+'"'+(state.data[id]===x?' selected':'')+'>'+esc(x)+'</option>').join('');
+    const rev = o.on ? o : null;
+    html = '<div class="full"><label class="lab" for="'+id+'">'+esc(label)+'</label>'+
+      '<select id="'+id+'" data-f'+(rev?' data-rev="'+esc(JSON.stringify(rev.on))+'" data-revid="'+rev.id+'"':'')+'>'+
+      '<option value="">Choose one</option>'+opts+'</select></div>';
+    if(rev){
+      const on = rev.on.indexOf(state.data[id])>-1;
+      html += '<div class="full reveal'+(on?' on':'')+'" id="rv_'+rev.id+'">'+
+        '<label class="lab" for="'+rev.id+'">'+esc(rev.label)+'</label>'+
+        '<textarea id="'+rev.id+'" data-f placeholder="'+esc(rev.ph||'')+'">'+esc(state.data[rev.id]||'')+'</textarea>'+
+        (rev.ex?'<p class="hint"><b>For example</b><span class="eg">'+esc(rev.ex)+'</span></p>':'')+'</div>';
+    }
+
+  } else {
+    html = '<div>'+sug+'<label class="lab" for="'+id+'">'+esc(label)+'</label>'+
+      '<input type="'+(type==='email'?'email':'text')+'" id="'+id+'" data-f value="'+v+'" placeholder="'+esc(ph||'')+'">'+hint+'</div>';
+  }
+  return html;
+}
+
+/* ---------------------------------------------------------------------
+   REMEMBERED PEOPLE
+   Every name and email typed anywhere on the form becomes a one-click
+   suggestion on every other person field, so nobody types themselves in
+   six times.
+   --------------------------------------------------------------------- */
+const PERSON_PAIRS = [
+  ['f_name','f_email'],        // the person filling this in
+  ['f_backup','f_backup_em'],  // their backup
+  ['d2a','d2b'],               // fallback owner for migrated conversations
+  ['e5a','e5b'],               // sample sign-off
+  ['f1c','f1d'],               // content owner
+  ['g3a','g3b'],               // developer
+  ['h5a','h5b']                // Fin reviewer
+];
+
+function people(){
+  const seen = {}, out = [];
+  const add = (n,e) => {
+    n = (n||'').trim(); e = (e||'').trim();
+    if(!n) return;
+    const k = n.toLowerCase();
+    if(seen[k]){ if(e && !seen[k].email) seen[k].email = e; return; }
+    seen[k] = { name:n, email:e }; out.push(seen[k]);
+  };
+  PERSON_PAIRS.forEach(([n,e]) => add(state.data[n], state.data[e]));
+  // names typed into "who is sorting it" on any status question
+  Object.keys(state.data).forEach(k => { if(/_own$/.test(k)) add(state.data[k],''); });
+  // names typed into the helpdesk repeater
+  Object.keys(state.reps).forEach(rk => (state.reps[rk]||[]).forEach(r => add(r.who,'')));
+  return out;
+}
+
+function refreshSugg(){
+  const list = people();
+  document.querySelectorAll('.sugg').forEach(box => {
+    const isRep   = !!box.dataset.srep;
+    const nameId  = box.dataset.sname || '';
+    const emailId = box.dataset.semail || '';
+    const current = isRep
+      ? ((state.reps[box.dataset.srep]||[])[+box.dataset.sri]||{})[box.dataset.sck]||''
+      : (state.data[nameId]||'');
+    const offer = list.filter(p => p.name.toLowerCase() !== current.trim().toLowerCase()).slice(0,6);
+    box.innerHTML = offer.length
+      ? '<span class="sl">Use</span>' + offer.map(p =>
+          '<button type="button"'+
+          (isRep ? ' data-frep="'+esc(box.dataset.srep)+'" data-fri="'+esc(box.dataset.sri)+'" data-fck="'+esc(box.dataset.sck)+'"'
+                 : ' data-fill="'+esc(nameId)+'" data-fillem="'+esc(emailId)+'"')+
+          ' data-n="'+esc(p.name)+'" data-e="'+esc(p.email||'')+'">'+esc(p.name)+'</button>').join('')
+      : '';
+  });
+}
+
+function multi(m){
+  const chosen = state.data[m.id] ? String(state.data[m.id]).split('|') : [];
+  let h = '<div class="checks">';
+  m.opts.forEach(([lab,hint],i)=>{
+    h += '<label class="chk"><input type="checkbox" data-multi="'+m.id+'" value="'+esc(lab)+'"'+
+      (chosen.indexOf(lab)>-1?' checked':'')+'><span><b>'+esc(lab)+'</b>'+
+      (hint?'<i>'+esc(hint)+'</i>':'')+'</span></label>';
+  });
+  h += '</div>';
+  if(m.other){
+    h += '<div class="fields"><div class="full"><label class="lab" for="'+m.id+'_o">'+
+      esc(m.otherLabel||'Anything else')+'</label><input type="text" id="'+m.id+'_o" data-f value="'+
+      esc(state.data[m.id+'_o']||'')+'" placeholder="Type it here"></div></div>';
+  }
+  return h;
+}
+
+function repeater(r){
+  const rows = state.reps[r.id] || (state.reps[r.id]=[{}]);
+  let h='<div class="rep" data-rep="'+r.id+'">';
+  rows.forEach((row,ri)=>{
+    h+='<div class="reprow">';
+    r.cols.forEach(([ck,clab,ctype,cph])=>{
+      const val = esc(row[ck]||'');
+      if(ctype==='select'){
+        const opts=String(cph).split('|').map(o=>'<option value="'+esc(o)+'"'+(row[ck]===o?' selected':'')+'>'+esc(o)+'</option>').join('');
+        h+='<div><label class="lab">'+esc(clab)+'</label><select data-rk="'+r.id+'" data-ri="'+ri+'" data-ck="'+ck+'"><option value="">Choose</option>'+opts+'</select></div>';
+      } else {
+        const sg = ck==='who' ? '<div class="sugg" data-srep="'+r.id+'" data-sri="'+ri+'" data-sck="'+ck+'"></div>' : '';
+        h+='<div>'+sg+'<label class="lab">'+esc(clab)+'</label><input type="text" data-rk="'+r.id+'" data-ri="'+ri+'" data-ck="'+ck+'" value="'+val+'" placeholder="'+esc(cph||'')+'"></div>';
+      }
+    });
+    h+= rows.length>1 ? '<button class="x" type="button" data-del="'+r.id+'" data-ri="'+ri+'" aria-label="Remove row">&times;</button>' : '<span></span>';
+    h+='</div>';
+  });
+  h+='<button class="addrow" type="button" data-add="'+r.id+'">+ Add another</button></div>';
+  return h;
+}
+
+function itemHTML(it){
+  if(it.t==='note'){
+    return '<div class="item"><span class="q">'+esc(it.q)+'</span><p class="why">'+esc(it.why)+'</p></div>';
+  }
+  let h='<div class="item"><span class="q">'+esc(it.q)+'</span>';
+  if(it.why) h+='<p class="why">'+esc(it.why)+'</p>';
+  if(it.more) h+='<details class="more"><summary>What does this mean?</summary><div class="body">'+it.more+'</div></details>';
+
+  if(it.t==='rag'){
+    const cur=state.data['s_'+it.id];
+    h+='<div class="opts" data-for="'+it.id+'">';
+    it.opts.forEach(([bucket,label],i)=>{
+      const v=bucket+'::'+label;
+      h+='<label class="'+bucket+'"><input type="radio" name="s_'+it.id+'" value="'+esc(v)+'"'+
+        (cur===v?' checked':'')+'><span class="c">'+esc(label)+'</span></label>';
+    });
+    h+='</div>';
+    const needs = cur && cur.indexOf('good::')!==0 && cur.indexOf('na::')!==0;
+    h+='<div class="follow'+(needs?' on':'')+'" id="fl_'+it.id+'">'+
+       '<div class="f"><div class="sugg" data-sname="'+it.id+'_own"></div><label class="lab" for="'+it.id+'_own">Who is sorting it</label><input type="text" id="'+it.id+'_own" data-f value="'+esc(state.data[it.id+'_own']||'')+'" placeholder="Name"></div>'+
+       '<div class="f"><label class="lab" for="'+it.id+'_by">Expected by</label><input type="date" id="'+it.id+'_by" data-f value="'+esc(state.data[it.id+'_by']||'')+'"></div>'+
+       '<div class="f" style="flex:2 1 240px"><label class="lab" for="'+it.id+'_note">Anything we should know</label><input type="text" id="'+it.id+'_note" data-f value="'+esc(state.data[it.id+'_note']||'')+'" placeholder="Optional"></div>'+
+       '</div>';
+  }
+  if(it.rep) h+=repeater(it.rep);
+  if(it.multi) h+=multi(it.multi);
+  if(it.f) h+='<div class="fields">'+it.f.map(fld).join('')+'</div>';
+  h+='</div>';
+  return h;
+}
+
+/* =====================================================================
+   PANELS
+   ===================================================================== */
+function startPanel(){
+  return '<div class="panel on"><div class="sechead">'+
+    '<p class="eyebrow">Sabel · Before we start building</p>'+
+    '<h1>Technical Readiness Check</h1>'+
+    '<p class="intro">A shared picture of what is ready and what is still moving. About twenty minutes, one section at a time, and you can stop and come back.</p></div>'+
+
+    '<div class="note"><p><strong>There are no wrong answers here.</strong> Most of the bumps on a project like this come from a handful of small things that were still being sorted when the build began. None of them are hard to fix early. A few of them cannot be undone once your workspace is live, which is the only reason we ask now.</p>'+
+    '<p>Nothing on this form will hold your project up. If something is not ready, that just tells us the order to do things in. A blank is far more useful to us than an optimistic tick.</p></div>'+
+
+    '<div class="card"><div class="items"><div class="item">'+
+      '<span class="q">First, what kind of project is this?</span>'+
+      '<p class="why">This decides which questions you see, so you are not asked about things that do not apply to you.</p>'+
+      '<div class="picks">'+ TYPES.map(([v,t,d])=>
+        '<label class="pick"><input type="radio" name="ptype" value="'+v+'"'+(state.projectType===v?' checked':'')+
+        '><span class="box"><b>'+esc(t)+'</b><span class="d">'+esc(d)+'</span></span></label>').join('') +'</div>'+
+      '<div class="errmsg" id="e-type">Please choose one so we can show you the right questions.</div>'+
+    '</div>'+
+    '<div class="item"><span class="q">And a little about you</span>'+
+      '<p class="why">So we know who to come back to.</p>'+
+      '<div class="fields">'+
+        fld(['f_client','Company name','text','Your company'])+
+        fld(['f_name','Your name','text','First and last name',{person:'name',pair:'f_email'}])+
+        fld(['f_email','Your email','email','you@company.com'])+
+        fld(['f_role','Your role','text','e.g. Head of Support'])+
+        fld(['f_backup','Who can answer these if you are away','text','Their name',{person:'name',pair:'f_backup_em'}])+
+        fld(['f_backup_em','Their email','email',''])+
+      '</div>'+
+      '<div class="errmsg" id="e-about">Please fill in your company, your name and your email.</div>'+
+    '</div></div></div>'+
+
+    navHTML(false,'Start')+'</div>';
+}
+
+function secPanel(sec){
+  const list = activeItems(sec);
+  return '<div class="panel on"><div class="sechead">'+
+    '<p class="eyebrow quiet">Section '+sec.id+'</p>'+
+    '<h2>'+esc(sec.title)+'</h2>'+
+    '<p class="intro">'+esc(sec.blurb)+'</p></div>'+
+    '<div class="card"><div class="items">'+list.map(itemHTML).join('')+'</div></div>'+
+    navHTML(true,'Next')+'</div>';
+}
+
+function navHTML(back, nextLabel){
+  return '<div class="nav">'+
+    (back?'<button class="btn quiet" data-nav="back">Back</button>':'')+
+    '<div class="spacer"></div>'+
+    '<button class="btn" data-nav="next">'+esc(nextLabel)+'</button></div>';
+}
+
+function tally(){
+  let g=0,a=0,r=0,n=0,miss=0;
+  activeSections().forEach(sec=>activeItems(sec).forEach(it=>{
+    if(it.t!=='rag') return;
+    const v=state.data['s_'+it.id];
+    if(!v){ miss++; return; }
+    const b=v.split('::')[0];
+    if(b==='good')g++; else if(b==='warn')a++; else if(b==='bad')r++; else n++;
+  }));
+  return {g,a,r,n,miss};
+}
+
+function reviewPanel(){
+  const t=tally();
+  let rev='<div class="rev">';
+  activeSections().forEach(sec=>{
+    const flags=[];
+    activeItems(sec).forEach(it=>{
+      if(it.t!=='rag') return;
+      const v=state.data['s_'+it.id];
+      if(!v){ flags.push(['miss',it.q,'Not answered']); return; }
+      const [b,label]=v.split('::');
+      if(b==='warn'||b==='bad') flags.push([b,it.q,label]);
+    });
+    rev+='<div class="revsec"><div class="h"><b>Section '+sec.id+' · '+esc(sec.title)+'</b>'+
+      '<button class="edit" data-goto="'+sec.id+'">Edit</button></div>';
+    rev += flags.length
+      ? '<ul>'+flags.map(([c,q,l])=>'<li class="'+c+'">'+esc(q)+' — <em>'+esc(l)+'</em></li>').join('')+'</ul>'
+      : '<p class="allgood">Nothing flagged here.</p>';
+    rev+='</div>';
+  });
+  rev+='</div>';
+
+  return '<div class="panel on"><div class="sechead">'+
+    '<p class="eyebrow quiet">Last step</p><h2>Have a look before you send</h2>'+
+    '<p class="intro">Here is what you have told us. Anything amber or red is fine, it just tells us the order to do things in.</p></div>'+
+    '<div class="tally">'+
+      '<div class="tal g"><span class="n">'+t.g+'</span><span class="l">Ready to go</span></div>'+
+      '<div class="tal a"><span class="n">'+t.a+'</span><span class="l">In progress</span></div>'+
+      '<div class="tal r"><span class="n">'+t.r+'</span><span class="l">Not yet started</span></div>'+
+      '<div class="tal"><span class="n">'+t.n+'</span><span class="l">Does not apply</span></div>'+
+      (t.miss?'<div class="tal"><span class="n">'+t.miss+'</span><span class="l">Not answered</span></div>':'')+
+    '</div>'+ rev +
+
+    '<div class="card"><div class="items"><div class="item">'+
+      '<span class="q">Anything we have not asked about?</span>'+
+      '<p class="why">It is usually the thing nobody thought to mention that causes the most work.</p>'+
+      '<div class="fields"><div class="full"><textarea id="f_other" data-f placeholder="Anything unusual about your setup, your team, your timing or your customers.">'+esc(state.data.f_other||'')+'</textarea></div></div>'+
+    '</div>'+
+    '<div class="item"><span class="q">Would you like a copy?</span>'+
+      '<p class="why">We will email your answers back to you as well as to the Sabel team.</p>'+
+      '<div class="fields">'+fld(['f_cc','Send a copy to','email','you@company.com'])+'</div>'+
+    '</div></div></div>'+
+
+    '<div class="nav">'+
+      '<button class="btn quiet" data-nav="back">Back</button>'+
+      '<div class="spacer"></div>'+
+      '<button class="btn ghost" data-nav="download">Download my answers</button>'+
+      '<button class="btn" data-nav="submit" id="sendbtn">Send to Sabel</button>'+
+    '</div>'+
+    '<p class="errmsg" id="e-send"></p></div>';
+}
+
+function donePanel(){
+  return '<div class="panel on"><div class="sechead" style="padding-top:60px">'+
+    '<div class="tick">&#10003;</div>'+
+    '<p class="eyebrow">Received</p>'+
+    '<h1>Thank you. That is everything we need to get going.</h1>'+
+    '<p class="intro">The Sabel team has your answers. We will go through them and come back to you with the plan, and anything we would like to talk through.</p></div>'+
+    '<div class="nav"><button class="btn ghost" data-nav="download">Download a copy of my answers</button></div></div>';
+}
+
+/* =====================================================================
+   RENDER
+   ===================================================================== */
+function render(){
+  const S=steps();
+  if(state.step>S.length-1) state.step=S.length-1;
+  const cur=S[state.step];
+  let html;
+  if(state.submitted) html=donePanel();
+  else if(cur==='start') html=startPanel();
+  else if(cur==='review') html=reviewPanel();
+  else html=secPanel(SECTIONS.find(s=>s.id===cur));
+  $('app').innerHTML=html;
+
+  // step rail
+  $('rail').innerHTML=S.map((s,i)=>'<span class="rseg'+(state.submitted||i<state.step?' done':(i===state.step?' now':''))+'"></span>').join('');
+  $('stepno').textContent = state.submitted ? 'Done' : ('Step '+(state.step+1)+' of '+S.length);
+  refreshSugg();
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+/* =====================================================================
+   COLLECT / SAVE
+   ===================================================================== */
+function readDOM(){
+  document.querySelectorAll('[data-f]').forEach(el=>{ state.data[el.id]=el.value; });
+  document.querySelectorAll('input[type=radio][name^="s_"]:checked').forEach(el=>{ state.data[el.name]=el.value; });
+  const pt=document.querySelector('input[name="ptype"]:checked'); if(pt) state.projectType=pt.value;
+  // multi checkboxes
+  const groups={};
+  document.querySelectorAll('input[data-multi]').forEach(el=>{
+    const k=el.dataset.multi; groups[k]=groups[k]||[];
+    if(el.checked) groups[k].push(el.value);
+  });
+  Object.keys(groups).forEach(k=>{ state.data[k]=groups[k].join('|'); });
+}
+function save(){
+  readDOM();
+  try{ localStorage.setItem(KEY, JSON.stringify({step:state.step,projectType:state.projectType,data:state.data,reps:state.reps})); }catch(e){}
+  const sv=$('sv'); sv.classList.add('on'); clearTimeout(window.__t); window.__t=setTimeout(()=>sv.classList.remove('on'),1400);
+}
+function restore(){
+  let d=null; try{ d=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
+  if(!d) return;
+  state.data=d.data||{}; state.reps=d.reps||{}; state.projectType=d.projectType||''; state.step=d.step||0;
+}
+
+function collect(){
+  readDOM();
+  const typeLabel=(TYPES.find(t=>t[0]===state.projectType)||[])[1]||'Not chosen';
+  const out={ formVersion:FORM_V, submittedAt:new Date().toISOString(),
+    projectType:typeLabel,
+    client:state.data.f_client||'', contactName:state.data.f_name||'', contactEmail:state.data.f_email||'',
+    contactRole:state.data.f_role||'',
+    backupContact:((state.data.f_backup||'')+(state.data.f_backup_em?' <'+state.data.f_backup_em+'>':'')).trim(),
+    otherNotes:state.data.f_other||'', copyTo:state.data.f_cc||'', sections:{} };
+
+  activeSections().forEach(sec=>{
+    out.sections[sec.id]=activeItems(sec).filter(i=>i.t!=='note').map(it=>{
+      if(it.t==='rag'){
+        const v=state.data['s_'+it.id]||'';
+        const [b,label]=v?v.split('::'):['',''];
+        const map={good:'green',warn:'amber',bad:'red',na:'na'};
+        return { id:it.id, question:it.q, type:'status', status:map[b]||'',
+                 answer:label, owner:state.data[it.id+'_own']||'',
+                 dueBy:state.data[it.id+'_by']||'', note:state.data[it.id+'_note']||'' };
+      }
+      const answers={};
+      if(it.rep){
+        const rows=(state.reps[it.rep.id]||[]).filter(r=>Object.values(r).some(v=>v&&v.trim()));
+        answers['Entries']=rows.map(r=>it.rep.cols.map(c=>r[c[0]]||'').filter(Boolean).join('  ·  ')).join('\n')||'(none given)';
+      }
+      if(it.multi){
+        answers['Selected']=(state.data[it.multi.id]||'').split('|').filter(Boolean).join(', ')||'(none)';
+        if(it.multi.other && state.data[it.multi.id+'_o']) answers['Also']=state.data[it.multi.id+'_o'];
+      }
+      (it.f||[]).forEach(f=>{
+        answers[f[1]]=state.data[f[0]]||'';
+        if(f[4]) answers[f[4].label]=state.data[f[4].id]||'';
+      });
+      return { id:it.id, question:it.q, type:'answer', answers };
+    });
+  });
+
+  const t=tally();
+  out.summary={green:t.g,amber:t.a,red:t.r,na:t.n,unanswered:t.miss};
+  return out;
+}
+
+function reportText(d){
+  const L=['SABEL TECHNICAL READINESS CHECK','','Company: '+d.client,'Project type: '+d.projectType,
+    'Completed by: '+d.contactName+' <'+d.contactEmail+'>','Date: '+new Date().toLocaleString('en-GB'),'',
+    'Ready '+d.summary.green+'  ·  In progress '+d.summary.amber+'  ·  Not started '+d.summary.red+
+    '  ·  N/A '+d.summary.na+'  ·  Unanswered '+d.summary.unanswered];
+  Object.keys(d.sections).forEach(sec=>{
+    L.push('','SECTION '+sec,'-----------');
+    d.sections[sec].forEach(i=>{
+      if(i.type==='status'){
+        L.push('['+(i.status||'not answered').toUpperCase()+'] '+i.question+(i.answer?'  → '+i.answer:'')+
+          (i.owner?'  | owner: '+i.owner:'')+(i.dueBy?'  | by: '+i.dueBy:'')+(i.note?'  | '+i.note:''));
+      } else {
+        L.push(i.question);
+        Object.keys(i.answers).forEach(k=>L.push('   '+k+': '+(i.answers[k]||'(blank)')));
+      }
+    });
+  });
+  if(d.otherNotes) L.push('','ANYTHING ELSE','-------------',d.otherNotes);
+  return L.join('\n');
+}
+
+function download(){
+  const d=state.lastPayload||collect();
+  const blob=new Blob([reportText(d)],{type:'text/plain'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='Sabel_Readiness_'+((d.client||'submission').replace(/[^A-Za-z0-9]+/g,'_'))+'.txt';
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* =====================================================================
+   NAVIGATION
+   ===================================================================== */
+function validateStart(){
+  let bad=false;
+  if(!state.projectType){ $('e-type').classList.add('on'); bad=true; } else $('e-type').classList.remove('on');
+  ['f_client','f_name','f_email'].forEach(id=>{
+    const el=$(id); if(!el) return;
+    const empty=!el.value.trim(); el.classList.toggle('err',empty); if(empty) bad=true;
+  });
+  const em=$('f_email');
+  if(em && em.value.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em.value.trim())){ em.classList.add('err'); bad=true; }
+  $('e-about').classList.toggle('on',bad);
+  return !bad;
+}
+
+async function submit(){
+  const btn=$('sendbtn'), err=$('e-send');
+  btn.disabled=true; err.classList.remove('on'); btn.textContent='Sending…';
+  const payload=collect(); state.lastPayload=payload;
+  try{
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    state.submitted=true; render();
+  }catch(e){
+    btn.disabled=false; btn.textContent='Send to Sabel';
+    err.textContent='That did not send, sorry. Please use Download my answers and email the file to admin@sabelcustomersuccess.com and we will take it from there.';
+    err.classList.add('on');
+  }
+}
+
+document.addEventListener('click',e=>{
+  const nav=e.target.closest('[data-nav]');
+  if(nav){
+    const a=nav.dataset.nav;
+    if(a==='download') return download();
+    if(a==='submit')  return submit();
+    if(a==='back'){ save(); state.step=Math.max(0,state.step-1); return render(); }
+    if(a==='next'){
+      if(steps()[state.step]==='start'){ readDOM(); if(!validateStart()) return; }
+      save(); state.step=Math.min(steps().length-1,state.step+1); return render();
+    }
+  }
+  const go=e.target.closest('[data-goto]');
+  if(go){ save(); const i=steps().indexOf(go.dataset.goto); if(i>-1){ state.step=i; render(); } return; }
+
+  const fill=e.target.closest('[data-fill],[data-frep]');
+  if(fill){
+    const n=fill.dataset.n||'', em=fill.dataset.e||'';
+    if(fill.dataset.frep){
+      const rows=state.reps[fill.dataset.frep];
+      rows[+fill.dataset.fri][fill.dataset.fck]=n;
+      const inp=document.querySelector('[data-rk="'+fill.dataset.frep+'"][data-ri="'+fill.dataset.fri+'"][data-ck="'+fill.dataset.fck+'"]');
+      if(inp) inp.value=n;
+    } else {
+      const ni=$(fill.dataset.fill); if(ni){ ni.value=n; state.data[fill.dataset.fill]=n; }
+      if(fill.dataset.fillem && em){ const ei=$(fill.dataset.fillem); if(ei){ ei.value=em; state.data[fill.dataset.fillem]=em; } }
+    }
+    save(); refreshSugg(); return;
+  }
+
+  const add=e.target.closest('[data-add]');
+  if(add){ save(); state.reps[add.dataset.add].push({}); return render(); }
+
+  const del=e.target.closest('[data-del]');
+  if(del){ save(); state.reps[del.dataset.del].splice(+del.dataset.ri,1); return render(); }
+});
+
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.name==='ptype'){ state.projectType=t.value; save(); return; }
+  if(t.dataset.rk){
+    const rows=state.reps[t.dataset.rk]; rows[+t.dataset.ri][t.dataset.ck]=t.value; save(); return;
+  }
+  if(t.name && t.name.indexOf('s_')===0){
+    const id=t.name.slice(2);
+    const needs=t.value.indexOf('good::')!==0 && t.value.indexOf('na::')!==0;
+    const fl=$('fl_'+id); if(fl) fl.classList.toggle('on',needs);
+    save(); return;
+  }
+  if(t.dataset.rev){
+    const on=JSON.parse(t.dataset.rev).indexOf(t.value)>-1;
+    const box=$('rv_'+t.dataset.revid); if(box) box.classList.toggle('on',on);
+  }
+  save(); refreshSugg();
+});
+document.addEventListener('input',e=>{
+  if(e.target.dataset.rk){ state.reps[e.target.dataset.rk][+e.target.dataset.ri][e.target.dataset.ck]=e.target.value; }
+  save();
+});
+
+restore(); render();
+</script>
+</body>
+</html>

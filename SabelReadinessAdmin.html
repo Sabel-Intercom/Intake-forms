@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Readiness Submissions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=IBM+Plex+Mono:wght@500;600&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#131313;--surface:#1A1A19;--alt:#212120;
+  --ink:#F2F1EF;--body:#C7C6C2;--muted:#8E8D88;
+  --line:#2E2E2C;--strong:#43433F;
+  --accent:#FF4F42;--g:#0FA97C;--a:#D69324;--r:#EE3A2E;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--body);
+  font-family:"Source Sans 3",-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0}
+h1{font-family:Archivo,sans-serif;font-weight:800;font-size:38px;letter-spacing:-.028em;
+  color:var(--ink);margin:12px 0 6px}
+h2{font-family:Archivo,sans-serif;font-weight:700;font-size:22px;letter-spacing:-.02em;color:var(--ink);margin:0 0 10px}
+h3{font-family:Archivo,sans-serif;font-weight:700;font-size:15px;color:var(--ink);margin:26px 0 8px}
+header{border-bottom:2px solid var(--accent);padding:44px 0 22px;margin-bottom:28px}
+p{margin:0 0 12px}
+a{color:var(--accent)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+input[type=password],input[type=text]{font-family:inherit;font-size:15px;color:var(--ink);
+  background:var(--surface);border:1px solid var(--strong);border-radius:2px;padding:9px 11px;min-width:280px}
+input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+button{font-family:Archivo,sans-serif;font-weight:700;font-size:15px;background:var(--accent);
+  color:#150404;border:0;border-radius:2px;padding:10px 20px;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent);font-size:14px;padding:8px 15px}
+button:disabled{opacity:.5;cursor:not-allowed}
+.lab{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px}
+
+.list{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden;margin-top:22px}
+.card{background:var(--surface);padding:18px 20px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;cursor:pointer}
+.card:hover{background:var(--alt)}
+.card .who{color:var(--ink);font-weight:600;font-size:17px}
+.card .meta{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);margin-top:3px}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;padding:4px 9px;border-radius:2px;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill.g{background:rgba(15,169,124,.16);color:var(--g)}
+.pill.a{background:rgba(214,147,36,.16);color:var(--a)}
+.pill.r{background:rgba(238,58,46,.16);color:var(--r)}
+.pill.u{background:rgba(142,141,136,.16);color:var(--muted)}
+
+pre{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:20px;
+  overflow-x:auto;font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.6;
+  color:var(--body);white-space:pre-wrap;word-break:break-word;margin:0}
+.msg{font-size:15px;margin-top:14px}
+.msg.bad{color:var(--accent)}
+.hide{display:none}
+.back{background:none;border:0;color:var(--accent);font-family:"IBM Plex Mono",monospace;
+  font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;padding:0;margin-bottom:14px}
+.empty{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:34px;text-align:center;color:var(--muted);margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Sabel · Internal</p>
+  <h1>Readiness Submissions</h1>
+  <p style="max-width:60ch">Everything clients have submitted through the Technical Readiness Check, newest first.</p>
+</header>
+
+<div id="auth">
+  <label class="lab" for="tok">Admin token</label>
+  <div class="row">
+    <input type="password" id="tok" placeholder="READINESS_ADMIN_TOKEN" autocomplete="off">
+    <button id="go">Open</button>
+  </div>
+  <p class="msg" id="authmsg"></p>
+  <p style="color:var(--muted);font-size:14px;margin-top:18px;max-width:60ch">The token is the <code>READINESS_ADMIN_TOKEN</code> environment variable set on the sabel-webhook Vercel project. It is remembered in this browser only.</p>
+</div>
+
+<div id="listview" class="hide">
+  <div class="row" style="justify-content:space-between">
+    <h2 id="count">Submissions</h2>
+    <div class="row"><button class="ghost" id="refresh">Refresh</button><button class="ghost" id="csv">Export summary CSV</button><button class="ghost" id="out">Sign out</button></div>
+  </div>
+  <div class="list" id="list"></div>
+</div>
+
+<div id="detail" class="hide">
+  <button class="back" id="back">&larr; All submissions</button>
+  <div class="row" style="justify-content:space-between;align-items:flex-start">
+    <div><h2 id="dtitle"></h2><p class="eyebrow" style="color:var(--muted)" id="dmeta"></p></div>
+    <div class="row"><button class="ghost" id="copy">Copy report</button><button class="ghost" id="dl">Download</button></div>
+  </div>
+  <h3>Full report</h3>
+  <pre id="dreport"></pre>
+</div>
+
+</div>
+
+<script>
+const API='https://sabel-webhook.vercel.app/api/readiness';
+const TK='sabel-readiness-token';
+let token='', index=[], current=null;
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const show=(...ids)=>['auth','listview','detail'].forEach(i=>$(i).classList.toggle('hide',!ids.includes(i)));
+
+async function api(qs){
+  const r=await fetch(API+'?token='+encodeURIComponent(token)+(qs||''));
+  if(r.status===401) throw new Error('That token was not accepted.');
+  if(r.status===503) throw new Error('READINESS_ADMIN_TOKEN is not set on the Vercel project yet.');
+  if(!r.ok) throw new Error('Could not reach the endpoint (HTTP '+r.status+').');
+  return r.json();
+}
+
+function pills(s){
+  s=s||{};
+  return '<div class="pills">'+
+    '<span class="pill g">'+(s.green||0)+' ready</span>'+
+    '<span class="pill a">'+(s.amber||0)+' in progress</span>'+
+    '<span class="pill r">'+(s.red||0)+' not started</span>'+
+    ((s.na||0)?'<span class="pill u">'+s.na+' n/a</span>':'')+
+    ((s.unanswered||0)?'<span class="pill u">'+s.unanswered+' blank</span>':'')+
+  '</div>';
+}
+
+function renderList(){
+  $('count').textContent=index.length+(index.length===1?' submission':' submissions');
+  const host=$('list');
+  if(!index.length){ host.className='empty'; host.innerHTML='Nothing submitted yet.'; return; }
+  host.className='list';
+  host.innerHTML=index.map(s=>
+    '<div class="card" data-id="'+esc(s.id)+'">'+
+      '<div><div class="who">'+esc(s.client||'Unnamed')+'</div>'+
+      '<div class="meta">'+esc(s.contactName||'')+' · '+new Date(s.submittedAt).toLocaleString('en-GB')+(s.projectType?' · '+esc(s.projectType):'')+'</div></div>'+
+      pills(s.summary)+
+    '</div>').join('');
+  document.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>open(c.dataset.id)));
+}
+
+async function load(){
+  try{
+    const d=await api('');
+    index=d.submissions||[];
+    localStorage.setItem(TK,token);
+    show('listview'); renderList();
+  }catch(e){ $('authmsg').className='msg bad'; $('authmsg').textContent=e.message; show('auth'); }
+}
+
+async function open(id){
+  try{
+    const d=await api('&id='+encodeURIComponent(id));
+    current=d;
+    $('dtitle').textContent=d.submission.client||'Unnamed';
+    $('dmeta').textContent=(d.submission.contactName||'')+' · '+(d.submission.contactEmail||'')+' · ref '+id;
+    $('dreport').textContent=d.report;
+    show('detail'); window.scrollTo(0,0);
+  }catch(e){ alert(e.message); }
+}
+
+function csv(){
+  const head=['Client','Project type','Contact','Email','Submitted','Ready','In progress','Not started','N/A','Unanswered','Reference'];
+  const rows=index.map(s=>[s.client,s.projectType,s.contactName,s.contactEmail,s.submittedAt,
+    (s.summary||{}).green||0,(s.summary||{}).amber||0,(s.summary||{}).red||0,(s.summary||{}).na||0,(s.summary||{}).unanswered||0,s.id]);
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const blob=new Blob([[head,...rows].map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='sabel-readiness-submissions.csv';a.click();URL.revokeObjectURL(a.href);
+}
+
+$('go').addEventListener('click',()=>{ token=$('tok').value.trim(); if(token) load(); });
+$('tok').addEventListener('keydown',e=>{ if(e.key==='Enter') $('go').click(); });
+$('refresh').addEventListener('click',load);
+$('back').addEventListener('click',()=>{ show('listview'); });
+$('csv').addEventListener('click',csv);
+$('out').addEventListener('click',()=>{ localStorage.removeItem(TK); token=''; $('tok').value=''; $('authmsg').textContent=''; show('auth'); });
+$('copy').addEventListener('click',()=>{ navigator.clipboard.writeText(current.report); });
+$('dl').addEventListener('click',()=>{
+  const blob=new Blob([current.report],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='Sabel_Readiness_'+current.id+'.txt';a.click();URL.revokeObjectURL(a.href);
+});
+
+const saved=localStorage.getItem(TK);
+if(saved){ token=saved; $('tok').value=saved; load(); } else show('auth');
+</script>
+</body>
+</html>
