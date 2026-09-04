@@ -583,6 +583,10 @@ function render(){
     groups.push({label:"Removed from the board", sub:"reasons below · Nikki updates Notion from these", color:"var(--warn)", items:removed, gone:true});
   }
 
+  // Oldest due date first inside every group.
+  const byDue = (a,b) => String(a.due||"9999-12-31").localeCompare(String(b.due||"9999-12-31"));
+  groups.forEach(g => g.items.sort(byDue));
+
   const board = document.getElementById("board");
   board.replaceChildren();
   groups.forEach(g=>{
