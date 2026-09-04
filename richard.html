@@ -1,0 +1,828 @@
+<title>Richard's Delivery Board</title>
+<style>
+  :root{
+    --ground:#0d0e10; --surface:#17181b; --raised:#1c1e22;
+    --line:#24262a; --line-soft:#191b1e; --edge:#2a2d32;
+    --ink:#eceded; --ink-2:#c9ccd1; --ink-3:#8b8f96; --ink-4:#70747b;
+    --accent:#e8564a; --accent-soft:#ff8078;
+    --warn:#e0a63c; --info:#4e9bd4; --good:#5fb08a;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:'Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 96px}
+
+  header{border-bottom:1px solid var(--line);padding-bottom:18px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:29px;font-weight:600;letter-spacing:-.01em;margin-top:8px;text-wrap:balance}
+  .sub{margin-top:6px;font-size:13px;color:var(--ink-3);max-width:70ch;line-height:1.5}
+  .sync{display:inline-flex;align-items:center;gap:7px;margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--ink-4)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ink-4)}
+  .dot.live{background:var(--good)}
+  .dot.local{background:var(--warn)}
+
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));gap:10px;margin-top:20px}
+  .tile{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--edge);border-radius:6px;padding:13px 16px}
+  .tile.a{border-left-color:var(--accent)}
+  .tile.b{border-left-color:var(--warn)}
+  .tile.c{border-left-color:var(--info)}
+  .tile .n{font-size:26px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+  .tile .l{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-top:5px}
+  .tile .h{font-family:var(--mono);font-size:10.5px;color:var(--ink-4);margin-top:3px}
+
+  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:22px 0 6px}
+  input[type=search]{background:var(--surface);border:1px solid var(--edge);border-radius:5px;color:var(--ink);font:13px var(--sans);padding:8px 12px;width:210px;outline:none}
+  input[type=search]:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .filterbar{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:7px}
+  .frow{display:flex;gap:12px;align-items:baseline}
+  .flabel{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-4);min-width:46px;padding-top:7px}
+  .chip .r{font-family:var(--mono);font-size:10.5px;opacity:.6;margin-left:6px}
+  button{font-family:var(--sans);cursor:pointer}
+  .chip{background:var(--surface);border:1px solid var(--edge);border-radius:5px;color:var(--ink-2);font-size:12px;padding:7px 11px}
+  .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--ground);font-weight:600}
+  .chip .c{font-family:var(--mono);font-size:11px;opacity:.75;margin-left:5px}
+  .spacer{flex:1}
+
+  .group{margin-bottom:26px}
+  .ghead{display:flex;align-items:baseline;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .ghead h2{font-size:15px;font-weight:600;letter-spacing:.01em}
+  .ghead .gs{font-family:var(--mono);font-size:11px;color:var(--ink-4)}
+  .ghead .gc{font-family:var(--mono);font-size:11px;color:var(--ink-4);margin-left:auto;white-space:nowrap}
+
+  .row{display:grid;grid-template-columns:126px 124px minmax(0,1fr) auto 136px;gap:14px;align-items:start;padding:11px 4px;border-bottom:1px solid var(--line-soft)}
+  .row.done{opacity:.45}
+  .row.doing{background:linear-gradient(90deg,rgba(78,155,212,.09),transparent 62%);box-shadow:inset 2px 0 0 var(--info)}
+  .row.blocked{box-shadow:inset 2px 0 0 var(--warn)}
+  .box{width:100%;appearance:none;-webkit-appearance:none;border-radius:5px;border:1px solid var(--edge);background:var(--surface);color:var(--ink-3);font:500 11.5px var(--sans);line-height:1.2;padding:6px 20px 6px 9px;cursor:pointer;
+    background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);
+    background-position:calc(100% - 11px) 12px,calc(100% - 7px) 12px;background-size:4px 4px,4px 4px;background-repeat:no-repeat}
+  .box:hover{border-color:var(--ink-4)}
+  .box option{background:var(--raised);color:var(--ink)}
+  .box.doing{border-color:rgba(78,155,212,.55);color:var(--info);background-color:rgba(78,155,212,.09)}
+  .box.blocked{border-color:rgba(224,166,60,.55);color:var(--warn);background-color:rgba(224,166,60,.08)}
+  .box.dependency{border-color:rgba(224,166,60,.35);color:var(--warn)}
+  .box.done{border-color:rgba(95,176,138,.5);color:var(--good);background-color:rgba(95,176,138,.09)}
+  .restore{width:100%;border-radius:5px;border:1px solid var(--edge);background:var(--surface);color:var(--ink-4);font:500 11.5px var(--sans);padding:6px 9px}
+  .restore:hover{color:var(--ink-2);border-color:var(--ink-4)}
+  .client{font-size:12.5px;font-weight:600;color:var(--ink-2);padding-top:1px}
+  .title{font-size:13.5px;line-height:1.5;color:var(--ink);text-wrap:pretty}
+  .row.done .title{text-decoration:line-through}
+  .note{font-size:12px;color:var(--warn);margin-top:4px;line-height:1.45;text-wrap:pretty}
+  .meta{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+  .tag{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border-radius:4px}
+  .tag.blocked{color:var(--warn);border:1px solid rgba(224,166,60,.4);background:rgba(224,166,60,.08)}
+  .tag.urgent{color:var(--accent);border:1px solid rgba(232,86,74,.4);background:rgba(232,86,74,.08)}
+  .tag.progress{color:var(--info);border:1px solid rgba(78,155,212,.4);background:rgba(78,155,212,.08)}
+  .tag.stale{color:var(--ink-4);border:1px solid var(--edge);background:rgba(139,143,150,.07)}
+  .tag.new{color:var(--good);border:1px solid rgba(95,176,138,.4);background:rgba(95,176,138,.09)}
+  .chip.add{background:var(--accent);border-color:var(--accent);color:var(--ground);font-weight:600}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .fields .full{grid-column:1/-1}
+  .fields input{width:100%;background:var(--surface);border:1px solid var(--edge);border-radius:5px;color:var(--ink);font:13px var(--sans);padding:9px 10px;outline:none}
+  .fields input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .when{font-family:var(--mono);font-size:11px;color:var(--ink-4);text-align:right;white-space:nowrap}
+  .duein{width:100%;font-family:var(--mono);font-size:11px;color:var(--ink-4);background:transparent;border:1px solid transparent;border-radius:4px;padding:4px 5px;text-align:right;cursor:pointer;font-variant-numeric:tabular-nums}
+  .duein:hover{border-color:var(--edge);color:var(--ink-2)}
+  .duein:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  .duein.late{color:var(--accent-soft)}
+  .duein.moved{color:var(--info)}
+  .duein::-webkit-calendar-picker-indicator{filter:invert(.55);opacity:.5;cursor:pointer}
+  .duein:hover::-webkit-calendar-picker-indicator{opacity:1}
+  .rm{background:transparent;border:1px solid transparent;border-radius:4px;color:var(--ink-4);font-size:15px;line-height:1;padding:2px 6px;margin-top:1px}
+  .rm:hover{color:var(--accent);border-color:var(--edge)}
+  .row.gone{opacity:.55}
+  .row.gone .title{text-decoration:line-through;color:var(--ink-3)}
+  .usernote{font-size:12px;color:var(--ink-2);margin-top:5px;line-height:1.45;border-left:2px solid var(--info);padding-left:9px;text-wrap:pretty;white-space:pre-wrap}
+  .note-btn{background:transparent;border:1px solid transparent;border-radius:4px;color:var(--ink-4);font-size:13px;line-height:1;padding:3px 6px;margin-top:1px}
+  .note-btn:hover{color:var(--info);border-color:var(--edge)}
+  .note-btn.has{color:var(--info)}
+  .reason{font-size:12px;color:var(--ink-2);margin-top:5px;line-height:1.45;border-left:2px solid var(--warn);padding-left:9px;text-wrap:pretty}
+  .reason b{color:var(--warn);font-weight:600}
+
+  .scrim{position:fixed;inset:0;background:rgba(6,7,8,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .modal{background:var(--raised);border:1px solid var(--edge);border-radius:9px;padding:22px;width:100%;max-width:460px}
+  .modal h3{font-size:16px;font-weight:600;margin-bottom:4px}
+  .modal .mt{font-size:13px;color:var(--ink-3);line-height:1.5;margin-bottom:16px}
+  .modal label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+  .quick{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .quick button{background:var(--surface);border:1px solid var(--edge);border-radius:5px;color:var(--ink-2);font-size:12px;padding:6px 10px}
+  .quick button:hover{border-color:var(--accent);color:var(--ink)}
+  .modal textarea{width:100%;min-height:82px;background:var(--surface);border:1px solid var(--edge);border-radius:5px;color:var(--ink);font:13px/1.5 var(--sans);padding:10px;outline:none;resize:vertical}
+  .modal textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .macts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+  .macts button{border-radius:5px;font-size:13px;padding:8px 14px;border:1px solid var(--edge);background:var(--surface);color:var(--ink-2)}
+  .macts .go{background:var(--accent);border-color:var(--accent);color:var(--ground);font-weight:600}
+  .macts .go[disabled]{opacity:.4;cursor:not-allowed}
+  .stamp{font-family:var(--mono);font-size:10.5px;color:var(--ink-4);margin-top:3px}
+  .empty{padding:40px;text-align:center;color:var(--ink-4);font-size:13px}
+  footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-4);line-height:1.6}
+
+  @media (max-width:760px){
+    .wrap{padding:20px 14px 80px}
+    .row{grid-template-columns:126px minmax(0,1fr);gap:10px}
+    .client{grid-column:2;font-size:11.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
+    .row > div:nth-child(3){grid-column:2}
+    .meta{grid-column:2;justify-content:flex-start}
+    .when{grid-column:2;text-align:left}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Sabel &middot; delivery board</div>
+    <h1>Richard &mdash; what needs doing</h1>
+    <p class="sub">From Notion Tasks, owner Richard, not Complete or Done, cross-checked against Slack. Snapshot taken Friday 4 September, after the nine RMS tasks were added. Filter by what is due, then narrow to a client. Set each task\u2019s status from the dropdown. The options are To do, In progress, Waiting on, Blocked and Done. Click a date to reschedule it, and the task moves to the right week. Use the × to take a task off the board and say why. Each due filter is cumulative, so anything overdue always shows.</p>
+    <div class="sync"><span class="dot" id="dot"></span><span id="syncText">Connecting&hellip;</span></div>
+  </header>
+
+  <div class="tiles">
+    <div class="tile a"><div class="n" id="nOverdue">&mdash;</div><div class="l">Overdue</div><div class="h">past its date</div></div>
+    <div class="tile b"><div class="n" id="nBlocked">&mdash;</div><div class="l">Blocked</div><div class="h">waiting on others</div></div>
+    <div class="tile c"><div class="n" id="nDoing">&mdash;</div><div class="l">In progress</div><div class="h">started, not finished</div></div>
+    <div class="tile"><div class="n" id="nWeek">&mdash;</div><div class="l">Due this week</div><div class="h" id="weekTo">next 7 days</div></div>
+  </div>
+
+  <div class="controls">
+    <input type="search" id="q" placeholder="Filter tasks&hellip;" aria-label="Filter tasks">
+    <button class="chip add" id="btnAdd">+ Add task</button>
+    <div class="spacer"></div>
+    <button class="chip" id="btnDone" aria-pressed="true">Hide finished</button>
+    <button class="chip" id="btnRemoved" aria-pressed="true">Hide removed</button>
+    <button class="chip" id="btnGroup">Group: timeframe</button>
+  </div>
+  <div class="filterbar">
+    <div class="frow"><span class="flabel">Due</span><div class="chips" id="horizons"></div></div>
+    <div class="frow"><span class="flabel">Client</span><div class="chips" id="chips"></div></div>
+  </div>
+
+  <div id="board"></div>
+  <div class="empty" id="empty" hidden>Nothing matches that filter.</div>
+
+  <footer id="foot">Status is shared, so a tick or a removal here is visible to the Sabel team. Notes are shared too, so use them instead of a separate message. The board saves to the Sabel tracker store on Vercel, so you both see the same thing. Changes from the other person appear within about 20 seconds. Removing a task takes it off this board only, and Nikki updates Notion from the reason you give. Hours and scheduling live in Notion, not here.</footer>
+</div>
+
+<div class="scrim" id="noteScrim" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="nTitle">
+    <h3 id="nTitle">Note on this task</h3>
+    <p class="mt" id="nTask"></p>
+    <label for="noteText">Anything worth recording</label>
+    <textarea id="noteText" placeholder="Where you got to, what you are waiting on, who you spoke to."></textarea>
+    <div class="macts">
+      <button id="nClear">Clear note</button>
+      <button id="nCancel">Cancel</button>
+      <button class="go" id="nGo">Save note</button>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="addScrim" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="aTitle">
+    <h3 id="aTitle">Add a task</h3>
+    <p class="mt">It appears on Richard's board straight away. Add it to Notion separately if it belongs there.</p>
+    <div class="fields">
+      <input id="aClient" placeholder="Client, e.g. RMS" aria-label="Client">
+      <input id="aDue" type="date" aria-label="Due date">
+      <input class="full" id="aTaskTitle" placeholder="What needs doing" aria-label="Task">
+      <input class="full" id="aNote" placeholder="Note, optional" aria-label="Note">
+    </div>
+    <div class="macts">
+      <button id="aCancel">Cancel</button>
+      <button class="go" id="aGo" disabled>Add to board</button>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <h3 id="mTitle">Remove this task</h3>
+    <p class="mt" id="mTask"></p>
+    <label for="why">Why is it coming off the board?</label>
+    <div class="quick" id="quick"></div>
+    <textarea id="why" placeholder="A short line is enough."></textarea>
+    <div class="macts">
+      <button id="mCancel">Cancel</button>
+      <button class="go" id="mGo" disabled>Remove task</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BUCKETS = [
+ {k:"overdue",label:"Overdue — needs a decision or a tick",sub:"oldest is 9 July · some blocked, not late",color:"var(--accent-soft)",when:"overdue",items:[
+  ["Tulka","182 help centre articles migrated",{tag:"progress",when:"due 5 Sep",}],
+  ["Tulka","Migr8Now full history migration",{tag:"progress",when:"due 5 Sep"}],
+  ["CleverCards","Map Zendesk data model to Intercom",{when:"w/c 24 Aug"}],
+  ["CleverCards","Migration kick-off and scoping",{when:"w/c 24 Aug"}],
+  ["CleverCards","Check Zendesk API access directly",{when:"w/c 24 Aug"}],
+  ["CleverCards","Send follow-up email with migration mapping doc",{when:"w/c 24 Aug"}],
+  ["CleverCards","Set up bi-weekly delta syncs to go-live",{when:"w/c 24 Aug"}],
+  ["CleverCards","Confirm the extract against Madalina's four filters plus the 01/09/2025 start date",{tag:"blocked",when:"w/c 24 Aug",note:"Waiting on Madalina's brand list."}],
+  ["Shiftmove","Project set-up and kick-off",{tag:"progress",when:"w/c 17 Aug",}],
+  ["Shiftmove","Conversation vs ticket walkthrough with Victor Copete",{when:"w/c 24 Aug"}],
+  ["Shiftmove","Joint working session with ICX on sequencing and cutover",{when:"w/c 24 Aug"}],
+  ["Shiftmove","Phase 1 field, tag and attribute mapping",{when:"w/c 24 Aug"}],
+  ["Shiftmove","Post-call email re admin and API access to Zendesk and Zoho Desk",{when:"28 Aug"}],
+  ["Shiftmove","Source system access to Zendesk and Zoho Desk",{tag:"blocked",when:"w/c 24 Aug"}],
+  ["The Giving Movement","Help Centre cleanup and migration",{tag:"progress",when:"w/c 24 Aug",}],
+  ["The Giving Movement","Delta migration for build-phase tickets",{tag:"blocked",when:"w/c 24 Aug",note:"Cannot run until TGM confirm Freshdesk is fully off."}],
+  ["Synchronest","Post-migration validation in Intercom",{when:"w/c 24 Aug",}],
+  ["Synchronest","Sabel cutover readiness checklist",{when:"w/c 24 Aug"}],
+  ["GPS Insight","Run Fin test-mode sampling per brand and tune",{tag:"progress",when:"w/c 24 Aug",}],
+  ["Eugene Labs","Proactive notifications from Genie",{when:"July",}],
+  ["Eugene Labs","Fin-actioned refunds and external actions",{when:"July"}],
+  ["Eugene Labs","Shopify integration",{when:"July"}],
+  ["Eugene Labs","NPS surveys",{when:"July"}],
+  ["Cronos","Handover and sign-off",{tag:"stale",when:"9 Jul",note:"Dated 9 July. Likely stale, close it or delete it."}],
+  ["Intercom","Email or DM Angie for the partner tier state-of-play audit",{when:"20 Aug",}]
+ ]},
+ {k:"w1",label:"This week",sub:"31 Aug to 4 Sep",color:"var(--info)",when:"this week",items:[
+  ["Synchronest","Open Intercom to inbound, Help Scout closes inbound",{}],
+  ["Synchronest","Go-live cutover coordination call",{}],
+  ["Synchronest","Delta migration and standby cutover support",{}],
+  ["Shiftmove","Confirm historical data window and extract bounds",{}],
+  ["Shiftmove","Document migration runbook and rollback plan",{}],
+  ["Shiftmove","Phase 1 sample run",{}],
+  ["Shiftmove","Schedule the data field mapping call",{}],
+  ["Eugene Labs","Migrate tickets raised during the bringing period",{}],
+  ["Eugene Labs","Cancel the temporary Intercom phone numbers",{}],
+  ["CleverCards","Start the 200 Help Center article migration",{when:"to 11 Sep"}]
+ ]},
+ {k:"w2",label:"Next week — the heaviest week",sub:"7 to 11 Sep",color:"var(--ink)",when:"7 to 11 Sep",items:[
+  ["RMS","Share the engineering and implementation requirements doc with the RMS team",{tag:"urgent",when:"Mon 7 / Tue 8",note:"Critical path. Decision wanted within two weeks and the Zendesk renewal is October."}],
+  ["RMS","Add Alec and Garth to the Sabel Intercom demo account",{tag:"urgent",when:"Mon 7 / Tue 8",note:"Garth asked for sandbox access by Monday or Tuesday."}],
+  ["RMS","Come back to Garth with questions on the MoSCoW sheet issued 20 Aug",{when:"7 to 11 Sep"}],
+  ["RMS","Answer Louise's question on Help Centre and Fin language translation vs Zendesk",{when:"7 to 11 Sep"}],
+  ["RMS","Complete the scorecard and Zendesk AI parameters",{when:"7 to 11 Sep",note:"Deflection analysis is already done."}],
+  ["RMS","Cover the rest of Garth's 31 Aug list: integrations, workflows by channel, AI incident detection and status page, org structures, wow factors, phone and QA",{when:"7 to 11 Sep"}],
+  ["RMS","Follow up with Intercom for a formal trial account",{when:"7 to 11 Sep"}],
+  ["RMS","Source Zendesk-to-Intercom reference clients",{when:"7 to 11 Sep",note:"Coordinate with Chris, he is on the same item with Louise."}],
+  ["RMS","Send the finalised implementation overview document",{when:"7 to 11 Sep"}],
+  ["Shiftmove","Phase 1 full historical run, approximately 50,000 Optimum tickets",{}],
+  ["Shiftmove","Error re-run on failed Phase 1 records",{}],
+  ["Shiftmove","Phase 1 migration report and audit trail",{}],
+  ["Synchronest","Open items and snag list resolved",{}],
+  ["Synchronest","Post-migration QA report issued",{}],
+  ["Synchronest","Final handover docs and Slack channel wind-down",{}],
+  ["CleverCards","Sample migration batch and validation",{}],
+  ["Tulka","Setup and sample run",{when:"8 to 9 Sep"}],
+  ["Tulka","Migration supervision",{when:"9 to 11 Sep"}],
+  ["Sounding Board","Map tickets, contacts, agents, statuses, tags and fields",{}]
+ ]},
+ {k:"w3",label:"14 to 18 Sep",sub:"",color:"var(--ink-2)",when:"14 to 18 Sep",items:[
+  ["CleverCards","Publish the migrated article set and confirm live",{}],
+  ["CleverCards","Full historical migration, ~80,000 conversations and contacts",{when:"to 25 Sep"}],
+  ["Shiftmove","Phase 1 delta run, go-live call and standby",{}],
+  ["Shiftmove","Post-cutover verification against Zendesk source counts",{}],
+  ["Tulka","Delta and cutover execution",{when:"14 to 15 Sep"}],
+  ["Tulka","Verification and handover report",{}],
+  ["Sounding Board","Sample batch run, validate and sample-based QA",{}],
+  ["Raiz","Phase 2 roadmap conversation: API, voice, overlay",{when:"18 Sep",}]
+ ]},
+ {k:"w4",label:"21 to 25 Sep",sub:"",color:"var(--ink-2)",when:"21 to 25 Sep",items:[
+  ["YFood","Go-live cutover coordination call",{}],
+  ["Sounding Board","Execute historical migration at the agreed depth",{}],
+  ["CleverCards","Sample-based QA on the migrated dataset",{}],
+  ["Shiftmove","Phase 2 field, tag and attribute mapping, Zoho to Intercom",{when:"to 2 Oct"}],
+  ["Shiftmove","Zoho Desk API rate limit and extract window validation",{}]
+ ]},
+ {k:"w5",label:"28 Sep to 2 Oct",sub:"",color:"var(--ink-2)",when:"28 Sep to 2 Oct",items:[
+  ["CleverCards","Zendesk closes inbound channels at cutover",{}],
+  ["CleverCards","Final delta sync ~2 hrs before go-live",{when:"30 Sep"}],
+  ["CleverCards","Go-live call, build delta and post-migration handover notes",{}],
+  ["Shiftmove","Phase 2 sample run and validation",{}],
+  ["Sounding Board","Delta migration to capture build-phase tickets",{}]
+ ]},
+ {k:"w6",label:"October",sub:"all Shiftmove",color:"var(--ink-3)",when:"October",items:[
+  ["Shiftmove","Phase 2 full historical run, approximately 70,000 Ocean tickets",{when:"5 to 16 Oct"}],
+  ["Shiftmove","Phase 2 delta run and Ocean cutover",{when:"12 to 16 Oct"}],
+  ["Shiftmove","Legacy switch-off advisory and final migration report",{when:"19 to 23 Oct"}],
+  ["Shiftmove","Migration handover and Slack channel wind-down",{when:"26 to 30 Oct"}]
+ ]},
+ {k:"later",label:"Later",sub:"beyond October",color:"var(--ink-3)",when:"later",items:[]},
+ {k:"carry",label:"Still outside Notion",sub:"tracked separately",color:"var(--warn)",when:"open",items:[
+  ["ELMO","Countersigned SOW, 240 hours, still outstanding, plus the AU change to go back on",{tag:"blocked",when:"since 17 Aug",note:"Contract sits with Intercom. Nikki chasing in the Intercom partner channel."}]
+ ]}
+];
+
+const SEED = [];
+BUCKETS.forEach(b => b.items.forEach((it,i) => {
+  const o = it[2] || {};
+  SEED.push({id:b.k+"-"+i, bucket:b.k, client:it[0], title:it[1],
+    tag:o.tag||"", note:o.note||"", when:o.when||b.when});
+}));
+let EXTRA = [];
+let TASKS = SEED;
+
+// Due dates from the Notion task records (end date where there is a range).
+const DUE = {
+ "overdue-0":"2026-09-05","overdue-1":"2026-09-05","overdue-2":"2026-08-28","overdue-3":"2026-08-28",
+ "overdue-4":"2026-08-28","overdue-5":"2026-08-28","overdue-6":"2026-08-21","overdue-7":"2026-09-03",
+ "overdue-8":"2026-08-21","overdue-9":"2026-08-28","overdue-10":"2026-08-28","overdue-11":"2026-08-28",
+ "overdue-12":"2026-08-28","overdue-13":"2026-08-28","overdue-14":"2026-08-28","overdue-15":"2026-08-28",
+ "overdue-16":"2026-08-28","overdue-17":"2026-08-28","overdue-18":"2026-08-28","overdue-19":"2026-07-24",
+ "overdue-20":"2026-07-24","overdue-21":"2026-07-24","overdue-22":"2026-07-24","overdue-23":"2026-07-10",
+ "overdue-24":"2026-08-21",
+ "w1-0":"2026-09-04","w1-1":"2026-09-04","w1-2":"2026-09-04","w1-3":"2026-09-04","w1-4":"2026-09-04",
+ "w1-5":"2026-09-04","w1-6":"2026-09-01","w1-7":"2026-08-31","w1-8":"2026-09-04","w1-9":"2026-09-11",
+ "w2-0":"2026-09-08","w2-1":"2026-09-08","w2-2":"2026-09-11","w2-3":"2026-09-11","w2-4":"2026-09-11",
+ "w2-5":"2026-09-11","w2-6":"2026-09-11","w2-7":"2026-09-11","w2-8":"2026-09-11","w2-9":"2026-09-11",
+ "w2-10":"2026-09-11","w2-11":"2026-09-11","w2-12":"2026-09-11","w2-13":"2026-09-11","w2-14":"2026-09-11",
+ "w2-15":"2026-09-11","w2-16":"2026-09-09","w2-17":"2026-09-11","w2-18":"2026-09-11",
+ "w3-0":"2026-09-18","w3-1":"2026-09-25","w3-2":"2026-09-18","w3-3":"2026-09-18","w3-4":"2026-09-15",
+ "w3-5":"2026-09-15","w3-6":"2026-09-18","w3-7":"2026-09-18",
+ "w4-0":"2026-09-25","w4-1":"2026-09-25","w4-2":"2026-09-25","w4-3":"2026-10-02","w4-4":"2026-09-25",
+ "w5-0":"2026-10-02","w5-1":"2026-10-01","w5-2":"2026-10-02","w5-3":"2026-10-02","w5-4":"2026-10-02",
+ "w6-0":"2026-10-16","w6-1":"2026-10-16","w6-2":"2026-10-23","w6-3":"2026-10-30",
+ "carry-0":"2026-08-17"
+};
+SEED.forEach(t => { t.due = DUE[t.id] || null; });
+
+// Which timeframe an added task falls into, from its due date.
+const BUCKET_END = [["overdue","2026-08-30"],["w1","2026-09-04"],["w2","2026-09-11"],
+  ["w3","2026-09-18"],["w4","2026-09-25"],["w5","2026-10-02"],["w6","2026-10-31"]];
+function bucketFor(due){
+  if(!due) return "carry";
+  for(const [k,end] of BUCKET_END){ if(due <= end) return k; }
+  return "later";
+}
+function rebuild(){
+  TASKS = SEED.concat(EXTRA.map(e => ({
+    id:e.id, bucket:bucketFor(e.due), client:e.client||"Ad hoc", title:e.title||"(untitled)",
+    tag:e.tag||"new", note:e.note||"", due:e.due||null,
+    when:e.due ? "added "+(e.addedAt? new Date(e.addedAt).toLocaleDateString(undefined,{day:"numeric",month:"short"}) : "") : "no date"
+  })));
+}
+
+function midnight(d){ const x = new Date(d); x.setHours(0,0,0,0); return x; }
+function plusDays(d,n){ const x = midnight(d); x.setDate(x.getDate()+n); return x; }
+const TODAY = midnight(new Date());
+const HORIZONS = {
+  today:{label:"Due by today", end:TODAY},
+  h48:{label:"Next 48 hours", end:plusDays(TODAY,2)},
+  week:{label:"This week", end:plusDays(TODAY,7)}
+};
+function shortDate(d){ return d.toLocaleDateString(undefined,{day:"numeric",month:"short"}); }
+function dueBy(t, key){
+  if(!key) return true;
+  if(!t.due) return false;
+  return midnight(new Date(t.due + "T00:00:00")) <= HORIZONS[key].end;
+}
+
+const state = {status:{}, query:"", client:null, horizon:null, group:"time", showDone:false, showRemoved:false};
+// Shared storage: the existing Sabel tracker endpoint, Vercel plus Upstash.
+const API = "https://sabel-webhook.vercel.app/api/tracker";
+const KEY = "richard-board-v1";
+let saving = false, lastRaw = "";
+
+function localGet(){ try{ return JSON.parse(localStorage.getItem("richard-board")||"{}"); }catch(e){ return {}; } }
+function localSet(){ try{ localStorage.setItem("richard-board", JSON.stringify({status:state.status, extra:EXTRA})); }catch(e){} }
+
+async function remoteGet(){
+  const r = await fetch(API + "?key=" + encodeURIComponent(KEY), {cache:"no-store"});
+  if(!r.ok) throw new Error("GET " + r.status);
+  const j = await r.json();
+  if(j.value == null) return {status:{}, extra:[]};
+  const v = typeof j.value === "string" ? JSON.parse(j.value) : j.value;
+  return {status: v.status || {}, extra: Array.isArray(v.extra) ? v.extra : []};
+}
+
+async function remotePut(payload){
+  const r = await fetch(API, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({key:KEY, value: JSON.stringify(payload)})
+  });
+  if(!r.ok) throw new Error("POST " + r.status);
+}
+
+function savedAt(){
+  return new Date().toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+}
+
+// Merge the change onto whatever is stored right now, so two people editing
+// at the same time cannot wipe each other's work.
+async function commit(mutate){
+  saving = true;
+  try {
+    let base;
+    try { base = await remoteGet(); }
+    catch(e){ base = {status: Object.assign({}, state.status), extra: EXTRA.slice()}; }
+    mutate(base);
+    await remotePut(base);
+    state.status = base.status;
+    EXTRA = base.extra;
+    lastRaw = JSON.stringify(base);
+    setSync("live","Shared with the Sabel team. Saved " + savedAt() + ".");
+  } catch(e){
+    localSet();
+    setSync("local","Could not reach the shared store. Saved on this device only.");
+  } finally {
+    saving = false;
+    rebuild(); render();
+  }
+}
+
+function setSync(cls, text){
+  document.getElementById("dot").className = "dot " + cls;
+  document.getElementById("syncText").textContent = text;
+}
+
+const STATUSES = [
+  ["pending","To do"],
+  ["doing","In progress"],
+  ["dependency","Waiting on"],
+  ["blocked","Blocked"],
+  ["done","Done"]
+];
+const LABEL = Object.fromEntries(STATUSES);
+const CLOSED = {done:1, complete:1}; // complete kept for older records
+
+function write(id, patch){
+  state.status[id] = Object.assign({}, state.status[id] || {}, patch);
+  rebuild(); render();
+  return commit(base => {
+    base.status[id] = Object.assign({}, base.status[id] || {}, patch);
+  });
+}
+
+function setStatus(id, s){ return write(id, {s:s, at:new Date().toISOString()}); }
+function restore(id){ return write(id, {s:"pending", at:new Date().toISOString()}); }
+
+// ---- remove dialog ----
+const QUICK = [
+  "Already done, not ticked",
+  "Client cancelled it",
+  "Out of scope now",
+  "Duplicate of another task",
+  "Not needed, plan changed",
+  "Moved to a later phase"
+];
+let pending = null;
+const scrim = document.getElementById("scrim");
+const why = document.getElementById("why");
+const mGo = document.getElementById("mGo");
+
+document.getElementById("quick").replaceChildren(...QUICK.map(q=>{
+  const b = document.createElement("button");
+  b.type = "button"; b.textContent = q;
+  b.addEventListener("click", ()=>{ why.value = q; why.dispatchEvent(new Event("input")); why.focus(); });
+  return b;
+}));
+
+why.addEventListener("input", ()=>{ mGo.disabled = why.value.trim().length < 3; });
+
+function askRemove(t){
+  pending = t;
+  document.getElementById("mTask").textContent = t.client + " — " + t.title;
+  why.value = ""; mGo.disabled = true;
+  scrim.hidden = false;
+  why.focus();
+}
+function closeModal(){ scrim.hidden = true; pending = null; }
+
+document.getElementById("mCancel").addEventListener("click", closeModal);
+scrim.addEventListener("click", e=>{ if(e.target === scrim) closeModal(); });
+document.addEventListener("keydown", e=>{ if(e.key === "Escape" && !scrim.hidden) closeModal(); });
+mGo.addEventListener("click", ()=>{
+  if(!pending) return;
+  const t = pending, reason = why.value.trim();
+  closeModal();
+  write(t.id, {s:"removed", at:new Date().toISOString(), reason:reason});
+});
+
+function fmtStamp(iso){
+  if(!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  return d.toLocaleDateString(undefined,{day:"numeric",month:"short"}) + " " +
+         d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+}
+
+function el(tag, cls, text){
+  const n = document.createElement(tag);
+  if(cls) n.className = cls;
+  if(text != null) n.textContent = text;
+  return n;
+}
+
+function stateOf(t){ return (state.status[t.id] && state.status[t.id].s) || "pending"; }
+
+function render(){
+  const q = state.query.trim().toLowerCase();
+  const view = TASKS.map(t => {
+    const o = state.status[t.id];
+    return (o && o.due) ? Object.assign({}, t, {due:o.due, bucket:bucketFor(o.due), moved:true}) : t;
+  });
+  const matches = t => (!state.client || t.client === state.client) &&
+    dueBy(t, state.horizon) &&
+    (!q || (t.client+" "+t.title+" "+t.note+" "+((state.status[t.id]&&state.status[t.id].userNote)||"")).toLowerCase().includes(q));
+
+  const removed = view.filter(t => stateOf(t) === "removed" && matches(t));
+  const visible = view.filter(t =>
+    stateOf(t) !== "removed" &&
+    (state.showDone || !CLOSED[stateOf(t)]) &&
+    matches(t));
+
+  const open = view.filter(t => {const s = stateOf(t); return !CLOSED[s] && s !== "removed";});
+  const isOverdue = t => t.due && midnight(new Date(t.due+"T00:00:00")) < TODAY;
+  document.getElementById("nOverdue").textContent = open.filter(isOverdue).length;
+  document.getElementById("nBlocked").textContent = open.filter(t=>stateOf(t)==="blocked"||stateOf(t)==="dependency"||t.tag==="blocked").length;
+  document.getElementById("nDoing").textContent = view.filter(t=>stateOf(t)==="doing").length;
+  document.getElementById("nWeek").textContent = open.filter(t=>dueBy(t,"week")).length;
+  document.getElementById("weekTo").textContent = "to " + shortDate(HORIZONS.week.end);
+
+  // chips
+  const chipBox = document.getElementById("chips");
+  chipBox.replaceChildren();
+  const clients = [...new Set(view.map(t=>t.client))].sort((a,b)=>a.localeCompare(b));
+  const mkChip = (label, count, active, fn) => {
+    const b = el("button","chip",label);
+    b.setAttribute("aria-pressed", active ? "true":"false");
+    if(count != null){ const s = el("span","c",String(count)); b.appendChild(s); }
+    b.addEventListener("click", fn);
+    return b;
+  };
+  const live = t => !CLOSED[stateOf(t)] && stateOf(t)!=="removed";
+  chipBox.appendChild(mkChip("All", null, !state.client, ()=>{state.client=null;render();}));
+  clients.forEach(c=>{
+    const n = view.filter(t=>t.client===c && live(t) && dueBy(t,state.horizon)).length;
+    if(state.horizon && n === 0 && state.client !== c) return;
+    chipBox.appendChild(mkChip(c, n, state.client===c, ()=>{state.client = state.client===c?null:c; render();}));
+  });
+
+  const hBox = document.getElementById("horizons");
+  hBox.replaceChildren();
+  const mkH = (key, label, sub) => {
+    const n = view.filter(t=>live(t) && dueBy(t,key)).length;
+    const b = el("button","chip",label);
+    b.setAttribute("aria-pressed", state.horizon===key ? "true":"false");
+    if(sub){ const s = el("span","r",sub); b.appendChild(s); }
+    const c = el("span","c",String(n)); b.appendChild(c);
+    b.addEventListener("click", ()=>{ state.horizon = state.horizon===key ? null : key; render(); });
+    return b;
+  };
+  hBox.appendChild(mkH(null,"Everything",""));
+  hBox.appendChild(mkH("today","Today","to "+shortDate(HORIZONS.today.end)));
+  hBox.appendChild(mkH("h48","48 hrs","to "+shortDate(HORIZONS.h48.end)));
+  hBox.appendChild(mkH("week","This week","to "+shortDate(HORIZONS.week.end)));
+
+  // groups
+  let groups;
+  if(state.group==="client"){
+    const names = [...new Set(visible.map(t=>t.client))].sort((a,b)=>a.localeCompare(b));
+    groups = names.map(n=>({label:n, sub:"", color:"var(--ink)", items:visible.filter(t=>t.client===n)}));
+  } else {
+    groups = BUCKETS.map(b=>({label:b.label, sub:b.sub, color:b.color, items:visible.filter(t=>t.bucket===b.k)}))
+                    .filter(g=>g.items.length);
+  }
+  if(state.showRemoved && removed.length){
+    groups.push({label:"Removed from the board", sub:"reasons below · Nikki updates Notion from these", color:"var(--warn)", items:removed, gone:true});
+  }
+
+  const board = document.getElementById("board");
+  board.replaceChildren();
+  groups.forEach(g=>{
+    const sec = el("section","group");
+    const head = el("div","ghead");
+    const h = el("h2",null,g.label); h.style.color = g.color;
+    head.appendChild(h);
+    if(g.sub) head.appendChild(el("div","gs",g.sub));
+    head.appendChild(el("div","gc", g.gone
+      ? g.items.length + " removed"
+      : g.items.filter(t=>live(t)).length + " open"));
+    sec.appendChild(head);
+
+    g.items.forEach(t=>{
+      const st = stateOf(t);
+      const gone = st === "removed";
+      const row = el("div","row" + (gone?" gone":CLOSED[st]?" done":st==="doing"?" doing":(st==="blocked"||st==="dependency")?" blocked":""));
+
+      if(gone){
+        const undo = el("button","restore","Restore");
+        undo.title = "Put this task back on the board";
+        undo.addEventListener("click", ()=>restore(t.id));
+        row.appendChild(undo);
+      } else {
+        const sel = document.createElement("select");
+        sel.className = "box " + st;
+        sel.setAttribute("aria-label", t.client + ": " + t.title + ", status");
+        STATUSES.forEach(([v,l])=>{
+          const o = document.createElement("option");
+          o.value = v; o.textContent = l;
+          if(v === st) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.addEventListener("change", e=>setStatus(t.id, e.target.value));
+        row.appendChild(sel);
+      }
+      row.appendChild(el("div","client",t.client));
+
+      const mid = el("div");
+      mid.appendChild(el("div","title",t.title));
+      if(t.note && !gone) mid.appendChild(el("div","note",t.note));
+      const rec = state.status[t.id];
+      if(gone && rec){
+        const r = el("div","reason");
+        r.appendChild(el("b",null,"Reason: "));
+        r.appendChild(document.createTextNode(rec.reason || "none given"));
+        mid.appendChild(r);
+        if(rec.at) mid.appendChild(el("div","stamp","Removed " + fmtStamp(rec.at)));
+        // removed rows keep their reason above
+      } else if(rec && rec.at && st!=="pending"){
+        mid.appendChild(el("div","stamp", LABEL[st] + " · " + fmtStamp(rec.at)));
+      }
+      if(rec && rec.userNote && !gone){
+        const un = el("div","usernote", rec.userNote);
+        un.title = rec.noteAt ? "Updated " + fmtStamp(rec.noteAt) : "";
+        mid.appendChild(un);
+      }
+      row.appendChild(mid);
+
+      const meta = el("div","meta");
+      if(!gone){
+        const nb = el("button","note-btn" + (rec && rec.userNote ? " has" : ""), rec && rec.userNote ? "✎" : "✎");
+        nb.title = rec && rec.userNote ? "Edit the note" : "Add a note";
+        nb.setAttribute("aria-label", (rec && rec.userNote ? "Edit note on " : "Add note to ") + t.title);
+        nb.addEventListener("click", ()=>openNote(t));
+        meta.appendChild(nb);
+      }
+      if(t.tag && !gone) meta.appendChild(el("span","tag "+(t.tag==="in progress"?"progress":t.tag), t.tag));
+      if(!gone){
+        const x = el("button","rm","×");
+        x.title = "Remove this task from the board";
+        x.setAttribute("aria-label","Remove "+t.title);
+        x.addEventListener("click", ()=>askRemove(t));
+        meta.appendChild(x);
+      }
+      row.appendChild(meta);
+
+      if(gone){
+        row.appendChild(el("div","when","removed"));
+      } else {
+        const di = document.createElement("input");
+        di.type = "date";
+        di.className = "duein";
+        di.value = t.due || "";
+        di.setAttribute("aria-label", "Due date for " + t.title);
+        if(t.due){
+          const d = midnight(new Date(t.due + "T00:00:00"));
+          if(d < TODAY && !CLOSED[st]) di.classList.add("late");
+          else if(t.moved) di.classList.add("moved");
+        }
+        di.title = t.moved ? "Rescheduled. Originally " + t.when : "Originally " + t.when;
+        di.addEventListener("click", ()=>{ if(di.showPicker) try{ di.showPicker(); }catch(e){} });
+        di.addEventListener("change", ()=>{ write(t.id, {due: di.value || null}); });
+        row.appendChild(di);
+      }
+      sec.appendChild(row);
+    });
+    board.appendChild(sec);
+  });
+  document.getElementById("empty").hidden = groups.length > 0;
+
+  const nRemoved = view.filter(t=>stateOf(t)==="removed").length;
+  const br = document.getElementById("btnRemoved");
+  br.textContent = state.showRemoved
+    ? "Showing removed (" + nRemoved + ")"
+    : "Hide removed" + (nRemoved ? " (" + nRemoved + ")" : "");
+  br.setAttribute("aria-pressed", state.showRemoved ? "false" : "true");
+}
+
+document.getElementById("q").addEventListener("input", e=>{state.query=e.target.value; render();});
+const btnDone = document.getElementById("btnDone");
+btnDone.addEventListener("click", ()=>{
+  state.showDone = !state.showDone;
+  btnDone.textContent = state.showDone ? "Showing finished" : "Hide finished";
+  btnDone.setAttribute("aria-pressed", state.showDone ? "false" : "true");
+  render();
+});
+// ---- note on a task ----
+const noteScrim = document.getElementById("noteScrim");
+const noteText = document.getElementById("noteText");
+let noteFor = null;
+
+function openNote(t){
+  noteFor = t;
+  document.getElementById("nTask").textContent = t.client + " \u2014 " + t.title;
+  noteText.value = (state.status[t.id] && state.status[t.id].userNote) || "";
+  noteScrim.hidden = false;
+  noteText.focus();
+}
+function closeNote(){ noteScrim.hidden = true; noteFor = null; }
+document.getElementById("nCancel").addEventListener("click", closeNote);
+noteScrim.addEventListener("click", e=>{ if(e.target === noteScrim) closeNote(); });
+document.addEventListener("keydown", e=>{ if(e.key === "Escape" && !noteScrim.hidden) closeNote(); });
+document.getElementById("nGo").addEventListener("click", ()=>{
+  if(!noteFor) return;
+  const t = noteFor, v = noteText.value.trim();
+  closeNote();
+  write(t.id, {userNote:v, noteAt:new Date().toISOString()});
+});
+document.getElementById("nClear").addEventListener("click", ()=>{
+  if(!noteFor) return;
+  const t = noteFor; closeNote();
+  write(t.id, {userNote:"", noteAt:null});
+});
+
+// ---- add task ----
+const addScrim = document.getElementById("addScrim");
+const aClient = document.getElementById("aClient");
+const aTitleIn = document.getElementById("aTaskTitle");
+const aDue = document.getElementById("aDue");
+const aNote = document.getElementById("aNote");
+const aGo = document.getElementById("aGo");
+
+function checkAdd(){ aGo.disabled = aTitleIn.value.trim().length < 3 || !aDue.value; }
+[aTitleIn, aDue].forEach(f => f.addEventListener("input", checkAdd));
+
+document.getElementById("btnAdd").addEventListener("click", ()=>{
+  aClient.value = state.client || "";
+  aTitleIn.value = ""; aNote.value = "";
+  aDue.value = new Date(Date.now() + 864e5*7).toISOString().slice(0,10);
+  checkAdd();
+  addScrim.hidden = false;
+  aTitleIn.focus();
+});
+function closeAdd(){ addScrim.hidden = true; }
+document.getElementById("aCancel").addEventListener("click", closeAdd);
+addScrim.addEventListener("click", e=>{ if(e.target === addScrim) closeAdd(); });
+document.addEventListener("keydown", e=>{ if(e.key === "Escape" && !addScrim.hidden) closeAdd(); });
+aGo.addEventListener("click", async ()=>{
+  const body = {
+    client: aClient.value.trim() || "Ad hoc",
+    title: aTitleIn.value.trim(),
+    due: aDue.value || null,
+    note: aNote.value.trim(),
+    addedAt: new Date().toISOString()
+  };
+  closeAdd();
+  body.id = "add-" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  await commit(base => { base.extra.push(body); });
+});
+
+document.getElementById("btnRemoved").addEventListener("click", ()=>{
+  state.showRemoved = !state.showRemoved;
+  render();
+});
+const btnGroup = document.getElementById("btnGroup");
+btnGroup.addEventListener("click", ()=>{
+  state.group = state.group==="time" ? "client" : "time";
+  btnGroup.textContent = "Group: " + (state.group==="time" ? "timeframe" : "client");
+  render();
+});
+
+rebuild();
+render();
+
+// Carried over from the first version of the board, so nothing already
+// marked up is lost. Only used when the shared store is still empty.
+const SEED_STATE = {status:{
+  "overdue-0":{s:"done", at:"2026-09-04T07:06:54.150Z"},
+  "overdue-1":{s:"doing", due:"2026-09-07", at:"2026-09-04T07:00:00.000Z"},
+  "overdue-7":{s:"done", at:"2026-09-04T07:26:50.198Z"},
+  "overdue-12":{s:"done", at:"2026-09-04T07:28:07.201Z"},
+  "overdue-13":{s:"pending", at:"2026-09-04T07:28:31.089Z"},
+  "overdue-16":{s:"doing", at:"2026-09-04T07:29:56.846Z"},
+  "w1-7":{s:"doing", at:"2026-09-04T07:29:04.567Z", userNote:"4 tickets blocked", noteAt:"2026-09-04T07:29:16.691Z"},
+  "w3-4":{due:"2026-09-08", at:"2026-09-04T07:00:00.000Z"}
+}, extra:[]};
+
+function applyRemote(data){
+  state.status = data.status;
+  EXTRA = data.extra;
+  EXTRA.sort((a,b)=> String(a.due||"").localeCompare(String(b.due||"")));
+  rebuild(); render();
+}
+
+(async function(){
+  try {
+    let data = await remoteGet();
+    if(!Object.keys(data.status).length && !data.extra.length){
+      data = SEED_STATE;
+      try { await remotePut(data); } catch(e){}
+    }
+    lastRaw = JSON.stringify(data);
+    applyRemote(data);
+    setSync("live","Shared with the Sabel team.");
+  } catch(e){
+    const cached = localGet();
+    if(cached && cached.status) applyRemote({status:cached.status, extra:cached.extra || []});
+    setSync("local","Cannot reach the shared store. Showing the last copy saved on this device.");
+  }
+
+  // Pick up the other person's changes.
+  setInterval(async ()=>{
+    if(saving || document.hidden) return;
+    try {
+      const data = await remoteGet();
+      const raw = JSON.stringify(data);
+      if(raw === lastRaw) return;
+      lastRaw = raw;
+      applyRemote(data);
+    } catch(e){ /* keep showing what we have */ }
+  }, 20000);
+})();
+</script>
