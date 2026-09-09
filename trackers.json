@@ -131,5 +131,12 @@
   "file": "ShiftmoveTracker.html",
   "sowHours": 30,
   "active": true
-  }
+  },
+{
+  "name": "Sky City Malta",
+  "key": "skycity-tracker-v1",
+  "file": "SkyCityTracker.html",
+  "sowHours": 35,
+  "active": true
+}
 ]
