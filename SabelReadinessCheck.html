@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sabel Technical Readiness Check</title>
+<title>Sabel · What We Need Before We Build</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
@@ -35,9 +35,21 @@ body{margin:0;background:var(--ground);color:var(--body);
 .brand{font-family:Archivo,sans-serif;font-weight:800;font-size:16px;letter-spacing:-.02em;color:var(--ink);white-space:nowrap}
 .brand em{color:var(--accent);font-style:normal}
 .rail{flex:1;display:flex;gap:3px;min-width:80px}
-.rseg{flex:1;height:5px;border-radius:2px;background:var(--line);transition:background .2s ease}
+.rseg{position:relative;flex:1;height:5px;border-radius:2px;background:var(--line);transition:background .2s ease;
+  border:none;padding:0;margin:0;cursor:pointer;display:block}
+.rseg::before{content:"";position:absolute;left:0;right:0;top:-10px;bottom:-10px}  /* bigger hit area */
 .rseg.done{background:var(--good)}
 .rseg.now{background:var(--accent)}
+.rseg:hover,.rseg:focus-visible{filter:brightness(.85);outline:none}
+.rseg::after{content:attr(data-label);position:absolute;top:16px;left:50%;transform:translateX(-50%) translateY(-4px);
+  background:var(--ink);color:#fff;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.06em;
+  white-space:nowrap;padding:6px 9px;border-radius:3px;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:50}
+.rseg:hover::after,.rseg:focus-visible::after{opacity:1;transform:translateX(-50%) translateY(0)}
+.rseg:first-child::after{left:0;transform:translateX(0) translateY(-4px)} .rseg:first-child:hover::after{transform:translateX(0) translateY(0)}
+.rseg:last-child::after{left:auto;right:0;transform:translateX(0) translateY(-4px)} .rseg:last-child:hover::after{transform:translateX(0) translateY(0)}
+.restart{font-size:13px;color:var(--muted);margin-top:14px}
+.restart a{color:var(--muted);text-decoration:underline;cursor:pointer}
+.restart a:hover{color:var(--accent)}
 .stepno{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;color:var(--muted);
   font-variant-numeric:tabular-nums;white-space:nowrap}
 .saved{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--good);opacity:0;transition:opacity .3s;white-space:nowrap}
@@ -147,6 +159,8 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:.75}
 .rep{margin-top:14px;display:flex;flex-direction:column;gap:12px}
 .reprow{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr)) 34px;gap:12px;align-items:end;
   padding:14px;background:var(--alt);border-radius:3px}
+.reprow.four{grid-template-columns:repeat(2,minmax(0,1fr)) 34px}
+.reprow.four>:last-child{grid-column:3;grid-row:1/span 2;align-self:end}
 .reprow .x{background:transparent;border:1px solid var(--strong);color:var(--muted);border-radius:2px;
   height:38px;width:34px;cursor:pointer;font-size:17px;line-height:1}
 .reprow .x:hover{border-color:var(--accent);color:var(--accent)}
@@ -238,8 +252,11 @@ footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);
    CONFIG
    ===================================================================== */
 const API = 'https://sabel-webhook.vercel.app/api/readiness';
-const FORM_V = '2026-09-03b';
-const KEY = 'sabel-readiness-v2';
+const FORM_V = '2026-09-09a';
+/* A link like SabelReadinessCheck.html?client=Acme%20Ltd pre-fills the company name and keeps
+   that client's draft separate from anyone else's on the same browser. */
+const CLIENT_PARAM = (new URLSearchParams(location.search).get('client')||'').trim();
+const KEY = 'sabel-readiness-v2' + (CLIENT_PARAM ? ':'+CLIENT_PARAM.toLowerCase() : '');
 
 /* =====================================================================
    ANSWER OPTION SETS
@@ -476,7 +493,7 @@ const SECTIONS = [
 },
 {
  id:'G', title:'Other systems Fin needs to reach', scope:'b',
- blurb:'If you want Fin to look up an order or check an account, it has to reach the system holding that information. This is the part that depends on your developers.',
+ blurb:'If you want Fin to look up an order or check an account, it has to reach the system holding that information, and we need somewhere safe to test that it works. This is the part that depends on your developers.',
  items:[
   {t:'ask',id:'g1',q:'What would you like Fin to be able to look up or do?',
    why:'Write it however makes sense to you. We will work out the technical side.',
@@ -486,6 +503,19 @@ const SECTIONS = [
   {t:'rag',id:'g2',opts:O.ready,q:'Can your developers give us access to those systems?',
    why:'API keys and a test environment. This is the most common thing that holds a build up.',
    more:'<p>An API is the way one system lets another ask it questions. To have Fin check an order, we need a key that lets us ask your order system about it, and ideally a test environment so we are not experimenting on real customers.</p><p>This is work only your developers can do, and in our experience it is the single most common reason a build sits waiting.</p>'},
+
+  {t:'rag',id:'g5',opts:O.ready,q:'Can we have a test account, somewhere safe to test, and some test data for each of those systems?',
+   why:'We need these from the day the build starts, not when it is time to test. The wait between building a connection and being able to check it is where projects most often stall.',
+   more:'<p>Building the connection is the quick part. Checking that Fin gives the right answer is where projects sit and wait, because it needs three things only you can provide.</p><p><strong>A test environment.</strong> A sandbox, staging site or test store for each system Fin will talk to, so we are not experimenting on real customers.</p><p><strong>A test account.</strong> A login we can use freely, such as a test customer with an order or booking against it.</p><p><strong>Test data, or a few live examples we can reference.</strong> A handful of real order numbers, booking references or account IDs that are safe for us to look up while we check Fin\'s answers.</p><p>If a system has no sandbox at all, that is worth knowing now because it changes how we test. Please do not paste passwords or API keys into this form. Tell us they are ready and we will agree a secure way to hand them over.</p>'},
+
+  {t:'ask',id:'g6',q:'For each system, where are the test environment, test account and test data up to?',
+   why:'One row per system. It is fine if the answer is none yet, that just tells us what to chase first.',
+   more:'<p>This is the list we work from during the build. If a system only has a live environment, say so and we will agree how to test carefully against it, for example with a dedicated test customer.</p><p>The examples box is for references we can safely look up: an order that has been delivered and one still in transit, a booking on the test account, a customer whose balance you know. They save a lot of back and forth.</p>',
+   rep:{id:'g6r', cols:[['sys','System','text','e.g. Shopify'],
+                        ['env','Test environment','select','Sandbox or staging available|Live only, test carefully|None yet|Not sure'],
+                        ['acct','Test account','select','Ready|Being set up|Not started'],
+                        ['data','Test data or examples','select','Test data ready|Live examples we can reference|Neither yet']]},
+   f:[['g6a','Example references we can use','textarea','Type here, one per line',{ex:'Order 10482 (delivered) and order 10511 (still in transit)\nBooking TK-2291 on the test account\nCustomer test@yourcompany.com, current balance $120'}]]},
 
   {t:'ask',id:'g3',q:'Who is your developer, and how much time do they realistically have?',
    why:'An honest answer here is genuinely more useful than an optimistic one.',
@@ -545,6 +575,11 @@ const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&l
 function activeSections(){ return SECTIONS.filter(s=>inScope(s.scope)); }
 function activeItems(sec){ return sec.items.filter(i=>inScope(i.scope)); }
 function steps(){ return ['start', ...activeSections().map(s=>s.id), 'review']; }
+function stepLabel(id){
+  if(id==='start') return 'Start · About you';
+  if(id==='review') return 'Review and send';
+  const sec=SECTIONS.find(s=>s.id===id); return sec ? id+' · '+sec.title : id;
+}
 
 /* =====================================================================
    FIELD RENDERERS
@@ -657,7 +692,7 @@ function repeater(r){
   const rows = state.reps[r.id] || (state.reps[r.id]=[{}]);
   let h='<div class="rep" data-rep="'+r.id+'">';
   rows.forEach((row,ri)=>{
-    h+='<div class="reprow">';
+    h+='<div class="reprow'+(r.cols.length>3?' four':'')+'">';
     r.cols.forEach(([ck,clab,ctype,cph])=>{
       const val = esc(row[ck]||'');
       if(ctype==='select'){
@@ -711,12 +746,13 @@ function itemHTML(it){
    ===================================================================== */
 function startPanel(){
   return '<div class="panel on"><div class="sechead">'+
-    '<p class="eyebrow">Sabel · Before we start building</p>'+
-    '<h1>Technical Readiness Check</h1>'+
-    '<p class="intro">A shared picture of what is ready and what is still moving. About twenty minutes, one section at a time, and you can stop and come back.</p></div>'+
+    '<p class="eyebrow">Sabel · Technical readiness check</p>'+
+    '<h1>What we need before we build</h1>'+
+    '<p class="intro">The access, people and technical pieces your Intercom build depends on, and where each one is up to today. It gives both of us a shared picture of what is ready and what is still moving, so nothing sits waiting once the build starts. About twenty minutes, one section at a time, and you can stop and come back.</p></div>'+
 
     '<div class="note"><p><strong>There are no wrong answers here.</strong> Most of the bumps on a project like this come from a handful of small things that were still being sorted when the build began. None of them are hard to fix early. A few of them cannot be undone once your workspace is live, which is the only reason we ask now.</p>'+
-    '<p>Nothing on this form will hold your project up. If something is not ready, that just tells us the order to do things in. A blank is far more useful to us than an optimistic tick.</p></div>'+
+    '<p>Nothing on this form will hold your project up. If something is not ready, that just tells us the order to do things in. A blank is far more useful to us than an optimistic tick.</p>'+
+    (state.hasDraft ? '<p class="restart">Your answers so far are saved in this browser. Not you, or want a clean slate? <a data-nav="restart">Start again</a>.</p>' : '')+'</div>'+
 
     '<div class="card"><div class="items"><div class="item">'+
       '<span class="q">First, what kind of project is this?</span>'+
@@ -846,7 +882,8 @@ function render(){
   $('app').innerHTML=html;
 
   // step rail
-  $('rail').innerHTML=S.map((s,i)=>'<span class="rseg'+(state.submitted||i<state.step?' done':(i===state.step?' now':''))+'"></span>').join('');
+  $('rail').innerHTML=S.map((s,i)=>'<button type="button" class="rseg'+(state.submitted||i<state.step?' done':(i===state.step?' now':''))+
+    '" data-go="'+i+'" data-label="'+esc(stepLabel(s))+'" aria-label="Go to '+esc(stepLabel(s))+'"></button>').join('');
   $('stepno').textContent = state.submitted ? 'Done' : ('Step '+(state.step+1)+' of '+S.length);
   refreshSugg();
   window.scrollTo({top:0,behavior:'instant'});
@@ -874,8 +911,15 @@ function save(){
 }
 function restore(){
   let d=null; try{ d=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
-  if(!d) return;
-  state.data=d.data||{}; state.reps=d.reps||{}; state.projectType=d.projectType||''; state.step=d.step||0;
+  if(d){ state.data=d.data||{}; state.reps=d.reps||{}; state.projectType=d.projectType||''; state.step=d.step||0; state.hasDraft=true; }
+  if(CLIENT_PARAM && !state.data.f_client) state.data.f_client=CLIENT_PARAM;
+}
+function startAgain(){
+  if(!confirm('Clear everything saved in this browser and start the form again?')) return;
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  state.data={}; state.reps={}; state.projectType=''; state.step=0; state.hasDraft=false;
+  if(CLIENT_PARAM) state.data.f_client=CLIENT_PARAM;
+  render();
 }
 
 function collect(){
@@ -909,7 +953,7 @@ function collect(){
       }
       (it.f||[]).forEach(f=>{
         answers[f[1]]=state.data[f[0]]||'';
-        if(f[4]) answers[f[4].label]=state.data[f[4].id]||'';
+        if(f[4] && f[4].label) answers[f[4].label]=state.data[f[4].id]||'';
       });
       return { id:it.id, question:it.q, type:'answer', answers };
     });
@@ -986,12 +1030,23 @@ document.addEventListener('click',e=>{
   if(nav){
     const a=nav.dataset.nav;
     if(a==='download') return download();
+    if(a==='restart')  return startAgain();
     if(a==='submit')  return submit();
     if(a==='back'){ save(); state.step=Math.max(0,state.step-1); return render(); }
     if(a==='next'){
       if(steps()[state.step]==='start'){ readDOM(); if(!validateStart()) return; }
       save(); state.step=Math.min(steps().length-1,state.step+1); return render();
     }
+  }
+  const seg=e.target.closest('[data-go]');
+  if(seg){
+    if(state.submitted) return;
+    const i=+seg.dataset.go;
+    if(i!==state.step){
+      if(steps()[state.step]==='start' && i>0){ readDOM(); if(!validateStart()) return; }
+      save(); state.step=i; render();
+    }
+    return;
   }
   const go=e.target.closest('[data-goto]');
   if(go){ save(); const i=steps().indexOf(go.dataset.goto); if(i>-1){ state.step=i; render(); } return; }
