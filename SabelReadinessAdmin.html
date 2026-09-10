@@ -94,7 +94,7 @@ pre{background:var(--surface);border:1px solid var(--line);border-radius:3px;pad
   <button class="back" id="back">&larr; All submissions</button>
   <div class="row" style="justify-content:space-between;align-items:flex-start">
     <div><h2 id="dtitle"></h2><p class="eyebrow" style="color:var(--muted)" id="dmeta"></p></div>
-    <div class="row"><button class="ghost" id="copy">Copy report</button><button class="ghost" id="dl">Download</button></div>
+    <div class="row"><button class="ghost" id="copy">Copy report</button><button class="ghost" id="dl">Download</button><button class="ghost" id="rm">Remove</button></div>
   </div>
   <h3>Full report</h3>
   <pre id="dreport"></pre>
@@ -150,6 +150,8 @@ async function load(){
     index=d.submissions||[];
     localStorage.setItem(TK,token);
     show('listview'); renderList();
+    const want=new URLSearchParams(location.search).get('id');
+    if(want){ history.replaceState(null,'',location.pathname); open(want); }
   }catch(e){ $('authmsg').className='msg bad'; $('authmsg').textContent=e.message; show('auth'); }
 }
 
@@ -185,6 +187,18 @@ $('dl').addEventListener('click',()=>{
   const blob=new Blob([current.report],{type:'text/plain'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='Sabel_Readiness_'+current.id+'.txt';a.click();URL.revokeObjectURL(a.href);
+});
+
+let armed=null;
+$('rm').addEventListener('click',async()=>{
+  const b=$('rm');
+  if(armed!==current.id){ armed=current.id; b.textContent='Click again to remove'; setTimeout(()=>{ if(armed===current.id){armed=null;b.textContent='Remove';} },4000); return; }
+  armed=null; b.disabled=true;
+  try{
+    const r=await fetch(API+'?token='+encodeURIComponent(token)+'&id='+encodeURIComponent(current.id),{method:'DELETE'});
+    if(!r.ok) throw new Error('Could not remove (HTTP '+r.status+').');
+    b.textContent='Remove'; b.disabled=false; load();
+  }catch(e){ alert(e.message); b.textContent='Remove'; b.disabled=false; }
 });
 
 const saved=localStorage.getItem(TK);
