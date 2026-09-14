@@ -396,7 +396,7 @@ var PORTAL_STAGE = {'Discovery':'Scoping','Onboarding':'Onboarding','Active':'Ac
 /* The portal, the registry and the trackers spell some clients differently.
    Matching is on a normalised name, with these for the ones normalising can't reach. */
 var ALIAS = {
-  'yfood labs':'yfood', 'tulka oy':'tulka', 'herotolk tulka':'tulka',
+  'yfood labs':'yfood', 'tulka oy':'tulka',
   'huuuge global':'huuuge', 'cronos particle research ltd':'cronos particle research',
   'cannabis clinic renewal':'cannabis clinic'
 };
@@ -405,6 +405,9 @@ function normName(n){
     .replace(/[().,'"&]/g,' ')
     .replace(/\b(ltd|limited|inc|oy|ab|pty|nz|usa|global|labs?)\b/g,' ')
     .replace(/\s+/g,' ').trim();
+  /* Herotolk and Tulka Oy are separate clients. A name carrying both words
+     belongs to Herotolk, never to Tulka. */
+  if(/\bherotolk\b/.test(s)) return 'herotolk';
   return ALIAS[s] || s;
 }
 function slug(n){ return String(n||'').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,18) || 'client'; }
@@ -926,7 +929,13 @@ function groupsFor(c){
     {label:'Coming up', color:'#64748B', tasks:list.filter(function(t){return t.u==='later';})}
   ];
 }
-function allIncludingParked(){ return CLIENTS.map(enrich).sort(function(a,b){return a.key-b.key;}); }
+/* Clients still being scoped are not delivery work yet, so they stay off this
+   board entirely: no card, no KPI count, no go-live lane. Set the stage in the
+   portal to anything past Scoping and the client appears. */
+var HIDE_STAGES = ['Scoping'];
+function allIncludingParked(){ return CLIENTS.map(enrich)
+  .filter(function(c){ return HIDE_STAGES.indexOf(c.stage)<0; })
+  .sort(function(a,b){return a.key-b.key;}); }
 function all(){ return allIncludingParked().filter(function(c){ return !c.parked; }); }
 function parkedList(){ return allIncludingParked().filter(function(c){ return c.parked; }); }
 function find(list,id){ for(var i=0;i<list.length;i++) if(list[i].id===id) return list[i]; return list[0]; }
