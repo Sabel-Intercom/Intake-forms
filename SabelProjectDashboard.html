@@ -233,23 +233,28 @@
      sticky header would pin 57px DOWN inside it, on top of the first row. The
      corners are rounded on the first and last children instead. */
   .tbl{background:var(--card);border:1px solid var(--border2);border-radius:11px;}
-  .thead,.tr{display:grid;grid-template-columns:minmax(170px,1.4fr) 96px 76px minmax(110px,1fr) 132px;gap:12px;padding:10px 15px;border-bottom:1px solid var(--border2);}
+  .thead,.tr{display:grid;grid-template-columns:minmax(150px,1.5fr) 150px 64px minmax(130px,1.3fr) minmax(120px,1fr) 128px;gap:14px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border2);}
   .thead{background:var(--surface);position:sticky;top:57px;z-index:5;border-radius:10px 10px 0 0;}
   .tbl .tr:last-child{border-bottom:none;border-radius:0 0 10px 10px;}
   .thead span{font-size:8.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mono);}
-  .tr{cursor:pointer;border-left:3px solid transparent;scroll-margin-top:120px;}
+  .tr{border-left:3px solid transparent;scroll-margin-top:120px;}
   .tr:hover{background:var(--card3);}
   .tr.sel{background:var(--card3);border-left-color:var(--red);}
   /* Arriving from a go-live on the timeline: say where you landed. */
   @keyframes trflash{0%,100%{background:var(--card3);}35%{background:rgba(225,6,0,.20);}}
   .tr.flash{animation:trflash 1.3s ease-in-out;}
 
-  /* client detail panel — the list of actions you work down on a call */
-  .dpanel{position:sticky;top:88px;display:flex;flex-direction:column;max-height:calc(100vh - 112px);overflow:hidden;}
-  .dhead{padding:14px 16px;border-bottom:1px solid var(--border2);background:linear-gradient(160deg,rgba(225,6,0,.10),var(--card));flex:none;}
-  .dnm{font-size:16px;font-weight:800;color:var(--w);letter-spacing:-.01em;line-height:1.2;min-width:0;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .dbody{flex:1;min-height:0;overflow:auto;}
+  /* row actions: open the tracker, park the client */
+  .ract{display:flex;align-items:center;justify-content:flex-end;gap:6px;}
+  a.pill{text-decoration:none;display:inline-block;}
+  button.ptb{cursor:pointer;font-family:inherit;border:1px solid transparent;}
+  button.ptb:hover{border-color:currentColor;}
+  .pmeta{font-size:9px;color:var(--mono);margin-top:4px;}
+  /* No overflow on the wrapper: a scrollport here would pin the sticky header inside it. */
+  .tbl-wrap{margin-bottom:22px;}
+  .rowempty{padding:26px 16px;text-align:center;}
+  .localwarn{font-size:10px;color:#FBBF24;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);
+    border-radius:7px;padding:8px 12px;margin-bottom:12px;}
   .gsec{border-bottom:1px solid var(--border2);}
   /* Group headings stay put as you scroll a long list, so an action always has
      a heading above it and the client name above that. */
@@ -372,7 +377,9 @@ var OVERRIDES_KEY = 'sabel-golive-overrides-v1';
    The webhook needs 'sabel-clientmeta-v1' on its key allowlist. Until it is
    there, changes hold on this browser and the board says so. */
 var META_KEY = 'sabel-clientmeta-v1';
+var META_LS = 'sabel_clientmeta_local_v1';
 var META = {};
+var META_AT = 0;
 var META_SHARED = null;
 var REFRESH_MS = 5 * 60 * 1000;
 
@@ -683,10 +690,13 @@ var TYPE_BG    = {full:'rgba(167,139,250,.14)', migration:'rgba(251,146,60,.14)'
 
 function metaFor(id){ return META[id] || {}; }
 function saveMeta(){
+  META_AT = Date.now();
+  try{ localStorage.setItem(META_LS, JSON.stringify({clients:META, at:META_AT})); }catch(e){}
   return fetch(API+'?key='+encodeURIComponent(META_KEY)+'&_t='+Date.now(), {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({key:META_KEY, value: JSON.stringify({clients:META, at:Date.now()})})
-  }).then(function(r){ META_SHARED = r.ok; }).catch(function(){ META_SHARED=false; });
+    body: JSON.stringify({key:META_KEY, value: JSON.stringify({clients:META, at:META_AT})})
+  }).then(function(r){ var was=META_SHARED; META_SHARED = r.ok; if(was!==META_SHARED) render(); })
+    .catch(function(){ META_SHARED=false; render(); });
 }
 function setType(id, t, ev){
   if(ev) ev.stopPropagation();
@@ -738,10 +748,19 @@ function loadAll(manual){
       .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
     fetchKey(PORTAL_KEY),
     fetchKey(OVERRIDES_KEY),
-    fetchKey(META_KEY)
+    fetchKeyMeta(META_KEY)
   ]).then(function(res){
-    META = (res[3] && typeof res[3]==='object' && res[3].clients && typeof res[3].clients==='object')
-             ? res[3].clients : (META||{});
+    /* Parked clients and project types. Shared state wins unless this browser
+       holds a newer change (made while the key was not yet on the webhook
+       allowlist, or offline) — in that case push it up. */
+    var rm = res[3] || {reached:false, data:null};
+    var remote = (rm.data && typeof rm.data==='object' && rm.data.clients && typeof rm.data.clients==='object') ? rm.data : null;
+    var local = null;
+    try{ local = JSON.parse(localStorage.getItem(META_LS)||'null'); }catch(e){}
+    if(local && (typeof local!=='object' || !local.clients)) local = null;
+    META_SHARED = rm.reached;
+    if(remote && (!local || (remote.at||0) >= (local.at||0))){ META = remote.clients; META_AT = remote.at||0; }
+    else if(local){ META = local.clients; META_AT = local.at||0; if(rm.reached) saveMeta(); }
     REGISTRY = Array.isArray(res[0]) ? res[0].slice() : [];
     var portal = (res[1] && Array.isArray(res[1].clients)) ? res[1].clients : [];
     var overrides = (res[2] && typeof res[2]==='object') ? res[2] : {};
@@ -785,15 +804,16 @@ function pipelineFor(L){
           });
 }
 
-var FILTERS = ['All open','Overdue','Due this week','Blocked'];
+var FILTERS = ['All clients','Overdue','Due this week','Blocked'];
 var MS = 86400000;
 var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 /* ── state (persisted) ── */
 var PK = 'sabel_dash_refresh_v1';
-var S = {sel:'', filter:'All open', cap:{}, capOpen:'', pIdx:0, showParked:false, ptFilter:''};
+var S = {sel:'', filter:'All clients', cap:{}, capOpen:'', pIdx:0, showParked:false, ptFilter:''};
 try{ var saved = JSON.parse(localStorage.getItem(PK)||'null'); if(saved) for(var k in saved) S[k]=saved[k]; }catch(e){}
 if(!S.cap || typeof S.cap!=='object') S.cap={};
+if(FILTERS.indexOf(S.filter)<0) S.filter='All clients';
 function save(){ try{ localStorage.setItem(PK, JSON.stringify(S)); }catch(e){} }
 /* Stable per-task key: the title, normalised. */
 function tkey(title){ return String(title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60); }
@@ -1414,91 +1434,65 @@ function filtersHTML(){
 }
 
 /* ── views ── */
+/* Progress at a glance. The task list that used to sit beside this table has
+   gone — Monday calls work through the client's own tracker — so each row
+   carries what it needs: stage, go-live, how far along, what is stuck, and
+   the two things you do from here (open the tracker, park the client). */
+function clientMatches(x){
+  if(S.filter==='Overdue') return x.overdue>0;
+  if(S.filter==='Due this week') return x.week>0 || x.overdue>0;
+  if(S.filter==='Blocked') return x.blocked>0;
+  return true;
+}
+var TYPE_CYCLE = ['full','migration','build'];
+function cycleType(id, cur, ev){
+  var i = TYPE_CYCLE.indexOf(cur);
+  setType(id, TYPE_CYCLE[(i+1)%TYPE_CYCLE.length], ev);
+}
 function viewC(Lall){
-  var L = S.ptFilter ? Lall.filter(function(x){ return x.ptype===S.ptFilter; }) : Lall;
-  if(!L.length) L = Lall;
-  var c=find(L,S.sel);
+  var L = Lall.filter(function(x){ return (!S.ptFilter || x.ptype===S.ptFilter) && clientMatches(x); });
   var rows=L.map(function(x){
     // A tracker rebuilt since its last save throws that saved state away on
     // load — statuses ticked off and notes written before the rebuild are gone
     // from the tracker too, not just from here. Worth knowing about.
     var reb = x.rebuilt ? '<span class="reb" title="This tracker was rebuilt after its last save, so the tracker discarded that saved state — any statuses or notes recorded before the rebuild are no longer in it. This board shows the rebuilt plan, the same one the tracker shows.">rebuilt</span>' : '';
     var tb = x.ptype
-      ? '<span class="ptb" style="color:'+TYPE_C[x.ptype]+';background:'+TYPE_BG[x.ptype]+'"'+
-        (x.ptypeGuessed?' title="Worked out from the tracker\u2019s pillars because the portal has no type for this client. Open the client to set it."':' title="From the onboarding portal"')+'>'+
-        esc(TYPE_SHORT[x.ptype])+(x.ptypeGuessed?'?':'')+'</span>'
-      : '<span class="ptb none" title="Not set. Open the client to set it.">Type?</span>';
+      ? '<button class="ptb" style="color:'+TYPE_C[x.ptype]+';background:'+TYPE_BG[x.ptype]+'" onclick="cycleType(\''+x.id+'\',\''+x.ptype+'\',event)"'+
+        ' title="'+(x.ptypeGuessed?'Worked out from the tracker’s pillars. ':'')+'Click to change the project type">'+
+        esc(TYPE_SHORT[x.ptype])+(x.ptypeGuessed?'?':'')+'</button>'
+      : '<button class="ptb none" onclick="cycleType(\''+x.id+'\',\'\',event)" title="Not set. Click to set the project type">Type?</button>';
     var risk = x.atRisk ? '<span class="riskb" title="Go-live is inside 30 days and the tracker is under a quarter done">at risk</span>' : '';
-    return '<div class="tr'+(x.id===S.sel?' sel':'')+'" id="row-'+x.id+'" onclick="focusClient(\''+x.id+'\')">'+
-      '<div><div style="font-size:12.5px;font-weight:700;color:var(--w)">'+esc(x.name)+reb+risk+'</div>'+
+    var done = x.allTasks.length - x.outstanding;
+    var pmeta = x.noData ? 'No tracker connected' : (done+' of '+x.allTasks.length+' tasks done');
+    var chips = x.noData ? '' : x.chips.map(function(ch){return '<span class="bchip" style="color:'+ch.c+';background:'+ch.bg+'">'+esc(ch.label)+'</span>';}).join('');
+    return '<div class="tr" id="row-'+x.id+'">'+
+      '<div style="min-width:0"><div style="font-size:12.5px;font-weight:700;color:var(--w)">'+esc(x.name)+reb+risk+'</div>'+
         '<div style="font-size:9px;margin-top:2px;color:'+(x.noLead?'#FBBF24':'var(--mono)')+'">'+
           (x.noLead?'No lead set':'Lead '+esc(x.lead))+'</div></div>'+
       '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+
         '<span class="stg" style="color:'+x.stageColor+';background:'+x.stageBg+'">'+esc(x.stage)+'</span>'+tb+'</div>'+
-      '<div class="mono" style="display:flex;align-items:center;font-size:11px;color:'+x.daysColor+'">'+x.shortDays+'</div>'+
-      '<div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i style="background:'+x.stageColor+';width:'+x.progPct+'"></i></div>'+
-        '<span class="mono" style="font-size:10px;color:var(--mono);width:32px;text-align:right">'+x.progPct+'</span></div>'+
-      '<div style="display:flex;align-items:center;justify-content:flex-end;gap:4px">'+
-        x.chips.map(function(ch){return '<span class="bchip" style="color:'+ch.c+';background:'+ch.bg+'">'+esc(ch.short)+'</span>';}).join('')+'</div></div>';
+      '<div class="mono" style="font-size:11px;color:'+x.daysColor+'" title="'+esc(x.gl?'Go-live '+fmt(x.gl):'No go-live set')+'">'+x.shortDays+'</div>'+
+      '<div><div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1;height:6px;border-radius:3px"><i style="background:'+x.stageColor+';width:'+x.progPct+'"></i></div>'+
+        '<span class="mono" style="font-size:11px;font-weight:700;color:var(--w);width:36px;text-align:right">'+x.progPct+'</span></div>'+
+        '<div class="pmeta">'+esc(pmeta)+'</div></div>'+
+      '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">'+chips+'</div>'+
+      '<div class="ract">'+
+        (x.trackerUrl?'<a class="pill tiny" href="'+x.trackerUrl+'" target="_blank" rel="noopener">Tracker &#8599;</a>':'')+
+        '<button class="pill tiny park" onclick="parkClient(\''+x.id+'\',event)" title="Take this client off the table while it is on hold">Park</button>'+
+      '</div></div>';
   }).join('');
-  var groups=groupsFor(c).map(function(g){
-    var rws=g.tasks.map(function(t){
-      return '<div class="tw'+(t.captured?' cap':'')+'">'+
-        '<div class="grow">'+tickHTML(t)+
-        '<div style="flex:1;min-width:0"><div class="ttx'+(t.done?' done':'')+'">'+esc(t.t)+'</div>'+
-        '<div class="m"><span style="font-weight:700;color:'+t.ownerColor+'">'+esc(t.o)+'</span>'+
-        '<span style="color:var(--mono)">'+esc(t.pillar)+'</span>'+
-        '<span class="mono" style="color:'+t.dueColor+'">'+esc(t.dueLabel)+'</span>'+capMarkHTML(t)+'</div></div>'+
-        '<span class="bchip" style="color:'+t.statusColor+';background:'+t.statusBg+'">'+esc(t.s)+'</span></div>'+
-        capPanelHTML(t)+'</div>';
-    }).join('');
-    return '<div class="gsec">'+
-      '<div class="grp-h gstick" style="color:'+g.color+'">'+esc(g.label)+
-        '<span class="gn">'+g.tasks.length+'</span></div>'+
-      '<div style="display:flex;flex-direction:column;gap:10px;padding:0 16px 12px">'+(rws||'<span class="empty">Nothing here</span>')+'</div></div>';
-  }).join('');
-
-  var risks=[];
-  L.forEach(function(x){ x.outTasks.forEach(function(t){
-    if(t.u==='blocked') risks.push({client:x.name, t:t.t, tag:t.s==='Blocked'?'Blocked':'Waiting',
-      meta:t.o+' · '+t.pillar+' · '+t.dueLabel,
-      tagColor:t.s==='Blocked'?'#F87171':'#FBBF24', tagBg:t.s==='Blocked'?'rgba(248,113,113,.14)':'rgba(251,191,36,.14)'});
-  });});
-  var pipe=pipelineFor(L);
-  var flagged=[]; L.forEach(function(x){ x.allTasks.forEach(function(t){ if(t.chase) flagged.push(t); }); });
-  var ticked=capCount();
+  if(!rows){
+    rows = '<div class="rowempty sub">No '+(S.ptFilter?esc(TYPE_SHORT[S.ptFilter]).toLowerCase()+' ':'')+'clients'+
+      (S.filter!=='All clients'?' with '+esc(S.filter.toLowerCase())+' actions':'')+'.</div>';
+  }
 
   return ''+
   '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">'+
-    '<h2 class="big">Command table</h2><span class="sub">'+L.length+' clients, go-live first &middot; pick a client, work its list</span>'+
-    '<div style="margin-left:auto;display:flex;align-items:center;gap:6px">'+typeFilterHTML()+filtersHTML()+'</div></div>'+
-  '<div class="sub" style="margin-bottom:12px">Read-only. Pick a client to see its open actions; updates are made in the client&rsquo;s own tracker.</div>'+
-  '<div style="display:grid;grid-template-columns:1fr 430px;gap:18px;align-items:start;margin-bottom:22px">'+
-    '<div class="tbl"><div class="thead"><span>Client</span><span>Stage &amp; type</span><span>Go-live</span><span>Progress</span><span style="text-align:right">Open actions</span></div>'+rows+'</div>'+
-    '<div class="panel dpanel">'+
-      // The client name rides at the top of the list it belongs to, so scrolling
-      // a long set of actions never leaves you wondering whose they are.
-      '<div class="dhead">'+
-        '<div style="display:flex;align-items:center;gap:9px">'+
-          '<span style="width:9px;height:9px;border-radius:50%;background:'+c.stageColor+';display:block;flex:none"></span>'+
-          '<span class="dnm">'+esc(c.name)+'</span>'+
-          '<span class="stg" style="color:'+c.stageColor+';background:'+c.stageBg+'">'+esc(c.stage)+'</span>'+
-          '<span class="mono" style="font-size:12.5px;font-weight:800;margin-left:auto;color:'+c.daysColor+'">'+c.shortDays+'</span></div>'+
-        '<div style="font-size:10px;color:var(--mono);margin-top:5px;line-height:1.5">'+esc(c.meta)+'</div></div>'+
-      '<div class="dbody">'+groups+'</div>'+
-      '<div class="dtools">'+
-        '<span class="dtl">Project type</span>'+
-        ['full','migration','build'].map(function(t){
-          return '<button class="pill tiny'+(c.ptype===t?' on':'')+'" onclick="setType(\''+c.id+'\',\''+t+'\',event)">'+esc(TYPE_SHORT[t])+'</button>';
-        }).join('')+
-        (c.ptypeGuessed?'<span class="sub" style="font-size:9px">guessed from the tracker \u00b7 click to confirm</span>':'')+
-        (META_SHARED===false?'<span class="sub" style="font-size:9px;color:#FBBF24">not saved for the team yet \u2014 add sabel-clientmeta-v1 to the webhook key list</span>':'')+
-        '<button class="pill tiny park" style="margin-left:auto" onclick="parkClient(\''+c.id+'\',event)">Park this client</button>'+
-      '</div>'+
-      '<div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border2)">'+
-        '<span class="sub">'+esc(c.foot)+'</span>'+
-        (c.trackerUrl?'<a href="'+c.trackerUrl+'" target="_blank" style="font-size:10px;font-weight:700;text-transform:uppercase">Open tracker &rarr;</a>':'<span class="sub">No tracker yet</span>')+
-      '</div></div></div>'+
+    '<h2 class="big">Command table</h2><span class="sub">'+L.length+' of '+Lall.length+' clients, go-live first</span>'+
+    '<div style="margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+typeFilterHTML()+filtersHTML()+'</div></div>'+
+  '<div class="sub" style="margin-bottom:12px">Progress at a glance. Tasks are worked in each client&rsquo;s own tracker. Park a client that is on hold to take it out of the counts and the go-live lanes.</div>'+
+  (META_SHARED===false?'<div class="localwarn">Parking and project types are saving on this browser only. Add <b>sabel-clientmeta-v1</b> to the webhook key list so the whole team sees them.</div>':'')+
+  '<div class="tbl-wrap"><div class="tbl"><div class="thead"><span>Client</span><span>Stage &amp; type</span><span>Go-live</span><span>Progress</span><span>Open actions</span><span></span></div>'+rows+'</div></div>'+
 
   parkedHTML();
 }
@@ -1700,7 +1694,6 @@ function tlOut(){
 /* Clicking a go-live used to select the client and nothing appeared to happen,
    because the client it opened was further down the page. Take the eye there. */
 function tlGo(id){
-  focusClient(id);
   setTimeout(function(){
     var row=document.getElementById('row-'+id);
     if(!row) return;
@@ -1715,9 +1708,8 @@ function tlGo(id){
 function safeRender(){ render(); }
 function render(){
   var L=all();
-  // Nothing to draw until the first fetch lands — the view indexes into the
-  // client list, so painting it empty would throw.
-  if(!L.length){
+  // Nothing to draw until the first fetch lands.
+  if(!CLIENTS.length){
     document.getElementById('kpis').innerHTML='';
     document.getElementById('tl').innerHTML='';
     document.getElementById('view').innerHTML =
