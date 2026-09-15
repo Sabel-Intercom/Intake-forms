@@ -265,7 +265,7 @@ footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);
    CONFIG
    ===================================================================== */
 const API = 'https://sabel-webhook.vercel.app/api/readiness';
-const FORM_V = '2026-09-15b';
+const FORM_V = '2026-09-15c';
 /* A link like SabelReadinessCheck.html?client=Acme%20Ltd pre-fills the company name and keeps
    that client's draft separate from anyone else's on the same browser. */
 const CLIENT_PARAM = (new URLSearchParams(location.search).get('client')||'').trim();
@@ -599,6 +599,84 @@ const SECTIONS = [
    why:'One named person spots more than a group review does. It usually takes an hour.',
    f:[['h5a','Name','text','',{person:'name',pair:'h5b'}],['h5b','Email address','email','']]}
  ]
+},
+{
+ id:'I', title:'Your business',
+ blurb:'A little about how your business works, so we set Intercom and Fin up for your industry rather than a generic one. Rough answers are fine.',
+ items:[
+  {t:'ask',id:'i1',q:'What kind of business are you?',
+   why:'Pick the closest. It adds a few questions just for your industry below.',
+   f:[['i1a','Industry','select','Ecommerce or retail|Financial services|Gambling or gaming|Software (SaaS)|Marketplace|Consultancy or professional services|Health|Travel or tourism|Other'],
+      ['i1b','Your business in one line','text','e.g. We sell meal kits by subscription in Australia']]},
+
+  {t:'ask',id:'i2',q:'How busy is your support?',
+   why:'Rough numbers are fine. They shape routing, staffing and how much Fin can take on.',
+   f:[['i2a','Conversations per day','text','e.g. about 150'],
+      ['i2b','How much busier at peak','text','e.g. three times as busy in November'],
+      ['i2c','Busiest times of year','text','e.g. Black Friday and Christmas']]},
+
+  {t:'ask',id:'i3',q:'When and where do you look after customers?',
+   f:[['i3a','Support hours and time zones','text','e.g. 8am to 6pm Sydney, Monday to Friday'],
+      ['i3b','Countries or regions you serve','text','e.g. Australia and New Zealand'],
+      ['i3c','Languages customers write in','text','e.g. English and German'],
+      ['i3d','Currencies','text','e.g. AUD and NZD']]},
+
+  {t:'ask',id:'i4',q:'Where are you with Fin, our AI agent?',
+   more:'<p>Fin answers customer questions automatically from your help content and hands over to your team when it should. Some teams already use it, some switch it on as part of this project, and some leave it for later.</p><p>For the build, some teams want everything set up properly from the start. Others prefer to copy what they have today first, then improve it once they are live.</p>',
+   f:[['i4a','Fin today','select','Already using Fin|Switching it on in this project|Not part of this project|Not sure'],
+      ['i4b','How should we approach the build','select','Set it up properly from the start|Copy our current setup first, then improve it|Not sure'],
+      ['i4c','A name for your AI assistant (optional)','text','e.g. Ava']]},
+
+  /* one block per industry; shown only for the industry picked in i1 */
+  {t:'ask',id:'ie1',ind:['Ecommerce or retail'],q:'About your online store',
+   f:[['ie1a','Store platform','select','Shopify|Shopify Plus|Magento|BigCommerce|WooCommerce|Custom built|Other'],
+      ['ie1b','How many storefronts','text','e.g. 3 (AU, NZ, UK)'],
+      ['ie1c','Subscriptions tool, if any','text','e.g. Recharge'],
+      ['ie1d','Returns tool, if any','text','e.g. Loop'],
+      ['ie1e','Shipping and tracking tools','text','e.g. Starshipit, Australia Post'],
+      ['ie1f','Loyalty or rewards tool, if any','text','e.g. Smile.io']]},
+  {t:'ask',id:'ie2',ind:['Ecommerce or retail'],q:'Returns and the kind of products you sell',
+   f:[['ie2a','Your returns policy in a few lines','textarea','Type here',{ex:'30 days for change of mind, unworn and with tags.\nFaulty items replaced or refunded at any time.\nCustomer pays return postage unless the item is faulty.'}],
+      ['ie2b','What customers mostly buy','select','Everyday items, quick decisions|Bigger, considered purchases|A mix']]},
+
+  {t:'ask',id:'if1',ind:['Financial services'],q:'Your licence and obligations',
+   f:[['if1a','Who your customers are','select','Consumers|Businesses|Both'],
+      ['if1b','Licence or regulator','text','e.g. AFSL, FCA'],
+      ['if1c','Complaints scheme and reporting obligations','text','e.g. IDR, AFCA'],
+      ['if1d','Identity verification provider','text','e.g. GreenID, Onfido']]},
+  {t:'ask',id:'if2',ind:['Financial services'],q:'Advice Fin must stay away from',
+   why:'Regulated businesses usually have firm lines here. We build them into Fin from day one.',
+   f:[['if2a','Topics Fin must never advise on','textarea','Type here, one per line',{ex:'Whether a product suits someone’s circumstances\nTax advice\nPredictions about investment returns'}],
+      ['if2b','Products that need their own disclaimer','textarea','Type here, one per line']]},
+
+  {t:'ask',id:'ig1',ind:['Gambling or gaming'],q:'Your licences and platform',
+   f:[['ig1a','Verticals','text','e.g. sports betting, casino, lottery'],
+      ['ig1b','Licences and jurisdictions, with complaint deadlines','textarea','Type here, one per line',{ex:'Malta (MGA): complaints answered within 10 days\nUnited Kingdom (UKGC): final response within 8 weeks'}],
+      ['ig1c','Player account platform','text','e.g. EveryMatrix'],
+      ['ig1d','KYC provider','text',''],
+      ['ig1e','Payment providers, including crypto','text','']]},
+  {t:'ask',id:'ig2',ind:['Gambling or gaming'],q:'Your players',
+   f:[['ig2a','VIP tier names','text','e.g. Bronze, Silver, Gold'],
+      ['ig2b','Responsible gambling tools','text','e.g. deposit limits, self-exclusion'],
+      ['ig2c','Channels beyond email and web chat','text','e.g. Telegram, WhatsApp']]},
+
+  {t:'ask',id:'is1',ind:['Software (SaaS)','Consultancy or professional services','Marketplace'],q:'Your products and customers',
+   f:[['is1a','Products or brands','text',''],
+      ['is1b','Engineering tracker, and how many','text','e.g. Jira, two instances'],
+      ['is1c','Customer tiers or plans','text','e.g. Starter, Pro, Enterprise'],
+      ['is1d','Who you support','select','External customers only|Internal staff only|Both'],
+      ['is1e','Customers also contact you in Slack or Teams','select','Yes, Slack|Yes, Teams|No']]},
+  {t:'ask',id:'im1',ind:['Marketplace'],q:'Buyers and sellers',
+   f:[['im1a','Who contacts support','select','Buyers|Sellers|Both'],
+      ['im1b','Buyers and sellers need different help content','select','Yes|No|Not sure']]},
+
+  {t:'ask',id:'ih1',ind:['Health'],q:'Clinical and sensitive questions',
+   why:'So a clinical question is never handled as if it were an admin one.',
+   f:[['ih1a','Roughly how questions split','text','e.g. 80% bookings and billing, 20% clinical'],
+      ['ih1b','How long you must keep records','text','e.g. 7 years'],
+      ['ih1c','How clinical or sensitive questions must be escalated','textarea','Type here',{ex:'Anything about symptoms or results goes straight to a nurse.\nAny mention of self-harm: call back within 1 hour.'}],
+      ['ih1d','Phone lines','text','']]}
+ ]
 }
 ];
 
@@ -611,7 +689,7 @@ const $  = id => document.getElementById(id);
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function activeSections(){ return SECTIONS.filter(s=>inScope(s.scope)); }
-function activeItems(sec){ return sec.items.filter(i=>inScope(i.scope)); }
+function activeItems(sec){ return sec.items.filter(i=>inScope(i.scope) && (!i.ind || i.ind.indexOf(state.data.i1a||'')>-1)); }
 function steps(){ return ['start', ...activeSections().map(s=>s.id), 'review']; }
 function stepLabel(id){
   if(id==='start') return 'Start · About you';
@@ -961,6 +1039,59 @@ function startAgain(){
   render();
 }
 
+/* =====================================================================
+   FORGE-READY FIELDS
+   industry, a suggested tier, a RAG roll-up per delivery stage, and a
+   markdown summary Greg can hand to Forge. SOW hours are not known here,
+   so the tier is only a hint; Internal Ops holds the real one.
+   ===================================================================== */
+const STAGE_OF = {A:'S0',I:'S0',J:'S0',B:'S1',C:'S1',D:'S1',F:'S2',H:'S3',G:'S4',E:'S5'};
+function tierHint(){
+  const reasons=[]; let tier='Light';
+  const lift=(t,why)=>{ reasons.push(why); if(t==='Enterprise' || (t==='Standard' && tier==='Light')) tier=t; };
+  const ind=state.data.i1a||'';
+  if(['Financial services','Gambling or gaming','Health'].indexOf(ind)>-1) lift('Enterprise','regulated industry: '+ind);
+  const num=v=>parseInt(String(v||'').replace(/[^0-9]/g,''),10);
+  const seats=num(state.data.d3a);
+  if(seats>50) lift('Enterprise',seats+' seats'); else if(seats>15) lift('Standard',seats+' seats');
+  const sources=(state.reps.a1r||[]).filter(r=>r && r.sys && r.sys.trim()).length;
+  if(sources>=3) lift('Enterprise',sources+' systems to move from'); else if(sources===2) lift('Standard','2 systems to move from');
+  const stores=num(state.data.ie1b);
+  if(stores>=3) lift('Enterprise',stores+' storefronts'); else if(stores===2) lift('Standard','2 storefronts');
+  return {tier, reasons, note:'Hint only. Contracted hours and the SOW decide the tier.'};
+}
+function stageRollup(out){
+  const st={};
+  Object.keys(out.sections).forEach(sec=>{
+    const k=STAGE_OF[sec]||sec; const s=st[k]||(st[k]={rag:'green',open:[]});
+    out.sections[sec].forEach(i=>{
+      if(i.type!=='status' || i.status==='green' || i.status==='na') return;
+      if(i.status==='red') s.rag='red'; else if(s.rag!=='red') s.rag='amber';
+      s.open.push(i.id);
+    });
+  });
+  return st;
+}
+function forgeIntake(out){
+  const L=['# Readiness intake: '+(out.client||''),'',
+    '- Project type: '+out.projectType,
+    '- Industry: '+(out.industry||'not given'),
+    '- Suggested tier: '+out.tierHint.tier+(out.tierHint.reasons.length?' ('+out.tierHint.reasons.join('; ')+')':''),
+    '- Form version: '+out.formVersion];
+  ['I','A','B','C','D','E','F','G','H','J'].filter(k=>out.sections[k]).forEach(k=>{
+    const sec=SECTIONS.find(s=>s.id===k); L.push('','## '+k+' · '+(sec?sec.title:k));
+    out.sections[k].forEach(i=>{
+      if(i.type==='status'){
+        L.push('- '+i.question+': '+(i.answer||'not answered')+(i.owner?' (owner '+i.owner+(i.dueBy?', by '+i.dueBy:'')+')':'')+(i.note?'. '+i.note:''));
+      } else {
+        const parts=Object.entries(i.answers||{}).filter(([q,a])=>a && a!=='(none given)' && a!=='(none)');
+        if(parts.length){ L.push('- '+i.question); parts.forEach(([q,a])=>L.push('  - '+q+': '+String(a).replace(/\n+/g,' / '))); }
+      }
+    });
+  });
+  return L.join('\n');
+}
+
 function collect(){
   readDOM();
   const typeLabel=(TYPES.find(t=>t[0]===state.projectType)||[])[1]||'Not chosen';
@@ -1000,6 +1131,10 @@ function collect(){
 
   const t=tally();
   out.summary={green:t.g,amber:t.a,red:t.r,na:t.n,unanswered:t.miss};
+  out.industry = state.data.i1a||'';
+  out.tierHint = tierHint();
+  out.stages = stageRollup(out);
+  out.forgeIntake = forgeIntake(out);
   return out;
 }
 
@@ -1142,7 +1277,39 @@ document.addEventListener('input',e=>{
   save();
 });
 
-restore(); render();
+/* Section I: picking an industry shows that industry's questions */
+document.addEventListener('change',e=>{
+  if(e.target.id!=='i1a') return;
+  readDOM(); save(); const y=window.scrollY; render(); window.scrollTo(0,y);
+});
+
+/* =====================================================================
+   SECTION J: this client's own inputs from their scope of work.
+   Sabel lists them in Internal Ops, which publishes them to the
+   readiness-inputs-v1 store keyed by the client name in ?client=.
+   No list, or no ?client=, means no Section J.
+   ===================================================================== */
+const INPUTS_URL = 'https://sabel-webhook.vercel.app/api/tracker?key=readiness-inputs-v1';
+function inputId(txt){ let h=0; for(const ch of String(txt)) h=(h*31+ch.charCodeAt(0))|0; return 'pj'+(h>>>0).toString(36); }
+async function loadProjectInputs(){
+  if(!CLIENT_PARAM) return;
+  try{
+    const r=await fetch(INPUTS_URL+'&_t='+Date.now(),{cache:'no-store'}); if(!r.ok) return;
+    const j=await r.json(); const all=(j && j.data && j.data.clients)||{};
+    const want=CLIENT_PARAM.toLowerCase().trim();
+    const hit=all[want] || Object.values(all).find(x=>x && String(x.name||'').toLowerCase().trim()===want);
+    const items=(hit && Array.isArray(hit.items) ? hit.items : []).map(x=>String(x).trim()).filter(Boolean);
+    if(!items.length || SECTIONS.some(s=>s.id==='J')) return;
+    const cur=steps()[state.step];
+    SECTIONS.push({id:'J', title:'Your project’s inputs',
+      blurb:'Your scope of work lists a few things we need from you for this particular project. Tell us where each one is up to.',
+      items:items.map(txt=>({t:'rag', id:inputId(txt), opts:O.ready, q:txt}))});
+    const i=steps().indexOf(cur); if(i>-1) state.step=i;
+    render();
+  }catch(e){}
+}
+
+restore(); render(); loadProjectInputs();
 </script>
 </body>
 </html>

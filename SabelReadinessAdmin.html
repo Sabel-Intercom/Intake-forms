@@ -162,6 +162,17 @@ async function open(id){
     $('dtitle').textContent=d.submission.client||'Unnamed';
     $('dmeta').textContent=(d.submission.contactName||'')+' · '+(d.submission.contactEmail||'')+' · ref '+id;
     $('dreport').textContent=d.report;
+    /* Forge-ready fields from form version 2026-09-15c onwards */
+    const sub=d.submission||{};
+    let fx=document.getElementById('dforge');
+    if(!fx){ fx=document.createElement('div'); fx.id='dforge'; fx.style.margin='0 0 14px'; $('dreport').parentNode.insertBefore(fx,$('dreport')); }
+    fx.innerHTML = sub.forgeIntake
+      ? '<p class="meta" style="margin:0 0 10px">Industry: '+esc(sub.industry||'not given')+' · Suggested tier: '+esc((sub.tierHint&&sub.tierHint.tier)||'none')+
+        ((sub.tierHint&&sub.tierHint.reasons&&sub.tierHint.reasons.length)?' ('+esc(sub.tierHint.reasons.join('; '))+')':'')+'</p>'+
+        '<button class="ghost" type="button" id="copyforge">Copy Forge intake for Greg</button>'
+      : '';
+    const cb=document.getElementById('copyforge');
+    if(cb) cb.onclick=()=>{ (navigator.clipboard?navigator.clipboard.writeText(sub.forgeIntake):Promise.reject()).then(()=>{ cb.textContent='Copied'; }).catch(()=>{ prompt('Copy the Forge intake', sub.forgeIntake); }); };
     show('detail'); window.scrollTo(0,0);
   }catch(e){ alert(e.message); }
 }

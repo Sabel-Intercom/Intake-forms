@@ -411,7 +411,7 @@ const PHASES = [
   ["nikki","Fill in this client's details: tier, type, lead, hours, signed date"],
   ["nikki","Drive folder 00 to 08 created, SOW saved in 00_Project Admin"],
   ["nikki","Slack channel with Richard, Chris and Greg, SOW pinned"],
-  ["nikki","Paste the SOW's Client Inputs Required into the readiness admin"],
+  ["nikki","List the SOW's Client Inputs Required in Details, so they show in the client's Readiness Check"],
   ["nikki","Scope register v1: every SOW line, marked in or out of scope"],
   ["nikki","Register the tracker key (and migration intake key) before any link goes out"],
   ["nikki","Notion Projects row: hours, signed date, SOW links"],
@@ -642,6 +642,8 @@ function warnings(c){
   if(tk && S.loaded.reg && !S.reg.some(t=>t.key===tk)) w.push(["Not in trackers.json: "+tk,"Add an entry so the dashboard and weekly sweeps find it."]);
   if(hasHub(c) && curIdx(c)>=5 && curIdx(c)<PHASES.length && !tk) w.push(["No tracker key yet","Needed once the blueprint is signed."]);
   if(c.goLiveDate && !c.day30Date) w.push(["No Day-30 date","Set it once go-live is confirmed (go-live plus 30 days)."]);
+  if(hasHub(c) && curIdx(c)<=2 && !((c.hub.sowInputs||[]).length)) w.push(["No SOW client inputs listed","Add the SOW's Client Inputs Required in Details, so they show in the client's Readiness Check."]);
+  if(hasHub(c) && (S.inputsStatus||{})[c.id]==="unregistered") w.push(["SOW client inputs not published","Add readiness-inputs-v1 to ALLOWED_KEYS in sabel-webhook, then edit the list again."]);
   if(hasHub(c) && !c.tier) w.push(["No tier set","Light, Standard or Enterprise, from the SOW triggers."]);
   return w;
 }
@@ -727,6 +729,30 @@ async function flush(){
   }
 }
 window.addEventListener("beforeunload", e=>{ if(S.dirty.size){ e.preventDefault(); e.returnValue=""; } });
+
+/* ---------- SOW client inputs: published to the client's Readiness Check ----------
+   Only the client name and the list go to readiness-inputs-v1, never the rest of the client record. */
+const INPUTS_KEY = "readiness-inputs-v1";
+async function publishInputs(c){
+  S.inputsStatus = S.inputsStatus || {};
+  S.inputsStatus[c.id] = "saving"; render(true);
+  try{
+    let store = {clients:{}};
+    try{
+      const j = await getJSON(API+"?key="+INPUTS_KEY);
+      if(j.data && j.data.clients) store = j.data;
+    }catch(e){
+      if(e.status===404){ S.inputsStatus[c.id]="unregistered"; return render(true); }
+      throw e;
+    }
+    store.clients[c.name.toLowerCase().trim()] = {name:c.name, items:(c.hub.sowInputs||[]), updated:new Date().toISOString()};
+    const r = await fetch(API+"?key="+INPUTS_KEY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({data:store})});
+    if(r.status===404) S.inputsStatus[c.id]="unregistered";
+    else if(!r.ok) throw new Error("HTTP "+r.status);
+    else S.inputsStatus[c.id]="published";
+  }catch(e){ S.inputsStatus[c.id]="failed"; }
+  render(true);
+}
 
 /* ---------- mutations ---------- */
 function ensureHub(c, startPhase){
@@ -1054,6 +1080,8 @@ function asidePanels(c,n,ko,tk,td,w){
     '<label>Drive folder URL<input type="url" data-field="hub.driveUrl" data-id="'+c.id+'" value="'+esc(hub.driveUrl||"")+'"></label>'+
     '<label class="full">Notion project<select data-field="hub.notionId" data-id="'+c.id+'"><option value="">'+(n&&!hub.notionId?'Matched by name: '+esc(n.name):'Not linked')+'</option>'+S.notion.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(p=>'<option value="'+esc(p.id)+'"'+(hub.notionId===p.id?' selected':'')+'>'+esc(p.name)+'</option>').join("")+'</select></label>'+
     '<label class="full">Kick-off Desk record<select data-field="hub.kickoffId" data-id="'+c.id+'"><option value="">'+(ko&&!hub.kickoffId?'Matched by name: '+esc(ko.r.name||ko.id):'Not linked')+'</option>'+Object.entries(S.kickoff||{}).filter(([k,r])=>r&&!r.removed).sort((a,b)=>String(a[1].name||a[0]).localeCompare(String(b[1].name||b[0]))).map(([k,r])=>'<option value="'+esc(k)+'"'+(hub.kickoffId===k?' selected':'')+'>'+esc(r.name||k)+'</option>').join("")+'</select></label>'+
+    '<label class="full">SOW client inputs · one per line · shown in their Readiness Check<textarea data-field="hub.sowInputs" data-id="'+c.id+'" placeholder="Brand assets for each brand&#10;Help centre article export">'+esc((hub.sowInputs||[]).join("\n"))+'</textarea></label>'+
+    '<div class="full" style="font-size:12px;color:var(--muted);margin-top:-6px">'+esc({saving:"Publishing to their Readiness Check…",published:"Shown in their Readiness Check (Section J).",unregistered:"Not published: add readiness-inputs-v1 to ALLOWED_KEYS in sabel-webhook, then edit again.",failed:"Could not publish. Edit the list again to retry."}[(S.inputsStatus||{})[c.id]] || ((hub.sowInputs||[]).length ? (hub.sowInputs.length+" item"+(hub.sowInputs.length>1?"s":"")+" listed. Clients see them when they open their Readiness Check link.") : "Copy these from the SOW's Client Inputs Required section."))+'</div>'+
     '<label class="full">Notes<textarea data-field="notes" data-id="'+c.id+'">'+esc(c.notes||"")+'</textarea></label>'+
   '</div></details></section>';
   return h;
@@ -1111,7 +1139,8 @@ document.addEventListener("change", e=>{
   const t=e.target; if(!t.dataset.field) return;
   const c=byId(t.dataset.id); if(!c) return;
   const f=t.dataset.field, v=t.value.trim();
-  if(f.startsWith("hub.")){ ensureHub(c, c.hub&&c.hub.startPhase); c.hub[f.slice(4)]=v; touch(c); }
+  if(f==="hub.sowInputs"){ ensureHub(c, c.hub&&c.hub.startPhase); c.hub.sowInputs=t.value.split("\n").map(x=>x.trim()).filter(Boolean); touch(c); publishInputs(c); }
+  else if(f.startsWith("hub.")){ ensureHub(c, c.hub&&c.hub.startPhase); c.hub[f.slice(4)]=v; touch(c); }
   else {
     c[f]=v; const fields=[f];
     if(f==="goLiveDate" && v && !c.day30Date){ c.day30Date=addDays(v,30); fields.push("day30Date"); }
