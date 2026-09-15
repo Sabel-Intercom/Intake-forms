@@ -1,0 +1,1167 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Sabel Ops Hub</title>
+<script>
+  try{ var t=localStorage.getItem('sabel-ops-theme'); if(t==='dark'||t==='light') document.documentElement.setAttribute('data-theme',t); }catch(e){}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#F5F5F3; --surface:#FFFFFF; --sunk:#F1F2F3; --raise:#FAFAF9;
+  --ink:#14171A; --body:#3A4046; --muted:#6B7480; --faint:#9AA1AB;
+  --line:#E3E5E8; --line2:#D2D6DB;
+  --accent:#E10600; --accent-ink:#B80500; --accent-soft:#FDECEA;
+  --good:#15803D; --good-soft:#E7F4EC; --warn:#B45309; --warn-soft:#FBF0E2; --info:#1D4ED8; --info-soft:#E8EEFB;
+  --mine:#FFF6F5; --shadow:0 1px 2px rgba(20,23,26,.05),0 4px 14px rgba(20,23,26,.04);
+  --display:'Archivo',"Helvetica Neue",Arial,sans-serif; --text:'Source Sans 3',"Helvetica Neue",Arial,sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --logo-filter:none;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1012; --surface:#15181B; --sunk:#1C2024; --raise:#181B1F;
+    --ink:#F2F3F5; --body:#C5CBD3; --muted:#8C95A1; --faint:#646C77;
+    --line:#262B31; --line2:#343A42;
+    --accent:#FF4D40; --accent-ink:#FF6B60; --accent-soft:rgba(255,77,64,.14);
+    --good:#4ADE80; --good-soft:rgba(74,222,128,.12); --warn:#F5A524; --warn-soft:rgba(245,165,36,.13); --info:#7AA2FF; --info-soft:rgba(122,162,255,.13);
+    --mine:rgba(255,77,64,.07); --shadow:0 1px 2px rgba(0,0,0,.4);
+    --logo-filter:brightness(0) invert(1);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1012; --surface:#15181B; --sunk:#1C2024; --raise:#181B1F;
+  --ink:#F2F3F5; --body:#C5CBD3; --muted:#8C95A1; --faint:#646C77;
+  --line:#262B31; --line2:#343A42;
+  --accent:#FF4D40; --accent-ink:#FF6B60; --accent-soft:rgba(255,77,64,.14);
+  --good:#4ADE80; --good-soft:rgba(74,222,128,.12); --warn:#F5A524; --warn-soft:rgba(245,165,36,.13); --info:#7AA2FF; --info-soft:rgba(122,162,255,.13);
+  --mine:rgba(255,77,64,.07); --shadow:0 1px 2px rgba(0,0,0,.4);
+  --logo-filter:brightness(0) invert(1);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ground);color:var(--body);font-family:var(--text);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+[hidden]{display:none!important}
+.mono{font-family:var(--mono)}
+.eyebrow{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- shell ---------- */
+.app{display:grid;grid-template-columns:284px minmax(0,1fr);height:100dvh}
+.side{background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;padding-top:env(safe-area-inset-top,0px)}
+.side-top{padding:16px 16px 10px;display:grid;gap:12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand img{height:20px;width:auto;filter:var(--logo-filter)}
+.brand b{font-family:var(--display);font-weight:700;color:var(--ink);font-size:15px;letter-spacing:-.01em;padding-left:10px;border-left:1px solid var(--line2)}
+.search{position:relative}
+.search input{width:100%;padding:8px 10px 8px 30px;border:1px solid var(--line2);border-radius:7px;background:var(--raise);font-size:14px}
+.search svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--muted)}
+.navbtn{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;padding:8px 10px;border-radius:7px;border:0;background:transparent;cursor:pointer;font-weight:600;color:var(--ink)}
+.navbtn:hover{background:var(--sunk)}
+.navbtn.on{background:var(--ink);color:var(--surface)}
+.navbtn .count{font-family:var(--mono);font-size:11px;background:var(--accent);color:#fff;border-radius:99px;padding:0 7px;line-height:18px}
+.navbtn.on .count{background:var(--accent)}
+.clients{flex:1;overflow-y:auto;padding:6px 8px 20px}
+.grp{margin-top:12px}
+.grp-h{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;width:100%;background:none;border:0;cursor:default}
+.grp-h.toggle{cursor:pointer}
+.grp-h .eyebrow{color:var(--faint)}
+.grp-h .n{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+.crow{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;width:100%;text-align:left;padding:7px 8px;border-radius:7px;border:0;background:transparent;cursor:pointer}
+.crow:hover{background:var(--sunk)}
+.crow.on{background:var(--accent-soft)}
+.crow .nm{font-weight:600;color:var(--ink);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow .mt{grid-column:1;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow .rt{grid-row:1/span 2;grid-column:2;display:flex;align-items:center;gap:6px}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:600;border-radius:99px;padding:0 6px;line-height:17px;background:var(--accent);color:#fff}
+.dot-warn{width:7px;height:7px;border-radius:50%;background:var(--warn)}
+.minibar{width:34px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.minibar i{display:block;height:100%;background:var(--good)}
+.side-foot{border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;align-items:center}
+
+.main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.topbar{display:flex;align-items:center;gap:10px;padding:10px 24px;padding-top:calc(10px + env(safe-area-inset-top,0px));border-bottom:1px solid var(--line);background:var(--surface)}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);min-width:0}
+.crumb button{border:0;background:none;cursor:pointer;color:var(--muted);padding:2px 4px;border-radius:4px}
+.crumb button:hover{color:var(--ink)}
+.crumb b{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spacer{flex:1}
+.savepill{font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.savepill i{width:7px;height:7px;border-radius:50%;background:var(--line2)}
+.savepill.saved i{background:var(--good)} .savepill.saving i{background:var(--warn)} .savepill.offline i{background:var(--accent)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:7px;border:1px solid var(--line2);background:var(--surface);cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink);text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--sunk);border-color:transparent}
+.btn.sm{padding:4px 9px;font-size:12.5px;border-radius:6px}
+.btn[disabled],.btn.off{opacity:.45;pointer-events:none}
+.tools{position:relative}
+.tools summary{list-style:none}
+.tools summary::-webkit-details-marker{display:none}
+.tools .menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.14);padding:6px;min-width:250px}
+.tools .menu a{display:block;padding:8px 10px;border-radius:6px;text-decoration:none;font-size:14px;color:var(--ink)}
+.tools .menu a small{display:block;color:var(--muted);font-size:12px}
+.tools .menu a:hover{background:var(--sunk)}
+.scroll{flex:1;overflow-y:auto;padding:24px;padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+.page{max-width:1240px;margin:0 auto}
+.menu-btn{display:none}
+
+/* ---------- common blocks ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.panel-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:14px 16px 10px}
+.panel-h h3{margin:0;font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink)}
+.panel-h .sub{font-size:12.5px;color:var(--muted)}
+.empty{padding:14px 16px 16px;color:var(--muted);font-size:14px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;font-weight:500;border:1px solid var(--line2);border-radius:5px;padding:1px 7px;color:var(--ink);background:var(--surface);white-space:nowrap}
+.chip.red{border-color:var(--accent);color:var(--accent)}
+.chip.good{border-color:transparent;background:var(--good-soft);color:var(--good)}
+.chip.warn{border-color:transparent;background:var(--warn-soft);color:var(--warn)}
+.chip.info{border-color:transparent;background:var(--info-soft);color:var(--info)}
+.chip.solid{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.own{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);white-space:nowrap}
+.own i{font-style:normal;font-family:var(--mono);font-size:10px;font-weight:600;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line2);color:var(--ink)}
+.own.nikki{color:var(--accent);font-weight:600}
+.own.nikki i{background:var(--accent);border-color:var(--accent);color:#fff}
+.due{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+.due.late{color:var(--accent);font-weight:600}
+.due.soon{color:var(--warn);font-weight:600}
+
+/* ---------- today ---------- */
+.today-h{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.today-h h1{margin:0;font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:-.02em;color:var(--ink)}
+.today-h p{margin:4px 0 0;color:var(--muted)}
+.stats{display:flex;flex-wrap:wrap;gap:8px}
+.stat{display:flex;align-items:baseline;gap:6px;padding:6px 12px;border:1px solid var(--line);border-radius:99px;background:var(--surface);font-size:13px;color:var(--muted)}
+.stat b{font-family:var(--display);font-size:17px;color:var(--ink)}
+.stat.red b{color:var(--accent)}
+.tgrid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:start}
+.tcol{display:grid;gap:16px}
+.tlist{list-style:none;margin:0;padding:0 8px 8px}
+.titem{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:4px 10px;align-items:start;padding:9px 8px;border-radius:8px}
+.titem:hover{background:var(--sunk)}
+.titem .cl{font-weight:600;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;text-align:left;font-size:13px}
+.titem .cl:hover{text-decoration:underline}
+.titem .tx{font-size:14.5px;color:var(--ink);line-height:1.35}
+.titem .ph{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.titem .meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin-top:2px}
+.titem .side-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.dates{list-style:none;margin:0;padding:0 16px 12px}
+.dates li{display:grid;grid-template-columns:74px 1fr auto;gap:10px;align-items:baseline;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.dates li:first-child{border-top:0}
+.dates .d{font-family:var(--mono);font-size:12px;color:var(--ink)}
+.dates button{background:none;border:0;padding:0;text-align:left;cursor:pointer;color:var(--ink);font-weight:600}
+.dates button:hover{text-decoration:underline}
+
+/* ---------- checkbox ---------- */
+.tick{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line2);background:var(--surface);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;flex:none;margin-top:1px}
+.tick:hover{border-color:var(--ink)}
+.tick svg{width:13px;height:13px;stroke:#fff;stroke-width:3;fill:none;opacity:0}
+.tick.done{background:var(--good);border-color:var(--good)}
+.tick.done svg{opacity:1}
+.tick.doing{border-color:var(--warn);background:var(--warn-soft)}
+.tick.doing::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.tick.na{border-style:dashed;background:var(--sunk)}
+.tick.na::after{content:"";width:9px;height:1.5px;background:var(--muted)}
+.tick.mine{border-color:var(--accent)}
+.tick.mine.done{border-color:var(--good)}
+
+/* ---------- client ---------- */
+.chead{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 24px;align-items:end;margin-bottom:18px}
+.chead h1{margin:0;font-family:var(--display);font-weight:800;font-size:32px;letter-spacing:-.02em;color:var(--ink);line-height:1.05;text-wrap:balance}
+.chead .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.keydates{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.keydates div{padding:8px 14px;border-left:1px solid var(--line);min-width:108px}
+.keydates div:first-child{border-left:0}
+.keydates .l{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.keydates .v{font-family:var(--display);font-weight:700;color:var(--ink);font-size:15px;white-space:nowrap}
+.keydates .c{font-size:12px;color:var(--muted);white-space:nowrap}
+.keydates .c.late{color:var(--accent)} .keydates .c.soon{color:var(--warn)}
+.cgrid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;align-items:start}
+.cmain{display:grid;gap:16px;min-width:0}
+.caside{display:grid;gap:16px;align-content:start}
+
+.scope{padding:0 16px 16px}
+.scope .txt{font-size:14.5px;color:var(--body);white-space:pre-wrap;max-width:88ch}
+.scope .txt.clamp{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.scope .row{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:13.5px}
+.scope .row b{color:var(--ink);font-weight:600}
+.inout{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.inout ul{margin:4px 0 0;padding-left:18px;font-size:13.5px}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;margin-top:6px}
+
+/* journey */
+.journey{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;padding:0 16px 14px}
+.jseg{border:0;background:none;padding:0;cursor:pointer;text-align:left;min-width:0}
+.jseg .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;position:relative}
+.jseg .bar i{position:absolute;inset:0 auto 0 0;background:var(--good)}
+.jseg.closed .bar{background:var(--good)}
+.jseg.cur .bar{background:var(--accent-soft);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.jseg.cur .bar i{background:var(--accent)}
+.jseg .lb{display:block;font-size:11px;color:var(--muted);margin-top:5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jseg .cd{display:block;font-family:var(--mono);font-size:10px;color:var(--faint)}
+.jseg.cur .lb{color:var(--ink);font-weight:600}
+.jseg.cur .cd{color:var(--accent)}
+.jseg:hover .lb{color:var(--ink)}
+.legacy-note{margin:0 16px 14px;font-size:12.5px;color:var(--muted)}
+
+.toolrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:6px 11px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:12px;scroll-margin-top:12px;overflow:hidden}
+.phase.cur{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.phase-h{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px;cursor:pointer;width:100%;border:0;background:none;text-align:left}
+.phase-h .num{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line2);border-radius:6px;padding:3px 7px;min-width:44px;text-align:center}
+.phase.cur .phase-h .num{background:var(--accent);border-color:var(--accent);color:#fff}
+.phase.closed .phase-h .num{background:var(--good-soft);border-color:transparent;color:var(--good)}
+.phase-h .t{font-family:var(--display);font-weight:700;font-size:16px;color:var(--ink)}
+.phase-h .w{font-size:12.5px;color:var(--muted)}
+.phase-h .r{display:flex;align-items:center;gap:10px}
+.phase-h .prog{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+.phase-h .prog b{color:var(--accent)}
+.phase-h .chev{width:16px;height:16px;stroke:var(--muted);transition:transform .15s}
+.phase.open .phase-h .chev{transform:rotate(180deg)}
+.steps{list-style:none;margin:0;padding:0 8px 4px;border-top:1px solid var(--line)}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:2px 10px;align-items:start;padding:8px 8px;border-radius:8px}
+.step+.step{margin-top:1px}
+.step.mine{background:var(--mine)}
+.step .tx{font-size:14.5px;color:var(--ink);line-height:1.4}
+.step.other .tx{color:var(--body)}
+.step.done .tx,.step.na .tx{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line2)}
+.step .acts{display:flex;align-items:center;gap:8px}
+.step .more{opacity:0;display:flex;gap:2px;transition:opacity .12s}
+.step:hover .more,.step:focus-within .more{opacity:1}
+.iconbtn{border:0;background:none;cursor:pointer;color:var(--muted);font-size:12px;padding:3px 6px;border-radius:5px;white-space:nowrap}
+.iconbtn:hover{background:var(--sunk);color:var(--ink)}
+.iconbtn.on{color:var(--warn)}
+.step .note{grid-column:2/-1;font-size:13px;color:var(--muted)}
+.step .note textarea{width:100%;min-height:54px;border:1px solid var(--line2);border-radius:6px;padding:6px 8px;background:var(--raise);font-size:13.5px;resize:vertical}
+.step .when{grid-column:2;font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+.gate{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding:10px 16px;background:var(--sunk);border-top:1px solid var(--line)}
+.gate .g{font-size:13.5px;color:var(--ink)}
+.gate .g b{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:8px}
+.gate.closed{background:var(--good-soft)}
+.gate.closed .g b{color:var(--good)}
+.phase-sum{padding:0 16px 12px;font-size:13px;color:var(--muted)}
+
+/* aside */
+.sow{padding:4px 16px 16px;display:grid;gap:10px}
+.hours{display:flex;align-items:baseline;gap:8px}
+.hours .n{font-family:var(--display);font-weight:800;font-size:40px;color:var(--ink);line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hours .u{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.hours .src{margin-left:auto;font-size:11.5px;color:var(--faint)}
+.sow .note{font-size:13px;color:var(--muted)}
+.docrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.docrow .btn{justify-content:center}
+.links{list-style:none;margin:0;padding:0 8px 10px}
+.links li a,.links li button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:7px 8px;border-radius:7px;text-decoration:none;font-size:14px;color:var(--ink);border:0;background:none;cursor:pointer;text-align:left}
+.links li a:hover,.links li button:hover{background:var(--sunk)}
+.links li .k{font-family:var(--mono);font-size:11px;color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.links li.off a{color:var(--faint);pointer-events:none}
+.trk{padding:4px 16px 16px;display:grid;gap:8px}
+.trk .bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;display:flex}
+.trk .bar i{display:block;height:100%}
+.trk .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.trk .nums div{font-size:12px;color:var(--muted)}
+.trk .nums b{display:block;font-family:var(--display);font-size:18px;color:var(--ink);font-variant-numeric:tabular-nums}
+.warns{list-style:none;margin:0;padding:0 16px 14px;display:grid;gap:8px}
+.warns li{font-size:13.5px;color:var(--ink);padding-left:14px;position:relative}
+.warns li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;background:var(--warn)}
+.warns li small{display:block;color:var(--muted);font-size:12.5px}
+.form{padding:2px 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form .full{grid-column:1/-1}
+.form label{display:grid;gap:3px;font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.form input,.form select,.form textarea{font-family:var(--text);font-size:14px;letter-spacing:0;text-transform:none;color:var(--ink);background:var(--raise);border:1px solid var(--line2);border-radius:6px;padding:6px 8px;width:100%;min-width:0}
+.form textarea{min-height:80px;resize:vertical}
+details.fold>summary{list-style:none;cursor:pointer}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary .chev{width:16px;height:16px;stroke:var(--muted);transition:transform .15s}
+details.fold[open]>summary .chev{transform:rotate(180deg)}
+
+.setup{padding:18px 20px;display:grid;gap:12px;border:1px dashed var(--accent);border-radius:12px;background:var(--mine)}
+.setup h3{margin:0;font-family:var(--display);font-size:18px;color:var(--ink)}
+.setup p{margin:0;max-width:70ch}
+.setup .row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.setup label{display:grid;gap:3px;font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.setup select,.setup input{font-family:var(--text);font-size:14px;text-transform:none;letter-spacing:0;color:var(--ink);background:var(--surface);border:1px solid var(--line2);border-radius:6px;padding:7px 9px}
+
+.banner{margin:0 0 14px;padding:10px 14px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:13.5px}
+.loading{padding:60px 0;text-align:center;color:var(--muted)}
+
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--body);padding:0;width:min(520px,calc(100vw - 32px));box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(10,12,14,.45)}
+dialog .dh{padding:16px 18px 6px;font-family:var(--display);font-weight:700;font-size:18px;color:var(--ink)}
+dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16px}
+
+@media (max-width:1100px){ .cgrid{grid-template-columns:1fr} .caside{position:static} .tgrid{grid-template-columns:1fr} }
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;inset:0 auto 0 0;width:min(300px,86vw);z-index:50;transform:translateX(-102%);transition:transform .18s;box-shadow:0 0 40px rgba(0,0,0,.2)}
+  body.side-open .side{transform:none}
+  .menu-btn{display:inline-flex}
+  .scroll{padding:16px}
+  .topbar{padding-inline:16px}
+  .chead{grid-template-columns:1fr}
+  .journey{grid-template-columns:repeat(6,minmax(0,1fr));row-gap:10px}
+  .form{grid-template-columns:1fr}
+  .inout{grid-template-columns:1fr}
+  .step .more{opacity:1}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side" aria-label="Clients">
+    <div class="side-top">
+      <div class="brand"><img src="data:image/png;base64,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" alt="Sabel"><b>Ops Hub</b></div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Find a client  ( / )" autocomplete="off">
+      </div>
+      <button class="navbtn" id="nav-today" data-act="today">Today <span class="count" id="today-count" hidden></span></button>
+    </div>
+    <div class="clients" id="clients"></div>
+    <div class="side-foot">
+      <button class="btn sm" data-act="add-client">+ Add client</button>
+      <span class="spacer"></span>
+      <button class="btn sm ghost" data-act="theme" id="theme-btn" aria-label="Switch light or dark">Theme</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="btn sm menu-btn" data-act="side">Clients</button>
+      <div class="crumb" id="crumb"></div>
+      <span class="spacer"></span>
+      <span class="savepill" id="savepill"><i></i><span>Loading</span></span>
+      <details class="tools" id="tools">
+        <summary class="btn sm">Other tools</summary>
+        <div class="menu">
+          <a href="SabelKickoffDesk.html" target="_blank" rel="noopener">Kick-off Desk<small>Run and record the kickoff call</small></a>
+          <a href="SabelReadinessAdmin.html" target="_blank" rel="noopener">Readiness submissions<small>Client answers and RAG</small></a>
+          <a href="SabelProjectDashboard.html" target="_blank" rel="noopener">Tracker dashboard<small>Every client tracker, live</small></a>
+          <a href="SabelWeeklyUpdates.html" target="_blank" rel="noopener">Weekly updates<small>Monday and Friday client notes</small></a>
+          <a href="SabelClientContracts.html" target="_blank" rel="noopener">Client contracts<small>Hours, scope and expiry watch</small></a>
+          <a href="SabelFeedbackDashboard.html" target="_blank" rel="noopener">Feedback<small>What clients are telling us</small></a>
+          <a href="SabelMigrationIntake.html#admin" target="_blank" rel="noopener">Migration intake<small>Mapping form admin view</small></a>
+          <a href="SabelClientPortal.html" target="_blank" rel="noopener">Old onboarding portal<small>Previous checklist view</small></a>
+          <a href="https://claude.ai/artifact/HGy9CJpb3iR2WHLX9h9S5m" target="_blank" rel="noopener">Delivery Run Sheet<small>The framework this hub follows</small></a>
+        </div>
+      </details>
+    </header>
+    <div class="scroll" id="scroll"><div class="page" id="view"><div class="loading">Loading clients, Notion and trackers…</div></div></div>
+  </div>
+</div>
+
+<dialog id="add-dlg">
+  <form method="dialog" id="add-form">
+    <div class="dh">Add a client</div>
+    <div class="form">
+      <label class="full">Client name<input id="add-name" required list="notion-names" autocomplete="off"></label>
+      <datalist id="notion-names"></datalist>
+      <label>Starting point<select id="add-stage"><option value="Discovery">Scoping, proposal out</option><option value="Onboarding">Signed, start at Day 0</option></select></label>
+      <label>Tier<select id="add-tier"><option value="">Not set</option><option>Light</option><option>Standard</option><option>Enterprise</option></select></label>
+      <label>Project type<select id="add-type"><option value="full">Full project</option><option value="build">Build only</option><option value="migration">Migration only</option></select></label>
+      <label>Project lead<select id="add-lead"><option value="">Not set</option><option>Chris</option><option>Richard</option><option>Greg</option></select></label>
+    </div>
+    <div class="dfoot"><button class="btn" value="cancel" type="submit" formnovalidate>Cancel</button><button class="btn primary" value="ok" type="submit">Add client</button></div>
+  </form>
+</dialog>
+
+<script>
+"use strict";
+/* =====================================================================
+   SOURCES
+   Portal store owns the client, its stage, dates and the hub step ticks.
+   Notion owns commercials (hours, SOW links, scope). Trackers own tasks.
+   ===================================================================== */
+const API = "https://sabel-webhook.vercel.app/api/tracker";
+const PORTAL_KEY = "client-portal-v1";
+const KICKOFF_KEY = "sabel-kickoff-v1";
+const NOTION_URL = "https://sabel-webhook.vercel.app/api/notion?kind=projects";
+const PAGES = "https://sabel-intercom.github.io/Intake-forms/";
+const TRACKERS_JSON = PAGES + "trackers.json";
+const SLACK = "https://scss-group.slack.com/archives/";
+const CACHE_KEY = "sabel-opshub-v2-cache";
+const PREF_KEY = "sabel-opshub-v2-prefs";
+const STAGES = ["Discovery","Onboarding","Active","Offboarding","Outreach","Complete"];
+const TIERS = ["Light","Standard","Enterprise"];
+
+const OWNERS = {
+  nikki:{n:"Nikki", i:"N"}, lead:{n:"Project lead", i:"L"}, richard:{n:"Richard", i:"R"},
+  greg:{n:"Greg", i:"G"}, client:{n:"Client", i:"C"}, auto:{n:"Automatic", i:"A"}
+};
+
+/* tag: b = not for migration-only, m = only when there is a migration, mo = migration-only projects */
+const PHASES = [
+ {id:"p0", code:"S0", when:"Day 0", name:"Signed", gate:"Client has the Readiness Check link. Scope register v1 exists.", steps:[
+  ["client","Signs the scope of work"],
+  ["client","Adds info+1@ as full admin in Intercom"],
+  ["richard","Sends the welcome email with the pre-filled Readiness Check link, no kickoff booking link"],
+  ["richard","Confirms the tier from the SOW triggers"],
+  ["nikki","Read the Signed Client Watch brief: partner or direct, project type, hours"],
+  ["nikki","Fill in this client's details: tier, type, lead, hours, signed date"],
+  ["nikki","Drive folder 00 to 08 created, SOW saved in 00_Project Admin"],
+  ["nikki","Slack channel with Richard, Chris and Greg, SOW pinned"],
+  ["nikki","Paste the SOW's Client Inputs Required into the readiness admin"],
+  ["nikki","Scope register v1: every SOW line, marked in or out of scope"],
+  ["nikki","Register the tracker key (and migration intake key) before any link goes out"],
+  ["nikki","Notion Projects row: hours, signed date, SOW links"],
+  ["nikki","Add the client to the Monday, Thursday and Friday routine prompts"]]},
+ {id:"p1", code:"S0", when:"Days 1 to 5", name:"Readiness Check", gate:"Readiness Check submitted.", steps:[
+  ["client","Completes the Readiness Check, target 5 business days"],
+  ["client","Lists contact sources and confirms IDs align (Section C)"],
+  ["client","Completes the migration intake form","m"],
+  ["nikki","Day 3: one nudge if nothing has been submitted"],
+  ["nikki","Review the submission within 1 working day"],
+  ["auto","Readiness alert lands in #tracker-notifications"]]},
+ {id:"p2", code:"S0", when:"Days 5 to 7", name:"Green light", gate:"Three hard gates green. Kickoff in both calendars.", steps:[
+  ["nikki","Check the 3 hard gates: info+1@ full admin, paperwork, 4 roles with emails"],
+  ["nikki","Build the kickoff pack by stage, save to 00_Project Admin"],
+  ["nikki","Tell the lead the gates are green, the same day"],
+  ["nikki","Confirm tier and meeting hours with Richard"],
+  ["richard","Confirms tier and meeting hours (Light 4, Standard 8 or 12, Enterprise 14 to 18)"],
+  ["lead","Books kickoff: purpose, decisions, inputs, 4 client roles, recording on"]]},
+ {id:"p3", code:"S0", when:"Week 1", name:"Kickoff", gate:"Go-live and Day-30 dates agreed and in the calendar.", steps:[
+  ["client","Decision-maker, developer, content owner and support lead attend"],
+  ["lead","Runs kickoff from the Kick-off Desk"],
+  ["lead","Confirms tier, go-live, cadence, sign-off owners and the parking-lot rule"],
+  ["lead","Agrees the out-of-scope list with indicative hours"],
+  ["lead","Books the Day-30 review on the call"],
+  ["nikki","Next working day: write-up from Notion Calls, Fireflies and #call-actions"],
+  ["nikki","Go-live and Day-30 dates into this hub, then the calendar"],
+  ["nikki","Kick-off summary PDF saved to 00_Project Admin"]]},
+ {id:"p4", code:"S0 · W0.1", when:"Weeks 1 to 2", name:"Blueprint workshops", gate:"Design decisions made for S1 to S5.", steps:[
+  ["lead","Runs W0.1 (Light: folded into kickoff)","b"],
+  ["greg","Forge ingest: SOW, readiness answers, kickoff notes"],
+  ["greg","Workspace snapshot, playbook questions, provisioning plan","b"],
+  ["richard","Migration plan agreed instead of a full blueprint","mo"],
+  ["nikki","Workshop invites carry purpose, decisions and inputs"],
+  ["nikki","Write up decisions per stage; off-agenda items become Parked or Change request rows"]]},
+ {id:"p5", code:"G0", when:"Within 5 days", name:"Blueprint signed", gate:"Blueprint signed. Tracker live. Dates in the calendar.", steps:[
+  ["greg","Generates the blueprint and tracker rows with phase dates"],
+  ["lead","Reviews the blueprint"],
+  ["nikki","Check the blueprint against the scope register"],
+  ["nikki","Send for signature; chase on day 3"],
+  ["client","Decision-maker signs the blueprint"],
+  ["nikki","Publish the tracker: key registered, trackers.json entry, key saved here and in Notion"],
+  ["nikki","Swap 'not yet' for the tracker key in the routine prompts"]]},
+ {id:"p6", code:"S1 to S5", when:"Weeks 2 to N", name:"Build stages", gate:"Every stage signed off (G1 to G5).", steps:[
+  ["lead","Opens each stage with its workshop and closes it with sign-off"],
+  ["lead","Foundations, Knowledge and Fin configuration","b"],
+  ["greg","Connectors, procedures and Forge builds, with a recap at each stage close","b"],
+  ["richard","S5 migration: mapping, sample, full run, delta planned","m"],
+  ["richard","Warns at 75% of hours; new scope by written change request"],
+  ["client","Supplies inputs by the blueprint dates and signs each stage gate"],
+  ["nikki","Weekly rhythm running: Monday asks, Thursday tracker truth, Friday note"],
+  ["nikki","Meeting write-ups turned into tracker rows"],
+  ["nikki","Out-of-scope requests on the Parked tile, billed as overage"],
+  ["nikki","S3 baseline resolution rate written in the tracker","b"]]},
+ {id:"p7", code:"S6", when:"Go-live minus 10", name:"UAT and QA", gate:"Written go-live sign-off. QA fails resolved or reasoned.", steps:[
+  ["client","Testers run UAT against the blueprint criteria"],
+  ["lead","Training delivered and recorded"],
+  ["lead","Cutover call booked"],
+  ["nikki","Go-Live QA sweep against the SOW (Thursday Forge hour)"],
+  ["greg","Fixes QA fails on connectors and procedures","b"],
+  ["nikki","Handover pack assembled from build recaps"],
+  ["client","Written go-live sign-off"]]},
+ {id:"p8", code:"S7", when:"Go-live day", name:"Cutover", gate:"Live and verified. Day-30 date reconfirmed.", steps:[
+  ["client","Closes old inbound; decision-maker reachable"],
+  ["lead","Runs the cutover call"],
+  ["richard","Runs the delta migration","m"],
+  ["nikki","Confirm the verification report went out the same day"],
+  ["nikki","Tracker go-live row complete, hypercare rows opened"]]},
+ {id:"p9", code:"S8", when:"Day +1 to +14", name:"Stabilise", gate:"Snags visible and owned.", steps:[
+  ["lead","Week-one health check and snag list"],
+  ["client","Week-one feedback"],
+  ["nikki","Snags logged as tracker rows, not Slack threads"],
+  ["nikki","Friday note carries resolution numbers"]]},
+ {id:"p10", code:"S8 · W8.1", when:"Day +25 to +30", name:"Day-30 review", gate:"Optimisation report delivered. Closed or extended.", steps:[
+  ["greg","Day 25 Forge pre-check: resolution, CSAT, gaps, connector errors"],
+  ["lead","Runs the Day-30 review with Greg"],
+  ["nikki","Write-up; optimisation report issued within 5 days"],
+  ["client","Decides to close or extend"],
+  ["richard","Follow-on scope, retainer and unbuilt extras as a proposal"]]},
+ {id:"p11", code:"Close", when:"After Day 30", name:"Close-out", gate:"Engagement closed.", steps:[
+  ["nikki","Offboarding document generated and issued to the client"],
+  ["nikki","Handover document with screenshots filed in 08_Go-Live & Handover"],
+  ["lead","Close-out email with retainer options sent"],
+  ["nikki","Feedback or testimonial prompt sent"],
+  ["nikki","Intercom Rocketlane updated"],
+  ["nikki","Status closed in Notion and trackers.json; client removed from routine prompts"],
+  ["nikki","Slack channel archived or handed over to the retainer"]]}
+];
+/* stable step ids: <phase>-<index in the phase's full list>. Only append new steps to keep ids stable. */
+PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], t:s[1], tag:s[2]||""})); });
+const PIDX = Object.fromEntries(PHASES.map((p,i)=>[p.id,i]));
+
+/* ---------- state ---------- */
+const S = {
+  portal:null, notion:[], reg:[], kickoff:{}, trk:{},
+  loaded:{portal:false,notion:false,reg:false,kick:false}, errors:{},
+  view:"today", clientId:null, dirty:new Map(), save:"idle",
+  open:{}, noteOpen:{}, scopeOpen:false,
+  prefs:{mine:false, closedOpen:false}
+};
+try{ Object.assign(S.prefs, JSON.parse(localStorage.getItem(PREF_KEY)||"{}")); }catch(e){}
+function savePrefs(){ try{ localStorage.setItem(PREF_KEY, JSON.stringify(S.prefs)); }catch(e){} }
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : "c"+Date.now().toString(36)+Math.random().toString(36).slice(2));
+function isoLocal(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function today(){ return isoLocal(new Date()); }
+function addDays(iso,n){ if(!iso||!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return ""; const d=new Date(iso+"T00:00:00"); d.setDate(d.getDate()+n); return isoLocal(d); }
+function daysTo(iso){ if(!iso) return null; const t=new Date(); t.setHours(0,0,0,0); return Math.round((new Date(iso+"T00:00:00")-t)/864e5); }
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function fmt(iso){ if(!iso||!/^\d{4}-\d{2}-\d{2}/.test(iso)) return iso||""; const [y,m,d]=iso.slice(0,10).split("-"); return (+d)+" "+MON[+m-1]; }
+function rel(iso){ const n=daysTo(iso); if(n===null) return ""; if(n===0) return "today"; if(n===1) return "tomorrow"; if(n===-1) return "yesterday"; return n>0?"in "+n+" days":Math.abs(n)+" days ago"; }
+function dueClass(iso){ const n=daysTo(iso); if(n===null) return ""; return n<0?"late":(n<=3?"soon":""); }
+const norm = s => String(s||"").toLowerCase().replace(/#\d+/g,"").replace(/\(.*?\)/g,"")
+  .replace(/\b(delivery|ltd|limited|oy|pty|inc|global|labs|the|software|nz)\b/g,"").replace(/[^a-z0-9]/g,"");
+const chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
+const tickSvg = '<svg viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"/></svg>';
+
+async function getJSON(url){
+  const r = await fetch(url+(url.includes("?")?"&":"?")+"_t="+Date.now(), {cache:"no-store"});
+  if(!r.ok){ const e=new Error("HTTP "+r.status); e.status=r.status; throw e; }
+  return r.json();
+}
+
+/* ---------- client lookups ---------- */
+const clients = () => (S.portal && S.portal.clients) || [];
+const byId = id => clients().find(c=>c.id===id);
+function notionFor(c){
+  if(c.hub && c.hub.notionId) return S.notion.find(p=>p.id===c.hub.notionId) || null;
+  const n = norm(c.name); if(!n) return null;
+  return S.notion.find(p=>norm(p.name)===n) || null;
+}
+function kickoffFor(c){
+  const k = S.kickoff||{};
+  if(c.hub && c.hub.kickoffId && k[c.hub.kickoffId] && !k[c.hub.kickoffId].removed) return {id:c.hub.kickoffId, r:k[c.hub.kickoffId]};
+  const exact = c.name.toLowerCase().replace(/[^a-z0-9]/g,"");
+  if(k[exact] && !k[exact].removed) return {id:exact, r:k[exact]};
+  const n = norm(c.name);
+  const hit = Object.entries(k).find(([id,r])=>r && !r.removed && norm(r.name||id)===n);
+  return hit ? {id:hit[0], r:hit[1]} : null;
+}
+function trackerKeyFor(c){ const n=notionFor(c); return c.trackerKey || (n&&n.trackerKey) || ""; }
+function trackerUrlFor(c){
+  const k=trackerKeyFor(c), n=notionFor(c);
+  const reg = k && S.reg.find(t=>t.key===k);
+  return (n&&n.trackerUrl) || (reg&&reg.file ? PAGES+reg.file : "") || c.trackerUrl || "";
+}
+function projectType(c){
+  if(c.hub && c.hub.type) return c.hub.type;
+  if(c.type==="Migration") return "migration";
+  if(c.type==="Project") return "build";
+  return "full";
+}
+const TYPE_LABEL = {full:"Full project", build:"Build only", migration:"Migration only"};
+function stepsFor(c, p){
+  const t = projectType(c);
+  return p.steps.filter(s => !s.tag || (s.tag==="b" && t!=="migration") || (s.tag==="m" && t!=="build") || (s.tag==="mo" && t==="migration"));
+}
+function ownerName(c,o){ return o==="lead" ? (c.owner ? c.owner+" (lead)" : "Project lead") : OWNERS[o].n; }
+
+/* ---------- hub progress ---------- */
+function hasHub(c){ return !!(c.hub && c.hub.v); }
+function startIdx(c){ return hasHub(c) ? (PIDX[c.hub.startPhase]||0) : 0; }
+function gateClosed(c,pid){ return PIDX[pid] < startIdx(c) || !!(c.hub && c.hub.gates && c.hub.gates[pid]); }
+function curIdx(c){ for(let i=startIdx(c); i<PHASES.length; i++){ if(!gateClosed(c,PHASES[i].id)) return i; } return PHASES.length; }
+function stepStatus(c,s){ const st=c.hub && c.hub.steps && c.hub.steps[s.id]; return st ? st.s : ""; }
+function phaseCounts(c,p){
+  const list=stepsFor(c,p); let done=0, mine=0, mineDone=0;
+  list.forEach(s=>{ const st=stepStatus(c,s); const d = st==="done"||st==="na"; if(d) done++; if(s.o==="nikki"){ mine++; if(d) mineDone++; } });
+  return {total:list.length, done, mine, mineDone};
+}
+function phaseDue(c,p){
+  const sg=c.signedDate, ko=(c.hub&&c.hub.kickoffDate)||"", gl=c.goLiveDate, d30=c.day30Date||addDays(gl,30);
+  switch(p.id){
+    case "p0": return sg; case "p1": return addDays(sg,7); case "p2": return addDays(sg,9);
+    case "p3": return ko || addDays(sg,14); case "p4": return addDays(ko||addDays(sg,14),10); case "p5": return addDays(ko||addDays(sg,14),15);
+    case "p6": return addDays(gl,-10); case "p7": return gl; case "p8": return gl; case "p9": return addDays(gl,14);
+    case "p10": return d30; case "p11": return addDays(d30,14);
+  }
+  return "";
+}
+function allProgress(c){
+  if(!hasHub(c)) return null;
+  let t=0,d=0; PHASES.forEach((p,i)=>{ const pc=phaseCounts(c,p); t+=pc.total; d+= i<startIdx(c) ? pc.total : pc.done; });
+  return t ? d/t : 0;
+}
+function band(c){
+  if(c.stage==="Discovery") return "scoping";
+  if(c.stage==="Complete"||c.stage==="Outreach") return "closed";
+  if(!hasHub(c)) return c.stage==="Offboarding" ? "closing" : "setup";
+  const i=curIdx(c);
+  if(i<=5) return "onboarding"; if(i===6) return "build"; if(i<=8) return "golive"; if(i<=10) return "stabilise"; if(i===11) return "closing"; return "closed";
+}
+const BANDS = [
+  ["scoping","Scoping"],["setup","Not set up in the hub"],["onboarding","Onboarding · S0"],["build","Build · S1 to S5"],
+  ["golive","UAT and go-live"],["stabilise","Stabilise and Day-30"],["closing","Closing"],["closed","Closed"]
+];
+function inDelivery(c){ return hasHub(c) && !["scoping","closed"].includes(band(c)); }
+
+/* ---------- tracker summary ---------- */
+function trackerSummary(d){
+  if(!d || !d.taskData || typeof d.taskData!=="object") return null;
+  let total=0, done=0, client=0, blocked=0, prog=0;
+  Object.entries(d.taskData).forEach(([pid,sides])=>{
+    ["sabel","client"].forEach(side=>{
+      ((sides&&sides[side])||[]).forEach((t,i)=>{
+        if(!t || t.parked) return;
+        const st = (d.statuses && d.statuses[pid+"-"+(side==="sabel"?"s":"c")+"-"+i]) || t.s || "Pending";
+        total++;
+        if(st==="Complete") done++;
+        else { if(side==="client") client++; if(st==="Blocked") blocked++; if(st==="In Progress") prog++; }
+      });
+    });
+  });
+  return total ? {total, done, client, blocked, prog} : null;
+}
+
+/* ---------- warnings ---------- */
+function warnings(c){
+  const w=[]; if(c.stage==="Discovery" || c.stage==="Complete") return w;
+  const n=notionFor(c), tk=trackerKeyFor(c), td=tk && S.trk[tk];
+  if(S.loaded.notion && !n) w.push(["Not linked to a Notion project","Link it in Details so hours, scope and SOW links show."]);
+  if(n && !n.sabelDoc && !n.intercomSow) w.push(["No SOW link in Notion","Add the Sabel doc or Intercom SOW link to the Notion project."]);
+  if(n && n.hours && c.hours && Number(n.hours)!==Number(c.hours)) w.push(["Hours differ: Notion "+n.hours+"h, portal "+c.hours+"h","Confirm the contracted figure and correct the other."]);
+  if(td && td.data && td.data.goLive && c.goLiveDate && td.data.goLive!==c.goLiveDate) w.push(["Go-live differs: hub "+fmt(c.goLiveDate)+", tracker "+fmt(td.data.goLive),"The hub date is the one to keep. Update the tracker to match."]);
+  if(tk && td && td.status===404) w.push(["Tracker key not registered: "+tk,"Add it to ALLOWED_KEYS in sabel-webhook, otherwise the tracker cannot save."]);
+  if(tk && S.loaded.reg && !S.reg.some(t=>t.key===tk)) w.push(["Not in trackers.json: "+tk,"Add an entry so the dashboard and weekly sweeps find it."]);
+  if(hasHub(c) && curIdx(c)>=5 && curIdx(c)<PHASES.length && !tk) w.push(["No tracker key yet","Needed once the blueprint is signed."]);
+  if(c.goLiveDate && !c.day30Date) w.push(["No Day-30 date","Set it once go-live is confirmed (go-live plus 30 days)."]);
+  if(hasHub(c) && !c.tier) w.push(["No tier set","Light, Standard or Enterprise, from the SOW triggers."]);
+  return w;
+}
+
+/* =====================================================================
+   LOAD
+   ===================================================================== */
+function cachePortal(){ try{ localStorage.setItem(CACHE_KEY, JSON.stringify(S.portal)); }catch(e){} }
+async function loadAll(){
+  setSave("loading");
+  await Promise.all([
+    getJSON(API+"?key="+PORTAL_KEY).then(j=>{
+      S.portal = (j.data && Array.isArray(j.data.clients)) ? j.data : {clients:[], templates:null};
+      S.loaded.portal = true; cachePortal();
+    }).catch(e=>{
+      S.errors.portal = e.message;
+      try{ const c=JSON.parse(localStorage.getItem(CACHE_KEY)||"null"); if(c && c.clients) S.portal=c; }catch(_){}
+      if(!S.portal) S.portal={clients:[],templates:null};
+    }),
+    getJSON(NOTION_URL).then(j=>{ S.notion = Array.isArray(j) ? j : (j.projects||j.data||[]); S.loaded.notion=true; }).catch(e=>S.errors.notion=e.message),
+    getJSON(TRACKERS_JSON).then(j=>{ S.reg = Array.isArray(j) ? j : (j.trackers||[]); S.loaded.reg=true; }).catch(e=>S.errors.reg=e.message),
+    getJSON(API+"?key="+KICKOFF_KEY).then(j=>{ S.kickoff=(j.data&&j.data.clients)||{}; S.loaded.kick=true; }).catch(e=>S.errors.kick=e.message)
+  ]);
+  setSave(S.errors.portal ? "offline" : "idle");
+  routeFromHash(); render();
+  loadTrackers();
+}
+async function loadTrackers(){
+  const keys = [...new Set(clients().filter(c=>!["Complete","Outreach"].includes(c.stage)).map(trackerKeyFor).filter(Boolean))];
+  await Promise.all(keys.map(k=>getJSON(API+"?key="+encodeURIComponent(k))
+    .then(j=>{ S.trk[k]={ok:true, data:j.data||null}; })
+    .catch(e=>{ S.trk[k]={ok:false, status:e.status||0}; })));
+  render();
+}
+async function refreshPortal(){
+  if(S.dirty.size || document.hidden) return;
+  try{
+    const j = await getJSON(API+"?key="+PORTAL_KEY);
+    if(j.data && Array.isArray(j.data.clients) && !S.dirty.size){ S.portal=j.data; cachePortal(); render(true); }
+  }catch(e){}
+}
+setInterval(refreshPortal, 60000);
+
+/* =====================================================================
+   SAVE: re-read the store, replace only the clients edited here, post.
+   Any field this page did not touch keeps whatever is on the server.
+   ===================================================================== */
+let saveTimer=null;
+function setSave(s){
+  S.save=s; const el=$("savepill"); if(!el) return;
+  el.className="savepill "+s;
+  el.querySelector("span").textContent = {loading:"Loading",idle:"Up to date",saving:"Saving…",saved:"Saved",offline:"Not saved, will retry"}[s]||s;
+}
+function touch(c, fields){
+  if(!S.dirty.has(c.id)) S.dirty.set(c.id, new Set());
+  const set=S.dirty.get(c.id); (fields||[]).forEach(f=>set.add(f));
+  if(c.hub) c.hub.updated = new Date().toISOString();
+  set.add("hub");
+  cachePortal(); setSave("saving");
+  clearTimeout(saveTimer); saveTimer=setTimeout(flush, 900);
+}
+async function flush(){
+  if(!S.dirty.size) return;
+  const pending = new Map(S.dirty); S.dirty.clear();
+  try{
+    const j = await getJSON(API+"?key="+PORTAL_KEY);
+    const remote = (j.data && Array.isArray(j.data.clients)) ? j.data : {clients:[], templates:(S.portal&&S.portal.templates)||null};
+    pending.forEach((fields,id)=>{
+      const mine = byId(id); if(!mine) return;
+      const i = remote.clients.findIndex(c=>c.id===id);
+      if(i===-1 || fields.has("*")){ if(i===-1) remote.clients.push(mine); else remote.clients[i]=mine; return; }
+      fields.forEach(f=>{ remote.clients[i][f] = mine[f]; });
+    });
+    const r = await fetch(API+"?key="+PORTAL_KEY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({data:remote})});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    S.portal = remote; cachePortal();
+    setSave(S.dirty.size ? "saving" : "saved");
+    setTimeout(()=>{ if(S.save==="saved") setSave("idle"); }, 2500);
+  }catch(e){
+    pending.forEach((f,id)=>{ const cur=S.dirty.get(id)||new Set(); f.forEach(x=>cur.add(x)); S.dirty.set(id,cur); });
+    setSave("offline");
+    clearTimeout(saveTimer); saveTimer=setTimeout(flush, 15000);
+  }
+}
+window.addEventListener("beforeunload", e=>{ if(S.dirty.size){ e.preventDefault(); e.returnValue=""; } });
+
+/* ---------- mutations ---------- */
+function ensureHub(c, startPhase){
+  if(!c.hub || !c.hub.v) c.hub = {v:1, startPhase:startPhase||"p0", steps:{}, gates:{}, kickoffDate:"", driveUrl:"", notionId:"", kickoffId:"", type:projectType(c), notes:"", updated:""};
+  return c.hub;
+}
+function syncStage(c){
+  if(!hasHub(c) || c.stage==="Outreach") return;
+  const i=curIdx(c);
+  const want = i>=PHASES.length ? "Complete" : i===11 ? "Offboarding" : i>=6 ? "Active" : "Onboarding";
+  if(c.stage!==want){ c.stage=want; return true; }
+  return false;
+}
+function setStep(c, sid, s){
+  const h=ensureHub(c);
+  if(!s) delete h.steps[sid];
+  else h.steps[sid] = Object.assign({}, h.steps[sid]||{}, {s, at:today()});
+  touch(c);
+}
+function setGate(c, pid, closed){
+  const h=ensureHub(c);
+  if(closed) h.gates[pid]={at:today()}; else delete h.gates[pid];
+  const moved = syncStage(c);
+  touch(c, moved?["stage"]:[]);
+}
+
+/* =====================================================================
+   RENDER
+   ===================================================================== */
+function render(soft){
+  renderSide();
+  const v=$("view"), sc=$("scroll"), top=sc.scrollTop;
+  if(!S.portal){ return; }
+  if(S.view==="client" && byId(S.clientId)) v.innerHTML = clientView(byId(S.clientId));
+  else { S.view="today"; v.innerHTML = todayView(); }
+  $("nav-today").classList.toggle("on", S.view==="today");
+  renderCrumb();
+  if(soft) sc.scrollTop=top;
+}
+function renderCrumb(){
+  const c = S.view==="client" && byId(S.clientId);
+  $("crumb").innerHTML = c ? '<button data-act="today">Today</button><span>/</span><b>'+esc(c.name)+'</b>' : '<b>Today</b>';
+}
+function renderSide(){
+  const q = norm($("q").value);
+  const groups = Object.fromEntries(BANDS.map(b=>[b[0],[]]));
+  clients().forEach(c=>{ if(q && !norm(c.name).includes(q) && !c.name.toLowerCase().includes($("q").value.toLowerCase())) return; groups[band(c)].push(c); });
+  let h="";
+  BANDS.forEach(([k,label])=>{
+    const list = groups[k].sort((a,b)=>a.name.localeCompare(b.name));
+    if(!list.length) return;
+    const closed = k==="closed";
+    const collapsed = closed && !S.prefs.closedOpen && !q;
+    h += '<div class="grp"><button class="grp-h'+(closed?' toggle':'')+'"'+(closed?' data-act="toggle-closed"':' tabindex="-1"')+'><span class="eyebrow">'+esc(label)+'</span><span class="n">'+list.length+(closed?(collapsed?' · show':' · hide'):'')+'</span></button>';
+    if(!collapsed) list.forEach(c=>{
+      const p=allProgress(c), w=warnings(c).length, mineOpen = openMine(c).length;
+      const meta = [c.tier, c.owner, hasHub(c) && curIdx(c)<PHASES.length ? PHASES[curIdx(c)].name : (c.stage==="Discovery" ? (c.proposalSent ? "proposal "+rel(c.proposalSent) : "proposal") : c.stage)].filter(Boolean).join(" · ");
+      h += '<button class="crow'+(S.view==="client"&&S.clientId===c.id?' on':'')+'" data-act="open" data-id="'+c.id+'"><span class="nm">'+esc(c.name)+'</span><span class="mt">'+esc(meta)+'</span><span class="rt">'+
+        (mineOpen?'<span class="badge" title="Your open steps at this gate">'+mineOpen+'</span>':'')+
+        (w?'<span class="dot-warn" title="'+w+' data issue'+(w>1?'s':'')+'"></span>':'')+
+        (p!==null?'<span class="minibar" title="'+Math.round(p*100)+'% of steps done"><i style="width:'+Math.round(p*100)+'%"></i></span>':'')+'</span></button>';
+    });
+    h += '</div>';
+  });
+  $("clients").innerHTML = h || '<div class="empty">No clients match.</div>';
+  const n = clients().filter(inDelivery).reduce((a,c)=>a+openMine(c).length,0);
+  const tc=$("today-count"); tc.hidden=!n; tc.textContent=n;
+}
+function openMine(c){
+  if(!hasHub(c) || !inDelivery(c)) return [];
+  const i=curIdx(c); if(i>=PHASES.length) return [];
+  const p=PHASES[i];
+  return stepsFor(c,p).filter(s=>s.o==="nikki" && !["done","na"].includes(stepStatus(c,s))).map(s=>({c,p,s}));
+}
+
+/* ---------- today ---------- */
+function todayView(){
+  const now=new Date();
+  const dateLine = now.toLocaleDateString("en-GB",{weekday:"long", day:"numeric", month:"long"});
+  const live = clients().filter(inDelivery);
+  const mine = live.flatMap(openMine).map(x=>Object.assign(x,{due:phaseDue(x.c,x.p)}))
+    .sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999") || a.c.name.localeCompare(b.c.name));
+  const waiting = live.filter(c=>{ const i=curIdx(c); return i<PHASES.length && openMine(c).length===0; }).map(c=>{
+    const p=PHASES[curIdx(c)]; const rest=stepsFor(c,p).filter(s=>!["done","na"].includes(stepStatus(c,s)));
+    return {c,p,rest};
+  });
+  const horizon = addDays(today(),21);
+  const dates=[];
+  clients().filter(c=>!["Complete","Outreach"].includes(c.stage)).forEach(c=>{
+    [["Kickoff",c.hub&&c.hub.kickoffDate],["Go-live",c.goLiveDate],["Day-30",c.day30Date]].forEach(([l,d])=>{
+      if(d && d>=addDays(today(),-3) && d<=horizon) dates.push({c,l,d});
+    });
+  });
+  dates.sort((a,b)=>a.d.localeCompare(b.d));
+  const setup = clients().filter(c=>band(c)==="setup");
+  const scoping = clients().filter(c=>c.stage==="Discovery").sort((a,b)=>(a.proposalSent||"9").localeCompare(b.proposalSent||"9"));
+  const issues = clients().filter(c=>!["Complete","Outreach","Discovery"].includes(c.stage)).map(c=>({c,w:warnings(c)})).filter(x=>x.w.length).sort((a,b)=>b.w.length-a.w.length);
+  const late = mine.filter(x=>x.due && daysTo(x.due)<0).length;
+
+  let h = '<div class="today-h"><div><div class="eyebrow">'+esc(dateLine)+'</div><h1>Today</h1></div><div class="stats">'+
+    '<span class="stat red"><b>'+mine.length+'</b> steps for you</span>'+
+    (late?'<span class="stat red"><b>'+late+'</b> past due</span>':'')+
+    '<span class="stat"><b>'+live.length+'</b> in delivery</span>'+
+    '<span class="stat"><b>'+dates.length+'</b> dates in 3 weeks</span>'+
+    (issues.length?'<span class="stat"><b>'+issues.length+'</b> clients with data to fix</span>':'')+'</div></div>';
+  h += loadBanner();
+
+  h += '<div class="tgrid"><div class="tcol">';
+  h += '<section class="panel"><div class="panel-h"><h3>Your next steps</h3><span class="sub">At each client\'s current gate, earliest due first</span></div>';
+  if(!mine.length) h += '<div class="empty">'+(live.length?'Nothing waiting on you at the current gates.':'No clients are set up in the hub yet. Open a client under "Not set up in the hub" to start.')+'</div>';
+  else h += '<ul class="tlist">'+mine.map(x=>
+    '<li class="titem"><button class="tick mine" data-act="tick" data-id="'+x.c.id+'" data-sid="'+x.s.id+'" aria-label="Mark done: '+esc(x.s.t)+'">'+tickSvg+'</button>'+
+    '<div><div class="tx">'+esc(x.s.t)+'</div><div class="meta"><button class="cl" data-act="open" data-id="'+x.c.id+'">'+esc(x.c.name)+'</button><span class="ph">'+esc(x.p.name)+' · '+esc(x.p.code)+'</span></div></div>'+
+    '<div class="side-r">'+(x.due?'<span class="due '+dueClass(x.due)+'">'+(daysTo(x.due)<0?'due ':'')+esc(fmt(x.due))+'</span><span class="due">'+esc(rel(x.due))+'</span>':'<span class="due">no date</span>')+'</div></li>').join("")+'</ul>';
+  h += '</section>';
+
+  h += '<section class="panel"><div class="panel-h"><h3>Waiting on someone else</h3><span class="sub">Your steps are done; the gate is still open</span></div>';
+  if(!waiting.length) h += '<div class="empty">Nothing waiting.</div>';
+  else h += '<ul class="tlist">'+waiting.map(x=>{
+    const who=[...new Set(x.rest.map(s=>ownerName(x.c,s.o)))];
+    return '<li class="titem"><span></span><div><div class="tx">'+(x.rest.length?esc(x.rest[0].t):'All steps done. Close the gate: '+esc(x.p.gate))+'</div><div class="meta"><button class="cl" data-act="open" data-id="'+x.c.id+'">'+esc(x.c.name)+'</button><span class="ph">'+esc(x.p.name)+(who.length?' · waiting on '+esc(who.join(", ")):'')+'</span></div></div><div class="side-r"><span class="due">'+x.rest.length+' open</span></div></li>';
+  }).join("")+'</ul>';
+  h += '</section></div><div class="tcol">';
+
+  h += '<section class="panel"><div class="panel-h"><h3>Coming up</h3><span class="sub">Next 3 weeks</span></div>';
+  h += dates.length ? '<ul class="dates">'+dates.map(x=>'<li><span class="d">'+esc(fmt(x.d))+'</span><span><button data-act="open" data-id="'+x.c.id+'">'+esc(x.c.name)+'</button> '+esc(x.l)+'</span><span class="due '+dueClass(x.d)+'">'+esc(rel(x.d))+'</span></li>').join("")+'</ul>' : '<div class="empty">No kickoffs, go-lives or Day-30 reviews in the next 3 weeks.</div>';
+  h += '</section>';
+
+  if(setup.length){
+    h += '<section class="panel"><div class="panel-h"><h3>Set up in the hub</h3><span class="sub">Active clients without gates yet</span></div><ul class="dates">'+
+      setup.map(c=>'<li><span class="d">'+esc(c.stage)+'</span><span><button data-act="open" data-id="'+c.id+'">'+esc(c.name)+'</button></span><span class="due">'+(c.goLiveDate?'go-live '+esc(fmt(c.goLiveDate)):'')+'</span></li>').join("")+'</ul></section>';
+  }
+  h += '<section class="panel"><div class="panel-h"><h3>Data to fix</h3><span class="sub">Stores that disagree or are missing</span></div>';
+  h += issues.length ? '<ul class="dates">'+issues.slice(0,10).map(x=>'<li><span class="d">'+x.w.length+' issue'+(x.w.length>1?'s':'')+'</span><span><button data-act="open" data-id="'+x.c.id+'">'+esc(x.c.name)+'</button><br><small style="color:var(--muted)">'+esc(x.w[0][0])+'</small></span><span></span></li>').join("")+'</ul>' : '<div class="empty">Nothing flagged.</div>';
+  h += '</section>';
+
+  if(scoping.length){
+    h += '<section class="panel"><div class="panel-h"><h3>Scoping</h3><span class="sub">Proposals out</span></div><ul class="dates">'+
+      scoping.map(c=>'<li><span class="d">'+(c.proposalSent?esc(fmt(c.proposalSent)):'no date')+'</span><span><button data-act="open" data-id="'+c.id+'">'+esc(c.name)+'</button></span><span class="due '+(c.proposalSent&&daysTo(c.proposalSent)<-14?'soon':'')+'">'+(c.proposalSent?esc(rel(c.proposalSent)):'')+'</span></li>').join("")+'</ul></section>';
+  }
+  h += '</div></div>';
+  return h;
+}
+function loadBanner(){
+  const bad=[]; if(S.errors.portal) bad.push("client list (showing this browser's last copy)"); if(S.errors.notion) bad.push("Notion"); if(S.errors.reg) bad.push("trackers.json"); if(S.errors.kick) bad.push("Kick-off Desk");
+  return bad.length ? '<div class="banner">Could not reach: '+esc(bad.join(", "))+'. Refresh to try again.</div>' : '';
+}
+
+/* ---------- client ---------- */
+function clientView(c){
+  const n=notionFor(c), ko=kickoffFor(c), tk=trackerKeyFor(c), td=tk&&S.trk[tk], w=warnings(c);
+  const i = hasHub(c) ? curIdx(c) : -1;
+  const cur = i>=0 && i<PHASES.length ? PHASES[i] : null;
+  let h = loadBanner();
+
+  /* header */
+  const chips = [];
+  if(cur) chips.push('<span class="chip solid">'+esc(cur.code)+' · '+esc(cur.name)+'</span>');
+  else if(hasHub(c)) chips.push('<span class="chip good">All gates closed</span>');
+  else chips.push('<span class="chip">'+esc(c.stage==="Discovery"?"Scoping":c.stage)+'</span>');
+  chips.push('<span class="chip'+(c.tier?'':' warn')+'">'+esc(c.tier||"No tier")+'</span>');
+  chips.push('<span class="chip">'+esc(TYPE_LABEL[projectType(c)])+'</span>');
+  chips.push('<span class="chip">Lead: '+esc(c.owner||"not set")+'</span>');
+  if(w.length) chips.push('<span class="chip warn">'+w.length+' data issue'+(w.length>1?'s':'')+'</span>');
+  const kd = (l,d,extra)=>'<div><div class="l">'+l+'</div><div class="v">'+(d?esc(fmt(d)):'<span style="color:var(--faint)">not set</span>')+'</div><div class="c '+(extra?dueClass(d):'')+'">'+(d&&extra?esc(rel(d)):'&nbsp;')+'</div></div>';
+  h += '<div class="chead"><div><div class="eyebrow">'+esc(n&&n.hoursNote?n.hoursNote.split("·")[0].trim():"Client")+'</div><h1>'+esc(c.name)+'</h1><div class="chips">'+chips.join("")+'</div></div>'+
+    '<div class="keydates">'+kd("Signed",c.signedDate)+kd("Kickoff",c.hub&&c.hub.kickoffDate,true)+kd("Go-live",c.goLiveDate,true)+kd("Day-30",c.day30Date,true)+'</div></div>';
+
+  h += '<div class="cgrid"><div class="cmain">';
+
+  if(c.stage==="Discovery") h += scopingPanel(c);
+  else if(!hasHub(c) || S.restart===c.id) h += setupPanel(c);
+
+  /* scope */
+  h += '<section class="panel"><div class="panel-h"><h3>What the project covers</h3><span class="sub">'+(n?'From Notion'+(ko&&ko.r.scope&&(ko.r.scope.inScope||[]).length?' and the Kick-off Desk':''):'No Notion project linked')+'</span></div><div class="scope">';
+  const scopeText = (n&&n.scope) || (ko&&ko.r.scope&&ko.r.scope.summary) || c.notes || "";
+  if(scopeText){
+    const long = scopeText.length>420;
+    h += '<div class="txt'+(long&&!S.scopeOpen?' clamp':'')+'">'+esc(scopeText)+'</div>'+(long?'<button class="linkbtn" data-act="scope">'+(S.scopeOpen?'Show less':'Show all')+'</button>':'');
+  } else h += '<div class="txt" style="color:var(--muted)">No scope summary yet. Add it to the Notion project, or record it on the Kick-off Desk.</div>';
+  if(n) h += '<div class="row">'+
+    '<span><b>Migration</b> '+esc(n.migration||"not stated")+(n.migrationHours?' · '+esc(n.migrationHours)+'h':'')+'</span>'+
+    (n.contact?'<span><b>Contact</b> '+esc(n.contact)+(n.contactRole?', '+esc(n.contactRole):'')+'</span>':'')+
+    (n.signed?'<span><b>Signed</b> '+esc(n.signed)+'</span>':'')+'</div>'+
+    (n.migrationNote?'<div class="row"><span style="color:var(--muted)">'+esc(n.migrationNote)+'</span></div>':'');
+  if(ko && ko.r.scope && ((ko.r.scope.inScope||[]).length || (ko.r.scope.outScope||[]).length)){
+    const li = a => (a||[]).map(x=>'<li>'+esc(typeof x==="string"?x:(x.item||x.text||x.label||JSON.stringify(x)))+'</li>').join("");
+    h += '<div class="inout"><div><div class="eyebrow">In scope</div><ul>'+li(ko.r.scope.inScope)+'</ul></div><div><div class="eyebrow">Out of scope</div><ul>'+li(ko.r.scope.outScope)+'</ul></div></div>';
+  }
+  h += '</div></section>';
+
+  if(hasHub(c)){
+    /* journey */
+    h += '<section class="panel"><div class="panel-h"><h3>Journey</h3><span class="sub">'+(cur?'At '+esc(cur.name)+(phaseDue(c,cur)?' · due '+esc(fmt(phaseDue(c,cur))):''):'All gates closed')+'</span></div><div class="journey">';
+    PHASES.forEach((p,pi)=>{
+      const pc=phaseCounts(c,p), closed=gateClosed(c,p.id), isCur=pi===i;
+      const pct = closed ? 100 : pc.total ? Math.round(100*pc.done/pc.total) : 0;
+      h += '<button class="jseg'+(closed?' closed':'')+(isCur?' cur':'')+'" data-act="jump" data-pid="'+p.id+'" title="'+esc(p.name+' · '+(closed?'gate closed':pc.done+' of '+pc.total+' steps'))+'"><span class="bar"><i style="width:'+pct+'%"></i></span><span class="lb">'+esc(p.name)+'</span><span class="cd">'+esc(p.code)+'</span></button>';
+    });
+    h += '</div>'+(startIdx(c)>0?'<p class="legacy-note">Started in the hub at '+esc(PHASES[startIdx(c)].name)+'. Earlier gates are treated as closed. <button class="linkbtn" data-act="restart">Change</button></p>':'')+'</section>';
+
+    /* steps toolbar */
+    h += '<div class="toolrow"><div class="seg" role="group" aria-label="Which steps"><button data-act="mine" data-v="0" aria-pressed="'+(!S.prefs.mine)+'">Everyone\'s steps</button><button data-act="mine" data-v="1" aria-pressed="'+(!!S.prefs.mine)+'">Only mine</button></div>'+
+      '<div style="display:flex;gap:6px"><button class="btn sm ghost" data-act="expand" data-v="1">Open all</button><button class="btn sm ghost" data-act="expand" data-v="0">Close all</button></div></div>';
+
+    PHASES.forEach((p,pi)=>{ h += phaseBlock(c,p,pi,i); });
+  }
+
+  h += '</div><div class="caside">'+asidePanels(c,n,ko,tk,td,w)+'</div></div>';
+  return h;
+}
+function isOpen(c,p,pi,i){
+  const k=c.id+":"+p.id;
+  if(k in S.open) return S.open[k];
+  return pi===i;
+}
+function phaseBlock(c,p,pi,i){
+  const pc=phaseCounts(c,p), closed=gateClosed(c,p.id), before=pi<startIdx(c), open=isOpen(c,p,pi,i), isCur=pi===i;
+  const due=phaseDue(c,p);
+  const gateInfo = c.hub.gates[p.id];
+  let h = '<section class="phase'+(isCur?' cur':'')+(closed?' closed':'')+(open?' open':'')+'" id="ph-'+p.id+'">'+
+    '<button class="phase-h" data-act="phase" data-pid="'+p.id+'" aria-expanded="'+open+'"><span class="num">'+esc(p.code)+'</span>'+
+    '<span><span class="t">'+esc(p.name)+'</span> <span class="w">· '+esc(p.when)+(due&&!closed?' · due '+esc(fmt(due)):'')+'</span></span>'+
+    '<span class="r"><span class="prog">'+(before?'before the hub':closed?'gate closed'+(gateInfo?' '+esc(fmt(gateInfo.at)):''):'<b>'+(pc.mine-pc.mineDone)+'</b> yours · '+pc.done+'/'+pc.total)+'</span>'+chev+'</span></button>';
+  if(open){
+    const list = stepsFor(c,p).filter(s=>!S.prefs.mine || s.o==="nikki");
+    h += '<ul class="steps">';
+    if(!list.length) h += '<li class="step"><span></span><span class="tx" style="color:var(--muted)">No steps of yours at this gate.</span><span></span></li>';
+    list.forEach(s=>{
+      const st = before ? "done" : stepStatus(c,s), rec=c.hub.steps[s.id]||{}, mine=s.o==="nikki";
+      const nk=c.id+":"+s.id;
+      h += '<li class="step '+(mine?'mine':'other')+(st?' '+st:'')+'">'+
+        '<button class="tick'+(mine?' mine':'')+(st?' '+st:'')+'" data-act="tick" data-id="'+c.id+'" data-sid="'+s.id+'" aria-label="'+(st==="done"?"Mark not done":"Mark done")+': '+esc(s.t)+'"'+(before?' disabled':'')+'>'+tickSvg+'</button>'+
+        '<span class="tx">'+esc(s.t)+'</span>'+
+        '<span class="acts"><span class="more">'+
+          (before?'':'<button class="iconbtn'+(st==="doing"?' on':'')+'" data-act="doing" data-id="'+c.id+'" data-sid="'+s.id+'">In progress</button><button class="iconbtn" data-act="na" data-id="'+c.id+'" data-sid="'+s.id+'">'+(st==="na"?"Needed":"Not needed")+'</button><button class="iconbtn" data-act="note" data-k="'+esc(nk)+'">Note</button>')+
+        '</span><span class="own '+s.o+'"><i>'+OWNERS[s.o].i+'</i>'+esc(ownerName(c,s.o))+'</span></span>'+
+        (rec.at && st && !before ? '<span class="when">'+esc({done:"Done",doing:"Started",na:"Marked not needed"}[st]||"")+' '+esc(fmt(rec.at))+'</span>' : '')+
+        (S.noteOpen[nk] ? '<div class="note"><textarea data-act="note-text" data-id="'+c.id+'" data-sid="'+s.id+'" placeholder="Note for this step">'+esc(rec.note||"")+'</textarea></div>' : (rec.note?'<div class="note">'+esc(rec.note)+'</div>':''))+
+      '</li>';
+    });
+    h += '</ul>';
+    const openCount = pc.total-pc.done;
+    h += '<div class="gate'+(closed?' closed':'')+'"><span class="g"><b>Gate</b>'+esc(p.gate)+'</span>'+
+      (before ? '' : closed
+        ? '<button class="btn sm" data-act="gate" data-id="'+c.id+'" data-pid="'+p.id+'" data-v="0">Reopen gate</button>'
+        : '<button class="btn sm '+(openCount?'':'primary')+'" data-act="gate" data-id="'+c.id+'" data-pid="'+p.id+'" data-v="1">Close gate'+(openCount?' ('+openCount+' open)':'')+'</button>')+'</div>';
+  } else if(closed && !before) {
+    h += '';
+  }
+  h += '</section>';
+  return h;
+}
+function scopingPanel(c){
+  return '<section class="setup"><h3>Proposal out</h3><p>'+(c.proposalSent?'Sent '+esc(fmt(c.proposalSent))+' ('+esc(rel(c.proposalSent))+').':'No proposal date recorded.')+(c.contactName?' Contact: '+esc(c.contactName)+'.':'')+'</p>'+
+    (c.scopingNotes?'<p style="color:var(--muted)">'+esc(c.scopingNotes)+'</p>':'')+
+    '<div class="row"><label>Signed on<input type="date" id="sg-date" value="'+today()+'"></label><button class="btn primary" data-act="signed" data-id="'+c.id+'">Signed: start at Day 0</button></div></section>';
+}
+function setupPanel(c){
+  const again = hasHub(c);
+  const guess = again ? c.hub.startPhase : c.stage==="Offboarding" ? "p11" : (c.goLiveDate && daysTo(c.goLiveDate)<0 ? "p9" : c.stage==="Active" ? "p6" : "p0");
+  return '<section class="setup"><h3>Where is '+esc(c.name)+' up to?</h3><p>'+(again?'Change the gate this client started at in the hub. Ticks and closed gates you have already recorded are kept.':'This client started before the hub. Pick the gate they are at now. Earlier gates are treated as closed, so only the steps from here on need ticking.')+'</p>'+
+    '<div class="row"><label>Current gate<select id="start-phase">'+PHASES.map(p=>'<option value="'+p.id+'"'+(p.id===guess?' selected':'')+'>'+esc(p.code+' · '+p.name)+'</option>').join("")+'</select></label>'+
+    '<label>Project type<select id="start-type">'+Object.entries(TYPE_LABEL).map(([k,v])=>'<option value="'+k+'"'+(k===projectType(c)?' selected':'')+'>'+v+'</option>').join("")+'</select></label>'+
+    '<button class="btn primary" data-act="start" data-id="'+c.id+'">'+(again?'Update starting gate':'Start tracking')+'</button>'+(again?'<button class="btn" data-act="cancel-restart">Cancel</button>':'')+'</div></section>';
+}
+function asidePanels(c,n,ko,tk,td,w){
+  let h="";
+  /* SOW */
+  const hours = (n&&n.hours) || c.hours || "";
+  h += '<section class="panel"><div class="panel-h"><h3>Scope of work</h3></div><div class="sow">'+
+    '<div class="hours"><span class="n">'+(hours?esc(hours):'?')+'</span><span class="u">hours on SOW</span><span class="src">'+((n&&n.hours)?'Notion':(c.hours?'portal':'not recorded'))+'</span></div>'+
+    (n&&n.hoursNote?'<div class="note">'+esc(n.hoursNote)+'</div>':'')+
+    '<div class="docrow">'+
+      '<a class="btn'+(n&&n.sabelDoc?'':' off')+'" href="'+esc((n&&n.sabelDoc)||"#")+'" target="_blank" rel="noopener">Sabel proposal</a>'+
+      '<a class="btn'+(n&&n.intercomSow?'':' off')+'" href="'+esc((n&&n.intercomSow)||"#")+'" target="_blank" rel="noopener">Intercom SOW</a>'+
+    '</div></div></section>';
+
+  /* tracker */
+  const sum = td && td.data && trackerSummary(td.data);
+  h += '<section class="panel"><div class="panel-h"><h3>Tracker</h3><span class="sub">'+(tk?esc(tk):'no key')+'</span></div>';
+  if(!tk) h += '<div class="empty">No tracker yet. It is published when the blueprint is signed.</div>';
+  else if(!td) h += '<div class="empty">Loading…</div>';
+  else if(!td.ok) h += '<div class="empty">'+(td.status===404?'This key is not registered, so the tracker cannot load or save.':'Could not reach the tracker store.')+'</div>';
+  else if(!sum) h += '<div class="empty">'+(td.data?'This tracker uses the older format. Open it to see progress.':'Registered, but nothing saved yet.')+'</div>';
+  else {
+    const pc = x => (100*x/sum.total).toFixed(1)+"%";
+    h += '<div class="trk"><div class="bar" title="'+sum.done+' complete of '+sum.total+'"><i style="width:'+pc(sum.done)+';background:var(--good)"></i><i style="width:'+pc(sum.prog)+';background:var(--warn)"></i></div>'+
+      '<div class="nums"><div><b>'+sum.done+'/'+sum.total+'</b>complete</div><div><b>'+sum.client+'</b>with client</div><div><b>'+sum.blocked+'</b>blocked</div></div>'+
+      '<div class="note" style="font-size:12px;color:var(--muted)">'+(td.data.goLive?'Tracker go-live '+esc(fmt(td.data.goLive))+' · ':'')+(td.data.savedAt?'saved '+esc(fmt(isoLocal(new Date(td.data.savedAt)))):'')+'</div></div>';
+  }
+  h += '</section>';
+
+  /* links */
+  const readyUrl = PAGES+"SabelReadinessCheck.html?client="+encodeURIComponent(c.name);
+  const link = (label,url,k) => '<li class="'+(url?'':'off')+'"><a href="'+esc(url||"#")+'" target="_blank" rel="noopener"><span>'+label+'</span><span class="k">'+esc(k|| (url?"open":"not set"))+'</span></a></li>';
+  const slack = /^C[A-Z0-9]{6,}$/.test(c.slackChannel||"") ? SLACK+c.slackChannel : "";
+  h += '<section class="panel"><div class="panel-h"><h3>Links</h3></div><ul class="links">'+
+    link("Tracker", trackerUrlFor(c), tk?"":"")+
+    link("Notion project", n&&n.url, n?n.name:"")+
+    link("Kick-off Desk", "SabelKickoffDesk.html", ko?"record found":"no record")+
+    link("Drive folder", c.hub&&c.hub.driveUrl, "")+
+    link("Slack channel", slack, c.slackChannel||"")+
+    '<li><button data-act="copy" data-url="'+esc(readyUrl)+'"><span>Copy Readiness Check link</span><span class="k" id="copy-k">for '+esc(c.name)+'</span></button></li>'+
+    link("Readiness submissions", "SabelReadinessAdmin.html", "")+
+  '</ul></section>';
+
+  if(w.length) h += '<section class="panel"><div class="panel-h"><h3>Data to fix</h3><span class="sub">'+w.length+'</span></div><ul class="warns">'+w.map(x=>'<li>'+esc(x[0])+'<small>'+esc(x[1])+'</small></li>').join("")+'</ul></section>';
+
+  /* details */
+  const hub=c.hub||{};
+  const opt = (arr,val,blank) => (blank?'<option value="">'+blank+'</option>':'')+arr.map(a=>{ const [v,l]=Array.isArray(a)?a:[a,a]; return '<option value="'+esc(v)+'"'+(String(val)===String(v)?' selected':'')+'>'+esc(l)+'</option>'; }).join("");
+  h += '<section class="panel"><details class="fold"'+(hasHub(c)&&!c.tier?' open':'')+'><summary class="panel-h"><h3>Details</h3>'+chev+'</summary><div class="form">'+
+    '<label>Tier<select data-field="tier" data-id="'+c.id+'">'+opt(TIERS,c.tier,"Not set")+'</select></label>'+
+    '<label>Project type<select data-field="hub.type" data-id="'+c.id+'">'+opt(Object.entries(TYPE_LABEL),projectType(c))+'</select></label>'+
+    '<label>Project lead<select data-field="owner" data-id="'+c.id+'">'+opt(["Chris","Richard","Greg"],c.owner,"Not set")+'</select></label>'+
+    '<label>Portal stage<select data-field="stage" data-id="'+c.id+'">'+opt(STAGES,c.stage)+'</select></label>'+
+    '<label>Signed<input type="date" data-field="signedDate" data-id="'+c.id+'" value="'+esc(c.signedDate||"")+'"></label>'+
+    '<label>Kickoff<input type="date" data-field="hub.kickoffDate" data-id="'+c.id+'" value="'+esc(hub.kickoffDate||"")+'"></label>'+
+    '<label>Go-live<input type="date" data-field="goLiveDate" data-id="'+c.id+'" value="'+esc(c.goLiveDate||"")+'"></label>'+
+    '<label>Day-30 review<input type="date" data-field="day30Date" data-id="'+c.id+'" value="'+esc(c.day30Date||"")+'"></label>'+
+    '<label>Hours (portal)<input type="text" inputmode="decimal" data-field="hours" data-id="'+c.id+'" value="'+esc(c.hours||"")+'"></label>'+
+    '<label>Tracker key<input type="text" data-field="trackerKey" data-id="'+c.id+'" value="'+esc(c.trackerKey||"")+'" placeholder="'+esc((n&&n.trackerKey)||"client-tracker-v1")+'"></label>'+
+    '<label>Slack channel ID<input type="text" data-field="slackChannel" data-id="'+c.id+'" value="'+esc(c.slackChannel||"")+'" placeholder="C0…"></label>'+
+    '<label>Drive folder URL<input type="url" data-field="hub.driveUrl" data-id="'+c.id+'" value="'+esc(hub.driveUrl||"")+'"></label>'+
+    '<label class="full">Notion project<select data-field="hub.notionId" data-id="'+c.id+'"><option value="">'+(n&&!hub.notionId?'Matched by name: '+esc(n.name):'Not linked')+'</option>'+S.notion.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(p=>'<option value="'+esc(p.id)+'"'+(hub.notionId===p.id?' selected':'')+'>'+esc(p.name)+'</option>').join("")+'</select></label>'+
+    '<label class="full">Kick-off Desk record<select data-field="hub.kickoffId" data-id="'+c.id+'"><option value="">'+(ko&&!hub.kickoffId?'Matched by name: '+esc(ko.r.name||ko.id):'Not linked')+'</option>'+Object.entries(S.kickoff||{}).filter(([k,r])=>r&&!r.removed).sort((a,b)=>String(a[1].name||a[0]).localeCompare(String(b[1].name||b[0]))).map(([k,r])=>'<option value="'+esc(k)+'"'+(hub.kickoffId===k?' selected':'')+'>'+esc(r.name||k)+'</option>').join("")+'</select></label>'+
+    '<label class="full">Notes<textarea data-field="notes" data-id="'+c.id+'">'+esc(c.notes||"")+'</textarea></label>'+
+  '</div></details></section>';
+  return h;
+}
+
+/* =====================================================================
+   EVENTS
+   ===================================================================== */
+function openClient(id){ S.view="client"; S.clientId=id; S.scopeOpen=false; location.hash="c="+id; document.body.classList.remove("side-open"); render(); $("scroll").scrollTop=0; }
+function goToday(){ S.view="today"; S.clientId=null; history.replaceState(null,"",location.pathname+location.search); document.body.classList.remove("side-open"); render(); $("scroll").scrollTop=0; }
+function routeFromHash(){ const m=location.hash.match(/c=([^&]+)/); if(m && byId(decodeURIComponent(m[1]))){ S.view="client"; S.clientId=decodeURIComponent(m[1]); } }
+window.addEventListener("hashchange", ()=>{ routeFromHash(); render(); });
+
+document.addEventListener("click", e=>{
+  const t = e.target.closest("[data-act]"); if(!t) return;
+  const a=t.dataset.act, c=t.dataset.id && byId(t.dataset.id);
+  switch(a){
+    case "today": return goToday();
+    case "open": return openClient(t.dataset.id);
+    case "side": return document.body.classList.toggle("side-open");
+    case "toggle-closed": S.prefs.closedOpen=!S.prefs.closedOpen; savePrefs(); return renderSide();
+    case "theme": {
+      const curDark = document.documentElement.getAttribute("data-theme")==="dark" || (!document.documentElement.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+      const next = curDark?"light":"dark"; document.documentElement.setAttribute("data-theme",next);
+      try{ localStorage.setItem("sabel-ops-theme",next); }catch(_){}
+      return;
+    }
+    case "tick": {
+      if(!c) return; const s = PHASES.flatMap(p=>p.steps).find(x=>x.id===t.dataset.sid);
+      const st = stepStatus(c,s);
+      setStep(c, s.id, st==="done" ? "" : "done"); return render(true);
+    }
+    case "doing": { if(!c) return; const st=c.hub&&c.hub.steps[t.dataset.sid]; setStep(c,t.dataset.sid, st&&st.s==="doing"?"":"doing"); return render(true); }
+    case "na": { if(!c) return; const st=c.hub&&c.hub.steps[t.dataset.sid]; setStep(c,t.dataset.sid, st&&st.s==="na"?"":"na"); return render(true); }
+    case "note": S.noteOpen[t.dataset.k]=!S.noteOpen[t.dataset.k]; render(true);
+      { const ta=document.querySelector('textarea[data-sid="'+t.dataset.k.split(":")[1]+'"]'); if(ta) ta.focus(); } return;
+    case "gate": { if(!c) return; setGate(c, t.dataset.pid, t.dataset.v==="1");
+      if(t.dataset.v==="1"){ const ni=curIdx(c); if(ni<PHASES.length){ S.open[c.id+":"+t.dataset.pid]=false; S.open[c.id+":"+PHASES[ni].id]=true; } }
+      render(true); if(t.dataset.v==="1" && curIdx(c)<PHASES.length){ const el=$("ph-"+PHASES[curIdx(c)].id); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); } return; }
+    case "phase": { const cc=byId(S.clientId); const pi=PIDX[t.dataset.pid]; const k=S.clientId+":"+t.dataset.pid; S.open[k]=!isOpen(cc,PHASES[pi],pi,curIdx(cc)); return render(true); }
+    case "jump": { const k=S.clientId+":"+t.dataset.pid; S.open[k]=true; render(true); const el=$("ph-"+t.dataset.pid); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); return; }
+    case "expand": PHASES.forEach(p=>S.open[S.clientId+":"+p.id]=t.dataset.v==="1"); return render(true);
+    case "mine": S.prefs.mine = t.dataset.v==="1"; savePrefs(); return render(true);
+    case "scope": S.scopeOpen=!S.scopeOpen; return render(true);
+    case "start": { if(!c) return; const sp=$("start-phase").value; ensureHub(c, sp); c.hub.startPhase=sp; c.hub.type=$("start-type").value; S.restart=null; const moved=syncStage(c); touch(c, moved?["stage"]:[]); render(true); $("scroll").scrollTop=0; return; }
+    case "restart": S.restart=S.clientId; render(true); $("scroll").scrollTop=0; return;
+    case "cancel-restart": S.restart=null; return render(true);
+    case "signed": { if(!c) return; const d=$("sg-date").value||today(); c.stage="Onboarding"; c.signedDate=d; if(!c.acceptedAt) c.acceptedAt=d; ensureHub(c,"p0"); touch(c,["stage","signedDate","acceptedAt"]); return render(true); }
+    case "copy": { const url=t.dataset.url; const done=()=>{ const k=$("copy-k"); if(k) k.textContent="copied"; };
+      if(navigator.clipboard) navigator.clipboard.writeText(url).then(done).catch(()=>prompt("Copy this link",url)); else prompt("Copy this link",url); return; }
+    case "add-client": return openAdd();
+  }
+});
+document.addEventListener("change", e=>{
+  const t=e.target; if(!t.dataset.field) return;
+  const c=byId(t.dataset.id); if(!c) return;
+  const f=t.dataset.field, v=t.value.trim();
+  if(f.startsWith("hub.")){ ensureHub(c, c.hub&&c.hub.startPhase); c.hub[f.slice(4)]=v; touch(c); }
+  else {
+    c[f]=v; const fields=[f];
+    if(f==="goLiveDate" && v && !c.day30Date){ c.day30Date=addDays(v,30); fields.push("day30Date"); }
+    touch(c, fields);
+  }
+  render(true);
+});
+let noteTimer=null;
+document.addEventListener("input", e=>{
+  const t=e.target;
+  if(t.dataset.act==="note-text"){
+    const c=byId(t.dataset.id); if(!c) return; const h=ensureHub(c);
+    h.steps[t.dataset.sid] = Object.assign({}, h.steps[t.dataset.sid]||{}, {note:t.value});
+    clearTimeout(noteTimer); noteTimer=setTimeout(()=>touch(c), 500);
+  }
+  if(t.id==="q") renderSide();
+});
+document.addEventListener("keydown", e=>{
+  if(e.key==="/" && !/input|textarea|select/i.test(document.activeElement.tagName)){ e.preventDefault(); $("q").focus(); }
+  if(e.key==="Escape" && document.activeElement===$("q")){ $("q").value=""; renderSide(); $("q").blur(); }
+  if(e.key==="Enter" && document.activeElement===$("q")){ const first=document.querySelector(".crow"); if(first) openClient(first.dataset.id); }
+});
+document.addEventListener("click", e=>{ const tools=$("tools"); if(tools.open && !tools.contains(e.target)) tools.open=false; });
+
+/* ---------- add client ---------- */
+function openAdd(){
+  $("notion-names").innerHTML = S.notion.filter(p=>!clients().some(c=>norm(c.name)===norm(p.name))).map(p=>'<option value="'+esc(p.name)+'">').join("");
+  $("add-form").reset(); $("add-dlg").showModal(); $("add-name").focus();
+}
+$("add-dlg").addEventListener("close", ()=>{
+  if($("add-dlg").returnValue!=="ok") return;
+  const name=$("add-name").value.trim(); if(!name) return;
+  const tpl = (S.portal.templates && S.portal.templates.offboarding) || [];
+  const stage=$("add-stage").value;
+  const c = {id:uid(), name, subtitle:"", stage, owner:$("add-lead").value, type:"", intake:"", notes:"", goLiveDate:"",
+    trackerUrl:"", trackerKey:"", trackerFile:"", goLiveManual:false, proposalSent: stage==="Discovery"?today():"", contactName:"", contactEmail:"",
+    scopingNotes:"", acceptedAt: stage==="Onboarding"?today():"", tier:$("add-tier").value, hours:"", signedDate: stage==="Onboarding"?today():"",
+    day30Date:"", slackChannel:"", createdAt:new Date().toISOString(),
+    onboarding:[], offboarding: tpl.map(s=>({id:uid(), label:s.label, status:"todo", note:""})),
+    outreach:{retainerPack:false, doNotFollowUp:false, pitchSent:"", nextFollowUp:"", outcome:"", note:""}};
+  const n = S.notion.find(p=>norm(p.name)===norm(name));
+  if(n){ c.hours = n.hours ? String(n.hours) : ""; c.trackerKey = n.trackerKey||""; }
+  if(stage==="Onboarding"){ ensureHub(c,"p0"); c.hub.type=$("add-type").value; }
+  S.portal.clients.push(c); touch(c,["*"]); openClient(c.id);
+});
+
+loadAll();
+</script>
+</body>
+</html>
