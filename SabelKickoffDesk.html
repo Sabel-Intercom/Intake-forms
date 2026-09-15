@@ -26,7 +26,8 @@
   FEEDS (read only, refreshed on load):
     /api/notion?kind=projects   name, hours, scope, signed, contact, migration, links
     trackers.json               tracker file and key per client
-    client-portal-v1            stage, owner, go-live
+    client-portal-v1            WHO SHOWS HERE: each client's portal stage picks the view
+                                (Scoping + Onboarding by default), plus owner and go-live
 
   OWN STATE: saved under MY_KEY (sabel-kickoff-v1) via the tracker webhook.
   The webhook only accepts allowlisted keys; until this one is added to
@@ -39,13 +40,32 @@
   Before then, use "Import JSON" on the client's record.
   ─────────────────────────────────────────────────────────────────────────────
 -->
+<script>try{ if(localStorage.getItem('sabel-ops-theme')==='light') document.documentElement.setAttribute('data-theme','light'); }catch(e){}</script>
 <style>
 :root{
   --bg:#0B0B0C; --card:#0F1113; --card2:#141719; --w:#FFFFFF; --red:#E10600;
   --body:#E2E8F0; --muted:#94A3B8; --border:#2A3547; --mono:#64748B;
   --green:#4ADE80; --amber:#FBBF24; --blue:#60A5FA; --rose:#F87171; --grey:#64748B;
+  --field:#0A0D10; --line:#171C22; --sel:#1A0E0E; --topic:#12161B; --track:#1B2129; --calbg:#141719;
+  --gB:#1E4A33; --gBg:#0E2A1C; --aB:#5A4A1E; --rB:#5A2323; --rT:#F8ABAB;
+  --warnBg:#1A1206; --warnT:#F5E6B8; --infoBg:#0C1420; --infoB:#1E3A5A; --infoT:#CBE0F5; --codeBg:#000;
+  --shadow:rgba(0,0,0,.5); --scheme:dark; color-scheme:dark;
+  /* portal stage colours, same hues as SabelClientPortal.html */
+  --sScope:#C084FC; --sOnb:#60A5FA; --sAct:#4ADE80; --sOff:#FBBF24; --sOut:#F87171; --sDone:#94A3B8;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
   --code:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+/* Light mode: the header toggle sets data-theme="light" on <html> and remembers it under
+   localStorage 'sabel-ops-theme' (shared by every Ops Hub tab, since they are one origin). */
+:root[data-theme="light"]{
+  --bg:#F4F5F7; --card:#FFFFFF; --card2:#F1F4F8; --w:#0F172A;
+  --body:#334155; --muted:#475569; --border:#D9DFE7; --mono:#64748B;
+  --green:#15803D; --amber:#B45309; --blue:#1D4ED8; --rose:#B91C1C; --grey:#64748B;
+  --field:#FFFFFF; --line:#EEF1F5; --sel:#FDEEEE; --topic:#F6F8FB; --track:#E5E9F0; --calbg:#F1F4F8;
+  --gB:#A7D7B8; --gBg:#E8F6EE; --aB:#E9CF9A; --rB:#EDB4B4; --rT:#B91C1C;
+  --warnBg:#FFF8E6; --warnT:#6B4E0A; --infoBg:#EEF4FC; --infoB:#BFD4EE; --infoT:#1E3A5F; --codeBg:#E9EDF2;
+  --shadow:rgba(15,23,42,.14); --scheme:light; color-scheme:light;
+  --sScope:#7E22CE; --sOnb:#1D4ED8; --sAct:#15803D; --sOff:#B45309; --sOut:#B91C1C; --sDone:#64748B;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -62,35 +82,67 @@ header .sub{font-size:12px;color:var(--muted);margin-top:3px}
 .dotlive{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block}
 .dotlive.warn{background:var(--amber)} .dotlive.off{background:var(--rose)}
 
-.banner{background:#1A1206;border:1px solid #5A4A1E;border-left:3px solid var(--amber);border-radius:7px;padding:10px 13px;font-size:12.5px;line-height:1.6;margin-bottom:12px;color:#F5E6B8}
-.banner.info{background:#0C1420;border-color:#1E3A5A;border-left-color:var(--blue);color:#CBE0F5}
-.banner code{font-family:var(--code);background:#000;padding:1px 5px;border-radius:4px}
+.banner{background:var(--warnBg);border:1px solid var(--aB);border-left:3px solid var(--amber);border-radius:7px;padding:10px 13px;font-size:12.5px;line-height:1.6;margin-bottom:12px;color:var(--warnT)}
+.banner.info{background:var(--infoBg);border-color:var(--infoB);border-left-color:var(--blue);color:var(--infoT)}
+.banner code{font-family:var(--code);background:var(--codeBg);padding:1px 5px;border-radius:4px}
 
 .layout{display:grid;grid-template-columns:280px 1fr;gap:18px;align-items:start}
 @media(max-width:900px){.layout{grid-template-columns:1fr}}
+/* Phones: the client list sat sticky over the record (Richard, 9 Sep 2026). Below 900px it is a
+   normal block, shows at most 40vh of clients, and collapses to a one-line bar once a client is open. */
+.side .cur{display:none;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);font-size:13px;color:var(--w);font-weight:600}
+.side .cur span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:900px){
+  body .side{position:static}
+  body .side .list{max-height:40vh}
+  body.has-cur .side .cur{display:flex}
+  body.has-cur:not(.list-open) .side .top,body.has-cur:not(.list-open) .side .list,body.has-cur:not(.list-open) .side .foot{display:none!important}
+}
 
 /* ── client list ── */
 .side{position:sticky;top:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .side .top{padding:10px 10px 8px;border-bottom:1px solid var(--border)}
-.side input.q{width:100%;background:#0A0D10;border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--body);font-size:12.5px}
+.side input.q{width:100%;background:var(--field);border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--body);font-size:12.5px}
 .side input.q:focus{outline:none;border-color:var(--red)}
-.side .list{max-height:calc(100vh - 200px);overflow:auto}
-.cl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:9px 12px;border-bottom:1px solid #171C22;cursor:pointer}
-.cl:hover{background:var(--card2)} .cl.on{background:#1A0E0E;border-left:3px solid var(--red);padding-left:9px}
+.side .list{max-height:calc(100vh - 250px);overflow:auto}
+.cl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.cl:hover{background:var(--card2)} .cl.on{background:var(--sel);border-left:3px solid var(--red);padding-left:9px}
 .cl .n{font-size:13px;color:var(--w);font-weight:600;grid-column:1}
 .cl .m{font-size:10.5px;color:var(--mono);grid-column:1}
 .cl .r{grid-column:2;grid-row:1/3;align-self:center;font-family:var(--code);font-size:10.5px;padding:2px 7px;border-radius:20px;border:1px solid var(--border);color:var(--muted)}
-.cl .r.g{border-color:#1E4A33;color:var(--green)} .cl .r.a{border-color:#5A4A1E;color:var(--amber)} .cl .r.d{border-color:#1E4A33;background:#0E2A1C;color:var(--green)}
+.cl .r.g{border-color:var(--gB);color:var(--green)} .cl .r.a{border-color:var(--aB);color:var(--amber)} .cl .r.d{border-color:var(--gB);background:var(--gBg);color:var(--green)}
 .side .foot{padding:9px 10px;border-top:1px solid var(--border);display:flex;gap:6px}
-.side .foot input{flex:1;background:#0A0D10;border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--body);font-size:12px;min-width:0}
+.side .foot input{flex:1;background:var(--field);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--body);font-size:12px;min-width:0}
 .side .foot input:focus{outline:none;border-color:var(--red)}
+
+/* ── stage views: which clients show is decided by the portal stage ── */
+.stages{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.stg{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.stg:hover{color:var(--w);border-color:var(--muted)}
+.stg i{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.stg b{font-family:var(--code);font-size:10.5px;font-weight:600;color:var(--mono)}
+.stg[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:#fff}
+.stg[aria-pressed="true"] b{color:#fff;opacity:.8}
+.stg[aria-pressed="true"] i{box-shadow:0 0 0 1.5px #fff}
+.stg.sep{margin-left:8px}
+.stages .sum{margin-left:auto;font-size:11.5px;color:var(--mono)}
+.stages .sum b{color:var(--body);font-weight:600}
+@media(max-width:900px){.stages{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.stg{flex:none}.stg.sep{margin-left:0}.stages .sum{display:none}}
+.side .grp{padding:9px 12px 5px;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--mono);font-weight:700;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--line)}
+.side .grp i,.cl .m .sd{display:inline-block;width:7px;height:7px;border-radius:50%;flex:none}
+.cl .m .sd{margin-right:6px;vertical-align:0}
+.side .empty a{color:var(--blue)}
+.stagebadge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;border:1px solid var(--border);border-radius:20px;padding:2px 9px;color:var(--muted)}
+.stagebadge i{width:7px;height:7px;border-radius:50%}
+.btn.theme{display:inline-flex;align-items:center;gap:6px;align-self:center}
+.btn.theme svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
 
 /* ── buttons ── */
 .btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:6px 11px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--sans)}
 .btn:hover{color:var(--w);border-color:var(--muted)}
 .btn.primary{background:var(--red);border-color:var(--red);color:#fff} .btn.primary:hover{background:#c40500}
 .btn.sm{padding:3px 8px;font-size:10.5px}
-.btn.danger{border-color:#5A2323;color:#F8ABAB} .btn.danger:hover{background:#1A0E0E;border-color:var(--rose)}
+.btn.danger{border-color:var(--rB);color:var(--rT)} .btn.danger:hover{background:var(--sel);border-color:var(--rose)}
 .btn.x{border:none;color:var(--mono);padding:2px 6px;font-size:14px;line-height:1} .btn.x:hover{color:var(--rose)}
 
 /* ── record ── */
@@ -102,7 +154,7 @@ header .sub{font-size:12px;color:var(--muted);margin-top:3px}
 .rhead .links a{color:var(--blue);text-decoration:none} .rhead .links a:hover{text-decoration:underline}
 .rhead .links span{color:var(--mono)}
 .ready{display:flex;align-items:center;gap:9px;margin-top:10px;font-size:11.5px;color:var(--muted)}
-.ready .bar{flex:1;max-width:260px;height:6px;background:#1B2129;border-radius:3px;overflow:hidden}
+.ready .bar{flex:1;max-width:260px;height:6px;background:var(--track);border-radius:3px;overflow:hidden}
 .ready .bar i{display:block;height:100%;background:var(--green);border-radius:3px;transition:width .2s}
 .ready .miss{color:var(--amber)}
 .callrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12.5px}
@@ -125,7 +177,7 @@ body.present .info.guide{display:none!important}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 14px;margin-top:10px}
 .f label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mono);margin-bottom:3px}
-.f input,.f select,.f textarea,table.ed input,table.ed select,table.ed textarea{width:100%;background:#0A0D10;border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--body);font-size:12.5px;font-family:var(--sans)}
+.f input,.f select,.f textarea,table.ed input,table.ed select,table.ed textarea{width:100%;background:var(--field);border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--body);font-size:12.5px;font-family:var(--sans)}
 .f input:focus,.f select:focus,.f textarea:focus,table.ed input:focus,table.ed select:focus,table.ed textarea:focus{outline:none;border-color:var(--red)}
 .f textarea,table.ed textarea{resize:vertical;min-height:54px;line-height:1.5}
 .f.wide{grid-column:1/-1}
@@ -133,17 +185,17 @@ body.present .info.guide{display:none!important}
 .f .auto{color:var(--blue)}
 
 .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.pill{display:flex;align-items:center;gap:7px;background:#0A0D10;border:1px solid var(--border);border-radius:20px;padding:5px 11px;font-size:12px;cursor:pointer;user-select:none}
+.pill{display:flex;align-items:center;gap:7px;background:var(--field);border:1px solid var(--border);border-radius:20px;padding:5px 11px;font-size:12px;cursor:pointer;user-select:none}
 .pill input{accent-color:var(--red);width:14px;height:14px;margin:0}
 .pill.on{border-color:var(--red);color:var(--w)}
 .pill small{color:var(--mono);font-family:var(--code);font-size:10px}
 
 .info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--mono);color:var(--mono);font-size:10px;font-weight:700;font-family:var(--code);cursor:help;position:relative;margin-left:2px;flex:none}
 .info:hover{border-color:var(--blue);color:var(--blue)}
-.info .tip{display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);width:300px;background:#0A0D10;border:1px solid var(--border);border-top:2px solid var(--red);border-radius:7px;padding:9px 11px;font-size:11.5px;font-weight:400;font-family:var(--sans);color:var(--body);line-height:1.5;text-align:left;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.5);cursor:default;white-space:normal}
+.info .tip{display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);width:300px;background:var(--field);border:1px solid var(--border);border-top:2px solid var(--red);border-radius:7px;padding:9px 11px;font-size:11.5px;font-weight:400;font-family:var(--sans);color:var(--body);line-height:1.5;text-align:left;z-index:20;box-shadow:0 8px 24px var(--shadow);cursor:default;white-space:normal}
 .info:hover .tip,.info:focus .tip{display:block}
 .pillrow{display:grid;grid-template-columns:260px 1fr;gap:8px 12px;align-items:center;margin-top:8px}
-.pillrow .pn{width:100%;background:#0A0D10;border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--body);font-size:12px;font-family:var(--sans)}
+.pillrow .pn{width:100%;background:var(--field);border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--body);font-size:12px;font-family:var(--sans)}
 .pillrow .pn:focus{outline:none;border-color:var(--red)}
 .pillrow .pn:disabled{opacity:.35}
 @media(max-width:900px){.pillrow{grid-template-columns:1fr}}
@@ -154,17 +206,17 @@ table.ed th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spa
 table.ed td{padding:3px 6px 3px 0;vertical-align:top}
 table.ed td.x{width:28px;padding-right:0;padding-top:6px}
 table.ed td.n{width:26px;font-family:var(--code);font-size:11px;color:var(--mono);padding-top:9px}
-table.ed select[data-c="green"]{border-color:#1E4A33;color:var(--green)}
-table.ed select[data-c="amber"]{border-color:#5A4A1E;color:var(--amber)}
-table.ed select[data-c="red"]{border-color:#5A2323;color:var(--rose)}
+table.ed select[data-c="green"]{border-color:var(--gB);color:var(--green)}
+table.ed select[data-c="amber"]{border-color:var(--aB);color:var(--amber)}
+table.ed select[data-c="red"]{border-color:var(--rB);color:var(--rose)}
 table.ed select[data-c="grey"]{color:var(--mono)}
 table.ed td.mv,table.ed th.mv{width:22px;padding-right:2px;padding-top:4px}
 table.ed td.mv .btn.x{display:block;font-size:8px;padding:1px 4px;line-height:1.2}
 table.ed td.mv .btn.x:disabled{opacity:.2;cursor:default}
-table.ed.raci td.topic{width:32%;background:#12161B;border-left:3px solid var(--red);border-radius:6px 0 0 6px}
+table.ed.raci td.topic{width:32%;background:var(--topic);border-left:3px solid var(--red);border-radius:6px 0 0 6px}
 table.ed.raci td.topic textarea.topic{background:transparent;border-color:transparent;color:var(--w);font-weight:700}
-table.ed.raci td.topic textarea.topic:focus{border-color:var(--red);background:#0A0D10}
-table.ed.raci td{padding-top:5px;padding-bottom:5px;border-bottom:1px solid #171C22}
+table.ed.raci td.topic textarea.topic:focus{border-color:var(--red);background:var(--field)}
+table.ed.raci td{padding-top:5px;padding-bottom:5px;border-bottom:1px solid var(--line)}
 table.ed textarea.grow{resize:none}
 table.ed tr.done input{color:var(--mono);text-decoration:line-through}
 table.ed input[type=checkbox]{width:15px;height:15px;accent-color:var(--green);margin-top:9px}
@@ -182,7 +234,7 @@ table.ed input[type=checkbox]{width:15px;height:15px;accent-color:var(--green);m
 .mbox{background:var(--card);border:1px solid var(--border);border-radius:10px;width:min(760px,100%);padding:18px}
 .mbox h3{margin:0 0 6px;color:var(--w);font-size:15px}
 .mbox p{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
-.mbox textarea{width:100%;min-height:300px;background:#0A0D10;border:1px solid var(--border);border-radius:7px;padding:9px;color:var(--body);font-family:var(--code);font-size:11.5px;resize:vertical}
+.mbox textarea{width:100%;min-height:300px;background:var(--field);border:1px solid var(--border);border-radius:7px;padding:9px;color:var(--body);font-family:var(--code);font-size:11.5px;resize:vertical}
 .mbox .mr{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
 .mbox .err{color:var(--rose);font-size:12px;margin-top:6px}
 
@@ -219,11 +271,11 @@ ul.sl li small{color:#64748B}
 
 /* ── date fields: our own calendar button (Safari shows no icon, Chrome's is black) ── */
 .dw{display:inline-flex;align-items:stretch;width:100%;min-width:150px}
-.dw input[type=date]{flex:1;min-width:0;border-top-right-radius:0;border-bottom-right-radius:0;color-scheme:dark;cursor:pointer}
+.dw input[type=date]{flex:1;min-width:0;border-top-right-radius:0;border-bottom-right-radius:0;color-scheme:var(--scheme);cursor:pointer}
 .dw input[type=date]::-webkit-calendar-picker-indicator{opacity:0;width:0;margin:0;padding:0}
-.dw .cal{flex:none;width:32px;border:1px solid var(--border);border-left:none;border-radius:0 6px 6px 0;background:#141719;color:var(--w);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
-.dw .cal svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:1.8}
-.dw .cal:hover{background:var(--red)}
+.dw .cal{flex:none;width:32px;border:1px solid var(--border);border-left:none;border-radius:0 6px 6px 0;background:var(--calbg);color:var(--w);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.dw .cal svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
+.dw .cal:hover{background:var(--red);color:#fff}
 .dw input[type=date]:focus + .cal{border-color:var(--red)}
 /* auto-growing text fields */
 textarea.grow{min-height:34px;height:34px;overflow:hidden;resize:none;line-height:1.45;padding:7px 9px;font-family:var(--sans)}
@@ -236,7 +288,7 @@ body.present .side,body.present #banners,body.present header .sub,body.present .
 body.present .layout{grid-template-columns:1fr}
 body.present .wrap{max-width:1100px}
 body.present .rhead{border-color:var(--red)}
-.presentbar{display:none;align-items:center;gap:10px;background:#1A0E0E;border:1px solid #5A2323;border-radius:7px;padding:8px 13px;margin-bottom:12px;font-size:12.5px;color:#F8ABAB}
+.presentbar{display:none;align-items:center;gap:10px;background:var(--sel);border:1px solid var(--rB);border-radius:7px;padding:8px 13px;margin-bottom:12px;font-size:12.5px;color:var(--rT)}
 body.present .presentbar{display:flex}
 
 @media print{
@@ -258,17 +310,20 @@ body.present .presentbar{display:flex}
     <div class="sub">Scope in and out, timeline, who does what, next steps. One record per client · internal only, never shared with a client</div>
   </div>
   <div class="spacer"></div>
+  <button type="button" class="btn theme" id="themeBtn" onclick="toggleTheme()"></button>
   <div class="stamp"><span id="livedot" class="dotlive warn"></span><span id="stamp">loading…</span></div>
 </header>
 
 <div id="banners"></div>
 <div class="presentbar"><b>Presenting</b><span>Only this client is on screen. The client list, internal notes and commercial details are hidden. Press Esc or Exit to get them back.</span><span class="spacer"></span><button class="btn" onclick="setPresent(false)">Exit presenting</button></div>
 
+<div class="stages hideP" id="stages" aria-label="Show clients by portal stage"></div>
 <div class="layout">
   <aside class="side">
-    <div class="top" style="display:flex;gap:6px"><input class="q" id="q" placeholder="Filter clients…" oninput="renderList()"><button class="btn sm" id="allBtn" onclick="toggleAll()" title="Include completed and offboarded clients">All</button></div>
+    <div class="cur"><span id="curname"></span><button class="btn sm" id="curbtn" onclick="toggleList()">Change client</button></div>
+    <div class="top"><input class="q" id="q" placeholder="Search this view…" oninput="renderList()"></div>
     <div class="list" id="list"></div>
-    <div class="foot"><input id="newName" placeholder="Add a client not in Notion…"><button class="btn sm" onclick="addManual()">Add</button></div>
+    <div class="foot"><input id="newName" placeholder="Add a client not in the portal…"><button class="btn sm" onclick="addManual()">Add</button></div>
   </aside>
   <main class="rec" id="rec"></main>
 </div>
@@ -310,7 +365,21 @@ var LOGO_LIGHT = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAApEAAADbCAYAAAA1
 var REG=[], PORTAL=[], PROJ=[], CLIENTS=[];
 var STORE={clients:{}}, REMOTE=false, CUR=null, SAVE_T=null, LIVE={ok:0,total:3,at:null,err:[]};
 var OPEN={};   /* section open/closed state, per session */
-var SHOWALL=false;
+/* Which clients show is decided by the Onboarding / Offboarding portal (client-portal-v1).
+   Its stage for each client picks the view, so a client leaves the default view the moment
+   the portal marks them Active, and comes back if the stage is moved back. Notion and
+   trackers.json still pre-fill a record; they no longer decide who is listed. */
+var STAGE_ORDER=['Discovery','Onboarding','Active','Offboarding','Outreach','Complete'];
+var STAGE_LABEL={Discovery:'Scoping',Onboarding:'Onboarding',Active:'Active',Offboarding:'Offboarding',Outreach:'Outreach',Complete:'Complete',none:'Not in portal'};
+var STAGE_VAR={Discovery:'--sScope',Onboarding:'--sOnb',Active:'--sAct',Offboarding:'--sOff',Outreach:'--sOut',Complete:'--sDone',none:'--grey'};
+var VIEWS=[
+  {k:'kickoff',label:'Scoping + Onboarding',tip:'Default: every client the portal has not yet marked Active'},
+  {k:'Discovery'},{k:'Onboarding'},{k:'Active'},{k:'Offboarding'},{k:'Outreach'},{k:'Complete'},
+  {k:'none',tip:'Kick-off records with no matching client in the portal: manual adds, or a name the portal spells differently'},
+  {k:'all',label:'All'}
+];
+var VIEW_KEY='sabel_kickoff_view', VIEW='kickoff';
+try{ var sv=localStorage.getItem(VIEW_KEY); if(sv&&VIEWS.some(function(v){return v.k===sv;})) VIEW=sv; }catch(e){}
 
 var SABEL_TEAM=[
   ['Richard Le Bas','Founder & Director'],
@@ -453,12 +522,15 @@ function build(){
     Object.keys(p).forEach(function(k){ if((c.notion[k]===''||c.notion[k]==null)&&p[k]!==''&&p[k]!=null) c.notion[k]=p[k]; });
   });
   REG.forEach(function(r){ var c=slot(r.name); if(c){ c.reg=r; if(!c.notion) c.name=r.name; } });
-  PORTAL.forEach(function(p){ var c=slot(p.name); if(c){ c.portal=p; if(!c.notion&&!c.reg) c.name=p.name; } });
+  PORTAL.forEach(function(p){ var c=slot(p.name); if(!c) return;
+    if(!c.portal||(c.portal.stage==='Complete'&&p.stage!=='Complete')) c.portal=p;   /* same name twice: the live engagement wins */
+    if(!c.notion&&!c.reg) c.name=p.name; });
   Object.keys(STORE.clients).forEach(function(id){
     var r=STORE.clients[id]; if(r.removed) return; if(!cand[id]) cand[id]={id:id,name:r.name||id,reg:null,portal:null,notion:null,manual:true};
   });
   CLIENTS=Object.keys(cand).map(function(k){ return cand[k]; });
   CLIENTS.sort(function(a,b){
+    var ia=stageIndex(a), ib=stageIndex(b); if(ia!==ib) return ia-ib;   /* portal order first */
     var ra=has(a.id)?STORE.clients[a.id]:null, rb=has(b.id)?STORE.clients[b.id]:null;
     var sa=ra?(ra.callDone?2:0):1, sb=rb?(rb.callDone?2:0):1;   /* in progress first, untouched next, done last */
     if(sa!==sb) return sa-sb;
@@ -481,34 +553,92 @@ function readiness(r){
   return {n:9-miss.length, of:9, miss:miss};
 }
 
-/* Live = anything still in flight anywhere: portal not Complete/Offboarding, Notion Active, or a tracker still flagged active. */
-function isLive(c){
-  if(c.portal&&c.portal.stage) return !/complete|offboard/i.test(c.portal.stage);
-  if(c.notion) return /active/i.test(c.notion.status||'');
-  if(c.reg) return !!c.reg.active;
-  return true;
+/* ── stage views ── */
+function stageOf(c){ if(!c||!c.portal) return 'none'; return STAGE_ORDER.indexOf(c.portal.stage)>-1?c.portal.stage:'Onboarding'; }
+function stageIndex(c){ var s=stageOf(c); return s==='none'?STAGE_ORDER.length:STAGE_ORDER.indexOf(s); }
+function listable(c){ return !!c.portal||has(c.id); }   /* not in the portal and no record here: nothing to list */
+function inView(c,k){
+  if(!listable(c)) return false;
+  var s=stageOf(c);
+  if(k==='all') return true;
+  if(k==='kickoff') return s==='Discovery'||s==='Onboarding';
+  return s===k;
 }
-function toggleAll(){ SHOWALL=!SHOWALL; document.getElementById('allBtn').classList.toggle('primary',SHOWALL); renderList(); }
-function renderList(){
-  var q=(document.getElementById('q').value||'').toLowerCase();
+function stageDot(s){ return 'var('+(STAGE_VAR[s]||'--grey')+')'; }
+function stageBadge(c){ if(!c||!c.id) return ''; var s=stageOf(c);
+  return '<span class="stagebadge hideP" id="stageBadge" title="Stage in the Onboarding / Offboarding portal"><i style="background:'+stageDot(s)+'"></i>'+(s==='none'?'Not in portal':'Portal · '+STAGE_LABEL[s])+'</span>'; }
+function kickState(c){ var r=has(c.id)?STORE.clients[c.id]:null; return !r?'new':(r.callDone?'held':'prep'); }
+function setView(k){ VIEW=k; try{ localStorage.setItem(VIEW_KEY,k); }catch(e){} renderList(); var l=document.getElementById('list'); if(l) l.scrollTop=0; }
+function renderStages(){
+  var el=document.getElementById('stages'); if(!el) return;
   var h='';
+  VIEWS.forEach(function(v){
+    var n=CLIENTS.filter(function(c){ return inView(c,v.k); }).length;
+    if((v.k==='Outreach'||v.k==='none')&&!n&&VIEW!==v.k) return;
+    var dot=(v.k==='kickoff'||v.k==='all')?'':'<i style="background:'+stageDot(v.k)+'"></i>';
+    h+='<button type="button" class="stg'+(v.k==='Discovery'||v.k==='all'?' sep':'')+'" aria-pressed="'+(VIEW===v.k)+'" onclick="setView(\''+v.k+'\')"'+(v.tip?' title="'+esc(v.tip)+'"':'')+'>'+
+       dot+esc(v.label||STAGE_LABEL[v.k])+(v.k==='all'?'':' <b>'+n+'</b>')+'</button>';
+  });
+  var held=0, prep=0, fresh=0;
+  CLIENTS.forEach(function(c){ if(!inView(c,VIEW)) return; var k=kickState(c); if(k==='held') held++; else if(k==='prep') prep++; else fresh++; });
+  h+='<span class="sum"><b>'+held+'</b> kick-off'+(held===1?'':'s')+' held · <b>'+prep+'</b> in prep · <b>'+fresh+'</b> not started</span>';
+  el.innerHTML=h;
+}
+function renderList(){
+  renderStages();
+  var q=(document.getElementById('q').value||'').toLowerCase().trim();
+  var multi=VIEW==='kickoff'||VIEW==='all', h='', last=null, shown=0;
   CLIENTS.forEach(function(c){
+    if(!inView(c,VIEW)) return;
     if(q&&c.name.toLowerCase().indexOf(q)<0) return;
-    var r=has(c.id)?STORE.clients[c.id]:null, pill, meta;
-    if(!SHOWALL&&!r&&!isLive(c)) return;
-    if(!r){ pill='<span class="r">new</span>'; meta=c.portal&&c.portal.stage?('Portal · '+esc(c.portal.stage)):(c.notion?('Notion · '+esc(c.notion.status||'')):'tracker only'); }
+    var s=stageOf(c), r=has(c.id)?STORE.clients[c.id]:null, pill, meta;
+    if(multi&&s!==last){ h+='<div class="grp"><i style="background:'+stageDot(s)+'"></i>'+STAGE_LABEL[s]+'</div>'; last=s; }
+    if(!r){ pill='<span class="r">new</span>'; meta='not started'; }
     else if(r.callDone){ pill='<span class="r d">✓ held</span>'; meta='Kick-off '+(fmt(r.callDate)||'held'); }
     else { var rd=readiness(r); pill='<span class="r '+(rd.n===9?'g':'a')+'">'+rd.n+'/'+rd.of+'</span>'; meta=r.timeline.kickoff?('Kick-off '+fmt(r.timeline.kickoff)):'kick-off date not set'; }
-    h+='<div class="cl'+(CUR===c.id?' on':'')+'" onclick="openClient(\''+c.id+'\')"><div class="n">'+esc(c.name)+'</div><div class="m">'+meta+'</div>'+pill+'</div>';
+    h+='<div class="cl'+(CUR===c.id?' on':'')+'" onclick="openClient(\''+c.id+'\')"><div class="n">'+esc(c.name)+'</div><div class="m"><span class="sd" style="background:'+stageDot(s)+'"></span>'+meta+'</div>'+pill+'</div>';
+    shown++;
   });
-  document.getElementById('list').innerHTML=h||'<div class="empty" style="padding:12px">No clients match'+(SHOWALL?'':' (completed clients are hidden; press All)')+'.</div>';
+  if(!shown){
+    var other=q?CLIENTS.filter(function(c){ return listable(c)&&!inView(c,VIEW)&&c.name.toLowerCase().indexOf(q)>-1; }):[];
+    h='<div class="empty" style="padding:12px">'+(q?'Nothing in this view matches.':'No clients at this stage in the portal.')+
+      (other.length?'<br>In other stages: '+other.slice(0,5).map(function(c){ return '<a href="#" onclick="setView(\''+stageOf(c)+'\');openClient(\''+c.id+'\');return false">'+esc(c.name)+'</a> ('+STAGE_LABEL[stageOf(c)]+')'; }).join(', '):'')+'</div>';
+  }
+  var cn=document.getElementById('curname'); if(cn){ var cc=CLIENTS.filter(function(x){return x.id===CUR;})[0]; cn.textContent=cc?cc.name:(has(CUR)?(STORE.clients[CUR].name||CUR):''); }
+  document.getElementById('list').innerHTML=h;
 }
+/* The portal decides who is listed, so re-read it on the same 45s beat as the store: a client
+   marked Active there leaves the default view without anyone reloading this page. */
+function refreshPortal(){
+  fetchJSON(API+'?key='+PORTAL_KEY+'&_t='+Date.now()).then(function(j){
+    var d=j&&(j.data||j.value), list=d&&d.clients; if(!list||!list.length) return;
+    function sig(a){ return a.map(function(p){ return p.name+'|'+p.stage; }).join(';'); }
+    if(sig(list)===sig(PORTAL)) return;
+    PORTAL=list; build(); renderList();
+    var el=document.getElementById('stageBadge'), c=CLIENTS.filter(function(x){return x.id===CUR;})[0];
+    if(el&&c) el.outerHTML=stageBadge(c);
+  });
+}
+setInterval(refreshPortal,45000);
+
+/* ── light / dark ── */
+var THEME_KEY='sabel-ops-theme';
+var ICON_SUN='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+var ICON_MOON='<svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function applyTheme(t){
+  if(t==='light') document.documentElement.setAttribute('data-theme','light'); else document.documentElement.removeAttribute('data-theme');
+  var b=document.getElementById('themeBtn'); if(!b) return;
+  b.innerHTML=(t==='light'?ICON_MOON+'Dark':ICON_SUN+'Light'); b.title='Switch to '+(t==='light'?'dark':'light')+' mode';
+}
+function toggleTheme(){ var t=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light'; try{ localStorage.setItem(THEME_KEY,t); }catch(e){} applyTheme(t); }
+window.addEventListener('storage',function(e){ if(e.key===THEME_KEY) applyTheme(e.newValue==='light'?'light':'dark'); });
 function addManual(){
   var n=document.getElementById('newName').value.trim(); if(!n) return;
   var id=norm(n); if(!id) return;
   if(!has(id)){ STORE.clients[id]=blankRecord(n); STORE.clients[id].basics.legalName=n; STORE.clients[id].updated=new Date().toISOString(); }
   document.getElementById('newName').value='';
   build(); openClient(id);
+  var nc=CLIENTS.filter(function(x){return x.id===id;})[0]; if(nc&&!inView(nc,VIEW)) setView(stageOf(nc));
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -557,8 +687,14 @@ function openClient(id){
   var fresh=!has(id);
   var r=rec(id);
   if(fresh){ var c=CLIENTS.filter(function(x){return x.id===id;})[0]; r.name=c?c.name:id; prefill(id,false); saveStore(); build(); }
+  document.body.classList.add('has-cur'); document.body.classList.remove('list-open');
   renderList(); renderRec();
   window.scrollTo(0,0);
+}
+function toggleList(){
+  var on=document.body.classList.toggle('list-open');
+  document.getElementById('curbtn').textContent=on?'Close list':'Change client';
+  if(on){ var q=document.getElementById('q'); if(q) q.focus(); }
 }
 function inp(path,val,opts){
   opts=opts||{};
@@ -597,12 +733,12 @@ function rowX(fn){ return '<td class="x"><button class="btn x" title="Remove" on
 
 function renderRec(){
   var el=document.getElementById('rec');
-  if(!CUR){ el.innerHTML='<div class="welcome"><b>Pick a client on the left</b> to open their kick-off record.<br>Clients come from the Notion Projects DB, the tracker registry and the portal; anyone else can be added below the list.<br>The basics fill themselves from Notion the first time you open a client. Scope, timeline and people are seeded from the SOW or typed in, then edited live on the call.</div>'; return; }
+  if(!CUR){ el.innerHTML='<div class="welcome"><b>Pick a client on the left</b> to open their kick-off record.<br>The list follows each client’s stage in the Onboarding / Offboarding portal: Scoping and Onboarding show by default, and a client drops out of that view once the portal marks them Active. Use the stage buttons above to look back at Active, Offboarding or Complete clients.<br>The basics fill themselves from Notion the first time you open a client. Scope, timeline and people are seeded from the SOW or typed in, then edited live on the call.</div>'; return; }
   var r=rec(CUR), b=r.basics, rd=readiness(r), c=CLIENTS.filter(function(x){return x.id===CUR;})[0]||{};
   var h='';
 
   /* header */
-  h+='<div class="rhead"><div class="row"><h2>'+esc(r.name||b.shortName||CUR)+'</h2><span class="spacer"></span>'+
+  h+='<div class="rhead"><div class="row"><h2>'+esc(r.name||b.shortName||CUR)+'</h2>'+stageBadge(c)+'<span class="spacer"></span>'+
      '<button class="btn hideP" onclick="prefill(CUR,true);saveStore();renderRec()">Refresh from Notion</button>'+
      '<button class="btn hideP" onclick="showJSON()">Copy JSON</button>'+
      '<button class="btn hideP" onclick="showImport()">Import JSON</button>'+
@@ -617,7 +753,7 @@ function renderRec(){
   if(links.length) h+='<div class="links">'+links.join('')+'</div>';
   h+='<div class="ready"><span>Ready for the call</span><div class="bar"><i style="width:'+Math.round(rd.n/rd.of*100)+'%"></i></div><b>'+rd.n+'/'+rd.of+'</b>'+(rd.miss.length?'<span class="miss">still needs: '+esc(rd.miss.join(', '))+'</span>':'<span style="color:var(--green)">all set</span>')+'</div>';
   h+='<div class="callrow"><label><input type="checkbox" data-p="callDone"'+(r.callDone?' checked':'')+'> Kick-off call held</label>'+
-     '<span style="color:var(--mono)">on</span><span style="display:inline-block;width:190px">'+dateField('callDate',r.callDate,' style="background:#0A0D10;border:1px solid var(--border);border-radius:6px 0 0 6px;padding:4px 8px;color:var(--body)"')+'</span>'+
+     '<span style="color:var(--mono)">on</span><span style="display:inline-block;width:190px">'+dateField('callDate',r.callDate,' style="background:var(--field);border:1px solid var(--border);border-radius:6px 0 0 6px;padding:4px 8px;color:var(--body)"')+'</span>'+
      (r.summaryAt?'<span style="color:var(--mono)">· summary last exported '+esc(r.summaryAt.slice(0,10))+'</span>':'')+
      '<span class="spacer"></span><span class="saved" id="savedStamp"></span>'+
      '<button class="btn danger sm hideP" onclick="removeRecord()">Remove record</button></div></div>';
@@ -886,9 +1022,10 @@ function loadAll(){
     fetchJSON(API+'?key='+PORTAL_KEY+'&_t='+Date.now()).then(function(j){ var d=j&&(j.data||j.value); PORTAL=(d&&d.clients)||[]; if(PORTAL.length) LIVE.ok++; else LIVE.err.push('client portal'); })
   ]).then(function(){ LIVE.at=new Date(); build(); banners(); renderList(); setStamp(); });
 }
+applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'light':'dark');
 loadLocal(); renderRec();
 probeStore().then(loadAll).then(function(){
-  var hash=(location.hash||'').replace('#',''); if(hash&&CLIENTS.some(function(c){return c.id===hash;})) openClient(hash);
+  var hash=(location.hash||'').replace('#',''); if(hash&&CLIENTS.some(function(c){return c.id===hash;})){ openClient(hash); var hc=CLIENTS.filter(function(c){return c.id===hash;})[0]; if(hc&&!inView(hc,VIEW)) setView(listable(hc)?stageOf(hc):'all'); }
   try{ if(sessionStorage.getItem('kickoff_present')==='1'&&CUR) setPresent(true); }catch(e){}
 });
 </script>
