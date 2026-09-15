@@ -67,8 +67,6 @@
       <button class="tab"    id="t-portal"    onclick="show('portal')">Onboarding / Offboarding</button>
       <button class="tab"    id="t-kickoff"   onclick="show('kickoff')">Kick-off Desk</button>
       <button class="tab"    id="t-dashboard" onclick="show('dashboard')">Project Dashboard</button>
-      <button class="tab"    id="t-contracts" onclick="show('contracts')">Client Contracts</button>
-      <button class="tab"    id="t-weekly"    onclick="show('weekly')">Weekly Updates</button>
       <button class="tab"    id="t-feedback"  onclick="show('feedback')">Feedback Dashboard</button>
     </nav>
     <div class="nav-right">Internal use only</div>
@@ -108,22 +106,6 @@
           <p>A single team view across all client project trackers: run sheet, stage board and command table — live task progress, blockers and owner workload pulled straight from the trackers themselves.</p>
           <span class="go">Open dashboard <span class="arrow">&rarr;</span></span>
         </button>
-        <button class="pillar" onclick="show('contracts')">
-          <span class="badge internal">Internal</span>
-          <div class="ico">&#128196;</div>
-          <h2>Client Contracts</h2>
-          <div class="sub">Scope, go-live timeline &amp; expiry watch</div>
-          <p>Hours, scope, migration and key dates from each client's SOW. Plus the go-live timeline with its pinch points, and the expiry watch for anyone in the final three months of their term.</p>
-          <span class="go">Open contracts <span class="arrow">&rarr;</span></span>
-        </button>
-        <button class="pillar" onclick="show('weekly')">
-          <span class="badge internal">Internal</span>
-          <div class="ico">&#128197;</div>
-          <h2>Weekly Client Updates</h2>
-          <div class="sub">Monday &amp; Friday client messages</div>
-          <p>Draft, review and send each client's weekly update. Pulls this week's tasks from the trackers, holds call notes, and gives you Slack-ready messages to approve.</p>
-          <span class="go">Open weekly updates <span class="arrow">&rarr;</span></span>
-        </button>
         <button class="pillar" onclick="show('feedback')">
           <span class="badge internal">Internal</span>
           <div class="ico">&#128172;</div>
@@ -137,8 +119,6 @@
         <b>Onboarding / Offboarding Portal</b> &mdash; your checklists to set clients up and close them out.<br>
         <b>Kick-off Desk</b> &mdash; the scope, dates and owners agreed on each kick-off call, with a printable summary.<br>
         <b>Project Tracker Dashboard</b> &mdash; the team view of where all the client trackers stand.<br>
-        <b>Client Contracts</b> &mdash; scope and hours per client, the go-live timeline and the expiry watch.<br>
-        <b>Weekly Client Updates</b> &mdash; draft and approve the Monday and Friday client messages.<br>
         <b>Feedback Dashboard</b> &mdash; what clients are telling us, pulled live from the feedback webhook.
       </div>
     </div>
@@ -159,16 +139,6 @@
     <iframe id="frame-dashboard" data-src="SabelProjectDashboard.html" title="Project Dashboard"></iframe>
   </section>
 
-  <!-- CLIENT CONTRACTS -->
-  <section class="view" id="contracts">
-    <iframe id="frame-contracts" data-src="SabelClientContracts.html" title="Client Contracts"></iframe>
-  </section>
-
-  <!-- WEEKLY UPDATES -->
-  <section class="view" id="weekly">
-    <iframe id="frame-weekly" data-src="SabelWeeklyUpdates.html" title="Weekly Client Updates"></iframe>
-  </section>
-
   <!-- FEEDBACK -->
   <section class="view" id="feedback">
     <iframe id="frame-feedback" data-src="SabelFeedbackDashboard.html" title="Feedback Dashboard"></iframe>
@@ -176,7 +146,7 @@
 </div>
 
 <script>
-  var VIEWS = ['home','portal','kickoff','dashboard','contracts','weekly','feedback'];
+  var VIEWS = ['home','portal','kickoff','dashboard','feedback'];
 
   // Each tab is a separate page in an iframe, with its own cache entry — so
   // refreshing the hub does not necessarily re-fetch the tool inside it, and a
@@ -184,7 +154,7 @@
   // browser holds it. Stamping the version onto the src makes it a new URL, so
   // a deploy is picked up immediately.
   // BUMP THIS whenever you push a new version of any tab's page.
-  var ASSET_V = '2026-09-15a';
+  var ASSET_V = '2026-09-15b';
   function versioned(src){
     return src + (src.indexOf('?') > -1 ? '&' : '?') + 'v=' + ASSET_V;
   }
@@ -203,7 +173,7 @@
       history.replaceState(null, '', '#'+view);
     }
   }
-  // Honour a deep link (e.g. SabelOpsHub.html#weekly)
+  // Honour a deep link (e.g. SabelOpsHub.html#kickoff)
   var start = (window.location.hash || '#home').replace('#','');
   show(VIEWS.indexOf(start) > -1 ? start : 'home');
 </script>
