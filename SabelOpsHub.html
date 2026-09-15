@@ -65,6 +65,7 @@
     <nav class="tabs">
       <button class="tab on" id="t-home"      onclick="show('home')">Home</button>
       <button class="tab"    id="t-internal"  onclick="show('internal')">Internal Ops</button>
+      <button class="tab"    id="t-readiness" onclick="show('readiness')">Readiness Check</button>
       <button class="tab"    id="t-kickoff"   onclick="show('kickoff')">Kick-off Desk</button>
       <button class="tab"    id="t-dashboard" onclick="show('dashboard')">Project Dashboard</button>
       <button class="tab"    id="t-feedback"  onclick="show('feedback')">Feedback Dashboard</button>
@@ -89,6 +90,14 @@
           <div class="sub">Every client, signature to close-out</div>
           <p>One page per client: SOW hours and links, what the project covers, every step by gate with yours highlighted, and a Today view of what needs you next.</p>
           <span class="go">Open Internal Ops <span class="arrow">&rarr;</span></span>
+        </button>
+        <button class="pillar" onclick="show('readiness')">
+          <span class="badge internal">Internal</span>
+          <div class="ico">&#10003;</div>
+          <h2>Readiness Submissions</h2>
+          <div class="sub">What each client has ready before kickoff</div>
+          <p>Every Readiness Check a client submits: their answers section by section, the red and amber items with owners and dates, and the three hard gates to check before kickoff is booked.</p>
+          <span class="go">Open submissions <span class="arrow">&rarr;</span></span>
         </button>
         <button class="pillar" onclick="show('kickoff')">
           <span class="badge internal">Internal</span>
@@ -117,6 +126,7 @@
       </div>
       <div class="foot-note">
         <b>Internal Ops</b> &mdash; every client from signature to close-out, step by step and gate by gate.<br>
+        <b>Readiness Submissions</b> &mdash; client Readiness Check answers and the hard gates, before the kickoff is booked.<br>
         <b>Kick-off Desk</b> &mdash; the scope, dates and owners agreed on each kick-off call, with a printable summary.<br>
         <b>Project Tracker Dashboard</b> &mdash; the team view of where all the client trackers stand.<br>
         <b>Feedback Dashboard</b> &mdash; what clients are telling us, pulled live from the feedback webhook.
@@ -127,6 +137,11 @@
   <!-- INTERNAL OPS -->
   <section class="view" id="internal">
     <iframe id="frame-internal" data-src="SabelInternalOps.html" title="Internal Ops"></iframe>
+  </section>
+
+  <!-- READINESS SUBMISSIONS -->
+  <section class="view" id="readiness">
+    <iframe id="frame-readiness" data-src="SabelReadinessAdmin.html" title="Readiness Submissions"></iframe>
   </section>
 
   <!-- KICK-OFF DESK -->
@@ -146,7 +161,7 @@
 </div>
 
 <script>
-  var VIEWS = ['home','internal','kickoff','dashboard','feedback'];
+  var VIEWS = ['home','internal','readiness','kickoff','dashboard','feedback'];
 
   // Each tab is a separate page in an iframe, with its own cache entry — so
   // refreshing the hub does not necessarily re-fetch the tool inside it, and a
@@ -154,7 +169,7 @@
   // browser holds it. Stamping the version onto the src makes it a new URL, so
   // a deploy is picked up immediately.
   // BUMP THIS whenever you push a new version of any tab's page.
-  var ASSET_V = '2026-09-15c';
+  var ASSET_V = '2026-09-15d';
   function versioned(src){
     return src + (src.indexOf('?') > -1 ? '&' : '?') + 'v=' + ASSET_V;
   }
