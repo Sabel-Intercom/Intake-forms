@@ -60,12 +60,12 @@ body{margin:0;background:var(--ground);color:var(--body);
 .panel.on{display:block}
 @keyframes in{from{opacity:.4}to{opacity:1}}
 
-.sechead{padding:44px 0 0}
+.sechead{padding:34px 0 0}
 h1{font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(30px,5vw,44px);line-height:1.05;
   letter-spacing:-.028em;color:var(--ink);margin:12px 0 14px;text-wrap:balance;max-width:17ch}
 h2{font-family:Archivo,sans-serif;font-weight:700;font-size:clamp(24px,3.6vw,32px);line-height:1.1;
   letter-spacing:-.022em;color:var(--ink);margin:12px 0 12px;text-wrap:balance;max-width:20ch}
-.intro{font-size:18.5px;max-width:56ch;margin:0}
+.intro{font-size:17px;max-width:64ch;margin:0}
 p{margin:0 0 14px}p:last-child{margin-bottom:0}
 strong{color:var(--ink);font-weight:600}
 
@@ -79,12 +79,21 @@ strong{color:var(--ink);font-weight:600}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:4px;
   box-shadow:var(--shadow-lift);margin-top:22px;overflow:hidden}
 .items{display:flex;flex-direction:column;gap:1px;background:var(--line)}
-.item{background:var(--surface);padding:22px 24px}
+.item{background:var(--surface);padding:18px 24px}
 .item .q{color:var(--ink);font-weight:600;display:block;font-size:16.5px;line-height:1.4}
-.item .why{font-size:15px;color:var(--muted);margin:5px 0 0;max-width:62ch}
+.item .why{font-size:15px;color:var(--muted);margin:4px 0 0;line-height:1.5}
 
 /* plain-English expander */
-.more{margin-top:11px}
+.more{margin-top:10px}
+.more:not(:has(.body:not([hidden]))){margin-top:0}
+/* small "?" after the question text opens the plain-English explainer */
+.qi{position:relative;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;
+  margin-left:7px;vertical-align:2px;padding:0;border-radius:50%;border:1px solid var(--accent);background:transparent;
+  color:var(--accent);font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;line-height:1;cursor:pointer;
+  transition:background .12s,color .12s}
+.qi::after{content:"";position:absolute;inset:-9px}
+.qi:hover,.qi.on{background:var(--accent);color:#fff}
+.qi:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .more summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:7px;
   font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.09em;
   text-transform:uppercase;color:var(--accent)}
@@ -92,12 +101,12 @@ strong{color:var(--ink);font-weight:600}
 .more summary::before{content:"?";display:inline-flex;align-items:center;justify-content:center;
   width:16px;height:16px;border-radius:50%;border:1px solid var(--accent);font-size:10px;flex:none}
 .more[open] summary::before{content:"–"}
-.more .body{margin-top:11px;padding:15px 17px;background:var(--alt);border-radius:3px;
-  font-size:15.5px;color:var(--body);max-width:64ch}
+.more .body{margin-top:0;padding:15px 17px;background:var(--alt);border-radius:3px;
+  font-size:15.5px;color:var(--body)}
 .more .body p{margin-bottom:10px}
 
 /* answer chips */
-.opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+.opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .opts label{display:inline-block;cursor:pointer}
 .opts input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .opts .c{display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border-radius:2px;
@@ -124,20 +133,24 @@ label.lab{display:block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;f
 input[type=text],input[type=email],input[type=date],textarea,select{
   width:100%;font-family:inherit;font-size:15.5px;color:var(--ink);background:var(--surface);
   border:1px solid var(--strong);border-radius:2px;padding:9px 11px;line-height:1.45}
-textarea{resize:vertical;min-height:84px}
+textarea{resize:vertical;min-height:72px}
 input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
 input::placeholder,textarea::placeholder{color:var(--muted);opacity:.75}
-.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:15px;margin-top:15px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin-top:12px}
 .fields .full{grid-column:1/-1}
 .reveal{display:none;margin-top:14px}
 .reveal.on{display:block}
 
-/* persistent example text, so the guidance does not vanish when you type */
-.hint{margin:7px 0 0;font-size:14.5px;color:var(--muted);line-height:1.5}
-.hint b{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px}
-.hint .eg{display:block;background:var(--alt);border-radius:3px;padding:11px 13px;margin-top:5px;
-  font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.65;color:var(--body);white-space:pre-wrap}
+/* example text, folded behind a one-line link so the form reads shorter; it stays put while you type */
+.hint{margin:6px 0 0;font-size:14px;color:var(--muted);line-height:1.5}
+.hint summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px;
+  font-size:13.5px;color:var(--muted);text-decoration:underline;text-decoration-color:var(--strong);text-underline-offset:3px}
+.hint summary::-webkit-details-marker{display:none}
+.hint summary::before{content:"+";font-family:"IBM Plex Mono",monospace;font-size:12px;width:10px;text-decoration:none;display:inline-block}
+.hint[open] summary::before{content:"–"}
+.hint summary:hover{color:var(--accent);text-decoration-color:var(--accent)}
+.hint .eg{display:block;background:var(--alt);border-radius:3px;padding:10px 12px;margin-top:6px;
+  font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.6;color:var(--body);white-space:pre-wrap}
 
 /* remembered people */
 .sugg{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:7px}
@@ -252,7 +265,7 @@ footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);
    CONFIG
    ===================================================================== */
 const API = 'https://sabel-webhook.vercel.app/api/readiness';
-const FORM_V = '2026-09-10a';
+const FORM_V = '2026-09-15b';
 /* A link like SabelReadinessCheck.html?client=Acme%20Ltd pre-fills the company name and keeps
    that client's draft separate from anyone else's on the same browser. */
 const CLIENT_PARAM = (new URLSearchParams(location.search).get('client')||'').trim();
@@ -368,7 +381,7 @@ const SECTIONS = [
 },
 {
  id:'C', title:'How you recognise your customers',
- blurb:'The shortest section here and the one that matters most. It is also the only one that cannot be fixed afterwards, so it is worth reading the explainers on this page.',
+ blurb:'The section that matters most. Duplicate customer records are the one problem on this form that cannot be fixed afterwards, so it is worth reading the explainers here and passing the ID questions to your developer.',
  items:[
   {t:'ask',id:'c1',q:'How do you recognise a returning customer today?',
    why:'In other words, what is the one piece of information that tells you two conversations came from the same person.',
@@ -393,7 +406,28 @@ const SECTIONS = [
 
   {t:'rag',id:'c5',scope:'b',opts:O.ready,q:'Will your developers switch on secure identity checking for the chat?',
    why:'Sometimes called JWT. If that means nothing to you, open the explainer and pass it to your developer.',
-   more:'<p>By default, anyone could tell the chat widget they are any email address they like. Secure identity checking, which your developer may know as <em>identity verification</em> or <em>JWT</em>, stops that, by having your website sign a small token proving the person really is who they say.</p><p>You need it if the chat shows anything private: order details, account balances, personal information. It is a small piece of work on your side, but it is work only your developers can do, and it is a common reason go-live slips.</p><p>If your chat will only ever answer general questions, it may not be needed.</p>'}
+   more:'<p>By default, anyone could tell the chat widget they are any email address they like. Secure identity checking, which your developer may know as <em>identity verification</em> or <em>JWT</em>, stops that, by having your website sign a small token proving the person really is who they say.</p><p>You need it if the chat shows anything private: order details, account balances, personal information. It is a small piece of work on your side, but it is work only your developers can do, and it is a common reason go-live slips.</p><p>If your chat will only ever answer general questions, it may not be needed.</p>'},
+
+  {t:'ask',id:'c6',q:'Which systems add or update customers in Intercom, now or planned?',
+   why:'Include everything: your website or app login, your online store, a CRM, a booking or partner platform, and any helpdesk we are moving you from. Add a row for each.',
+   more:'<p>Intercom decides whether a customer already exists by their <strong>ID</strong>. It does not look at whether the name or email address match.</p><p>So every system that sends people into Intercom has to identify them the same way. One team we worked with had three: people messaging in created a new record, their online store synced customers with its own store IDs, and a partner platform synced the same people again. Each used a different ID, so some customers arrived two or three times.</p><p>Listing every source now, including ones you only plan to connect, is how we spot that before it happens.</p>',
+   rep:{id:'c6r', cols:[['sys','System','text','e.g. Shopify'],
+                        ['does','What it does in Intercom','select','Creates new customers|Only updates customers that already exist|Both|Not sure'],
+                        ['idby','How it identifies a customer','select','Our own customer or user ID|Email address|Its own ID, e.g. a Shopify customer ID|Not sure'],
+                        ['when','Connected now or planned','select','Connected now|Planned|The system we are moving from']]}},
+
+  {t:'rag',id:'c7',opts:O.confirm,q:'Does every one of those systems use the same ID for the same customer?',
+   why:'This is the check that prevents duplicate customer records. Your developer can confirm it.',
+   more:'<p>If your website knows someone as customer 48213, your store knows them as 7730912 and your old helpdesk only has their email address, Intercom treats them as three different people.</p><p>If the IDs do not match today, bringing them into line is work on your side, and it needs doing <strong>before we move any data or connect anything</strong>. Fixing it afterwards means deleting and reloading customer records.</p><p>Once you confirm the IDs match, we build and migrate on that basis. If duplicates turn up later, cleaning them up is extra work that we would quote separately.</p>'},
+
+  {t:'ask',id:'c8',q:'Which system should be the one that creates new customers in Intercom?',
+   why:'Only one system should create customers. Every other system should only update people who already exist.',
+   more:'<p>When two systems can both create customers, the same person gets created once through each. The usual answer is to let your website or app create them when someone logs in, using secure identity checking, and have your store, CRM and anything else only add details to that record.</p><p>If customers are pushed into Intercom from another platform instead, that is fine too. We just need to know which one, so nothing else creates them as well.</p>',
+   f:[['c8a','Choose the closest','select','Our website or app, when someone logs in|Our online store|Our CRM or customer database|Another platform pushes them in|Intercom, when someone first messages us|We have not decided yet|Not sure',
+       {on:['Another platform pushes them in','We have not decided yet','Not sure'],id:'c8b',
+        label:'Tell us what you know so far',
+        ph:'Type here',
+        ex:'Customers log into our app, but our Shopify store also creates them when they place an order.\nOur CRM pushes every customer into Intercom overnight.'}]]}
  ]
 },
 {
@@ -453,7 +487,13 @@ const SECTIONS = [
   {t:'ask',id:'e5',q:'Who will check the sample before we move everything?',
    why:'We move a small batch first so you can look at it. Catching something at that point is easy. Catching it afterwards is not.',
    more:'<p>Before the full move we bring across a sample so you can open a few and check they look right: the right customer, the full message, attachments present, notes still private.</p><p>It takes about half an hour and it is the single best value half hour in the whole project. We just need one named person who will actually do it.</p>',
-   f:[['e5a','Name','text','',{person:'name',pair:'e5b'}],['e5b','Email address','email','']]}
+   f:[['e5a','Name','text','',{person:'name',pair:'e5b'}],['e5b','Email address','email','']]},
+
+  {t:'ask',id:'e6',q:'How will the customers we move across match the people who log in after go-live?',
+   why:'We move your customers before go-live. When they later log in or message you, Intercom has to recognise them as the same person, or it creates them again.',
+   more:'<p>This is the most common cause of duplicates after a move. Customer records come across from your old system carrying one reference, then the same person logs into your website carrying a different one, and Intercom creates a second record.</p><p>If your old system holds the same customer ID your website or app uses, we bring that across and everything lines up. If it only holds email addresses, or its own reference numbers, tell us now so we can agree how to match them before anything moves.</p>',
+   f:[['e6a','What your old system holds for each customer','select','The same customer or user ID our website or app uses|Email address only|Its own reference number|A mix|Not sure'],
+      ['e6b','Anything we should know','textarea','Type here',{ex:'Our old helpdesk only has email addresses. Our app uses a numeric user ID.\nAbout a third of customers have never logged in, so they only exist in the old helpdesk.'}]]}
  ]
 },
 {
@@ -586,7 +626,7 @@ function fld(f){
   const [id,label,type,ph] = f;
   const o = f[4] || {};                 // {on,id,label,ph} = reveal · {ex} = example · {person,pair}
   const v = esc(state.data[id]||'');
-  const hint = o.ex ? '<p class="hint"><b>For example</b><span class="eg">'+esc(o.ex)+'</span></p>' : '';
+  const hint = o.ex ? '<details class="hint"><summary>See an example</summary><span class="eg">'+esc(o.ex)+'</span></details>' : '';
   const sug  = o.person ? '<div class="sugg" data-sname="'+id+'"'+(o.pair?' data-semail="'+o.pair+'"':'')+'></div>' : '';
   let html;
 
@@ -606,7 +646,7 @@ function fld(f){
       html += '<div class="full reveal'+(on?' on':'')+'" id="rv_'+rev.id+'">'+
         '<label class="lab" for="'+rev.id+'">'+esc(rev.label)+'</label>'+
         '<textarea id="'+rev.id+'" data-f placeholder="'+esc(rev.ph||'')+'">'+esc(state.data[rev.id]||'')+'</textarea>'+
-        (rev.ex?'<p class="hint"><b>For example</b><span class="eg">'+esc(rev.ex)+'</span></p>':'')+'</div>';
+        (rev.ex?'<details class="hint"><summary>See an example</summary><span class="eg">'+esc(rev.ex)+'</span></details>':'')+'</div>';
     }
 
   } else {
@@ -712,9 +752,10 @@ function itemHTML(it){
   if(it.t==='note'){
     return '<div class="item"><span class="q">'+esc(it.q)+'</span><p class="why">'+esc(it.why)+'</p></div>';
   }
-  let h='<div class="item"><span class="q">'+esc(it.q)+'</span>';
+  let h='<div class="item"><span class="q">'+esc(it.q)+
+    (it.more?'<button type="button" class="qi" data-more="'+it.id+'" aria-expanded="false" aria-controls="mb_'+it.id+'" aria-label="What does this mean?" title="What does this mean?">?</button>':'')+'</span>';
   if(it.why) h+='<p class="why">'+esc(it.why)+'</p>';
-  if(it.more) h+='<details class="more"><summary>What does this mean?</summary><div class="body">'+it.more+'</div></details>';
+  if(it.more) h+='<div class="more"><div class="body" id="mb_'+it.id+'" hidden>'+it.more+'</div></div>';
 
   if(it.t==='rag'){
     const cur=state.data['s_'+it.id];
@@ -779,7 +820,7 @@ function startPanel(){
 function secPanel(sec){
   const list = activeItems(sec);
   return '<div class="panel on"><div class="sechead">'+
-    '<p class="eyebrow quiet">Section '+sec.id+'</p>'+
+    '<p class="eyebrow quiet">Section '+sec.id+' · '+list.filter(i=>i.t!=='note').length+' question'+(list.filter(i=>i.t!=='note').length===1?'':'s')+'</p>'+
     '<h2>'+esc(sec.title)+'</h2>'+
     '<p class="intro">'+esc(sec.blurb)+'</p></div>'+
     '<div class="card"><div class="items">'+list.map(itemHTML).join('')+'</div></div>'+
@@ -1024,6 +1065,13 @@ async function submit(){
 }
 
 document.addEventListener('click',e=>{
+  const qi=e.target.closest('[data-more]');
+  if(qi){
+    const body=document.getElementById('mb_'+qi.dataset.more);
+    if(body){ const opening=body.hidden; body.hidden=!opening;
+      qi.setAttribute('aria-expanded',opening?'true':'false'); qi.classList.toggle('on',opening); }
+    return;
+  }
   const nav=e.target.closest('[data-nav]');
   if(nav){
     const a=nav.dataset.nav;
