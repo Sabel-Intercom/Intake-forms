@@ -130,6 +130,12 @@ a{color:inherit}
 .own i{font-style:normal;font-family:var(--mono);font-size:10px;font-weight:600;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line2);color:var(--ink)}
 .own.nikki{color:var(--accent);font-weight:600}
 .own.nikki i{background:var(--accent);border-color:var(--accent);color:#fff}
+.ownsel{position:relative;display:inline-flex;cursor:pointer}
+.ownsel select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px}
+.ownsel:hover .own,.ownsel:focus-within .own{color:var(--ink)}
+.ownsel:focus-within .own i{outline:2px solid var(--accent);outline-offset:1px}
+.ownsel.set .own i{border-style:dashed}
+.ownsel.set .own::after{content:"·edited";font-size:9.5px;color:var(--muted);letter-spacing:.02em}
 .due{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
 .due.late{color:var(--accent);font-weight:600}
 .due.soon{color:var(--warn);font-weight:600}
@@ -579,9 +585,11 @@ function startIdx(c){ return hasHub(c) ? (PIDX[c.hub.startPhase]||0) : 0; }
 function gateClosed(c,pid){ return PIDX[pid] < startIdx(c) || !!(c.hub && c.hub.gates && c.hub.gates[pid]); }
 function curIdx(c){ for(let i=startIdx(c); i<PHASES.length; i++){ if(!gateClosed(c,PHASES[i].id)) return i; } return PHASES.length; }
 function stepStatus(c,s){ const st=c.hub && c.hub.steps && c.hub.steps[s.id]; return st ? st.s : ""; }
+/* Owners come from the framework step list, not the tracker. A client can override any of them. */
+function stepOwner(c,s){ const r=c.hub && c.hub.steps && c.hub.steps[s.id]; return (r && r.o && OWNERS[r.o]) ? r.o : s.o; }
 function phaseCounts(c,p){
   const list=stepsFor(c,p); let done=0, mine=0, mineDone=0;
-  list.forEach(s=>{ const st=stepStatus(c,s); const d = st==="done"||st==="na"; if(d) done++; if(s.o==="nikki"){ mine++; if(d) mineDone++; } });
+  list.forEach(s=>{ const st=stepStatus(c,s); const d = st==="done"||st==="na"; if(d) done++; if(stepOwner(c,s)==="nikki"){ mine++; if(d) mineDone++; } });
   return {total:list.length, done, mine, mineDone};
 }
 function phaseDue(c,p){
@@ -840,7 +848,7 @@ function openMine(c){
   if(!hasHub(c) || !inDelivery(c)) return [];
   const i=curIdx(c); if(i>=PHASES.length) return [];
   const p=PHASES[i];
-  return stepsFor(c,p).filter(s=>s.o==="nikki" && !["done","na"].includes(stepStatus(c,s))).map(s=>({c,p,s}));
+  return stepsFor(c,p).filter(s=>stepOwner(c,s)==="nikki" && !["done","na"].includes(stepStatus(c,s))).map(s=>({c,p,s}));
 }
 
 /* ---------- today ---------- */
@@ -889,7 +897,7 @@ function todayView(){
   h += '<section class="panel"><div class="panel-h"><h3>Waiting on someone else</h3><span class="sub">Your steps are done; the gate is still open</span></div>';
   if(!waiting.length) h += '<div class="empty">Nothing waiting.</div>';
   else h += '<ul class="tlist">'+waiting.map(x=>{
-    const who=[...new Set(x.rest.map(s=>ownerName(x.c,s.o)))];
+    const who=[...new Set(x.rest.map(s=>ownerName(x.c,stepOwner(x.c,s))))];
     return '<li class="titem"><span></span><div><div class="tx">'+(x.rest.length?esc(x.rest[0].t):'All steps done. Close the gate: '+esc(x.p.gate))+'</div><div class="meta"><button class="cl" data-act="open" data-id="'+x.c.id+'">'+esc(x.c.name)+'</button><span class="ph">'+esc(x.p.name)+(who.length?' · waiting on '+esc(who.join(", ")):'')+'</span></div></div><div class="side-r"><span class="due">'+x.rest.length+' open</span></div></li>';
   }).join("")+'</ul>';
   h += '</section></div><div class="tcol">';
@@ -1001,18 +1009,22 @@ function phaseBlock(c,p,pi,i){
     '<span><span class="t">'+esc(p.name)+'</span> <span class="w">· '+esc(p.when)+(due&&!closed?' · due '+esc(fmt(due)):'')+'</span></span>'+
     '<span class="r"><span class="prog">'+(before?'before the hub':closed?'gate closed'+(gateInfo?' '+esc(fmt(gateInfo.at)):''):'<b>'+(pc.mine-pc.mineDone)+'</b> yours · '+pc.done+'/'+pc.total)+'</span>'+chev+'</span></button>';
   if(open){
-    const list = stepsFor(c,p).filter(s=>!S.prefs.mine || s.o==="nikki");
+    const list = stepsFor(c,p).filter(s=>!S.prefs.mine || stepOwner(c,s)==="nikki");
     h += '<ul class="steps">';
     if(!list.length) h += '<li class="step"><span></span><span class="tx" style="color:var(--muted)">No steps of yours at this gate.</span><span></span></li>';
     list.forEach(s=>{
-      const st = before ? "done" : stepStatus(c,s), rec=c.hub.steps[s.id]||{}, mine=s.o==="nikki";
+      const st = before ? "done" : stepStatus(c,s), rec=c.hub.steps[s.id]||{}, own=stepOwner(c,s), mine=own==="nikki";
       const nk=c.id+":"+s.id;
       h += '<li class="step '+(mine?'mine':'other')+(st?' '+st:'')+'">'+
         '<button class="tick'+(mine?' mine':'')+(st?' '+st:'')+'" data-act="tick" data-id="'+c.id+'" data-sid="'+s.id+'" aria-label="'+(st==="done"?"Mark not done":"Mark done")+': '+esc(s.t)+'"'+(before?' disabled':'')+'>'+tickSvg+'</button>'+
         '<span class="tx">'+esc(s.t)+'</span>'+
         '<span class="acts"><span class="more">'+
           (before?'':'<button class="iconbtn'+(st==="doing"?' on':'')+'" data-act="doing" data-id="'+c.id+'" data-sid="'+s.id+'">In progress</button><button class="iconbtn" data-act="na" data-id="'+c.id+'" data-sid="'+s.id+'">'+(st==="na"?"Needed":"Not needed")+'</button><button class="iconbtn" data-act="note" data-k="'+esc(nk)+'">Note</button>')+
-        '</span><span class="own '+s.o+'"><i>'+OWNERS[s.o].i+'</i>'+esc(ownerName(c,s.o))+'</span></span>'+
+        '</span><label class="ownsel'+(own!==s.o?' set':'')+'" title="Who does this step for '+esc(c.name)+'"><span class="own '+own+'"><i>'+OWNERS[own].i+'</i>'+esc(ownerName(c,own))+'</span>'+
+        '<select data-act="setowner" data-id="'+c.id+'" data-sid="'+s.id+'" aria-label="Who does this step">'+
+          Object.keys(OWNERS).map(k=>'<option value="'+k+'"'+(k===own?' selected':'')+'>'+esc(ownerName(c,k))+'</option>').join("")+
+          (own!==s.o?'<option value="__reset">Put back to '+esc(ownerName(c,s.o))+'</option>':'')+
+        '</select></label></span>'+
         (rec.at && st && !before ? '<span class="when">'+esc({done:"Done",doing:"Started",na:"Marked not needed"}[st]||"")+' '+esc(fmt(rec.at))+'</span>' : '')+
         (S.noteOpen[nk] ? '<div class="note"><textarea data-act="note-text" data-id="'+c.id+'" data-sid="'+s.id+'" placeholder="Note for this step">'+esc(rec.note||"")+'</textarea></div>' : (rec.note?'<div class="note">'+esc(rec.note)+'</div>':''))+
       '</li>';
@@ -1163,7 +1175,15 @@ document.addEventListener("click", e=>{
   }
 });
 document.addEventListener("change", e=>{
-  const t=e.target; if(!t.dataset.field) return;
+  const t=e.target;
+  if(t.dataset.act==="setowner"){
+    const c=byId(t.dataset.id); if(!c) return;
+    const h=ensureHub(c), sid=t.dataset.sid, rec=Object.assign({}, h.steps[sid]||{});
+    if(t.value==="__reset") delete rec.o; else rec.o=t.value;
+    if(Object.keys(rec).length) h.steps[sid]=rec; else delete h.steps[sid];
+    touch(c); return render(true);
+  }
+  if(!t.dataset.field) return;
   const c=byId(t.dataset.id); if(!c) return;
   const f=t.dataset.field, v=t.value.trim();
   if(f==="hub.sowInputs"){ ensureHub(c, c.hub&&c.hub.startPhase); c.hub.sowInputs=t.value.split("\n").map(x=>x.trim()).filter(Boolean); touch(c); publishInputs(c); }
