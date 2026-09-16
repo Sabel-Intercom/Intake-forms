@@ -821,6 +821,21 @@ function renderSide(){
   const n = clients().filter(inDelivery).reduce((a,c)=>a+openMine(c).length,0);
   const tc=$("today-count"); tc.hidden=!n; tc.textContent=n;
 }
+/* Notion projects with no client here yet: the safety net for a signing nobody added.
+   Names are matched loosely, so "Astro" does not look new when "Astropad" is already here. */
+function sameClient(a,b){
+  const x=norm(a), y=norm(b);
+  if(!x || !y) return false;
+  if(x===y) return true;
+  return x.length>=4 && y.length>=4 && (x.startsWith(y) || y.startsWith(x));
+}
+function notionMissing(){
+  return S.notion.filter(p=>{
+    if(!p.name || /partnership|internal/i.test(p.name)) return false;
+    if((p.status||"")==="Done") return false;
+    return !clients().some(c=>sameClient(c.name, p.name));
+  }).sort((a,b)=>a.name.localeCompare(b.name));
+}
 function openMine(c){
   if(!hasHub(c) || !inDelivery(c)) return [];
   const i=curIdx(c); if(i>=PHASES.length) return [];
@@ -852,17 +867,19 @@ function todayView(){
   const issues = clients().filter(c=>!["Complete","Outreach","Discovery"].includes(c.stage)).map(c=>({c,w:warnings(c)})).filter(x=>x.w.length).sort((a,b)=>b.w.length-a.w.length);
   const late = mine.filter(x=>x.due && daysTo(x.due)<0).length;
 
-  let h = '<div class="today-h"><div><div class="eyebrow">'+esc(dateLine)+'</div><h1>Today</h1></div><div class="stats">'+
+  const missing = notionMissing();
+  let h = '<div class="today-h"><div><div class="eyebrow">'+esc(dateLine)+'</div><h1>Today</h1></div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end"><button class="btn primary" data-act="add-client">+ Add client</button><div class="stats">'+
     '<span class="stat red"><b>'+mine.length+'</b> steps for you</span>'+
     (late?'<span class="stat red"><b>'+late+'</b> past due</span>':'')+
     '<span class="stat"><b>'+live.length+'</b> in delivery</span>'+
     '<span class="stat"><b>'+dates.length+'</b> dates in 3 weeks</span>'+
-    (issues.length?'<span class="stat"><b>'+issues.length+'</b> clients with data to fix</span>':'')+'</div></div>';
+    (issues.length?'<span class="stat"><b>'+issues.length+'</b> clients with data to fix</span>':'')+'</div></div></div>';
   h += loadBanner();
 
   h += '<div class="tgrid"><div class="tcol">';
   h += '<section class="panel"><div class="panel-h"><h3>Your next steps</h3><span class="sub">At each client\'s current gate, earliest due first</span></div>';
-  if(!mine.length) h += '<div class="empty">'+(live.length?'Nothing waiting on you at the current gates.':'No clients are set up in the hub yet. Open a client under "Not set up in the hub" to start.')+'</div>';
+  if(!mine.length) h += '<div class="empty">'+(live.length?'Nothing waiting on you at the current gates.':'No clients are set up in the hub yet. Pick one under "Not set up in the hub", or use + Add client.')+'</div>';
   else h += '<ul class="tlist">'+mine.map(x=>
     '<li class="titem"><button class="tick mine" data-act="tick" data-id="'+x.c.id+'" data-sid="'+x.s.id+'" aria-label="Mark done: '+esc(x.s.t)+'">'+tickSvg+'</button>'+
     '<div><div class="tx">'+esc(x.s.t)+'</div><div class="meta"><button class="cl" data-act="open" data-id="'+x.c.id+'">'+esc(x.c.name)+'</button><span class="ph">'+esc(x.p.name)+' · '+esc(x.p.code)+'</span></div></div>'+
@@ -884,6 +901,12 @@ function todayView(){
   if(setup.length){
     h += '<section class="panel"><div class="panel-h"><h3>Set up in the hub</h3><span class="sub">Active clients without gates yet</span></div><ul class="dates">'+
       setup.map(c=>'<li><span class="d">'+esc(c.stage)+'</span><span><button data-act="open" data-id="'+c.id+'">'+esc(c.name)+'</button></span><span class="due">'+(c.goLiveDate?'go-live '+esc(fmt(c.goLiveDate)):'')+'</span></li>').join("")+'</ul></section>';
+  }
+  if(missing.length){
+    h += '<section class="panel"><div class="panel-h"><h3>New in Notion</h3><span class="sub">Projects with no client here yet</span></div><ul class="dates">'+
+      missing.map(p=>'<li><span class="d">'+esc(p.hours?p.hours+'h':'no hours')+'</span><span>'+esc(p.name)+
+        (p.signed && p.signed.length<24 ? '<br><small style="color:var(--muted)">signed '+esc(p.signed)+'</small>' : '')+'</span>'+
+        '<button class="btn sm" data-act="add-notion" data-nid="'+esc(p.id)+'">Add</button></li>').join("")+'</ul></section>';
   }
   h += '<section class="panel"><div class="panel-h"><h3>Data to fix</h3><span class="sub">Stores that disagree or are missing</span></div>';
   h += issues.length ? '<ul class="dates">'+issues.slice(0,10).map(x=>'<li><span class="d">'+x.w.length+' issue'+(x.w.length>1?'s':'')+'</span><span><button data-act="open" data-id="'+x.c.id+'">'+esc(x.c.name)+'</button><br><small style="color:var(--muted)">'+esc(x.w[0][0])+'</small></span><span></span></li>').join("")+'</ul>' : '<div class="empty">Nothing flagged.</div>';
@@ -1133,6 +1156,10 @@ document.addEventListener("click", e=>{
     case "copy": { const url=t.dataset.url; const done=()=>{ const k=$("copy-k"); if(k) k.textContent="copied"; };
       if(navigator.clipboard) navigator.clipboard.writeText(url).then(done).catch(()=>prompt("Copy this link",url)); else prompt("Copy this link",url); return; }
     case "add-client": return openAdd();
+    case "add-notion": {
+      const n = S.notion.find(p=>p.id===t.dataset.nid); if(!n) return;
+      return createClient({name:n.name, stage:(n.hours||n.trackerKey)?"Onboarding":"Discovery", notion:n});
+    }
   }
 });
 document.addEventListener("change", e=>{
@@ -1166,6 +1193,25 @@ document.addEventListener("keydown", e=>{
 document.addEventListener("click", e=>{ const tools=$("tools"); if(tools.open && !tools.contains(e.target)) tools.open=false; });
 
 /* ---------- add client ---------- */
+function createClient(o){
+  const tpl = (S.portal.templates && S.portal.templates.offboarding) || [];
+  const c = {id:uid(), name:o.name, subtitle:"", stage:o.stage, owner:o.lead||"", type:"", intake:"", notes:"", goLiveDate:"",
+    trackerUrl:"", trackerKey:"", trackerFile:"", goLiveManual:false, proposalSent: o.stage==="Discovery"?today():"", contactName:"", contactEmail:"",
+    scopingNotes:"", acceptedAt: o.stage==="Onboarding"?today():"", tier:o.tier||"", hours:"", signedDate: o.stage==="Onboarding"?today():"",
+    day30Date:"", slackChannel:"", createdAt:new Date().toISOString(),
+    onboarding:[], offboarding: tpl.map(x=>({id:uid(), label:x.label, status:"todo", note:""})),
+    outreach:{retainerPack:false, doNotFollowUp:false, pitchSent:"", nextFollowUp:"", outcome:"", note:""}};
+  const n = o.notion || S.notion.find(x=>norm(x.name)===norm(o.name));
+  if(n){
+    c.hours = n.hours ? String(n.hours) : "";
+    c.trackerKey = n.trackerKey || "";
+    if(n.contact) c.contactName = n.contact;
+    ensureHub(c,"p0"); c.hub.notionId = n.id;
+  }
+  if(o.stage==="Onboarding"){ ensureHub(c,"p0"); c.hub.type = o.type || "full"; }
+  S.portal.clients.push(c); touch(c,["*"]); openClient(c.id);
+  return c;
+}
 function openAdd(){
   $("notion-names").innerHTML = S.notion.filter(p=>!clients().some(c=>norm(c.name)===norm(p.name))).map(p=>'<option value="'+esc(p.name)+'">').join("");
   $("add-form").reset(); $("add-dlg").showModal(); $("add-name").focus();
@@ -1173,18 +1219,7 @@ function openAdd(){
 $("add-dlg").addEventListener("close", ()=>{
   if($("add-dlg").returnValue!=="ok") return;
   const name=$("add-name").value.trim(); if(!name) return;
-  const tpl = (S.portal.templates && S.portal.templates.offboarding) || [];
-  const stage=$("add-stage").value;
-  const c = {id:uid(), name, subtitle:"", stage, owner:$("add-lead").value, type:"", intake:"", notes:"", goLiveDate:"",
-    trackerUrl:"", trackerKey:"", trackerFile:"", goLiveManual:false, proposalSent: stage==="Discovery"?today():"", contactName:"", contactEmail:"",
-    scopingNotes:"", acceptedAt: stage==="Onboarding"?today():"", tier:$("add-tier").value, hours:"", signedDate: stage==="Onboarding"?today():"",
-    day30Date:"", slackChannel:"", createdAt:new Date().toISOString(),
-    onboarding:[], offboarding: tpl.map(s=>({id:uid(), label:s.label, status:"todo", note:""})),
-    outreach:{retainerPack:false, doNotFollowUp:false, pitchSent:"", nextFollowUp:"", outcome:"", note:""}};
-  const n = S.notion.find(p=>norm(p.name)===norm(name));
-  if(n){ c.hours = n.hours ? String(n.hours) : ""; c.trackerKey = n.trackerKey||""; }
-  if(stage==="Onboarding"){ ensureHub(c,"p0"); c.hub.type=$("add-type").value; }
-  S.portal.clients.push(c); touch(c,["*"]); openClient(c.id);
+  createClient({name, stage:$("add-stage").value, tier:$("add-tier").value, type:$("add-type").value, lead:$("add-lead").value});
 });
 
 loadAll();
