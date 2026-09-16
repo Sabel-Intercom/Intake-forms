@@ -375,7 +375,7 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
       <datalist id="notion-names"></datalist>
       <label>Starting point<select id="add-stage"><option value="Discovery">Scoping, proposal out</option><option value="Onboarding">Signed, start at Day 0</option></select></label>
       <label>Tier<select id="add-tier"><option value="">Not set</option><option>Light</option><option>Standard</option><option>Enterprise</option></select></label>
-      <label>Project type<select id="add-type"><option value="full">Full project</option><option value="build">Build only</option><option value="migration">Migration only</option></select></label>
+      <label>Project type<select id="add-type"><option value="full">Full project</option><option value="build">Build only</option><option value="migration">Migration only</option><option value="audit">Audit only</option></select></label>
       <label>Project lead<select id="add-lead"><option value="">Not set</option><option>Chris</option><option>Richard</option><option>Greg</option></select></label>
     </div>
     <div class="dfoot"><button class="btn" value="cancel" type="submit" formnovalidate>Cancel</button><button class="btn primary" value="ok" type="submit">Add client</button></div>
@@ -509,6 +509,37 @@ const PHASES = [
 PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], t:s[1], tag:s[2]||""})); });
 const PIDX = Object.fromEntries(PHASES.map((p,i)=>[p.id,i]));
 
+/* Audit only: we review their workspace, then recommend and usually sell hours from there. */
+const AUDIT_PHASES = [
+ {id:"a0", code:"A1", when:"Day 0", name:"Proposal signed", gate:"Proposal signed and the file is open.", steps:[
+  ["client","Signs the audit proposal"],
+  ["richard","Sends the welcome note and the invoice"],
+  ["nikki","Add the client here: lead, fee and the audit scope"],
+  ["nikki","Drive folder created, signed proposal saved in 00_Project Admin"],
+  ["nikki","Slack channel or email thread opened with the client"]]},
+ {id:"a1", code:"A2", when:"Days 1 to 5", name:"Workspace access", gate:"info+1@ has full admin on their workspace.", steps:[
+  ["client","Adds info+1@ as full admin in Intercom"],
+  ["client","Names the main contact and who else should be in the workshop"],
+  ["nikki","Confirm the access works; note the workspace region, plan and seats"],
+  ["greg","Add the workspace to Forge and take an arrival snapshot"]]},
+ {id:"a2", code:"A3", when:"Weeks 1 to 2", name:"Discovery workshop", gate:"Workshop held and written up.", steps:[
+  ["lead","Books the workshop with a stated purpose and the right people"],
+  ["greg","Forge snapshot and playbook comparison before the call"],
+  ["client","Attends with the people who know the setup"],
+  ["lead","Runs the workshop"],
+  ["nikki","Writes it up the next working day from Notion Calls and #call-actions"]]},
+ {id:"a3", code:"A4", when:"Weeks 2 to 3", name:"Findings and recommendations", gate:"Findings walked through and a recommendation with the client.", steps:[
+  ["greg","Forge health check and QA sweep against what they have today"],
+  ["nikki","Draft the findings and recommendations pack"],
+  ["lead","Walks the client through the findings"],
+  ["richard","Sends the proposal for the recommended hours"],
+  ["nikki","Record the outcome: hours bought, parked, or closed"],
+  ["nikki","If they buy hours, change the project type and start again at Day 0"]]}
+];
+AUDIT_PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], t:s[1], tag:""})); });
+function phasesFor(c){ return projectType(c)==="audit" ? AUDIT_PHASES : PHASES; }
+function pidxOf(c,pid){ const L=phasesFor(c); for(let i=0;i<L.length;i++){ if(L[i].id===pid) return i; } return 0; }
+
 /* ---------- state ---------- */
 const S = {
   portal:null, notion:[], reg:[], kickoff:{}, trk:{},
@@ -572,7 +603,7 @@ function projectType(c){
   if(c.type==="Project") return "build";
   return "full";
 }
-const TYPE_LABEL = {full:"Full project", build:"Build only", migration:"Migration only"};
+const TYPE_LABEL = {full:"Full project", build:"Build only", migration:"Migration only", audit:"Audit only"};
 function stepsFor(c, p){
   const t = projectType(c);
   return p.steps.filter(s => !s.tag || (s.tag==="b" && t!=="migration") || (s.tag==="m" && t!=="build") || (s.tag==="mo" && t==="migration"));
@@ -581,9 +612,9 @@ function ownerName(c,o){ return o==="lead" ? (c.owner ? c.owner+" (lead)" : "Pro
 
 /* ---------- hub progress ---------- */
 function hasHub(c){ return !!(c.hub && c.hub.v); }
-function startIdx(c){ return hasHub(c) ? (PIDX[c.hub.startPhase]||0) : 0; }
-function gateClosed(c,pid){ return PIDX[pid] < startIdx(c) || !!(c.hub && c.hub.gates && c.hub.gates[pid]); }
-function curIdx(c){ for(let i=startIdx(c); i<PHASES.length; i++){ if(!gateClosed(c,PHASES[i].id)) return i; } return PHASES.length; }
+function startIdx(c){ return hasHub(c) ? pidxOf(c, c.hub.startPhase) : 0; }
+function gateClosed(c,pid){ return pidxOf(c,pid) < startIdx(c) || !!(c.hub && c.hub.gates && c.hub.gates[pid]); }
+function curIdx(c){ const L=phasesFor(c); for(let i=startIdx(c); i<L.length; i++){ if(!gateClosed(c,L[i].id)) return i; } return L.length; }
 function stepStatus(c,s){ const st=c.hub && c.hub.steps && c.hub.steps[s.id]; return st ? st.s : ""; }
 /* Owners come from the framework step list, not the tracker. A client can override any of them. */
 function stepOwner(c,s){ const r=c.hub && c.hub.steps && c.hub.steps[s.id]; return (r && r.o && OWNERS[r.o]) ? r.o : s.o; }
@@ -599,23 +630,25 @@ function phaseDue(c,p){
     case "p3": return ko || addDays(sg,14); case "p4": return addDays(ko||addDays(sg,14),10); case "p5": return addDays(ko||addDays(sg,14),15);
     case "p6": return addDays(gl,-10); case "p7": return gl; case "p8": return gl; case "p9": return addDays(gl,14);
     case "p10": return d30; case "p11": return addDays(d30,14);
+    case "a0": return sg; case "a1": return addDays(sg,7); case "a2": return addDays(sg,14); case "a3": return addDays(sg,21);
   }
   return "";
 }
 function allProgress(c){
   if(!hasHub(c)) return null;
-  let t=0,d=0; PHASES.forEach((p,i)=>{ const pc=phaseCounts(c,p); t+=pc.total; d+= i<startIdx(c) ? pc.total : pc.done; });
+  let t=0,d=0; phasesFor(c).forEach((p,i)=>{ const pc=phaseCounts(c,p); t+=pc.total; d+= i<startIdx(c) ? pc.total : pc.done; });
   return t ? d/t : 0;
 }
 function band(c){
   if(c.stage==="Discovery") return "scoping";
   if(c.stage==="Complete"||c.stage==="Outreach") return "closed";
   if(!hasHub(c)) return c.stage==="Offboarding" ? "closing" : "setup";
+  if(projectType(c)==="audit") return curIdx(c)>=AUDIT_PHASES.length ? "closed" : "audit";
   const i=curIdx(c);
   if(i<=5) return "onboarding"; if(i===6) return "build"; if(i<=8) return "golive"; if(i<=10) return "stabilise"; if(i===11) return "closing"; return "closed";
 }
 const BANDS = [
-  ["scoping","Scoping"],["setup","Not set up in the hub"],["onboarding","Onboarding · S0"],["build","Build · S1 to S5"],
+  ["scoping","Scoping"],["setup","Not set up in the hub"],["audit","Audit"],["onboarding","Onboarding · S0"],["build","Build · S1 to S5"],
   ["golive","UAT and go-live"],["stabilise","Stabilise and Day-30"],["closing","Closing"],["closed","Closed"]
 ];
 function inDelivery(c){ return hasHub(c) && !["scoping","closed"].includes(band(c)); }
@@ -648,9 +681,9 @@ function warnings(c){
   if(td && td.data && td.data.goLive && c.goLiveDate && td.data.goLive!==c.goLiveDate) w.push(["Go-live differs: hub "+fmt(c.goLiveDate)+", tracker "+fmt(td.data.goLive),"The hub date is the one to keep. Update the tracker to match."]);
   if(tk && td && td.status===404) w.push(["Tracker key not registered: "+tk,"Add it to ALLOWED_KEYS in sabel-webhook, otherwise the tracker cannot save."]);
   if(tk && S.loaded.reg && !S.reg.some(t=>t.key===tk)) w.push(["Not in trackers.json: "+tk,"Add an entry so the dashboard and weekly sweeps find it."]);
-  if(hasHub(c) && curIdx(c)>=5 && curIdx(c)<PHASES.length && !tk) w.push(["No tracker key yet","Needed once the blueprint is signed."]);
+  if(hasHub(c) && projectType(c)!=="audit" && curIdx(c)>=5 && curIdx(c)<PHASES.length && !tk) w.push(["No tracker key yet","Needed once the blueprint is signed."]);
   if(c.goLiveDate && !c.day30Date) w.push(["No Day-30 date","Set it once go-live is confirmed (go-live plus 30 days)."]);
-  if(hasHub(c) && curIdx(c)<=2 && !((c.hub.sowInputs||[]).length)) w.push(["No SOW client inputs listed","Add the SOW's Client Inputs Required in Details, so they show in the client's Readiness Check."]);
+  if(hasHub(c) && projectType(c)!=="audit" && curIdx(c)<=2 && !((c.hub.sowInputs||[]).length)) w.push(["No SOW client inputs listed","Add the SOW's Client Inputs Required in Details, so they show in the client's Readiness Check."]);
   if(hasHub(c) && (S.inputsStatus||{})[c.id]==="unregistered") w.push(["SOW client inputs not published","Add readiness-inputs-v1 to ALLOWED_KEYS in sabel-webhook, then edit the list again."]);
   if(hasHub(c) && !c.tier) w.push(["No tier set","Light, Standard or Enterprise, from the SOW triggers."]);
   return w;
@@ -770,7 +803,10 @@ function ensureHub(c, startPhase){
 function syncStage(c){
   if(!hasHub(c) || c.stage==="Outreach") return;
   const i=curIdx(c);
-  const want = i>=PHASES.length ? "Complete" : i===11 ? "Offboarding" : i>=6 ? "Active" : "Onboarding";
+  const L=phasesFor(c);
+  const want = i>=L.length ? "Complete"
+    : projectType(c)==="audit" ? (i>=2 ? "Active" : "Onboarding")
+    : i===11 ? "Offboarding" : i>=6 ? "Active" : "Onboarding";
   if(c.stage!==want){ c.stage=want; return true; }
   return false;
 }
@@ -817,7 +853,7 @@ function renderSide(){
     h += '<div class="grp"><button class="grp-h'+(closed?' toggle':'')+'"'+(closed?' data-act="toggle-closed"':' tabindex="-1"')+'><span class="eyebrow">'+esc(label)+'</span><span class="n">'+list.length+(closed?(collapsed?' · show':' · hide'):'')+'</span></button>';
     if(!collapsed) list.forEach(c=>{
       const p=allProgress(c), w=warnings(c).length, mineOpen = openMine(c).length;
-      const meta = [c.tier, c.owner, hasHub(c) && curIdx(c)<PHASES.length ? PHASES[curIdx(c)].name : (c.stage==="Discovery" ? (c.proposalSent ? "proposal "+rel(c.proposalSent) : "proposal") : c.stage)].filter(Boolean).join(" · ");
+      const meta = [c.tier, c.owner, hasHub(c) && curIdx(c)<phasesFor(c).length ? phasesFor(c)[curIdx(c)].name : (c.stage==="Discovery" ? (c.proposalSent ? "proposal "+rel(c.proposalSent) : "proposal") : c.stage)].filter(Boolean).join(" · ");
       h += '<button class="crow'+(S.view==="client"&&S.clientId===c.id?' on':'')+'" data-act="open" data-id="'+c.id+'"><span class="nm">'+esc(c.name)+'</span><span class="mt">'+esc(meta)+'</span><span class="rt">'+
         (mineOpen?'<span class="badge" title="Your open steps at this gate">'+mineOpen+'</span>':'')+
         (w?'<span class="dot-warn" title="'+w+' data issue'+(w>1?'s':'')+'"></span>':'')+
@@ -846,8 +882,8 @@ function notionMissing(){
 }
 function openMine(c){
   if(!hasHub(c) || !inDelivery(c)) return [];
-  const i=curIdx(c); if(i>=PHASES.length) return [];
-  const p=PHASES[i];
+  const L=phasesFor(c); const i=curIdx(c); if(i>=L.length) return [];
+  const p=L[i];
   return stepsFor(c,p).filter(s=>stepOwner(c,s)==="nikki" && !["done","na"].includes(stepStatus(c,s))).map(s=>({c,p,s}));
 }
 
@@ -858,8 +894,8 @@ function todayView(){
   const live = clients().filter(inDelivery);
   const mine = live.flatMap(openMine).map(x=>Object.assign(x,{due:phaseDue(x.c,x.p)}))
     .sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999") || a.c.name.localeCompare(b.c.name));
-  const waiting = live.filter(c=>{ const i=curIdx(c); return i<PHASES.length && openMine(c).length===0; }).map(c=>{
-    const p=PHASES[curIdx(c)]; const rest=stepsFor(c,p).filter(s=>!["done","na"].includes(stepStatus(c,s)));
+  const waiting = live.filter(c=>{ const i=curIdx(c); return i<phasesFor(c).length && openMine(c).length===0; }).map(c=>{
+    const p=phasesFor(c)[curIdx(c)]; const rest=stepsFor(c,p).filter(s=>!["done","na"].includes(stepStatus(c,s)));
     return {c,p,rest};
   });
   const horizon = addDays(today(),21);
@@ -936,7 +972,7 @@ function loadBanner(){
 function clientView(c){
   const n=notionFor(c), ko=kickoffFor(c), tk=trackerKeyFor(c), td=tk&&S.trk[tk], w=warnings(c);
   const i = hasHub(c) ? curIdx(c) : -1;
-  const cur = i>=0 && i<PHASES.length ? PHASES[i] : null;
+  const cur = i>=0 && i<phasesFor(c).length ? phasesFor(c)[i] : null;
   let h = loadBanner();
 
   /* header */
@@ -978,18 +1014,18 @@ function clientView(c){
   if(hasHub(c)){
     /* journey */
     h += '<section class="panel"><div class="panel-h"><h3>Journey</h3><span class="sub">'+(cur?'At '+esc(cur.name)+(phaseDue(c,cur)?' · due '+esc(fmt(phaseDue(c,cur))):''):'All gates closed')+'</span></div><div class="journey">';
-    PHASES.forEach((p,pi)=>{
+    phasesFor(c).forEach((p,pi)=>{
       const pc=phaseCounts(c,p), closed=gateClosed(c,p.id), isCur=pi===i;
       const pct = closed ? 100 : pc.total ? Math.round(100*pc.done/pc.total) : 0;
       h += '<button class="jseg'+(closed?' closed':'')+(isCur?' cur':'')+'" data-act="jump" data-pid="'+p.id+'" title="'+esc(p.name+' · '+(closed?'gate closed':pc.done+' of '+pc.total+' steps'))+'"><span class="bar"><i style="width:'+pct+'%"></i></span><span class="lb">'+esc(p.name)+'</span><span class="cd">'+esc(p.code)+'</span></button>';
     });
-    h += '</div>'+(startIdx(c)>0?'<p class="legacy-note">Started in the hub at '+esc(PHASES[startIdx(c)].name)+'. Earlier gates are treated as closed. <button class="linkbtn" data-act="restart">Change</button></p>':'')+'</section>';
+    h += '</div>'+(startIdx(c)>0?'<p class="legacy-note">Started in the hub at '+esc(phasesFor(c)[startIdx(c)].name)+'. Earlier gates are treated as closed. <button class="linkbtn" data-act="restart">Change</button></p>':'')+'</section>';
 
     /* steps toolbar */
     h += '<div class="toolrow"><div class="seg" role="group" aria-label="Which steps"><button data-act="mine" data-v="0" aria-pressed="'+(!S.prefs.mine)+'">Everyone\'s steps</button><button data-act="mine" data-v="1" aria-pressed="'+(!!S.prefs.mine)+'">Only mine</button></div>'+
       '<div style="display:flex;gap:6px"><button class="btn sm ghost" data-act="expand" data-v="1">Open all</button><button class="btn sm ghost" data-act="expand" data-v="0">Close all</button></div></div>';
 
-    PHASES.forEach((p,pi)=>{ h += phaseBlock(c,p,pi,i); });
+    phasesFor(c).forEach((p,pi)=>{ h += phaseBlock(c,p,pi,i); });
   }
 
   h += '</div><div class="caside">'+asidePanels(c,n,ko,tk,td,w)+'</div></div>';
@@ -1048,9 +1084,9 @@ function scopingPanel(c){
 }
 function setupPanel(c){
   const again = hasHub(c);
-  const guess = again ? c.hub.startPhase : c.stage==="Offboarding" ? "p11" : (c.goLiveDate && daysTo(c.goLiveDate)<0 ? "p9" : c.stage==="Active" ? "p6" : "p0");
+  const guess = again ? c.hub.startPhase : projectType(c)==="audit" ? "a0" : c.stage==="Offboarding" ? "p11" : (c.goLiveDate && daysTo(c.goLiveDate)<0 ? "p9" : c.stage==="Active" ? "p6" : "p0");
   return '<section class="setup"><h3>Where is '+esc(c.name)+' up to?</h3><p>'+(again?'Change the gate this client started at in the hub. Ticks and closed gates you have already recorded are kept.':'This client started before the hub. Pick the gate they are at now. Earlier gates are treated as closed, so only the steps from here on need ticking.')+'</p>'+
-    '<div class="row"><label>Current gate<select id="start-phase">'+PHASES.map(p=>'<option value="'+p.id+'"'+(p.id===guess?' selected':'')+'>'+esc(p.code+' · '+p.name)+'</option>').join("")+'</select></label>'+
+    '<div class="row"><label>Current gate<select id="start-phase">'+phasesFor(c).map(p=>'<option value="'+p.id+'"'+(p.id===guess?' selected':'')+'>'+esc(p.code+' · '+p.name)+'</option>').join("")+'</select></label>'+
     '<label>Project type<select id="start-type">'+Object.entries(TYPE_LABEL).map(([k,v])=>'<option value="'+k+'"'+(k===projectType(c)?' selected':'')+'>'+v+'</option>').join("")+'</select></label>'+
     '<button class="btn primary" data-act="start" data-id="'+c.id+'">'+(again?'Update starting gate':'Start tracking')+'</button>'+(again?'<button class="btn" data-act="cancel-restart">Cancel</button>':'')+'</div></section>';
 }
@@ -1145,7 +1181,7 @@ document.addEventListener("click", e=>{
       return;
     }
     case "tick": {
-      if(!c) return; const s = PHASES.flatMap(p=>p.steps).find(x=>x.id===t.dataset.sid);
+      if(!c) return; const s = phasesFor(c).flatMap(p=>p.steps).find(x=>x.id===t.dataset.sid);
       const st = stepStatus(c,s);
       setStep(c, s.id, st==="done" ? "" : "done"); return render(true);
     }
@@ -1154,11 +1190,11 @@ document.addEventListener("click", e=>{
     case "note": S.noteOpen[t.dataset.k]=!S.noteOpen[t.dataset.k]; render(true);
       { const ta=document.querySelector('textarea[data-sid="'+t.dataset.k.split(":")[1]+'"]'); if(ta) ta.focus(); } return;
     case "gate": { if(!c) return; setGate(c, t.dataset.pid, t.dataset.v==="1");
-      if(t.dataset.v==="1"){ const ni=curIdx(c); if(ni<PHASES.length){ S.open[c.id+":"+t.dataset.pid]=false; S.open[c.id+":"+PHASES[ni].id]=true; } }
-      render(true); if(t.dataset.v==="1" && curIdx(c)<PHASES.length){ const el=$("ph-"+PHASES[curIdx(c)].id); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); } return; }
-    case "phase": { const cc=byId(S.clientId); const pi=PIDX[t.dataset.pid]; const k=S.clientId+":"+t.dataset.pid; S.open[k]=!isOpen(cc,PHASES[pi],pi,curIdx(cc)); return render(true); }
+      if(t.dataset.v==="1"){ const L=phasesFor(c), ni=curIdx(c); if(ni<L.length){ S.open[c.id+":"+t.dataset.pid]=false; S.open[c.id+":"+L[ni].id]=true; } }
+      render(true); if(t.dataset.v==="1" && curIdx(c)<phasesFor(c).length){ const el=$("ph-"+phasesFor(c)[curIdx(c)].id); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); } return; }
+    case "phase": { const cc=byId(S.clientId); const pi=pidxOf(cc,t.dataset.pid); const k=S.clientId+":"+t.dataset.pid; S.open[k]=!isOpen(cc,phasesFor(cc)[pi],pi,curIdx(cc)); return render(true); }
     case "jump": { const k=S.clientId+":"+t.dataset.pid; S.open[k]=true; render(true); const el=$("ph-"+t.dataset.pid); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); return; }
-    case "expand": PHASES.forEach(p=>S.open[S.clientId+":"+p.id]=t.dataset.v==="1"); return render(true);
+    case "expand": phasesFor(byId(S.clientId)).forEach(p=>S.open[S.clientId+":"+p.id]=t.dataset.v==="1"); return render(true);
     case "mine": S.prefs.mine = t.dataset.v==="1"; savePrefs(); return render(true);
     case "scope": S.scopeOpen=!S.scopeOpen; return render(true);
     case "start": { if(!c) return; const sp=$("start-phase").value; ensureHub(c, sp); c.hub.startPhase=sp; c.hub.type=$("start-type").value; S.restart=null; const moved=syncStage(c); touch(c, moved?["stage"]:[]); render(true); $("scroll").scrollTop=0; return; }
@@ -1228,7 +1264,7 @@ function createClient(o){
     if(n.contact) c.contactName = n.contact;
     ensureHub(c,"p0"); c.hub.notionId = n.id;
   }
-  if(o.stage==="Onboarding"){ ensureHub(c,"p0"); c.hub.type = o.type || "full"; }
+  if(o.stage==="Onboarding" || o.type==="audit"){ ensureHub(c, o.type==="audit" ? "a0" : "p0"); c.hub.type = o.type || "full"; }
   S.portal.clients.push(c); touch(c,["*"]); openClient(c.id);
   return c;
 }
