@@ -77,6 +77,17 @@ table.map td:last-child{width:34px}
 #admin .meta{font-size:11px;color:var(--fnt);margin-bottom:12px;line-height:1.6}
 #admin .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 #admin input{width:auto;flex:1;min-width:160px}
+.modal{position:fixed;inset:0;z-index:1100;background:rgba(5,7,12,.72);display:none;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-card{background:var(--card);border:1px solid rgba(74,222,128,.45);border-radius:14px;max-width:460px;width:100%;padding:28px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.done-tick{width:58px;height:58px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--green);background:rgba(74,222,128,.15);border:2px solid var(--green)}
+.modal-card.warn{border-color:rgba(251,191,36,.5)}
+.modal-card.warn .done-tick{color:var(--amber);background:rgba(251,191,36,.15);border-color:var(--amber)}
+.modal-card h2{font-size:19px;font-weight:600;margin-bottom:8px}
+.modal-card p{font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+#submit-status{font-size:13px;font-weight:600;color:var(--green)}
+@media print{.modal{display:none!important}}
 .toast{position:fixed;bottom:20px;right:20px;background:var(--line);border:1px solid var(--line2);border-radius:8px;padding:9px 14px;font-size:12px;color:var(--txt);opacity:0;transition:opacity .3s;pointer-events:none;z-index:1001}
 footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;font-size:11px;color:var(--fnt)}
 .btn.print{background:transparent;color:var(--txt);border-color:var(--line2);padding:7px 14px;font-size:12px;white-space:nowrap}
@@ -158,7 +169,8 @@ footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;font-size:11px;color:v
 
   <section class="card">
     <div class="submit-bar">
-      <button class="btn primary" onclick="submitForm()">Submit to Sabel</button>
+      <button class="btn primary" id="submit-btn" onclick="submitForm()">Submit to Sabel</button>
+      <span id="submit-status"></span>
       <button class="btn ghost" onclick="printPDF()">&#128438; Print / Save PDF</button>
       <span style="font-size:12px;color:var(--fnt)">You can still edit after submitting, changes keep saving.</span>
     </div>
@@ -167,6 +179,18 @@ footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;font-size:11px;color:v
 </div>
 <footer>Sabel Customer Success Solutions · Migration Mapping Requirements · All information is used solely to configure your migration.</footer>
 <div class="toast" id="toast"></div>
+<div class="modal" id="done-modal" onclick="if(event.target===this)closeDone()">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="done-title">
+    <div class="done-tick" id="done-icon">&#10003;</div>
+    <h2 id="done-title">Thank you, your answers are with Sabel</h2>
+    <p id="done-body"></p>
+    <div class="modal-actions">
+      <button class="btn primary" onclick="closeDone();printPDF()">Save a PDF copy</button>
+      <button class="btn ghost" onclick="closeDone()">Close</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 'use strict';
@@ -467,9 +491,24 @@ function submitForm(){
   if(inc.length&&!confirm('Some sections look incomplete:\n\n- '+inc.join('\n- ')+'\n\nSubmit anyway? You can come back and finish them later, your answers keep saving.'))return;
   F.__submitted=new Date().toISOString();
   dirty=true;showSubmitted();
-  save().then(()=>toast(REMOTE?'Submitted, thank you.':'Saved on this device only. Please use Print / Save PDF and send the copy to Richard.'));
+  save().then(()=>openDone(REMOTE));
 }
+function openDone(ok){
+  const m=document.getElementById('done-modal'),c=m.querySelector('.modal-card');
+  c.classList.toggle('warn',!ok);
+  document.getElementById('done-icon').textContent=ok?'\u2713':'!';
+  document.getElementById('done-title').textContent=ok?'Thank you, your answers are with Sabel':'Saved on this device only';
+  document.getElementById('done-body').textContent=ok
+    ?'Submitted '+new Date(F.__submitted).toLocaleString()+'. Richard will review your answers and get in touch if anything needs a closer look. You can keep editing and your changes will carry on saving. We recommend saving a PDF copy for your records.'
+    :'We could not reach Sabel\'s server, so your answers have not been sent yet. Please save a PDF copy and send it to Richard.';
+  m.classList.add('show');
+  m.querySelector('.btn.primary').focus();
+}
+function closeDone(){document.getElementById('done-modal').classList.remove('show')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDone()});
 function showSubmitted(){
+  const st=document.getElementById('submit-status');if(st)st.textContent='\u2713 Submitted '+new Date(F.__submitted).toLocaleString();
+  const sb=document.getElementById('submit-btn');if(sb)sb.textContent='Resubmit changes to Sabel';
   const b=document.getElementById('submitted-banner');
   b.style.display='block';
   b.innerHTML='<strong>Submitted to Sabel</strong> on '+new Date(F.__submitted).toLocaleString()+'. You can keep editing, any changes continue to save.';
