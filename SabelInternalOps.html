@@ -323,6 +323,34 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
   .inout{grid-template-columns:1fr}
   .step .more{opacity:1}
 }
+/* critical steps, status row, on hold, checklist editor, sales follow-up */
+.crit{display:inline-block;margin-left:6px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--warn);background:var(--warn-soft);border-radius:4px;padding:0 5px;vertical-align:1px}
+.statusrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:12px;font-size:13px;color:var(--muted)}
+.statusrow label{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+.statusrow select{font-family:var(--text);font-size:13.5px;letter-spacing:0;text-transform:none;color:var(--ink);background:var(--surface);border:1px solid var(--line2);border-radius:6px;padding:4px 8px}
+.hold{padding:14px 18px;border-radius:12px;background:var(--warn-soft);color:var(--ink);display:grid;gap:10px}
+.hold .ht b{color:var(--warn);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-right:8px}
+.hold p{margin:0;white-space:pre-wrap}
+.hold .row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.hold label{display:grid;gap:3px;font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.hold label.full{flex:1 1 100%}
+.hold input,.hold select,.hold textarea{font-family:var(--text);font-size:14px;text-transform:none;letter-spacing:0;color:var(--ink);background:var(--surface);border:1px solid var(--line2);border-radius:6px;padding:6px 8px}
+.hold textarea{width:100%;min-height:64px;resize:vertical}
+.lead-note{max-width:80ch;margin:0 0 14px;color:var(--muted)}
+.edtabs{margin-bottom:16px;flex-wrap:wrap}
+.edlist{list-style:none;margin:0;padding:6px 12px 12px;display:grid;gap:6px}
+.edrow{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;padding:4px 0;border-bottom:1px solid var(--line)}
+.edrow:last-child{border-bottom:0}
+.edrow .edtx{flex:1 1 320px}
+.edrow input.edtx,.edrow select{font-family:var(--text);font-size:14px;color:var(--ink);background:var(--raise);border:1px solid var(--line2);border-radius:6px;padding:5px 8px;min-width:0}
+.edrow.hidden-step .edtx{text-decoration:line-through;color:var(--faint)}
+.edrow .mv{display:flex;gap:2px}
+.edrow .mv button{width:26px;height:26px;border:1px solid var(--line2);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--ink)}
+.edrow .mv button:disabled{opacity:.35;cursor:default}
+.crit-cb{display:flex;align-items:center;gap:5px;font-size:13px;white-space:nowrap;color:var(--body)}
+.edacts{display:flex;gap:4px;margin-left:auto}
+.salesgrid{display:grid;gap:14px}
+.salescard .panel-h .sub .chip{margin-left:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -336,6 +364,8 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
         <input id="q" type="search" placeholder="Find a client  ( / )" autocomplete="off">
       </div>
       <button class="navbtn" id="nav-today" data-act="today">Today <span class="count" id="today-count" hidden></span></button>
+      <button class="navbtn" id="nav-sales" data-act="sales">Sales follow-up <span class="count" id="sales-count" hidden></span></button>
+      <button class="navbtn" id="nav-lists" data-act="lists">Checklists</button>
     </div>
     <div class="clients" id="clients"></div>
     <div class="side-foot">
@@ -537,8 +567,96 @@ const AUDIT_PHASES = [
   ["nikki","If they buy hours, change the project type and start again at Day 0"]]}
 ];
 AUDIT_PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], t:s[1], tag:""})); });
-function phasesFor(c){ return projectType(c)==="audit" ? AUDIT_PHASES : PHASES; }
-function pidxOf(c,pid){ const L=phasesFor(c); for(let i=0;i<L.length;i++){ if(L[i].id===pid) return i; } return 0; }
+/* Migration only: no workshops, blueprint or build. Access, the intake form, a Slack channel, then the run. */
+const MIGRATION_PHASES = [
+ {id:"m0", code:"M1", when:"Day 0", name:"Signed", gate:"File open, intake link sent, Slack channel live with the client.", steps:[
+  ["client","Signs the migration scope of work"],
+  ["nikki","Fill in this client's details: type, lead, hours, signed date"],
+  ["nikki","Drive folder created, SOW saved in 00_Project Admin"],
+  ["nikki","Register the migration intake key before the link goes out"],
+  ["richard","Sends the welcome email with the migration intake form link"],
+  ["nikki","Slack channel shared with the client, plus Richard, Chris and Greg; SOW pinned"],
+  ["nikki","Notion Projects row: hours, signed date, SOW link"]]},
+ {id:"m1", code:"M2", when:"Days 1 to 5", name:"Access", gate:"Full admin on their Intercom workspace and on every source.", steps:[
+  ["client","Adds info+1@ as full admin in Intercom"],
+  ["client","Gives admin access to each source being migrated"],
+  ["nikki","Confirm the Intercom access works; note the region and plan"],
+  ["nikki","Confirm each source login works; list the sources in Details"],
+  ["nikki","Day 3: one nudge in Slack if any access is still missing"]]},
+ {id:"m2", code:"M3", when:"Days 1 to 7", name:"Intake form", gate:"Intake form submitted and reviewed.", steps:[
+  ["client","Completes the migration intake form"],
+  ["nikki","Day 3: one nudge in Slack if nothing has been submitted"],
+  ["nikki","Review the submission within 1 working day; send gaps back in Slack"],
+  ["richard","Migration plan agreed with the client in Slack"]]},
+ {id:"m3", code:"M4", when:"Agreed dates", name:"Migration", gate:"Data in Intercom and confirmed by the client.", steps:[
+  ["richard","Mapping, sample run, then full run"],
+  ["client","Checks the sample and confirms in Slack"],
+  ["richard","Runs the delta migration at cutover"],
+  ["richard","Warns at 75% of hours; new scope by written change request"],
+  ["client","Confirms the migration is complete"]]},
+ {id:"m4", code:"Close", when:"After the run", name:"Close-out", gate:"Engagement closed.", steps:[
+  ["nikki","Completion confirmation saved in 00_Project Admin"],
+  ["nikki","Feedback or testimonial prompt sent"],
+  ["nikki","Intercom Rocketlane updated if it is a partner project"],
+  ["nikki","Status closed in Notion; client removed from routine prompts"],
+  ["nikki","Slack channel archived"]]}
+];
+MIGRATION_PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], t:s[1], tag:""})); });
+/* Migration clients set up on the 12-gate list before 22 Sep 2026 land on the matching migration gate. */
+const P_TO_M = {p0:"m0",p1:"m1",p2:"m2",p3:"m2",p4:"m2",p5:"m2",p6:"m3",p7:"m3",p8:"m3",p9:"m4",p10:"m4",p11:"m4"};
+function phasesForType(t){ return t==="audit" ? AUDIT_PHASES : t==="migration" ? MIGRATION_PHASES : PHASES; }
+function phasesFor(c){ return phasesForType(projectType(c)); }
+function startFor(t,pid){ const L=phasesForType(t); if(L.some(p=>p.id===pid)) return pid; if(t==="migration" && P_TO_M[pid]) return P_TO_M[pid]; return L[0].id; }
+function pidxOf(c,pid){ const L=phasesFor(c); if(projectType(c)==="migration" && P_TO_M[pid]) pid=P_TO_M[pid]; for(let i=0;i<L.length;i++){ if(L[i].id===pid) return i; } return 0; }
+
+/* ---------- standard checklists: the defaults above plus edits made on the Checklists page ----------
+   Edits live in the portal store at templates.opsChecklists = {steps:{<id>:{t,o,tag,crit,hide}}, added:{<phase>:[{id,o,t,tag,crit}]}, order:{<phase>:[ids]}}.
+   Step ids never change, so ticks on clients survive renames, moves, removals and restores. */
+const CRIT_DEFAULT = new Set(["p0-1","p0-5","p0-6","p0-7","p0-8","p0-9","p0-10","p0-11","p1-0","p1-4","p2-0","p2-1",
+  "m0-1","m0-2","m0-3","m0-5","m1-0","m1-1","m1-2","m1-3","m2-0","m2-2",
+  "a0-2","a0-3","a0-4","a1-0","a1-2"]);
+/* Gates that come before the first client session: kickoff, the discovery workshop, or the migration run. */
+const PRE_KICKOFF = {p0:1,p1:1,p2:1, m0:1,m1:1,m2:1, a0:1,a1:1};
+const LISTS = [["main","Full project and Build only",PHASES],["migration","Migration only",MIGRATION_PHASES],["audit","Audit only",AUDIT_PHASES]];
+const BASE = {};
+LISTS.forEach(([,,L])=>L.forEach(p=>{
+  p.steps.forEach(s=>{ s.crit=CRIT_DEFAULT.has(s.id); if(s.tag==="mo"){ s.hide=true; s.tag=""; } });   /* migration-only steps now live in the migration list */
+  BASE[p.id]=p.steps.map(s=>Object.assign({},s));
+}));
+function checklistEdits(){ const t=S.portal&&S.portal.templates; return (t&&t.opsChecklists)||{}; }
+function editorSteps(pid){
+  const E=checklistEdits(), ed=E.steps||{}, added=(E.added&&E.added[pid])||[];
+  const all = (BASE[pid]||[]).map(b=>Object.assign({}, b, ed[b.id]||{}, {base:b}))
+    .concat(added.map(a=>Object.assign({tag:"",crit:false}, a, ed[a.id]||{}, {added:true})));
+  const order=(E.order&&E.order[pid])||[];
+  const pos=id=>{ const i=order.indexOf(id); return i<0 ? 1e4+all.findIndex(x=>x.id===id) : i; };
+  return all.sort((a,b)=>pos(a.id)-pos(b.id));
+}
+function applyChecklists(){
+  LISTS.forEach(([,,L])=>L.forEach(p=>{
+    p.steps = editorSteps(p.id).filter(s=>!s.hide).map(s=>({id:s.id, o:OWNERS[s.o]?s.o:"nikki", t:s.t, tag:s.tag||"", crit:!!s.crit}));
+  }));
+}
+function editChecklists(fn){
+  S.portal.templates = S.portal.templates || {};
+  const E = S.portal.templates.opsChecklists = S.portal.templates.opsChecklists || {};
+  E.steps=E.steps||{}; E.added=E.added||{}; E.order=E.order||{};
+  fn(E); E.updated=new Date().toISOString();
+  applyChecklists(); S.listsDirty=true; cachePortal(); setSave("saving");
+  clearTimeout(saveTimer); saveTimer=setTimeout(flush, 900);
+}
+function isCritOpen(c,s){ return s.crit && !["done","na"].includes(stepStatus(c,s)); }
+/* Open critical steps in the gates before kickoff (skipping gates before the client joined the hub). */
+function preKickoff(c){
+  const L=phasesFor(c), si=startIdx(c); let last=-1;
+  L.forEach((p,i)=>{ if(PRE_KICKOFF[p.id]) last=i; });
+  const open = L.filter((p,i)=>PRE_KICKOFF[p.id] && i>=si).flatMap(p=>stepsFor(c,p).filter(s=>isCritOpen(c,s)).map(s=>({c,p,s})));
+  return {open, past: curIdx(c)>last};
+}
+const STAGE_LABEL = {Discovery:"Scoping", Onboarding:"Onboarding", Active:"Active", Offboarding:"Closing", Complete:"Complete", Outreach:"Sales follow-up"};
+const OLD_TYPE = {full:"Both", build:"Project", migration:"Migration", audit:"Audit"};
+const WAITING = {client:"the client", sabel:"us", other:"someone else"};
+const optHtml = (arr,val,blank) => (blank!=null?'<option value="">'+blank+'</option>':'')+arr.map(a=>{ const [v,l]=Array.isArray(a)?a:[a,a]; return '<option value="'+esc(v)+'"'+(String(val)===String(v)?' selected':'')+'>'+esc(l)+'</option>'; }).join("");
 
 /* ---------- state ---------- */
 const S = {
@@ -600,6 +718,7 @@ function trackerUrlFor(c){
 function projectType(c){
   if(c.hub && c.hub.type) return c.hub.type;
   if(c.type==="Migration") return "migration";
+  if(c.type==="Audit") return "audit";
   if(c.type==="Project") return "build";
   return "full";
 }
@@ -630,6 +749,7 @@ function phaseDue(c,p){
     case "p3": return ko || addDays(sg,14); case "p4": return addDays(ko||addDays(sg,14),10); case "p5": return addDays(ko||addDays(sg,14),15);
     case "p6": return addDays(gl,-10); case "p7": return gl; case "p8": return gl; case "p9": return addDays(gl,14);
     case "p10": return d30; case "p11": return addDays(d30,14);
+    case "m0": return sg; case "m1": return addDays(sg,5); case "m2": return addDays(sg,7); case "m3": return gl || addDays(sg,21); case "m4": return addDays(gl || addDays(sg,21),7);
     case "a0": return sg; case "a1": return addDays(sg,7); case "a2": return addDays(sg,14); case "a3": return addDays(sg,21);
   }
   return "";
@@ -639,19 +759,23 @@ function allProgress(c){
   let t=0,d=0; phasesFor(c).forEach((p,i)=>{ const pc=phaseCounts(c,p); t+=pc.total; d+= i<startIdx(c) ? pc.total : pc.done; });
   return t ? d/t : 0;
 }
+function onHold(c){ return !!(c.hold && c.hold.on) && !["Complete","Outreach"].includes(c.stage); }
 function band(c){
+  if(c.stage==="Outreach") return "sales";
+  if(onHold(c)) return "hold";
   if(c.stage==="Discovery") return "scoping";
-  if(c.stage==="Complete"||c.stage==="Outreach") return "closed";
+  if(c.stage==="Complete") return "closed";
   if(!hasHub(c)) return c.stage==="Offboarding" ? "closing" : "setup";
   if(projectType(c)==="audit") return curIdx(c)>=AUDIT_PHASES.length ? "closed" : "audit";
+  if(projectType(c)==="migration"){ const m=curIdx(c); return m<=2 ? "onboarding" : m===3 ? "migration" : m===4 ? "closing" : "closed"; }
   const i=curIdx(c);
   if(i<=5) return "onboarding"; if(i===6) return "build"; if(i<=8) return "golive"; if(i<=10) return "stabilise"; if(i===11) return "closing"; return "closed";
 }
 const BANDS = [
-  ["scoping","Scoping"],["setup","Not set up in the hub"],["audit","Audit"],["onboarding","Onboarding · S0"],["build","Build · S1 to S5"],
-  ["golive","UAT and go-live"],["stabilise","Stabilise and Day-30"],["closing","Closing"],["closed","Closed"]
+  ["scoping","Scoping"],["setup","Not set up in the hub"],["audit","Audit"],["onboarding","Onboarding · S0"],["build","Build · S1 to S5"],["migration","Migration run"],
+  ["golive","UAT and go-live"],["stabilise","Stabilise and Day-30"],["hold","On hold"],["closing","Closing"],["closed","Closed"]
 ];
-function inDelivery(c){ return hasHub(c) && !["scoping","closed"].includes(band(c)); }
+function inDelivery(c){ return hasHub(c) && !["scoping","closed","hold","sales"].includes(band(c)); }
 
 /* ---------- tracker summary ---------- */
 function trackerSummary(d){
@@ -673,7 +797,7 @@ function trackerSummary(d){
 
 /* ---------- warnings ---------- */
 function warnings(c){
-  const w=[]; if(c.stage==="Discovery" || c.stage==="Complete") return w;
+  const w=[]; if(["Discovery","Complete","Outreach"].includes(c.stage)) return w;
   const n=notionFor(c), tk=trackerKeyFor(c), td=tk && S.trk[tk];
   if(S.loaded.notion && !n) w.push(["Not linked to a Notion project","Link it in Details so hours, scope and SOW links show."]);
   if(n && !n.sabelDoc && !n.intercomSow) w.push(["No SOW link in Notion","Add the Sabel doc or Intercom SOW link to the Notion project."]);
@@ -681,11 +805,12 @@ function warnings(c){
   if(td && td.data && td.data.goLive && c.goLiveDate && td.data.goLive!==c.goLiveDate) w.push(["Go-live differs: hub "+fmt(c.goLiveDate)+", tracker "+fmt(td.data.goLive),"The hub date is the one to keep. Update the tracker to match."]);
   if(tk && td && td.status===404) w.push(["Tracker key not registered: "+tk,"Add it to ALLOWED_KEYS in sabel-webhook, otherwise the tracker cannot save."]);
   if(tk && S.loaded.reg && !S.reg.some(t=>t.key===tk)) w.push(["Not in trackers.json: "+tk,"Add an entry so the dashboard and weekly sweeps find it."]);
-  if(hasHub(c) && projectType(c)!=="audit" && curIdx(c)>=5 && curIdx(c)<PHASES.length && !tk) w.push(["No tracker key yet","Needed once the blueprint is signed."]);
-  if(c.goLiveDate && !c.day30Date) w.push(["No Day-30 date","Set it once go-live is confirmed (go-live plus 30 days)."]);
-  if(hasHub(c) && projectType(c)!=="audit" && curIdx(c)<=2 && !((c.hub.sowInputs||[]).length)) w.push(["No SOW client inputs listed","Add the SOW's Client Inputs Required in Details, so they show in the client's Readiness Check."]);
+  if(hasHub(c) && !["audit","migration"].includes(projectType(c)) && curIdx(c)>=5 && curIdx(c)<PHASES.length && !tk) w.push(["No tracker key yet","Needed once the blueprint is signed."]);
+  if(c.goLiveDate && !c.day30Date && projectType(c)!=="migration") w.push(["No Day-30 date","Set it once go-live is confirmed (go-live plus 30 days)."]);
+  if(hasHub(c) && !["audit","migration"].includes(projectType(c)) && curIdx(c)<=2 && !((c.hub.sowInputs||[]).length)) w.push(["No SOW client inputs listed","Add the SOW's Client Inputs Required in Details, so they show in the client's Readiness Check."]);
   if(hasHub(c) && (S.inputsStatus||{})[c.id]==="unregistered") w.push(["SOW client inputs not published","Add readiness-inputs-v1 to ALLOWED_KEYS in sabel-webhook, then edit the list again."]);
-  if(hasHub(c) && !c.tier) w.push(["No tier set","Light, Standard or Enterprise, from the SOW triggers."]);
+  if(hasHub(c) && !c.contactName && !(n&&n.contact)) w.push(["No client contact","Add the main contact in Details."]);
+  if(hasHub(c) && !c.tier && projectType(c)!=="migration") w.push(["No tier set","Light, Standard or Enterprise, from the SOW triggers."]);
   return w;
 }
 
@@ -708,6 +833,7 @@ async function loadAll(){
     getJSON(TRACKERS_JSON).then(j=>{ S.reg = Array.isArray(j) ? j : (j.trackers||[]); S.loaded.reg=true; }).catch(e=>S.errors.reg=e.message),
     getJSON(API+"?key="+KICKOFF_KEY).then(j=>{ S.kickoff=(j.data&&j.data.clients)||{}; S.loaded.kick=true; }).catch(e=>S.errors.kick=e.message)
   ]);
+  applyChecklists();
   setSave(S.errors.portal ? "offline" : "idle");
   routeFromHash(); render();
   loadTrackers();
@@ -720,10 +846,10 @@ async function loadTrackers(){
   render();
 }
 async function refreshPortal(){
-  if(S.dirty.size || document.hidden) return;
+  if(S.dirty.size || S.listsDirty || document.hidden) return;
   try{
     const j = await getJSON(API+"?key="+PORTAL_KEY);
-    if(j.data && Array.isArray(j.data.clients) && !S.dirty.size){ S.portal=j.data; cachePortal(); render(true); }
+    if(j.data && Array.isArray(j.data.clients) && !S.dirty.size && !S.listsDirty){ S.portal=j.data; applyChecklists(); cachePortal(); if(!/input|textarea|select/i.test((document.activeElement||{}).tagName||"")) render(true); }
   }catch(e){}
 }
 setInterval(refreshPortal, 60000);
@@ -747,8 +873,13 @@ function touch(c, fields){
   clearTimeout(saveTimer); saveTimer=setTimeout(flush, 900);
 }
 async function flush(){
-  if(!S.dirty.size) return;
+  if(!S.dirty.size && !S.listsDirty) return;
+  /* One save at a time; anything edited meanwhile goes in the next one. */
+  if(S.flushing){ clearTimeout(saveTimer); saveTimer=setTimeout(flush, 600); return; }
+  S.flushing = true;
   const pending = new Map(S.dirty); S.dirty.clear();
+  const lists = S.listsDirty; S.listsDirty=false;
+  const listsSnap = lists && S.portal.templates ? S.portal.templates.opsChecklists : null;
   try{
     const j = await getJSON(API+"?key="+PORTAL_KEY);
     const remote = (j.data && Array.isArray(j.data.clients)) ? j.data : {clients:[], templates:(S.portal&&S.portal.templates)||null};
@@ -758,18 +889,26 @@ async function flush(){
       if(i===-1 || fields.has("*")){ if(i===-1) remote.clients.push(mine); else remote.clients[i]=mine; return; }
       fields.forEach(f=>{ remote.clients[i][f] = mine[f]; });
     });
+    if(lists){ remote.templates = remote.templates || {}; remote.templates.opsChecklists = listsSnap; }
     const r = await fetch(API+"?key="+PORTAL_KEY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({data:remote})});
     if(!r.ok) throw new Error("HTTP "+r.status);
-    S.portal = remote; cachePortal();
-    setSave(S.dirty.size ? "saving" : "saved");
+    /* Edits made while this save was in flight are still pending: keep them over the copy just saved. */
+    const local = S.portal;
+    S.dirty.forEach((f,id)=>{ const mine=(local.clients||[]).find(c=>c.id===id); if(!mine) return; const i=remote.clients.findIndex(c=>c.id===id); if(i===-1) remote.clients.push(mine); else remote.clients[i]=mine; });
+    if(S.listsDirty && local.templates){ remote.templates=remote.templates||{}; remote.templates.opsChecklists=local.templates.opsChecklists; }
+    S.portal = remote; applyChecklists(); cachePortal();
+    S.flushing = false;
+    setSave(S.dirty.size || S.listsDirty ? "saving" : "saved");
     setTimeout(()=>{ if(S.save==="saved") setSave("idle"); }, 2500);
   }catch(e){
     pending.forEach((f,id)=>{ const cur=S.dirty.get(id)||new Set(); f.forEach(x=>cur.add(x)); S.dirty.set(id,cur); });
+    if(lists) S.listsDirty=true;
+    S.flushing = false;
     setSave("offline");
     clearTimeout(saveTimer); saveTimer=setTimeout(flush, 15000);
   }
 }
-window.addEventListener("beforeunload", e=>{ if(S.dirty.size){ e.preventDefault(); e.returnValue=""; } });
+window.addEventListener("beforeunload", e=>{ if(S.dirty.size || S.listsDirty){ e.preventDefault(); e.returnValue=""; } });
 
 /* ---------- SOW client inputs: published to the client's Readiness Check ----------
    Only the client name and the list go to readiness-inputs-v1, never the rest of the client record. */
@@ -801,11 +940,12 @@ function ensureHub(c, startPhase){
   return c.hub;
 }
 function syncStage(c){
-  if(!hasHub(c) || c.stage==="Outreach") return;
+  if(!hasHub(c) || c.stage==="Outreach" || c.stageManual) return false;
   const i=curIdx(c);
   const L=phasesFor(c);
   const want = i>=L.length ? "Complete"
     : projectType(c)==="audit" ? (i>=2 ? "Active" : "Onboarding")
+    : projectType(c)==="migration" ? (i===4 ? "Offboarding" : i>=3 ? "Active" : "Onboarding")
     : i===11 ? "Offboarding" : i>=6 ? "Active" : "Onboarding";
   if(c.stage!==want){ c.stage=want; return true; }
   return false;
@@ -831,21 +971,28 @@ function render(soft){
   const v=$("view"), sc=$("scroll"), top=sc.scrollTop;
   if(!S.portal){ return; }
   if(S.view==="client" && byId(S.clientId)) v.innerHTML = clientView(byId(S.clientId));
+  else if(S.view==="lists") v.innerHTML = listsView();
+  else if(S.view==="sales") v.innerHTML = salesView();
   else { S.view="today"; v.innerHTML = todayView(); }
   $("nav-today").classList.toggle("on", S.view==="today");
+  $("nav-sales").classList.toggle("on", S.view==="sales");
+  $("nav-lists").classList.toggle("on", S.view==="lists");
   renderCrumb();
   if(soft) sc.scrollTop=top;
 }
 function renderCrumb(){
   const c = S.view==="client" && byId(S.clientId);
-  $("crumb").innerHTML = c ? '<button data-act="today">Today</button><span>/</span><b>'+esc(c.name)+'</b>' : '<b>Today</b>';
+  $("crumb").innerHTML = c ? (c.stage==="Outreach" ? '<button data-act="sales">Sales follow-up</button>' : '<button data-act="today">Today</button>')+'<span>/</span><b>'+esc(c.name)+'</b>'
+    : '<b>'+({lists:"Checklists", sales:"Sales follow-up"}[S.view]||"Today")+'</b>';
 }
 function renderSide(){
   const q = norm($("q").value);
   const groups = Object.fromEntries(BANDS.map(b=>[b[0],[]]));
+  groups.sales=[];
   clients().forEach(c=>{ if(q && !norm(c.name).includes(q) && !c.name.toLowerCase().includes($("q").value.toLowerCase())) return; groups[band(c)].push(c); });
   let h="";
-  BANDS.forEach(([k,label])=>{
+  /* Sales follow-up clients stay out of the client list; they only show here when searched for. */
+  (q ? BANDS.concat([["sales","Sales follow-up"]]) : BANDS).forEach(([k,label])=>{
     const list = groups[k].sort((a,b)=>a.name.localeCompare(b.name));
     if(!list.length) return;
     const closed = k==="closed";
@@ -853,7 +1000,8 @@ function renderSide(){
     h += '<div class="grp"><button class="grp-h'+(closed?' toggle':'')+'"'+(closed?' data-act="toggle-closed"':' tabindex="-1"')+'><span class="eyebrow">'+esc(label)+'</span><span class="n">'+list.length+(closed?(collapsed?' · show':' · hide'):'')+'</span></button>';
     if(!collapsed) list.forEach(c=>{
       const p=allProgress(c), w=warnings(c).length, mineOpen = openMine(c).length;
-      const meta = [c.tier, c.owner, hasHub(c) && curIdx(c)<phasesFor(c).length ? phasesFor(c)[curIdx(c)].name : (c.stage==="Discovery" ? (c.proposalSent ? "proposal "+rel(c.proposalSent) : "proposal") : c.stage)].filter(Boolean).join(" · ");
+      const meta = k==="hold" ? [c.owner, c.hold.checkBack ? "check back "+fmt(c.hold.checkBack) : "on hold"].filter(Boolean).join(" · ")
+        : k==="sales" ? "sales follow-up" : [c.tier, c.owner, hasHub(c) && curIdx(c)<phasesFor(c).length ? phasesFor(c)[curIdx(c)].name : (c.stage==="Discovery" ? (c.proposalSent ? "proposal "+rel(c.proposalSent) : "proposal") : c.stage)].filter(Boolean).join(" · ");
       h += '<button class="crow'+(S.view==="client"&&S.clientId===c.id?' on':'')+'" data-act="open" data-id="'+c.id+'"><span class="nm">'+esc(c.name)+'</span><span class="mt">'+esc(meta)+'</span><span class="rt">'+
         (mineOpen?'<span class="badge" title="Your open steps at this gate">'+mineOpen+'</span>':'')+
         (w?'<span class="dot-warn" title="'+w+' data issue'+(w>1?'s':'')+'"></span>':'')+
@@ -864,6 +1012,7 @@ function renderSide(){
   $("clients").innerHTML = h || '<div class="empty">No clients match.</div>';
   const n = clients().filter(inDelivery).reduce((a,c)=>a+openMine(c).length,0);
   const tc=$("today-count"); tc.hidden=!n; tc.textContent=n;
+  const sd=salesDue().length, sc=$("sales-count"); sc.hidden=!sd; sc.textContent=sd;
 }
 /* Notion projects with no client here yet: the safety net for a signing nobody added.
    Names are matched loosely, so "Astro" does not look new when "Astropad" is already here. */
@@ -892,7 +1041,11 @@ function todayView(){
   const now=new Date();
   const dateLine = now.toLocaleDateString("en-GB",{weekday:"long", day:"numeric", month:"long"});
   const live = clients().filter(inDelivery);
-  const mine = live.flatMap(openMine).map(x=>Object.assign(x,{due:phaseDue(x.c,x.p)}))
+  const pre = live.map(c=>Object.assign({c}, preKickoff(c))).filter(x=>x.open.length)
+    .sort((a,b)=>(b.past-a.past) || a.c.name.localeCompare(b.c.name));
+  const preIds = new Set(pre.flatMap(x=>x.open.map(o=>x.c.id+":"+o.s.id)));
+  const mineAll = live.flatMap(openMine);
+  const mine = mineAll.filter(x=>!preIds.has(x.c.id+":"+x.s.id)).map(x=>Object.assign(x,{due:phaseDue(x.c,x.p)}))
     .sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999") || a.c.name.localeCompare(b.c.name));
   const waiting = live.filter(c=>{ const i=curIdx(c); return i<phasesFor(c).length && openMine(c).length===0; }).map(c=>{
     const p=phasesFor(c)[curIdx(c)]; const rest=stepsFor(c,p).filter(s=>!["done","na"].includes(stepStatus(c,s)));
@@ -900,21 +1053,25 @@ function todayView(){
   });
   const horizon = addDays(today(),21);
   const dates=[];
-  clients().filter(c=>!["Complete","Outreach"].includes(c.stage)).forEach(c=>{
+  clients().filter(c=>!["Complete","Outreach"].includes(c.stage) && !onHold(c)).forEach(c=>{
     [["Kickoff",c.hub&&c.hub.kickoffDate],["Go-live",c.goLiveDate],["Day-30",c.day30Date]].forEach(([l,d])=>{
       if(d && d>=addDays(today(),-3) && d<=horizon) dates.push({c,l,d});
     });
   });
+  const held = clients().filter(onHold).sort((a,b)=>(a.hold.checkBack||"9999").localeCompare(b.hold.checkBack||"9999"));
+  held.forEach(c=>{ const d=c.hold.checkBack; if(d && d<=horizon) dates.push({c,l:"Check back (on hold)",d}); });
   dates.sort((a,b)=>a.d.localeCompare(b.d));
   const setup = clients().filter(c=>band(c)==="setup");
-  const scoping = clients().filter(c=>c.stage==="Discovery").sort((a,b)=>(a.proposalSent||"9").localeCompare(b.proposalSent||"9"));
+  const scoping = clients().filter(c=>c.stage==="Discovery" && !onHold(c)).sort((a,b)=>(a.proposalSent||"9").localeCompare(b.proposalSent||"9"));
   const issues = clients().filter(c=>!["Complete","Outreach","Discovery"].includes(c.stage)).map(c=>({c,w:warnings(c)})).filter(x=>x.w.length).sort((a,b)=>b.w.length-a.w.length);
   const late = mine.filter(x=>x.due && daysTo(x.due)<0).length;
+  const myPre = pre.reduce((a,x)=>a+x.open.filter(o=>stepOwner(o.c,o.s)==="nikki").length,0);
 
   const missing = notionMissing();
   let h = '<div class="today-h"><div><div class="eyebrow">'+esc(dateLine)+'</div><h1>Today</h1></div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end"><button class="btn primary" data-act="add-client">+ Add client</button><div class="stats">'+
-    '<span class="stat red"><b>'+mine.length+'</b> steps for you</span>'+
+    '<span class="stat red"><b>'+(mine.length+myPre)+'</b> steps for you</span>'+
+    (pre.length?'<span class="stat red"><b>'+pre.length+'</b> with critical steps open</span>':'')+
     (late?'<span class="stat red"><b>'+late+'</b> past due</span>':'')+
     '<span class="stat"><b>'+live.length+'</b> in delivery</span>'+
     '<span class="stat"><b>'+dates.length+'</b> dates in 3 weeks</span>'+
@@ -922,8 +1079,18 @@ function todayView(){
   h += loadBanner();
 
   h += '<div class="tgrid"><div class="tcol">';
+  if(pre.length){
+    h += '<section class="panel"><div class="panel-h"><h3>Before kickoff</h3><span class="sub">Critical steps still open, everyone\'s</span></div><ul class="tlist">';
+    pre.forEach(x=>x.open.forEach(o=>{
+      const own=stepOwner(o.c,o.s), mineS=own==="nikki";
+      h += '<li class="titem"><button class="tick'+(mineS?' mine':'')+'" data-act="tick" data-id="'+o.c.id+'" data-sid="'+o.s.id+'" aria-label="Mark done: '+esc(o.s.t)+'">'+tickSvg+'</button>'+
+        '<div><div class="tx">'+esc(o.s.t)+'<span class="crit">Critical</span></div><div class="meta"><button class="cl" data-act="open" data-id="'+o.c.id+'">'+esc(o.c.name)+'</button><span class="ph">'+esc(o.p.name)+' · '+esc(ownerName(o.c,own))+'</span></div></div>'+
+        '<div class="side-r">'+(x.past?'<span class="due late">kickoff passed</span>':(phaseDue(o.c,o.p)?'<span class="due '+dueClass(phaseDue(o.c,o.p))+'">'+esc(fmt(phaseDue(o.c,o.p)))+'</span>':''))+'</div></li>';
+    }));
+    h += '</ul></section>';
+  }
   h += '<section class="panel"><div class="panel-h"><h3>Your next steps</h3><span class="sub">At each client\'s current gate, earliest due first</span></div>';
-  if(!mine.length) h += '<div class="empty">'+(live.length?'Nothing waiting on you at the current gates.':'No clients are set up in the hub yet. Pick one under "Not set up in the hub", or use + Add client.')+'</div>';
+  if(!mine.length) h += '<div class="empty">'+(live.length?(myPre?'Only the critical steps above.':'Nothing waiting on you at the current gates.'):'No clients are set up in the hub yet. Pick one under "Not set up in the hub", or use + Add client.')+'</div>';
   else h += '<ul class="tlist">'+mine.map(x=>
     '<li class="titem"><button class="tick mine" data-act="tick" data-id="'+x.c.id+'" data-sid="'+x.s.id+'" aria-label="Mark done: '+esc(x.s.t)+'">'+tickSvg+'</button>'+
     '<div><div class="tx">'+esc(x.s.t)+'</div><div class="meta"><button class="cl" data-act="open" data-id="'+x.c.id+'">'+esc(x.c.name)+'</button><span class="ph">'+esc(x.p.name)+' · '+esc(x.p.code)+'</span></div></div>'+
@@ -942,6 +1109,10 @@ function todayView(){
   h += dates.length ? '<ul class="dates">'+dates.map(x=>'<li><span class="d">'+esc(fmt(x.d))+'</span><span><button data-act="open" data-id="'+x.c.id+'">'+esc(x.c.name)+'</button> '+esc(x.l)+'</span><span class="due '+dueClass(x.d)+'">'+esc(rel(x.d))+'</span></li>').join("")+'</ul>' : '<div class="empty">No kickoffs, go-lives or Day-30 reviews in the next 3 weeks.</div>';
   h += '</section>';
 
+  if(held.length){
+    h += '<section class="panel"><div class="panel-h"><h3>On hold</h3><span class="sub">Check back when the date comes round</span></div><ul class="dates">'+
+      held.map(c=>'<li><span class="d">'+(c.hold.checkBack?esc(fmt(c.hold.checkBack)):'no date')+'</span><span><button data-act="open" data-id="'+c.id+'">'+esc(c.name)+'</button><br><small style="color:var(--muted)">Waiting on '+esc(WAITING[c.hold.waiting]||"the client")+(c.hold.reason?': '+esc(c.hold.reason.split("\n")[0].slice(0,90)):'')+'</small></span><span class="due '+dueClass(c.hold.checkBack)+'">'+(c.hold.checkBack?esc(rel(c.hold.checkBack)):'')+'</span></li>').join("")+'</ul></section>';
+  }
   if(setup.length){
     h += '<section class="panel"><div class="panel-h"><h3>Set up in the hub</h3><span class="sub">Active clients without gates yet</span></div><ul class="dates">'+
       setup.map(c=>'<li><span class="d">'+esc(c.stage)+'</span><span><button data-act="open" data-id="'+c.id+'">'+esc(c.name)+'</button></span><span class="due">'+(c.goLiveDate?'go-live '+esc(fmt(c.goLiveDate)):'')+'</span></li>').join("")+'</ul></section>';
@@ -983,13 +1154,16 @@ function clientView(c){
   chips.push('<span class="chip'+(c.tier?'':' warn')+'">'+esc(c.tier||"No tier")+'</span>');
   chips.push('<span class="chip">'+esc(TYPE_LABEL[projectType(c)])+'</span>');
   chips.push('<span class="chip">Lead: '+esc(c.owner||"not set")+'</span>');
+  if(onHold(c)) chips.unshift('<span class="chip warn">On hold</span>');
   if(w.length) chips.push('<span class="chip warn">'+w.length+' data issue'+(w.length>1?'s':'')+'</span>');
   const kd = (l,d,extra)=>'<div><div class="l">'+l+'</div><div class="v">'+(d?esc(fmt(d)):'<span style="color:var(--faint)">not set</span>')+'</div><div class="c '+(extra?dueClass(d):'')+'">'+(d&&extra?esc(rel(d)):'&nbsp;')+'</div></div>';
-  h += '<div class="chead"><div><div class="eyebrow">'+esc(n&&n.hoursNote?n.hoursNote.split("·")[0].trim():"Client")+'</div><h1>'+esc(c.name)+'</h1><div class="chips">'+chips.join("")+'</div></div>'+
-    '<div class="keydates">'+kd("Signed",c.signedDate)+kd("Kickoff",c.hub&&c.hub.kickoffDate,true)+kd("Go-live",c.goLiveDate,true)+kd("Day-30",c.day30Date,true)+'</div></div>';
+  h += '<div class="chead"><div><div class="eyebrow">'+esc(n&&n.hoursNote?n.hoursNote.split("·")[0].trim():"Client")+'</div><h1>'+esc(c.name)+'</h1><div class="chips">'+chips.join("")+'</div>'+statusRow(c)+'</div>'+
+    '<div class="keydates">'+kd("Signed",c.signedDate)+(projectType(c)==="migration" ? kd("Go-live",c.goLiveDate,true) : kd("Kickoff",c.hub&&c.hub.kickoffDate,true)+kd("Go-live",c.goLiveDate,true)+kd("Day-30",c.day30Date,true))+'</div></div>';
 
   h += '<div class="cgrid"><div class="cmain">';
 
+  h += holdPanel(c);
+  if(c.stage==="Outreach" || c.stage==="Complete") h += salesPanel(c);
   if(c.stage==="Discovery") h += scopingPanel(c);
   else if(!hasHub(c) || S.restart===c.id) h += setupPanel(c);
 
@@ -1053,7 +1227,7 @@ function phaseBlock(c,p,pi,i){
       const nk=c.id+":"+s.id;
       h += '<li class="step '+(mine?'mine':'other')+(st?' '+st:'')+'">'+
         '<button class="tick'+(mine?' mine':'')+(st?' '+st:'')+'" data-act="tick" data-id="'+c.id+'" data-sid="'+s.id+'" aria-label="'+(st==="done"?"Mark not done":"Mark done")+': '+esc(s.t)+'"'+(before?' disabled':'')+'>'+tickSvg+'</button>'+
-        '<span class="tx">'+esc(s.t)+'</span>'+
+        '<span class="tx">'+esc(s.t)+(s.crit?'<span class="crit">Critical</span>':'')+'</span>'+
         '<span class="acts"><span class="more">'+
           (before?'':'<button class="iconbtn'+(st==="doing"?' on':'')+'" data-act="doing" data-id="'+c.id+'" data-sid="'+s.id+'">In progress</button><button class="iconbtn" data-act="na" data-id="'+c.id+'" data-sid="'+s.id+'">'+(st==="na"?"Needed":"Not needed")+'</button><button class="iconbtn" data-act="note" data-k="'+esc(nk)+'">Note</button>')+
         '</span><label class="ownsel'+(own!==s.o?' set':'')+'" title="Who does this step for '+esc(c.name)+'"><span class="own '+own+'"><i>'+OWNERS[own].i+'</i>'+esc(ownerName(c,own))+'</span>'+
@@ -1066,11 +1240,11 @@ function phaseBlock(c,p,pi,i){
       '</li>';
     });
     h += '</ul>';
-    const openCount = pc.total-pc.done;
+    const openCount = pc.total-pc.done, critOpen = stepsFor(c,p).filter(s=>isCritOpen(c,s)).length;
     h += '<div class="gate'+(closed?' closed':'')+'"><span class="g"><b>Gate</b>'+esc(p.gate)+'</span>'+
       (before ? '' : closed
         ? '<button class="btn sm" data-act="gate" data-id="'+c.id+'" data-pid="'+p.id+'" data-v="0">Reopen gate</button>'
-        : '<button class="btn sm '+(openCount?'':'primary')+'" data-act="gate" data-id="'+c.id+'" data-pid="'+p.id+'" data-v="1">Close gate'+(openCount?' ('+openCount+' open)':'')+'</button>')+'</div>';
+        : '<button class="btn sm '+(openCount?'':'primary')+'" data-act="gate" data-id="'+c.id+'" data-pid="'+p.id+'" data-v="1" data-crit="'+critOpen+'">Close gate'+(critOpen?' ('+critOpen+' critical open)':openCount?' ('+openCount+' open)':'')+'</button>')+'</div>';
   } else if(closed && !before) {
     h += '';
   }
@@ -1084,7 +1258,7 @@ function scopingPanel(c){
 }
 function setupPanel(c){
   const again = hasHub(c);
-  const guess = again ? c.hub.startPhase : projectType(c)==="audit" ? "a0" : c.stage==="Offboarding" ? "p11" : (c.goLiveDate && daysTo(c.goLiveDate)<0 ? "p9" : c.stage==="Active" ? "p6" : "p0");
+  const guess = again ? startFor(projectType(c), c.hub.startPhase) : projectType(c)==="audit" ? "a0" : projectType(c)==="migration" ? (c.stage==="Offboarding" ? "m4" : c.stage==="Active" ? "m3" : "m0") : c.stage==="Offboarding" ? "p11" : (c.goLiveDate && daysTo(c.goLiveDate)<0 ? "p9" : c.stage==="Active" ? "p6" : "p0");
   return '<section class="setup"><h3>Where is '+esc(c.name)+' up to?</h3><p>'+(again?'Change the gate this client started at in the hub. Ticks and closed gates you have already recorded are kept.':'This client started before the hub. Pick the gate they are at now. Earlier gates are treated as closed, so only the steps from here on need ticking.')+'</p>'+
     '<div class="row"><label>Current gate<select id="start-phase">'+phasesFor(c).map(p=>'<option value="'+p.id+'"'+(p.id===guess?' selected':'')+'>'+esc(p.code+' · '+p.name)+'</option>').join("")+'</select></label>'+
     '<label>Project type<select id="start-type">'+Object.entries(TYPE_LABEL).map(([k,v])=>'<option value="'+k+'"'+(k===projectType(c)?' selected':'')+'>'+v+'</option>').join("")+'</select></label>'+
@@ -1124,23 +1298,26 @@ function asidePanels(c,n,ko,tk,td,w){
   h += '<section class="panel"><div class="panel-h"><h3>Links</h3></div><ul class="links">'+
     link("Tracker", trackerUrlFor(c), tk?"":"")+
     link("Notion project", n&&n.url, n?n.name:"")+
-    link("Kick-off Desk", "SabelKickoffDesk.html", ko?"record found":"no record")+
+    (projectType(c)==="migration" ? "" : link("Kick-off Desk", "SabelKickoffDesk.html", ko?"record found":"no record"))+
     link("Drive folder", c.hub&&c.hub.driveUrl, "")+
     link("Slack channel", slack, c.slackChannel||"")+
-    '<li><button data-act="copy" data-url="'+esc(readyUrl)+'"><span>Copy Readiness Check link</span><span class="k" id="copy-k">for '+esc(c.name)+'</span></button></li>'+
-    link("Readiness submissions", "SabelReadinessAdmin.html", "")+
+    (projectType(c)==="migration" ? "" : '<li><button data-act="copy" data-url="'+esc(readyUrl)+'"><span>Copy Readiness Check link</span><span class="k" id="copy-k">for '+esc(c.name)+'</span></button></li>'+
+    link("Readiness submissions", "SabelReadinessAdmin.html", ""))+
   '</ul></section>';
 
   if(w.length) h += '<section class="panel"><div class="panel-h"><h3>Data to fix</h3><span class="sub">'+w.length+'</span></div><ul class="warns">'+w.map(x=>'<li>'+esc(x[0])+'<small>'+esc(x[1])+'</small></li>').join("")+'</ul></section>';
 
   /* details */
   const hub=c.hub||{};
-  const opt = (arr,val,blank) => (blank?'<option value="">'+blank+'</option>':'')+arr.map(a=>{ const [v,l]=Array.isArray(a)?a:[a,a]; return '<option value="'+esc(v)+'"'+(String(val)===String(v)?' selected':'')+'>'+esc(l)+'</option>'; }).join("");
+  const opt = optHtml;
   h += '<section class="panel"><details class="fold"'+(hasHub(c)&&!c.tier?' open':'')+'><summary class="panel-h"><h3>Details</h3>'+chev+'</summary><div class="form">'+
     '<label>Tier<select data-field="tier" data-id="'+c.id+'">'+opt(TIERS,c.tier,"Not set")+'</select></label>'+
     '<label>Project type<select data-field="hub.type" data-id="'+c.id+'">'+opt(Object.entries(TYPE_LABEL),projectType(c))+'</select></label>'+
     '<label>Project lead<select data-field="owner" data-id="'+c.id+'">'+opt(["Chris","Richard","Greg"],c.owner,"Not set")+'</select></label>'+
-    '<label>Portal stage<select data-field="stage" data-id="'+c.id+'">'+opt(STAGES,c.stage)+'</select></label>'+
+    '<label>Came via<select data-field="intake" data-id="'+c.id+'">'+opt([["Intercom","Intercom partner"],["Sabel","Sabel direct"]],c.intake,"Not set")+'</select></label>'+
+    '<label>Contact name<input type="text" data-field="contactName" data-id="'+c.id+'" value="'+esc(c.contactName||"")+'" placeholder="'+esc((n&&n.contact)||"")+'"></label>'+
+    '<label>Contact email<input type="email" data-field="contactEmail" data-id="'+c.id+'" value="'+esc(c.contactEmail||"")+'"></label>'+
+    '<label>Proposal sent<input type="date" data-field="proposalSent" data-id="'+c.id+'" value="'+esc(c.proposalSent||"")+'"></label>'+
     '<label>Signed<input type="date" data-field="signedDate" data-id="'+c.id+'" value="'+esc(c.signedDate||"")+'"></label>'+
     '<label>Kickoff<input type="date" data-field="hub.kickoffDate" data-id="'+c.id+'" value="'+esc(hub.kickoffDate||"")+'"></label>'+
     '<label>Go-live<input type="date" data-field="goLiveDate" data-id="'+c.id+'" value="'+esc(c.goLiveDate||"")+'"></label>'+
@@ -1153,8 +1330,89 @@ function asidePanels(c,n,ko,tk,td,w){
     '<label class="full">Kick-off Desk record<select data-field="hub.kickoffId" data-id="'+c.id+'"><option value="">'+(ko&&!hub.kickoffId?'Matched by name: '+esc(ko.r.name||ko.id):'Not linked')+'</option>'+Object.entries(S.kickoff||{}).filter(([k,r])=>r&&!r.removed).sort((a,b)=>String(a[1].name||a[0]).localeCompare(String(b[1].name||b[0]))).map(([k,r])=>'<option value="'+esc(k)+'"'+(hub.kickoffId===k?' selected':'')+'>'+esc(r.name||k)+'</option>').join("")+'</select></label>'+
     '<label class="full">SOW client inputs · one per line · shown in their Readiness Check<textarea data-field="hub.sowInputs" data-id="'+c.id+'" placeholder="Brand assets for each brand&#10;Help centre article export">'+esc((hub.sowInputs||[]).join("\n"))+'</textarea></label>'+
     '<div class="full" style="font-size:12px;color:var(--muted);margin-top:-6px">'+esc({saving:"Publishing to their Readiness Check…",published:"Shown in their Readiness Check (Section J).",unregistered:"Not published: add readiness-inputs-v1 to ALLOWED_KEYS in sabel-webhook, then edit again.",failed:"Could not publish. Edit the list again to retry."}[(S.inputsStatus||{})[c.id]] || ((hub.sowInputs||[]).length ? (hub.sowInputs.length+" item"+(hub.sowInputs.length>1?"s":"")+" listed. Clients see them when they open their Readiness Check link.") : "Copy these from the SOW's Client Inputs Required section."))+'</div>'+
+    '<label class="full">Scoping notes<textarea data-field="scopingNotes" data-id="'+c.id+'">'+esc(c.scopingNotes||"")+'</textarea></label>'+
     '<label class="full">Notes<textarea data-field="notes" data-id="'+c.id+'">'+esc(c.notes||"")+'</textarea></label>'+
   '</div></details></section>';
+  return h;
+}
+
+/* ---------- status, on hold, sales follow-up ---------- */
+function autoStageOf(c){ const was=c.stage, m=c.stageManual; c.stageManual=false; syncStage(c); const v=c.stage; c.stage=was; c.stageManual=m; return v; }
+function statusRow(c){
+  const manual = c.stageManual && hasHub(c) && autoStageOf(c)!==c.stage;
+  return '<div class="statusrow"><label>Status<select data-act="set-stage" data-id="'+c.id+'">'+optHtml(["Discovery","Onboarding","Active","Offboarding","Complete","Outreach"].map(s=>[s,STAGE_LABEL[s]]),c.stage)+'</select></label>'+
+    (manual?'<span>set by hand · <button class="linkbtn" data-act="auto-stage" data-id="'+c.id+'">let the gates decide</button></span>':'')+
+    (!onHold(c) && !["Complete","Outreach"].includes(c.stage) && S.holdEdit!==c.id ? '<button class="btn sm" data-act="hold-edit" data-id="'+c.id+'">Put on hold</button>' : '')+
+    (c.stage==="Complete" ? '<button class="btn sm" data-act="to-sales" data-id="'+c.id+'">Move to sales follow-up</button>' : '')+'</div>';
+}
+function holdPanel(c){
+  const h=c.hold||{};
+  if(S.holdEdit===c.id){
+    return '<section class="hold"><div class="ht"><b>'+(onHold(c)?'Edit hold':'Put on hold')+'</b>Their steps leave Today until you resume them. The check-back date brings them back to Today.</div>'+
+      '<div class="row"><label class="full">Why it is on hold<textarea id="hold-reason" placeholder="e.g. Audit delivered, waiting on them to decide build scope">'+esc(onHold(c)?h.reason||"":"")+'</textarea></label>'+
+      '<label>Waiting on<select id="hold-waiting">'+optHtml([["client","The client"],["sabel","Us"],["other","Someone else"]],onHold(c)?h.waiting:"client")+'</select></label>'+
+      '<label>Check back on<input type="date" id="hold-check" value="'+esc(onHold(c)?h.checkBack||"":addDays(today(),14))+'"></label>'+
+      '<button class="btn primary" data-act="hold-save" data-id="'+c.id+'">'+(onHold(c)?'Save':'Put on hold')+'</button><button class="btn" data-act="hold-cancel">Cancel</button></div></section>';
+  }
+  if(!onHold(c)) return '';
+  return '<section class="hold"><div class="ht"><b>On hold</b>since '+esc(fmt(h.since))+' · waiting on '+esc(WAITING[h.waiting]||"the client")+
+    (h.checkBack?' · check back <span class="due '+dueClass(h.checkBack)+'">'+esc(fmt(h.checkBack))+' ('+esc(rel(h.checkBack))+')</span>':' · no check-back date')+'</div>'+
+    (h.reason?'<p>'+esc(h.reason)+'</p>':'')+
+    '<div class="row"><button class="btn sm primary" data-act="resume" data-id="'+c.id+'">Resume</button><button class="btn sm" data-act="hold-edit" data-id="'+c.id+'">Edit</button></div></section>';
+}
+function salesDue(){
+  return clients().filter(c=>c.stage==="Outreach").filter(c=>{ const o=c.outreach||{}; return !o.doNotFollowUp && !["Won","Lost"].includes(o.outcome) && o.nextFollowUp && o.nextFollowUp<=today(); });
+}
+function salesForm(c){
+  const o=c.outreach||{};
+  return '<div class="form">'+
+    '<label>Retainer pack sent<select data-field="outreach.retainerPack" data-id="'+c.id+'">'+optHtml([["","No"],["1","Yes"]],o.retainerPack?"1":"")+'</select></label>'+
+    '<label>Outcome<select data-field="outreach.outcome" data-id="'+c.id+'">'+optHtml(["Won","Lost","No reply"],o.outcome,"Open")+'</select></label>'+
+    '<label>Pitch sent<input type="date" data-field="outreach.pitchSent" data-id="'+c.id+'" value="'+esc(o.pitchSent||"")+'"></label>'+
+    '<label>Next follow-up<input type="date" data-field="outreach.nextFollowUp" data-id="'+c.id+'" value="'+esc(o.nextFollowUp||"")+'"></label>'+
+    '<label>Follow up?<select data-field="outreach.doNotFollowUp" data-id="'+c.id+'">'+optHtml([["","Yes, keep following up"],["1","No, do not follow up"]],o.doNotFollowUp?"1":"")+'</select></label>'+
+    '<label class="full">Note<textarea data-field="outreach.note" data-id="'+c.id+'">'+esc(o.note||"")+'</textarea></label></div>';
+}
+function salesPanel(c){
+  if(c.stage==="Complete") return '';
+  const o=c.outreach||{};
+  return '<section class="panel"><div class="panel-h"><h3>Sales follow-up</h3><span class="sub">'+esc(o.outcome||"Open")+(o.nextFollowUp?' · next '+esc(fmt(o.nextFollowUp)):'')+'</span></div>'+salesForm(c)+'</section>';
+}
+function salesView(){
+  const list = clients().filter(c=>c.stage==="Outreach").sort((a,b)=>((a.outreach||{}).nextFollowUp||"9999").localeCompare((b.outreach||{}).nextFollowUp||"9999") || a.name.localeCompare(b.name));
+  let h='<div class="today-h"><div><div class="eyebrow">Closed projects</div><h1>Sales follow-up</h1></div><div class="stats"><span class="stat"><b>'+list.length+'</b> clients</span>'+(salesDue().length?'<span class="stat red"><b>'+salesDue().length+'</b> follow-ups due</span>':'')+'</div></div>'+
+    '<p class="lead-note">Projects that are finished and that we are following up for more work. They are kept out of the client list and Today. To add one, open a completed client and choose Move to sales follow-up.</p>';
+  if(!list.length) return h+'<section class="panel"><div class="empty">No clients in sales follow-up yet.</div></section>';
+  h+='<div class="salesgrid">'+list.map(c=>{ const o=c.outreach||{}, nf=o.nextFollowUp;
+    return '<section class="panel salescard"><div class="panel-h"><h3><button class="linkbtn" data-act="open" data-id="'+c.id+'" style="font:inherit;color:inherit">'+esc(c.name)+'</button></h3><span class="sub">'+
+      (o.outcome?'<span class="chip '+(o.outcome==="Won"?'good':o.outcome==="Lost"?'':'warn')+'">'+esc(o.outcome)+'</span>':'')+
+      (o.doNotFollowUp?'<span class="chip">Do not follow up</span>':nf?'<span class="chip '+(nf<=today()?'red':'')+'">next '+esc(fmt(nf))+' · '+esc(rel(nf))+'</span>':'')+'</span></div>'+salesForm(c)+'</section>';
+  }).join("")+'</div>';
+  return h;
+}
+
+/* ---------- checklist editor ---------- */
+function listsView(){
+  const tab = S.listTab || "main", L = LISTS.find(x=>x[0]===tab);
+  let h='<div class="today-h"><div><div class="eyebrow">Standard checklists</div><h1>Checklists</h1></div></div>'+
+    '<p class="lead-note">The steps every client of each project type works through. Renaming a step or changing its owner updates it for every client, and ticks already recorded are kept. Remove hides a step everywhere; Restore brings it back with its ticks. Critical steps are the ones that must be done before kickoff: they are listed on Today and flagged when a gate closes with them open. A different owner set on one client still wins for that client.</p>'+
+    '<div class="seg edtabs" role="group" aria-label="Which checklist">'+LISTS.map(([k,l,P])=>'<button data-act="list-tab" data-v="'+k+'" aria-pressed="'+(k===tab)+'">'+esc(l)+' · '+P.length+' gates</button>').join("")+'</div>';
+  L[2].forEach(p=>{
+    const steps=editorSteps(p.id);
+    h+='<section class="panel"><div class="panel-h"><h3>'+esc(p.code+' · '+p.name)+'</h3><span class="sub">'+esc(p.when)+(PRE_KICKOFF[p.id]?' · before kickoff':'')+' · '+steps.filter(s=>!s.hide).length+' steps</span></div><ul class="edlist">';
+    steps.forEach((s,i)=>{
+      const b=s.base, changed = b && (s.t!==b.t || s.o!==b.o || (s.tag||"")!==(b.tag||"") || !!s.crit!==!!b.crit || !!s.hide!==!!b.hide), dis=s.hide?' disabled':'';
+      h+='<li class="edrow'+(s.hide?' hidden-step':'')+'">'+
+        '<span class="mv"><button data-act="ed-move" data-pid="'+p.id+'" data-sid="'+s.id+'" data-v="-1"'+(i===0?' disabled':'')+' aria-label="Move up">↑</button><button data-act="ed-move" data-pid="'+p.id+'" data-sid="'+s.id+'" data-v="1"'+(i===steps.length-1?' disabled':'')+' aria-label="Move down">↓</button></span>'+
+        '<input class="edtx" data-ed="t" data-sid="'+s.id+'" value="'+esc(s.t)+'" aria-label="Step"'+dis+'>'+
+        '<select data-ed="o" data-sid="'+s.id+'" aria-label="Owner"'+dis+'>'+Object.keys(OWNERS).map(k=>'<option value="'+k+'"'+(k===s.o?' selected':'')+'>'+esc(OWNERS[k].n)+'</option>').join("")+'</select>'+
+        (tab==="main"?'<select data-ed="tag" data-sid="'+s.id+'" aria-label="Applies to"'+dis+'><option value=""'+(s.tag!=="m"?' selected':'')+'>Full and Build</option><option value="m"'+(s.tag==="m"?' selected':'')+'>Full only (has a migration)</option></select>':'')+
+        '<label class="crit-cb"><input type="checkbox" data-ed="crit" data-sid="'+s.id+'"'+(s.crit?' checked':'')+dis+'>Critical</label>'+
+        '<span class="edacts">'+(s.hide?'<button class="btn sm" data-act="ed-hide" data-sid="'+s.id+'" data-v="0">Restore</button>':'<button class="btn sm ghost" data-act="ed-hide" data-sid="'+s.id+'" data-v="1">Remove</button>')+
+        (changed&&!s.hide?'<button class="btn sm ghost" data-act="ed-reset" data-sid="'+s.id+'" title="Back to the standard wording, owner and flags">Reset</button>':'')+'</span></li>';
+    });
+    h+='</ul><div class="gate"><span class="g"><b>Gate</b>'+esc(p.gate)+'</span><button class="btn sm" data-act="ed-add" data-pid="'+p.id+'">+ Add a step</button></div></section>';
+  });
   return h;
 }
 
@@ -1163,7 +1421,7 @@ function asidePanels(c,n,ko,tk,td,w){
    ===================================================================== */
 function openClient(id){ S.view="client"; S.clientId=id; S.scopeOpen=false; location.hash="c="+id; document.body.classList.remove("side-open"); render(); $("scroll").scrollTop=0; }
 function goToday(){ S.view="today"; S.clientId=null; history.replaceState(null,"",location.pathname+location.search); document.body.classList.remove("side-open"); render(); $("scroll").scrollTop=0; }
-function routeFromHash(){ const m=location.hash.match(/c=([^&]+)/); if(m && byId(decodeURIComponent(m[1]))){ S.view="client"; S.clientId=decodeURIComponent(m[1]); } }
+function routeFromHash(){ const m=location.hash.match(/c=([^&]+)/); if(m && byId(decodeURIComponent(m[1]))){ S.view="client"; S.clientId=decodeURIComponent(m[1]); } else if(location.hash==="#lists"||location.hash==="#sales"){ S.view=location.hash.slice(1); } }
 window.addEventListener("hashchange", ()=>{ routeFromHash(); render(); });
 
 document.addEventListener("click", e=>{
@@ -1171,6 +1429,23 @@ document.addEventListener("click", e=>{
   const a=t.dataset.act, c=t.dataset.id && byId(t.dataset.id);
   switch(a){
     case "today": return goToday();
+    case "sales": case "lists": S.view=a; S.clientId=null; history.replaceState(null,"",location.pathname+location.search+"#"+a); document.body.classList.remove("side-open"); render(); $("scroll").scrollTop=0; return;
+    case "list-tab": S.listTab=t.dataset.v; return render(true);
+    case "ed-add": { const pid=t.dataset.pid, id=pid+"-x"+Date.now().toString(36);
+      editChecklists(E=>{ (E.added[pid]=E.added[pid]||[]).push({id, o:"nikki", t:"New step", tag:"", crit:false}); });
+      render(true); const el=document.querySelector('input[data-ed="t"][data-sid="'+id+'"]'); if(el){ el.focus(); el.select(); } return; }
+    case "ed-hide": { const sid=t.dataset.sid; editChecklists(E=>{ E.steps[sid]=Object.assign({}, E.steps[sid]||{}, {hide:t.dataset.v==="1"}); }); return render(true); }
+    case "ed-reset": { const sid=t.dataset.sid; editChecklists(E=>{ delete E.steps[sid]; }); return render(true); }
+    case "ed-move": { const pid=t.dataset.pid, ids=editorSteps(pid).map(s=>s.id), i=ids.indexOf(t.dataset.sid), j=i+Number(t.dataset.v);
+      if(i<0||j<0||j>=ids.length) return; [ids[i],ids[j]]=[ids[j],ids[i]]; editChecklists(E=>{ E.order[pid]=ids; }); return render(true); }
+    case "hold-edit": S.holdEdit=t.dataset.id; render(true); { const el=$("hold-reason"); if(el) el.focus(); } return;
+    case "hold-cancel": S.holdEdit=null; return render(true);
+    case "hold-save": { if(!c) return; const was=onHold(c)&&c.hold.since;
+      c.hold={on:true, reason:$("hold-reason").value.trim(), waiting:$("hold-waiting").value, checkBack:$("hold-check").value, since:was||today()};
+      S.holdEdit=null; touch(c,["hold"]); return render(true); }
+    case "resume": { if(!c) return; c.hold=Object.assign({}, c.hold, {on:false, resumed:today()}); touch(c,["hold"]); return render(true); }
+    case "auto-stage": { if(!c) return; c.stageManual=false; syncStage(c); touch(c,["stage","stageManual"]); return render(true); }
+    case "to-sales": { if(!c) return; c.stage="Outreach"; c.stageManual=true; if(c.hold) c.hold.on=false; touch(c,["stage","stageManual","hold"]); return render(true); }
     case "open": return openClient(t.dataset.id);
     case "side": return document.body.classList.toggle("side-open");
     case "toggle-closed": S.prefs.closedOpen=!S.prefs.closedOpen; savePrefs(); return renderSide();
@@ -1189,7 +1464,9 @@ document.addEventListener("click", e=>{
     case "na": { if(!c) return; const st=c.hub&&c.hub.steps[t.dataset.sid]; setStep(c,t.dataset.sid, st&&st.s==="na"?"":"na"); return render(true); }
     case "note": S.noteOpen[t.dataset.k]=!S.noteOpen[t.dataset.k]; render(true);
       { const ta=document.querySelector('textarea[data-sid="'+t.dataset.k.split(":")[1]+'"]'); if(ta) ta.focus(); } return;
-    case "gate": { if(!c) return; setGate(c, t.dataset.pid, t.dataset.v==="1");
+    case "gate": { if(!c) return;
+      if(t.dataset.v==="1" && Number(t.dataset.crit)>0 && !confirm(t.dataset.crit+" critical step"+(t.dataset.crit==="1"?" is":"s are")+" still open at this gate. Close it anyway?")) return;
+      setGate(c, t.dataset.pid, t.dataset.v==="1");
       if(t.dataset.v==="1"){ const L=phasesFor(c), ni=curIdx(c); if(ni<L.length){ S.open[c.id+":"+t.dataset.pid]=false; S.open[c.id+":"+L[ni].id]=true; } }
       render(true); if(t.dataset.v==="1" && curIdx(c)<phasesFor(c).length){ const el=$("ph-"+phasesFor(c)[curIdx(c)].id); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); } return; }
     case "phase": { const cc=byId(S.clientId); const pi=pidxOf(cc,t.dataset.pid); const k=S.clientId+":"+t.dataset.pid; S.open[k]=!isOpen(cc,phasesFor(cc)[pi],pi,curIdx(cc)); return render(true); }
@@ -1197,7 +1474,7 @@ document.addEventListener("click", e=>{
     case "expand": phasesFor(byId(S.clientId)).forEach(p=>S.open[S.clientId+":"+p.id]=t.dataset.v==="1"); return render(true);
     case "mine": S.prefs.mine = t.dataset.v==="1"; savePrefs(); return render(true);
     case "scope": S.scopeOpen=!S.scopeOpen; return render(true);
-    case "start": { if(!c) return; const sp=$("start-phase").value; ensureHub(c, sp); c.hub.startPhase=sp; c.hub.type=$("start-type").value; S.restart=null; const moved=syncStage(c); touch(c, moved?["stage"]:[]); render(true); $("scroll").scrollTop=0; return; }
+    case "start": { if(!c) return; const ty=$("start-type").value, sp=startFor(ty, $("start-phase").value); ensureHub(c, sp); c.hub.startPhase=sp; c.hub.type=ty; c.type=OLD_TYPE[ty]||c.type; S.restart=null; const moved=syncStage(c); touch(c, moved?["stage","type"]:["type"]); render(true); $("scroll").scrollTop=0; return; }
     case "restart": S.restart=S.clientId; render(true); $("scroll").scrollTop=0; return;
     case "cancel-restart": S.restart=null; return render(true);
     case "signed": { if(!c) return; const d=$("sg-date").value||today(); c.stage="Onboarding"; c.signedDate=d; if(!c.acceptedAt) c.acceptedAt=d; ensureHub(c,"p0"); touch(c,["stage","signedDate","acceptedAt"]); return render(true); }
@@ -1219,10 +1496,27 @@ document.addEventListener("change", e=>{
     if(Object.keys(rec).length) h.steps[sid]=rec; else delete h.steps[sid];
     touch(c); return render(true);
   }
+  if(t.dataset.ed){
+    const sid=t.dataset.sid, k=t.dataset.ed, v = k==="crit" ? t.checked : t.value.trim();
+    if(k==="t" && !v){ render(true); return; }
+    editChecklists(E=>{ E.steps[sid]=Object.assign({}, E.steps[sid]||{}, {[k]:v}); });
+    return render(true);
+  }
+  if(t.dataset.act==="set-stage"){
+    const c=byId(t.dataset.id); if(!c) return;
+    c.stage=t.value; c.stageManual = !hasHub(c) || autoStageOf(c)!==c.stage;
+    if(c.stage==="Outreach" && c.hold) c.hold.on=false;
+    touch(c,["stage","stageManual","hold"]); return render(true);
+  }
   if(!t.dataset.field) return;
   const c=byId(t.dataset.id); if(!c) return;
   const f=t.dataset.field, v=t.value.trim();
   if(f==="hub.sowInputs"){ ensureHub(c, c.hub&&c.hub.startPhase); c.hub.sowInputs=t.value.split("\n").map(x=>x.trim()).filter(Boolean); touch(c); publishInputs(c); }
+  else if(f.startsWith("outreach.")){
+    const k=f.slice(9); c.outreach=Object.assign({retainerPack:false, doNotFollowUp:false, pitchSent:"", nextFollowUp:"", outcome:"", note:""}, c.outreach||{});
+    c.outreach[k] = (k==="retainerPack"||k==="doNotFollowUp") ? t.value==="1" : v; touch(c,["outreach"]);
+  }
+  else if(f==="hub.type"){ ensureHub(c, c.hub&&c.hub.startPhase); c.hub.type=v; c.hub.startPhase=startFor(v, c.hub.startPhase); c.type=OLD_TYPE[v]||c.type; const moved=syncStage(c); touch(c, moved?["type","stage"]:["type"]); }
   else if(f.startsWith("hub.")){ ensureHub(c, c.hub&&c.hub.startPhase); c.hub[f.slice(4)]=v; touch(c); }
   else {
     c[f]=v; const fields=[f];
@@ -1264,7 +1558,9 @@ function createClient(o){
     if(n.contact) c.contactName = n.contact;
     ensureHub(c,"p0"); c.hub.notionId = n.id;
   }
-  if(o.stage==="Onboarding" || o.type==="audit"){ ensureHub(c, o.type==="audit" ? "a0" : "p0"); c.hub.type = o.type || "full"; }
+  if(o.type) c.type = OLD_TYPE[o.type] || "";
+  if(o.stage==="Onboarding" || o.type==="audit"){ ensureHub(c, o.type==="audit" ? "a0" : o.type==="migration" ? "m0" : "p0"); c.hub.type = o.type || "full"; }
+  if(c.hub) c.hub.startPhase = startFor(projectType(c), c.hub.startPhase);
   S.portal.clients.push(c); touch(c,["*"]); openClient(c.id);
   return c;
 }
