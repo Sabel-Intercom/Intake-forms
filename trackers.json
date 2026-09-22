@@ -25,7 +25,7 @@
     "key": "flkitover-tracker-v1",
     "file": "FlkitOverTracker_v2.html",
     "sowHours": null,
-    "active": true
+    "active": false
   },
   {
     "name": "YFood",
@@ -109,7 +109,7 @@
   "key": "synchronest-tracker-v1",
   "file": "SynchronestTracker.html",
   "sowHours": 0,
-  "active": true
+  "active": false
   },
 {
   "name": "CleverCards",
