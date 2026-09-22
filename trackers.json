@@ -138,5 +138,12 @@
   "file": "SkyCityTracker.html",
   "sowHours": 35,
   "active": true
-}
+},
+  {
+    "name": "ELMO Software",
+    "key": "elmo-tracker-v1",
+    "file": "ELMOTracker.html",
+    "sowHours": 240,
+    "active": true
+  }
 ]
