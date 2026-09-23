@@ -101,7 +101,7 @@
   "name": "Eugene Labs",
   "key": "eugenelabs-tracker-v1",
   "file": "EugeneLabsTracker.html",
-  "sowHours": 27.5,
+  "sowHours": 24.5,
   "active": true
 },
   {
@@ -144,6 +144,13 @@
     "key": "elmo-tracker-v1",
     "file": "ELMOTracker.html",
     "sowHours": 240,
+    "active": true
+  },
+  {
+    "name": "Re-Leased #2",
+    "key": "released-remediation-tracker-v1",
+    "file": "ReLeasedRemediationTracker.html",
+    "sowHours": 32,
     "active": true
   }
 ]
