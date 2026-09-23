@@ -136,7 +136,7 @@
   <header>
     <div class="eyebrow">Sabel &middot; delivery board</div>
     <h1>Richard &mdash; what needs doing</h1>
-    <p class="sub">From Notion Tasks, owner Richard, not Complete or Done, cross-checked against Slack. Snapshot refreshed Thursday 10 September from every active client channel in Slack. New lines since 4 September carry the tag <b>new</b>. Filter by what is due, then narrow to a client. Set each task’s status from the dropdown. The options are To do, In progress, Waiting on, Blocked and Done. Click a date to reschedule it, and the task moves to the right week. Use the × to take a task off the board and say why. Each due filter is cumulative, so anything overdue always shows.</p>
+    <p class="sub">Refreshed Wednesday 23 September from the live client trackers (Sabel rows owned by Richard), open Notion tasks with no tracker row, and every client channel in Slack since 9 September. Lines tagged <b>new</b> arrived after 10 September; <b>stale</b> means the task looks finished or superseded, so tick it or remove it. Filter by what is due, then narrow to a client. Set each task’s status from the dropdown. The options are To do, In progress, Waiting on, Blocked and Done. Click a date to reschedule it, and the task moves to the right week. Use the × to take a task off the board and say why. Each due filter is cumulative, so anything overdue always shows.</p>
     <div class="sync"><span class="dot" id="dot"></span><span id="syncText">Connecting&hellip;</span></div>
   </header>
 
@@ -213,154 +213,120 @@
 
 <script>
 const BUCKETS = [
- {k:"overdue",label:"Overdue — needs a decision or a tick",sub:"oldest is 9 July · some blocked, not late",color:"var(--accent-soft)",when:"overdue",items:[
-  ["Tulka","182 help centre articles migrated",{tag:"progress",when:"due 5 Sep",}],
-  ["Tulka","Migr8Now full history migration",{tag:"progress",when:"due 5 Sep",note:"Finished 7 to 8 Sep, errors fixed the morning of 8 Sep. Chris told Oona the migration is complete."}],
-  ["CleverCards","Map Zendesk data model to Intercom",{when:"w/c 24 Aug",note:"Jai wants the Zendesk to Intercom attribute map agreed with you off the 7 Sep extract before the ticket load. 9 Sep."}],
-  ["CleverCards","Migration kick-off and scoping",{when:"w/c 24 Aug"}],
-  ["CleverCards","Check Zendesk API access directly",{when:"w/c 24 Aug"}],
-  ["CleverCards","Send follow-up email with migration mapping doc",{when:"w/c 24 Aug"}],
-  ["CleverCards","Set up bi-weekly delta syncs to go-live",{when:"w/c 24 Aug"}],
-  ["CleverCards","Confirm the extract against Madalina's four filters plus the 01/09/2025 start date",{tag:"blocked",when:"w/c 24 Aug",note:"Waiting on Madalina's brand list."}],
-  ["Shiftmove","Project set-up and kick-off",{tag:"progress",when:"w/c 17 Aug",}],
-  ["Shiftmove","Conversation vs ticket walkthrough with Victor Copete",{when:"w/c 24 Aug"}],
-  ["Shiftmove","Joint working session with ICX on sequencing and cutover",{when:"w/c 24 Aug"}],
-  ["Shiftmove","Phase 1 field, tag and attribute mapping",{when:"w/c 24 Aug"}],
-  ["Shiftmove","Post-call email re admin and API access to Zendesk and Zoho Desk",{when:"28 Aug"}],
-  ["Shiftmove","Source system access to Zendesk and Zoho Desk",{tag:"blocked",when:"w/c 24 Aug",note:"Zoho Desk invite still not arriving as of 8 Sep. You asked Nicolas to try the integrations@ address instead. Nicolas says he sent an email 7 Sep."}],
-  ["The Giving Movement","Help Centre cleanup and migration",{tag:"progress",when:"w/c 24 Aug",}],
-  ["The Giving Movement","Delta migration for build-phase tickets",{tag:"urgent",when:"w/c 24 Aug",note:"Unblocked. Diana confirmed 7 Sep that Freshdesk is switched off across all channels and everything runs through Fin, so deltas can run. She mentioned the remaining tickets as 500k, worth checking against scope."}],
-  ["Synchronest","Post-migration validation in Intercom",{when:"w/c 24 Aug",}],
-  ["Synchronest","Sabel cutover readiness checklist",{when:"w/c 24 Aug"}],
-  ["GPS Insight","Run Fin test-mode sampling per brand and tune",{tag:"progress",when:"w/c 24 Aug",}],
-  ["Eugene Labs","Proactive notifications from Genie",{when:"July",}],
-  ["Eugene Labs","Fin-actioned refunds and external actions",{when:"July"}],
-  ["Eugene Labs","Shopify integration",{when:"July"}],
-  ["Eugene Labs","NPS surveys",{when:"July"}],
-  ["Cronos","Handover and sign-off",{tag:"stale",when:"9 Jul",note:"Dated 9 July. Likely stale, close it or delete it."}],
-  ["Intercom","Email or DM Angie for the partner tier state-of-play audit",{when:"20 Aug",}]
+ {k:"overdue",label:"Overdue: before this week",sub:"past its date \u00b7 some waiting on others",color:"var(--accent-soft)",when:"overdue: before this week",items:[
+  ["Shiftmove", "Answer Nikki's 14 Sep questions: Phase 1 completion date, mapping call, and hours at 31,253 tickets", {"id": "r23-f63d2898", "due": "2026-09-18", "note": "The 30 hours were sized on ~120k tickets. The Zendesk extract came out at 31,253 (2 Sep 2024 to 1 Sep 2026)."}],
+  ["RMS", "Complete the scorecard and Zendesk AI parameters", {"id": "r23-e51a32f6", "due": "2026-09-11", "tag": "stale", "note": "Still open in Notion, no Slack mention since 8 Sep. Tick it if it is done, or remove it."}],
+  ["RMS", "Come back to Garth with questions on the MoSCoW sheet issued 20 Aug", {"id": "r23-a7eea397", "due": "2026-09-11", "tag": "stale", "note": "Still open in Notion, no Slack mention since 8 Sep."}],
+  ["RMS", "Answer Louise's question on Help Centre and Fin language translation vs Zendesk", {"id": "r23-be6b91a1", "due": "2026-09-11", "tag": "stale", "note": "Still open in Notion, no Slack mention since 8 Sep."}],
+  ["RMS", "Cover the rest of Garth's 31 Aug list: integrations, workflows by channel, AI incident detection, org structures, phone and QA", {"id": "r23-a5648a5c", "due": "2026-09-11", "tag": "stale", "note": "Still open in Notion. Org hierarchy was answered by Chris and you on 21 Sep, and Monitors is its own line above."}],
+  ["CorpCloud", "Send the compliance and security pack for their CTO: SOC 2, ISO, data processing, retention, architecture", {"id": "r23-18246a5c", "due": "2026-09-16", "note": "From the 10 Sep call. The next step hinges on this."}],
+  ["CorpCloud", "Follow up with Lucas to book the next call once the documents are sent", {"id": "r23-f1286892", "due": "2026-09-18"}],
+  ["Sabel", "Set up Fireflies sharing and auto-join as Nikki asked", {"id": "r23-0b3c88a0", "due": "2026-09-17", "note": "Nikki asked 15 Sep. No reply seen."}]
  ]},
- {k:"w1",label:"Last week, still open",sub:"31 Aug to 4 Sep",color:"var(--info)",when:"this week",items:[
-  ["Synchronest","Open Intercom to inbound, Help Scout closes inbound",{note:"Tracker shows go-live 11 Sep with post-migration validation in progress. No Slack activity since 28 Aug."}],
-  ["Synchronest","Go-live cutover coordination call",{}],
-  ["Synchronest","Delta migration and standby cutover support",{}],
-  ["Shiftmove","Confirm historical data window and extract bounds",{}],
-  ["Shiftmove","Document migration runbook and rollback plan",{}],
-  ["Shiftmove","Phase 1 sample run",{}],
-  ["Shiftmove","Schedule the data field mapping call",{}],
-  ["Eugene Labs","Migrate tickets raised during the bridging period",{note:"Your 2 Sep report: delta 1 (30 Aug) and delta 2 (31 Aug) loaded, retry sweep recovered 57 of 61, cut-off 31 Aug 11:23 UTC. The 4 unloaded are blocked senders, left as agreed. Zendesk access extended free to 5 Oct."}],
-  ["Eugene Labs","Cancel the temporary Intercom phone numbers",{}],
-  ["CleverCards","Start the 200 Help Center article migration",{when:"to 11 Sep",note:"Jai asked you in the channel on 9 Sep to kick off the content migration from Zendesk by 11 Sep. Zendesk is the only content source."}]
+ {k:"w1",label:"This week",sub:"21 to 25 Sep",color:"var(--ink)",when:"this week",items:[
+  ["CleverCards", "Migrate the Help Center article set (200 articles)", {"id": "r23-3f4f034e", "due": "2026-09-21", "tag": "urgent", "note": "Jai reset the date from 11 Sep to 21 Sep. Jenny signed off the content on 22 Sep and Jai asked if you are good to start. On 14 Sep you said you had not done the knowledge move yet."}],
+  ["CleverCards", "Re-run the ticket extract for the expanded scope and post the new count", {"id": "r23-563f8e1b", "due": "2026-09-22", "tag": "urgent", "note": "Scope confirmed 18 Sep by Madalina and Louise: CleverCards incl. Cardholder and Business from 1 Sep 2025; Love2Shop Contactless last 6 months plus Open and Pending; Charis Open and Pending only. Nikki told the client you would share the new count."}],
+  ["CleverCards", "Tell Nikki whether Love2Shop and Contactless push past the 80k tickets quoted at 20 hours", {"id": "r23-78ca797b", "due": "2026-09-22", "note": "Nikki asked 21 and 22 Sep. Needed before the count goes back to the client."}],
+  ["CleverCards", "Answer Jai on contact mapping: requesters with no email, and where account code comes from", {"id": "r23-4de7e1c3", "due": "2026-09-23", "tag": "new", "note": "Jai 22 Sep: External ID set to None and key on email, account code maps to company ID. You confirmed None on 23 Sep and asked Zendesk or Intercom for account code. The no-email question is still open."}],
+  ["CleverCards", "Give Madalina a sample-review deadline for section 13 of the intake form", {"id": "r23-8f73dca1", "due": "2026-09-24", "tag": "new", "note": "Intake form is complete (21 Sep). Madalina did not know what date to put for the sample review. Relayed by Nikki 21 Sep."}],
+  ["CleverCards", "Send Nikki a status update and tick off the CleverCards tracker", {"id": "r23-9325ba29", "due": "2026-09-24", "note": "Nikki asked 22 Sep. You said 23 Sep you were off the laptop and back tomorrow."}],
+  ["CleverCards", "Migration kick-off and scoping", {"id": "r23-550d9ef3", "due": "2026-09-24", "tag": "stale", "note": "Still In Progress on the tracker. Scope was answered 18 Sep and the intake form completed 21 Sep, so this can be marked Complete."}],
+  ["CleverCards", "Sample migration batch and validation", {"id": "r23-4d1a5a20", "due": "2026-09-25", "tag": "progress", "note": "You ran a sample on 22 Sep (#sabel-projects, 23 Sep). Share it for Madalina's review."}],
+  ["CleverCards", "Map Zendesk data model to Intercom", {"id": "r23-677c0d7b", "due": "2026-09-25", "tag": "progress", "note": "Contact rules agreed with Jai 22 to 23 Sep, apart from the no-email and account code points above."}],
+  ["Sounding Board", "Run the migration sample so Kelsy can review it", {"id": "r23-0fe4c3d3", "due": "2026-09-23", "tag": "urgent", "note": "Slipped from 14 Sep. Nikki's 18 Sep wrap set it for 23 Sep with Kelsy reviewing the same day."}],
+  ["Sounding Board", "Review the intake form and tell Nikki what you still need and where the migration is at", {"id": "r23-c250b0d7", "due": "2026-09-23", "tag": "new", "note": "Intake form complete: Kelsy re-entered the section 6 notes on 22 Sep, confirmed by Nikki 23 Sep."}],
+  ["Sounding Board", "With Greg, send Mary everything you are waiting on from BTS", {"id": "r23-2aeb3498", "due": "2026-09-24", "tag": "new", "note": "Mary asked 22 Sep for any and all items where Greg and Richard are waiting on BTS input. Greg said 23 Sep it is just pending some migration work."}],
+  ["Sounding Board", "Map tickets, contacts, agents, statuses, tags and fields", {"id": "r23-bf117e69", "due": "2026-09-24", "tag": "progress", "note": "You asked for the field map as a spreadsheet on 11 Sep. Check Mary filled in column K (attribute name to map to). Greg created the SB conversation attributes 16 Sep."}],
+  ["Sounding Board", "Sample-based QA on migrated dataset", {"id": "r23-f06ef1f6", "due": "2026-09-25"}],
+  ["The Giving Movement", "Test email-only leads on a few customers, then push the remaining ~577,000 tickets", {"id": "r23-ca5c6259", "due": "2026-09-25", "tag": "urgent", "note": "Your 19 Sep plan: re-home the 46,650 migrated tickets onto email-only leads and load the rest the same way. Omar 18 Sep: test with a few customers first. Push approved 16 Sep, weekend preferred."}],
+  ["The Giving Movement", "Swap the extracted Freshdesk user IDs for the ones Omar shared", {"id": "r23-0b1e8883", "due": "2026-09-25", "tag": "new", "note": "Omar sent a file 22 Sep. You replied that we would look into it."}],
+  ["The Giving Movement", "Answer Omar on bulk archiving the ~830k Shopify-imported users", {"id": "r23-bb7f6815", "due": "2026-09-25", "tag": "new", "note": "Omar 22 Sep: is there a way to bulk archive Shopify-imported users?"}],
+  ["The Giving Movement", "Tell Nikki whether the duplicates are resolved", {"id": "r23-fa830e4e", "due": "2026-09-22", "note": "Nikki asked by DM 21 Sep. The retainer was declined 18 Sep; the channel stays open until the duplicates and migration are done."}],
+  ["The Giving Movement", "Delta migration to capture build-phase tickets", {"id": "r23-715d93a0", "due": "2026-09-24", "tag": "stale", "note": "Still In Progress on the tracker. Omar 14 Sep: no need to check the delta, Freshdesk was switched off before 28 Aug. Close it and track the backlog push above instead."}],
+  ["Shiftmove", "Pull the Zoho Desk (Ocean) extract", {"id": "r23-9927cf75", "due": "2026-09-25", "tag": "progress", "note": "You have Zoho access (17 Sep). 14 Sep: Zendesk is out, Zoho still to get out."}],
+  ["Shiftmove", "Load the Phase 1 sample into Intercom", {"id": "r23-00727994", "due": "2026-09-25", "tag": "urgent", "note": "Nicolas created the info+1 admin account 18 Sep. Nikki's 18 Sep wrap: load the sample as soon as Intercom access is in place."}],
+  ["Shiftmove", "Project set-up and kick-off", {"id": "r23-ff03c779", "due": "2026-09-25", "tag": "progress", "note": "Arvin asked for every commitment in writing, so the written scope confirmation closes this. The tracker pushed it to 9 Oct when go-live moved, which is a date bug."}],
+  ["Tulka", "Verification and handover report", {"id": "r23-0e22650a", "due": "2026-09-25", "tag": "urgent", "note": "Due 11 Sep on the tracker. Cover the 33,797 EU conversations against the US source and the load window (QA checks mg1 and mg7), the fallback for tickets assigned to agents not in the EU workspace (asked of Oona 4 Sep, unanswered), and the migration checks Nikki flagged 15 Sep. EU handover still pending per the 18 Sep wrap."}],
+  ["Sky City Malta", "Agree with Dan what the 35 hours deliver for the October milestone", {"id": "r23-6ba1e1f4", "due": "2026-09-23", "tag": "urgent", "note": "You raised it 15 Sep. Chris is asking SkyCity for a call today (23 Sep). The 18 Sep framework: chat, helpdesk and reporting, no integration, 28 hours plus 7 in reserve."}],
+  ["Sky City Malta", "Send kick-off intake form and file returned responses", {"id": "r23-35a483b8", "due": "2026-09-25", "tag": "progress", "note": "Sections 1 to 3 of the missing-info form and Sabel admin seats done by 18 Sep."}],
+  ["ELMO", "Update SOW page and milestone dates to the Sep to Dec plan", {"id": "r23-65f998d7", "due": "2026-09-25", "note": "Kick-off action: the SOW page and PMO milestones still show the August dates and the EU region. The workspace is AU."}],
+  ["YFood", "Send YFood the migration proposal: selected agents' conversations, then a delta of open tickets", {"id": "r23-6cd61cff", "due": "2026-09-25", "note": "Agreed on the 22 Sep call; the 18 Sep wrap had it as next week from us. Chris told YFood 17 Sep they can migrate as conversations. Waiting on YFood to pick the agents and on Daniel's conversations vs tickets decision."}],
+  ["Raiz", "Review the four proposal drafts, SAB-RAIZ-001 to 004, before they go to the client", {"id": "r23-d22c06ce", "due": "2026-09-22", "tag": "new", "note": "15 hours each, marked Richard reviews before it goes to the client (18 Sep). Chris's 16 Sep call agreed a paid support package; go-live 23 to 30 Sep. No Phase 2 roadmap message seen."}],
+  ["RMS", "Walk Garth through the Monitors (QA) feature on the RMS Intercom account", {"id": "r23-d94a622f", "due": "2026-09-22", "note": "You accepted it from the 17 Sep call."}],
+  ["RMS", "Help Chris with Louise's CEO and CFO pack: deflection results, implementation cost detail, sample bot flows", {"id": "r23-092f6646", "due": "2026-09-25", "tag": "new", "note": "Louise 22 Sep. So far only the overview links have gone (you re-sent them 22 Sep). A Sydney in-person meeting has been floated."}],
+  ["RMS", "Show Fin form-handling on Alec's sample queries and Ultimate conversations", {"id": "r23-c5585ed9", "due": "2026-09-25", "note": "Offered 8 Sep. No sign it has happened."}],
+  ["Step One", "Send Jonathan a Gorgias vs Fin cost comparison with a calculator using Step One's volumes", {"id": "r23-13725080", "due": "2026-09-21", "tag": "new", "note": "From the 17 Sep demo call, accepted 18 Sep."}],
+  ["Step One", "Find former Gorgias clients, ideally fashion, who moved to Fin and set up reference calls", {"id": "r23-c8bb7fa5", "due": "2026-09-21", "tag": "new", "note": "For Jonathan and Chai."}],
+  ["Work Initiatives", "Quote for the inbound sales and customer success function, about 5 hours a week", {"id": "r23-1ad7eaa7", "due": "2026-09-23", "tag": "new", "note": "From your 22 Sep call: phone follow-up with tour attendees who did not convert, about an hour a day."}],
+  ["Erinliving", "Triage the four call actions, including Forge info and costings", {"id": "r23-c26db852", "due": "2026-09-22", "tag": "new", "note": "From the 18 Sep call."}]
  ]},
- {k:"w2",label:"This week",sub:"7 to 11 Sep",color:"var(--ink)",when:"7 to 11 Sep",items:[
-  ["RMS","Share the engineering and implementation requirements doc with the RMS team",{tag:"urgent",when:"Mon 7 / Tue 8",note:"Critical path. Decision wanted within two weeks and the Zendesk renewal is October. Not seen in the channel yet as of 10 Sep."}],
-  ["RMS","Add Alec and Garth to the Sabel Intercom demo account",{tag:"urgent",when:"Mon 7 / Tue 8",note:"Garth confirmed 8 Sep he is in the demo instance. Alec found his invite too."}],
-  ["RMS","Come back to Garth with questions on the MoSCoW sheet issued 20 Aug",{when:"7 to 11 Sep"}],
-  ["RMS","Answer Louise's question on Help Centre and Fin language translation vs Zendesk",{when:"7 to 11 Sep"}],
-  ["RMS","Complete the scorecard and Zendesk AI parameters",{when:"7 to 11 Sep",note:"Deflection analysis is already done."}],
-  ["RMS","Cover the rest of Garth's 31 Aug list: integrations, workflows by channel, AI incident detection and status page, org structures, wow factors, phone and QA",{when:"7 to 11 Sep"}],
-  ["RMS","Follow up with Intercom for a formal trial account",{when:"7 to 11 Sep"}],
-  ["RMS","Source Zendesk-to-Intercom reference clients",{when:"7 to 11 Sep",note:"Intercom is finding a customer, available Mon or Tue next week, Chris is scheduling. Lou asked 8 Sep for contact details of the alternatives you offered from Sabel's side."}],
-  ["RMS","Send the finalised implementation overview document",{when:"7 to 11 Sep"}],
-  ["Shiftmove","Phase 1 full historical run, approximately 50,000 Optimum tickets",{}],
-  ["Shiftmove","Error re-run on failed Phase 1 records",{}],
-  ["Shiftmove","Phase 1 migration report and audit trail",{}],
-  ["Synchronest","Open items and snag list resolved",{}],
-  ["Synchronest","Post-migration QA report issued",{}],
-  ["Synchronest","Final handover docs and Slack channel wind-down",{}],
-  ["CleverCards","Sample migration batch and validation",{note:"Extract done 7 Sep: 37,894 tickets against Madalina's filters, well under the 80k estimate. Madalina is re-running the Zendesk export to confirm the count by 16 Sep. Jai has the ticket migration kick-off pencilled for when you are back."}],
-  ["Tulka","Setup and sample run",{when:"8 to 9 Sep",note:"Superseded by the full run, which completed 8 Sep."}],
-  ["Tulka","Migration supervision",{when:"9 to 11 Sep",note:"Migration finished 8 Sep. Follow-ups from Oona and the QA sweep are separate lines below."}],
-  ["Sounding Board","Map tickets, contacts, agents, statuses, tags and fields",{note:"You said 8 Sep you only need the completed intake doc, then you map and send the sample. Nikki is chasing Mary for the doc and a call booking. Mary also asked Greg whether migrated history can train Fin, which decides if and when SB migrate tickets."}],
-  ["Tulka","Map contacts to people attributes in the EU workspace",{tag:"new",when:"9 Sep",note:"Oona 9 Sep: contacts are not mapped to the people attributes in the new workspace. She asked whether they were migrated with mapping from the US data. Chris said you would look into it and make the update."}],
-  ["Tulka","Compare the 33,797 conversations in EU against the US source and confirm the load window",{tag:"new",when:"8 Sep",note:"From the go-live QA sweep, checks mg1 and mg7. Also confirm the two ticket routers stayed live but did not fire during the load."}],
-  ["Tulka","Confirm the fallback for tickets assigned to agents not in the EU workspace",{tag:"new",when:"4 Sep",note:"You asked Oona on 4 Sep whether to leave them unassigned or use a fallback. No answer in the channel."}],
-  ["RMS","Re-share Friday's proposal and steps documents in the channel",{tag:"urgent",when:"9 Sep",note:"Garth asked 8 Sep and again 9 Sep, links or documents are fine. Chris told him you would send them shortly."}],
-  ["RMS","Answer Garth on organisation and user hierarchy in Intercom, Ascott use case",{tag:"new",when:"8 Sep",note:"Garth replied 8 Sep to your question: it plays into the ticketing portal, help centre guidance and internal reporting. Ascott is two master orgs, 100+ and 300+ properties, with super users, cluster champions and property users. Luke Weuffen wants input too."}],
-  ["RMS","Show Fin form-handling on Alec's sample queries and Ultimate conversations",{tag:"new",when:"8 Sep",note:"You offered to show the Fin response to a query Alec sends. Alec will pull existing conversations from Ultimate to compare, including the failed member look-up form submissions from the weekend."}],
-  ["RMS","AI controls: audience-specific terminology and sentiment escalation walkthrough",{tag:"new",when:"8 Sep",note:"Garth's point 3. He has asked Clinton whether the current help centre has comparable terminology content."}],
-  ["RMS","Clinton: clear the stuck help centre sync in the demo workspace and answer what is lost by keeping Help Centre in Zendesk",{tag:"new",when:"8 Sep",note:"Clinton deleted his upload but the Migr8Now demo workspace has been stuck on Syncing. He also wants to know if reporting, ticketing or AI is lost if the Help Centre stays in Zendesk, and will send a content-blocks example once the sync is fixed. Lou wants an overall recommendation on the help centre move."}],
-  ["Sky City Malta","Assign the project resource in Rocketlane and review the Intercom handover doc",{tag:"new",when:"8 Sep",note:"Angeliki 8 Sep: new 35-hour engagement, contract start 7 Sep, SOW sent. Daniel Headford is the RM. Chris has already run the intro call and shared the form."}],
-  ["Sky City Malta","Include Daniel Headford (RM) in the kick-off invite",{tag:"new",when:"8 Sep",note:"Requested by Angeliki after the intro. Kamayani has also asked whether Intercom provides inbound phone support."}],
-  ["Shiftmove","Get access to the Shiftmove Intercom EU workspace",{tag:"new",when:"7 Sep",note:"You flagged 7 Sep that you do not have it yet. Needed alongside the Zendesk and Zoho Desk access before anything can load."}],
-  ["Eugene Labs","Look into the duplicate user profiles with Greg ahead of the Q&A call",{tag:"new",when:"7 Sep",note:"Chris tagged you and Greg 7 Sep. Gaby's agenda for the call also lists Fin over-responding, shipping status from Starshipit not Shopify, US customers getting AU info, +61 numbers defaulting to Cocos Islands, contact search by name, hold music, and tickets re-opening after a human closes them. Greg has Starshipit order details pulling as of 10 Sep."}]
+ {k:"w2",label:"Next week",sub:"28 Sep to 2 Oct \u00b7 CleverCards and Sounding Board go live",color:"var(--ink-2)",when:"next week",items:[
+  ["CleverCards", "Full historical migration, ~80,000 conversations and contact records", {"id": "r23-ca2b57a1", "due": "2026-09-30", "note": "Jai 22 Sep: history loaded by 30 Sep, 5 Oct launch holds. Volume depends on the new extract count."}],
+  ["CleverCards", "Sample-based QA on the migrated dataset", {"id": "r23-2b59b19f", "due": "2026-09-30"}],
+  ["CleverCards", "Publish the migrated article set and confirm live", {"id": "r23-a04d9b24", "due": "2026-10-02"}],
+  ["Sounding Board", "Execute historical migration at the agreed depth", {"id": "r23-49cd96df", "due": "2026-09-28", "note": "Scope changed 14 Sep: all closed history comes across as conversations, full agent dataset. Conversations do train Fin (your answer 11 Sep)."}],
+  ["Sounding Board", "Delta migration to capture build-phase tickets", {"id": "r23-9f45eb93", "due": "2026-09-30", "note": "About 2 hours before the go-live meeting. Go-live 30 Sep."}],
+  ["Tulka", "Merge the duplicate users created since 14 Sep once Túlka's Messenger fix is live", {"id": "r23-9146ff7e", "due": "2026-09-30", "tag": "blocked", "note": "Your 19 Sep root cause: 262 Messenger users with email but no user_id, so the sync creates a second user. Oona 21 Sep: taking it to their developer. Then run the same merge routine."}],
+  ["ELMO", "Discovery and scope lock: build backlog and acceptance criteria", {"id": "r23-5a116cdf", "due": "2026-10-02", "note": "Owned by you on the tracker, but Slack has discovery with Chris since the 21 Sep kick-off. Agree who holds it."}],
+  ["Astropad", "Run the audit, then book the findings session", {"id": "r23-8be71230", "due": "2026-10-02", "tag": "new", "note": "Signed and paid 16 Sep. You said 18 Sep you need to do the audit, then the findings. No session booked yet."}],
+  ["Cheeky Kiwi Travel", "Extract ~1,000 Gmail messages and run the analysis against website content", {"id": "r23-95b6d7d7", "due": "2026-10-02"}]
  ]},
- {k:"w3",label:"Next week",sub:"14 to 18 Sep",color:"var(--ink-2)",when:"14 to 18 Sep",items:[
-  ["CleverCards","Publish the migrated article set and confirm live",{}],
-  ["CleverCards","Full historical migration, ~80,000 conversations and contacts",{when:"to 25 Sep",note:"Volume is now 37,894 from the 7 Sep extract. Jai's timeline has the historical load done by 30 Sep and the helpdesk live 5 Oct."}],
-  ["Shiftmove","Phase 1 delta run, go-live call and standby",{}],
-  ["Shiftmove","Post-cutover verification against Zendesk source counts",{}],
-  ["Tulka","Delta and cutover execution",{when:"14 to 15 Sep",note:"Moved to 8 Sep. Full run finished that day, but a delta pass after it is not confirmed anywhere in Slack. Tick this if it ran."}],
-  ["Tulka","Verification and handover report",{}],
-  ["Sounding Board","Sample batch run, validate and sample-based QA",{}],
-  ["Raiz","Phase 2 roadmap conversation: API, voice, overlay",{when:"18 Sep",}],
-  ["YFood","Scope the Zendesk migration once Lilly grants access and sends the specs and ticket count",{tag:"new",when:"from 3 Sep",note:"Lilly 3 Sep: 1,500 to 1,800 tickets a week, 150 open. She will add you to Zendesk once the other topics are decided and send the migration specs. Chris invoices in EUR once the final numbers land."}]
+ {k:"w3",label:"5 to 16 Oct",sub:"",color:"var(--ink-2)",when:"5 to 16 oct",items:[
+  ["CleverCards", "Delta migration to capture tickets raised during the build", {"id": "r23-edf371fe", "due": "2026-10-05", "note": "Runs about 2 hours before the 9am go-live on Mon 5 Oct. The tracker still shows go-live 1 Oct."}],
+  ["CleverCards", "Zendesk closes inbound channels (cutover)", {"id": "r23-f25ce742", "due": "2026-10-05"}],
+  ["CleverCards", "Go-live meeting: cutover coordination call", {"id": "r23-e135d4af", "due": "2026-10-05", "note": "9am Mon 5 Oct."}],
+  ["CleverCards", "Post-migration checks and handover notes", {"id": "r23-588f072b", "due": "2026-10-09"}],
+  ["Shiftmove", "Phase 1 mapping · Zendesk", {"id": "r23-a2399792", "due": "2026-10-09", "tag": "blocked", "note": "Waiting on the mapping form answers from Shiftmove: mapping owners, Zoho plan tier, second workspace, contract end dates, Optimum cutover weekend. Form sent 18 Sep."}],
+  ["Shiftmove", "Joint working session with ICX: migration sequencing and cutover coordination", {"id": "r23-3b43b164", "due": "2026-10-16", "note": "No activity in the ICX deployment channel since 9 Sep."}],
+  ["Shiftmove", "Phase 1 migration run · Optimum", {"id": "r23-78bd01c2", "due": "2026-10-16", "note": "31,253 Zendesk tickets, down from the ~50,000 estimate."}],
+  ["Sky City Malta", "Sabel go-live readiness checklist completed", {"id": "r23-a7fa1e15", "due": "2026-10-16"}],
+  ["Sky City Malta", "Hours consumed check against contracted hours", {"id": "r23-5a2b5c27", "due": "2026-10-16"}],
+  ["Step One", "Book the live Fin demo on Step One's website, customer and agent views", {"id": "r23-171d0d54", "due": "2026-10-09", "tag": "new", "note": "Second week of October."}]
  ]},
- {k:"w4",label:"21 to 25 Sep",sub:"",color:"var(--ink-2)",when:"21 to 25 Sep",items:[
-  ["YFood","Go-live cutover coordination call",{}],
-  ["Sounding Board","Execute historical migration at the agreed depth",{}],
-  ["CleverCards","Sample-based QA on the migrated dataset",{}],
-  ["Shiftmove","Phase 2 field, tag and attribute mapping, Zoho to Intercom",{when:"to 2 Oct"}],
-  ["Shiftmove","Zoho Desk API rate limit and extract window validation",{}]
+ {k:"w4",label:"19 to 30 Oct",sub:"SkyCity and Shiftmove Phase 1 go live",color:"var(--ink-2)",when:"19 to 30 oct",items:[
+  ["Shiftmove", "Migration runbook and rollback plan documented", {"id": "r23-5fd0456b", "due": "2026-10-23"}],
+  ["Shiftmove", "Phase 1 delta run: tickets raised during the migration window", {"id": "r23-5649c7b9", "due": "2026-10-30", "note": "About two hours before the go-live meeting."}],
+  ["Shiftmove", "Go-live meeting: cutover coordination call", {"id": "r23-70c29cdf", "due": "2026-10-30", "note": "Joint call with Shiftmove and ICX."}],
+  ["Shiftmove", "Post-cutover verification against Zendesk source counts", {"id": "r23-87d46d3b", "due": "2026-10-30"}],
+  ["Shiftmove", "Sabel on standby for cutover support", {"id": "r23-91981a68", "due": "2026-10-30"}],
+  ["Sky City Malta", "Go-live meeting: cutover coordination call", {"id": "r23-c8267c52", "due": "2026-10-22", "note": "Go-live 22 Oct."}],
+  ["Sky City Malta", "Final handover docs and Slack channel wind-down", {"id": "r23-86894bc3", "due": "2026-10-30"}]
  ]},
- {k:"w5",label:"28 Sep to 2 Oct",sub:"",color:"var(--ink-2)",when:"28 Sep to 2 Oct",items:[
-  ["CleverCards","Zendesk closes inbound channels at cutover",{}],
-  ["CleverCards","Final delta sync ~2 hrs before go-live",{when:"30 Sep"}],
-  ["CleverCards","Go-live call, build delta and post-migration handover notes",{}],
-  ["Shiftmove","Phase 2 sample run and validation",{}],
-  ["Sounding Board","Delta migration to capture build-phase tickets",{}]
+ {k:"w5",label:"November",sub:"",color:"var(--ink-3)",when:"november",items:[
+  ["Shiftmove", "Phase 2 mapping · Zoho Desk", {"id": "r23-1d48a86e", "due": "2026-11-06"}],
+  ["Shiftmove", "Phase 2 migration and cutover · Ocean", {"id": "r23-d875e1c4", "due": "2026-11-20"}],
+  ["ELMO", "Offline knowledge extraction from ticket history", {"id": "r23-42861e51", "due": "2026-11-20", "note": "Tickets are mined into draft articles, never used as Fin training data."}]
  ]},
- {k:"w6",label:"October",sub:"all Shiftmove",color:"var(--ink-3)",when:"October",items:[
-  ["Shiftmove","Phase 2 full historical run, approximately 70,000 Ocean tickets",{when:"5 to 16 Oct"}],
-  ["Shiftmove","Phase 2 delta run and Ocean cutover",{when:"12 to 16 Oct"}],
-  ["Shiftmove","Legacy switch-off advisory and final migration report",{when:"19 to 23 Oct"}],
-  ["Shiftmove","Migration handover and Slack channel wind-down",{when:"26 to 30 Oct"}]
+ {k:"later",label:"December onwards",sub:"",color:"var(--ink-3)",when:"december onwards",items:[
+  ["Shiftmove", "Final migration report and audit trail for both phases", {"id": "r23-ecf60bb5", "due": "2026-12-11"}],
+  ["Shiftmove", "Legacy switch-off advisory for Zendesk and Zoho Desk", {"id": "r23-a99dcf89", "due": "2026-12-11", "note": "Sabel advises, Shiftmove owns and executes the switch-off."}],
+  ["Shiftmove", "Migration handover and Slack channel wind-down", {"id": "r23-79d8acb2", "due": "2026-12-18"}],
+  ["ELMO", "Sabel go-live readiness checklist completed", {"id": "r23-a252a686", "due": "2026-12-04"}],
+  ["ELMO", "Delta migration to capture build-phase tickets", {"id": "r23-0ac2bcc1", "due": "2026-12-17", "note": "About 2 hours before the go-live meeting."}],
+  ["ELMO", "Go-live meeting: cutover coordination call", {"id": "r23-a32ce8f4", "due": "2026-12-17", "note": "Thu 17 Dec."}],
+  ["ELMO", "Final handover docs to the knowledge manager, Slack wind-down", {"id": "r23-9e2e2604", "due": "2027-01-15"}]
  ]},
- {k:"later",label:"Later",sub:"beyond October",color:"var(--ink-3)",when:"later",items:[]},
- {k:"carry",label:"Still outside Notion",sub:"tracked separately",color:"var(--warn)",when:"open",items:[
-  ["ELMO","Countersigned SOW, 240 hours, still outstanding, plus the AU change to go back on",{tag:"blocked",when:"since 17 Aug",note:"Angeliki 4 Sep: not closed-won on the Fin side yet, contract sent to the ELMO team. You confirmed 9 Sep that ELMO already accepted our version of the same thing."}]
+ {k:"carry",label:"On hold or no date",sub:"confirm or close",color:"var(--warn)",when:"no date",items:[
+  ["GPS Insight", "Run Fin test-mode sampling per brand and tune", {"id": "r23-7801a64c", "tag": "blocked", "note": "On hold. You said 18 Sep that your contact has just left. Put the tracker row on hold."}],
+  ["Synchronest", "Post-migration QA report and handover docs", {"id": "r23-071e5a39", "tag": "blocked", "note": "You said 14 Sep that cutover is done and you had reached out but not heard back. The client ticked cutover sign-off and data quality feedback on 21 Sep. Close it if nothing else is owed."}],
+  ["FoundU", "Jira integration and Zendesk Help Center article migration into a test workspace", {"id": "r23-7b273d4c", "tag": "blocked", "note": "Pre-contract, carried from Motion on 7 Sep. No activity since. Confirm whether it is still live."}],
+  ["Eugene Labs", "Cancel the temporary Intercom phone numbers", {"id": "r23-bc54ca5f", "note": "Carried from the 2 Sep list, no mention since. Gaby 21 Sep: your ticket discrepancy work is done and there are no other Zendesk needs. The duplicate profiles are with Greg."}]
  ]}
 ];
 
+// Every task carries its own stable id and due date (23 Sep refresh), so ticks
+// saved against the old positional ids cannot land on the wrong task.
 const SEED = [];
-BUCKETS.forEach(b => b.items.forEach((it,i) => {
+BUCKETS.forEach(b => b.items.forEach(it => {
   const o = it[2] || {};
-  SEED.push({id:b.k+"-"+i, bucket:b.k, client:it[0], title:it[1],
-    tag:o.tag||"", note:o.note||"", when:o.when||b.when});
+  SEED.push({id:o.id, bucket:b.k, client:it[0], title:it[1],
+    tag:o.tag||"", note:o.note||"", when:o.when||b.when, due:o.due||null});
 }));
 let EXTRA = [];
 let TASKS = SEED;
 
-// Due dates from the Notion task records (end date where there is a range).
-const DUE = {
- "overdue-0":"2026-09-05","overdue-1":"2026-09-05","overdue-2":"2026-08-28","overdue-3":"2026-08-28",
- "overdue-4":"2026-08-28","overdue-5":"2026-08-28","overdue-6":"2026-08-21","overdue-7":"2026-09-03",
- "overdue-8":"2026-08-21","overdue-9":"2026-08-28","overdue-10":"2026-08-28","overdue-11":"2026-08-28",
- "overdue-12":"2026-08-28","overdue-13":"2026-08-28","overdue-14":"2026-08-28","overdue-15":"2026-08-28",
- "overdue-16":"2026-08-28","overdue-17":"2026-08-28","overdue-18":"2026-08-28","overdue-19":"2026-07-24",
- "overdue-20":"2026-07-24","overdue-21":"2026-07-24","overdue-22":"2026-07-24","overdue-23":"2026-07-10",
- "overdue-24":"2026-08-21",
- "w1-0":"2026-09-04","w1-1":"2026-09-04","w1-2":"2026-09-04","w1-3":"2026-09-04","w1-4":"2026-09-04",
- "w1-5":"2026-09-04","w1-6":"2026-09-01","w1-7":"2026-08-31","w1-8":"2026-09-04","w1-9":"2026-09-11",
- "w2-0":"2026-09-08","w2-1":"2026-09-08","w2-2":"2026-09-11","w2-3":"2026-09-11","w2-4":"2026-09-11",
- "w2-5":"2026-09-11","w2-6":"2026-09-11","w2-7":"2026-09-11","w2-8":"2026-09-11","w2-9":"2026-09-11",
- "w2-10":"2026-09-11","w2-11":"2026-09-11","w2-12":"2026-09-11","w2-13":"2026-09-11","w2-14":"2026-09-11",
- "w2-15":"2026-09-11","w2-16":"2026-09-09","w2-17":"2026-09-11","w2-18":"2026-09-11",
- "w2-19":"2026-09-11","w2-20":"2026-09-11","w2-21":"2026-09-11","w2-22":"2026-09-10","w2-23":"2026-09-11",
- "w2-24":"2026-09-11","w2-25":"2026-09-11","w2-26":"2026-09-10","w2-27":"2026-09-11","w2-28":"2026-09-11",
- "w2-29":"2026-09-11","w2-30":"2026-09-11",
- "w3-0":"2026-09-18","w3-1":"2026-09-25","w3-2":"2026-09-18","w3-3":"2026-09-18","w3-4":"2026-09-15",
- "w3-5":"2026-09-15","w3-6":"2026-09-18","w3-7":"2026-09-18","w3-8":"2026-09-18",
- "w4-0":"2026-09-25","w4-1":"2026-09-25","w4-2":"2026-09-25","w4-3":"2026-10-02","w4-4":"2026-09-25",
- "w5-0":"2026-10-02","w5-1":"2026-10-01","w5-2":"2026-10-02","w5-3":"2026-10-02","w5-4":"2026-10-02",
- "w6-0":"2026-10-16","w6-1":"2026-10-16","w6-2":"2026-10-23","w6-3":"2026-10-30",
- "carry-0":"2026-08-17"
-};
-SEED.forEach(t => { t.due = DUE[t.id] || null; });
-
 // Which timeframe an added task falls into, from its due date.
-const BUCKET_END = [["overdue","2026-08-30"],["w1","2026-09-04"],["w2","2026-09-11"],
-  ["w3","2026-09-18"],["w4","2026-09-25"],["w5","2026-10-02"],["w6","2026-10-31"]];
+const BUCKET_END = [["overdue", "2026-09-20"], ["w1", "2026-09-27"], ["w2", "2026-10-04"], ["w3", "2026-10-18"], ["w4", "2026-10-31"], ["w5", "2026-11-30"]];
 function bucketFor(due){
   if(!due) return "carry";
   for(const [k,end] of BUCKET_END){ if(due <= end) return k; }
@@ -799,18 +765,9 @@ btnGroup.addEventListener("click", ()=>{
 rebuild();
 render();
 
-// Carried over from the first version of the board, so nothing already
-// marked up is lost. Only used when the shared store is still empty.
-const SEED_STATE = {status:{
-  "overdue-0":{s:"done", at:"2026-09-04T07:06:54.150Z"},
-  "overdue-1":{s:"doing", due:"2026-09-07", at:"2026-09-04T07:00:00.000Z"},
-  "overdue-7":{s:"done", at:"2026-09-04T07:26:50.198Z"},
-  "overdue-12":{s:"done", at:"2026-09-04T07:28:07.201Z"},
-  "overdue-13":{s:"pending", at:"2026-09-04T07:28:31.089Z"},
-  "overdue-16":{s:"doing", at:"2026-09-04T07:29:56.846Z"},
-  "w1-7":{s:"doing", at:"2026-09-04T07:29:04.567Z", userNote:"4 tickets blocked", noteAt:"2026-09-04T07:29:16.691Z"},
-  "w3-4":{due:"2026-09-08", at:"2026-09-04T07:00:00.000Z"}
-}, extra:[]};
+// Starting state when the shared store is empty. Ticks from the 10 Sep
+// board used positional ids that no longer exist, so none are carried.
+const SEED_STATE = {status:{}, extra:[]};
 
 function applyRemote(data){
   state.status = data.status;
