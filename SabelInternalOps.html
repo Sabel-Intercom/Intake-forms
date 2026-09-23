@@ -672,10 +672,14 @@ const S = {
   portal:null, notion:[], reg:[], kickoff:{}, trk:{},
   loaded:{portal:false,notion:false,reg:false,kick:false}, errors:{},
   view:"today", clientId:null, dirty:new Map(), save:"idle",
-  open:{}, noteOpen:{}, scopeOpen:false,
-  prefs:{mine:false, closedOpen:false}
+  open:{}, noteOpen:{}, scopeOpen:false, foldOpen:{},
+  prefs:{mine:false, closedOpen:false, grp:{}}
 };
 try{ Object.assign(S.prefs, JSON.parse(localStorage.getItem(PREF_KEY)||"{}")); }catch(e){}
+/* Any sidebar group can be folded away (On hold is the one Nikki hides most). Older prefs only
+   knew about Closed, so that stays the default-collapsed group until a choice is made. */
+function grpCollapsed(k){ const g=S.prefs.grp||{}; return (k in g) ? !!g[k] : (k==="closed" ? !S.prefs.closedOpen : false); }
+function toggleGrp(k){ S.prefs.grp=Object.assign({}, S.prefs.grp||{}); S.prefs.grp[k]=!grpCollapsed(k); if(k==="closed") S.prefs.closedOpen=!S.prefs.grp[k]; savePrefs(); }
 function savePrefs(){ try{ localStorage.setItem(PREF_KEY, JSON.stringify(S.prefs)); }catch(e){} }
 
 /* ---------- helpers ---------- */
@@ -1042,9 +1046,8 @@ function renderSide(){
       (q ? BANDS.concat([["sales","Sales follow-up"]]) : BANDS).forEach(([k,label])=>{
         const list = groups[k].sort(cmp);
         if(!list.length) return;
-        const closed = k==="closed";
-        const collapsed = closed && !S.prefs.closedOpen && !q;
-        h += '<div class="grp"><button class="grp-h'+(closed?' toggle':'')+'"'+(closed?' data-act="toggle-closed"':' tabindex="-1"')+'><span class="eyebrow">'+esc(label)+'</span><span class="n">'+list.length+(closed?(collapsed?' · show':' · hide'):'')+'</span></button>';
+        const collapsed = !q && grpCollapsed(k);
+        h += '<div class="grp"><button class="grp-h toggle" data-act="grp" data-k="'+k+'" aria-expanded="'+(!collapsed)+'" title="'+(collapsed?'Show':'Hide')+' '+esc(label)+'"><span class="eyebrow">'+esc(label)+'</span><span class="n">'+list.length+(q?'':(collapsed?' · show':' · hide'))+'</span></button>';
         if(!collapsed) h += list.map(c=>sideRow(c,k,byDate)).join("");
         h += '</div>';
       });
@@ -1239,7 +1242,7 @@ function clientView(c){
       const pct = closed ? 100 : pc.total ? Math.round(100*pc.done/pc.total) : 0;
       h += '<button class="jseg'+(closed?' closed':'')+(isCur?' cur':'')+'" data-act="jump" data-pid="'+p.id+'" title="'+esc(p.name+' · '+(closed?'gate closed':pc.done+' of '+pc.total+' steps'))+'"><span class="bar"><i style="width:'+pct+'%"></i></span><span class="lb">'+esc(p.name)+'</span><span class="cd">'+esc(p.code)+'</span></button>';
     });
-    h += '</div>'+(startIdx(c)>0?'<p class="legacy-note">Started in the hub at '+esc(phasesFor(c)[startIdx(c)].name)+'. Earlier gates are treated as closed. <button class="linkbtn" data-act="restart">Change</button></p>':'')+'</section>';
+    h += '</div><p class="legacy-note">'+(startIdx(c)>0?'Started in the hub at '+esc(phasesFor(c)[startIdx(c)].name)+'. Earlier gates are treated as closed. ':'Tracking from the first gate. ')+'<button class="linkbtn" data-act="restart">Change starting gate</button></p></section>';
 
     /* steps toolbar */
     h += '<div class="toolrow"><div class="seg" role="group" aria-label="Which steps"><button data-act="mine" data-v="0" aria-pressed="'+(!S.prefs.mine)+'">Everyone\'s steps</button><button data-act="mine" data-v="1" aria-pressed="'+(!!S.prefs.mine)+'">Only mine</button></div>'+
@@ -1256,6 +1259,9 @@ function isOpen(c,p,pi,i){
   if(k in S.open) return S.open[k];
   return pi===i;
 }
+/* Gates before the starting gate were never closed by hand: they are closed because of where
+   tracking started. Reopening one means moving the start back to it. */
+function reopenStartBtn(c,p){ return '<button class="btn sm" data-act="unstart" data-id="'+c.id+'" data-pid="'+p.id+'">Reopen this gate</button>'; }
 function phaseBlock(c,p,pi,i){
   const pc=phaseCounts(c,p), closed=gateClosed(c,p.id), before=pi<startIdx(c), open=isOpen(c,p,pi,i), isCur=pi===i;
   const due=phaseDue(c,p);
@@ -1288,11 +1294,13 @@ function phaseBlock(c,p,pi,i){
     h += '</ul>';
     const openCount = pc.total-pc.done, critOpen = stepsFor(c,p).filter(s=>isCritOpen(c,s)).length;
     h += '<div class="gate'+(closed?' closed':'')+'"><span class="g"><b>Gate</b>'+esc(p.gate)+'</span>'+
-      (before ? '' : closed
+      (before ? reopenStartBtn(c,p) : closed
         ? '<button class="btn sm" data-act="gate" data-id="'+c.id+'" data-pid="'+p.id+'" data-v="0">Reopen gate</button>'
         : '<button class="btn sm '+(openCount?'':'primary')+'" data-act="gate" data-id="'+c.id+'" data-pid="'+p.id+'" data-v="1" data-crit="'+critOpen+'">Close gate'+(critOpen?' ('+critOpen+' critical open)':openCount?' ('+openCount+' open)':'')+'</button>')+'</div>';
-  } else if(closed && !before) {
-    h += '';
+  } else if(closed || before) {
+    /* Folded shut, but still fixable: the way out of a mis-click must not be hidden behind expanding. */
+    h += '<div class="gate closed"><span class="g"><b>Gate</b>'+(before?'Treated as closed — this client started tracking further along.':esc(p.gate))+'</span>'+
+      (before ? reopenStartBtn(c,p) : '<button class="btn sm" data-act="gate" data-id="'+c.id+'" data-pid="'+p.id+'" data-v="0">Reopen gate</button>')+'</div>';
   }
   h += '</section>';
   return h;
@@ -1309,6 +1317,16 @@ function setupPanel(c){
     '<div class="row"><label>Current gate<select id="start-phase">'+phasesFor(c).map(p=>'<option value="'+p.id+'"'+(p.id===guess?' selected':'')+'>'+esc(p.code+' · '+p.name)+'</option>').join("")+'</select></label>'+
     '<label>Project type<select id="start-type">'+Object.entries(TYPE_LABEL).map(([k,v])=>'<option value="'+k+'"'+(k===projectType(c)?' selected':'')+'>'+v+'</option>').join("")+'</select></label>'+
     '<button class="btn primary" data-act="start" data-id="'+c.id+'">'+(again?'Update starting gate':'Start tracking')+'</button>'+(again?'<button class="btn" data-act="cancel-restart">Cancel</button>':'')+'</div></section>';
+}
+/* Every edit re-renders the client view, which rebuilt this panel shut and dropped focus:
+   one field per open was all you got. The open state and the focused field are restored instead. */
+function detailsOpen(c){ return (c.id in S.foldOpen) ? S.foldOpen[c.id] : (hasHub(c) && !c.tier); }
+function refocusField(cid,f){
+  if(!cid||!f) return;
+  const el = document.querySelector('[data-field="'+f.replace(/"/g,'')+'"][data-id="'+String(cid).replace(/"/g,'')+'"]');
+  if(!el) return;
+  el.focus({preventScroll:true});
+  if(el.setSelectionRange && /^(text|email|url|search|tel)$/i.test(el.type||"")){ const n=el.value.length; try{ el.setSelectionRange(n,n); }catch(_){} }
 }
 function asidePanels(c,n,ko,tk,td,w){
   let h="";
@@ -1356,7 +1374,7 @@ function asidePanels(c,n,ko,tk,td,w){
   /* details */
   const hub=c.hub||{};
   const opt = optHtml;
-  h += '<section class="panel"><details class="fold"'+(hasHub(c)&&!c.tier?' open':'')+'><summary class="panel-h"><h3>Details</h3>'+chev+'</summary><div class="form">'+
+  h += '<section class="panel"><details class="fold" data-fold="'+c.id+'"'+(detailsOpen(c)?' open':'')+'><summary class="panel-h"><h3>Details</h3>'+chev+'</summary><div class="form">'+
     '<label>Tier<select data-field="tier" data-id="'+c.id+'">'+opt(TIERS,c.tier,"Not set")+'</select></label>'+
     '<label>Project type<select data-field="hub.type" data-id="'+c.id+'">'+opt(Object.entries(TYPE_LABEL),projectType(c))+'</select></label>'+
     '<label>Project lead<select data-field="owner" data-id="'+c.id+'">'+opt(["Chris","Richard","Greg"],c.owner,"Not set")+'</select></label>'+
@@ -1495,6 +1513,7 @@ document.addEventListener("click", e=>{
     case "open": return openClient(t.dataset.id);
     case "side": return document.body.classList.toggle("side-open");
     case "side-sort": S.prefs.sort=t.dataset.v; savePrefs(); return renderSide();
+    case "grp": toggleGrp(t.dataset.k); return renderSide();
     case "toggle-closed": S.prefs.closedOpen=!S.prefs.closedOpen; savePrefs(); return renderSide();
     case "theme": {
       const curDark = document.documentElement.getAttribute("data-theme")==="dark" || (!document.documentElement.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
@@ -1522,6 +1541,13 @@ document.addEventListener("click", e=>{
     case "mine": S.prefs.mine = t.dataset.v==="1"; savePrefs(); return render(true);
     case "scope": S.scopeOpen=!S.scopeOpen; return render(true);
     case "start": { if(!c) return; const ty=$("start-type").value, sp=startFor(ty, $("start-phase").value); ensureHub(c, sp); c.hub.startPhase=sp; c.hub.type=ty; c.type=OLD_TYPE[ty]||c.type; S.restart=null; const moved=syncStage(c); touch(c, moved?["stage","type"]:["type"]); render(true); $("scroll").scrollTop=0; return; }
+    case "unstart": { if(!c) return;
+      const p = phasesFor(c)[pidxOf(c, t.dataset.pid)]; if(!p) return;
+      if(!confirm('Reopen "'+p.name+'"?\n\n'+esc(c.name)+' will start tracking at that gate again, so it and anything between it and where they are now become open. Every tick and closed gate you have recorded is kept.')) return;
+      ensureHub(c).startPhase = p.id;
+      const moved=syncStage(c); touch(c, moved?["stage"]:[]);
+      S.open[c.id+":"+p.id]=true; render(true);
+      const el=$("ph-"+p.id); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); return; }
     case "restart": S.restart=S.clientId; render(true); $("scroll").scrollTop=0; return;
     case "cancel-restart": S.restart=null; return render(true);
     case "signed": { if(!c) return; const d=$("sg-date").value||today(); c.stage="Onboarding"; c.signedDate=d; if(!c.acceptedAt) c.acceptedAt=d; ensureHub(c,"p0"); touch(c,["stage","signedDate","acceptedAt"]); return render(true); }
@@ -1572,7 +1598,10 @@ document.addEventListener("change", e=>{
     touch(c, fields);
   }
   render(true);
+  refocusField(t.dataset.id, t.dataset.field);
 });
+/* "toggle" does not bubble, so this listens in the capture phase. */
+document.addEventListener("toggle", e=>{ const d=e.target; if(d && d.dataset && d.dataset.fold) S.foldOpen[d.dataset.fold]=d.open; }, true);
 let noteTimer=null;
 document.addEventListener("input", e=>{
   const t=e.target;
