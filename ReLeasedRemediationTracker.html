@@ -59,6 +59,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .task-expand textarea{resize:vertical}
 .task-expand textarea:focus,.task-expand input:focus{border-color:#3B82F6}
 .task-expand label{font-size:11px;font-weight:500;color:#94A3B8;display:block;margin-bottom:4px}
+/* Comments: a short thread on every task card (see the Comments block in the JS) */
+.cmt-chip{display:inline-flex;align-items:center;gap:4px;background:transparent;border:1px solid #2A3145;color:#64748B;font:inherit;font-size:10.5px;border-radius:10px;padding:1px 8px;cursor:pointer;position:relative;flex-shrink:0}
+.cmt-chip i{font-size:12px}
+.cmt-chip:hover{color:#E2E8F0;border-color:#475569}
+.cmt-chip.has{color:#FBBF24;border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.08)}
+.cmt-chip .dot{position:absolute;top:-3px;right:-3px;width:7px;height:7px;border-radius:50%;background:#E10600}
+.cmts{margin-bottom:10px}
+.cmt{background:#12151D;border:1px solid #1E2433;border-left:3px solid #2A3145;border-radius:8px;padding:8px 10px;margin-top:6px}
+.cmt.client{border-left-color:#FBBF24}
+.cmt.sabel{border-left-color:#60A5FA}
+.cmt-h{display:flex;align-items:center;gap:8px;font-size:11px}
+.cmt-h span{color:#64748B;flex:1;min-width:0}
+.cmt-h button{background:none;border:none;color:#64748B;cursor:pointer;padding:2px;display:flex;border-radius:4px;flex-shrink:0}
+.cmt-h button i{font-size:14px}
+.cmt-h button:hover{color:#E2E8F0;background:#1E2433}
+.cmt-h button.del:hover{color:#F87171}
+.cmt-b{font-size:12px;line-height:1.5;color:#CBD5E1;white-space:pre-wrap;margin-top:4px;word-break:break-word}
+.cmt-edited{font-size:10px;color:#64748B;margin-top:3px;font-style:italic}
+.task-expand textarea.cmt-ed{margin-top:6px;border-color:#FBBF24}
+.cmt-more{background:transparent;border:1px dashed #2A3145;color:#94A3B8;font:inherit;font-size:11px;border-radius:6px;padding:4px 10px;cursor:pointer;margin-top:6px;width:100%}
+.cmt-more:hover{color:#E2E8F0;border-color:#475569}
+.cmt-new{margin-top:8px}
+.cmt-act{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+.cmt-as{font-size:11px;color:#64748B;margin-right:auto}
+.cmt-as b{color:#94A3B8;font-weight:500}
+.cmt-as a{color:#60A5FA;text-decoration:none;margin-left:4px}
+.task-expand .cmt-act input{flex:0 1 180px;width:auto;margin-right:auto}
+.cmt-cancel{background:transparent;border:1px solid #2A3145;color:#94A3B8;font:inherit;font-size:11.5px;border-radius:6px;padding:6px 12px;cursor:pointer;margin-left:auto}
+.cmt-post{background:#E10600;border:none;color:#fff;font:inherit;font-size:11.5px;font-weight:500;border-radius:6px;padding:6px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;flex-shrink:0}
+.cmt-post i{font-size:13px}
+.cmt-post:hover{background:#C10500}
 .chk-btn{background:none;border:none;cursor:pointer;padding:0;flex-shrink:0;display:flex;align-items:flex-start;padding-top:1px}
 .bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
 /* status picker trigger */
@@ -1676,7 +1707,7 @@ function moveTaskToPillar(cid,pid){
 // ── Expand/collapse ───────────────────────────────────────────────────────────
 function tog(cid){
   if(expandedCards.has(cid)){expandedCards.delete(cid);editCards.delete(cid);} // collapsing also closes edit mode
-  else expandedCards.add(cid);
+  else{expandedCards.add(cid);if(cmtLog(resolveTask(cid)).length)cmtMarkRead(cid);}
   renderMain();
 }
 // Expanding a card shows its steps; the full editable form sits behind "Edit
@@ -2066,6 +2097,127 @@ function exportHoursCSV(){
 // this is the same file the client opens, just with the display switched on.
 if(INTERNAL){try{document.title='Hours · '+document.title;}catch(e){}}
 
+// -- Comments ------------------------------------------------------------------
+// A short thread on every task, so a question or an update can be left on the
+// card itself rather than in email. Comments are stored on the task object as
+// t.log=[{by,at,txt}]: the existing save writes the whole task into
+// payload.taskData, so they persist and move with the task (reorder, pillar
+// change, park) without any change to the save format. The free-text Notes field
+// is left exactly as it was.
+//
+// A first name that matches the Sabel team reads as a Sabel comment; anything
+// else reads as the client. Read state is per-browser (localStorage), which is
+// what it should be: it is "have I seen this", not tracker data.
+const CMT_TEAM=['Chris','Richard','Greg','Nikki'];
+let cmtName='';try{cmtName=localStorage.getItem('tracker-note-name')||'';}catch(e){}
+let cmtRead={};try{cmtRead=JSON.parse(localStorage.getItem(KEY+'-comments-read')||'{}')||{};}catch(e){cmtRead={};}
+let cmtDrafts={};          // unposted text per card, kept across re-renders
+let cmtAll=new Set();      // cards showing their full history rather than the last 3
+let cmtEdit=null;          // cid|index of the comment being edited, if any
+function cmtLog(t){return t&&Array.isArray(t.log)?t.log:[];}
+function cmtSide(by){const f=String(by||'').trim().split(/\s+/)[0].toLowerCase();return CMT_TEAM.some(x=>x.toLowerCase()===f)?'sabel':'client';}
+function cmtWhen(ts){
+  const d=new Date(ts),diff=Date.now()-ts;
+  if(diff<60000)return'just now';
+  if(diff<3600000)return Math.round(diff/60000)+'m ago';
+  if(diff<86400000)return Math.round(diff/3600000)+'h ago';
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+function cmtFresh(t,cid){
+  const me=cmtSide(cmtName||CLIENT_LABEL),seen=cmtRead[cid]||0;
+  return cmtLog(t).some(x=>x.at>seen&&cmtSide(x.by)!==me);
+}
+function cmtMarkRead(cid){
+  cmtRead[cid]=Date.now();
+  try{localStorage.setItem(KEY+'-comments-read',JSON.stringify(cmtRead));}catch(e){}
+}
+function cmtChip(t,cid){
+  const n=cmtLog(t).length;
+  const title=n?(n+' comment'+(n===1?'':'s')+' · add another'):'Add a comment';
+  return`<button class="cmt-chip${n?' has':''}" onclick="cmtOpen(event,'${cid}')" title="${title}"><i class="ti ti-message-circle"></i>${n?`<span>${n}</span>`:''}${n&&cmtFresh(t,cid)?'<b class="dot"></b>':''}</button>`;
+}
+function cmtHTML(t,cid){
+  const log=cmtLog(t);
+  const shown=cmtAll.has(cid)?log:log.slice(-3);
+  const off=log.length-shown.length;
+  const row=(x,i)=>{
+    const side=cmtSide(x.by);
+    const c=side==='sabel'?((OW[String(x.by).trim().split(/\s+/)[0]]||{c:'#60A5FA'}).c):'#FBBF24';
+    const editing=cmtEdit===cid+'|'+i;
+    return`<div class="cmt ${side}">
+      <div class="cmt-h"><b style="color:${c}">${esc(x.by)}</b><span>${side==='client'?esc(CLIENT_LABEL):'Sabel'} · ${cmtWhen(x.at)}</span>
+        ${editing?'':`<button onclick="editCmt(event,'${cid}',${i})" title="Edit this comment"><i class="ti ti-pencil"></i></button><button class="del" onclick="removeCmt(event,'${cid}',${i})" title="Delete this comment"><i class="ti ti-trash"></i></button>`}</div>
+      ${editing
+        ?`<textarea id="cmt-ed-${cid}-${i}" class="cmt-ed" rows="3" onclick="event.stopPropagation()" onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter')saveCmtEdit(event,'${cid}',${i});if(event.key==='Escape')cancelCmtEdit(event)">${esc(x.txt)}</textarea>
+          <div class="cmt-act"><button class="cmt-cancel" onclick="cancelCmtEdit(event)">Cancel</button><button class="cmt-post" onclick="saveCmtEdit(event,'${cid}',${i})"><i class="ti ti-check"></i>Save</button></div>`
+        :`<div class="cmt-b">${esc(x.txt)}</div>${x.edited?`<div class="cmt-edited">edited ${cmtWhen(x.edited)}</div>`:''}`}
+    </div>`;
+  };
+  return`<div class="cmts" onclick="event.stopPropagation()">
+    <label>Comments${log.length?` <span style="font-weight:400;color:#475569">· ${log.length}</span>`:''}</label>
+    ${off?`<button class="cmt-more" onclick="cmtAll.add('${cid}');renderMain()">Show ${off} earlier comment${off===1?'':'s'}</button>`:''}
+    ${shown.map((x,i)=>row(x,off+i)).join('')}
+    <div class="cmt-new">
+      <textarea id="cmt-in-${cid}" rows="2" placeholder="Add a comment. Everyone on the tracker sees it." oninput="cmtDrafts['${cid}']=this.value" onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter')postCmt(event,'${cid}')">${esc(cmtDrafts[cid]||'')}</textarea>
+      <div class="cmt-act">
+        ${cmtName
+          ?`<span class="cmt-as">Posting as <b>${esc(cmtName)}</b><a href="#" onclick="event.preventDefault();event.stopPropagation();cmtName='';renderMain()">change</a></span>`
+          :`<input type="text" id="cmt-by-${cid}" placeholder="Your name" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter')postCmt(event,'${cid}')">`}
+        <button class="cmt-post" onclick="postCmt(event,'${cid}')"><i class="ti ti-send"></i>Post comment</button>
+      </div>
+    </div>
+  </div>`;
+}
+function cmtOpen(e,cid){
+  if(e)e.stopPropagation();
+  const t=resolveTask(cid);
+  if(t&&cmtLog(t).length)cmtMarkRead(cid);
+  expandedCards.add(cid);
+  renderMain();
+  setTimeout(()=>{const el=document.getElementById('cmt-in-'+cid);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}},80);
+}
+function postCmt(e,cid){
+  if(e)e.stopPropagation();
+  const ta=document.getElementById('cmt-in-'+cid);
+  const txt=String(ta?ta.value:(cmtDrafts[cid]||'')).trim();
+  if(!txt){showToast('Write a comment first');if(ta)ta.focus();return;}
+  if(!cmtName){
+    const nb=document.getElementById('cmt-by-'+cid);
+    const nm=String(nb?nb.value:'').trim();
+    if(!nm){showToast('Add your name so everyone knows who wrote the comment');if(nb)nb.focus();return;}
+    cmtName=nm;try{localStorage.setItem('tracker-note-name',nm);}catch(err){}
+  }
+  const t=resolveTask(cid);
+  if(!t){showToast('That task could not be found — reload the page and try again');return;}
+  t.log=cmtLog(t).concat([{by:cmtName,at:Date.now(),txt}]);
+  delete cmtDrafts[cid];
+  cmtMarkRead(cid);
+  renderMain();scheduleAutoSave();showToast('Comment added');
+}
+function editCmt(e,cid,i){
+  if(e)e.stopPropagation();
+  cmtEdit=cid+'|'+i;renderMain();
+  setTimeout(()=>{const el=document.getElementById('cmt-ed-'+cid+'-'+i);if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},30);
+}
+function cancelCmtEdit(e){if(e)e.stopPropagation();cmtEdit=null;renderMain();}
+function saveCmtEdit(e,cid,i){
+  if(e)e.stopPropagation();
+  const el=document.getElementById('cmt-ed-'+cid+'-'+i),t=resolveTask(cid);
+  if(!el||!t||!t.log||!t.log[i])return;
+  const v=el.value.trim();
+  if(!v){showToast('A comment cannot be empty. Use the bin to delete it');el.focus();return;}
+  if(v!==t.log[i].txt){t.log[i].txt=v;t.log[i].edited=Date.now();scheduleAutoSave();showToast('Comment updated');}
+  cmtEdit=null;renderMain();
+}
+function removeCmt(e,cid,i){
+  if(e)e.stopPropagation();
+  const t=resolveTask(cid);
+  if(!t||!t.log||!t.log[i])return;
+  if(!confirm('Delete this comment?\n\nIt is removed for everyone and cannot be undone.'))return;
+  t.log.splice(i,1);
+  cmtEdit=null;renderMain();scheduleAutoSave();showToast('Comment deleted');
+}
+
 function makeCard(t,cid,isClient,ctx){
   const _p=cid.split('-');
   const _idx=parseInt(_p[_p.length-1]);
@@ -2115,6 +2267,7 @@ function makeCard(t,cid,isClient,ctx){
               ${isClient?oBdg(t.o):ownerBtn(t.o,cid)}
               <span style="font-size:11px;color:${late?'#F87171':'#475569'}">${taskDatesText(t)}</span>
               ${hrsBadge(t)}
+              ${cmtChip(t,cid)}
               ${ctx&&ctx.l?`<span style="font-size:10px;color:#475569">· ${esc(ctx.l)}</span>`:''}
               <i class="ti ti-chevron-down" style="font-size:11px;color:#334155;margin-left:auto;${isOpen?'transform:rotate(180deg)':''}"></i>
             </div>
@@ -2172,6 +2325,7 @@ function cardExpand(t,cid,isClient){
           </div>
         </div>
         ${(nt=>nt?`<div style="margin-bottom:10px"><label>Notes</label><div style="font-size:12px;color:#94A3B8;line-height:1.5;white-space:pre-wrap">${esc(nt)}</div></div>`:'')(curNotes)}
+        ${cmtHTML(t,cid)}
         ${hasLink?`<div style="margin-bottom:10px"><label>${linkLabel}</label>${linkEl}</div>`:''}
         <div style="display:flex;justify-content:flex-end;margin-bottom:${editCards.has(cid)?'10':'0'}px">
           <button onclick="toggleEdit(event,'${cid}')" title="Show the full set of task fields" style="background:transparent;border:1px solid #2A3145;color:${editCards.has(cid)?'#E2E8F0':'#94A3B8'};font-size:11px;font-family:inherit;border-radius:6px;padding:4px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px">
@@ -2850,6 +3004,7 @@ function renderMain(){
       const head=`<div onclick="tog('${cid}')" style="display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid #1E2433;cursor:pointer;user-select:none">
           <span style="font-size:12px;color:#E2E8F0;flex:1;min-width:0;line-height:1.4">${esc(t.t)}</span>
           <span style="font-size:10px;color:#64748B;white-space:nowrap;flex-shrink:0">${o.g==='client'?'Client action':'Sabel action'}</span>
+          ${cmtChip(t,cid)}
           ${oBdg(t.o)}
           <span title="Estimated effort if this is scoped later" style="font-size:10px;color:#FB923C;white-space:nowrap;flex-shrink:0;text-align:right;min-width:52px">${estLabel(t)}</span>
           <button onclick="unparkTask(event,'${cid}')" style="background:transparent;border:1px solid #2A3145;color:#94A3B8;font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer;flex-shrink:0;white-space:nowrap">Move back into scope</button>
@@ -2884,6 +3039,7 @@ function renderMain(){
             <label>Notes</label>
             <textarea rows="3" placeholder="Add notes for this item..." oninput="saveNote('${cid}',this.value)">${esc(curNotes)}</textarea>
           </div>
+          ${cmtHTML(t,cid)}
           <div>
             <label>Link</label>
             ${linkEl}
