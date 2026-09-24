@@ -68,7 +68,7 @@ a{color:inherit}
 .navbtn .count{font-family:var(--mono);font-size:11px;background:var(--accent);color:#fff;border-radius:99px;padding:0 7px;line-height:18px}
 .navbtn.on .count{background:var(--accent)}
 .clients{flex:1;overflow-y:auto;padding:6px 8px 20px}
-.grp{margin-top:12px}
+.grp{margin-top:10px;border-top:1px solid var(--line);padding-top:4px}
 .sidectl{display:flex;gap:6px;align-items:center}
 .sidectl select{flex:1;min-width:0;font-size:13.5px;font-weight:600;color:var(--ink);padding:6px 8px;border:1px solid var(--line2);border-radius:7px;background:var(--raise)}
 .sidectl select:disabled{opacity:.5}
@@ -78,10 +78,11 @@ a{color:inherit}
 .grp-h.toggle{cursor:pointer}
 .grp-h .eyebrow{color:var(--faint)}
 .grp-h .n{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
-.crow{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;width:100%;text-align:left;padding:7px 8px;border-radius:7px;border:0;background:transparent;cursor:pointer}
+.crow{display:flex;gap:8px;align-items:center;width:100%;text-align:left;padding:4px 8px;border-radius:6px;border:0;background:transparent;cursor:pointer}
 .crow:hover{background:var(--sunk)}
 .crow.on{background:var(--accent-soft)}
-.crow .nm{font-weight:600;color:var(--ink);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow .nm{flex:1;min-width:0;font-weight:500;color:var(--ink);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dot-crit{flex:none;width:9px;height:9px;border-radius:50%;background:var(--accent)}
 .crow .mt{grid-column:1;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .crow .rt{grid-row:1/span 2;grid-column:2;display:flex;align-items:center;gap:6px}
 .badge{font-family:var(--mono);font-size:10.5px;font-weight:600;border-radius:99px;padding:0 6px;line-height:17px;background:var(--accent);color:#fff}
@@ -369,7 +370,7 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
         <input id="q" type="search" placeholder="Find a client  ( / )" autocomplete="off">
       </div>
       <div class="sidectl">
-        <select id="band-filter" aria-label="Which clients to show"></select>
+        <select id="band-filter" aria-label="Filter clients by project type"></select>
         <div class="seg" role="group" aria-label="Sort clients"><button data-act="side-sort" data-v="name" aria-pressed="true">A–Z</button><button data-act="side-sort" data-v="golive" aria-pressed="false">Go-live</button></div>
       </div>
       <button class="navbtn" id="nav-today" data-act="today">Today <span class="count" id="today-count" hidden></span></button>
@@ -678,7 +679,7 @@ const S = {
 try{ Object.assign(S.prefs, JSON.parse(localStorage.getItem(PREF_KEY)||"{}")); }catch(e){}
 /* Any sidebar group can be folded away (On hold is the one Nikki hides most). Older prefs only
    knew about Closed, so that stays the default-collapsed group until a choice is made. */
-function grpCollapsed(k){ const g=S.prefs.grp||{}; return (k in g) ? !!g[k] : (k==="closed" ? !S.prefs.closedOpen : false); }
+function grpCollapsed(k){ const g=S.prefs.grp||{}; return (k in g) ? !!g[k] : (k==="closed" ? !S.prefs.closedOpen : k==="parked"); }
 function toggleGrp(k){ S.prefs.grp=Object.assign({}, S.prefs.grp||{}); S.prefs.grp[k]=!grpCollapsed(k); if(k==="closed") S.prefs.closedOpen=!S.prefs.grp[k]; savePrefs(); }
 function savePrefs(){ try{ localStorage.setItem(PREF_KEY, JSON.stringify(S.prefs)); }catch(e){} }
 
@@ -1000,63 +1001,53 @@ function renderCrumb(){
 }
 /* Go-live from the client record, else the tracker's own date. */
 function goLiveOf(c){ const tk=trackerKeyFor(c), td=tk&&S.trk[tk]; return c.goLiveDate || (td&&td.data&&td.data.goLive) || ""; }
-function sideRow(c,k,byDate){
-  const p=allProgress(c), w=warnings(c).length, mineOpen = openMine(c).length, gl=goLiveOf(c);
-  const where = k==="hold" ? [c.owner, c.hold.checkBack ? "check back "+fmt(c.hold.checkBack) : "on hold"]
-    : k==="sales" ? ["sales follow-up"] : [c.tier, c.owner, hasHub(c) && curIdx(c)<phasesFor(c).length ? phasesFor(c)[curIdx(c)].name : (c.stage==="Discovery" ? (c.proposalSent ? "proposal "+rel(c.proposalSent) : "proposal") : c.stage)];
-  const meta = (byDate ? [gl ? "go-live "+fmt(gl)+" ("+rel(gl)+")" : "no go-live date"].concat(where.slice(-1)) : where).filter(Boolean).join(" · ");
-  return '<button class="crow'+(S.view==="client"&&S.clientId===c.id?' on':'')+'" data-act="open" data-id="'+c.id+'"><span class="nm">'+esc(c.name)+'</span><span class="mt'+(byDate&&gl&&daysTo(gl)>=0&&daysTo(gl)<=14?' soon':'')+'">'+esc(meta)+'</span><span class="rt">'+
-    (mineOpen?'<span class="badge" title="Your open steps at this gate">'+mineOpen+'</span>':'')+
-    (w?'<span class="dot-warn" title="'+w+' data issue'+(w>1?'s':'')+'"></span>':'')+
-    (p!==null?'<span class="minibar" title="'+Math.round(p*100)+'% of steps done"><i style="width:'+Math.round(p*100)+'%"></i></span>':'')+'</span></button>';
+/* Critical steps that are due: open, critical, and the gate is due within 3 days or overdue
+   (a gate with no date counts once the client has reached it). Only clients in delivery. */
+function critDue(c){
+  if(!inDelivery(c)) return [];
+  const L=phasesFor(c), ci=curIdx(c), out=[];
+  L.forEach((p,i)=>{ if(i<startIdx(c)) return; const d=phaseDue(c,p);
+    if(d ? daysTo(d)<=3 : i<=ci) stepsFor(c,p).forEach(s=>{ if(isCritOpen(c,s)) out.push({p,s,d}); }); });
+  return out;
 }
-/* Go-live view: upcoming soonest first, then already live (most recent first), then no date. */
-function byDateBlocks(list, kOf){
-  const t=today(), up=[], live=[], none=[];
-  list.forEach(c=>{ const g=goLiveOf(c); (!g ? none : g>=t ? up : live).push(c); });
-  up.sort((a,b)=>goLiveOf(a).localeCompare(goLiveOf(b)) || a.name.localeCompare(b.name));
-  live.sort((a,b)=>goLiveOf(b).localeCompare(goLiveOf(a)) || a.name.localeCompare(b.name));
-  none.sort((a,b)=>a.name.localeCompare(b.name));
-  return [["Going live",up],["Already live",live],["No go-live date",none]].filter(x=>x[1].length)
-    .map(([l,L])=>'<div class="grp"><div class="grp-h"><span class="eyebrow">'+esc(l)+'</span><span class="n">'+L.length+'</span></div>'+L.map(c=>sideRow(c,kOf(c),true)).join("")+'</div>').join("");
+/* Compact sidebar row: the name, plus a red dot when a critical step is due. */
+function sideRow(c){
+  const cd=critDue(c).length;
+  return '<button class="crow'+(S.view==="client"&&S.clientId===c.id?' on':'')+'" data-act="open" data-id="'+c.id+'"><span class="nm">'+esc(c.name)+'</span>'+
+    (cd?'<span class="dot-crit" title="'+cd+' critical step'+(cd>1?'s':'')+' due" aria-label="'+cd+' critical step'+(cd>1?'s':'')+' due"></span>':'')+'</button>';
 }
+/* Sidebar: one A–Z (or go-live) list of clients in delivery. Parked (on hold) and scoping clients
+   sit in their own foldable group, closed clients in another. The picker filters by project type.
+   Searching looks across everyone and ignores the type filter and folds. */
 function renderSide(){
   const raw=$("q").value, q = norm(raw);
   const byDate = S.prefs.sort==="golive";
-  const groups = Object.fromEntries(BANDS.map(b=>[b[0],[]])); groups.sales=[];
-  clients().forEach(c=>{ if(q && !norm(c.name).includes(q) && !c.name.toLowerCase().includes(raw.toLowerCase())) return; groups[band(c)].push(c); });
   const cmp = byDate
     ? (a,b)=>{ const x=goLiveOf(a), y=goLiveOf(b); return (x?0:1)-(y?0:1) || x.localeCompare(y) || a.name.localeCompare(b.name); }
     : (a,b)=>a.name.localeCompare(b.name);
-  /* Show picker: all groups, or one. Searching always looks across every group. */
-  let f = S.prefs.band || "all";
-  if(f!=="all" && !BANDS.some(b=>b[0]===f)) f="all";
-  const nAll = BANDS.filter(b=>b[0]!=="closed").reduce((a,b)=>a+groups[b[0]].length,0);
-  $("band-filter").innerHTML = '<option value="all"'+(f==="all"?' selected':'')+'>All clients ('+nAll+')</option>'+
-    BANDS.filter(([k])=>groups[k].length || k===f).map(([k,l])=>'<option value="'+k+'"'+(k===f?' selected':'')+'>'+esc(l)+' ('+groups[k].length+')</option>').join("");
+  let f = S.prefs.type || "all"; if(f!=="all" && !TYPE_LABEL[f]) f="all";
+  const shown = clients().filter(c=>!["closed","sales"].includes(band(c)));
+  const nType = t => shown.filter(c=>projectType(c)===t).length;
+  $("band-filter").innerHTML = '<option value="all"'+(f==="all"?' selected':'')+'>All types ('+shown.length+')</option>'+
+    Object.entries(TYPE_LABEL).map(([k,l])=>'<option value="'+k+'"'+(k===f?' selected':'')+'>'+esc(l)+' ('+nType(k)+')</option>').join("");
   $("band-filter").disabled = !!q;
   document.querySelectorAll('[data-act="side-sort"]').forEach(b=>b.setAttribute("aria-pressed", String((b.dataset.v==="golive")===byDate)));
   let h="";
-  if(q || f==="all"){
-    if(byDate && !q){
-      /* All clients by go-live: one list, closed clients left out. */
-      h += byDateBlocks(BANDS.filter(b=>b[0]!=="closed").flatMap(b=>groups[b[0]]), band);
-    } else {
-      /* Sales follow-up clients stay out of the client list; they only show here when searched for. */
-      (q ? BANDS.concat([["sales","Sales follow-up"]]) : BANDS).forEach(([k,label])=>{
-        const list = groups[k].sort(cmp);
-        if(!list.length) return;
-        const collapsed = !q && grpCollapsed(k);
-        h += '<div class="grp"><button class="grp-h toggle" data-act="grp" data-k="'+k+'" aria-expanded="'+(!collapsed)+'" title="'+(collapsed?'Show':'Hide')+' '+esc(label)+'"><span class="eyebrow">'+esc(label)+'</span><span class="n">'+list.length+(q?'':(collapsed?' · show':' · hide'))+'</span></button>';
-        if(!collapsed) h += list.map(c=>sideRow(c,k,byDate)).join("");
-        h += '</div>';
-      });
-    }
+  if(q){
+    const hits = clients().filter(c=>norm(c.name).includes(q) || c.name.toLowerCase().includes(raw.toLowerCase())).sort(cmp);
+    h = hits.map(sideRow).join("");
   } else {
-    const list = groups[f].sort(cmp), label=(BANDS.find(b=>b[0]===f)||[])[1];
-    if(byDate && list.length) h += '<div class="grp"><div class="grp-h"><span class="eyebrow" style="color:var(--ink)">'+esc(label)+'</span><span class="n">'+list.length+'</span></div></div>'+byDateBlocks(list, ()=>f);
-    else h += '<div class="grp"><div class="grp-h"><span class="eyebrow">'+esc(label)+'</span><span class="n">'+list.length+'</span></div>'+
-      (list.length ? list.map(c=>sideRow(c,f,byDate)).join("") : '<div class="empty">No clients here right now.</div>')+'</div>';
+    const pool = clients().filter(c=>f==="all" || projectType(c)===f);
+    const main=[], parked=[], closed=[];
+    pool.forEach(c=>{ const b=band(c); if(b==="sales") return; (b==="closed" ? closed : ["hold","scoping"].includes(b) ? parked : main).push(c); });
+    h += main.sort(cmp).map(sideRow).join("") || '<div class="empty">No '+(f==="all"?'':esc(TYPE_LABEL[f].toLowerCase())+' ')+'clients in delivery.</div>';
+    [["parked","Parked and scoping",parked],["closed","Closed",closed]].forEach(([k,label,list])=>{
+      if(!list.length) return;
+      const collapsed = grpCollapsed(k);
+      h += '<div class="grp"><button class="grp-h toggle" data-act="grp" data-k="'+k+'" aria-expanded="'+(!collapsed)+'" title="'+(collapsed?'Show':'Hide')+' '+esc(label)+'"><span class="eyebrow">'+esc(label)+'</span><span class="n">'+list.length+(collapsed?' · show':' · hide')+'</span></button>';
+      if(!collapsed) h += list.sort(cmp).map(sideRow).join("");
+      h += '</div>';
+    });
   }
   $("clients").innerHTML = h || '<div class="empty">No clients match.</div>';
   const n = clients().filter(inDelivery).reduce((a,c)=>a+openMine(c).length,0);
@@ -1569,7 +1560,7 @@ document.addEventListener("change", e=>{
     if(Object.keys(rec).length) h.steps[sid]=rec; else delete h.steps[sid];
     touch(c); return render(true);
   }
-  if(t.id==="band-filter"){ S.prefs.band=t.value; savePrefs(); return renderSide(); }
+  if(t.id==="band-filter"){ S.prefs.type=t.value; savePrefs(); return renderSide(); }
   if(t.dataset.ed){
     const sid=t.dataset.sid, k=t.dataset.ed, v = k==="crit" ? t.checked : t.value.trim();
     if(k==="t" && !v){ render(true); return; }
