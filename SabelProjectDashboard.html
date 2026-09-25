@@ -384,6 +384,7 @@ var META_SHARED = null;
 var REFRESH_MS = 5 * 60 * 1000;
 
 var CLIENTS = [];
+var NO_TRACKER = [];   // portal clients (not Complete) with no trackers.json entry
 var REGISTRY = [];
 var LIVE = {ok:0, total:0, at:null, state:'loading'};   // state: loading | live | partial | offline
 
@@ -651,9 +652,15 @@ function buildClients(portal, overrides){
   }
 
   var out=[], used={};
+  NO_TRACKER = [];
   portal.forEach(function(pc){
     var reg = regFor(pc);
     if(reg) used[reg.key||reg.name]=1;
+    // Live portal clients with no tracker registered at all get their own panel,
+    // so they are visible without being counted on the board.
+    if(!reg && pc.stage!=='Complete')
+      NO_TRACKER.push({name:pc.name, stage:PORTAL_STAGE[pc.stage] || pc.stage || 'Active',
+                       lead:pc.owner||'', gl:pc.goLiveDate||''});
     // trackers.json decides who is on the board: a client shows only while its
     // tracker is active, or while someone has parked it here by hand. The portal
     // stage alone (Outreach, Discovery, Offboarding...) never puts a client on.
@@ -725,6 +732,7 @@ function unparkClient(id, ev){
   saveMeta(); render();
 }
 function toggleParked(){ S.showParked=!S.showParked; save(); render(); }
+function toggleNoTr(){ S.showNoTr=!S.showNoTr; save(); render(); }
 
 function setStamp(){
   var el = document.getElementById('stamp'); if(!el) return;
@@ -814,7 +822,7 @@ var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','De
 
 /* ── state (persisted) ── */
 var PK = 'sabel_dash_refresh_v1';
-var S = {sel:'', filter:'All clients', cap:{}, capOpen:'', pIdx:0, showParked:false, ptFilter:''};
+var S = {sel:'', filter:'All clients', cap:{}, capOpen:'', pIdx:0, showParked:false, showNoTr:true, ptFilter:''};
 try{ var saved = JSON.parse(localStorage.getItem(PK)||'null'); if(saved) for(var k in saved) S[k]=saved[k]; }catch(e){}
 if(!S.cap || typeof S.cap!=='object') S.cap={};
 if(FILTERS.indexOf(S.filter)<0) S.filter='All clients';
@@ -1504,7 +1512,37 @@ function viewC(Lall){
   (META_SHARED===false?'<div class="localwarn">Parking and project types are saving on this browser only. Add <b>sabel-clientmeta-v1</b> to the webhook key list so the whole team sees them.</div>':'')+
   '<div class="tbl-wrap"><div class="tbl"><div class="thead"><span>Client</span><span>Stage &amp; type</span><span>Go-live</span><span>Progress</span><span>Open actions</span><span></span></div>'+rows+'</div></div>'+
 
-  parkedHTML();
+  parkedHTML()+noTrackerHTML();
+}
+
+/* ── no tracker ──
+   Clients the portal knows about (anything short of Complete) that have no entry
+   in trackers.json. They are not on the board, so list them here until a
+   tracker is registered as active. Outreach and Scoping sort last. */
+function noTrackerHTML(){
+  var N=NO_TRACKER.slice();
+  if(!N.length) return '';
+  var ORD=['Go-live','Testing','Build','Active','Onboarding','Offboarding','On hold','Scoping','Outreach'];
+  function rank(st){ var i=ORD.indexOf(st); return i<0?ORD.length:i; }
+  N.sort(function(a,b){
+    return rank(a.stage)-rank(b.stage) || (a.name.toLowerCase()<b.name.toLowerCase()?-1:1);
+  });
+  var rows=N.map(function(x){
+    var col=STAGE_C[x.stage]||'#94A3B8', bg=STAGE_BG[x.stage]||'rgba(148,163,184,.12)';
+    return '<div class="prow">'+
+      '<div style="min-width:0"><div class="pnm">'+esc(x.name)+'</div>'+
+        '<div class="pmt">'+esc([(x.lead?'Lead '+x.lead:'No lead set'),
+            (x.gl?'go-live '+fmt(x.gl):'no go-live set')].join(' \u00b7 '))+'</div></div>'+
+      '<span class="stg" style="color:'+col+';background:'+bg+'">'+esc(x.stage)+'</span>'+
+    '</div>';
+  }).join('');
+  return '<div class="panel parkbox">'+
+    '<div class="parkh" onclick="toggleNoTr()">'+
+      '<span class="sec-h">No tracker</span><span class="count">'+N.length+'</span>'+
+      '<span class="sub" style="margin-left:8px">In the portal, not in trackers.json &middot; add one as active to put it on the board</span>'+
+      '<span class="parkarrow'+(S.showNoTr?' open':'')+'">&#9662;</span></div>'+
+    (S.showNoTr?'<div class="parkb">'+rows+'</div>':'')+
+  '</div>';
 }
 
 /* ── parked ──
