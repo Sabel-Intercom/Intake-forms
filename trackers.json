@@ -24,7 +24,7 @@
     "name": "FLKItOver",
     "key": "flkitover-tracker-v1",
     "file": "FlkitOverTracker_v2.html",
-    "sowHours": null,
+    "sowHours": 0,
     "active": false
   },
   {
@@ -38,14 +38,14 @@
     "name": "Cirqul",
     "key": "cirqul-tracker-v1",
     "file": "CirqulTracker_v2.html",
-    "sowHours": null,
+    "sowHours": 0,
     "active": false
   },
   {
     "name": "Education Perfect",
     "key": "education-perfect-tracker-v1",
     "file": "EducationPerfectTracker_v2.html",
-    "sowHours": null,
+    "sowHours": 0,
     "active": false
   },
   {
@@ -80,7 +80,7 @@
     "name": "Tulka",
     "key": "tulka-tracker-v1",
     "file": "TulkaTracker_v2.html",
-    "sowHours": null,
+    "sowHours": 65,
     "active": true
   },
 {
