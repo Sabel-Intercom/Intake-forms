@@ -653,10 +653,11 @@ function buildClients(portal, overrides){
   var out=[], used={};
   portal.forEach(function(pc){
     var reg = regFor(pc);
-    // Complete clients only stay on the board while their tracker is still active,
-    // otherwise the Complete column fills with years of finished work.
-    if(pc.stage==='Complete' && !(reg && reg.active)) return;
     if(reg) used[reg.key||reg.name]=1;
+    // trackers.json decides who is on the board: a client shows only while its
+    // tracker is active, or while someone has parked it here by hand. The portal
+    // stage alone (Outreach, Discovery, Offboarding...) never puts a client on.
+    if(!(reg && reg.active) && !metaFor(slug(pc.name)).parked) return;
     out.push(make(pc.name, PORTAL_STAGE[pc.stage] || pc.stage || 'Active',
                   pc.owner, pc.goLiveDate, reg, pc.type));
   });
