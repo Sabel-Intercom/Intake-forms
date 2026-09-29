@@ -243,8 +243,55 @@ footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);
   .opts .c{padding:8px 12px;font-size:14.5px}
   .nav .btn{flex:1}
 }
+/* embed=1: shown inside the project tracker, which already carries the Sabel branding */
+body.embed .bar .brand{display:none}
+body.embed footer{display:none}
+body.embed .wrap{padding-bottom:40px}
+body.embed .bar .inner{padding:10px 16px}
+@media (max-width:420px){body.embed .wrap{padding-left:16px;padding-right:16px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ---- dark theme: html.dark, set by ?theme=dark or the tracker's sabel-theme message.
+   Screen only, so printing stays black on white. ---- */
+@media screen{
+html.dark{color-scheme:dark;
+  --ground:#0F1117;--surface:#161B26;--alt:#1B2130;
+  --ink:#E2E8F0;--body:#CBD5E1;--muted:#94A3B8;
+  --line:#1E2433;--strong:#2A3145;
+  --accent:#E10600;--accent-soft:rgba(225,6,0,.16);
+  --good:#4ADE80;--good-soft:rgba(74,222,128,.12);
+  --warn:#FBBF24;--warn-soft:rgba(251,191,36,.12);
+  --bad:#E10600;--bad-soft:rgba(225,6,0,.16);
+  --na:#94A3B8;--na-soft:rgba(148,163,184,.12);
+  --shadow:0 1px 2px rgba(0,0,0,.35);
+  --shadow-lift:0 2px 10px rgba(0,0,0,.35);
+}
+html.dark .brand{filter:invert(1) hue-rotate(180deg)}  /* black wordmark -> white, red bubble stays red */
+html.dark .rseg::after{background:#E2E8F0;color:#0F1117}
+html.dark .tick{color:#0F1117}
+html.dark input[type=text],html.dark input[type=email],html.dark input[type=date],html.dark textarea,html.dark select{
+  background:var(--ground);border-color:#3A4358;color:var(--ink)}
+html.dark input::placeholder,html.dark textarea::placeholder{color:#64748B;opacity:1}
+html.dark .opts .c,html.dark .pick .box,html.dark .reprow .x,html.dark .btn.quiet,html.dark .addrow{border-color:#3A4358}
+html.dark .reprow input[type=text],html.dark .reprow input[type=email],html.dark .reprow input[type=date],html.dark .reprow select,html.dark .reprow textarea{background:var(--surface)}
+html.dark .more .body,html.dark .hint .eg{background:#1B2130}
+html.dark input:focus,html.dark textarea:focus,html.dark select:focus{border-color:var(--accent)}
+html.dark .err{background:var(--bad-soft)}
+}
 </style>
+<script>
+/* Theme (see client-hub/CONTRACT.md): ?theme=light|dark picks one; with no param the page keeps its
+   own default look. The tracker that embeds this page can switch it live, without a reload, by posting
+   {type:'sabel-theme', theme:'light'|'dark'} from the same origin. */
+(function(){
+  var root=document.documentElement;
+  function applyTheme(t){ if(t!=='light'&&t!=='dark') return; root.classList.toggle('dark', t==='dark'); }
+  try{ applyTheme(new URLSearchParams(location.search).get('theme')); }catch(e){}
+  window.addEventListener('message', function(e){
+    if(e.origin!==location.origin || e.source!==window.parent) return;
+    var d=e.data; if(d && d.type==='sabel-theme') applyTheme(d.theme);
+  });
+})();
+</script>
 </head>
 <body>
 
@@ -265,11 +312,27 @@ footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);
    CONFIG
    ===================================================================== */
 const API = 'https://sabel-webhook.vercel.app/api/readiness';
-const FORM_V = '2026-09-15c';
-/* A link like SabelReadinessCheck.html?client=Acme%20Ltd pre-fills the company name and keeps
-   that client's draft separate from anyone else's on the same browser. */
-const CLIENT_PARAM = (new URLSearchParams(location.search).get('client')||'').trim();
+const FORM_V = '2026-09-29a';
+/* URL parameters (see client-hub/CONTRACT.md):
+   ?client=<slug>   picks this client's saved copy on the server (readiness-<slug>-v1) and keeps
+                    their draft separate from anyone else's on the same browser.
+                    The old style ?client=Acme%20Ltd still works: a value with a space or a capital
+                    is treated as the company name, and the slug is worked out from it.
+   ?name=<Company>  pre-fills the company name.
+   ?embed=1         shown inside the project tracker: hides the page's own logo and footer. */
+const QS = new URLSearchParams(location.search);
+const CLIENT_PARAM = (QS.get('client')||'').trim();
+const NAME_PARAM = (QS.get('name')||'').trim();
+const EMBED = QS.get('embed')==='1';
+function slugify(v){ return String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+const SLUG = slugify(CLIENT_PARAM);
+const COMPANY_PREFILL = NAME_PARAM || CLIENT_PARAM;
 const KEY = 'sabel-readiness-v2' + (CLIENT_PARAM ? ':'+CLIENT_PARAM.toLowerCase() : '');
+/* Server copy of the draft, so answers follow the client between browsers and the tracker can
+   show progress. Same storage API the trackers use. If the key is not registered yet the GET
+   comes back 404 / ok:false and the form carries on with this browser's copy only. */
+const STORE = 'https://sabel-webhook.vercel.app/api/tracker';
+const SERVER_KEY = SLUG ? 'readiness-'+SLUG+'-v1' : '';
 
 /* =====================================================================
    ANSWER OPTION SETS
@@ -376,7 +439,13 @@ const SECTIONS = [
   {t:'ask',id:'b6',q:'Do you split your support by region or by brand?',
    why:'If you do, tell us how you tell them apart. If you do not, just say no.',
    more:'<p>For example, an Australian team and a New Zealand team, or two brands sharing one support team. If so, we need to know what decides which is which: the address they wrote to, the website they came from, or something on their account.</p><p>Getting this rule right up front is what stops a UK customer landing in the US queue after go-live, which is one of the most common complaints we see.</p>',
-   f:[['b6a','Regions or brands, and how you tell them apart','textarea','Type here',{ex:'We have an Australian team and a New Zealand team.\nYou can tell which is which by the address they emailed: support-au@ or support-nz@.\n\nWe also run two brands through the same team. The brand is decided by which website the chat was opened on.'}]]}
+   f:[['b6a','Regions or brands, and how you tell them apart','textarea','Type here',{ex:'We have an Australian team and a New Zealand team.\nYou can tell which is which by the address they emailed: support-au@ or support-nz@.\n\nWe also run two brands through the same team. The brand is decided by which website the chat was opened on.'}]]},
+
+  {t:'ask',id:'b7',scope:'b',q:'How should your emails look to customers?',
+   why:'So replies from Intercom look like they come from you, not from a system.',
+   f:[['b7a','Sender name','text','e.g. Anna from Acme'],
+      ['b7b','Reply address','email','e.g. support@yourcompany.com'],
+      ['b7c','Link to your logo files','text','A Google Drive or Dropbox link is fine']]}
  ]
 },
 {
@@ -526,7 +595,11 @@ const SECTIONS = [
 
   {t:'rag',id:'f4',opts:O.confirm,q:'Do you have an existing help centre that people already link to?',
    why:'If so we will want to send those old links to the new pages so nothing breaks.',
-   more:'<p>If customers have bookmarked your articles, or they are linked from your website, emails or Google, those links will break when the content moves. We can redirect them, we just need to know they exist.</p>'}
+   more:'<p>If customers have bookmarked your articles, or they are linked from your website, emails or Google, those links will break when the content moves. We can redirect them, we just need to know they exist.</p>'},
+
+  {t:'ask',id:'f5',q:'Who will look after your help articles after go-live?',
+   why:'Fin answers from these articles, so someone needs to keep them up to date.',
+   f:[['f5a','Name','text','',{person:'name',pair:'f5b'}],['f5b','Email address','email','']]}
  ]
 },
 {
@@ -593,11 +666,17 @@ const SECTIONS = [
    more:'<p>If Fin answers someone in Portuguese and then hands them to a team who cannot read it, everyone has a bad day. We set Fin to answer only in languages you can back up.</p>',
    f:[['h4a','Languages you support','text','e.g. English and German'],
       ['h4b','Any wording your industry requires you to include','textarea','Leave blank if this does not apply to you',
-       {ex:'This is general information only and does not take your circumstances into account.\n\nWe are not able to give medical advice. Please speak to your doctor.\n\nFinancial, medical and legal businesses usually have something like this. Most others have nothing.'}]]},
+       {ex:'This is general information only and does not take your circumstances into account.\n\nWe are not able to give medical advice. Please speak to your doctor.\n\nFinancial, medical and legal businesses usually have something like this. Most others have nothing.'}],
+      ['h4c','When a customer writes in another language, Fin should','select','Reply in the language the customer writes in|Use the language on their profile|Not sure, talk us through it']]},
 
   {t:'ask',id:'h5',q:'Who will read through Fin answers and sign them off before go-live?',
    why:'One named person spots more than a group review does. It usually takes an hour.',
-   f:[['h5a','Name','text','',{person:'name',pair:'h5b'}],['h5b','Email address','email','']]}
+   f:[['h5a','Name','text','',{person:'name',pair:'h5b'}],['h5b','Email address','email','']]},
+
+  {t:'ask',id:'h6',q:'How should Fin sound?',
+   why:'Fin copies the style of what you send us, so a few good examples go a long way.',
+   f:[['h6a','Link to a tone of voice or brand voice guide','text','Leave blank if you do not have one'],
+      ['h6b','3 to 5 example replies you are happy with','textarea','Paste real replies your team has sent. Take out customer names and details.']]}
  ]
 },
 {
@@ -619,13 +698,20 @@ const SECTIONS = [
    f:[['i3a','Support hours and time zones','text','e.g. 8am to 6pm Sydney, Monday to Friday'],
       ['i3b','Countries or regions you serve','text','e.g. Australia and New Zealand'],
       ['i3c','Languages customers write in','text','e.g. English and German'],
-      ['i3d','Currencies','text','e.g. AUD and NZD']]},
+      ['i3d','Currencies','text','e.g. AUD and NZD'],
+      ['i3e','Public holidays and closures','text','e.g. Christmas Day to New Year, Australian public holidays']]},
 
   {t:'ask',id:'i4',q:'Where are you with Fin, our AI agent?',
    more:'<p>Fin answers customer questions automatically from your help content and hands over to your team when it should. Some teams already use it, some switch it on as part of this project, and some leave it for later.</p><p>For the build, some teams want everything set up properly from the start. Others prefer to copy what they have today first, then improve it once they are live.</p>',
    f:[['i4a','Fin today','select','Already using Fin|Switching it on in this project|Not part of this project|Not sure'],
       ['i4b','How should we approach the build','select','Set it up properly from the start|Copy our current setup first, then improve it|Not sure'],
       ['i4c','A name for your AI assistant (optional)','text','e.g. Ava']]},
+
+  {t:'ask',id:'i5',scope:'b',q:'How fast do you aim to reply to customers?',
+   why:'Intercom tracks these and flags conversations running late.',
+   f:[['i5a','Chat','text','e.g. within 5 minutes'],
+      ['i5b','Email','text','e.g. within 1 working day'],
+      ['i5c','Other channels','text','e.g. social replies within 4 hours']]},
 
   /* one block per industry; shown only for the industry picked in i1 */
   {t:'ask',id:'ie1',ind:['Ecommerce or retail'],q:'About your online store',
@@ -747,7 +833,8 @@ const PERSON_PAIRS = [
   ['e5a','e5b'],               // sample sign-off
   ['f1c','f1d'],               // content owner
   ['g3a','g3b'],               // developer
-  ['h5a','h5b']                // Fin reviewer
+  ['h5a','h5b'],               // Fin reviewer
+  ['f5a','f5b']                // help article owner after go-live
 ];
 
 function people(){
@@ -869,7 +956,8 @@ function startPanel(){
 
     '<div class="note"><p><strong>There are no wrong answers here.</strong> Most of the bumps on a project like this come from a handful of small things that were still being sorted when the build began. None of them are hard to fix early. A few of them cannot be undone once your workspace is live, which is the only reason we ask now.</p>'+
     '<p>Nothing on this form will hold your project up. If something is not ready, that just tells us the order to do things in. A blank is far more useful to us than an optimistic tick.</p>'+
-    (state.hasDraft ? '<p class="restart">Your answers so far are saved in this browser. Not you, or want a clean slate? <a data-nav="restart">Start again</a>.</p>' : '')+'</div>'+
+    (state.submittedAt ? '<p class="restart">You sent this to us on '+esc(new Date(state.submittedAt).toLocaleDateString('en-GB',{day:'numeric',month:'long'}))+'. You can change anything and send it again.</p>' : '')+
+    (state.hasDraft ? '<p class="restart">Your answers so far are saved'+(SERVER_KEY?'':' in this browser')+'. Not you, or want a clean slate? <a data-nav="restart">Start again</a>.</p>' : '')+'</div>'+
 
     '<div class="card"><div class="items"><div class="item">'+
       '<span class="q">First, what kind of project is this?</span>'+
@@ -1021,22 +1109,106 @@ function readDOM(){
   });
   Object.keys(groups).forEach(k=>{ state.data[k]=groups[k].join('|'); });
 }
+/* ---------------------------------------------------------------------
+   PROGRESS SUMMARY (P) for the project tracker, per client-hub/CONTRACT.md.
+   An item counts as filled when: status question answered; or any field,
+   repeat-table cell or tick box has something in it. Notes do not count.
+   --------------------------------------------------------------------- */
+const nonEmpty = v => v!=null && String(v).trim()!=='';
+function itemFilled(it){
+  if(it.t==='rag') return nonEmpty(state.data['s_'+it.id]);
+  if((it.f||[]).some(f=>nonEmpty(state.data[f[0]]))) return true;
+  if(it.rep && (state.reps[it.rep.id]||[]).some(r=>r && Object.values(r).some(nonEmpty))) return true;
+  if(it.multi && nonEmpty(state.data[it.multi.id])) return true;
+  return false;
+}
+function buildP(){
+  return { form:'readiness', v:1, updated:new Date().toISOString(),
+    submitted: state.submittedAt ? new Date(state.submittedAt).toISOString() : null,
+    projectType: state.projectType||'',
+    sections: activeSections().map(sec=>{
+      const list=activeItems(sec).filter(i=>i.t!=='note');
+      const filled=list.filter(itemFilled).length, total=list.length;
+      return { id:sec.id, title:sec.title, done: total>0 && filled>=total, filled, total };
+    }) };
+}
+function snapshot(){
+  const P=buildP();
+  return { v:FORM_V, savedAt:state.savedAt||Date.now(), step:state.step, projectType:state.projectType,
+           data:state.data, reps:state.reps, submitted:!!state.submittedAt, submittedAt:state.submittedAt||null, P };
+}
+function tellParent(P){
+  if(window.parent===window) return;
+  try{ window.parent.postMessage({type:'sabel-form-progress', form:'readiness', slug:SLUG, P:P||buildP()}, location.origin); }catch(e){}
+}
+
+/* ---- server copy: never blocks typing, silent when unavailable ---- */
+const server = { ok:false, checked:false, timer:null, dirty:false };
+async function pushServer(){
+  clearTimeout(server.timer); server.timer=null;
+  if(!SERVER_KEY || !server.ok) return;
+  try{
+    await fetch(STORE,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key:SERVER_KEY, value:JSON.stringify(snapshot())})});
+  }catch(e){}
+}
+function queueServer(){
+  if(!SERVER_KEY) return;
+  server.dirty=true;
+  if(!server.ok) return;             // not checked yet, or key not registered: this browser only
+  clearTimeout(server.timer); server.timer=setTimeout(pushServer,1000);
+}
+function applyDraft(d){
+  state.data=d.data||{}; state.reps=d.reps||{}; state.projectType=d.projectType||''; state.step=d.step||0;
+  state.savedAt=d.savedAt||0; state.submittedAt=d.submittedAt||null; state.hasDraft=true;
+}
+async function syncServer(){
+  if(!SERVER_KEY) return;
+  let remote=null;
+  try{
+    const r=await fetch(STORE+'?key='+encodeURIComponent(SERVER_KEY)+'&_t='+Date.now(),{cache:'no-store'});
+    if(!r.ok) return;                                   // 404: key not registered yet
+    const j=await r.json();
+    if(!j || j.ok===false) return;
+    const raw = j.value!==undefined ? j.value : j.data;
+    remote = typeof raw==='string' ? (raw ? JSON.parse(raw) : null) : (raw||null);
+    server.ok=true;
+  }catch(e){ return; }
+  server.checked=true;
+  const localAt=state.savedAt||0, remoteAt=(remote && remote.savedAt)||0;
+  if(remote && remoteAt>localAt && !server.dirty){
+    applyDraft(remote);
+    if(COMPANY_PREFILL && !state.data.f_client) state.data.f_client=COMPANY_PREFILL;
+    try{ localStorage.setItem(KEY, JSON.stringify(snapshot())); }catch(e){}
+    render(); tellParent();
+  } else if(server.dirty || (state.hasDraft && localAt>remoteAt)){
+    pushServer();
+  }
+}
+
 function save(){
   readDOM();
-  try{ localStorage.setItem(KEY, JSON.stringify({step:state.step,projectType:state.projectType,data:state.data,reps:state.reps})); }catch(e){}
+  state.savedAt=Date.now();
+  const snap=snapshot();
+  try{ localStorage.setItem(KEY, JSON.stringify(snap)); }catch(e){}
+  state.hasDraft=true;
+  queueServer(); tellParent(snap.P);
   const sv=$('sv'); sv.classList.add('on'); clearTimeout(window.__t); window.__t=setTimeout(()=>sv.classList.remove('on'),1400);
 }
 function restore(){
   let d=null; try{ d=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
-  if(d){ state.data=d.data||{}; state.reps=d.reps||{}; state.projectType=d.projectType||''; state.step=d.step||0; state.hasDraft=true; }
-  if(CLIENT_PARAM && !state.data.f_client) state.data.f_client=CLIENT_PARAM;
+  if(d) applyDraft(d);
+  if(COMPANY_PREFILL && !state.data.f_client) state.data.f_client=COMPANY_PREFILL;
 }
 function startAgain(){
-  if(!confirm('Clear everything saved in this browser and start the form again?')) return;
+  if(!confirm('Clear your saved answers and start the form again?')) return;
   try{ localStorage.removeItem(KEY); }catch(e){}
   state.data={}; state.reps={}; state.projectType=''; state.step=0; state.hasDraft=false;
-  if(CLIENT_PARAM) state.data.f_client=CLIENT_PARAM;
+  state.submittedAt=null; state.savedAt=Date.now();
+  if(COMPANY_PREFILL) state.data.f_client=COMPANY_PREFILL;
   render();
+  if(server.ok) pushServer(); else server.dirty=true;   // clear the server copy too
+  tellParent();
 }
 
 /* =====================================================================
@@ -1191,7 +1363,9 @@ async function submit(){
     const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(!r.ok) throw new Error('HTTP '+r.status);
     try{ localStorage.removeItem(KEY); }catch(e){}
-    state.submitted=true; render();
+    state.submitted=true; state.submittedAt=Date.now(); state.savedAt=Date.now();
+    render();
+    pushServer(); tellParent();       // server copy only: this browser's draft stays cleared as before
   }catch(e){
     btn.disabled=false; btn.textContent='Send to Sabel';
     err.textContent='That did not send, sorry. Please use Download my answers and email the file to admin@sabelcustomersuccess.com and we will take it from there.';
@@ -1309,7 +1483,8 @@ async function loadProjectInputs(){
   }catch(e){}
 }
 
-restore(); render(); loadProjectInputs();
+if(EMBED) document.body.classList.add('embed');
+restore(); render(); tellParent(); loadProjectInputs(); syncServer();
 </script>
 </body>
 </html>

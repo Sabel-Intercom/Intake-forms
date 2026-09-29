@@ -18,10 +18,6 @@ a{color:var(--blue2)}
 .client-chip{font-size:12px;font-weight:600;color:var(--amber);background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:20px;padding:4px 12px;white-space:nowrap}
 #save-dot{font-size:11px;color:var(--fnt);display:flex;align-items:center;gap:5px;opacity:0;transition:opacity .4s;white-space:nowrap}
 #save-dot span{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block}
-.top-dl{font-size:11px;color:var(--fnt);white-space:nowrap;display:flex;align-items:center;gap:5px}
-.top-dl i{font-style:normal;color:var(--line2)}
-.top-dl button{background:none;border:none;color:var(--blue2);font-size:11px;font-family:inherit;cursor:pointer;padding:2px 0}
-.top-dl button:hover{text-decoration:underline}
 .pbar{height:3px;background:var(--line)}
 .pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),#F87171);transition:width .4s}
 .wrap{max-width:1120px;margin:0 auto;padding:22px 20px 80px;display:flex;gap:26px;align-items:flex-start}
@@ -81,10 +77,120 @@ table.map td:last-child{width:34px}
 #admin .meta{font-size:11px;color:var(--fnt);margin-bottom:12px;line-height:1.6}
 #admin .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 #admin input{width:auto;flex:1;min-width:160px}
+.modal{position:fixed;inset:0;z-index:1100;background:rgba(5,7,12,.72);display:none;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-card{background:var(--card);border:1px solid rgba(74,222,128,.45);border-radius:14px;max-width:460px;width:100%;padding:28px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.done-tick{width:58px;height:58px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--green);background:rgba(74,222,128,.15);border:2px solid var(--green)}
+.modal-card.warn{border-color:rgba(251,191,36,.5)}
+.modal-card.warn .done-tick{color:var(--amber);background:rgba(251,191,36,.15);border-color:var(--amber)}
+.modal-card h2{font-size:19px;font-weight:600;margin-bottom:8px}
+.modal-card p{font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+#submit-status{font-size:13px;font-weight:600;color:var(--green)}
+@media print{.modal{display:none!important}}
 .toast{position:fixed;bottom:20px;right:20px;background:var(--line);border:1px solid var(--line2);border-radius:8px;padding:9px 14px;font-size:12px;color:var(--txt);opacity:0;transition:opacity .3s;pointer-events:none;z-index:1001}
 footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;font-size:11px;color:var(--fnt)}
-@media(max-width:1000px){nav.rail{display:none}.grid{grid-template-columns:1fr}.top-t p{display:none}.top-dl{display:none}}
+.btn.print{background:transparent;color:var(--txt);border-color:var(--line2);padding:7px 14px;font-size:12px;white-space:nowrap}
+.btn.print:hover{border-color:var(--red);color:#fff}
+@media print{
+  @page{size:A4;margin:14mm 12mm}
+  :root{--bg:#fff;--card:#fff;--line:#d4d4d8;--line2:#a1a1aa;--txt:#000;--mut:#333;--fnt:#555;--blue:#E11D48;--blue2:#E11D48}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body{background:#fff!important;color:#000!important}
+  .top{position:static;background:#fff;backdrop-filter:none;border-bottom:2px solid var(--red)}
+  .top-in{padding:0 0 10px}
+  .top-t p{display:block}
+  .btn,.print,#save-dot,.pbar,nav.rail,#admin,.toast,.submit-bar,.row-x,.add-row,.na-toggle{display:none!important}
+  .client-chip{color:#000;background:#fff;border-color:#000}
+  .wrap{display:block;padding:14px 0 0;max-width:none}
+  main{width:100%}
+  .intro{color:#333;max-width:none}
+  section.card{background:#fff;border:1px solid #d4d4d8;border-radius:6px;padding:14px 16px;margin-bottom:12px;break-inside:avoid;page-break-inside:avoid}
+  .sec-h h2{color:#000}
+  .note{background:#fafafa;border-color:#e4e4e7;border-left-color:var(--red);color:#333}
+  .banner.green{background:#fff;border:1px solid #16a34a;color:#166534}
+  input[type=text],input[type=date],textarea,select{background:#fff;border:1px solid #a1a1aa;color:#000;border-radius:4px}
+  textarea{resize:none;overflow:hidden}
+  select{background-image:none;padding-right:11px}
+  .pill{color:#555;background:#fff;border-color:#a1a1aa}
+  .pill.on{color:#fff;background:var(--red);border-color:var(--red)}
+  .chk{color:#000}
+  .chk .box{border-color:#a1a1aa}
+  .chk.on .box{background:var(--red);border-color:var(--red);color:#fff}
+  table.map th{color:#555}
+  table.map td:last-child{display:none}
+  footer{padding:10px 0 0;color:#555;border-top:1px solid #d4d4d8;margin-top:10px}
+  a{color:#000;text-decoration:none}
+}
+@media(max-width:1000px){nav.rail{display:none}.grid{grid-template-columns:1fr}.top-t p{display:none}}
+@media print{.grid{grid-template-columns:1fr 1fr}.top-t p{display:block}}
+/* table scroll on narrow screens */
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:560px){table.map input{min-width:120px}.wrap{padding:16px 12px 60px}.top-in{padding:10px 12px}}
+/* embed=1: inside the tracker iframe, drop the chrome the tracker already shows */
+html.embed body{min-height:0}
+html.embed .top img,html.embed .top-t,html.embed .client-chip,html.embed footer{display:none!important}
+html.embed .top-in{justify-content:flex-end;padding:6px 16px;min-height:34px}
+html.embed .wrap{padding-top:14px;padding-bottom:30px}
+html.embed nav.rail{top:48px}
+html.embed section.card{scroll-margin-top:52px}
+@media(max-width:1000px){
+  html.embed .wrap{flex-direction:column;gap:12px}
+  html.embed nav.rail{display:flex;position:sticky;top:40px;z-index:40;width:100%;overflow-x:auto;background:var(--bg);border-bottom:1px solid var(--line)}
+  html.embed .rail button{width:auto;white-space:nowrap;border-left:none;border-bottom:2px solid transparent}
+  html.embed .rail button.on{border-bottom-color:var(--red)}
+}
+@media print{html.embed .top-t,html.embed footer{display:block!important}}
+/* ---- light theme: html.light, set by ?theme=light or the tracker's sabel-theme message.
+   Screen only, so the print stylesheet above keeps printing black on white. ---- */
+@media screen{
+html.light{color-scheme:light;
+  --bg:#F4F5F7;--card:#FFFFFF;--line:#E4E7EC;--line2:#D0D5DD;--txt:#101828;--mut:#475467;--fnt:#7A8699;
+  --blue:#2563EB;--blue2:#2563EB;--red:#E10600;--amber:#B45309;--green:#15803D}
+html.light .top{background:rgba(244,245,247,.92)}
+html.light .top img{filter:invert(1) hue-rotate(180deg);mix-blend-mode:multiply}  /* white-on-black logo -> black on the light bar */
+html.light .client-chip{background:rgba(180,83,9,.08);border-color:rgba(180,83,9,.3)}
+html.light .pbar i{background:linear-gradient(90deg,#E10600,#F87171)}
+html.light .rail button:hover{background:rgba(16,24,40,.04)}
+html.light .rail .tick.done{background:rgba(21,128,61,.1)}
+html.light .banner.amber{background:rgba(180,83,9,.07);border-color:rgba(180,83,9,.35);color:#92400E}
+html.light .banner.green{background:rgba(21,128,61,.07);border-color:rgba(21,128,61,.35);color:#166534}
+html.light input[type=text],html.light input[type=date],html.light textarea,html.light select{background-color:#FFFFFF;border-color:var(--line2);color:var(--txt)}
+html.light select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23475467' fill='none' stroke-width='1.5'/></svg>")}
+html.light input:focus,html.light textarea:focus,html.light select:focus{border-color:var(--blue)}
+html.light input::placeholder,html.light textarea::placeholder{color:var(--fnt);opacity:1}
+html.light .pill{background:#FFFFFF}
+html.light .pill.on{color:var(--blue);background:rgba(37,99,235,.1);border-color:var(--blue)}
+html.light .chk .box{background:#FFFFFF}
+html.light .chk.on .box{background:rgba(37,99,235,.12);border-color:var(--blue);color:var(--blue)}
+html.light .row-x:hover{color:var(--red)}
+html.light .btn.primary{color:#fff}
+html.light .btn.primary:hover{background:#B80500}
+html.light .btn.print:hover{color:var(--red)}
+html.light #admin{background:#FAF5FF;border-color:rgba(126,34,206,.3)}
+html.light #admin h3{color:#7E22CE}
+html.light .modal{background:rgba(16,24,40,.45)}
+html.light .modal-card{border-color:rgba(21,128,61,.4);box-shadow:0 20px 60px rgba(16,24,40,.18)}
+html.light .done-tick{background:rgba(21,128,61,.1)}
+html.light .modal-card.warn{border-color:rgba(180,83,9,.45)}
+html.light .modal-card.warn .done-tick{background:rgba(180,83,9,.1)}
+html.light .toast{background:#101828;border-color:#101828;color:#FFFFFF;box-shadow:0 6px 20px rgba(16,24,40,.18)}
+}
 </style>
+<script>
+/* Theme (see client-hub/CONTRACT.md): ?theme=light|dark picks one; with no param the page keeps its
+   own default look. The tracker that embeds this page can switch it live, without a reload, by posting
+   {type:'sabel-theme', theme:'light'|'dark'} from the same origin. */
+(function(){
+  var root=document.documentElement;
+  function applyTheme(t){ if(t!=='light'&&t!=='dark') return; root.classList.toggle('light', t==='light'); }
+  try{ applyTheme(new URLSearchParams(location.search).get('theme')); }catch(e){}
+  window.addEventListener('message', function(e){
+    if(e.origin!==location.origin || e.source!==window.parent) return;
+    var d=e.data; if(d && d.type==='sabel-theme') applyTheme(d.theme);
+  });
+})();
+</script>
 </head>
 <body>
 <div class="top">
@@ -92,11 +198,11 @@ footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;font-size:11px;color:v
     <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCADbApEDASIAAhEBAxEB/8QAHQABAAMBAQEBAQEAAAAAAAAAAAcICQYFBAMCAf/EAFkQAAEDAwECBwQSDgkEAwEAAAEAAgMEBQYRBxIIEyExQVFhInF1sgkUFhcYNTc4VFdzgZGSldHS0xUyNkJSU1ZncnSlsbPkIzNDYoKUoaLCJCW0wTR2o5P/xAAbAQEAAgMBAQAAAAAAAAAAAAAABAUDBgcCAf/EADwRAQABAgICDA0EAwEAAAAAAAABAgMEBRFxBgcSITE1UXKRobHBExQVFjIzNEFSU2GB0iKy0fAXJGLx/9oADAMBAAIRAxEAPwCmSIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiIP2o6WesqG09NGZJHcwC7a0YjSQMElefLEvS0Ehg/9lfbitoZbKBrntHlqUAyHpH933v3r977eaW0wh0ur5XfaRNPKe3sHaqLE425er8HZ/8AXWMk2MYLLcL47mejTo06J4Kfpo989+9EPrho6SBu7DSwxjqawBfpxUX4tnxQo+rMru87yYpWU7OhrGA/6nVfP5o717Pf8VvzLzGWX535mGerZ3lNqdxbt1TEckREdqSeKi/Fs+KE4qL8Wz4oUbeaO9ez3/Fb8yeaO9ez3/Fb8y++Sr3xR1vPn/lvyquin8kk8VF+LZ8UJxUX4tnxQo280d69nv8Ait+ZPNHevZ7/AIrfmTyVe+KOs8/8t+VV0U/kkniovxbPihOKi/Fs+KFG3mjvXs9/xW/MnmjvXs9/xW/Mnkq98UdZ5/5b8qrop/JJPFRfi2fFCcVF+LZ8UKNvNHevZ7/it+ZPNHevZ7/it+ZPJV74o6zz/wAt+VV0U/kkniovxbPihOKi/Fs+KFG3mjvXs9/xW/MnmjvXs9/xW/Mnkq98UdZ5/wCW/Kq6KfySTxUX4tnxQv4lpaaVu7LTwvb1OYCFHPmjvXs9/wAVvzL9qXKrxC8F87J2/gyMH7xoV8nK78b8THW9U7PMqrnc126oifpT/LpLtidBUsL6MeVZujTlYe+Oj3lxFxoam31Jp6qMseOUdTh1g9IUhY/faW7MLAOKqGjV0ZPR1g9IX65DaorrQOiIAmbqYn9R6u8V9sYy7h6/B3uDsY822N4DN8L45luiKuGNG9FX0mPdPRv8KL0X9SMdG9zHtLXNJBB6Cv5V85LMTE6JEREfBERAREQEREBTdsm4MW0zPIYrhNRR45aZAHNqrmHMfI09LIgN49GhO6D0FTbwKeD/AEENootpmaULKmsqQJ7NRTN1ZBHztqHNPO93O3oA0dzkbtvUFUMf4EWIQwgZBmd9rpdOU0MMVM3XvPEi96fgY7J5IQxlyyuJw07tlbDvH4YSP9FZFEFPMr4EFC6F0mK5zURSD7WG5UjXtd35IyNPilVr2s7G9oGzGbXJ7K4ULn7kdxpXcbSyHoG+B3JPLoHBpOnMtV1810t9DdbdUW25UkFZR1MZjngmYHskaecOB5CEGOCKfeGBsObsuyGG+48yR2K3WUtha4lxop9C4wknnaQCWk8ugIPNqYCQEREBERAVgeDvwZrjtYw2fKanJ2Y/ReWXU9K3ygal0+6Bvv8A6xga0E7o59SHc2g1gSipqitrIKOkidNUTyNiijaNS97joAO0krWvZTidPg2ziw4nT7pFtomRSOaNA+U91I//ABPLne+gq16Bj86P7A/mF/FRwGZm08jqfadHJMGExsksZY1ztOQFwnJA16dDp1FXPRBjlebdV2i8VtpuEJhrKKokp6iM87JGOLXD3iCvkVg+HphXmZ21vvlNDuUOR04rGkDuRO3Rkze/qGvPuir4gIiICIiDuthezmp2p7RKTEaa5xWwSxSTS1UkRk4tjBqdGAjePMNNR31ZL0DH50f2B/MKM+AJ64al8G1XihaMIKZ+gY/Oj+wP5hPQMfnR/YH8wrmIgpn6Bj86P7A/mF+NXwGqpsetJtLhlf1S2UsHwiZ37ldJEGeGacD/AGq2SF9RaHWnIomjXcpKgxzafoSBo94OJUB3u03Sx3Oa13m3VduroDpLTVULopGHn5WuAIWxa4HbTsmxParjzrbkFI2OsjYRRXGJo4+ld0aH75uvOw8h7DoQGUqLodo2IXjA80uWKX6JrK6gl3HOZyslaRqyRp6WuaQR08vLodQueQEREFoNkPBFqc72d2nLqrPIrUbnEZo6WO1mo3GakN1eZWcp01005OsrrPQMfnR/YH8wrAcFf1vOFeDW+M5SYgpn6Bj86P7A/mE9Ax+dH9gfzCuYiCmfoGPzo/sD+YT0DH50f2B/MK5iIKZ+gY/Oj+wP5hV64Q2yup2QZ5FjFReIrvHPQx1sFSyAwksc57NHMJdukOjdzOPJoenQaoqgHkjvq32b/wCtwf8Ak1KCsyIiArQbIeCLU53s7tOXVWeRWo3OIzR0sdrNRuM1Ibq8ys5TprppydZVX1qZwV/W84V4Nb4zkFf/AEDH50f2B/MKvPCG2X+dJnseK/Zz7Nb9DHV+WPKnlfTfc8bu7vv5tzn16eZapLPTyQz1eoPAlP8AxJUFckREBERAREQF6mKUwqr/AEsbhq1rt8/4Rr+8BeWvfwP7oG+5uWDE1TTZqmOSVpkdqm7mNiirgmqntSDI9scbpHnRrQXE9QCim61stwr5aqUnV55B+COgKTL5yWWuI9jSeKVFKrcpojRVV7287YmJr3VmxE/p35+/BHRv9IiIrlzIREQf6ASdANSVO2zjgqbVMwoI7lU0tFjlHK3ejN1kcyV7egiJrXOH+Pd/dr33kf8Asnt99rqzaTf6VlTBbajyraoJW6sM4aHPmIPId0OaG841JPO0K8aCgeS8C7aPQUb6izXuw3h7G6+VxI+CR56m7zdz4XBV3yjHr3i97nsuQ2uqtlwgOklPURlrh1EdYPQRyHoWwihvhY7J7ftL2bVtRBSsGR2iB9TbahrO7fugudAekteAQB0O0PXqGZaIiAiIgIiIP2o6mWkqo6mB27JG7eBUrUU7aqkhqWfaysDwOrUKI1JuJknHaMn8Aj/UqozaiNzTX7+B0ba7xVcYi7h9P6ZjdfeJiO/qcdnFMKe/yOaNBMwSad/kP+oK8NdRtG9NKf3H/kVy6nYOqarFMzyNU2SWqbOa36aeDdTPTv8AeIiKSpBERAREQF0uyzHW5btJxzGX73FXK5QU8xbztjc8B5HebvH3lzSk7gqTQwcIjC3zta5huIYAXad05jmtPxiOTpQaj08MVPTx09PEyKGJgZGxg0a1oGgAHQAF+Vzraa222quNbKIqWlhfPNIeZrGtLnH3gCvoXg7RrNPkWz3JMfpXhlRc7TVUcTidNHSxOYD8LkGcO3Xb1mm0y/VJbc6y1Y8HkUlrp5ixgZ0GXd/rHnnJOoGp00Ci213G4WusZW2yuqqGqjOrJqeV0b295zSCF/FwpKq3109DXU8lNVU8jopoZG7ro3tOjmkHmII0X4ILs8DPhD3rIb7Bs7zytNdVTxn7FXKT+tkc0EmKV33xLQS1x5SQQSSQrfrHrE75XYzlFryK2FgrbZVxVcG+CWl8bg4BwBGrSRoRryjVT16Mna57Gxn/ACMn1iC6HCAxGDONjuS4/LEHzSUT5qQ9LaiMb8ZHV3TQD2ErKJWIquGJtemppYWMx2Bz2FoljoXbzNRzjWQjUdoKrugIiICIiCc+BBhXmu26W+tqId+gsDDc5iW6tMjSBCNevjC13eYVpKq3eR+YV5n9kM+T1MO7WZHVGVpI0Ip4iWRj33ca7tDgrIoP5fJGxzGvka10jt1gJ0LjoToOs6AnvAr+lUzhj7XJMQ2zbPbfQTuMdhqW3e5RxnXfbITFudjuK473pQrX008NTTRVNPI2WGVgfG9p1Dmkagg9RCCA+HjhXmo2JTXqmh367HJxWsIHdGA9xM3vaFrz7ms51sdd7fSXa01lrr4RNR1kD6eeM8z43tLXN98EhZHbQcaq8Ozi9YvXame2VklOXEab7Wu7l/ec3Rw76DwkREBERBYDgCeuGpfBtV4oWjCzn4AnrhqXwbVeKFowg4zbpdLhZdjmXXe1VUlJX0dpqJqeeM91G9rCQ4doKzn8/wC2y+2Fefjt+ZaGcI/1Bc58CVP8MrKZBJzOEBtla8OG0K8ag6jVzSPgLeVdzs94XW1Gw3GI5JUUuUW7eHGw1EDIZg3p3JI2jQ/pByrwiDXrZ/llmznDrdlVgmdLb7hFxke+NHsIJa5jh0Oa4Fp7R0r3lWXyOWask2L3eOYE00d+lEBPbBCXAdmp175Ks0gpb5JPjNPHV4pmEETWzzNmt9U8DlcG6Pi+Del/0VOVejySeuhjwPFLY4jjqi6SzsGvLuxxbruTvytVF0BERBqZwV/W84V4Nb4zlJijPgr+t5wrwa3xnKTEFLuGjtf2kYNtghsuKZRUWy3utUE5hjhicC9z5AXauaTzNHT0KEvRI7bfy+rf8tT/AFa7PyQz1eoPAlP/ABJVXJBLXokdtv5fVv8Alqf6tPRI7bfy+rf8tT/VqJUQS16JHbb+X1b/AJan+rXD59m2U57eIrxl13lutdDTtpo5pI2MLYg5zg3RoA53uPvrnUQEREBamcFf1vOFeDW+M5ZZrUzgr+t5wrwa3xnIJMWenkhnq9QeBKf+JKtC1np5IZ6vUHgSn/iSoK5IiICIiAiIgL38D+6Bvubl4C9/A/ugb7m5R8X6ivUuNj3GmH50drt756SV36tJ4pUUqVr56SV36tJ4pUUqDlPoVa227YntNnmz2iIitnOhERBpDwDnwO4OVpEJYXtrKsTbvOHca48vbulvvaKd1QXgKbY7dhd6rMHyetZSWe7zCajqpX7sdPVaBpDyeRrXgNG9zAtGvISRfoEEag6goC/xxDWlziAANST0L/VAvDF2x23AMBrccttayTKbxA6nghif3dJE8aPnfp9ryEhvSXEEcjSgzquhhdc6p1Pu8SZnmPdGg3d46admi+ZFYzgl8Hip2iVkOWZbBLTYlBJrFEdWvuT2nla084iBGjnDn+1by6loeXwc+DbkG1Sk+z9zrHWHGg/djqXQ781WQe6ETSQN0coLzya8gDtDpN2S8CPFZLU4Y3mF6prgGdy64Mimhe7qIY1haD16nTtVrKGlpqGjhoqKnipqaCNscMMTA1kbGjQNaByAADTQL9kGQmfYlfMHyyuxjI6TyrcaJ+69oOrXgjVr2npa4EEHt6DyLwlbLySimoGZvidXE1gr5bdMycjnMbZAY9ffdIqmoCk3Efuco/0T4xUZKTcR+5yj/RPjFVebeqjX3S33a94wucyf3Uua2jemlP7j/wAiuXXUbRvTSn9x/wCRXLqVgfZ6VFsq43v6+6BERSmviIiAiIgL0cZu9Xj+R2y/UBAq7bVxVcBPNvxvD269moC85EGvmA5Tac1w+2ZRZJhLQ3CBsrOXUsPM5jupzXAtI6wV7izI4OG3i/7Irm+lMTrpjdXJv1duLtC13IONicftX6DlHM4c/KARoFsu2qYLtJt4qcUvsFTMGB01FIeLqYOvfjPLprybw1aeglBxu3bg54TtSqZbw8zWTIXMDTcKVoIl0Gg42M8j9ByagtdyAa6ABVB2i8Ffazib5JqG1R5NQt1ImtTt+TTo1hOj9exocO1aSogxtraWqoauSkraaamqIjuyRTMLHsPUQeUFfitds1wbD81ozS5Vjdtu7N3da6ogBkYP7j/tmHtaQVV3bBwMqSSGe57Mbq+GYauFpuMm8x392Obnb2B+up53BBStF6eT2C84xfKmx5Bbam23KlduzU87N1zeo9oI5QRyEEEaheYgIiIC9XEbFW5PlNrx23N3qu5VcVLDyagOe4N1PYNdT2ArylZnyPXCvs5tTrcuqod6kx+l/oiW8hqZgWN+BgkPYd1Be/GbPRY9jltsNtj4ujt1LHSwN6mMaGjXt0C+6V7Io3SSPaxjAXOc46BoHOSV/SiLhfZn5i9g99qIpeLrboz7F0mh0O/MCHEdojEjh2gIM9ttuXuzzavkeVb7nwVta7yrvDQiBncRDTr3Gt99X+4F2Y+a7YJZmTTcZW2UutdRqeXSLTiv/wAnRjXrBWZ6tJ5HXmP2K2kXbDqmbdgvlJx1O0nnqINToO/G6Qn9AIL6Kh3kimFfYvaBas2pYdKe9U3leqcByCohAAJ/SjLAP0Cr4qIuF5hXm22FXymhh4yvtjPsnR8mp34QS4DtMZkb3yEGYiIiAiIgsBwBPXDUvg2q8ULRhZz8AT1w1L4NqvFC0YQcBwj/AFBc58CVP8MrKiNj5JGxxtc97iA1rRqST0Bar8I/1Bc58CVP8MrMDBPu4sPhKn/itQf1Fh2XSyNjixa+SPcdGtbb5ST726u72f8AB52s5jXwwwYlXWmkeRv1l1jdSxRt/C0eA5w/RaStQUQcjsewK17Ndn1txG1PMzKVpdNUOaGuqJnHV8hHRqeYanQADU6LrJpI4YnyyyNjjY0ue9x0DQOck9AX9HkHNqs/eFnte2w3KrmxS/49WYRY5tQKRurnVrP7847mRvW1nc9B1QcpwxdqNNtM2pE2efjrDZojR0MgPczu3tZJh2OOgHW1jT0qFERAREQamcFf1vOFeDW+M5SYoz4K/recK8Gt8ZykxBQ3h54nlN623wVlmxq83KmFmp2GakoZZWbwfLqN5rSNeUcnaoA87zP/AMh8m+SZ/orXFEGR3neZ/wDkPk3yTP8ARTzvM/8AyHyb5Jn+itcUQZFVGB5zTU8lRUYZkcMMTC+SSS1zNaxoGpJJboAB0rnFrltY9SzLfAlb/AesjUBERAWpnBX9bzhXg1vjOWWa1M4K/recK8Gt8ZyCTFnp5IZ6vUHgSn/iSrQtZ6eSGer1B4Ep/wCJKgrkiIgIiICIiAvfwP7oG+5uXgL38D+6BvublHxfqK9S42PcaYfnR2u3vnpJXfq0nilRSpWvnpJXfq0nilRSoOU+hVrbbtie02ebPaL7bFablfbzSWaz0ctbcKyVsNPBENXSPcdAB8/MF8Ssd5HlQUFZt3qairYx81FZKiek3udshkijJHbuSPHeJVs507nC+BJNNaY6jL8zNJXSM1dS2+lEjYT1GRxG8evRoHUSox4QHBmynZfbHZBQVzcix9h0nqYoDHNS6nkMkeru55hvgka84bya6Pr86mCCqppaaphjmglYWSRyNDmvaRoWkHkII5NEGNalXZvwg9qmBUMVttGRuqrbCA2OiuEQqI2NHM1pPdtb2NcApC4XHB1nwSpqMzwymkmxaV+9U0zdXOtrifhMRPMfveY9BNaEE8ZJws9sl4oXUkF0ttoDwWukoKINkI7HPLi09o0KhC511bc7hPcLlWVFZWVDzJNPPIXySOPO5zjyk9pXzKxnBL4PFTtErIcsy2CWmxKCTWKI6tfcntPK1p5xECNHOHP9q3l1LQcEvg8VO0SshyzLYJabEoJNYojq19ye08rWnnEQI0c4c/2reXUt0GoaWmoaOGioqeKmpoI2xwwxMDWRsaNA1oHIAANNAlDS01DRw0VFTxU1NBG2OGGJgayNjRoGtA5AABpoF+yAuV2pZ9jmzfEKnJclq+Jpou5iiboZamUjuY429Ljp3gNSdACU2pZ9jmzfEKnJclq+Jpou5iiboZamUjuY429Ljp3gNSdACVmdtv2p5HtXy997vcnE0sWrKCgjcTFSRE8w63HQbzucnqAAAfNto2iXjahn1Zld4a2EyAQ0tMx2raaBuu5GD085JPS5zjoNdFxaIgKTcR+5yj/RPjFRkpNxH7nKP9E+MVV5t6qNfdLfdr3jC5zJ/dS5raN6aU/uP/Irl11G0b00p/cf+RXLqVgfZ6VFsq43v6+6BERSmviIiAiIgIi9vDcTyXMrs604tZay71rYjM+Kmj3ixgIBc7oA1IGp6SB0oPEX70NXVUFXFWUNTNS1MTt6OaGQsew9YcOUFSN5wO2X2vbz8Rvzrxsx2VbRMPs/2YybErla6DjGxGeZg3Q52ug5D06FB3eBcKXa9iojgqL1FkNIwj+iu0XGvI6f6UESE99x7ysfsz4Y+CX18VHmFuq8Yq3chnH/AFFKT2uaA9uva0gdJVAUQbG2e526822C52ivpa+hqG78NRTStkjkb1hzSQV9ayw2C7YMl2T5RFXW6olqbPNIPshbHPPFTs6SBzNkA5nDvHUag6h2K50d6slDebdLx1FX00dVTyfhxyNDmn3wQgi7hPbG7btXwqUQwRRZNQROfa6vmLiOXiXnpY4/FJ1HSDmRUQzU1RJT1ET4ponlkjHjRzXA6EEdBBWyiy74W1lhsPCKzCip49yKWsbWDQaAmeJkztP8T3IIrREQFpdwLMK8x2wm1Szw8XX3sm6VGo0OkgHFD/8AmGHTrcVn/sbxCXPNp+P4pG1xZX1jW1Bbrq2BvdSu5OpjXFaz08MVPTx08EbY4omBjGNGga0DQAdmiD+1RXyRnMzcM3smD00oMFppjWVQaf7eb7Vp7WxtBHuhV6lzF62d7P73c5rpecGxi5V85Bmqqu0wTSyaAAbz3NJOgAHKeYBBkcvf2dZLU4dndkyml3jJbK2KpLW/fta4bzO85urffWo3nT7LPa0wz5CpvoJ50+yz2tMM+Qqb6CDrLdWU1xt9NcKKZs1LVRNmhkbzPY4AtI7CCCv2e1r2Fj2hzXDQgjUEL8bfR0duoIKC30kFJSU8bYoIIIwyOJjRo1rWjkaAOQAcy/dBlBt7wx2AbXMhxhsZZTU9WZKPUc9PJ3cff0a4A9oK4ZXL8kgwvQ47tApYRy62uucB35ISf/1Gp/uhU0QEREFgOAJ64al8G1XihaMLOfgCeuGpfBtV4oWjCDgOEf6guc+BKn+GVllY642u9UNzbGJTSVMc4YTpvbjg7TXo10WpvCP9QXOfAlT/AAyspkFwo+HHcRI0ybOKRzNe6Dbs4EjsPFHT4F1eIcNjEK+rjgybE7pY2PdoZ6eobWMj5ed3csdp3mk9hVEkQbDYvf7LlFipb5j9yp7lbapm/DUQO3muHSOsEHkIOhBBBAK/HM8XsOY47U4/ktsguNuqW6PilbroehzTztcOhw0I6FTHyOLLrhBmt9wiSZ77bV0JuEUZOojnjexhIHRvNfy/oNV5kGXfCX2RV2yPOzbmvkqbHXh09qq3jldGDyxvPNvs1AOnOC06DXQRWtJOHLitPkWwG6V5jaayxyxV9O8jlA3gyQa9RY9x06S0LNtAREQamcFf1vOFeDW+M5SYoz4K/recK8Gt8ZykxBAW37hK0OybOWYtUYlUXZ76KOr4+OtbEAHucN3dLDzbnPr0qPfRx2r2uq35Ub9Woz8kM9XqDwJT/wASVVyQXZ9HHava6rflRv1aejjtXtdVvyo36tUmRBcXL+GbbL7id4sbMBrIHXGgnpBKbk1wYZI3M3tOL5dNddFTpEQEREBamcFf1vOFeDW+M5ZZrUzgr+t5wrwa3xnIJMWenkhnq9QeBKf+JKtC1np5IZ6vUHgSn/iSoK5IiICIiAiIgL38D+6Bvubl4C9/A/ugb7m5R8X6ivUuNj3GmH50drt756SV36tJ4pUUqVr56SV36tJ4pUUqDlPoVa227YntNnmz2i6rZPnN22c57bcuswbJPRvPGQvJDJ4nDR8buwgnl6DoehcqitnOmtGyPaLje03EIMjxyp3mO7ippnkcbSy6csbx0HqPMRyhdgsndjO0zJNlmXxZBj828x2jK2ikceKq4teVjh0HqdztPvg6ZbI9ouN7TcQgyPHKneY7uKmmeRxtLLpyxvHQeo8xHKEHWVMEFVTS01TDHNBKwskjkaHNe0jQtIPIQRyaKgXC44Os+CVNRmeGU0k2LSv3qmmbq51tcT8JiJ5j97zHoJ0BX51MEFVTS01TDHNBKwskjkaHNe0jQtIPIQRyaIMs+Dbj+EZNtbtVpz65mhtMhJYwndbVTgjcgc/7xruXl6dN0aFwI1KoaWmoaOGioqeKmpoI2xwwxMDWRsaNA1oHIAANNAqCcLjg6z4JU1GZ4ZTSTYtK/eqaZurnW1xPwmInmP3vMegnvOB7wkfLHlPZ5tDr/wCn7mG03ad/9Z0Ngmcfvuhrzz8x5dCQuKuV2pZ9jmzfEKnJclq+Jpou5iiboZamUjuY429Ljp3gNSdACU2pZ9jmzfEKnJclq+Jpou5iiboZamUjuY429Ljp3gNSdACVmdtv2p5HtXy997vcnE0sWrKCgjcTFSRE8w63HQbzucnqAAANt+1PI9q+Xvvd7k4mli1ZQUEbiYqSInmHW46Dedzk9QAA4JEQEREBSbiP3OUf6J8YqMlJuI/c5R/onxiqvNvVRr7pb7te8YXOZP7qXNbRvTSn9x/5Fcuuo2jemlP7j/yK5dSsD7PSotlXG9/X3QIiKU18REQEREBWL8j4vkdr28PtsrwBd7VPTRg9MjCyYf7Y3qui9rBsjr8QzG0ZPbD/ANXbKuOpjGugfunUsPY4atPYSg1+UZcKPDarOthuRWO3Qma4tibV0cbRq58kLg/caPwnNDmjtcuxwHKrRm2H23KLHOJqGvhErPwmHmcx3U5p1aR1he4gxoIIOhGhC/xaH7dOCpimfXWoyHHq44zeqhxkqNyHjKWpeedzmagscelzToectJJKg+TgT7ShVlseS4k6n15JHT1Afp17vEka/wCJBWBax7B7RX2HYxiFoujXsraa0U7Zo3jR0biwEsPa3Xd95Q3sR4I+OYbeqbIMtuoyS40r2y09M2HiqWKQHUOIJJkIIBGug6wVZlAWZfDSuUVz4SWUvgc10dO6nptR+EyCMP17zt4e8tDdqeaWrZ9gd0yy7yNENFCXRxF2jp5TyMib2udoOzlJ5AVk7kV2rr/f7hfLnLxtbcKmSqqHgaB0j3Fzj2DUlB8CIiC33kcOFeWLzf8AP6qHVlJGLbROI/tH6PlI7Q0MHeeVdpR1wbsJ8wGxjHrBLFxdcacVVcCNHeWJe7eD+jqGd5oUioOX2kbQcP2dWinu2ZXllrpKicU8LzDJK58m6XaBsbXO5mnl00HJy8oXA+ij2E/lz+ya36lVr8kQzIXjafbcQppt6nsFJvztB5PLE+jiD16RiL4xVYUGmXoo9hP5c/smt+pT0Uewn8uf2TW/UrM1EGpeF7fNkuZZLSY3jmXNrLpWFwp4HUFTDvlrS4jekja3XRp5zy9Ck1Y/YXfqvFsutGSUB0qbZWRVUY103ixwdunsOmh7CtdbHc6O9WWhvFvl42jrqeOpgf8AhRvaHNPwEIOS2+YY3P8AZFkWMNjD6qopDJR69FRH3cXL0auaAewlZQuBa4tcCCDoQehbLrMPhd4X5idu19pYYuLobm8XSj5NBuTElwHYJBI0dgCCI0REFgOAJ64al8G1XihaMLOfgCeuGpfBtV4oWjCDgOEf6guc+BKn+GVlMtfs6x2ly7DbvjFbPNBTXSkkpZZIdN9jXt0JbqCNeXpCrp6CXAPyryb4YPq0FDEV8/QS4B+VeTfDB9Wuixbgg7IrNVsqa1l7vpYQeLr6xojJ/RiYwkdhJ99BFHkc2CXI3+87Q6uCSK3MpHW6ic8ECeRz2ukc3rDAwNJ5tX9bTpdpfPbKGitlvgt9to6ejo6dgjhggjDI42jma1o5AOwL6EEacKWshoeD1ms8+7uutj4RvfhSERt9/VwWWSvD5IhtGpaXG6HZpb6gPra2VlbcmsOvFwMJMbHdRc/R2nUwHpCo8gIiINTOCv63nCvBrfGcpMUZ8Ff1vOFeDW+M5SYgz08kM9XqDwJT/wASVVyWlm23g4YttWzJmT3m+XmhqWUjKUR0hi3N1jnEHumk690elcN6CXAPyryb4YPq0FDEV8/QS4B+VeTfDB9WnoJcA/KvJvhg+rQUMRXz9BLgH5V5N8MH1arPwqdltn2SbQqDG7LcK6vp6m0x1zpKvc3w90szCBugDTSMfCUESIiIC1M4K/recK8Gt8ZyyzWpnBX9bzhXg1vjOQSYs9PJDPV6g8CU/wDElWhagLb9waqHaznLMpqMtqLS9lFHScRHRNlBDHOO9vF459/m06EGciK7PoHLV7Ytb8lt+sT0Dlq9sWt+S2/WIKTIrs+gctXti1vyW36xPQOWr2xa35Lb9YgpMi7bbpg0WzbaneMLguL7lHbuI0qXxCMv4yCOX7UE6ab+nP0LiUBe/gf3QN9zcvAXvYGR5oGe5u/co+L9RXqXGx7jTD86O13F89JK79Wk8UqKVK95aX2etY0al1PIB8UqKFAyn0KtbbdsWP8AZsz/AMz2iIit3OhdtsZ2mZJssy+LIMfm3mO0ZW0UjjxVXFryscOg9Tudp98HiUQa0bI9ouN7TcQgyPHKneY7uKmmeRxtLLpyxvHQeo8xHKF2Cyd2M7TMk2WZfFkGPzbzHaMraKRx4qri15WOHQep3O0++Dplsj2i43tNxCDI8cqd5ju4qaZ5HG0sunLG8dB6jzEcoQdZUwQVVNLTVMMc0ErCySORoc17SNC0g8hBHJos9+GPsHpdmtwjyzGZI243cqnihRvk/pKOYgu3G68royASOlumh6CbxbUs+xzZviFTkuS1fE00XcxRN0MtTKR3Mcbelx07wGpOgBKzO237U8j2r5e+93uTiaWLVlBQRuJipIieYdbjoN53OT1AAAPBy3M8qy2K3RZLfq66sttOKejbUSbwiZ1DrJ0GrjqToNSdAvAREBERAREQFJuI/c5R/onxioyUn4qwsx6jB5zHr8JJ/wDaq829VGtv215E+P3J/wCO+HMbRvTSn9x/5Fcuun2ikfZWnbryiDX/AHFcwpWC9npUOynje/r7oERFKa+IiICIiAiIgl7g47dcg2Q3Z8DY3XTG6uQOrbc5+ha7m42I8zX6Aa9DgND0FugGy7a3gO0iiZNjF+p5aot1koJyIqqLrBjJ1OnW3VvasoV/UT3xSNlie5j2EOa5p0LSOYg9aDZZFlZje3La7j8TYrbn974tmgaypmFS1o6gJQ4Adi6UcKfbmIDGczjLidRIbVSbw7P6rTT3kGly4bartZwXZpbn1OUXuGKp3d6GghIkqpuTk3YxygH8J2jeshZ15Ft72xX+F8Nw2gXhsb/thSObSajq/oQ3k7FHFRNNUTvnqJZJpZDvPe9xc5x6yTzlBKXCI225Dtfvsb6qP7HWKjeTQW1j94MJ5OMkd9/IR08wHIOkmKURAUncFvDmZxtyxy0VDGvooJ/L1W13M6KEb5aexxDW/wCJRivusd4u1iuUdysl0rrXXRghlTR1DoZW6jQ6OaQRqO1BsUvlvFwpLTaay618oipKKB9RPIfvI2NLnH3gCspPPY2p+2Xmfy7U/TXyXfaNtCvFumtt3zvKLhRTjdlpqq7zyxSDqc1zyCO+g+PPsjqsvza85PW6ie6VstSWl2u4HOJDAepo0aOwLw0RAREQFotwC8yGSbEIrLPNv1uO1LqNwJ7riXd3E7vaFzB7ms6V62NZNkmM1EtRjeQXayzTMDJZLfWSU7ntB10cWEEjXoKDYJVW8kXw1tywGz5tTsHliz1XlaoPNrBNpoT17sjWgD++5VD89jan7ZeZ/LtT9NedkOd5vkVB9j8gzLIrvR74f5XrrnNPHvDmO69xGo60HOoiIJ/4AhA4Q1Jqee21WnxQtGVjlaLlcbRcoblaa+qt9dA7ehqaWZ0UsZ001a5pBB0J5iuo89jan7ZeZ/LtT9NBrKiya89jan7ZeZ/LtT9NPPY2p+2Xmfy7U/TQayosmvPY2p+2Xmfy7U/TX8T7Utp1REYp9o2Xyxnna+91LgfeL0Grl3utss9E6uu9yo7dSs+2nqp2xRt77nEAKtm3Hhc4tj1HNa9nbo8hvDgW+XS0ijpz16nQynqDe5/vcmiojc7lcbnPx9yr6qtm/GVEzpHfC4kr5EH35BeLpkF6q71eq6auuNZKZaiomdq57j0n9wA5AAAORfAiICIiDUvgrkHg84Vodf8AtrfGcpNWRdhz7O8ftrbbYc1yS1ULHFzaaiuk0ETSTqSGscACT2L7/PY2p+2Xmfy7U/TQayosmvPY2p+2Xmfy7U/TTz2Nqftl5n8u1P00GsqLJrz2Nqftl5n8u1P0089jan7ZeZ/LtT9NBrKqAeSOEHbfZ+XmxuD/AMmpUM+extT9svM/l2p+muavl4u19uUlzvl0rrpXSgCSprKh00r9BoNXuJJ0AA50HwoiIC1L4K5B4POFaHX/ALa3xnLLRdJYc+zvH7a222HNcktVCxxc2morpNBE0k6khrHAAk9iDXRFk157G1P2y8z+Xan6aeextT9svM/l2p+mg1lRZNeextT9svM/l2p+mnnsbU/bLzP5dqfpoNZUWTXnsbU/bLzP5dqfpp57G1P2y8z+Xan6aDs+GyQeE7l2h1/+F/4UChlfvcKysuNdPX3Crnq6uoeZJp55C+SR5Opc5x5SSekr8EBffj9WKG801S46Ma/R56mnkP8AoV8CLzXTFdM0z72bD36sPdpu0cNMxMa4nSmHkI6CCoxyS1yWu4vi3TxLyXRO6C3q74XUYXe2VNO231LwJ4xpGSft29XfC9+vo6aupzBVRNkYeg84PWD0LXrNyvA3ppqje/u+7JmOCw+yrLqL1irRVG/H0n30z/eSeBEqLsazCtXk0lbo3obK3lHvj5l83mLr/ZdN/u+ZW8Y/DzGndOc3diOb26tz4GZ1TE97l0XR1mI1tNSTVL6mnLYo3PIGupAGvUucWe1eouxponSqcdluKwFUU4miaZng0i6XZ7nuX7P7tJdMPvtTaamVm5KYw17JWjmD2PBa7To1B0XNIsqC6jaJtCzPaFcYa/Mb/U3aaBpbCHtayOIHTXdYwBrddBroOXQarl0Xu2rGK+vpBUh0cDHfaCTXVw6+Qcyx3LtFqNNc6EvBYDE4654PD0TVPDvPCRdR5i6/2XTf7vmTzF1/sum/3fMsPj2H+Ja+aub/ACJ6v5cui6jzF1/sum/3fMnmLr/ZdN/u+ZPHsP8AEeaub/Inq/ly6LqPMXX+y6b/AHfMvopcKdvg1VcN3pEbOU++fmXycfh4j0nu3sSziurR4GY1zEd7nLLbprnXspogd3XWR2nI1vSVKUUbIomRRjdYxoa0dQC/C2W+kt0HE0kQY08rjzlx6yV5WXXxlvpnUtO/WrkboND/AFYPT3+pVGIvVY27FFEb3933Rsoy2xsXwNeIxNUTVPD3Uxy9+qHJ5dVtrL7O9h1ZHpG097n/ANdV5CIr+3RFuiKY9zj+MxVeLxFd+vhqmZ6RERe0YREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQf60lrg5pIIOoI5wuns+X1EDWxV8ZqGDk4xvI/wB/oP8AouXRYr1i3ejRXGlYZdmuLy254TDV7nl5J1xwJIgyiyyt1NS6I9T4z/65F9lDd7dXTcTS1TZZNN7dAI5PfCitdFs/9PXe4O/eFV4jLbVu3VXEzvN8yfZtjsXjLWGuUU6KpiJmInT26HaXz0krv1aTxSopUrXz0krv1aTxSopXvKfQq1sG2J7TZ5s9oiLp8Sx01hbXVzCKccrGH+07T2fvVjevU2ad1U0rLMsxGZYiLFiNMz0RHLP0MRx41bmV1azSnB1jYf7TtPZ+9dzI9kUTnvc1jGDUknQAI4sijLnFrGMGpJ5AAFH+WX91xlNLSuc2kYeXo4w9Z7OoKiiLuPu7+9EdTrNdeB2I4DRT+qurpqnuiOrXO/1vmisvs9nxXfMnmisvs9nxXfMoyRTvJNrlnq/hqf8AkLMPl0dFX5JN80Vl9ns+K75k80Vl9ns+K75lGSJ5Jtcs9X8H+Qsw+XR0Vfkk3zRWX2ez4rvmX5zZPZY26irLz1Mjcf8A1oo2RIyqzyz/AH7PlW2FmMxoi3RH2n8nWXbMZJGuit0JiB/tZNC73hzD/VcrLI+WR0kj3Pe46uc46klfyinWcPbsxoohq2ZZvjMzr3eJr06OCOCI1R/ZERFmVgiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAui2f+nrvcHfvC51dFs/9PXe4O/eFGxnqKtS72N8a4fnQ7S+ekld+rSeKVFKla+ekld+rSeKVx+I495cLa6tb/wBMD3DD/aHt7P3qty+9TZs1VVcredmWW38yzGxYsRpmaZ1RGnhn6P8AcSx01hbXVzCKccrGH+07T2fvXcuLIoy5xaxjBqSeQABHFkUZc4tYxg1JPIAAuByvIHXB5pKRxbSNPKeYyHr73Yo8Rdx93kiOpbVVYDYjgNEfqrq6ap7ojq+szvsryB1weaSkcW0jTynmMh6+92LnURX9q1Tap3NLkWYZhfzC/N+/OmqeiI5I+giIsiEIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiIC9XFa5lvvUU0p3YnAseeoHp+HReUi8XKIrpmmfekYTE14S/Rft8NMxMfZMBDJGaENexw74IQmOKIklscbG94NAUZ26/wB0oIhDDUaxjmY8bwHe6l/NzvlyuEfFVFR/RdLGDdB7/WqTyVc3WjTGh1SdsHBeB3cW6vCaODe0adeng+32ehleQOuDzSUji2kaeU8xkPX3uxc6iK6tWqbVO5pcwzDML+YX5v3501T0RHJH0ERFkQhERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERB//2Q==" alt="Sabel">
     <div class="top-t">
       <h1>Migration Mapping Requirements</h1>
-      <p>Your inputs for the migration into Intercom · Prepared with Sabel Customer Success Solutions</p>
+      <p id="top-sub">Migration to Intercom · Prepared with Sabel Customer Success Solutions</p>
     </div>
-    <div id="save-dot"><span></span>Autosaved</div>
-    <div class="top-dl">Download: <button onclick="exportXLSX()">Excel</button><i>·</i><button onclick="exportCSV()">CSV</button></div>
+    <div id="save-dot"><span></span><b id="save-txt" style="font-weight:400">Autosaved</b></div>
     <div class="client-chip" id="client-chip">Client</div>
+    <button class="btn print" onclick="printPDF()" title="Print or save this form as a PDF">&#128438; Print / Save PDF</button>
   </div>
   <div class="pbar"><i id="pbar"></i></div>
 </div>
@@ -104,10 +210,7 @@ footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;font-size:11px;color:v
 <div class="wrap">
 <nav class="rail" id="rail"></nav>
 <main>
-  <div id="nokey" class="banner amber" style="display:none">
-    <strong>This is the master template link.</strong> Answers typed here will not be saved.
-    Please use the personalised link Sabel sent you (it ends in <code>?client=yourcompany</code>).
-  </div>
+  <div id="local-banner" class="banner amber" style="display:none"><strong>Saved in this browser only.</strong> We cannot reach Sabel's server right now, so please keep using this device. If this message is still showing when you finish, use <strong>Print / Save PDF</strong> and send the copy to Richard.</div>
   <div id="submitted-banner" class="banner green" style="display:none"></div>
 
   <div id="admin">
@@ -124,17 +227,15 @@ footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;font-size:11px;color:v
     </div>
   </div>
 
-  <p class="intro">This form captures everything we need to migrate your historical support data into Intercom accurately.
-  Answer what you can; your progress <strong>saves automatically</strong>, so you can return any time using the same link.
-  Anything you are unsure about, leave blank and add a note, we will pick it up together.</p>
+  <p class="intro" id="intro"></p>
 
   <div id="form-root"></div>
 
   <section class="card">
     <div class="submit-bar">
-      <button class="btn primary" onclick="submitForm()">Submit to Sabel</button>
-      <button class="btn ghost" onclick="exportXLSX()">Download your answers (Excel)</button>
-      <button class="btn ghost" onclick="exportCSV()">CSV</button>
+      <button class="btn primary" id="submit-btn" onclick="submitForm()">Submit to Sabel</button>
+      <span id="submit-status"></span>
+      <button class="btn ghost" onclick="printPDF()">&#128438; Print / Save PDF</button>
       <span style="font-size:12px;color:var(--fnt)">You can still edit after submitting, changes keep saving.</span>
     </div>
   </section>
@@ -142,106 +243,196 @@ footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;font-size:11px;color:v
 </div>
 <footer>Sabel Customer Success Solutions · Migration Mapping Requirements · All information is used solely to configure your migration.</footer>
 <div class="toast" id="toast"></div>
+<div class="modal" id="done-modal" onclick="if(event.target===this)closeDone()">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="done-title">
+    <div class="done-tick" id="done-icon">&#10003;</div>
+    <h2 id="done-title">Thank you, your answers are with Sabel</h2>
+    <p id="done-body"></p>
+    <div class="modal-actions">
+      <button class="btn primary" onclick="closeDone();printPDF()">Save a PDF copy</button>
+      <button class="btn ghost" onclick="closeDone()">Close</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 'use strict';
-const BUILD_V='202607290509';
+/* =====================================================================
+   Sabel Migration Mapping Requirements: client-neutral master.
+   Contract with the tracker: client-hub/CONTRACT.md
+     key  migration-intake-<slug>-v1, progress object P saved in the value,
+     postMessage 'sabel-form-progress' to the parent, ?embed=1 for the iframe.
+
+   URL parameters
+     ?client=<slug>     picks the storage key (no client = read-only template)
+     ?source=<Product>  names the platform being migrated from, e.g. Zendesk
+     ?embed=1           inside the tracker iframe (hides duplicated chrome)
+     #admin             Sabel admin panel (exports, link generator)
+
+   To make a per-client copy (save as SabelMigrationIntake_<Client>.html):
+     1. DEFAULT_SLUG = '<slug>'  so the plain URL opens that client's record
+        (the key must be allowlisted in sabel-webhook or saves stay local).
+     2. Change the fallback in SOURCE from 'your current helpdesk' to the
+        product, e.g. 'Zendesk' (turns on the Zendesk wording and the
+        seeded Zendesk status rows).
+     3. Put what was agreed (SOW, kick-off) in AGREED_NOTE as trusted HTML;
+        the 'What we have agreed so far' section only shows when it is set.
+        Optional first-load prefills go in SEED (field id -> value).
+   ===================================================================== */
+const BUILD_V='202609290001';
 const API='https://sabel-webhook.vercel.app/api/tracker';
 const qs=new URLSearchParams(location.search);
-const SLUG=(qs.get('client')||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
+const DEFAULT_SLUG='';
+const SOURCE = (qs.get('source') || 'your current helpdesk');
+const AGREED_NOTE='';   // trusted HTML, e.g. '<strong>Volume:</strong> about 50,000 tickets ...'
+const SEED={};          // per-client first-load prefills, e.g. {client:'Acme Ltd',golive_tz:'Europe/London'}
+
+const SLUG=(qs.get('client')||DEFAULT_SLUG).toLowerCase().replace(/[^a-z0-9-]/g,'');
 const KEY=SLUG?('migration-intake-'+SLUG+'-v1'):'';
 const ADMIN=location.hash.replace('#','')==='admin';
+const EMBED=qs.get('embed')==='1';
 const SESS=Math.random().toString(36).slice(2);
 const TZ=(Intl.DateTimeFormat().resolvedOptions().timeZone)||'';
+if(EMBED)document.documentElement.classList.add('embed');
+
+/* ---------- source platform labelling ----------
+   SRC     the platform in running text: 'Zendesk' or 'your current helpdesk'
+   S(x,g)  a label: named source -> 'Zendesk ' + x ; generic -> g
+   ZD      Zendesk-only wording and defaults                                  */
+const SRC=String(SOURCE).replace(/[<>"'&`]/g,'').trim().slice(0,40)||'your current helpdesk';
+const GENERIC=SRC.toLowerCase()==='your current helpdesk';
+const ZD=/zendesk/i.test(SRC);
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const S=(x,g)=>GENERIC?g:SRC+' '+x;
 
 /* ---------- data model ---------- */
 let F={};                                  // scalar fields
 let T={inbox:[],status:[],attrs:[],agents:[]}; // mapping tables
-let lastSavedAt=0, dirty=false, saveTimer=null;
+let lastSavedAt=0, dirty=false, saveTimer=null, hadState=false;
+let REMOTE=null; // true: server answering for this key; false: key not registered or unreachable
+const LKEY=KEY?('sabel_'+KEY):'';
 
 const YN=['Yes','No'];
-const SECTIONS=[
+const ALL_SECTIONS=[
  {id:'details',n:'',t:'Project details',fields:[
    {id:'client',l:'Client / company name',ty:'text'},
-   {id:'source_platform',l:'Source platform (the system you are moving away from)',ty:'select',opts:['Zendesk','Freshdesk','Help Scout','Salesforce Service Cloud','Gorgias','HubSpot Service Hub','Other']},
-   {id:'source_platform_other',l:'If Other, name the platform',ty:'text',showIf:['source_platform','Other']},
-   {id:'intercom_workspace',l:'Intercom workspace (name + URL)',ty:'text',ph:'e.g. Acme Support, https://app.intercom.com/a/apps/abc123'},
+   {id:'source_platform',l:'Source platform (the system you are moving away from)',ty:'text'},
+   {id:'zd_subdomain',l:ZD?'Zendesk subdomain(s)':S('URL(s)','Helpdesk URL(s)'),ty:'text',
+     ph:ZD?'e.g. yourcompany.zendesk.com':'e.g. support.yourcompany.com',
+     hint:ZD?'List every Zendesk instance or brand URL tickets should come from':'List every instance or brand URL tickets should come from'},
+   {id:'intercom_workspace',l:'Intercom production workspace (name + URL)',ty:'text',ph:'e.g. Acme, https://app.intercom.com/a/apps/abc123',hint:'The workspace the migrated history lands in'},
+   {id:'intercom_test_workspace',l:'Intercom test workspace for the sample (name + URL)',ty:'text',opt:1,ph:'Leave blank if the sample goes into production'},
    {id:'migration_type',l:'Migration type',ty:'pills',opts:['Tickets','Conversations','Both']},
    {id:'co_name',l:'Client owner, name',ty:'text',ph:'Your day-to-day contact for the migration'},
    {id:'co_email',l:'Client owner, email',ty:'text'},
+   {id:'zd_contact',l:S('mapping owner, name + email','Helpdesk mapping owner, name + email'),ty:'text',ph:'One person who can answer field, tag and group questions'},
    {id:'so_name',l:'Sign-off owner, name',ty:'text',ph:'The person who approves the migration'},
    {id:'so_role',l:'Sign-off owner, role',ty:'text'},
    {id:'so_email',l:'Sign-off owner, email',ty:'text'},
-   {id:'target_golive',l:'Target go-live (cutover date)',ty:'date'},
-   {id:'golive_tz',l:'Timezone',ty:'text',ph:'e.g. Australia/Perth'}
+   {id:'target_golive',l:'Target go-live (cutover date)',ty:'date',hint:'The day your team starts working in Intercom'},
+   {id:'golive_time',l:'Go-live start time (local)',ty:'text',ph:'e.g. 09:00',hint:'The final delta runs about 2 hours before this'},
+   {id:'golive_tz',l:'Timezone',ty:'text',ph:'e.g. Europe/London'},
+   {id:'zd_contract_end',l:S('contract end date','Current helpdesk contract end date'),ty:'date',hint:'Helps us plan the cutover and any overlap'}
  ]},
- {id:'access',n:'1',t:'Access and readiness',desc:'We need admin access to both platforms to run the migration.',
-  note:'Please grant admin access to <strong>info+1@sabelcustomersuccess.com</strong> in both your source platform and Intercom.',
+ {id:'agreed',n:'',t:'What we have agreed so far',desc:'Pulled from your SOW and our calls so far. Please check it is right.',
+  note:AGREED_NOTE,
   fields:[
-   {id:'source_access',l:'Source platform admin access granted',ty:'pills',opts:YN},
-   {id:'intercom_access',l:'Intercom admin access granted',ty:'pills',opts:YN},
+   {id:'agreed_ok',l:'Does this match your understanding?',ty:'pills',opts:['Yes, confirmed','Needs changes']},
+   {id:'agreed_changes',l:'What needs to change?',ty:'textarea',showIf:['agreed_ok','Needs changes']}
+ ]},
+ {id:'sources',n:'1',t:'History, brands and channels',
+  desc:'How much history comes across from '+SRC+', which brands it comes from, and how your team tells them apart in Intercom afterwards.',
+  fields:[
+   {id:'history_range',l:'How much history should we migrate?',ty:'pills',opts:['3 years','4 years','5 years','Other (describe below)'],hint:'Please check this against the volume in your SOW'},
+   {id:'active_former',l:'Keep full history for active customers and a shorter window for former customers?',ty:'pills',opts:['Yes, split active and former','No, same range for everyone']},
+   {id:'active_def',l:'How do we tell an active customer from a former one?',ty:'textarea',full:1,showIf:['active_former','Yes, split active and former'],ph:'e.g. an organisation field, a tag, or a list from your CRM or data warehouse'},
+   {id:'former_range',l:'History to keep for former customers',ty:'text',showIf:['active_former','Yes, split active and former'],ph:'e.g. last 2 years'},
+   {id:'zd_brands',l:S('brands to migrate','Brands or instances to migrate'),ty:'text',full:1,ph:'e.g. Acme UK, Acme US',hint:'List every brand and say if any should be left out'},
+   {id:'brand_marker',l:'How should migrated tickets show which brand or region they came from?',ty:'pills',opts:['Tag','Separate team inbox','Brand attribute','A combination (describe below)']},
+   {id:'_channels',l:'Channels to migrate',ty:'checks',opts:[
+     ['ch_email','Email'],['ch_webform','Web form'],['ch_chat','Chat / messaging'],['ch_phone','Phone call logs'],['ch_api','API-created tickets'],['ch_other','Other (describe below)']]},
+   {id:'_exclusions',l:'Leave out',ty:'checks',opts:[
+     ['x_spam','Spam and deleted tickets'],['x_auto','Automated or system notifications'],['x_other','Anything else (describe below)']]},
+   {id:'brand_notes',l:'Notes on history, brands, channels or exclusions',ty:'textarea',full:1,opt:1}
+ ]},
+ {id:'access',n:'2',t:'Access and readiness',desc:'We need admin access to '+SRC+' and Intercom to run the migration.',
+  note:'Please invite <strong>info+1@sabelcustomersuccess.com</strong> as an admin on both systems; Richard needs full, unrestricted admin to extract the data. <strong>Never paste API tokens or passwords into this form</strong>; if one is needed, Richard will ask for it separately.',
+  fields:[
+   {id:'source_access',l:S('admin access granted (full, unrestricted)','Admin access to your current helpdesk granted (full, unrestricted)'),ty:'pills',opts:YN},
+   {id:'zd_api',l:S('API token shared with Sabel','API token shared with Sabel'),ty:'pills',opts:['Yes','No','Not sure']},
+   {id:'intercom_access',l:'Intercom workspace admin access granted',ty:'pills',opts:YN},
+   {id:'ws_separation',l:'Nothing is migrated into any other Intercom workspace you have (test, legacy or sister-brand)',ty:'pills',opts:['Confirmed','Needs discussion'],hint:'So nothing is loaded into the wrong workspace'},
+   {id:'zd_plan',l:S('plan tier','Plan tier'),ty:'text',ph:ZD?'e.g. Suite Professional, Enterprise':'e.g. Professional, Enterprise',
+     hint:ZD?'Zendesk limits API calls by plan, which sets how long the extract takes':'Most helpdesks limit API calls by plan, which sets how long the extract takes'},
    {id:'_constraints',l:'Access constraints (tick any that apply)',ty:'checks',opts:[
-     ['c_sso','SSO required'],['c_ip','IP allowlist'],['c_2fa','2FA enforced'],['c_other','Other (describe below)']]},
+     ['c_sso','SSO required'],['c_ip','IP allowlist'],['c_2fa','2FA enforced'],['c_sov','Data-sovereignty limits on who can view some customers'],['c_other','Other (describe below)']]},
    {id:'access_notes',l:'Notes / constraints details',ty:'textarea',full:1,opt:1}
  ]},
- {id:'settings',n:'2',t:'Migration settings',fields:[
-   {id:'migrate_as',l:'Migrate into Intercom as',ty:'pills',opts:['Tickets','Conversations']},
+ {id:'settings',n:'3',t:'Migration and cutover settings',fields:[
+   {id:'migrate_as',l:'Migrate into Intercom as',ty:'pills',opts:['Tickets','Conversations'],hint:'A common setup: history comes through as tickets assigned to the original agent, and new work starts as conversations'},
    {id:'_optset',l:'Optional settings',ty:'checks',opts:[
      ['o_unassign_closed','Unassign closed tickets'],
      ['o_unassign_team','Unassign ticket if it is assigned to a team'],
-     ['o_notify_last','Include notifications for last comment (tickets only)']]}
+     ['o_notify_last','Include notifications for last comment (tickets only)']]},
+   {id:'open_at_cutover',l:'Tickets still open in '+SRC+' at cutover should be',ty:'pills',opts:['Migrated as open tickets in Intercom','Closed before cutover','A mix (describe below)'],hint:'Migrating them lets your agents keep replying to the customer from Intercom'},
+   {id:'freeze',l:S('freeze window before go-live','Freeze window in your current helpdesk before go-live'),ty:'text',full:1,ph:'e.g. no new tickets taken after 07:00 on go-live day',hint:cap(SRC)+' stops taking new email and forms at this point, so the final delta is complete'},
+   {id:'cutover_notes',l:'Cutover notes',ty:'textarea',full:1,opt:1}
  ]},
- {id:'tags',n:'3',t:'Tags',
-  note:'A tag of <strong>"migration"</strong> is automatically added to every migrated ticket, so you can always tell migrated records apart.',
+ {id:'tags',n:'4',t:'Tags',
+  note:'A tag of <strong>"migration"</strong> is automatically added to every migrated ticket, so you can always tell migrated records apart. We recommend archiving tags not used in the last 3 to 6 months, and restricting who can create new tags in Intercom.',
   fields:[
    {id:'tags_wanted',l:'Would you like any additional tags added?',ty:'pills',opts:YN},
-   {id:'extra_tags',l:'Additional tags (comma-separated)',ty:'text',full:1,ph:'e.g. legacy-zendesk, pre-2026',showIf:['tags_wanted','Yes']}
+   {id:'extra_tags',l:'Additional tags (comma-separated)',ty:'text',full:1,ph:'e.g. legacy-uk, legacy-us',showIf:['tags_wanted','Yes']},
+   {id:'tags_retire',l:'Tags to drop, or a rule for dropping them',ty:'textarea',full:1,opt:1,ph:'e.g. any tag not used in the last 6 months, or attach a list'}
  ]},
- {id:'filter',n:'4',t:'Filter (timeframe)',desc:'Optionally limit the migration to a date window. Leave off to migrate everything.',fields:[
+ {id:'filter',n:'5',t:'Filter (timeframe)',desc:'The window of history to migrate, matching your answer in section 1.',fields:[
    {id:'tf_enable',l:'Enable timeframe filter',ty:'pills',opts:YN},
-   {id:'tf_start',l:'Start date and time',ty:'datetime',showIf:['tf_enable','Yes']},
-   {id:'tf_end',l:'End date and time',ty:'datetime',showIf:['tf_enable','Yes']},
-   {id:'tf_tz',l:'Timezone for the filter window',ty:'text',ph:'e.g. Australia/Perth',showIf:['tf_enable','Yes']}
+   {id:'tf_start',l:'Start date and time',ty:'datetime',showIf:['tf_enable','Yes'],hint:'For example, 3 years back from go-live'},
+   {id:'tf_end',l:'End date and time',ty:'datetime',opt:1,showIf:['tf_enable','Yes'],hint:'Leave blank: the delta runs carry everything up to go-live'},
+   {id:'tf_tz',l:'Timezone for the filter window',ty:'text',ph:'e.g. Europe/London',showIf:['tf_enable','Yes']}
  ]},
- {id:'inbox',n:'5',t:'Team inbox mappings',
-  note:'We can replicate your existing inbox structure, or use this as a chance to clean things up and create inboxes aligned to specific use cases. List each source queue/group/inbox and where its tickets should land in Intercom.',
-  table:{key:'inbox',na:['na_inbox','Not applicable, we do not use separate queues or inboxes'],cols:[['src','Source queue / group / inbox'],['dst','Intercom team inbox'],['notes','Notes']]}},
- {id:'status',n:'6',t:'Ticket status mapping',
-  note:'New statuses can be created in Intercom if required. Map each source status to the Intercom status it should become.',
-  table:{key:'status',na:['na_status','Not applicable, use the Intercom default statuses'],cols:[['src','Source status'],['dst','Intercom status'],['notes','Notes']]},
+ {id:'inbox',n:'6',t:'Team inbox mappings',
+  note:'We can replicate your existing groups in '+SRC+', or use this as a chance to create inboxes that match how you now route work, for example by product or by region, including any customers only certain teams may handle. List each group and where its tickets should land in Intercom.',
+  table:{key:'inbox',na:['na_inbox','Not applicable, we do not use separate groups'],cols:[['src',S('group','Group or team in your current helpdesk')],['dst','Intercom team inbox'],['notes','Notes']]}},
+ {id:'status',n:'7',t:'Ticket status mapping',
+  note:ZD?'We have started this with the standard Zendesk statuses and a suggested Intercom status for each. Change any you disagree with, and add rows for custom statuses. New statuses can be created in Intercom if required.'
+         :'List each status you use in '+SRC+' and the Intercom status it should become, including any custom statuses. New statuses can be created in Intercom if required.',
+  table:{key:'status',na:['na_status','Not applicable, use the Intercom default statuses'],cols:[['src',S('status','Status in your current helpdesk')],['dst','Intercom status'],['notes','Notes']]},
   fields:[{id:'status_default',l:'Default behaviour for empty or unmapped statuses',ty:'text',full:1,opt:1}]},
- {id:'types',n:'7',t:'Ticket type mapping',
-  desc:'We want to understand what kinds of tickets you currently use: customer tickets, back office tickets, tracker tickets. Should historical tickets be customer-facing in Intercom, or internal only?',
+ {id:'types',n:'8',t:'Ticket type mapping',
+  desc:'Historical tickets can have their own ticket types, so they stay separate from new work. Tell us what the history should become, and whether it should be customer-facing in Intercom or internal only.',
   fields:[
    {id:'type_open',l:'Open tickets migrate as',ty:'select',opts:['Customer Ticket','Back-office Ticket','Tracker Ticket']},
    {id:'type_closed',l:'Closed tickets migrate as',ty:'select',opts:['Customer Ticket','Back-office Ticket','Tracker Ticket']},
-   {id:'type_notes',l:'How many ticket types do you have, and should historical tickets be customer-facing?',ty:'textarea',full:1,opt:1}
+   {id:'type_per_stack',l:'Should history use separate ticket types per product or brand?',ty:'pills',opts:['Yes, one per product or brand','No, shared types'],opt:1},
+   {id:'type_notes',l:'Which ticket forms or types do you use in '+SRC+' today, and should historical tickets be customer-facing?',ty:'textarea',full:1,opt:1}
  ]},
- {id:'attrs',n:'8',t:'Custom attributes',
-  note:'By default, ALL custom attributes are migrated. If you have many historical attributes you no longer need, choose "Specific only" and list just the ones to migrate.',
+ {id:'attrs',n:'9',t:'Custom attributes',
+  note:'By default, ALL custom ticket, user and organisation fields in '+SRC+' are migrated. If you have old fields you no longer need, choose "Specific only" and list just the ones to migrate.',
   fields:[{id:'attr_mode',l:'Attribute import selection',ty:'pills',opts:['ALL','Specific only']}],
-  table:{key:'attrs',showIf:['attr_mode','Specific only'],cols:[['src','Field name in source'],['obj','Object (Ticket, Contact, Company)']]}},
- {id:'agents',n:'9',t:'Agent settings (agent mapping)',
-  note:'Some previous agents may no longer exist in your source platform or in Intercom. Map each source agent to their Intercom teammate. For the migration to succeed, all mapped agents must be configured and accepted in Intercom. Unmatched agents fall back to the handling you choose below.',
-  table:{key:'agents',na:['na_agents','Not applicable, no individual agent mapping needed'],cols:[['src','Source agent (name + email)'],['dst','Intercom teammate']]},
+  table:{key:'attrs',showIf:['attr_mode','Specific only'],cols:[['src',S('field name','Field name in your current helpdesk')],['obj','Object (Ticket, Contact, Company)']]}},
+ {id:'agents',n:'10',t:'Agent settings (agent mapping)',
+  note:'Some previous agents may no longer exist in '+SRC+' or Intercom. Map each agent to their Intercom teammate. For the migration to succeed, all mapped agents must be set up and have accepted their invite in Intercom. Unmatched agents fall back to the handling you choose below.',
+  table:{key:'agents',na:['na_agents','Not applicable, no individual agent mapping needed'],cols:[['src',S('agent (name + email)','Agent in your current helpdesk (name + email)')],['dst','Intercom teammate']]},
   fields:[
    {id:'unmatched',l:'Unmatched agent handling',ty:'pills',opts:['Leave unassigned','Assign to specific teammate']},
    {id:'fallback_agent',l:'Fallback teammate (name + email)',ty:'text',full:1,showIf:['unmatched','Assign to specific teammate']}
  ]},
- {id:'contacts',n:'10',t:'Contact settings',
-  note:'The default matching method is Email. If you use External IDs in your source platform, tell us whether to use them in Intercom too.',
+ {id:'contacts',n:'11',t:'Contact settings',
+  note:'The default matching method is Email. If your Intercom users will carry an external or product user ID (for example from your own platform, CRM or data warehouse), migrated users should match on that ID instead, so no duplicate users are created.',
   fields:[
    {id:'match',l:'Contact matching approach',ty:'pills',opts:['Email only','External ID']},
-   {id:'external_field',l:'External ID source field name',ty:'text',showIf:['match','External ID']},
+   {id:'external_field',l:'External ID source field name in '+SRC,ty:'text',showIf:['match','External ID'],ph:ZD?'e.g. the Zendesk user external_id or a custom user field':'e.g. an external ID or a custom user field'},
    {id:'contact_type',l:'Contact type in Intercom',ty:'text',ph:'e.g. User, Lead',opt:1},
    {id:'contact_scope',l:'Which contacts should we migrate?',ty:'pills',opts:['All contacts','Only ticket contacts']}
  ]},
- {id:'companies',n:'11',t:'Company settings',fields:[
-   {id:'migrate_companies',l:'Migrate companies',ty:'pills',opts:YN},
-   {id:'company_rule',l:'Preferred matching rule',ty:'text',ph:'e.g. match on company domain',showIf:['migrate_companies','Yes']}
+ {id:'companies',n:'12',t:'Company settings',desc:ZD?'Zendesk organisations become Intercom companies.':'Organisations or companies in '+SRC+' become Intercom companies.',fields:[
+   {id:'migrate_companies',l:'Migrate organisations as companies',ty:'pills',opts:YN},
+   {id:'company_rule',l:'Preferred matching rule',ty:'text',ph:'e.g. match on company domain or your customer account ID',showIf:['migrate_companies','Yes']}
  ]},
- {id:'signoff',n:'12',t:'Sample review and sign-off',
-  desc:'We migrate a small sample first for you to review, then run the full production migration once you sign off.',
+ {id:'signoff',n:'13',t:'Sample review and sign-off',
+  desc:'Once mapping is agreed Richard sends a sample sheet (names, contact details, message body, replies and tags) and pushes a sample into Intercom for you to review. Check each ticket is assigned to the right person and team, shows the original requester, and has its attachments, fields and status. Once you sign off we load the history, run deltas up to go-live, and send a validation report for your sign-off before '+SRC+' is stood down.',
   fields:[
    {id:'reviewer_name',l:'Reviewer, name',ty:'text'},
    {id:'reviewer_email',l:'Reviewer, email',ty:'text'},
@@ -251,6 +442,8 @@ const SECTIONS=[
    {id:'approver_email',l:'Sign-off approver, email',ty:'text',hint:'Pre-filled from Project details'}
  ]}
 ];
+// 'agreed' only exists when AGREED_NOTE is set; hidden sections are excluded from progress, P, submit and exports
+const SECTIONS=ALL_SECTIONS.filter(s=>s.id!=='agreed'||String(AGREED_NOTE).trim());
 
 /* ---------- render ---------- */
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -283,8 +476,8 @@ function tableHTML(tb){
     <td><button class="row-x" data-del="${tb.key}" data-i="${i}" title="Remove row">×</button></td></tr>`).join('');
   const naHTML=tb.na?`<div class="na-toggle"><span class="chk${naOn?' on':''}" data-chk="${tb.na[0]}"><span class="box">✓</span>${esc(tb.na[1])}</span></div>`:'';
   const hid=tb.showIf?` id="tbl-${tb.key}" class="subhide${(F[tb.showIf[0]]===tb.showIf[1])?' show':''}"`:'';
-  return `<div${hid}>${naHTML}<div${naOn?' style="display:none"':''}><table class="map"><thead><tr>${tb.cols.map(([,l])=>`<th>${esc(l)}</th>`).join('')}<th></th></tr></thead>
-    <tbody>${body}</tbody></table>
+  return `<div${hid}>${naHTML}<div${naOn?' style="display:none"':''}><div class="tblwrap"><table class="map"><thead><tr>${tb.cols.map(([,l])=>`<th>${esc(l)}</th>`).join('')}<th></th></tr></thead>
+    <tbody>${body}</tbody></table></div>
     <button class="add-row" data-add="${tb.key}">+ Add row</button></div></div>`;
 }
 function render(){
@@ -328,11 +521,11 @@ function secFilled(s){
   (s.fields||[]).forEach(f=>{
     if(f.ty==='checks'||f.opt)return;
     if(!condOK(f))return;
-    total++; if((F[f.id]||'').trim())filled++;
+    total++; if(String(F[f.id]||'').trim())filled++;
   });
   if(s.table&&condOK(s.table)){
     total++;
-    if((s.table.na&&F[s.table.na[0]])||T[s.table.key].some(r=>Object.values(r).some(v=>(v||'').trim())))filled++;
+    if((s.table.na&&F[s.table.na[0]])||T[s.table.key].some(r=>Object.values(r).some(v=>String(v||'').trim())))filled++;
   }
   return [filled,total];
 }
@@ -340,6 +533,16 @@ function secDone(s){const[a,b]=secFilled(s);return b>0&&a>=b}
 function renderProgress(){
   let f=0,t=0; SECTIONS.forEach(s=>{const[a,b]=secFilled(s);f+=a;t+=b});
   document.getElementById('pbar').style.width=(t?Math.round(f/t*100):0)+'%';
+}
+
+/* ---------- progress summary for the tracker (CONTRACT.md) ---------- */
+function buildP(at){
+  return {form:'migration',v:1,updated:new Date(at||Date.now()).toISOString(),submitted:F.__submitted||null,
+    sections:SECTIONS.map(s=>{const[a,b]=secFilled(s);return{id:s.id,title:s.t,done:secDone(s),filled:a,total:b}})};
+}
+function postProgress(P){
+  if(window.parent===window)return;
+  try{window.parent.postMessage({type:'sabel-form-progress',form:'migration',slug:SLUG,P:P||buildP()},location.origin)}catch(_){}
 }
 
 /* ---------- events (delegated) ---------- */
@@ -389,41 +592,75 @@ function touch(rerender){
 /* ---------- persistence ---------- */
 async function apiGet(){
   const r=await fetch(API+'?key='+encodeURIComponent(KEY));
-  const j=await r.json();
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||j.ok===false){REMOTE=false;return null}
+  REMOTE=true;
   return j.value?JSON.parse(j.value):null;
+}
+function localGet(){try{const s=localStorage.getItem(LKEY);return s?JSON.parse(s):null}catch(_){return null}}
+function localPut(p){try{localStorage.setItem(LKEY,JSON.stringify(p))}catch(_){}}
+function syncBanner(){
+  const b=document.getElementById('local-banner');
+  if(b)b.style.display=(KEY&&REMOTE===false)?'block':'none';
 }
 async function save(){
   if(!KEY||!dirty)return;
+  const now=Date.now();
+  const payload={v:BUILD_V,savedAt:now,sess:SESS,F,T,P:buildP(now)};
+  localPut(payload);
   try{
     const cur=await apiGet();
-    if(cur&&cur.savedAt>lastSavedAt&&cur.sess!==SESS){
+    if(REMOTE&&cur&&cur.savedAt>lastSavedAt&&cur.sess!==SESS){
       if(!confirm('Someone else has saved changes to this form since you opened it. Overwrite with your version? (Cancel keeps theirs and reloads.)')){
+        try{localStorage.removeItem(LKEY)}catch(_){}
         location.reload();return;
       }
     }
-    const payload={v:BUILD_V,savedAt:Date.now(),sess:SESS,F,T};
-    await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({key:KEY,value:JSON.stringify(payload)})});
-    lastSavedAt=payload.savedAt;dirty=false;
-    const dot=document.getElementById('save-dot');dot.style.opacity=1;setTimeout(()=>dot.style.opacity=0,1600);
-  }catch(err){toast('Could not save, will retry with your next change')}
+    if(REMOTE){
+      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({key:KEY,value:JSON.stringify(payload)})});
+      if(!r.ok)REMOTE=false;
+    }
+  }catch(err){REMOTE=false}
+  lastSavedAt=payload.savedAt;dirty=false;
+  document.getElementById('save-txt').textContent=REMOTE?'Autosaved':'Saved on this device';
+  const dot=document.getElementById('save-dot');dot.style.opacity=1;setTimeout(()=>dot.style.opacity=0,1600);
+  syncBanner();
+  postProgress(payload.P);
 }
 async function load(){
   if(!KEY)return;
-  try{
-    const st=await apiGet();
-    if(st){F=st.F||{};T=Object.assign({inbox:[],status:[],attrs:[],agents:[]},st.T||{});lastSavedAt=st.savedAt||0;}
-  }catch(err){toast('Could not load saved answers, check your connection')}
+  let st=null;
+  try{st=await apiGet()}catch(err){REMOTE=false}
+  const loc=localGet();
+  if(loc&&(!st||(loc.savedAt||0)>(st.savedAt||0))){st=loc;dirty=true} // newer copy in this browser: push it up
+  if(st){F=st.F||{};T=Object.assign({inbox:[],status:[],attrs:[],agents:[]},st.T||{});lastSavedAt=st.savedAt||0;hadState=true}
+  syncBanner();
   if(F.__submitted)showSubmitted();
 }
 function submitForm(){
   const inc=SECTIONS.filter(s=>!secDone(s)).map(s=>(s.n?s.n+' · ':'')+s.t);
   if(inc.length&&!confirm('Some sections look incomplete:\n\n- '+inc.join('\n- ')+'\n\nSubmit anyway? You can come back and finish them later, your answers keep saving.'))return;
   F.__submitted=new Date().toISOString();
-  dirty=true;save();showSubmitted();
-  toast('Submitted, thank you.');
+  dirty=true;showSubmitted();
+  save().then(()=>openDone(REMOTE));
 }
+function openDone(ok){
+  const m=document.getElementById('done-modal'),c=m.querySelector('.modal-card');
+  c.classList.toggle('warn',!ok);
+  document.getElementById('done-icon').textContent=ok?'✓':'!';
+  document.getElementById('done-title').textContent=ok?'Thank you, your answers are with Sabel':'Saved on this device only';
+  document.getElementById('done-body').textContent=ok
+    ?'Submitted '+new Date(F.__submitted).toLocaleString()+'. Richard will review your answers and get in touch if anything needs a closer look. You can keep editing and your changes will carry on saving. We recommend saving a PDF copy for your records.'
+    :'We could not reach Sabel\'s server, so your answers have not been sent yet. Please save a PDF copy and send it to Richard.';
+  m.classList.add('show');
+  m.querySelector('.btn.primary').focus();
+}
+function closeDone(){document.getElementById('done-modal').classList.remove('show')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDone()});
 function showSubmitted(){
+  const st=document.getElementById('submit-status');if(st)st.textContent='✓ Submitted '+new Date(F.__submitted).toLocaleString();
+  const sb=document.getElementById('submit-btn');if(sb)sb.textContent='Resubmit changes to Sabel';
   const b=document.getElementById('submitted-banner');
   b.style.display='block';
   b.innerHTML='<strong>Submitted to Sabel</strong> on '+new Date(F.__submitted).toLocaleString()+'. You can keep editing, any changes continue to save.';
@@ -441,6 +678,7 @@ function exportRows(){
     });
   });
   SECTIONS.forEach(s=>{if(s.table&&s.table.na)out.push([s.t,s.table.na[1],F[s.table.na[0]]?'Yes':'No'])});
+  out.push(['Meta','Source platform label',SRC]);
   out.push(['Meta','Submitted at',F.__submitted||'']);
   out.push(['Meta','Storage key',KEY]);
   return out;
@@ -490,32 +728,63 @@ function exportXLSX(){
   });
 }
 function exportJSON(){
-  dl(fname('json'),new Blob([JSON.stringify({v:BUILD_V,exportedAt:new Date().toISOString(),slug:SLUG,F,T},null,2)],{type:'application/json'}));
+  dl(fname('json'),new Blob([JSON.stringify({v:BUILD_V,exportedAt:new Date().toISOString(),slug:SLUG,source:SRC,F,T,P:buildP()},null,2)],{type:'application/json'}));
 }
 function makeLink(){
   const slug=document.getElementById('linkgen').value.toLowerCase().replace(/[^a-z0-9-]/g,'');
   if(!slug){toast('Type a client slug first');return}
-  const url=location.origin+location.pathname+'?client='+slug;
+  const url=location.origin+location.pathname+'?client='+slug+(GENERIC?'':'&source='+encodeURIComponent(SRC));
   navigator.clipboard.writeText(url).then(()=>toast('Copied: '+url)).catch(()=>prompt('Client link:',url));
+}
+
+
+/* ---------- print / save as PDF ---------- */
+function printPDF(){
+  try{save();}catch(e){}
+  window.print();
+}
+window.addEventListener('beforeprint',()=>{
+  document.querySelectorAll('textarea').forEach(t=>{t.dataset.h=t.style.height||'';t.style.height='auto';t.style.height=Math.max(t.scrollHeight,44)+'px';});
+});
+window.addEventListener('afterprint',()=>{
+  document.querySelectorAll('textarea').forEach(t=>{t.style.height=t.dataset.h||'';delete t.dataset.h;});
+});
+
+/* ---------- static copy that names the source platform ---------- */
+function renderStatic(){
+  document.getElementById('top-sub').textContent=(GENERIC?'Helpdesk':SRC)+' to Intercom migration · Prepared with Sabel Customer Success Solutions';
+  document.getElementById('intro').innerHTML='This form captures how your tickets from '+esc(SRC)+' should land in Intercom: how much history comes across, where tickets go, and how statuses, ticket types, fields, contacts and agents map. Where we already know an answer from your SOW or our calls, we have pre-filled it, so please check those rather than start from scratch. Your progress <strong>saves automatically</strong> and you can return any time using the same link, so different people can fill in different sections. If anything is unclear, leave it blank and add a note, or ask Richard or Chris to go through it with you.';
 }
 
 /* ---------- boot ---------- */
 (async function(){
-  if(!KEY)document.getElementById('nokey').style.display='block';
+  renderStatic();
   if(ADMIN){
     document.getElementById('admin').style.display='block';
     document.getElementById('admin-meta').innerHTML=
-      'Build '+BUILD_V+' · Storage key: <code>'+(KEY||'none, template link')+'</code>'+
+      'Build '+BUILD_V+' · Storage key: <code>'+(KEY||'none, template link')+'</code> · Source: '+esc(SRC)+
       (KEY?'':'<br>Open a client\'s link with #admin on the end to export their answers.');
   }
   await load();
-  if(!F.client&&SLUG)F.client=SLUG.split('-').map(w=>w?w[0].toUpperCase()+w.slice(1):'').join(' ');
+  if(!hadState){
+    if(!GENERIC)F.source_platform=SRC;
+    Object.assign(F,SEED);
+    if(ZD)T.status=[
+      {src:'Zendesk: New',dst:'Submitted',notes:'Suggested'},
+      {src:'Zendesk: Open',dst:'In progress',notes:'Suggested'},
+      {src:'Zendesk: Pending',dst:'Waiting on customer',notes:'Suggested'},
+      {src:'Zendesk: On-hold',dst:'In progress',notes:'Suggested, or create an On hold status'},
+      {src:'Zendesk: Solved',dst:'Resolved',notes:'Suggested'},
+      {src:'Zendesk: Closed',dst:'Resolved',notes:'Suggested'}];
+  }
   if(!F.golive_tz)F.golive_tz=TZ;
   if(!F.tf_tz)F.tf_tz=TZ;
   if(ADMIN&&lastSavedAt)document.getElementById('admin-meta').innerHTML+=
     ' · Last saved: '+new Date(lastSavedAt).toLocaleString()+
-    (F.__submitted?' · <span style="color:#4ADE80">Submitted '+new Date(F.__submitted).toLocaleString()+'</span>':' · Not yet submitted');
+    (F.__submitted?' · <span style="color:var(--green)">Submitted '+new Date(F.__submitted).toLocaleString()+'</span>':' · Not yet submitted');
   render();
+  postProgress();
+  if(dirty&&REMOTE)save();
 })();
 </script>
 </body>
