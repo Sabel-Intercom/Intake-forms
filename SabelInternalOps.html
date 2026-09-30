@@ -1347,7 +1347,14 @@ function asidePanels(c,n,ko,tk,td,w){
   h += '</section>';
 
   /* links */
-  const readyUrl = PAGES+"SabelReadinessCheck.html?client="+encodeURIComponent(c.name);
+  /* Form links (30 Sep 2026): ?client= is the client's short name, the same one in the tracker
+     key (elmo-tracker-v1 -> elmo). It picks where the form saves, so it must match the keys
+     registered in sabel-webhook: readiness-<slug>-v1 and migration-intake-<slug>-v1.
+     &name= fills in the company name the client sees. */
+  const formSlug = (trackerKeyFor(c).replace(/-tracker-v\d+$/,"") || String(c.name||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""));
+  const readyUrl = PAGES+"SabelReadinessCheck.html?client="+encodeURIComponent(formSlug)+"&name="+encodeURIComponent(c.name);
+  const migUrl = PAGES+"SabelMigrationIntake.html?client="+encodeURIComponent(formSlug);
+  const copyBtn = (label,url,key) => '<li><button data-act="copy" data-url="'+esc(url)+'"><span>'+label+'</span><span class="k">key: '+esc(key)+'</span></button></li>';
   const link = (label,url,k) => '<li class="'+(url?'':'off')+'"><a href="'+esc(url||"#")+'" target="_blank" rel="noopener"><span>'+label+'</span><span class="k">'+esc(k|| (url?"open":"not set"))+'</span></a></li>';
   const slack = /^C[A-Z0-9]{6,}$/.test(c.slackChannel||"") ? SLACK+c.slackChannel : "";
   h += '<section class="panel"><div class="panel-h"><h3>Links</h3></div><ul class="links">'+
@@ -1356,8 +1363,9 @@ function asidePanels(c,n,ko,tk,td,w){
     (projectType(c)==="migration" ? "" : link("Kick-off Desk", "SabelKickoffDesk.html", ko?"record found":"no record"))+
     link("Drive folder", c.hub&&c.hub.driveUrl, "")+
     link("Slack channel", slack, c.slackChannel||"")+
-    (projectType(c)==="migration" ? "" : '<li><button data-act="copy" data-url="'+esc(readyUrl)+'"><span>Copy Readiness Check link</span><span class="k" id="copy-k">for '+esc(c.name)+'</span></button></li>'+
-    link("Readiness submissions", "SabelReadinessAdmin.html", ""))+
+    (projectType(c)==="audit" ? "" : copyBtn("Copy Readiness Check link", readyUrl, "readiness-"+formSlug+"-v1"))+
+    (["full","migration"].includes(projectType(c)) ? copyBtn("Copy Migration form link", migUrl, "migration-intake-"+formSlug+"-v1") : "")+
+    link("Readiness submissions", "SabelReadinessAdmin.html", "")+
   '</ul></section>';
 
   if(w.length) h += '<section class="panel"><div class="panel-h"><h3>Data to fix</h3><span class="sub">'+w.length+'</span></div><ul class="warns">'+w.map(x=>'<li>'+esc(x[0])+'<small>'+esc(x[1])+'</small></li>').join("")+'</ul></section>';
@@ -1542,7 +1550,7 @@ document.addEventListener("click", e=>{
     case "restart": S.restart=S.clientId; render(true); $("scroll").scrollTop=0; return;
     case "cancel-restart": S.restart=null; return render(true);
     case "signed": { if(!c) return; const d=$("sg-date").value||today(); c.stage="Onboarding"; c.signedDate=d; if(!c.acceptedAt) c.acceptedAt=d; ensureHub(c,"p0"); touch(c,["stage","signedDate","acceptedAt"]); return render(true); }
-    case "copy": { const url=t.dataset.url; const done=()=>{ const k=$("copy-k"); if(k) k.textContent="copied"; };
+    case "copy": { const url=t.dataset.url; const done=()=>{ const k=t.querySelector(".k")||$("copy-k"); if(k) k.textContent="copied"; };
       if(navigator.clipboard) navigator.clipboard.writeText(url).then(done).catch(()=>prompt("Copy this link",url)); else prompt("Copy this link",url); return; }
     case "add-client": return openAdd();
     case "add-notion": {
