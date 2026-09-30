@@ -207,7 +207,63 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .explain{font-size:12px;background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.3);border-radius:12px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start}
 .explain .keys{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 #draft-pill{display:none;font-family:inherit;cursor:pointer;align-items:center;gap:6px;background:rgba(225,6,0,.12);border:1px solid rgba(225,6,0,.4);border-radius:22px;color:#F87171;font-size:11px;font-weight:600;padding:7px 12px;white-space:nowrap}
-    </style>
+    
+/* ── Staged deliverables, client-friendly (30 Sep 2026) ─────────────────────── */
+.sd-legend{display:inline-flex;align-items:center;gap:14px;margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400;font-size:11px;color:var(--k94A3B8,#94A3B8)}
+.sd-legend span{display:inline-flex;align-items:center;gap:6px}
+.sd-legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.task.phased.sd{padding:0!important;border:1px solid var(--k1E2433,#1E2433)!important;border-radius:12px!important;background:var(--k12151D,#12151D)!important;margin-bottom:12px;box-shadow:none!important}
+.task.phased.sd .task-inner{padding:0!important}
+.sd-head{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;cursor:pointer}
+.sd-head:hover .sd-title{color:#fff}
+.sd-tt{flex:1;min-width:0}
+.sd-title{font-size:15px;font-weight:600;color:var(--kE2E8F0,#E2E8F0);line-height:1.35}
+.sd-desc{font-size:12.5px;color:var(--k94A3B8,#94A3B8);margin-top:3px;line-height:1.45}
+.sd-sum{font-size:12px;color:var(--k94A3B8,#94A3B8);margin-top:4px;line-height:1.5}
+.sd-sum .b{color:#5b9cf6}.sd-sum .a{color:#f0b429}
+.sd-pill{flex-shrink:0;font-size:12px;color:var(--kE2E8F0,#E2E8F0);border:1px solid var(--k2A3145,#2A3145);background:var(--k0F1117,#0F1117);border-radius:10px;padding:6px 12px;white-space:nowrap}
+.sd-right{display:flex;align-items:center;gap:10px;flex-shrink:0;align-self:center}
+.sd-dots{display:inline-flex;gap:5px}
+.sd-dots i{width:10px;height:10px;border-radius:50%;display:inline-block;box-sizing:border-box}
+.sd-body{padding:0 18px 16px}
+.sd-stp{position:relative;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));margin:6px 0 18px}
+.sd-line,.sd-fill{position:absolute;top:14px;height:2px;border-radius:2px}
+.sd-line{background:#3a4457}
+.sd-col{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 4px;background:none;border:none;font:inherit;color:inherit;cursor:pointer}
+.sd-node{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;box-sizing:border-box;position:relative;z-index:1;background:var(--k12151D,#12151D);border:2px solid #3a4457;color:var(--k94A3B8,#94A3B8);transition:transform .12s}
+.sd-col:hover .sd-node{transform:scale(1.08)}
+.sd-node.now{background:#5b9cf6;border-color:#5b9cf6;color:#0F1117;box-shadow:0 0 0 5px rgba(91,156,246,.2)}
+.sd-node.nowclient{background:#f0b429;border-color:#f0b429;color:#0F1117;box-shadow:0 0 0 5px rgba(240,180,41,.2)}
+.sd-node.client{border-color:#f0b429;color:#f0b429}
+.sd-node.done{background:#4ADE80;border-color:#4ADE80;color:#0F1117}
+.sd-lab{font-size:13px;font-weight:600;margin-top:9px;line-height:1.3;color:var(--kE2E8F0,#E2E8F0)}
+.sd-lab.client{color:#f0b429}.sd-lab.up{color:var(--k94A3B8,#94A3B8)}
+.sd-sub{font-size:11.5px;margin-top:3px;color:var(--k64748B,#64748B);line-height:1.3}
+.sd-sub.now{color:#5b9cf6}.sd-sub.nowclient{color:#f0b429}
+.sd-call{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.sd-call.one{grid-template-columns:minmax(0,1fr)}
+.sd-box{border-radius:10px;padding:14px 16px;border:1px solid}
+.sd-box.blue{background:rgba(91,156,246,.08);border-color:rgba(91,156,246,.35)}
+.sd-box.amber{background:rgba(240,180,41,.08);border-color:rgba(240,180,41,.35)}
+.sd-box.green{background:rgba(74,222,128,.08);border-color:rgba(74,222,128,.35)}
+.sd-box .h{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.sd-box.blue .h{color:#5b9cf6}.sd-box.amber .h{color:#f0b429}.sd-box.green .h{color:#4ADE80}
+.sd-box .t{font-size:13.5px;color:var(--kE2E8F0,#E2E8F0);line-height:1.5}
+.sd-box .m{font-size:11.5px;color:var(--k94A3B8,#94A3B8);margin-top:8px}
+.sd-foot{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.sd-link{background:none;border:none;color:#5b9cf6;font:inherit;font-size:12px;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:5px}
+.sd-link:hover{text-decoration:underline}
+.sd-btn{background:transparent;border:1px solid var(--k2A3145,#2A3145);color:var(--k94A3B8,#94A3B8);font-size:11px;font-family:inherit;border-radius:6px;padding:4px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.sd-btn:hover{color:var(--kE2E8F0,#E2E8F0);border-color:var(--k475569,#475569)}
+.sd-check{margin-top:12px;border-top:1px solid var(--k1E2433,#1E2433);padding-top:12px}
+.sd-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.sd-tab{font:inherit;font-size:11px;border-radius:14px;padding:3px 10px;border:1px solid var(--k2A3145,#2A3145);background:transparent;color:var(--k94A3B8,#94A3B8);cursor:pointer}
+.sd-tab.on{border-color:#5b9cf6;color:var(--kE2E8F0,#E2E8F0);background:rgba(91,156,246,.1)}
+.sd-copy{margin-top:6px;padding:8px;border:1px dashed var(--k2A3145,#2A3145);border-radius:6px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}
+.sd-copy .full{grid-column:1/-1}
+.sd-copy label{font-size:10px;color:var(--k64748B,#64748B);display:block;margin-bottom:2px}
+@media(max-width:640px){.sd-call{grid-template-columns:minmax(0,1fr)}.sd-lab{font-size:11.5px}.sd-sub{font-size:10.5px}.sd-legend{display:none}.sd-copy{grid-template-columns:minmax(0,1fr)}}
+</style>
     </head>
 <body>
 <button id="sb-toggle" onclick="toggleSidebar()" title="Open the project menu"><i class="ti ti-menu-2" style="font-size:14px"></i>Menu</button>
@@ -1376,7 +1432,7 @@ function resolveTask(cid){
         ${editCards.has(cid)?phasedEditHTML(t,cid):''}
       </div>`;
     }
-    function phasedCard(t,cid,ctx){
+    function phasedCardOld(t,cid,ctx){
       syncPhased(t);
       const done=t.s==='Complete',late=isOverdue(t),isOpen=expandedCards.has(cid);
       const ai=activePhaseIdx(t);const ds=t.phases.filter(phaseDone).length;
@@ -1415,7 +1471,7 @@ function resolveTask(cid){
       const main=document.getElementById('main');const cols=main.querySelector('.phase-cols');if(!cols)return;
       const cards=[...cols.querySelectorAll('.task.phased')];const isPillar=groupBy==='pillar'&&P.some(p=>p.id===cur);if(!cards.length&&!isPillar)return;
       const strip=document.createElement('div');strip.className='deliv-strip';
-      strip.innerHTML=`<p class="col-head" style="color:#94A3B8"><i class="ti ti-route" style="font-size:12px"></i>Staged deliverables <span style="font-size:10px;color:#475569;font-weight:400;margin-left:4px">${cards.length}</span><span style="font-size:10px;color:#475569;font-weight:400;margin-left:auto;text-transform:none;letter-spacing:0">Click a stage to open its checklist, or the row to expand it.</span></p><div class="deliv-grid"></div>${isPillar?`<button class="add-task-btn" onclick="addPhasedTask('${cur}')"><i class="ti ti-plus" style="font-size:13px"></i>Add staged deliverable</button>`:''}`;
+      strip.innerHTML=`<p class="col-head" style="color:#94A3B8"><i class="ti ti-route" style="font-size:12px"></i>Staged deliverables <span style="font-size:10px;color:#475569;font-weight:400;margin-left:4px">${cards.length}</span><span class="sd-legend"><span><i style="background:#5b9cf6"></i>Sabel working</span><span><i style="background:#f0b429"></i>Needs you</span><span><i style="border:1.5px solid #3a4457;box-sizing:border-box"></i>Upcoming</span></span></p><div class="deliv-grid"></div>${isPillar?`<button class="add-task-btn" onclick="addPhasedTask('${cur}')"><i class="ti ti-plus" style="font-size:13px"></i>Add staged deliverable</button>`:''}`;
       const grid=strip.querySelector('.deliv-grid');cards.forEach(c=>grid.appendChild(c));
       cols.parentNode.insertBefore(strip,cols);
       // An empty column beside staged work should say so, not "adjust filters".
@@ -1578,6 +1634,7 @@ function resolveTask(cid){
             </span>
           </div>
           <input type="text" value="${esc(p.tip||'')}" ${PH_INP} style="width:100%;margin-top:6px" placeholder="One line for ${esc(CLIENT_LABEL)}: what this stage is for" onchange="phSet('${cid}',${pi},'tip',this.value)">
+          ${sdCopyEditHTML(t,cid,pi)}
           <div style="margin-top:6px;padding-left:20px">${items}
             <div style="display:flex;gap:6px;margin-top:4px"><input id="ph-add-${cid}-${pi}" type="text" placeholder="Add an item to ${esc(p.l)}..." ${PH_INP} style="flex:1" onkeydown="if(event.key==='Enter')phAddItem('${cid}',${pi})"><button onclick="phAddItem('${cid}',${pi})" style="background:transparent;border:1px solid #2A3145;color:#94A3B8;font-size:11px;font-family:inherit;border-radius:6px;padding:3px 10px;cursor:pointer">Add</button></div>
           </div>
@@ -1727,6 +1784,194 @@ function resolveTask(cid){
         </div>`:'';
       return nowBlock+laterBlock;
     }
+
+const STAGE_COPY={"Phase 2 migration and cutover \u00b7 Ocean": {"_desc": "About 70,000 Zoho Desk tickets, then Ocean switches to Intercom.", "_descFrom": "About 70,000 Zoho Desk tickets, then Ocean switches over", "Sample run": {"ownerLabel": "Richard", "clientAction": false, "nowText": "Richard runs a sample batch and checks it against the Zoho source."}, "Approve sample": {"ownerLabel": "Ocean", "clientAction": true, "clientText": "Review the sample in Intercom and give the go-ahead for the full run.", "helperText": "We'll send a link when it's ready"}, "Full run": {"ownerLabel": "Richard", "clientAction": false, "nowText": "Richard runs the full extract from Zoho Desk within the plan limits, then loads and reconciles every ticket."}, "Cutover": {"ownerLabel": "Ocean", "clientAction": false, "nowText": "Zoho Desk stops taking new tickets for Ocean, Richard runs the final delta, and Ocean switches to Intercom."}}, "Phase 2 mapping \u00b7 Zoho Desk": {"Validate limits": {"ownerLabel": "Richard", "clientAction": false, "nowText": "Richard checks the Zoho Desk plan's API limits and sets the extract window."}, "Map": {"ownerLabel": "Richard", "clientAction": false, "nowText": "Richard maps Ocean's Zoho Desk fields, tags, statuses and agents to Intercom, then sends you the proposed mapping."}, "Sign-off": {"ownerLabel": "Ocean", "clientAction": true, "clientText": "Review the proposed Phase 2 mapping and sign it off, so the sample run can start.", "helperText": "We'll send you the mapping when it's ready"}}};
+
+// ── Staged deliverables, client-friendly (30 Sep 2026) ──────────────────────────
+// Presentation only: data, ticking, editing and saving are the engine's.
+let sdCheckOpen=new Set(), sdCollapsed=new Set();
+function sdSeed(t,p){const d=STAGE_COPY&&STAGE_COPY[t.t];return (d&&d[p.l])||{};}
+// A seeded description replaces the built one only while the saved text is still the old one.
+function sdDesc(t){const d=STAGE_COPY&&STAGE_COPY[t.t];return (d&&d._desc&&(!d._descFrom||t.desc===d._descFrom))?d._desc:(t.desc||'');}
+function sdCopy(t,p){
+  const s=sdSeed(t,p),pick=k=>(p[k]!==undefined&&p[k]!=='')?p[k]:s[k];
+  const ca=pick('clientAction');
+  return {ownerLabel:pick('ownerLabel')||'',clientAction:ca===undefined?(p.o===CLIENT_LABEL):!!ca,
+          nowText:pick('nowText')||'',clientText:pick('clientText')||'',helperText:pick('helperText')||''};
+}
+const SD_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function sdFmt(d){return d.getDate()+' '+SD_MON[d.getMonth()];}
+function sdFri(n){const d=new Date(weekStartDate(n));d.setDate(d.getDate()+4);return d;}
+function sdEndWk(p){return p.wkEnd&&p.wkEnd>p.week?p.wkEnd:p.week;}
+function sdRange(p){if(!p.week)return '';const a=new Date(weekStartDate(p.week)),b=sdFri(sdEndWk(p));
+  return a.getMonth()===b.getMonth()?a.getDate()+'–'+b.getDate()+' '+SD_MON[b.getMonth()]:sdFmt(a)+'–'+sdFmt(b);}
+function sdDue(p){return p.week?sdFmt(sdFri(sdEndWk(p))):'';}
+function sdYou(l){l=String(l||'').trim();if(!l)return 'Your turn';const w=l.replace(/^sign-?off/i,'sign off');return 'You '+w.charAt(0).toLowerCase()+w.slice(1);}
+// Summary wording for a client stage: a verb reads "you approve sample", a noun
+// reads "your sign-off".
+function sdYours(l){const w=sdLow(String(l||'').trim());
+  return /^(approve|review|provide|send|install|confirm|decide|test|check|choose|sign |give|add|name|tell|share|book)/.test(w)?'you '+w:'your '+w.replace(/^sign-?off/,'sign-off');}
+function sdLow(l){l=String(l||'');return l.charAt(0).toLowerCase()+l.slice(1);}
+function sdStages(t){
+  const ai=activePhaseIdx(t);
+  return t.phases.map((p,i)=>{
+    const c=sdCopy(t,p),done=phaseDone(p);
+    const state=done?'done':(i===ai?(c.clientAction?'nowclient':'now'):(c.clientAction?'client':'up'));
+    return {p,i,c,done,state};
+  });
+}
+function sdSubLabel(st,all,ai){
+  const p=st.p;
+  if(st.state==='done')return p.doneAt?'Done '+sdFmt(new Date(p.doneAt+'T00:00:00')):'Done';
+  if(st.state==='now'||st.state==='nowclient'){const r=sdRange(p);return r?'Now · '+r:'Now';}
+  if(st.state==='client')return p.week?'Around '+sdDue(p):'Date TBC';
+  // Upcoming: waits on an open client stage between the current one and this one.
+  const gate=all.slice(Math.max(ai,0),st.i).map(x=>x).reverse().find(x=>!x.done&&x.c.clientAction);
+  if(gate)return gate.i===st.i-1?'After approval':'Date TBC';
+  return p.week?'From '+sdFmt(new Date(weekStartDate(p.week))):'Date TBC';
+}
+function sdLabel(st){return (st.state==='client'||st.state==='nowclient')?sdYou(st.p.l):st.p.l;}
+function sdOwner(t,st){return st.c.ownerLabel||phaseHolder(st.p)||t.lead||'Sabel';}
+function sdNowText(t,st){
+  if(st.c.nowText)return st.c.nowText;
+  const x=(st.p.sub||[]).find(s=>s.s!=='Complete');
+  return sdOwner(t,st)+' is working on '+sdLow(st.p.l)+(st.p.tip?'. '+st.p.tip:(x?': '+x.t:''))+'.';
+}
+function sdClientText(t,st){
+  if(st.c.clientText)return st.c.clientText;
+  if(st.p.tip)return st.p.tip.replace(/\.?$/,'.');
+  const open=(st.p.sub||[]).filter(s=>s.s!=='Complete').map(s=>s.t);
+  return open.length?open.join('; ')+'.':sdYou(st.p.l)+'.';
+}
+function sdStepper(t,cid,all,ai){
+  const n=all.length,step=100/n,left=step/2;
+  let end=ai<0?n-1:ai,grad='#5b9cf6';
+  if(ai<0)grad='#4ADE80';
+  else if(all[ai].state==='now'&&all[ai+1]&&all[ai+1].state==='client'){end=ai+1;const cut=end?Math.round(ai/end*100):0;grad=`linear-gradient(90deg,#5b9cf6 ${cut}%,#f0b429 100%)`;}
+  else if(all[ai].state==='nowclient')grad=ai?`linear-gradient(90deg,#5b9cf6 ${Math.round((ai-1)/ai*100)}%,#f0b429 100%)`:'#f0b429';
+  const fillW=end*step;
+  return `<div class="sd-stp" style="--n:${n}">
+    <div class="sd-line" style="left:${left}%;right:${left}%"></div>
+    ${fillW>0?`<div class="sd-fill" style="left:${left}%;width:${fillW}%;background:${grad}"></div>`:''}
+    ${all.map(st=>`<button class="sd-col" onclick="sdOpenStage(event,'${cid}',${st.i})" title="${esc(st.p.l)}${st.p.tip?': '+esc(st.p.tip):''}">
+      <span class="sd-node ${st.state}">${st.state==='done'?'<i class="ti ti-check" style="font-size:14px"></i>':st.i+1}</span>
+      <span class="sd-lab ${st.state==='client'||st.state==='nowclient'?'client':(st.state==='up'?'up':'')}">${esc(sdLabel(st))}</span>
+      <span class="sd-sub ${st.state==='now'?'now':(st.state==='nowclient'?'nowclient':'')}">${esc(sdSubLabel(st,all,ai))}</span>
+    </button>`).join('')}
+  </div>`;
+}
+function sdCallouts(t,all,ai){
+  if(ai<0)return `<div class="sd-call one"><div class="sd-box green"><div class="h">All done</div><div class="t">Every stage of this deliverable is complete.</div></div></div>`;
+  const cu=all[ai];
+  const helper=st=>st.c.helperText||'We will let you know when it is ready.';
+  if(cu.state==='nowclient'){
+    const due=sdDue(cu.p);
+    return `<div class="sd-call one"><div class="sd-box amber"><div class="h">We need you to</div><div class="t">${esc(sdClientText(t,cu))}</div><div class="m">${due?'Due '+due+(cu.c.helperText?' · ':''):''}${cu.c.helperText?esc(cu.c.helperText):''}</div></div></div>`;
+  }
+  const nx=all.slice(ai+1).find(x=>!x.done&&x.c.clientAction);
+  const due=sdDue(cu.p);
+  const blue=`<div class="sd-box blue"><div class="h">What's happening now</div><div class="t">${esc(sdNowText(t,cu))}</div>${due?`<div class="m">Due ${due}</div>`:''}</div>`;
+  if(!nx)return `<div class="sd-call one">${blue}</div>`;
+  return `<div class="sd-call">${blue}<div class="sd-box amber"><div class="h">Then we need you to</div><div class="t">${esc(sdClientText(t,nx))}</div><div class="m">${esc(helper(nx))}</div></div></div>`;
+}
+function sdChecklist(t,cid,ai){
+  const oi=phaseOpen[cid]!==undefined?phaseOpen[cid]:(ai<0?t.phases.length-1:ai);
+  const p=t.phases[oi];if(!p)return '';
+  const tabs=t.phases.map((q,i)=>`<button class="sd-tab${i===oi?' on':''}" onclick="sdOpenStage(event,'${cid}',${i})">${i+1} · ${esc(q.l)}</button>`).join('');
+  return `<div class="sd-check" onclick="event.stopPropagation()">
+    <div class="sd-tabs">${tabs}</div>
+    <div class="sub-rail">${(p.sub||[]).map((x,i)=>{const sd=x.s==='Complete';const o=x.o||p.o||'Client';const c=OW[o]||OW.Client||{c:'#94A3B8',bg:'rgba(148,163,184,.1)'};return `<div style="display:flex;align-items:center;gap:7px;padding:3px 0">
+      <button class="chk-btn" onclick="togglePhaseSub(event,'${cid}',${oi},${i})" title="${sd?'Mark incomplete':'Mark done'}" style="padding-top:0;align-items:center"><i class="ti ti-${sd?'circle-check-filled':'circle'}" style="font-size:15px;color:${sd?'#4ADE80':'#334155'}"></i></button>
+      <span style="font-size:12px;flex:1;min-width:0;line-height:1.4;color:${sd?'#475569':'#E2E8F0'};${sd?'text-decoration:line-through':''}">${esc(x.t)}</span>
+      ${x.tip?`<i class="ti ti-info-circle" onmouseenter="showPhaseTip(event,'${cid}',${oi},${i})" onmousemove="moveTip(event)" onmouseleave="hideTip()" style="font-size:12px;color:#475569;cursor:help;flex-shrink:0"></i>`:''}
+      <span class="bdg" style="color:${c.c};background:${c.bg};font-size:10px;padding:1px 7px">${esc(o)}</span>
+    </div>`;}).join('')||'<div style="font-size:12px;color:#64748B">Nothing listed for this stage yet.</div>'}</div>
+    ${p.note?`<div class="stage-note">${esc(p.note)}</div>`:''}
+  </div>`;
+}
+// Open by default: a deliverable whose current stage is under way, or, when nothing on
+// the board is under way yet, the one whose current stage comes first.
+function sdAutoOpen(t,cid){
+  const ai=activePhaseIdx(t);if(ai<0)return false;const p=t.phases[ai];
+  if(!(p.week&&p.week>currentWeek()&&!phaseStarted(p)))return true;
+  const parts=String(cid).split('-');const pid=parts.slice(0,parts.length-2).join('-');
+  const list=((T[pid]||{}).sabel||[]).filter(x=>isPhased(x)&&!x.parked&&activePhaseIdx(x)>=0);
+  const wk=x=>{const q=x.phases[activePhaseIdx(x)];return q.week||999;};
+  if(list.some(x=>{const q=x.phases[activePhaseIdx(x)];return !(q.week&&q.week>currentWeek()&&!phaseStarted(q));}))return false;
+  const first=list.slice().sort((a,b)=>wk(a)-wk(b))[0];
+  return first===t;
+}
+function sdIsOpen(t,cid){return expandedCards.has(cid)||(!sdCollapsed.has(cid)&&sdAutoOpen(t,cid));}
+function sdTog(cid){const t=resolveTask(cid);if(!t)return;
+  if(sdIsOpen(t,cid)){expandedCards.delete(cid);sdCollapsed.add(cid);}else{expandedCards.add(cid);sdCollapsed.delete(cid);}
+  renderMain();}
+function sdToggleCheck(e,cid){e.stopPropagation();if(sdCheckOpen.has(cid))sdCheckOpen.delete(cid);else sdCheckOpen.add(cid);renderMain();}
+function sdOpenStage(e,cid,i){e.stopPropagation();closeStatusPicker();closeOwnerPicker();phaseOpen[cid]=i;expandedCards.add(cid);sdCollapsed.delete(cid);sdCheckOpen.add(cid);renderMain();}
+function phasedCard(t,cid,ctx){
+  syncPhased(t);
+  const done=t.s==='Complete',all=sdStages(t),ai=activePhaseIdx(t),n=all.length,isOpen=sdIsOpen(t,cid);
+  const chip=typeof noteChip==='function'?noteChip(t,cid):'';
+  const dot=ctx&&ctx.c?`<span title="${esc(ctx.l||'')}" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${ctx.c};margin-right:7px;vertical-align:2px"></span>`:'';
+  const pill=ai<0?`All ${n} stages done`:`Stage ${ai+1} of ${n}`;
+  if(!isOpen){
+    const parts=[];
+    if(ai<0)parts.push('<span style="color:#4ADE80">All stages done</span>');
+    else{
+      parts.push(pill);
+      const cu=all[ai],r=sdRange(cu.p);
+      parts.push(`<span class="${cu.state==='nowclient'?'a':'b'}">${esc(cu.state==='nowclient'?sdYou(cu.p.l):cu.p.l)}</span>${r?', '+r:''}`);
+      all.slice(ai+1).forEach(st=>parts.push('then '+(st.c.clientAction?`<span class="a">${esc(sdYours(st.p.l))}</span>`:esc(st.p.l))));
+    }
+    const dots=all.map(st=>{const s=st.state;const bg=s==='done'?'#4ADE80':(s==='now'?'#5b9cf6':(s==='nowclient'?'#f0b429':'transparent'));
+      const bd=s==='client'?'#f0b429':(s==='up'?'#3a4457':bg);return `<i title="${esc(st.p.l)}" style="background:${bg};border:1.5px solid ${bd}"></i>`;}).join('');
+    return `<div id="card-${cid}" class="task phased sd${done?' done':''}" draggable="false"><div class="task-inner">
+      <div class="sd-head" onclick="sdTog('${cid}')">
+        <div class="sd-tt"><div class="sd-title">${dot}${esc(t.t)}</div><div class="sd-sum">${parts.join(' · ')}</div></div>
+        <div class="sd-right">${chip}<span class="sd-dots">${dots}</span><i class="ti ti-chevron-down" style="font-size:14px;color:#64748B"></i></div>
+      </div></div></div>`;
+  }
+  const oi=phaseOpen[cid]!==undefined?phaseOpen[cid]:(ai<0?n-1:ai);
+  const items=((t.phases[oi]||{}).sub||[]).length;
+  const curNotes=cardNotes[cid]!==undefined?cardNotes[cid]:(t.notes||'');
+  const curLink=cardLinks[cid]!==undefined?cardLinks[cid]:(t.link||'');
+  const checkOpen=sdCheckOpen.has(cid);
+  return `<div id="card-${cid}" class="task phased sd${done?' done':''}" draggable="false"><div class="task-inner">
+    <div class="sd-head" onclick="sdTog('${cid}')">
+      <div class="sd-tt"><div class="sd-title">${dot}${esc(t.t)}</div>${sdDesc(t)?`<div class="sd-desc">${esc(sdDesc(t))}</div>`:''}</div>
+      <div class="sd-right">${chip}<span class="sd-pill">${pill}</span></div>
+    </div>
+    <div class="sd-body" onclick="event.stopPropagation()">
+      ${sdStepper(t,cid,all,ai)}
+      ${sdCallouts(t,all,ai)}
+      <div class="sd-foot">
+        <button class="sd-link" onclick="sdToggleCheck(event,'${cid}')"><i class="ti ti-list-check" style="font-size:13px"></i>${checkOpen?'Hide checklist':'Show checklist ('+items+')'}</button>
+        ${curLink?`<a href="${esc(curLink)}" target="_blank" rel="noopener" class="sd-link" onclick="event.stopPropagation()"><i class="ti ti-external-link" style="font-size:12px"></i>Open the guide</a>`:''}
+        <span style="flex:1"></span>
+        <button class="sd-btn" onclick="toggleComplete(event,'${cid}')" title="${done?'Reopen the last stage':'Mark every stage done'}"><i class="ti ti-${done?'rotate':'checks'}" style="font-size:12px"></i>${done?'Reopen':'Mark all done'}</button>
+        <button onclick="toggleEdit(event,'${cid}')" class="sd-btn"><i class="ti ti-${editCards.has(cid)?'x':'pencil'}" style="font-size:12px"></i>${editCards.has(cid)?'Done editing':'Edit deliverable'}</button>
+      </div>
+      ${checkOpen?sdChecklist(t,cid,ai):''}
+      ${editCards.has(cid)?phasedEditHTML(t,cid):''}
+      ${typeof notesHTML==='function'?`<div style="margin-top:10px">${notesHTML(t,cid,curNotes)}</div>`:(curNotes?`<div style="margin-top:10px;font-size:12px;color:#94A3B8;white-space:pre-wrap">${esc(curNotes)}</div>`:'')}
+    </div>
+  </div></div>`;
+}
+// Completed stages remember the day they finished, for "Done 14 Oct".
+(function(){const orig=syncPhased;syncPhased=function(t){orig(t);if(!isPhased(t))return;
+  t.phases.forEach(p=>{if(phaseDone(p)){if(!p.doneAt)p.doneAt=isoDate(new Date());}else if(p.doneAt)delete p.doneAt;});};})();
+// Per-stage copy fields in Edit deliverable.
+function sdCopyEditHTML(t,cid,pi){
+  const p=t.phases[pi],s=sdSeed(t,p),c=sdCopy(t,p);
+  const v=k=>esc(p[k]!==undefined?p[k]:(s[k]||''));
+  const inp=(k,ph,full)=>`<div${full?' class="full"':''}><label>${ph}</label><input type="text" value="${v(k)}" ${PH_INP} style="width:100%" placeholder="${esc(ph)}" onchange="phSet('${cid}',${pi},'${k}',this.value)"></div>`;
+  return `<div class="sd-copy">
+    ${inp('ownerLabel','Who is doing it (e.g. Richard, '+CLIENT_LABEL+')')}
+    <div><label>Stage type</label><label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#f0b429;cursor:pointer;margin-top:4px"><input type="checkbox" ${c.clientAction?'checked':''} onchange="phSet('${cid}',${pi},'clientAction',this.checked)" style="accent-color:#f0b429">Something ${esc(CLIENT_LABEL)} has to do</label></div>
+    ${inp('nowText','"What\'s happening now" sentence',true)}
+    ${inp('clientText','"We need you to" sentence',true)}
+    ${inp('helperText','Small line under it (e.g. We\'ll send a link when it\'s ready)',true)}
+  </div>`;
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
