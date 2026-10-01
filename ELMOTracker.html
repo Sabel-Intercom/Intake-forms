@@ -739,6 +739,87 @@ html.light .hn-pl.on{background:#E4E7EC;color:#101828}
 .pv-pg button:hover{border-color:var(--k475569,#475569)}
 .wk-tog{display:flex;justify-content:flex-end;margin-bottom:10px}
 @media(max-width:700px){.pv-row{flex-wrap:wrap}.pv-tt{flex-basis:calc(100% - 40px)}.pv-when{min-width:0}}
+/* Split pillar view (1 Oct 2026) */
+.pcols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.pcol{border:1px solid var(--k1E2433,#1E2433);border-radius:12px;background:var(--k12151D,#12151D);overflow:hidden;transition:box-shadow .12s}
+.pcol.client{border-color:rgba(240,180,41,.45)}
+.pcol.drop{box-shadow:0 0 0 2px #5b9cf6}
+.pcol-h{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--k1E2433,#1E2433)}
+.pcol.client .pcol-h{background:rgba(240,180,41,.07)}.pcol.sabel .pcol-h{background:rgba(91,156,246,.07)}
+.pcol-h b{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.pcol.client .pcol-h b{color:#f0b429}.pcol.sabel .pcol-h b{color:#5b9cf6}
+.pcol-h span{margin-left:auto;font-size:12.5px;color:var(--k94A3B8,#94A3B8)}
+.pcol.client .pcol-h span{color:#f0b429}
+.pcol-e{padding:16px 18px;font-size:13.5px;color:var(--k94A3B8,#94A3B8)}
+.pcol-f{display:flex;align-items:center;padding:12px 18px;border-top:1px solid var(--k1E2433,#1E2433);font-size:13px;color:var(--k94A3B8,#94A3B8)}
+.pcol-f button{margin-left:auto;background:none;border:none;font:inherit;font-size:13.5px;color:var(--kE2E8F0,#E2E8F0);cursor:pointer}
+.pcol-f button:hover{text-decoration:underline}
+.pc{padding:14px 18px;border-top:1px solid var(--k1E2433,#1E2433);cursor:pointer}
+.pcol-h+.pc{border-top:none}
+.pc.od{background:rgba(225,6,0,.07)}
+.pc-top{display:flex;gap:12px;align-items:flex-start}
+.pc .pv-st{margin-top:2px}
+.pv-st.cl{border-color:#f0b429}.pv-st.og{border-color:#5b9cf6}
+.pc-m{flex:1;min-width:0}
+.pc-t{font-size:15px;font-weight:600;color:var(--kE2E8F0,#E2E8F0);line-height:1.35;outline:none;border-radius:4px;cursor:text}
+.pc-t:focus,.pv-desc2:focus,.ps-t:focus,.pv-h1[contenteditable]:focus,.pv-desc span[contenteditable]:focus{box-shadow:0 0 0 2px rgba(91,156,246,.5);background:var(--k0F1117,#0F1117)}
+.pc.done .pc-t{color:var(--k64748B,#64748B);text-decoration:line-through}
+.pc-d{font-size:13px;color:var(--k94A3B8,#94A3B8);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-pills{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:9px}
+.pill{display:inline-flex;align-items:center;gap:4px;font:inherit;font-size:12.5px;font-weight:600;border:none;border-radius:8px;padding:4px 9px;cursor:pointer;background:var(--k1E2433,#1E2433);color:var(--kCBD5E1,#CBD5E1);transition:filter .12s}
+.pill:hover{filter:brightness(1.25)}
+.pill i{font-size:11px;opacity:.8}
+.pill.red{background:rgba(225,6,0,.18);color:#FF6B66}.pill.blue{background:rgba(91,156,246,.16);color:#5b9cf6}
+.pv-a{background:none;border:none;font:inherit;font-size:12.5px;color:#5b9cf6;cursor:pointer;text-decoration:none;padding:0 2px}
+.pv-a:hover{text-decoration:underline}.pv-a.q{color:var(--k94A3B8,#94A3B8)}
+.pc-chev{background:none;border:none;color:var(--k64748B,#64748B);cursor:pointer;padding:2px;font-size:15px}
+.pv-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;margin:12px 0 2px 32px;cursor:default}
+.pv-meta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:13px;color:var(--k94A3B8,#94A3B8)}
+.pv-meta a{color:#5b9cf6;text-decoration:none}.pv-meta .og{color:#5b9cf6}
+.pv-ed{background:none;border:none;border-bottom:1px dashed var(--k475569,#475569);font:inherit;font-size:13px;color:var(--kE2E8F0,#E2E8F0);cursor:pointer;padding:0 1px}
+.pv-desc2{font-size:13.5px;color:var(--kCBD5E1,#CBD5E1);line-height:1.5;margin-top:10px;padding:2px 3px;border-radius:4px;outline:none;min-height:18px;border-bottom:1px dashed var(--k2A3145,#2A3145);padding-bottom:10px}
+.pv-desc2:empty:before{content:attr(data-ph);color:var(--k64748B,#64748B)}
+.pv-lab{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--k94A3B8,#94A3B8);margin-bottom:6px}
+.ps{display:flex;align-items:center;gap:9px;padding:3px 0}
+.ps-c{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--k475569,#475569);background:transparent;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.ps-c.d{background:#16A34A;border-color:#16A34A}.ps-c i{font-size:10px}
+.ps-t{flex:1;font-size:13.5px;color:var(--kE2E8F0,#E2E8F0);outline:none;border-radius:3px;padding:1px 3px;cursor:text}
+.ps-t.d{color:var(--k64748B,#64748B);text-decoration:line-through}
+.ps-x{opacity:0;background:none;border:none;color:var(--k94A3B8,#94A3B8);cursor:pointer;font-size:16px}
+.ps:hover .ps-x{opacity:1}.ps-x:hover{color:#FF6B66}
+.ps{cursor:grab}
+.ps-add{margin-top:6px;width:100%;box-sizing:border-box;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--kE2E8F0,#E2E8F0);font:inherit;font-size:13px;padding:3px}
+.ps-add:focus{outline:none;border-bottom-color:var(--k475569,#475569)}
+.ps-add::placeholder{color:var(--k64748B,#64748B)}
+.pn{display:flex;gap:10px;margin-bottom:10px}
+.pn .av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;flex-shrink:0}
+.pn .av.sabel{background:rgba(91,156,246,.18);color:#5b9cf6}.pn .av.client{background:rgba(240,180,41,.18);color:#f0b429}
+.pn .bd{flex:1;min-width:0}
+.pn .hd{display:flex;align-items:center;gap:5px;font-size:13px}
+.pn .hd b{color:var(--kE2E8F0,#E2E8F0)}.pn .hd span{color:var(--k94A3B8,#94A3B8);flex:1}
+.pn .hd button{background:none;border:none;color:var(--k94A3B8,#94A3B8);cursor:pointer;padding:1px}
+.pn .tx{font-size:13.5px;color:var(--kCBD5E1,#CBD5E1);line-height:1.45;margin-top:2px;white-space:pre-wrap}
+.pn-ed{width:100%;box-sizing:border-box;font:inherit;font-size:13px;color:var(--kE2E8F0,#E2E8F0);background:var(--k0F1117,#0F1117);border:1px solid #5b9cf6;border-radius:6px;padding:6px 8px;margin-top:4px}
+.pn-act{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}.pn-act button{font:inherit;font-size:12px;border-radius:6px;padding:4px 10px;cursor:pointer;background:transparent;border:1px solid var(--k2A3145,#2A3145);color:var(--kCBD5E1,#CBD5E1)}
+.pn-act .go{background:#E10600;border-color:#E10600;color:#fff}
+.pn-none{font-size:13px;color:var(--k64748B,#64748B);margin-bottom:8px}
+.pn-new{display:flex;gap:8px;margin-top:8px}
+.pn-new textarea{flex:1;font:inherit;font-size:13.5px;color:var(--kE2E8F0,#E2E8F0);background:var(--k0F1117,#0F1117);border:1px solid var(--k2A3145,#2A3145);border-radius:8px;padding:9px 11px;resize:vertical;min-height:38px;box-sizing:border-box}
+.pn-new button{background:#E10600;border:none;color:#fff;font:inherit;font-size:13.5px;font-weight:600;border-radius:8px;padding:0 16px;cursor:pointer}
+.pn-as{font-size:12px;color:var(--k64748B,#64748B);margin-top:6px}.pn-as a{color:var(--k94A3B8,#94A3B8)}
+.pn-as input{font:inherit;font-size:12.5px;color:var(--kE2E8F0,#E2E8F0);background:var(--k0F1117,#0F1117);border:1px solid var(--k2A3145,#2A3145);border-radius:6px;padding:4px 8px}
+#hn-pop{position:fixed;z-index:2000;display:none;min-width:170px;background:var(--k161B26,#161B26);border:1px solid var(--k2A3145,#2A3145);border-radius:10px;padding:5px;box-shadow:0 12px 32px rgba(0,0,0,.35)}
+#hn-pop>button{display:flex;align-items:center;gap:8px;width:100%;background:transparent;border:none;border-radius:7px;padding:8px 10px;font:inherit;font-size:13.5px;color:var(--kCBD5E1,#CBD5E1);cursor:pointer;text-align:left}
+#hn-pop>button:hover{background:var(--k1E2433,#1E2433)}#hn-pop>button.on{color:var(--kE2E8F0,#E2E8F0);font-weight:600}
+#hn-pop>button i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.pp-date{display:flex;flex-direction:column;gap:6px;padding:6px;width:220px}
+.pp-date label{font-size:12px;color:var(--k94A3B8,#94A3B8)}
+.pp-date input{font:inherit;font-size:13px;color:var(--kE2E8F0,#E2E8F0);background:var(--k0F1117,#0F1117);border:1px solid var(--k2A3145,#2A3145);border-radius:7px;padding:6px 8px}
+.pp-date button{margin-top:4px;background:none;border:none;color:var(--k94A3B8,#94A3B8);font:inherit;font-size:12.5px;cursor:pointer;text-align:left;padding:2px}
+.pv-h1[contenteditable],.pv-desc span[contenteditable]{outline:none;border-radius:4px;cursor:text}
+@media(max-width:980px){.pcols{grid-template-columns:minmax(0,1fr)}}
+.pcol{container-type:inline-size}
+@container (max-width:560px){.pv-panel{grid-template-columns:minmax(0,1fr);margin-left:0}.pv-panel .pr{border-top:1px solid var(--k1E2433,#1E2433);padding-top:12px}}
 </style>
     </head>
 <body>
@@ -880,7 +961,7 @@ let remoteStamp=null;
 // rather than letting one transient toast be the only warning the user gets.
 let saveBroken=false;
 function buildPayload(){
-  const payload={progression:PROG,buildV:BUILD_V,goLive:goLiveDate,groupBy,hideDone,runwayOnDash,panels:{runway:!!panelOpen.runway,call:!!panelOpen.call},weekStarts,statuses:{},notes:cardNotes,links:cardLinks,origStatus,taskData:{},savedAt:Date.now(),savedBy:SESSION_ID};
+  const payload={pillarText:PILLAR_TEXT,progression:PROG,buildV:BUILD_V,goLive:goLiveDate,groupBy,hideDone,runwayOnDash,panels:{runway:!!panelOpen.runway,call:!!panelOpen.call},weekStarts,statuses:{},notes:cardNotes,links:cardLinks,origStatus,taskData:{},savedAt:Date.now(),savedBy:SESSION_ID};
   P.forEach(ph=>{
     payload.taskData[ph.id]={sabel:[...T[ph.id].sabel],client:[...T[ph.id].client]};
     ['sabel','client'].forEach(grp=>{
@@ -961,6 +1042,7 @@ async function loadInitial(){
       if(d.progression) Object.keys(d.progression).forEach(k=>{if(PROG[k])PROG[k]=Object.assign(JSON.parse(JSON.stringify(PROG_SEED[k])),d.progression[k]);});  // fields added since the save come from the seed
       if(d.links) cardLinks=d.links;
       if(d.origStatus) origStatus=d.origStatus;
+      if(d.pillarText){PILLAR_TEXT=d.pillarText;pvApplyPillarText();}
       if(d.goLive!==undefined) goLiveDate=d.goLive;
       if(d.weekStarts) weekStarts={...WEEK_STARTS_DEFAULT,...d.weekStarts};
       if(d.groupBy) groupBy=d.groupBy;
@@ -3070,59 +3152,175 @@ function trackerView(){
     <div class="tk-sec">Tools</div><div class="tk-more">${tools}</div>
   </div>`;
 }
-// One pillar at a time: header, staged deliverables, the task list, and the progression after it.
+// ── Pillar view: client tasks left, Sabel tasks right, everything editable (1 Oct 2026) ─
 let pvOpen=new Set();
-function pvToggle(cid){if(pvOpen.has(cid)){pvOpen.delete(cid);expandedCards.delete(cid);}else{pvOpen.add(cid);expandedCards.add(cid);}renderMain();}
+let PILLAR_TEXT={};   // Sabel's edits to pillar names / subtitles, saved with the tracker
+function pvApplyPillarText(){Object.entries(PILLAR_TEXT||{}).forEach(([id,v])=>{const p=P.find(x=>x.id===id);if(p&&v){if(v.l)p.l=v.l;if(v.sub!==undefined)p.sub=v.sub;}});}
+function pvSavePillar(pid,k,el){const p=P.find(x=>x.id===pid);if(!p)return;const v=el.innerText.trim();if(k==='l'&&!v){el.innerText=p.l;return;}
+  if(v===(p[k]||''))return;p[k]=v;PILLAR_TEXT[pid]=Object.assign({},PILLAR_TEXT[pid]||{},{[k]:v});render();scheduleAutoSave();}
+function pvToggle(cid){if(pvOpen.has(cid))pvOpen.delete(cid);else pvOpen.add(cid);renderMain();}
+function pvTools(){return typeof toolsOn==='undefined'||toolsOn;}
 const PV_OWN={Richard:['rgba(192,132,252,.16)','#C084FC'],Chris:['rgba(96,165,250,.16)','#60A5FA'],Greg:['rgba(52,211,153,.16)','#34D399']};
-function pvOwner(t,isClient){
-  if(isClient||t.o===CLIENT_LABEL)return `<span class="pv-own" style="background:rgba(240,180,41,.16);color:#f0b429">You</span>`;
-  const c=PV_OWN[t.o];return c?`<span class="pv-own" style="background:${c[0]};color:${c[1]}">${esc(t.o)}</span>`:`<span class="pv-own" style="background:rgba(148,163,184,.14);color:var(--kCBD5E1,#CBD5E1)">${esc(t.o||'Sabel')}</span>`;
-}
-function pvWhen(t){
+function pvIsSabel(t){return SABEL_TEAM.includes(t.o);}
+function pvOwnerStyle(o){if(SABEL_TEAM.includes(o)){const c=PV_OWN[o]||['rgba(148,163,184,.14)','var(--kCBD5E1,#CBD5E1)'];return 'background:'+c[0]+';color:'+c[1];}return 'background:rgba(240,180,41,.16);color:#f0b429';}
+function pvOngoing(t){return t.s!=='Complete'&&(t.ongoing||(isSpan(t)&&t.s==='In Progress'));}
+function pvStatusLabel(t){if(t.s==='Complete')return 'Done';if(t.s==='Blocked')return 'Blocked';if(pvOngoing(t))return 'Ongoing';if(t.s==='In Progress')return 'In progress';return 'Not started';}
+function pvDateLabel(t){
   if(t.s==='Complete')return t.doneAt?'Done '+hnFmt(new Date(t.doneAt+'T00:00:00')):'Done';
-  const end=endWeek(t),cw=currentWeek();if(!end)return t.d||'';
-  return (end<=cw+1)?'Due '+hnDue(end):'Week '+(t.week&&t.wkEnd&&t.wkEnd>t.week?t.week+'–'+t.wkEnd:end);
+  if(!t.week)return 'No date';
+  if(isSpan(t)&&pvOngoing(t))return 'Weeks '+t.week+'–'+t.wkEnd;
+  return 'Due '+hnDue(endWeek(t));
 }
-function pvRow(t,cid,isClient){
-  const done=t.s==='Complete',od=isOverdue(t),cw=currentWeek();
-  const mine=(isClient||t.o===CLIENT_LABEL)&&!done&&(od||(t.week&&t.week<=cw));
-  const prog=!done&&!mine&&t.s==='In Progress';
-  const st=done?'done':(mine?'need':(prog?'prog':''));
-  const n=(t.log||[]).length,steps=(t.sub||[]).length;
-  const det=[t.tip&&isClient?t.tip:'',steps?(t.sub.filter(x=>x.s==='Complete').length+'/'+steps+' steps'):'',n?n+' note'+(n===1?'':'s'):''].filter(Boolean).join(' · ');
-  const open=pvOpen.has(cid);
-  return `<div class="pv-row${done?' done':''}${mine?' need':''}" onclick="pvToggle('${cid}')">
+// One small floating menu for every pill.
+function pvPop(e,html){e.stopPropagation();closeStatusPicker();closeOwnerPicker();let el=document.getElementById('hn-pop');
+  if(!el){el=document.createElement('div');el.id='hn-pop';el.onclick=ev=>ev.stopPropagation();document.body.appendChild(el);}
+  el.innerHTML=html;el.style.display='block';const r=e.currentTarget.getBoundingClientRect();
+  el.style.left=Math.max(8,Math.min(r.left,innerWidth-el.offsetWidth-8))+'px';
+  el.style.top=(r.bottom+6+el.offsetHeight>innerHeight?Math.max(8,r.top-el.offsetHeight-6):r.bottom+6)+'px';}
+function pvPopClose(){const el=document.getElementById('hn-pop');if(el)el.style.display='none';}
+document.addEventListener('click',pvPopClose);document.addEventListener('keydown',e=>{if(e.key==='Escape')pvPopClose();});
+function pvOwnerMenu(e,cid){const t=resolveTask(cid);if(!t)return;
+  pvPop(e,[CLIENT_LABEL,...SABEL_TEAM].map(o=>`<button class="${t.o===o?'on':''}" onclick="pvSetOwner('${cid}','${esc(o)}')"><i style="${pvOwnerStyle(o)}"></i>${esc(o)}</button>`).join(''));}
+function pvStatusMenu(e,cid){const t=resolveTask(cid);if(!t)return;const curL=pvStatusLabel(t);
+  pvPop(e,['Not started','In progress','Ongoing','Blocked','Done'].map(l=>`<button class="${curL===l?'on':''}" onclick="pvSetStatus('${cid}','${l}')">${l}</button>`).join(''));}
+function pvDateMenu(e,cid){const t=resolveTask(cid);if(!t)return;
+  const iso=t.week?isoDate(new Date(weekStartDate(t.week))):'';
+  pvPop(e,`<div class="pp-date"><label>Pick a date</label><input type="date" value="${iso}" onchange="pvPopClose();setTaskWeekByDate('${cid}',this.value)">
+    <label>Or type weeks</label><input type="text" placeholder="Week 3, or Weeks 1–11" value="${t.week?(isSpan(t)?'Weeks '+t.week+'–'+t.wkEnd:'Week '+t.week):''}" onkeydown="if(event.key==='Enter'){pvPopClose();pvSetWeeks('${cid}',this.value)}">
+    <button onclick="pvPopClose();pvSetWeeks('${cid}','')">Clear the date</button></div>`);}
+function pvSetWeeks(cid,v){const t=resolveTask(cid);if(!t)return;const m=/(\d+)\s*(?:[–\-to]+\s*(\d+))?/.exec(String(v||''));
+  if(!m){t.week=0;delete t.wkEnd;}else{t.week=+m[1];if(m[2]&&+m[2]>t.week)t.wkEnd=+m[2];else delete t.wkEnd;}
+  render();scheduleAutoSave();}
+function pvSetStatus(cid,l){pvPopClose();const t=resolveTask(cid);if(!t)return;
+  const map={'Not started':'Pending','In progress':'In Progress','Ongoing':'In Progress','Blocked':'Blocked','Done':'Complete'};
+  if(l==='Ongoing')t.ongoing=true;else delete t.ongoing;
+  pickStatus(cid,map[l]);}
+// Owner change; crossing sides moves the task to the other column (and list).
+function pvSetOwner(cid,o){pvPopClose();const t=resolveTask(cid);if(!t)return;
+  const toSabel=SABEL_TEAM.includes(o),{grp}=cidParts(cid);
+  if(toSabel===(grp==='sabel')){pickOwner(cid,o);return;}
+  pvMoveSide(cid,toSabel?'sabel':'client',o);}
+function pvMoveSide(cid,grp2,owner){
+  const {idx,grp,phId}=cidParts(cid);if(grp===grp2){if(owner)pickOwner(cid,owner);return;}
+  const task=T[phId][grp][idx];if(!task)return;
+  const keepN=cardNotes[cid],keepL=cardLinks[cid],wasOpen=pvOpen.has(cid);
+  remapCids(phId,grp,idx);T[phId][grp].splice(idx,1);
+  task.o=owner||(grp2==='client'?CLIENT_LABEL:(task.lead||SABEL_TEAM[0]));
+  T[phId][grp2].push(task);const n=phId+'-'+(grp2==='sabel'?'s':'c')+'-'+(T[phId][grp2].length-1);
+  if(keepN!==undefined)cardNotes[n]=keepN;if(keepL!==undefined)cardLinks[n]=keepL;
+  pvOpen=new Set([...pvOpen].filter(x=>x.indexOf(phId+'-')!==0));if(wasOpen)pvOpen.add(n);
+  render();scheduleAutoSave();showToast('Moved to '+(grp2==='client'?CLIENT_LABEL+"'s":"Sabel's")+' tasks');}
+let pvDrag=null;
+function pvDragStart(e,cid){pvDrag=cid;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',cid);}catch(x){}}
+function pvDragOver(e){if(!pvDrag)return;e.preventDefault();e.currentTarget.classList.add('drop');}
+function pvDragLeave(e){e.currentTarget.classList.remove('drop');}
+function pvDrop(e,side){e.preventDefault();e.currentTarget.classList.remove('drop');const cid=pvDrag;pvDrag=null;if(!cid)return;
+  const t=resolveTask(cid);if(!t)return;if((side==='sabel')===pvIsSabel(t))return;pvMoveSide(cid,side);}
+// Inline text edits: Enter saves, Esc cancels.
+function pvKey(e,el){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();el.blur();}if(e.key==='Escape'){el.innerText=el.dataset.orig||'';el.blur();}}
+function pvSaveTitle(cid,el){const v=el.innerText.trim();if(!v){el.innerText=el.dataset.orig;return;}if(v!==el.dataset.orig)saveTitle(cid,v);}
+function pvSaveDesc(cid,el){const t=resolveTask(cid);if(!t)return;const v=el.innerText.trim();if(v===(el.dataset.orig||''))return;t.desc=v;renderMain();scheduleAutoSave();}
+function pvSaveSub(cid,i,el){const v=el.innerText.trim();if(!v||v===el.dataset.orig){el.innerText=el.dataset.orig;return;}renameSub(cid,i,v);}
+function pvAddStep(e,cid,el){if(e.key!=='Enter')return;const v=el.value.trim();if(!v)return;const t=resolveTask(cid);(t.sub=t.sub||[]).push({t:v,s:'Pending'});syncParentFromSubs(t);renderMain();scheduleAutoSave();
+  setTimeout(()=>{const n=document.getElementById('pv-step-'+cid);if(n)n.focus();},40);}
+let pvSubDrag=null;
+function pvSubStart(e,cid,i){pvSubDrag={cid,i};e.stopPropagation();e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain','step');}catch(x){}}
+function pvSubDrop(e,cid,j){e.preventDefault();e.stopPropagation();const d=pvSubDrag;pvSubDrag=null;if(!d||d.cid!==cid||d.i===j)return;
+  const t=resolveTask(cid);const x=t.sub.splice(d.i,1)[0];t.sub.splice(j,0,x);renderMain();scheduleAutoSave();}
+function pvNameEdit(e,cid){e.stopPropagation();const el=document.getElementById('pv-as-'+cid);if(!el)return;
+  el.innerHTML=`<input type="text" value="${esc(noteName||'')}" placeholder="Your name" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter')this.blur()" onblur="pvNameSet(this.value)">`;el.querySelector('input').focus();}
+function pvNameSet(v){v=String(v||'').trim();if(!v)return;noteName=v;try{localStorage.setItem('tracker-note-name',v);}catch(e){}renderMain();}
+function pvInitials(n){const w=String(n||'?').replace(/\(.*?\)/g,'').trim().split(/\s+/);return ((w[0]||'?')[0]+((w[1]||'')[0]||(w[0]||'')[1]||'')).toUpperCase();}
+function pvNotes(t,cid){
+  const log=typeof noteLog==='function'?noteLog(t):(t.log||[]);
+  const rows=log.map((x,i)=>{const mine=noteName&&x.by===noteName;const side=typeof noteSideOf==='function'?noteSideOf(x.by):'client';
+    const editing=typeof noteEdit!=='undefined'&&noteEdit===cid+'|'+i;
+    return `<div class="pn"><span class="av ${side}">${esc(pvInitials(x.by))}</span><div class="bd"><div class="hd"><b>${esc(x.by)}</b><span>· ${typeof noteWhen==='function'?noteWhen(x.at):''}</span>
+      ${mine&&!editing?`<button onclick="editNote(event,'${cid}',${i})" title="Edit"><i class="ti ti-pencil"></i></button><button onclick="removeNote(event,'${cid}',${i})" title="Delete"><i class="ti ti-x"></i></button>`:''}</div>
+      ${editing?`<textarea id="note-ed-${cid}-${i}" rows="2" class="pn-ed">${esc(x.txt)}</textarea><div class="pn-act"><button onclick="cancelNoteEdit(event)">Cancel</button><button class="go" onclick="saveNoteEdit(event,'${cid}',${i})">Save</button></div>`
+        :`<div class="tx">${esc(x.txt)}</div>`}</div></div>`;}).join('');
+  return `<div class="pv-notes"><div class="pv-lab">Notes · ${log.length}</div>${rows||'<div class="pn-none">No notes yet.</div>'}
+    <div class="pn-new"><textarea id="note-in-${cid}" rows="1" placeholder="Add a note…" onclick="event.stopPropagation()" onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter')postNote(event,'${cid}')"></textarea><button onclick="postNote(event,'${cid}')">Post</button></div>
+    <div class="pn-as" id="pv-as-${cid}">${noteName?`Posting as <a href="#" onclick="event.preventDefault();pvNameEdit(event,'${cid}')">${esc(noteName)} &#8964;</a>`:`<input id="note-by-${cid}" type="text" placeholder="Your name (asked once)" onclick="event.stopPropagation()" onblur="pvNameSet(this.value)">`}</div></div>`;
+}
+function pvPanel(t,cid){
+  const steps=t.sub||[],done=steps.filter(x=>x.s==='Complete').length,link=cardLinks[cid]!==undefined?cardLinks[cid]:(t.link||'');
+  const desc=t.desc||t.tip||'';
+  const wk=t.week?(isSpan(t)?t.week+'–'+t.wkEnd:String(t.week)):'–';
+  const start=t.week?hnFmt(new Date(weekStartDate(t.week))):'not set';
+  return `<div class="pv-panel" onclick="event.stopPropagation()">
+    <div class="pl">
+      <div class="pv-meta"><span>Weeks <button class="pv-ed" onclick="pvDateMenu(event,'${cid}')">${wk}</button></span><span>Start <button class="pv-ed" onclick="pvDateMenu(event,'${cid}')">${start}</button></span>
+        ${pvOngoing(t)?'<span class="og">&harr; Ongoing</span>':''}${link?`<a href="${esc(link)}" target="_blank" rel="noopener">Open the guide &#8599;</a>`:''}</div>
+      <div class="pv-desc2" contenteditable="true" data-orig="${esc(desc)}" data-ph="Add a description" onkeydown="pvKey(event,this)" onblur="pvSaveDesc('${cid}',this)">${esc(desc)}</div>
+      <div class="pv-lab" style="margin-top:12px">Sub-tasks · ${done} of ${steps.length}</div>
+      ${steps.map((x,i)=>{const sd=x.s==='Complete';return `<div class="ps" draggable="true" ondragstart="pvSubStart(event,'${cid}',${i})" ondragover="event.preventDefault()" ondrop="pvSubDrop(event,'${cid}',${i})">
+        <button class="ps-c${sd?' d':''}" onclick="toggleSub(event,'${cid}',${i})">${sd?'<i class="ti ti-check"></i>':''}</button>
+        <span class="ps-t${sd?' d':''}" contenteditable="true" data-orig="${esc(x.t)}" onkeydown="pvKey(event,this)" onblur="pvSaveSub('${cid}',${i},this)">${esc(x.t)}</span>
+        <button class="ps-x" onclick="removeSub(event,'${cid}',${i})" title="Remove step">&times;</button></div>`;}).join('')}
+      <input class="ps-add" id="pv-step-${cid}" type="text" placeholder="+ Add a step" onkeydown="pvAddStep(event,'${cid}',this)">
+    </div>
+    <div class="pr">${pvNotes(t,cid)}</div>
+  </div>`;
+}
+function pvCard(t,cid){
+  const done=t.s==='Complete',od=isOverdue(t),cl=!pvIsSabel(t),open=pvOpen.has(cid);
+  const st=done?'done':(od?'need':(pvOngoing(t)?'og':(t.s==='In Progress'?'prog':(cl?'cl':''))));
+  const n=(t.log||[]).length,desc=t.desc||t.tip||'';
+  const link=cardLinks[cid]!==undefined?cardLinks[cid]:(t.link||'');
+  const links=[t.form&&typeof formById==='function'&&formById(t.form)?`<button class="pv-a" onclick="event.stopPropagation();hnSetOpen('forms');setP('form:${t.form}')">Open form &rarr;</button>`:(link?`<a class="pv-a" href="${esc(link)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open the guide &#8599;</a>`:''),
+    n?`<button class="pv-a q" onclick="event.stopPropagation();pvToggle('${cid}')">${n} note${n===1?'':'s'}</button>`:''].join('');
+  return `<div class="pc${od&&!done?' od':''}${done?' done':''}" id="card-${cid}" draggable="true" ondragstart="pvDragStart(event,'${cid}')" onclick="pvToggle('${cid}')">
+    <div class="pc-top">
       <button class="pv-st ${st}" onclick="event.stopPropagation();toggleComplete(event,'${cid}')" title="${done?'Mark not done':'Mark done'}">${done?'<i class="ti ti-check" style="font-size:12px"></i>':''}</button>
-      <div class="pv-tt"><b>${esc(t.t)}</b>${prog?'<span class="ip">IN PROGRESS</span>':''}${det?`<span class="d">${esc(det)}</span>`:''}</div>
-      ${pvOwner(t,isClient)}<span class="pv-when"${od&&!done?' style="color:#FF6B66"':''}>${esc(pvWhen(t))}</span>
-    </div>${open?`<div class="pv-open">${makeCard(t,cid,isClient,{noDrag:true})}</div>`:''}`;
+      <div class="pc-m">
+        <div class="pc-t" contenteditable="true" spellcheck="false" data-orig="${esc(t.t)}" onclick="event.stopPropagation()" onkeydown="pvKey(event,this)" onblur="pvSaveTitle('${cid}',this)">${esc(t.t)}</div>
+        ${desc?`<div class="pc-d">${esc(desc)}</div>`:''}
+        <div class="pc-pills">
+          <button class="pill" style="${pvOwnerStyle(t.o)}" onclick="pvOwnerMenu(event,'${cid}')">${esc(cl?CLIENT_LABEL:t.o)} <i class="ti ti-chevron-down"></i></button>
+          <button class="pill${od&&!done?' red':''}" onclick="pvDateMenu(event,'${cid}')">${esc(pvDateLabel(t))} <i class="ti ti-chevron-down"></i></button>
+          <button class="pill${t.s==='In Progress'?' blue':(t.s==='Blocked'?' red':'')}" onclick="pvStatusMenu(event,'${cid}')">${pvStatusLabel(t)} <i class="ti ti-chevron-down"></i></button>
+          ${links}
+        </div>
+      </div>
+      <button class="pc-chev" onclick="event.stopPropagation();pvToggle('${cid}')" title="${open?'Close':'Open'}"><i class="ti ti-chevron-${open?'up':'down'}"></i></button>
+    </div>
+    ${open?pvPanel(t,cid):''}
+  </div>`;
 }
 function pillarView(pid){
   const p=P.find(x=>x.id===pid);if(!p)return '';
   const idx=P.indexOf(p)+1,m=phaseMini(pid),pc=m.total?Math.round(m.done/m.total*100):0;
-  const rows=[],staged=[];
+  const cols={client:[],sabel:[]},staged=[];let openN=0,doneN=0;const hid={client:0,sabel:0};
   ['client','sabel'].forEach(g=>(T[pid][g]||[]).forEach((t,i)=>{if(t.parked)return;const cid=pid+'-'+(g==='sabel'?'s':'c')+'-'+i;
-    if(isPhased(t)){if(!hiddenByDone(t))staged.push(makeCard(t,cid,false,{noDrag:true}));return;}
-    if(hiddenByDone(t))return;rows.push({t,cid,isClient:g==='client'});}));
-  // Order: needs you first, then in progress, then by week; done last.
-  const rank=r=>r.t.s==='Complete'?3:((r.isClient&&isOverdue(r.t))?0:(r.t.s==='In Progress'?1:2));
-  rows.sort((a,b)=>rank(a)-rank(b)||(endWeek(a.t)||99)-(endWeek(b.t)||99));
+    if(isPhased(t)){if(!hiddenByDone(t))staged.push(makeCard(t,cid,false,{noDrag:true}));if(t.s==='Complete')doneN++;else openN++;return;}
+    const side=pvIsSabel(t)?'sabel':'client';if(t.s==='Complete')doneN++;else openN++;
+    if(hiddenByDone(t)){hid[side]++;return;}cols[side].push({t,cid});}));
+  const key=o=>o.t.s==='Complete'?9000+(endWeek(o.t)||0):(endWeek(o.t)||999);
+  ['client','sabel'].forEach(k=>cols[k].sort((a,b)=>key(a)-key(b)));
+  const tools=pvTools();
+  const col=(side)=>{const list=cols[side];const isC=side==='client';
+    return `<div class="pcol ${side}" ondragover="pvDragOver(event)" ondragleave="pvDragLeave(event)" ondrop="pvDrop(event,'${side}')">
+      <div class="pcol-h"><b>${isC?esc(CLIENT_LABEL)+' tasks':"Sabel's tasks"} · ${list.filter(o=>o.t.s!=='Complete').length}</b><span>${isC?'Earliest first':"What we're doing for you"}</span></div>
+      ${list.length?list.map(o=>pvCard(o.t,o.cid)).join(''):`<div class="pcol-e">${isC?'Nothing for '+esc(CLIENT_LABEL)+' here.':'Nothing for Sabel here.'}</div>`}
+      <div class="pcol-f"><span>${hid[side]?hid[side]+' done · hidden':''}</span>${tools?`<button onclick="openAddMenu(event,'${pid}','${side}')">+ Add a task</button>`:''}</div>
+    </div>`;};
   const pg=(typeof progPages==='function'?progPages():[]).find(x=>x.frm===pid);
   let pgCard='';
   if(pg){const i=PROG_IDS.indexOf(pg.id)+1;const sab=(pg.who||[]).filter(w=>w.s==='s').map(w=>w.n);
-    const when=pg.date?('booked for '+new Date(pg.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).replace('Sept','Sep')+(pg.time?', '+pg.time:'')):(pg.hint?'planned for '+pg.hint:'to be scheduled');
-    const stx={unscheduled:'',booked:'',held:' · held, waiting for the green light',green:' · green light given'}[pg.status]||'';
-    pgCard=`<div class="pv-pg"><div class="t"><div class="ey">Progression ${i} · after this pillar</div><b>${esc(pg.title||'')}</b><span>Session${sab.length?' with '+esc(sab.join(' and ')):''} · ${esc(when)}${stx}</span></div><button onclick="setP('prog:${pg.id}')">View agenda</button></div>`;}
-  const tools=typeof toolsOn==='undefined'||toolsOn;
-  const add=tools?`<div class="pv-add"><button class="add-task-btn" onclick="openAddMenu(event,'${pid}','client')"><i class="ti ti-plus" style="font-size:13px"></i>Add client action</button><button class="add-task-btn" onclick="openAddMenu(event,'${pid}','sabel')"><i class="ti ti-plus" style="font-size:13px"></i>Add Sabel action</button><button class="add-task-btn" onclick="addPhasedTask('${pid}')"><i class="ti ti-plus" style="font-size:13px"></i>Add staged deliverable</button></div>`:'';
+    const when=pg.date?new Date(pg.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).replace('Sept','Sep')+(pg.time?', '+pg.time:''):(pg.hint||'to be scheduled');
+    pgCard=`<div class="pv-pg"><div class="t"><div class="ey">Progression ${i} · after this pillar</div><b>${esc(pg.title||'')}${sab.length?' · with '+esc(sab.join(' and ')):''} · ${esc(when)}</b></div><button onclick="setP('prog:${pg.id}')">View agenda</button></div>`;}
   const gate=typeof blockGateHTML==='function'?blockGateHTML(pid):'';
+  const ce=tools?' contenteditable="true" spellcheck="false"':'';
   return `<div class="pv">
-    <div class="pv-head"><div class="t"><div class="pv-eye">Tracker · Pillar ${idx} of ${P.length}</div><div class="pv-h1">${esc(p.l)}</div><div class="pv-desc">${p.sub?esc(p.sub)+' · ':''}${esc(p.w||'')}</div></div>
+    <div class="pv-head"><div class="t"><div class="pv-eye">Tracker · Pillar ${idx} of ${P.length}</div>
+      <div class="pv-h1"${ce} data-orig="${esc(p.l)}" onkeydown="pvKey(event,this)" onblur="pvSavePillar('${pid}','l',this)">${esc(p.l)}</div>
+      <div class="pv-desc"><span${ce} data-orig="${esc(p.sub||'')}" onkeydown="pvKey(event,this)" onblur="pvSavePillar('${pid}','sub',this)">${esc(p.sub||'')}</span>${p.w?' · '+esc(p.w):''} · ${openN} open, ${doneN} done</div></div>
       <div class="tk-tog"><button class="on" onclick="setGroupBy('pillar');setP('${pid}')">By pillar</button><button onclick="setGroupBy('week');setP('tracker')">By week</button></div>
-      <div class="pv-prog"><div class="r"><span>Pillar progress</span><b>${pc}%</b></div><div class="bar"><i style="width:${pc}%;background:${p.c||'#5b9cf6'}"></i></div></div></div>
+      <div class="pv-prog"><div class="r"><span>Progress</span><b>${pc}%</b></div><div class="bar"><i style="width:${pc}%;background:#16A34A"></i></div></div></div>
     ${gate}
     ${staged.length?`<div class="pv-stage">${staged.join('')}</div>`:''}
-    <div class="pv-list">${rows.length?rows.map(r=>pvRow(r.t,r.cid,r.isClient)).join(''):`<div style="padding:16px 20px;font-size:14px;color:var(--k94A3B8,#94A3B8)">${staged.length?'Everything here sits in the staged deliverables above.':'Nothing to show.'}${hideDone&&m.done?' Completed tasks are hidden.':''}</div>`}${add}</div>
+    <div class="pcols">${col('client')}${col('sabel')}</div>
     ${pgCard}
   </div>`;
 }
