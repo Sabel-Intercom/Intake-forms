@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Sabel · Task list</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style>
+/* Sabel Task list — internal. Design handoff "Task list 2a" (1 Oct 2026):
+   List and Board views per person, plus Nikki's desk for parked tasks.
+   Reads: trackers.json, each tracker page, each tracker's saved state, and
+   sabel-hours-v1 (Notion estimates and call actions).
+   Writes: its own store (sabel-tasklist-v1: status, notes, parked questions) and,
+   for Start / Pause / Done on a tracker task, that task's status on the client
+   tracker. Notes and parked questions are internal and never go to a tracker. */
+:root{
+  --bg:#0F1117;--surface:#161B26;--surface2:#12161F;--raise:#1A2030;--line:#1E2433;--line2:#2A3145;
+  --text:#F2F4F8;--body:#C9CFDA;--soft:#A7AFBE;--mute:#8B93A3;--faint:#5F6878;
+  --red:#E10600;--red2:#FF4D45;--redsoft:#FFB3AF;--green:#4ADE80;--greenfill:#16A34A;--amber:#FBBF24;--blue:#60A5FA;--violet:#A78BFA;
+  --hl2:rgba(255,255,255,.12);--hl3:rgba(255,255,255,.14);--hl4:rgba(255,255,255,.22);--hl5:rgba(255,255,255,.3);
+  --pill:rgba(22,27,38,.7);--ink:#0F1117;--onamber:#101828;
+}
+html.light{
+  --bg:#F4F5F7;--surface:#FFFFFF;--surface2:#F9FAFB;--raise:#F2F4F7;--line:#E4E7EC;--line2:#D0D5DD;
+  --text:#101828;--body:#344054;--soft:#475467;--mute:#667085;--faint:#7A8699;
+  --red2:#D92D20;--redsoft:#B42318;--green:#15803D;--amber:#B45309;--blue:#2563EB;--violet:#7C3AED;
+  --hl2:rgba(16,24,40,.12);--hl3:rgba(16,24,40,.16);--hl4:rgba(16,24,40,.28);--hl5:rgba(16,24,40,.4);
+  --pill:rgba(255,255,255,.8);--ink:#FFFFFF;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--body);font-family:'Source Sans 3','Helvetica Neue',Arial,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:none;text-align:left}
+textarea{font:inherit;color:var(--text)}
+a{color:inherit}
+.ar{font-family:Archivo,sans-serif}
+
+/* header */
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 22px;border-bottom:1px solid var(--line)}
+.sq{display:inline-block;width:14px;height:14px;background:var(--red);border-radius:3px;box-shadow:0 0 18px rgba(225,6,0,.65)}
+.word{font-family:Archivo,sans-serif;font-weight:800;font-size:14px;letter-spacing:.14em;color:var(--text)}
+.div{width:1px;height:16px;background:var(--hl3)}
+.ch{font-family:Archivo,sans-serif;font-weight:600;font-size:14px;color:var(--mute)}
+.ch em{font-style:normal;font-family:'Source Sans 3',sans-serif;font-size:12.5px;font-weight:600;color:var(--amber);margin-left:6px}
+.seg{display:inline-flex;background:var(--surface2);border:1px solid var(--line);border-radius:9px;padding:3px;margin-left:6px}
+.seg button{padding:5px 14px;border-radius:7px;font-weight:600;font-size:13px;color:var(--mute);transition:color .15s ease}
+.seg button.on{background:var(--raise);color:var(--text);box-shadow:0 0 0 1px var(--line2)}
+.who{margin-left:auto;display:inline-flex;gap:3px;padding:3px;border-radius:99px;border:1px solid var(--hl2);background:var(--pill);flex-wrap:wrap}
+.who button{padding:6px 14px;border-radius:99px;font-weight:600;font-size:13px;color:var(--soft);display:inline-flex;align-items:center;gap:7px;transition:color .15s ease,background .15s ease}
+.who button:hover{color:var(--text)}
+.who button small{font-family:Archivo,sans-serif;font-weight:700;font-size:11px;opacity:.8}
+.who button.on{background:var(--red);color:#fff;box-shadow:0 0 18px rgba(225,6,0,.5)}
+.who button.on.co{background:#FBBF24;color:var(--onamber);box-shadow:0 0 18px rgba(251,191,36,.45)}
+
+/* title row */
+.trow{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:22px 22px 6px}
+.eye{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+h2{font-family:Archivo,sans-serif;font-weight:800;font-size:30px;letter-spacing:-.03em;color:var(--text);line-height:1;margin-top:6px}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stat{padding:6px 12px;border-radius:99px;border:1px solid var(--hl2);background:var(--pill);font-size:13px;color:var(--body);white-space:nowrap}
+.stat b{font-family:Archivo,sans-serif;font-weight:700;color:var(--text);margin-right:4px}
+.stat.hot{border-color:rgba(225,6,0,.55);background:rgba(225,6,0,.12);color:var(--redsoft)}
+.stat.amb{border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.1);color:var(--amber);font-weight:600}
+.stat.amb b{color:var(--amber)}
+.banner{margin:14px 22px 0;border:1px solid rgba(251,191,36,.45);background:rgba(251,191,36,.08);border-radius:12px;padding:10px 14px;font-size:13.5px;color:var(--body)}
+.banner b{color:var(--amber)}
+
+/* list */
+.list{padding:16px 22px 28px;display:flex;flex-direction:column;gap:18px}
+.secc{border:1px solid var(--line2);border-radius:14px;background:var(--surface);overflow:hidden}
+.sech{display:flex;align-items:center;gap:9px;padding:10px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.sech i{width:8px;height:8px;border-radius:50%}
+.sech b{font-family:Archivo,sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+.sech span{font-size:12.5px;color:var(--mute)}
+.sech small{margin-left:auto;font-size:12.5px;color:var(--mute)}
+.row{border-top:1px solid var(--line)}
+.sech+.row{border-top:none}
+.rh{display:grid;grid-template-columns:22px minmax(0,1fr) auto auto 14px;gap:14px;align-items:center;padding:12px 20px}
+.row.late .rh{background:rgba(225,6,0,.06)}
+.row.open .rh{background:var(--surface2)}
+.dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--faint);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;line-height:1;color:#fff;flex-shrink:0;transition:box-shadow .15s ease,border-color .15s ease}
+.dot.prog{border-color:var(--blue);background:var(--blue);box-shadow:0 0 0 4px rgba(96,165,250,.18)}
+.dot.block{border-color:var(--red2);background:rgba(225,6,0,.3);color:var(--red2)}
+.dot.park{border-color:#FBBF24;background:rgba(251,191,36,.25);color:#FBBF24;cursor:default}
+.dot.done{border-color:var(--greenfill);background:var(--greenfill)}
+.rt{min-width:0;display:block;width:100%}
+.rt b{display:block;font-size:15px;font-weight:600;color:var(--text);line-height:1.35}
+.row.isdone .rt b{color:var(--mute);text-decoration:line-through}
+.rm{display:flex;flex-wrap:wrap;gap:5px 10px;align-items:center;margin-top:3px;font-size:12.5px;color:var(--mute)}
+.rm .cl{font-weight:600;color:var(--body)}
+.own{background:var(--line);color:var(--body);border-radius:6px;padding:1px 7px;font-size:12px;font-weight:600}
+.tag{border-radius:6px;padding:1px 7px;font-size:12px;font-weight:600;background:var(--line);color:var(--body)}
+.tag.blue{background:rgba(96,165,250,.16);color:var(--blue)}
+.tag.red{background:rgba(225,6,0,.18);color:var(--red2)}
+.tag.amber{background:rgba(251,191,36,.16);color:var(--amber)}
+.tag.violet{background:rgba(167,139,250,.16);color:var(--violet)}
+.q{color:var(--amber)}
+.due{font-size:13px;font-weight:500;color:var(--soft);white-space:nowrap;text-align:right}
+.due.late{color:var(--red2);font-weight:700}
+.due.today{color:var(--amber);font-weight:700}
+.due.done{color:var(--green)}
+.est{font-family:Archivo,sans-serif;font-weight:700;font-size:12.5px;color:var(--text);border:1px solid var(--hl2);border-radius:99px;padding:3px 9px;min-width:46px;text-align:center;white-space:nowrap}
+.est.none{color:var(--faint);font-weight:500;border-style:dashed}
+.chev{color:var(--faint);font-size:11px;transition:transform .15s ease}
+.row.open .chev{transform:rotate(90deg)}
+
+/* expanded detail */
+.det{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:28px;padding:14px 20px 18px 56px;background:var(--surface2);border-top:1px dashed var(--line)}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.pb{padding:7px 14px;font-weight:700;font-size:13px;border-radius:99px;border:1px solid var(--hl3);color:var(--body);transition:border-color .15s ease,color .15s ease,background .15s ease;white-space:nowrap;text-align:center}
+.pb:hover{filter:brightness(1.15)}
+.pb.blue{border-color:rgba(96,165,250,.5);background:rgba(96,165,250,.12);color:var(--blue)}
+.pb.green{border-color:rgba(74,222,128,.5);background:rgba(74,222,128,.12);color:var(--green)}
+.pb.red{border-color:rgba(225,6,0,.55);background:rgba(225,6,0,.12);color:var(--redsoft)}
+.pb.amber{border-color:rgba(251,191,36,.6);background:rgba(251,191,36,.14);color:var(--amber)}
+.pb.tagb{color:var(--mute)}
+.pb.tagb.on{border-color:rgba(225,6,0,.6);background:rgba(225,6,0,.14);color:var(--redsoft)}
+.pb.post{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 16px rgba(225,6,0,.4)}
+.pb.hand{background:#FBBF24;border-color:#FBBF24;color:var(--onamber);box-shadow:0 0 16px rgba(251,191,36,.35);padding:8px 16px}
+.dl{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:14px 0 6px}
+.dp{font-size:14px;color:var(--body);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.dp a,.nt .tx a{color:var(--blue);text-decoration:none}
+.dp a:hover,.nt .tx a:hover{text-decoration:underline}
+.kv{display:grid;grid-template-columns:76px minmax(0,1fr);gap:4px 12px;font-size:13px;margin-top:14px}
+.kv span{color:var(--mute)}.kv b{font-weight:500;color:var(--body)}
+.kv small{color:var(--faint);font-size:12px}
+.tl{display:inline-block;margin-top:14px;font-size:13px;font-weight:700;color:var(--red2);text-decoration:none}
+.tl:hover{text-decoration:underline}
+.tl.sub2{color:var(--mute);font-weight:600;margin-left:14px}
+.hint{font-size:12.5px;color:var(--faint);margin-top:8px}
+.step{display:flex;gap:9px;align-items:flex-start;padding:2px 0;font-size:13.5px;color:var(--body)}
+.step i{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--faint);flex-shrink:0;margin-top:3px}
+.step.d i{background:var(--greenfill);border-color:var(--greenfill)}
+.step.d span{color:var(--mute);text-decoration:line-through}
+.step small{color:var(--mute);font-size:12px;margin-left:5px}
+.stage{font-size:13px;font-weight:600;color:var(--text);margin:8px 0 2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.nt{display:flex;gap:10px;margin-bottom:12px}
+.av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:rgba(255,255,255,.12);color:#C9CFDA}
+html.light .av{background:rgba(16,24,40,.08);color:var(--body)}
+.av.sm{width:22px;height:22px;font-size:9.5px}
+.av.Chris{background:rgba(96,165,250,.2);color:var(--blue)}
+.av.Richard{background:rgba(167,139,250,.2);color:var(--violet)}
+.av.Greg{background:rgba(74,222,128,.18);color:var(--green)}
+.av.Nikki{background:rgba(251,191,36,.2);color:var(--amber)}
+.nt .bd{flex:1;min-width:0}
+.nt .hd{font-size:13px;color:var(--mute)}
+.nt .hd b{color:var(--text);margin-right:6px}
+.nt .tx{font-size:14px;color:var(--body);line-height:1.45;margin-top:1px;white-space:pre-wrap;overflow-wrap:anywhere}
+.none{font-size:13.5px;color:var(--faint);margin-bottom:12px}
+.comp{border:1px solid var(--line2);border-radius:10px;padding:10px;background:var(--bg)}
+.comp textarea{display:block;width:100%;border:none;outline:none;background:transparent;font-size:14px;resize:vertical;min-height:52px}
+.comp textarea::placeholder,.desk textarea::placeholder{color:var(--faint)}
+.cbtn{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.cbtn .sp{flex:1}
+
+/* board */
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:16px 22px 28px;align-items:start}
+.colh{display:flex;align-items:baseline;gap:8px;padding:6px 4px;border-bottom:2px solid var(--soft);margin-bottom:10px}
+.colh b{font-family:Archivo,sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;color:var(--text);letter-spacing:.04em}
+.colh em{font-style:normal;font-family:Archivo,sans-serif;font-weight:700;font-size:12px}
+.colh span{margin-left:auto;font-size:12px;color:var(--mute)}
+.cards{display:flex;flex-direction:column;gap:10px}
+.card{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line2);border-radius:12px;padding:12px 12px 10px;cursor:pointer;transition:border-color .15s ease}
+.card:hover{border-color:var(--hl4)}
+.card.wn{border-color:rgba(225,6,0,.5)}
+.card.late{border-color:rgba(255,77,69,.45);box-shadow:0 20px 40px -30px rgba(225,6,0,.6)}
+.card.sel{border-color:var(--hl5)}
+.card .c1{display:flex;justify-content:space-between;gap:8px;font-size:12px}
+.card .c1 b{font-weight:700;color:var(--soft);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .ct{font-size:14px;font-weight:600;color:var(--text);line-height:1.35}
+.card .cq{border-left:2px solid #FBBF24;padding:4px 8px;font-size:12.5px;color:var(--amber)}
+.card .c3{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mute)}
+.card .c3 b{font-family:Archivo,sans-serif;font-weight:700;font-size:12px;color:var(--text)}
+.card .c3 .sp{flex:1}
+.nx{border:1px solid var(--hl3);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--text);transition:border-color .15s ease}
+.nx:hover{border-color:var(--red2)}
+.wait{font-size:11.5px;color:var(--amber)}
+.cempty{border:1px dashed var(--line2);border-radius:12px;padding:18px 12px;font-size:13px;color:var(--faint);text-align:center}
+.more{font-size:12.5px;color:var(--mute);text-align:center;padding:6px;border:1px dashed var(--line2);border-radius:10px;width:100%}
+.more:hover{color:var(--text);border-color:var(--hl4)}
+
+/* drawer */
+.scrim{position:fixed;inset:0;z-index:40}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:100vw;z-index:50;display:flex;flex-direction:column;background:var(--surface);border-left:1px solid var(--line2);box-shadow:-40px 0 80px rgba(0,0,0,.55)}
+.dh{display:flex;gap:12px;align-items:flex-start;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dh .t{flex:1;min-width:0}
+.dh .t span{display:block;font-size:12px;font-weight:700;color:var(--soft)}
+.dh .t b{display:block;font-family:Archivo,sans-serif;font-weight:700;font-size:18px;letter-spacing:-.01em;color:var(--text);line-height:1.2;margin-top:4px}
+.x{width:28px;height:28px;border-radius:50%;border:1px solid var(--hl3);display:inline-flex;align-items:center;justify-content:center;color:var(--body);font-size:15px;flex-shrink:0}
+.x:hover{border-color:var(--red2)}
+.db{flex:1;overflow:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.db .dl{margin:0 0 6px}.db .kv{margin-top:0}.db .tl{margin-top:0}
+.db hr{border:none;border-top:1px solid var(--line)}
+.pc{border-left:3px solid #FBBF24;background:rgba(251,191,36,.08);padding:8px 12px;border-radius:0 10px 10px 0;font-size:14px;color:var(--text)}
+.pc small{display:block;font-size:12.5px;color:var(--mute);margin-bottom:2px}
+.df{background:var(--surface2);border-top:1px solid var(--line);padding:12px 20px 18px}
+.df textarea{display:block;width:100%;border:1px solid var(--line2);border-radius:10px;background:var(--bg);padding:8px 10px;min-height:56px;font-size:14px;outline:none;resize:vertical}
+
+/* Nikki's desk */
+.desk{padding:22px 22px 28px;display:flex;flex-direction:column;gap:18px}
+.pk{border:1px solid rgba(225,6,0,.5);border-radius:14px;background:var(--surface);overflow:hidden}
+.pkt{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;padding:16px 20px}
+.pkl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--mute)}
+.pkl b{color:var(--text)}.pkl .cl{font-weight:600;color:var(--body)}
+.pkh{font-family:Archivo,sans-serif;font-weight:700;font-size:17px;letter-spacing:-.02em;color:var(--text);margin:8px 0 10px;line-height:1.25}
+.pk .pc{font-size:15px}
+.pkr{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.lk{font-size:12.5px;color:var(--mute);text-decoration:underline;white-space:nowrap}
+.lk:hover{color:var(--text)}
+.pkd{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;padding:12px 20px 14px;border-top:1px dashed var(--line);background:var(--surface2)}
+.pkd .tl{margin-top:10px}
+.pkf{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;padding:12px 20px 16px;border-top:1px solid var(--line)}
+.pkf textarea{flex:1;min-width:260px;border:1px solid var(--line2);border-radius:10px;background:var(--bg);padding:8px 10px;min-height:52px;font-size:14px;outline:none;resize:vertical}
+.pkf .pb{padding:8px 16px}
+.flab{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.bl{border:1px solid var(--line2);border-radius:14px;background:var(--surface);overflow:hidden}
+.bli{display:flex;align-items:center;gap:14px;padding:12px 20px;border-top:1px solid var(--line)}
+.bli:first-child{border-top:none}
+.bli .t{flex:1;min-width:0}
+.bli .t b{display:block;font-size:14px;font-weight:600;color:var(--text)}
+.bli .t span{font-size:12.5px;color:var(--mute)}
+.blank{border:1px dashed var(--line2);border-radius:14px;padding:40px;text-align:center;color:var(--soft)}
+.blank b{display:block;font-family:Archivo,sans-serif;font-weight:700;font-size:20px;color:var(--text);margin-bottom:4px}
+.skel{height:64px;border-radius:14px;background:var(--surface);border:1px solid var(--line);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.45}50%{opacity:.9}}
+
+/* footer: sync, utilities, data checks */
+.foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 22px 28px;border-top:1px solid var(--line);font-size:12.5px;color:var(--faint)}
+.foot .live{display:inline-flex;align-items:center;gap:7px;color:var(--mute)}
+.foot .live i{width:7px;height:7px;border-radius:99px;background:var(--green)}
+.foot .live.warn i{background:var(--amber)}
+.foot .live.busy i{animation:pulse 1s ease-in-out infinite}
+.foot .sp{flex:1}
+.fb{border:1px solid var(--hl3);border-radius:99px;padding:5px 12px;font-size:12.5px;font-weight:600;color:var(--body)}
+.fb:hover{border-color:var(--red2);color:var(--text)}
+.fb.on{background:var(--red);border-color:var(--red);color:#fff}
+.health{margin:0 22px 28px;border:1px solid var(--hl2);border-radius:14px;background:var(--surface2);overflow:hidden}
+.health summary{cursor:pointer;padding:14px 20px;font-family:Archivo,sans-serif;font-weight:600;font-size:14px;color:var(--text);list-style:none;display:flex;justify-content:space-between;gap:12px}
+.health summary::-webkit-details-marker{display:none}
+.health summary span{color:var(--amber);font-size:13px;font-family:'Source Sans 3',sans-serif}
+.hi{padding:12px 20px;border-top:1px solid var(--hl2);font-size:13.5px;color:var(--body)}
+.hi b{color:var(--text)}
+.hi ul{margin:6px 0 0 18px;color:var(--soft);font-size:13px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:60;background:var(--raise);border:1px solid var(--line2);border-radius:99px;padding:9px 18px;font-size:13.5px;color:var(--text);box-shadow:0 20px 40px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .15s ease}
+.toast.show{opacity:1}
+
+/* audit mode: reassign owner / client. Changes queue in this browser until applied. */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--hl2);border-radius:99px;padding:6px 13px;font-size:13px;font-weight:600;color:var(--soft)}
+.chip:hover{border-color:var(--red2);color:var(--text)}
+.chip.on{background:var(--surface);border-color:var(--red2);color:var(--text)}
+.abar{margin:14px 22px 0;border:1px solid rgba(167,139,250,.45);background:rgba(167,139,250,.08);border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.abar .at{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.abar .at b{font-family:Archivo,sans-serif;font-weight:700;font-size:16px;color:var(--text)}
+.abar p{font-size:14px;color:var(--soft);max-width:760px}
+.abar ol{margin:0 0 0 20px;font-size:13.5px;color:var(--body);display:flex;flex-direction:column;gap:4px}
+.abar ol em{font-style:normal;color:var(--violet);font-weight:600}
+.abar textarea{width:100%;min-height:110px;border:1px solid var(--hl2);border-radius:10px;background:var(--bg);color:var(--body);font:12.5px ui-monospace,Menlo,monospace;padding:10px}
+.aud{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:10px 20px 12px 56px;background:rgba(167,139,250,.06);border-top:1px dashed var(--line);font-size:13px;color:var(--mute)}
+.aud label{display:inline-flex;align-items:center;gap:7px;font-weight:600}
+.aud select{font:inherit;font-size:13.5px;font-weight:600;color:var(--text);background:var(--surface);border:1px solid var(--hl3);border-radius:8px;padding:5px 8px;max-width:220px}
+.aud select.ch{border-color:var(--violet);box-shadow:0 0 0 2px rgba(167,139,250,.25)}
+.aud .was{color:var(--violet)}
+.aud button{color:var(--blue);font-size:13px}
+.aud button:hover{text-decoration:underline}
+
+@media(prefers-reduced-motion:reduce){.skel,.foot .live.busy i{animation:none}}
+@media(max-width:720px){
+  .top{padding:12px 16px}.who{margin-left:0}
+  .trow{padding:18px 16px 6px}.list{padding:14px 12px 24px}.banner,.abar{margin:12px 12px 0}
+  .rh{grid-template-columns:20px minmax(0,1fr) auto;padding:12px 14px;gap:8px 12px}
+  .rh .due{grid-column:2;grid-row:2;text-align:left}.rh .est{grid-column:3;grid-row:1}.rh .chev{display:none}
+  .det{grid-template-columns:minmax(0,1fr);gap:8px;padding:12px 14px 16px}
+  .aud{padding:10px 14px 12px}
+  .board{display:flex;overflow-x:auto;padding:14px 12px 24px}.board>.col{min-width:260px;flex:0 0 260px}
+  .drawer{width:100vw}
+  .desk{padding:16px 12px 24px}.pkt,.pkd{grid-template-columns:minmax(0,1fr)}.pkr{align-items:flex-start;flex-direction:row;flex-wrap:wrap}
+  .health{margin:0 12px 24px}.foot{padding:14px 16px 24px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+/* ── config ─────────────────────────────────────────────────────────────── */
+const BASE='https://sabel-intercom.github.io/Intake-forms/';
+const API='https://sabel-webhook.vercel.app/api/tracker';
+const HOURS_KEY='sabel-hours-v1';      // Notion estimates and call actions, pushed by the menu bar plugin
+const TEAM=['Chris','Richard','Greg'];
+const ALIAS={Gregory:'Greg'};
+const COORD='Nikki';                   // project coordinator: tasks get parked with her, she answers and hands back
+const TL_KEY='sabel-tasklist-v1';      // this page's own store. Must be on ALLOWED_KEYS in sabel-webhook api/tracker.js
+const TL_LOCAL='sabel-tasklist-local-v1';
+const WRITE_THROUGH=true;              // Start / Pause / Done also set the task's status on the client tracker
+const TRACKER_ST=['Pending','In Progress','Complete'];   // the only statuses ever written to a tracker
+const POLL_MS=60*1000;                 // own store: so a hand-back shows up without a reload
+const REFRESH_MS=5*60*1000;            // trackers + Notion blob
+const BOARD_CAP=30;                    // cards per board column before "show all"
+const PK='sabel-taskhub-v1';
+
+/* ── state ──────────────────────────────────────────────────────────────── */
+/* localStorage holds UI state only: who, mode, the open task. */
+const S={who:'Everyone',mode:'list',open:null,draft:'',tag:false,audit:false,deskOpen:{},deskDraft:{},full:{}};
+try{const p=JSON.parse(localStorage.getItem(PK)||'{}');['who','mode','open','audit'].forEach(k=>{if(p[k]!==undefined)S[k]=p[k];});}catch(e){}
+if(S.mode!=='board')S.mode='list';
+function save(){try{localStorage.setItem(PK,JSON.stringify({who:S.who,mode:S.mode,open:S.open,audit:S.audit}));}catch(e){}}
+const WHO=TEAM.concat(['Everyone',COORD]);
+const hashWho=()=>{const h=decodeURIComponent((location.hash||'').slice(1)).toLowerCase();return WHO.find(n=>n.toLowerCase()===h)||null;};
+if(hashWho())S.who=hashWho();
+if(WHO.indexOf(S.who)<0)S.who='Everyone';
+
+let TASKS=[],OTHER=[],RAW=[],CLIENTS={},HEALTH=[],LOADED_AT=0,HOURS_AT=0,FIRST=true,LIVE=['busy','Loading'];
+/* Audit queue: taskId -> {owner?, client?, title, was, tracker, notion, staged, at}.
+   Kept in this browser only. Nothing here writes to a tracker or to Notion; the
+   queue is copied out and applied separately, with a title check per task. */
+const AK='sabel-taskhub-audit-v1';
+let AUD={};try{AUD=JSON.parse(localStorage.getItem(AK)||'{}')||{};}catch(e){}
+function saveAud(){try{localStorage.setItem(AK,JSON.stringify(AUD));}catch(e){}}
+const TRK={};   // trackerKey -> parsed tracker page, cached for the session
+
+/* ── own store ──────────────────────────────────────────────────────────────
+   Per-task overrides, keyed by the hub task id (<trackerKey>:<cid> or n:<notionId>):
+     { status, base, wrote, sAt, by, doneAt, prevStatus, parked:{by,question,askedAt},
+       flagged, notes:[{id,by,txt,at,tag}], title }
+   One shared blob under TL_KEY. Every save re-reads the blob and merges per task
+   (newest status wins, notes are unioned by id), so two people saving at once do
+   not drop each other's work. Until TL_KEY is allowlisted the store 404s and this
+   falls back to localStorage, which only this browser can see. */
+let OV={v:1,tasks:{}},REMOTE='unknown';   // 'ok' | 'off' (key not allowlisted) | 'down' | 'unknown'
+try{const l=JSON.parse(localStorage.getItem(TL_LOCAL)||'null');if(l&&l.tasks)OV=l;}catch(e){}
+function saveLocalOv(){try{localStorage.setItem(TL_LOCAL,JSON.stringify(OV));}catch(e){}}
+function mergeOv(a,b){
+  const out={v:1,tasks:{}};
+  Object.keys(Object.assign({},a&&a.tasks,b&&b.tasks)).forEach(id=>{
+    const x=a&&a.tasks&&a.tasks[id],y=b&&b.tasks&&b.tasks[id];
+    if(!x||!y){out.tasks[id]=x||y;return;}
+    const m=Object.assign({},(y.sAt||0)>(x.sAt||0)?y:x),seen={};
+    m.notes=(x.notes||[]).concat(y.notes||[]).filter(n=>n&&n.id&&!seen[n.id]&&(seen[n.id]=1)).sort((p,q)=>p.at-q.at);
+    out.tasks[id]=m;
+  });
+  return out;
+}
+async function readRemoteOv(){
+  try{
+    const r=await fetch(API+'?key='+TL_KEY+'&_t='+Date.now(),{cache:'no-store'});
+    if(r.status===404){REMOTE='off';return null;}
+    if(!r.ok){REMOTE='down';return null;}
+    const j=await r.json();REMOTE='ok';
+    return j&&j.data&&j.data.tasks?j.data:{v:1,tasks:{}};
+  }catch(e){REMOTE='down';return null;}
+}
+/* Pull: merge the shared blob into ours. Returns true when anything changed. */
+async function pullOv(){
+  const remote=await readRemoteOv();
+  if(!remote)return false;
+  const before=JSON.stringify(OV),merged=mergeOv(OV,remote);
+  OV=merged;saveLocalOv();
+  if(JSON.stringify(merged)!==JSON.stringify(remote))pushOv();   // this browser held work the store had not seen
+  return JSON.stringify(merged)!==before;
+}
+let PUSHQ=Promise.resolve();
+function pushOv(){
+  PUSHQ=PUSHQ.then(async()=>{
+    const remote=await readRemoteOv();
+    if(!remote)return;
+    OV=mergeOv(OV,remote);saveLocalOv();
+    OV.at=Date.now();
+    try{
+      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:TL_KEY,data:OV})});
+      if(!r.ok)REMOTE='down';
+    }catch(e){REMOTE='down';}
+  }).catch(()=>{});
+  return PUSHQ;
+}
+
+/* ── helpers ────────────────────────────────────────────────────────────── */
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const linkify=s=>esc(s).replace(/(https?:\/\/[^\s<]+)/g,u=>'<a href="'+u+'" target="_blank" rel="noopener">'+(u.length>60?u.slice(0,57)+'…':u)+'</a>');
+const norm=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
+const who=o=>{o=String(o||'').trim();return ALIAS[o]||o;};
+const isTeam=o=>TEAM.indexOf(who(o))>-1;
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d;};
+const dOf=iso=>{const d=new Date(String(iso).slice(0,10)+'T00:00:00');return isNaN(d.getTime())?null:d;};
+const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
+const fD=d=>d.getDate()+' '+MON[d.getMonth()];
+function fRange(a,b){
+  if(!a&&!b)return '';
+  if(!a||!b||a.getTime()===b.getTime())return fD(b||a);
+  return a.getMonth()===b.getMonth()?a.getDate()+'–'+fD(b):fD(a)+' – '+fD(b);
+}
+function fEst(h){
+  if(h==null||h==='')return '';
+  h=+h;if(!h)return '';
+  if(h<1)return Math.round(h*60)+'m';
+  return (Math.round(h*100)/100)+'h';
+}
+const fTot=h=>(Math.round(h*10)/10)+'h';
+const isoOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function ago(ms){
+  if(!ms)return 'never';
+  const m=Math.round((Date.now()-ms)/60000);
+  if(m<1)return 'just now';if(m<60)return m+' min ago';
+  const h=Math.round(m/60);if(h<48)return h+' h ago';
+  return Math.round(h/24)+' days ago';
+}
+/* Monday of this week, and the Sunday that ends it. */
+function weekBounds(){const t=today(),dow=(t.getDay()+6)%7;const a=addD(t,-dow);return [a,addD(a,6)];}
+
+/* ── reading a tracker page ─────────────────────────────────────────────────
+   A tracker's HTML holds what its saved state does not: the week-grid anchor,
+   the pillar names, the build stamp and the freshly built plan. Same parsing as
+   SabelProjectDashboard, plus the pillar list. */
+function balanced(src,from,open,close){
+  const i=src.indexOf(open,from);if(i<0)return '';
+  let depth=0,q='',e=false;
+  for(let j=i;j<src.length;j++){
+    const ch=src.charAt(j);
+    if(q){if(e)e=false;else if(ch==='\\')e=true;else if(ch===q)q='';continue;}
+    if(ch==='"'||ch==="'"||ch==='`'){q=ch;continue;}
+    if(ch===open)depth++;
+    else if(ch===close){depth--;if(!depth)return src.slice(i,j+1);}
+  }
+  return '';
+}
+/* Current builds write JSON; older ones a JS object literal, which only
+   evaluating the literal can read. The source is our own tracker file. */
+function parseLit(src){
+  if(!src)return null;
+  try{return JSON.parse(src);}catch(e){}
+  try{return (new Function('return ('+src+');'))();}catch(e){}
+  return null;
+}
+async function loadTracker(tr){
+  if(TRK[tr.key])return TRK[tr.key];
+  const out={ok:false,week1:null,buildV:null,goLive:null,seed:null,weekStarts:null,pillars:{},deep:false};
+  try{
+    const r=await fetch(BASE+tr.file,{cache:'no-store'});
+    if(r.ok){
+      const txt=await r.text();
+      const w1=txt.match(/WEEK1_START\s*=\s*['"]([\d-]{10})['"]/);
+      const bv=txt.match(/BUILD_V\s*=\s*['"]?(\d+)/);
+      const gl=txt.match(/GO_LIVE\s*=\s*['"]([\d-]{10})['"]/);
+      const tm=txt.match(/(?:const|var|let)\s+T\s*=\s*\{/);
+      const pm=txt.match(/(?:const|var|let)\s+P\s*=\s*\[/);
+      const wsm=txt.match(/WEEK_STARTS_DEFAULT\s*=\s*\{/);
+      out.ok=true;
+      out.week1=w1?w1[1]:null;out.buildV=bv?bv[1]:null;out.goLive=gl?gl[1]:null;
+      out.seed=tm?parseLit(balanced(txt,tm.index,'{','}')):null;
+      out.weekStarts=wsm?(parseLit(balanced(txt,wsm.index,'{','}'))||null):null;
+      const P=pm?parseLit(balanced(txt,pm.index,'[',']')):null;
+      (P||[]).forEach(p=>{if(p&&p.id)out.pillars[p.id]=p.l||p.id;});
+      out.deep=/pillar\\\//.test(txt);          // page understands #pillar/<id>
+    }
+  }catch(e){}
+  if(out.ok)TRK[tr.key]=out;
+  return out;
+}
+async function fetchKey(key){
+  try{
+    const r=await fetch(API+'?key='+encodeURIComponent(key)+'&_t='+Date.now(),{cache:'no-store'});
+    if(!r.ok)return {reached:false,data:null};
+    const j=await r.json();
+    return j&&j.ok?{reached:true,data:j.data}:{reached:false,data:null};
+  }catch(e){return {reached:false,data:null};}
+}
+
+/* ── the week grid ──────────────────────────────────────────────────────── */
+function weekStart(n,w1,ws){
+  if(ws&&ws[n]){const d=dOf(ws[n]);if(d)return d;}
+  const d=dOf(w1);return d?addD(d,(n-1)*7):null;
+}
+const SKM={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function skillDate(d){
+  const ms=String(d||'').match(/([A-Z][a-z]{2})\s*(\d{1,2})/g);if(!ms)return null;
+  const m=ms[ms.length-1].match(/([A-Z][a-z]{2})\s*(\d{1,2})/);
+  return SKM[m[1]]==null?null:new Date(today().getFullYear(),SKM[m[1]],+m[2]);
+}
+/* start = Monday of the first week, end = Friday of the last, late = after that Sunday. */
+function datesOf(t,trk,ws,n){
+  if(t.week&&t.week>=1&&trk.week1){
+    const a=weekStart(t.week,trk.week1,ws),lw=weekStart((t.wkEnd&&t.wkEnd>t.week)?t.wkEnd:t.week,trk.week1,ws);
+    if(a&&lw)return {start:a,end:addD(lw,4),late:addD(lw,6),wk:t.week,wkEnd:(t.wkEnd&&t.wkEnd>t.week)?t.wkEnd:0};
+  }
+  if(n&&(n.start||n.end)){const a=dOf(n.start||n.end),b=dOf(n.end||n.start);if(b)return {start:a,end:b,late:b};}
+  const s=skillDate(t.d);
+  return s?{start:null,end:s,late:s}:{start:null,end:null,late:null};
+}
+
+/* ── build the model ────────────────────────────────────────────────────── */
+function activeStage(t){return (t.phases||[]).findIndex(p=>!((p.sub||[]).length>0&&p.sub.every(x=>x.s==='Complete')));}
+
+async function loadAll(){
+  setLive('busy','Syncing');
+  let reg;
+  try{
+    const r=await fetch(BASE+'trackers.json?_t='+Date.now(),{cache:'no-store'});
+    reg=await r.json();
+  }catch(e){setLive('warn','Could not reach the tracker registry');if(FIRST)renderFail();return;}
+  const active=reg.filter(t=>t.active&&t.key&&t.file);
+  const [hoursRes,loaded]=await Promise.all([
+    fetchKey(HOURS_KEY),
+    Promise.all(active.map(async tr=>{const [trk,st]=await Promise.all([loadTracker(tr),fetchKey(tr.key)]);return {tr,trk,st};}))
+  ]);
+  const health=[],tasks=[],clients={},parkedTitle={};
+  const hb=hoursRes.data||{};
+  HOURS_AT=hb.savedAt||0;
+  /* Notion rows by tracker key + title. The blob only carries OPEN Notion tasks. */
+  const nIdx={},nUsed={};
+  (hb.tasks||[]).forEach(n=>{(nIdx[n.project||'']=nIdx[n.project||'']||{})[norm(n.title)]=n;});
+  if(!hoursRes.reached||!hb.tasks)health.push({t:'Durations are missing',d:'The Notion estimates could not be read, so every task shows without a duration.'});
+  else if(Date.now()-HOURS_AT>36*3600*1000)health.push({t:'Durations may be stale',d:'Notion estimates were last pushed '+ago(HOURS_AT)+'. They refresh when the Sabel hours menu bar plugin runs.'});
+
+  loaded.forEach(({tr,trk,st})=>{
+    const c=clients[tr.key]={key:tr.key,name:tr.name,file:tr.file,url:BASE+tr.file,goLive:null,deep:trk.deep};
+    if(!st.reached){health.push({t:tr.name+': saved progress could not be read',d:'The tracker store did not answer for this client, so its tasks are left out.'});return;}
+    const saved=st.data;
+    /* Legacy shape (Raiz): the whole plan lives in saved state as phases. */
+    const legacy=Array.isArray(saved)?saved:(saved&&Array.isArray(saved.phases)?saved.phases:null);
+    if(legacy){
+      c.legacy=true;
+      legacy.forEach(p=>(p.tasks||[]).forEach(k=>{
+        if(k.dep)return;
+        const n=(nIdx[tr.key]||{})[norm(k.task)];if(n)nUsed[n.id]=1;
+        const b=dOf(k.end||k.start),a=dOf(k.start||k.end);
+        tasks.push({id:tr.key+':'+k.id,key:tr.key,cid:k.id,pid:p.id,pillar:p.name||p.label||p.title||p.id,title:k.task,owner:who(k.owner),lead:'',
+          status:k.status||'Pending',start:a,end:b,late:b,est:n?n.est:null,notion:n||null,desc:'',bg:k.notes||'',card:'',tip:'',link:k.link||'',log:[],sub:[],stages:null,doneAt:''});
+      }));
+      return;
+    }
+    /* Which plan to believe: the tracker throws its saved state away when the
+       page has been rebuilt since (buildV mismatch) and shows the built plan.
+       Same rule here, or the hub lists a plan the tracker no longer shows. */
+    const rebuilt=!!(trk.buildV&&saved&&saved.buildV!==undefined&&String(saved.buildV)!==String(trk.buildV));
+    let data=saved;
+    if(trk.seed&&(!saved||rebuilt)){
+      data={taskData:trk.seed,statuses:{},weekStarts:trk.weekStarts||{},goLive:trk.goLive||''};
+      if(rebuilt)health.push({t:tr.name+': tracker page and saved progress are on different builds',d:'The live tracker page (build '+trk.buildV+') ignores the saved progress (build '+saved.buildV+') and shows the plan as built. The hub shows the same thing, so recent status changes for this client may be missing.'});
+    }
+    c.seeded=!!(trk.seed&&(!saved||rebuilt));c.buildV=saved?saved.buildV:undefined;
+    if(!trk.ok)health.push({t:tr.name+': tracker page could not be read',d:'Dates and pillar names for this client are unavailable; tasks still come from saved progress.'});
+    if(!data||!data.taskData){health.push({t:tr.name+': no plan found',d:'Nothing saved and no plan could be read from the tracker page.'});return;}
+    c.goLive=dOf(data.goLive||trk.goLive||'');
+    const ws=Object.assign({},trk.weekStarts||{},data.weekStarts||{});
+    const stt=data.statuses||{},cn=data.notes||{},cl=data.links||{};
+    Object.keys(data.taskData).forEach(pid=>{
+      ((data.taskData[pid]||{}).sabel||[]).forEach((t,i)=>{
+        if(!t)return;
+        if(t.parked){parkedTitle[tr.key+'|'+norm(t.t)]=1;return;}   // out of scope: never a to-do
+        const cid=pid+'-s-'+i;
+        const n=(nIdx[tr.key]||{})[norm(t.t)];if(n)nUsed[n.id]=1;
+        const dt=datesOf(t,trk,ws,n);
+        const ai=t.phases&&t.phases.length?activeStage(t):-1;
+        tasks.push({id:tr.key+':'+cid,key:tr.key,cid,pid,pillar:trk.pillars[pid]||pid,title:t.t,owner:who(t.o),lead:who(t.lead||''),
+          status:stt[cid]||t.s||'Pending',start:dt.start,end:dt.end,late:dt.late,wk:dt.wk||0,wkEnd:dt.wkEnd||0,
+          est:n?n.est:(t.hrs||null),notion:n||null,desc:t.desc||'',bg:t.notes||'',card:cn[cid]||'',tip:t.tip||'',link:t.link||cl[cid]||'',
+          log:Array.isArray(t.log)?t.log:[],sub:Array.isArray(t.sub)?t.sub:[],
+          stages:t.phases&&t.phases.length?t.phases.map((p,pi)=>({l:p.l||p.k||('Stage '+(pi+1)),o:who(p.o),sub:p.sub||[],note:p.note||'',tip:p.tip||'',
+            start:p.week?weekStart(p.week,trk.week1,ws):null,now:pi===ai,done:ai<0||pi<ai})):null,
+          milestone:t.kind==='milestone',doneAt:t.doneAt||''});
+      });
+    });
+  });
+
+  /* Notion rows filed under a client that matched no open tracker task. Two cases:
+     the tracker has that title and it is Complete (Notion is behind: a data check),
+     or the tracker has no such task at all. The second is normal: actions taken on
+     client calls land in Notion and are not always added to the tracker. Those are
+     real work, so they join the client's list tagged "Notion only". */
+  const titleSt={};
+  tasks.forEach(t=>{const k=t.key+'|'+norm(t.title);if(titleSt[k]!=='open')titleSt[k]=t.status==='Complete'?'done':'open';});
+  const drift={},notOn={},other=[];
+  (hb.tasks||[]).forEach(n=>{
+    const o=who(n.owner);
+    if(clients[n.project]){
+      if(nUsed[n.id]||!isTeam(o))return;
+      const st=titleSt[n.project+'|'+norm(n.title)];
+      if(st==='open')return;
+      if(st==='done'){(drift[n.project]=drift[n.project]||[]).push(n);return;}
+      /* The Notion import also copies parked, out-of-scope tracker rows. Not work. */
+      if(parkedTitle[n.project+'|'+norm(n.title)]||/^\(OOS\b/i.test(n.title||''))return;
+      (notOn[n.project]=notOn[n.project]||[]).push(n);
+      const b=dOf(n.end||n.start);
+      tasks.push({id:'n:'+n.id,key:n.project,cid:'',pid:'',pillar:'',title:n.title,owner:o,lead:'',status:n.status||'Pending',
+        start:dOf(n.start||n.end),end:b,late:b,est:n.est,notion:n,desc:'',bg:'',card:'',tip:'',link:'',log:[],sub:[],stages:null,doneAt:'',src:'Notion only'});
+      return;
+    }
+    if(!isTeam(o)||/^\(OOS\b/i.test(n.title||''))return;
+    other.push({id:'n:'+n.id,key:'',title:n.title,owner:o,status:n.status||'Pending',est:n.est,start:dOf(n.start||n.end),end:dOf(n.end||n.start),late:dOf(n.end||n.start),
+      src:/^call:/.test(n.project||'')?'Meeting action':'Notion task',ref:(n.project||'').replace(/^call:/,''),notion:n});
+  });
+  Object.keys(drift).forEach(k=>health.push({t:clients[k].name+': '+drift[k].length+' task'+(drift[k].length>1?'s':'')+' done in the tracker but still open in Notion',
+    d:'The tracker shows these complete. The Notion rows need closing.',list:drift[k].map(n=>n.title+' ('+who(n.owner)+')')}));
+  Object.keys(notOn).forEach(k=>health.push({t:clients[k].name+': '+notOn[k].length+' Notion task'+(notOn[k].length>1?'s':'')+' not on the tracker',
+    d:'Shown in the list tagged "Notion only". Either an action from a client call, or a tracker task that was renamed or removed after Notion copied it.',list:notOn[k].map(n=>n.title+' ('+who(n.owner)+')')}));
+  const noEst={};
+  tasks.forEach(t=>{if(!t.src&&t.status!=='Complete'&&isTeam(t.owner)&&!t.est)(noEst[t.key]=noEst[t.key]||[]).push(t);});
+  Object.keys(noEst).forEach(k=>health.push({t:clients[k].name+': '+noEst[k].length+' open task'+(noEst[k].length>1?'s':'')+' with no duration',
+    d:'No open Notion row has the same title, so there is no estimate to show. Usually the task was renamed in one place.',list:noEst[k].map(t=>t.title+' ('+t.owner+')')}));
+
+  RAW=tasks.concat(other);CLIENTS=clients;HEALTH=health;LOADED_AT=Date.now();FIRST=false;
+  project();
+  setLive(health.some(h=>/could not|different builds|missing/.test(h.t))?'warn':'', 'Live · synced '+ago(LOADED_AT));
+  render();
+}
+
+/* ── audit queue ────────────────────────────────────────────────────────── */
+function setAudit(id,field,val){
+  const t=RAW.find(x=>x.id===id);if(!t)return;
+  const a=AUD[id]||{};
+  if(field==='owner'){if(val===t.owner)delete a.owner;else a.owner=val;}
+  else{if(val===(t.key||''))delete a.client;else a.client=val;}
+  if(a.owner===undefined&&a.client===undefined)delete AUD[id];
+  else AUD[id]=Object.assign(a,{title:t.title,was:{owner:t.owner,client:t.key||''},
+    tracker:t.src?null:{key:t.key,cid:t.cid},notion:t.notion&&t.notion.id?t.notion.id:null,staged:!!t.stages,at:Date.now()});
+  saveAud();project();render();
+}
+const cName=k=>CLIENTS[k]?CLIENTS[k].name:'No client';
+function auditLines(){
+  return Object.keys(AUD).sort((a,b)=>AUD[a].at-AUD[b].at).map(id=>{
+    const a=AUD[id],bits=[];
+    if(a.owner)bits.push('owner '+a.was.owner+' → '+a.owner);
+    if(a.client!==undefined)bits.push('client '+cName(a.was.client)+' → '+cName(a.client));
+    return {id,a,txt:'['+cName(a.client!==undefined?a.client:a.was.client)+'] '+a.title+': '+bits.join(', ')};
+  });
+}
+function auditText(){
+  const L=auditLines();
+  return 'Sabel task hub audit, '+fD(new Date())+', '+L.length+' change'+(L.length===1?'':'s')+'\n'+
+    L.map((l,i)=>(i+1)+'. '+l.txt).join('\n')+'\n\nDATA '+JSON.stringify(AUD);
+}
+function auditBarHTML(){
+  const L=auditLines();
+  return '<div class="abar"><div class="at"><b>Audit mode'+(L.length?' · '+L.length+' change'+(L.length===1?'':'s')+' queued':'')+'</b>'+
+    '<div class="chips">'+(L.length?'<button type="button" class="chip on" data-act="aud-copy" id="aud-copy">Copy changes</button><button type="button" class="chip" data-act="aud-clear">Clear all</button>':'')+
+    '<button type="button" class="chip" data-act="aud-off">Leave audit mode</button></div></div>'+
+    '<p>In the List view, set the owner on any task, or the client on a task that came from Notion. Changes are held in this browser and shown in the list straight away. Nothing is written to a tracker or to Notion until the queue is applied.</p>'+
+    (L.length?'<ol>'+L.map(l=>'<li>'+esc(l.txt).replace(/→ ([^,]+)/g,'→ <em>$1</em>')+'</li>').join('')+'</ol><textarea readonly id="aud-text">'+esc(auditText())+'</textarea>':'')+'</div>';
+}
+function audHTML(t){
+  const a=AUD[t.id],r=RAW.find(x=>x.id===t.id)||t;
+  const owners=TEAM.slice();if(owners.indexOf(r.owner)<0)owners.push(r.owner);
+  let h='<div class="aud"><label>Owner <select data-aud="owner" class="'+(a&&a.owner?'ch':'')+'">'+owners.map(o=>'<option'+(o===t.owner?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select></label>';
+  if(t.src){
+    const ks=Object.keys(CLIENTS).sort((x,y)=>CLIENTS[x].name.localeCompare(CLIENTS[y].name));
+    h+='<label>Client <select data-aud="client" class="'+(a&&a.client!==undefined?'ch':'')+'"><option value=""'+(CLIENTS[t.key]?'':' selected')+'>No client</option>'+
+      ks.map(k=>'<option value="'+esc(k)+'"'+(k===t.key?' selected':'')+'>'+esc(CLIENTS[k].name)+'</option>').join('')+'</select></label>';
+  }else h+='<span>Client is set by the tracker</span>';
+  if(a)h+='<span class="was">Was '+esc(a.was.owner)+(a.client!==undefined?', '+esc(cName(a.was.client)):'')+'</span><button type="button" data-act="aud-undo">Undo</button>';
+  if(t.stages)h+='<span>Staged deliverable: the change applies to this person’s stages</span>';
+  return h+'</div>';
+}
+
+/* ── the list as it stands: trackers + Notion, then the audit queue, then our own store ── */
+const mapSt=s=>s==='Dependency'?'Pending':s==='Done'?'Complete':(s||'Pending');
+function project(){
+  const all=RAW.map(t=>{
+    const base=mapSt(t.status);
+    const x=Object.assign({},t,{status:base,waiting:t.status==='Dependency',notes:[],flagged:false,parked:null,prevStatus:''});
+    const a=AUD[t.id];
+    if(a){x.edited=true;if(a.owner)x.owner=a.owner;if(a.client!==undefined)x.key=a.client;}
+    const o=OV.tasks[t.id];
+    if(o){
+      x.notes=o.notes||[];x.flagged=!!o.flagged;
+      if(o.status){
+        /* The tracker (or Notion) has moved on since we acted, and not to what we set:
+           someone changed it at source, so the source wins. */
+        const moved=o.base!==undefined&&base!==o.base&&base!==o.wrote&&base!==o.status;
+        if(!moved){
+          x.status=o.status;x.waiting=false;
+          if(o.status==='Complete')x.doneAt=o.doneAt||x.doneAt;
+          if(o.status==='Parked'){x.parked=o.parked||null;x.prevStatus=o.prevStatus||'';}
+        }
+      }
+    }
+    return x;
+  });
+  TASKS=all.filter(t=>CLIENTS[t.key]);
+  OTHER=all.filter(t=>!CLIENTS[t.key]);
+}
+
+/* ── helpers for the views ──────────────────────────────────────────────── */
+const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const isDone=t=>t.status==='Complete';
+const allTasks=()=>TASKS.concat(OTHER);
+const findTask=id=>allTasks().find(t=>t.id===id)||null;
+const author=()=>S.who==='Everyone'?'Team':S.who;
+const onDesk=()=>S.who===COORD;
+/* Whose tasks are on screen. Everyone and the desk see the whole team's. */
+function scope(){
+  const a=allTasks();
+  return (S.who==='Everyone'||onDesk())?a.filter(t=>isTeam(t.owner)):a.filter(t=>t.owner===S.who);
+}
+const dueIn=t=>t.end?Math.round((t.end.getTime()-today().getTime())/864e5):null;
+const isLate=t=>!isDone(t)&&dueIn(t)!==null&&dueIn(t)<0;
+const clientOf=t=>CLIENTS[t.key]?CLIENTS[t.key].name:'No client';
+const doneToday=t=>isDone(t)&&String(t.doneAt||'').slice(0,10)===isoOf(today());
+const noteCount=t=>(t.notes?t.notes.length:0)+(t.log?t.log.length:0);
+const ini=n=>esc(String(n||'?').slice(0,2).toUpperCase());
+const av=(n,sm)=>'<span class="av'+(sm?' sm':'')+' '+esc(String(n||'').replace(/[^A-Za-z]/g,''))+'">'+ini(n)+'</span>';
+function fStamp(ms){
+  const d=new Date(ms);if(isNaN(d.getTime()))return '';
+  const hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  return (isoOf(d)===isoOf(new Date())?'Today':fD(d))+' '+hm;
+}
+/* [text, class] */
+function dueLabel(t,short){
+  if(isDone(t))return ['Done','done'];
+  const n=dueIn(t);
+  if(n===null)return [short?'':'No date',''];
+  if(n<0)return [short?'Overdue':'Overdue · '+fD(t.end),'late'];
+  if(n===0)return ['Today','today'];
+  if(n===1)return [short?'Tmrw':'Tomorrow',''];
+  if(n<7)return [short?DOW[t.end.getDay()]:DOW[t.end.getDay()]+' '+fD(t.end),''];
+  return [fD(t.end),''];
+}
+const dueHTML=(t,short)=>{const d=dueLabel(t,short);return '<span class="due '+d[1]+'">'+esc(d[0])+'</span>';};
+const estHTML=t=>{const e=fEst(t.est);return '<span class="est'+(e?'':' none')+'" title="'+(e?'Estimate from Notion':'No estimate in Notion')+'">'+(e||'–')+'</span>';};
+const byDue=(a,b)=>((a.end?a.end.getTime():9e15)-(b.end?b.end.getTime():9e15))||String(a.id).localeCompare(String(b.id));
+const quote=q=>'“'+esc(q)+'”';
+function setLive(cls,txt){LIVE=[cls,txt];const el=document.getElementById('live');if(el){el.className='live'+(cls?' '+cls:'');el.lastChild.textContent=txt;}}
+let toastT=0;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),3200);}
+
+/* ── writing: our own store ─────────────────────────────────────────────── */
+const ov=id=>OV.tasks[id]||(OV.tasks[id]={notes:[]});
+const nid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function commit(){saveLocalOv();project();render();pushOv();}
+function addNote(o,by,txt,tag){o.notes=(o.notes||[]).concat([{id:nid(),by:by,txt:txt,at:Date.now(),tag:!!tag}]);}
+function setStatus(id,status,by){
+  const t=findTask(id),raw=RAW.find(x=>x.id===id);if(!t||!raw)return;
+  const o=ov(id);
+  o.base=mapSt(raw.status);o.status=status;o.sAt=Date.now();o.by=by||author();o.title=t.title;o.wrote=null;
+  if(status==='Complete')o.doneAt=isoOf(today());else delete o.doneAt;
+  if(status!=='Parked'){delete o.parked;delete o.prevStatus;}
+  if(status!=='Blocked'&&status!=='Parked')o.flagged=false;
+  return o;
+}
+/* Status change + the matching write to the client tracker, where there is one. */
+function act(id,status,by){
+  const raw=RAW.find(x=>x.id===id);if(!raw)return;
+  const o=setStatus(id,status,by);if(!o)return;
+  commit();
+  writeThrough(raw,status).then(r=>{
+    if(r.skip)return;
+    if(r.ok){o.wrote=status;raw.status=status;saveLocalOv();pushOv();}
+    else toast('Saved here, but the client tracker was not updated: '+r.why);
+  });
+}
+const NEXT={Pending:'In Progress','In Progress':'Complete',Complete:'Pending',Blocked:'In Progress'};
+function cycle(id){const t=findTask(id);if(t&&NEXT[t.status])act(id,NEXT[t.status]);}
+function flagBlocked(id){
+  const t=findTask(id);if(!t||(t.status==='Blocked'&&t.flagged))return;
+  const o=setStatus(id,'Blocked');o.flagged=true;
+  addNote(o,author(),'@'+COORD+' needs your action on this one.',true);
+  commit();
+}
+function postNote(id){
+  let txt=S.draft.trim();if(!txt)return;
+  const re=new RegExp('@'+COORD,'i');
+  if(S.tag&&!re.test(txt))txt='@'+COORD+' '+txt;
+  const o=ov(id),tag=re.test(txt);
+  addNote(o,author(),txt,tag);
+  if(tag){o.flagged=true;}
+  S.draft='';S.tag=false;commit();
+}
+function park(id){
+  const t=findTask(id);if(!t)return;
+  const q=S.draft.trim()||'Can you check this one before I go further?';
+  const prev=t.status==='Parked'?(t.prevStatus||'Pending'):t.status;
+  const o=setStatus(id,'Parked');
+  o.prevStatus=prev;o.parked={by:author(),question:q,askedAt:Date.now()};o.flagged=true;
+  addNote(o,author(),'@'+COORD+' '+q,true);
+  S.draft='';S.tag=false;S.open=null;save();commit();
+  if(REMOTE==='off'||REMOTE==='down')toast('Parked in this browser only. '+COORD+' cannot see it until shared saving is on.');
+}
+function answer(id,keep){
+  const t=findTask(id);if(!t)return;
+  const txt=(S.deskDraft[id]||'').trim(),o=ov(id);
+  if(keep&&!txt)return;
+  if(txt)addNote(o,COORD,txt,false);
+  delete S.deskDraft[id];
+  if(keep){commit();return;}
+  const back=t.prevStatus&&t.prevStatus!=='Parked'?t.prevStatus:'Pending';
+  setStatus(id,back,COORD);commit();
+  toast('Handed back to '+t.owner);
+}
+
+/* ── writing: the client tracker ────────────────────────────────────────────
+   Only Pending / In Progress / Complete, only for a task that lives on a tracker,
+   and only when the slot still holds the same task: ids are positional, so the
+   title is checked before anything is changed. Blocked, Parked, notes and
+   questions are internal and stay in our own store. Same write shape as the
+   tracker page itself (statuses + task.s + doneAt + origStatus, savedAt bumped so
+   an open tracker tab gets its "someone else updated" prompt). */
+const WQ={};
+function writeThrough(raw,status){
+  const c=CLIENTS[raw.key];
+  if(!WRITE_THROUGH||raw.src||!c||c.seeded||raw.stages||TRACKER_ST.indexOf(status)<0)return Promise.resolve({skip:true});
+  const run=async()=>{
+    const m=await fetchKey(raw.key);
+    if(!m.reached||!m.data)return {ok:false,why:'the tracker store did not answer'};
+    const st=m.data;
+    if(c.legacy){
+      let k=null;(Array.isArray(st)?st:(st.phases||[])).forEach(p=>(p.tasks||[]).forEach(x=>{if(x.id===raw.cid)k=x;}));
+      if(!k||norm(k.task)!==norm(raw.title))return {ok:false,why:'the task has moved on the tracker'};
+      if(k.status===status)return {ok:true};
+      k.status=status;
+    }else{
+      if(String(st.buildV)!==String(c.buildV))return {ok:false,why:'the tracker has been rebuilt'};
+      const i=parseInt(raw.cid.slice(raw.cid.lastIndexOf('-')+1),10);
+      const list=(st.taskData&&st.taskData[raw.pid]&&st.taskData[raw.pid].sabel)||[],t=list[i];
+      if(!t||norm(t.t)!==norm(raw.title))return {ok:false,why:'the task has moved on the tracker'};
+      st.statuses=st.statuses||{};st.origStatus=st.origStatus||{};
+      const cur=st.statuses[raw.cid]||t.s;
+      if(cur===status)return {ok:true};
+      if(status==='Complete'){st.origStatus[raw.cid]=cur;t.doneAt=isoOf(today());}
+      else{delete st.origStatus[raw.cid];delete t.doneAt;}
+      t.s=status;st.statuses[raw.cid]=status;
+      st.savedAt=Date.now();st.savedBy='task-hub';
+    }
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:raw.key,value:JSON.stringify(st)})});
+    return r.ok?{ok:true}:{ok:false,why:'the tracker refused the save ('+r.status+')'};
+  };
+  const p=(WQ[raw.key]||Promise.resolve()).then(run,run).catch(()=>({ok:false,why:'the tracker could not be reached'}));
+  WQ[raw.key]=p;
+  return p;
+}
+
+/* ── shared pieces ──────────────────────────────────────────────────────── */
+function tagsHTML(t){
+  let h='';
+  if(t.status==='In Progress')h+='<span class="tag blue">In progress</span>';
+  if(t.status==='Parked')h+='<span class="tag red">Parked with '+COORD+'</span>';
+  if(t.status==='Blocked')h+='<span class="tag red">'+(t.flagged?'With '+COORD:'Blocked')+'</span>';
+  if(t.waiting)h+='<span class="tag amber">Waiting</span>';
+  if(t.src)h+='<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>';
+  if(t.edited)h+='<span class="tag violet">Change queued</span>';
+  return h;
+}
+function actionsHTML(t){
+  let h='<div class="acts"><button type="button" class="pb blue" data-act="start">'+(t.status==='In Progress'?'Pause':'Start')+'</button>';
+  if(!t.stages||isDone(t))h+='<button type="button" class="pb green" data-act="done">'+(isDone(t)?'Reopen':'Mark done')+'</button>';
+  h+='<button type="button" class="pb red" data-act="flag">Blocked · flag '+COORD+'</button></div>';
+  if(t.stages&&!isDone(t))h+='<div class="hint">Staged deliverable: it completes when its steps are ticked in the client tracker.</div>';
+  return h;
+}
+function stepsHTML(steps){
+  return steps.map(s=>'<div class="step'+(s.s==='Complete'?' d':'')+'"><i></i><span>'+esc(s.t)+(s.o?'<small>'+esc(who(s.o))+'</small>':'')+'</span></div>').join('');
+}
+function aboutHTML(t){
+  let h='';
+  const d=[t.desc,t.bg,t.card].filter(Boolean).join('\n\n');
+  if(d)h+='<div><div class="dl">What this is</div><div class="dp">'+linkify(d)+'</div></div>';
+  if(t.stages)h+='<div><div class="dl">Stages</div>'+t.stages.map(s=>'<div class="stage">'+esc(s.l)+'<span class="tag '+(isTeam(s.o)?'blue':'amber')+'">'+esc(s.o||'Client')+'</span>'+
+    (s.done?'<span class="tag">Done</span>':s.now?'<span class="tag blue">Now</span>':'')+'</div>'+stepsHTML(s.sub)).join('')+'</div>';
+  else if(t.sub&&t.sub.length)h+='<div><div class="dl">Steps</div>'+stepsHTML(t.sub)+'</div>';
+  return h;
+}
+function kvHTML(t,withStatus){
+  const d=dueLabel(t)[0],e=fEst(t.est);
+  return '<div class="kv">'+(withStatus?'<span>Status</span><b>'+esc(t.status)+'</b>':'<span>Client</span><b>'+esc(clientOf(t))+'</b>')+
+    '<span>Owner</span><b>'+esc(t.owner)+'</b>'+
+    '<span>Due</span><b>'+(t.end?DOW[t.end.getDay()]+' '+fD(t.end):'No date')+(isLate(t)?' · '+esc(d.split(' · ')[0]):'')+'</b>'+
+    '<span>Estimate</span><b>'+(e?e+' <small>from Notion</small>':'<small>none in Notion</small>')+'</b></div>';
+}
+function linksHTML(t){
+  const c=CLIENTS[t.key];let h='';
+  if(c&&t.pid)h+='<a class="tl" href="'+esc(c.url+(c.deep?'#pillar/'+encodeURIComponent(t.pid):''))+'" target="_blank" rel="noopener">Open in client tracker &rarr;</a>';
+  if(t.link&&/^https?:\/\//.test(t.link))h+='<a class="tl'+(h?' sub2':'')+'" href="'+esc(t.link)+'" target="_blank" rel="noopener">Reference link</a>';
+  if(t.src&&t.notion&&t.notion.id)h+='<a class="tl'+(h?' sub2':'')+'" href="https://www.notion.so/'+esc(String(t.notion.id).replace(/-/g,''))+'" target="_blank" rel="noopener">Open Notion row &rarr;</a>';
+  return h?'<div>'+h+'</div>':'';
+}
+/* Tracker notes are what the client sees; ours are internal. Shown together, in time order. */
+function notesHTML(t){
+  const L=(t.log||[]).map(n=>({by:n.by||'Unknown',at:n.at||0,txt:n.txt,src:'tracker'})).concat((t.notes||[]).map(n=>({by:n.by,at:n.at,txt:n.txt}))).sort((a,b)=>a.at-b.at);
+  if(!L.length)return '<div class="none">No notes yet.</div>';
+  return L.map(n=>'<div class="nt">'+av(n.by)+'<div class="bd"><div class="hd"><b>'+esc(n.by)+'</b>'+fStamp(n.at)+(n.src?' · on the client tracker':'')+'</div><div class="tx">'+linkify(n.txt)+'</div></div></div>').join('');
+}
+function composerBtns(t){
+  return '<div class="cbtn">'+(t.status==='Parked'?'':'<button type="button" class="pb amber" data-act="park">Park with '+COORD+' ?</button>')+
+    '<span class="sp"></span><button type="button" class="pb tagb'+(S.tag?' on':'')+'" data-act="tag">@'+COORD+'</button>'+
+    '<button type="button" class="pb post" data-act="post">Post note</button></div>';
+}
+const draftTA=()=>'<textarea data-ta="draft" placeholder="Add a note, or type a question and park it with '+COORD+'…">'+esc(S.draft)+'</textarea>';
+
+/* ── header + title ─────────────────────────────────────────────────────── */
+function headerHTML(){
+  const a=allTasks().filter(t=>isTeam(t.owner));
+  const n={};TEAM.forEach(p=>{n[p]=a.filter(t=>t.owner===p&&!isDone(t)).length;});
+  n.Everyone=a.filter(t=>!isDone(t)).length;n[COORD]=a.filter(t=>t.status==='Parked').length;
+  return '<header class="top"><span class="sq"></span><span class="word">SABEL</span><span class="div"></span>'+
+    '<span class="ch">Task list'+(onDesk()?'<em>· '+COORD+'’s desk</em>':'')+'</span>'+
+    (onDesk()?'':'<div class="seg"><button type="button" data-act="mode" data-m="list" class="'+(S.mode==='list'?'on':'')+'">List</button><button type="button" data-act="mode" data-m="board" class="'+(S.mode==='board'?'on':'')+'">Board</button></div>')+
+    '<div class="who">'+WHO.map(p=>'<button type="button" data-act="who" data-who="'+p+'" class="'+(S.who===p?'on':'')+(p===COORD?' co':'')+'">'+p+'<small>'+n[p]+'</small></button>').join('')+'</div></header>';
+}
+function titleHTML(mine){
+  const d=new Date(),eye=DOW[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]+' · '+d.getFullYear();
+  let stats='';
+  if(onDesk()){
+    const p=mine.filter(t=>t.status==='Parked').length;
+    stats='<span class="stat amb">'+p+' task'+(p===1?'':'s')+' parked with you</span>';
+  }else{
+    const open=mine.filter(t=>!isDone(t)),late=open.filter(isLate).length;
+    const hrs=open.reduce((s,t)=>s+(+t.est||0),0);
+    stats='<span class="stat'+(late?' hot':'')+'"><b>'+late+'</b>overdue</span>'+
+      '<span class="stat"><b>'+open.filter(t=>dueIn(t)===0).length+'</b>due today</span>'+
+      '<span class="stat"><b>'+fTot(hrs)+'</b>open</span>'+
+      '<span class="stat"><b>'+open.filter(t=>t.status==='Parked'||t.status==='Blocked').length+'</b>with '+COORD+'</span>';
+  }
+  const name=S.who==='Everyone'?'Everyone':S.who;
+  return '<div class="trow"><div><div class="eye">'+eye+'</div><h2>'+esc(name)+'’s '+(onDesk()?'desk':S.mode==='board'?'board':'day')+'</h2></div><div class="stats">'+stats+'</div></div>';
+}
+function bannerHTML(){
+  if(REMOTE==='off')return '<div class="banner"><b>Shared saving is not switched on yet.</b> Notes and parked questions are kept in this browser only, so nobody else can see them. Start, Pause and Done still update the client tracker. (The store key <code>'+TL_KEY+'</code> needs adding to the webhook.)</div>';
+  if(REMOTE==='down')return '<div class="banner"><b>The shared store is not answering.</b> Changes are kept in this browser and sent when it comes back.</div>';
+  return '';
+}
+
+/* ── view 1: list ───────────────────────────────────────────────────────── */
+const SECS=[
+  ['late','Overdue','Past the tracker date. Clear or park these first.','var(--red2)','var(--red2)','rgba(225,6,0,.45)'],
+  ['today','Today','Due today','var(--amber)','var(--amber)',''],
+  ['week','This week','Due in the next 7 days','var(--blue)','var(--body)',''],
+  ['later','Later','Beyond this week','var(--faint)','var(--mute)',''],
+  ['parked','Parked with '+COORD,'Waiting on an answer. Comes back to you when '+COORD+' hands it back.','var(--amber)','var(--amber)','rgba(251,191,36,.35)'],
+  ['done','Done today','Marked complete today','var(--greenfill)','var(--mute)','var(--line)']
+];
+function secOf(t){
+  if(t.status==='Parked')return 'parked';
+  if(isDone(t))return doneToday(t)?'done':'';
+  const n=dueIn(t);
+  return n===null?'later':n<0?'late':n===0?'today':n<7?'week':'later';
+}
+function rowHTML(t){
+  const open=S.open===t.id,showOwner=S.who==='Everyone'||onDesk();
+  const dc=t.status==='In Progress'?'prog':t.status==='Blocked'?'block':t.status==='Parked'?'park':isDone(t)?'done':'';
+  const glyph=t.status==='Blocked'?'!':t.status==='Parked'?'?':isDone(t)?'✓':'';
+  const n=noteCount(t);
+  let meta='<span class="cl">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+(showOwner?'<span class="own">'+esc(t.owner)+'</span>':'')+tagsHTML(t);
+  if(t.parked&&t.parked.question)meta+='<span class="q">'+quote(t.parked.question)+'</span>';
+  if(n)meta+='<span>'+n+' note'+(n===1?'':'s')+'</span>';
+  let h='<div class="row'+(isLate(t)?' late':'')+(isDone(t)?' isdone':'')+(open?' open':'')+'" data-id="'+esc(t.id)+'"><div class="rh">'+
+    '<button type="button" class="dot '+dc+'" data-act="dot" title="'+esc(t.status)+'" aria-label="Status: '+esc(t.status)+'">'+glyph+'</button>'+
+    '<button type="button" class="rt" data-act="open"><b>'+esc(t.title)+'</b><span class="rm">'+meta+'</span></button>'+
+    dueHTML(t)+estHTML(t)+'<span class="chev">&#9654;</span></div>';
+  if(S.audit)h+=audHTML(t);
+  if(open)h+='<div class="det"><div>'+actionsHTML(t)+aboutHTML(t)+kvHTML(t)+linksHTML(t)+'</div>'+
+    '<div><div class="dl" style="margin-top:0">Notes</div>'+notesHTML(t)+'<div class="comp">'+draftTA()+composerBtns(t)+'</div>'+
+    '<div class="hint">Notes here are internal. The client does not see them.</div></div></div>';
+  return h+'</div>';
+}
+function listHTML(mine){
+  const by={};mine.forEach(t=>{const s=secOf(t);if(s)(by[s]=by[s]||[]).push(t);});
+  const secs=SECS.filter(s=>by[s[0]]);
+  if(!secs.some(s=>s[0]!=='done'))
+    return '<div class="list"><div class="blank"><b>Clear.</b>Nothing open for '+esc(S.who==='Everyone'?'the team':S.who)+'.</div>'+(by.done?secHTML(SECS[5],by.done):'')+'</div>';
+  return '<div class="list">'+secs.map(s=>secHTML(s,by[s[0]])).join('')+'</div>';
+}
+function secHTML(s,rows){
+  rows.sort(byDue);
+  const hrs=rows.reduce((a,t)=>a+(isDone(t)?0:(+t.est||0)),0);
+  return '<div class="secc"'+(s[5]?' style="border-color:'+s[5]+'"':'')+'><div class="sech"><i style="background:'+s[3]+'"></i><b style="color:'+s[4]+'">'+esc(s[1])+'</b><span>'+esc(s[2])+'</span>'+
+    '<small>'+rows.length+' task'+(rows.length===1?'':'s')+(hrs?' · '+fTot(hrs):'')+'</small></div>'+rows.map(rowHTML).join('')+'</div>';
+}
+
+/* ── view 2: board ──────────────────────────────────────────────────────── */
+const COLS=[
+  ['next','Up next',['Pending'],'var(--soft)','Nothing queued'],
+  ['prog','In progress',['In Progress'],'var(--blue)','Start something from Up next'],
+  ['coord','With '+COORD,['Blocked','Parked'],'var(--amber)','Nothing with '+COORD],
+  ['done','Done',['Complete'],'var(--green)','Nothing finished yet']
+];
+function cardHTML(t){
+  const wn=t.status==='Blocked'||t.status==='Parked',n=noteCount(t);
+  const nx=t.status==='Pending'?'Start':t.status==='In Progress'?'Done':t.status==='Blocked'?'Resume':isDone(t)?'Reopen':'';
+  return '<div class="card'+(wn?' wn':isLate(t)?' late':'')+(S.open===t.id?' sel':'')+'" data-id="'+esc(t.id)+'" data-act="open">'+
+    '<div class="c1"><b>'+esc(clientOf(t))+'</b>'+dueHTML(t,true)+'</div><div class="ct">'+esc(t.title)+'</div>'+
+    (t.parked&&t.parked.question?'<div class="cq">'+quote(t.parked.question)+'</div>':'')+
+    '<div class="c3">'+av(t.owner,true)+(fEst(t.est)?'<b>'+fEst(t.est)+'</b>':'')+(n?'<span>'+n+' note'+(n===1?'':'s')+'</span>':'')+'<span class="sp"></span>'+
+    (t.status==='Parked'?'<span class="wait">Waiting on '+COORD+'</span>':(nx&&!(t.stages&&nx==='Done')?'<button type="button" class="nx" data-act="next">'+nx+'</button>':''))+'</div></div>';
+}
+function boardHTML(mine){
+  return '<div class="board">'+COLS.map(c=>{
+    /* Done shows today's only, like the list; the tracker holds the full history. */
+    const rows=mine.filter(t=>c[2].indexOf(t.status)>-1&&(c[0]!=='done'||doneToday(t))).sort(byDue);
+    const hrs=rows.reduce((a,t)=>a+(+t.est||0),0),cap=S.full[c[0]]?rows.length:BOARD_CAP;
+    return '<div class="col"><div class="colh" style="border-bottom-color:'+c[3]+'"><b>'+esc(c[1])+'</b><em style="color:'+c[3]+'">'+rows.length+'</em>'+(hrs?'<span>'+fTot(hrs)+'</span>':'')+'</div>'+
+      '<div class="cards">'+(rows.length?rows.slice(0,cap).map(cardHTML).join('')+(rows.length>cap?'<button type="button" class="more" data-act="full" data-col="'+c[0]+'">Show all '+rows.length+'</button>':''):'<div class="cempty">'+esc(c[4])+'</div>')+'</div></div>';
+  }).join('')+'</div>';
+}
+function drawerHTML(t){
+  return '<div class="scrim" data-act="close"></div><aside class="drawer" data-id="'+esc(t.id)+'"><div class="dh"><div class="t"><span>'+esc(clientOf(t))+(t.pillar?' · '+esc(t.pillar):'')+'</span><b>'+esc(t.title)+'</b></div>'+
+    '<button type="button" class="x" data-act="close" aria-label="Close">×</button></div>'+
+    '<div class="db"><div>'+actionsHTML(t)+'</div>'+
+    (t.parked?'<div class="pc"><small>Parked with '+COORD+' · '+fStamp(t.parked.askedAt)+'</small>'+quote(t.parked.question)+'</div>':'')+
+    kvHTML(t,true)+aboutHTML(t)+linksHTML(t)+'<hr><div><div class="dl">Notes</div>'+notesHTML(t)+'</div></div>'+
+    '<div class="df">'+draftTA()+composerBtns(t)+'<div class="hint">Notes here are internal. The client does not see them.</div></div></aside>';
+}
+
+/* ── view 3: the coordinator's desk ─────────────────────────────────────── */
+function deskHTML(mine){
+  const parked=mine.filter(t=>t.status==='Parked').sort((a,b)=>((a.parked&&a.parked.askedAt)||0)-((b.parked&&b.parked.askedAt)||0));
+  const blocked=mine.filter(t=>t.status==='Blocked').sort(byDue);
+  let h='<div class="desk">';
+  if(!parked.length)h+='<div class="blank"><b>Nothing parked.</b>When someone parks a task with you it appears here with their question.</div>';
+  h+=parked.map(t=>{
+    const p=t.parked||{},n=noteCount(t),open=!!S.deskOpen[t.id];
+    return '<div class="pk" data-id="'+esc(t.id)+'"><div class="pkt"><div><div class="pkl">'+av(p.by||t.owner,true)+'<span><b>'+esc(p.by||t.owner)+'</b> parked this · '+fStamp(p.askedAt)+' ·</span><span class="cl">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+'</div>'+
+      '<div class="pkh">'+esc(t.title)+'</div><div class="pc">'+quote(p.question||'')+'</div></div>'+
+      '<div class="pkr">'+dueHTML(t)+estHTML(t)+'<button type="button" class="lk" data-act="desk-toggle">'+n+' note'+(n===1?'':'s')+' · task detail</button></div></div>'+
+      (open?'<div class="pkd"><div>'+(aboutHTML(t)||'<div class="none">No description on this task.</div>')+'<div class="hint">Owner '+esc(t.owner)+(t.end?' · due '+DOW[t.end.getDay()]+' '+fD(t.end):'')+'</div>'+linksHTML(t)+'</div><div>'+notesHTML(t)+'</div></div>':'')+
+      '<div class="pkf"><textarea data-ta="desk:'+esc(t.id)+'" placeholder="Answer '+esc(p.by||t.owner)+'…">'+esc(S.deskDraft[t.id]||'')+'</textarea>'+
+      '<button type="button" class="pb hand" data-act="answer">Answer &amp; hand back to '+esc(t.owner)+'</button>'+
+      '<button type="button" class="pb" data-act="reply">Reply, keep parked</button>'+
+      (t.stages?'':'<button type="button" class="pb green" data-act="desk-done">Mark done</button>')+'</div></div>';
+  }).join('');
+  if(blocked.length){
+    h+='<div class="flab">Also flagged to you · blocked tasks</div><div class="bl">'+blocked.map(t=>{
+      const n=noteCount(t);
+      return '<div class="bli" data-id="'+esc(t.id)+'"><div class="t"><b>'+esc(t.title)+'</b><span>'+esc(clientOf(t))+' · '+esc(t.owner)+(n?' · '+n+' note'+(n===1?'':'s'):'')+(t.flagged?'':(t.src?' · blocked in Notion':' · blocked on the tracker'))+'</span></div>'+
+        dueHTML(t)+'<button type="button" class="pb blue" data-act="unblock">Unblock</button></div>';
+    }).join('')+'</div>';
+  }
+  return h+'</div>';
+}
+
+/* ── render ─────────────────────────────────────────────────────────────── */
+function footHTML(){
+  return '<div class="foot"><span class="live '+LIVE[0]+'" id="live"><i></i><span>'+esc(LIVE[1])+'</span></span>'+
+    '<span>Tasks from the live client trackers · durations and call actions from Notion, pushed '+ago(HOURS_AT)+'</span><span class="sp"></span>'+
+    '<button type="button" class="fb'+(S.audit?' on':'')+'" data-act="audit">'+(S.audit?'Audit on':'Audit'+(Object.keys(AUD).length?' · '+Object.keys(AUD).length:''))+'</button>'+
+    '<button type="button" class="fb" data-act="refresh">Refresh</button>'+
+    '<button type="button" class="fb" data-act="theme">'+(document.documentElement.classList.contains('light')?'Dark':'Light')+'</button></div>'+
+    (HEALTH.length?'<details class="health"'+(S.healthOpen?' open':'')+'><summary>Data checks<span>'+HEALTH.length+' thing'+(HEALTH.length>1?'s':'')+' to look at</span></summary>'+
+      HEALTH.map(x=>'<div class="hi"><b>'+esc(x.t)+'</b><br>'+esc(x.d)+(x.list?'<ul>'+x.list.map(i=>'<li>'+esc(i)+'</li>').join('')+'</ul>':'')+'</div>').join('')+'</details>':'');
+}
+function render(){
+  const app=document.getElementById('app');
+  /* Keep whatever is being typed: the page re-renders on every poll. */
+  const ae=document.activeElement,ta=ae&&ae.getAttribute&&ae.getAttribute('data-ta'),pos=ta?[ae.selectionStart,ae.selectionEnd]:null;
+  const hd=app.querySelector('.health');if(hd)S.healthOpen=hd.open;
+  const y=window.scrollY,db=app.querySelector('.db'),dby=db?db.scrollTop:0;
+  if(S.open&&!findTask(S.open))S.open=null;
+  let h=headerHTML();
+  if(FIRST){
+    h+='<div class="trow"><div><div class="eye">Loading the trackers</div><h2>One moment</h2></div></div><div class="list"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>';
+  }else{
+    const mine=scope();
+    h+=bannerHTML()+titleHTML(mine)+(S.audit&&!onDesk()&&S.mode==='list'?auditBarHTML():'');
+    h+=onDesk()?deskHTML(mine):S.mode==='board'?boardHTML(mine):listHTML(mine);
+    if(!onDesk()&&S.mode==='board'&&S.open)h+=drawerHTML(findTask(S.open));
+  }
+  app.innerHTML=h+footHTML();
+  if(ta){const el=app.querySelector('[data-ta="'+ta.replace(/"/g,'')+'"]');if(el){el.focus();try{el.setSelectionRange(pos[0],pos[1]);}catch(e){}}}
+  const nd=app.querySelector('.db');if(nd)nd.scrollTop=dby;
+  window.scrollTo(0,y);
+}
+function renderFail(){
+  document.getElementById('app').innerHTML=headerHTML()+'<div class="trow"><div><div class="eye">Could not load</div><h2>No answer</h2></div></div><div class="list"><div class="blank"><b>The tracker registry did not answer.</b>Check your connection and press Refresh.</div></div>'+footHTML();
+}
+
+/* ── events ─────────────────────────────────────────────────────────────── */
+function applyTheme(light){document.documentElement.classList.toggle('light',light);}
+let LIGHT=false;try{LIGHT=localStorage.getItem('sabel-hub-theme')==='light';}catch(e){}
+applyTheme(LIGHT);
+function refreshAll(){Object.keys(TRK).forEach(k=>delete TRK[k]);pullOv();loadAll();}
+
+document.addEventListener('click',e=>{
+  const a=e.target.closest('[data-act]');if(!a)return;
+  const act=a.getAttribute('data-act'),host=a.closest('[data-id]'),id=host?host.getAttribute('data-id'):null;
+  const t=id?findTask(id):null;
+  switch(act){
+    case 'who':S.who=a.getAttribute('data-who');S.open=null;S.draft='';S.tag=false;history.replaceState(null,'','#'+S.who.toLowerCase());save();render();window.scrollTo(0,0);break;
+    case 'mode':S.mode=a.getAttribute('data-m');S.open=null;S.draft='';S.tag=false;save();render();break;
+    case 'open':S.open=(S.mode==='list'&&S.open===id)?null:id;S.draft='';S.tag=false;save();render();break;
+    case 'close':S.open=null;S.draft='';S.tag=false;save();render();break;
+    case 'full':S.full[a.getAttribute('data-col')]=true;render();break;
+    case 'dot':cycle(id);break;
+    case 'next':e.stopPropagation();cycle(id);break;
+    case 'start':if(t)act2(id,t.status==='In Progress'?'Pending':'In Progress');break;
+    case 'done':if(t)act2(id,isDone(t)?'Pending':'Complete');break;
+    case 'flag':flagBlocked(id);break;
+    case 'tag':S.tag=!S.tag;render();break;
+    case 'post':postNote(id);break;
+    case 'park':park(id);break;
+    case 'answer':answer(id,false);break;
+    case 'reply':answer(id,true);break;
+    case 'desk-done':act2(id,'Complete',COORD);break;
+    case 'unblock':act2(id,'In Progress',COORD);break;
+    case 'desk-toggle':S.deskOpen[id]=!S.deskOpen[id];render();break;
+    case 'refresh':refreshAll();break;
+    case 'theme':LIGHT=!LIGHT;applyTheme(LIGHT);try{localStorage.setItem('sabel-hub-theme',LIGHT?'light':'dark');}catch(x){}render();break;
+    case 'audit':S.audit=!S.audit;if(S.audit&&!onDesk())S.mode='list';save();render();break;
+    case 'aud-off':S.audit=false;save();render();break;
+    case 'aud-undo':delete AUD[id];saveAud();project();render();break;
+    case 'aud-clear':if(confirm('Clear all '+Object.keys(AUD).length+' queued changes?')){AUD={};saveAud();project();render();}break;
+    case 'aud-copy':{
+      const txt=auditText(),done=ok=>{const b=document.getElementById('aud-copy');if(b)b.textContent=ok?'Copied':'Select the box below and copy';};
+      const sel=()=>{const x=document.getElementById('aud-text');if(x){x.focus();x.select();}done(false);};
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(()=>done(true),sel);else sel();
+      break;}
+  }
+});
+const act2=act;   // inside the click handler `act` is the action name
+document.addEventListener('input',e=>{
+  const ta=e.target.getAttribute&&e.target.getAttribute('data-ta');if(!ta)return;
+  if(ta==='draft')S.draft=e.target.value;else S.deskDraft[ta.slice(5)]=e.target.value;
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&S.open&&S.mode==='board'&&!onDesk()){S.open=null;save();render();return;}
+  if(e.key!=='Enter'||!(e.metaKey||e.ctrlKey))return;
+  const ta=e.target.getAttribute&&e.target.getAttribute('data-ta');
+  if(ta==='draft'&&S.open){e.preventDefault();postNote(S.open);}
+});
+document.addEventListener('change',e=>{
+  const f=e.target.getAttribute&&e.target.getAttribute('data-aud');if(!f)return;
+  setAudit(e.target.closest('.row').getAttribute('data-id'),f,e.target.value);
+});
+window.addEventListener('hashchange',()=>{const w=hashWho();if(w&&w!==S.who){S.who=w;S.open=null;save();render();}});
+
+/* ── go ─────────────────────────────────────────────────────────────────── */
+const typing=()=>{const ae=document.activeElement;return !!(ae&&ae.getAttribute&&ae.getAttribute('data-ta')&&ae.value);};
+render();
+pullOv().then(ch=>{if(!FIRST){project();render();}});
+loadAll();
+setInterval(()=>{if(document.hidden)return;pullOv().then(ch=>{if(ch&&!FIRST){project();render();}});},POLL_MS);
+setInterval(()=>{if(!document.hidden&&!typing())loadAll();},REFRESH_MS);
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden||!LOADED_AT)return;
+  pullOv().then(ch=>{if(ch){project();render();}});
+  if(Date.now()-LOADED_AT>REFRESH_MS)loadAll();
+});
+</script>
+</body>
+</html>
