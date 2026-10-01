@@ -684,6 +684,61 @@ body.has-dock #form-dock,#form-dock{display:none!important}
 .tk-tile .ct{font-size:12.5px;font-weight:600;color:var(--k94A3B8,#94A3B8)}
 .tk-tile.quiet{font-weight:500;color:var(--kCBD5E1,#CBD5E1)}
 @media(max-width:700px){.tk-row{grid-template-columns:minmax(0,1fr) 52px}.tk-row .bar{display:none}}
+/* Tracker drop-down in the sidebar (1 Oct 2026) */
+.sb.hn{height:100vh;box-sizing:border-box;overflow:hidden!important}
+.hn-nav{flex:1;min-height:0;display:flex;flex-direction:column}
+.hn-sub.tk{overflow-y:auto;min-height:0;flex:0 1 auto;scrollbar-width:thin}
+.hn-pl{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;border-radius:8px;border:none;background:transparent;color:var(--kCBD5E1,#CBD5E1);font:inherit;font-size:14px;cursor:pointer;text-align:left;width:100%;flex-shrink:0}
+.hn-pl:hover{background:var(--k1E2433,#1E2433);color:var(--kE2E8F0,#E2E8F0)}
+.hn-pl.on{background:#1b2230;color:#fff;font-weight:600}
+html.light .hn-pl.on{background:#E4E7EC;color:#101828}
+.hn-pl.hint{box-shadow:inset 2px 0 0 var(--k475569,#475569)}
+.hn-pl .lb{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hn-pl .pc{font-size:13px;font-weight:600;flex-shrink:0}
+.hn-pg{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px 0 22px;border-radius:7px;border:none;background:transparent;color:var(--k94A3B8,#94A3B8);font:inherit;font-size:12.5px;cursor:pointer;text-align:left;width:100%;flex-shrink:0}
+.hn-pg:hover{background:var(--k1E2433,#1E2433);color:var(--kE2E8F0,#E2E8F0)}
+.hn-pg.on{color:var(--kE2E8F0,#E2E8F0);background:rgba(225,6,0,.1)}
+.hn-pg i{width:6px;height:6px;border-radius:50%;background:#E10600;flex-shrink:0}
+.hn-proj.compact{padding:12px 14px}.hn-proj.compact .nm{margin-top:0;font-size:15px}.hn-proj.compact .gl{margin-top:4px}
+/* Single-pillar view */
+.pv{max-width:1120px}
+.pv-head{display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.pv-head .t{flex:1;min-width:280px}
+.pv-eye{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--k94A3B8,#94A3B8)}
+.pv-h1{font-size:30px;font-weight:700;color:var(--kE2E8F0,#E2E8F0);margin-top:8px;line-height:1.2}
+.pv-desc{font-size:14px;color:var(--k94A3B8,#94A3B8);margin-top:6px}
+.pv-prog{width:160px}
+.pv-prog .r{display:flex;justify-content:space-between;font-size:13px;color:var(--k94A3B8,#94A3B8)}.pv-prog .r b{color:var(--kE2E8F0,#E2E8F0)}
+.pv-prog .bar{height:6px;border-radius:3px;background:var(--k1E2433,#1E2433);margin-top:8px;overflow:hidden}.pv-prog .bar i{display:block;height:100%;border-radius:3px}
+.pv-list{border:1px solid var(--k1E2433,#1E2433);border-radius:12px;background:var(--k12151D,#12151D);overflow:hidden}
+.pv-row{display:flex;align-items:center;gap:14px;padding:14px 20px;border-top:1px solid var(--k1E2433,#1E2433);cursor:pointer}
+.pv-row:first-child{border-top:none}
+.pv-row:hover{background:rgba(148,163,184,.05)}
+.pv-row.need{background:rgba(225,6,0,.07)}
+.pv-st{width:20px;height:20px;border-radius:50%;flex-shrink:0;box-sizing:border-box;border:2px solid var(--k475569,#475569);background:transparent;display:inline-flex;align-items:center;justify-content:center;color:#0F1117;cursor:pointer;padding:0}
+.pv-st.done{background:#16A34A;border-color:#16A34A;color:#fff}
+.pv-st.need{border-color:#FF4D47}
+.pv-st.prog{background:#5b9cf6;border-color:#5b9cf6;box-shadow:0 0 0 4px rgba(91,156,246,.18)}
+.pv-tt{flex:1;min-width:0}
+.pv-tt b{font-size:15px;font-weight:600;color:var(--kE2E8F0,#E2E8F0);line-height:1.35}
+.pv-tt .ip{font-size:12px;font-weight:700;letter-spacing:.08em;color:#5b9cf6;margin-left:8px}
+.pv-tt span.d{display:block;font-size:13px;color:var(--k94A3B8,#94A3B8);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-row.done .pv-tt b{color:var(--k64748B,#64748B);text-decoration:line-through}
+.pv-own{font-size:12.5px;font-weight:600;border-radius:12px;padding:3px 10px;white-space:nowrap}
+.pv-when{font-size:13px;color:var(--k94A3B8,#94A3B8);white-space:nowrap;min-width:84px;text-align:right}
+.pv-open{border-top:1px solid var(--k1E2433,#1E2433);padding:6px 12px 10px;background:var(--k0F1117,#0F1117)}
+.pv-add{display:flex;gap:10px;padding:12px 20px;border-top:1px solid var(--k1E2433,#1E2433)}
+.pv-add .add-task-btn{width:auto;flex:1}
+.pv-stage{margin-bottom:16px}
+.pv-pg{margin-top:18px;border:1.5px dashed rgba(225,6,0,.45);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:16px;background:rgba(225,6,0,.03)}
+.pv-pg .t{flex:1;min-width:0}
+.pv-pg .ey{font-size:12.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#FF4D47}
+.pv-pg b{display:block;font-size:16px;font-weight:600;color:var(--kE2E8F0,#E2E8F0);margin-top:6px}
+.pv-pg span{display:block;font-size:13px;color:var(--k94A3B8,#94A3B8);margin-top:3px}
+.pv-pg button{border:1px solid var(--k2A3145,#2A3145);background:var(--k161B26,#161B26);color:var(--kE2E8F0,#E2E8F0);font:inherit;font-size:13.5px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;white-space:nowrap}
+.pv-pg button:hover{border-color:var(--k475569,#475569)}
+.wk-tog{display:flex;justify-content:flex-end;margin-bottom:10px}
+@media(max-width:700px){.pv-row{flex-wrap:wrap}.pv-tt{flex-basis:calc(100% - 40px)}.pv-when{min-width:0}}
 </style>
     </head>
 <body>
@@ -2871,8 +2926,15 @@ const HUB_RANGE="Sep 2026-Jan 2027";
 const SLACK_URL="";
 
 // ── Hub navigation and Home (1 Oct 2026) ────────────────────────────────────────
-let hnFormsOpen=true;try{hnFormsOpen=localStorage.getItem('hub-forms-open')!=='closed';}catch(e){}
-function hnToggleForms(){hnFormsOpen=!hnFormsOpen;try{localStorage.setItem('hub-forms-open',hnFormsOpen?'open':'closed');}catch(e){}renderSidebar();}
+// Which sidebar group is open: 'tracker', 'forms' or ''. Only one at a time; remembered.
+let hnOpen='forms';try{const v=localStorage.getItem('hub-nav-open');if(v!==null)hnOpen=v;}catch(e){}
+function hnSetOpen(v){hnOpen=v;try{localStorage.setItem('hub-nav-open',v);}catch(e){}}
+function hnToggleForms(){hnSetOpen(hnOpen==='forms'?'':'forms');renderSidebar();}
+function hnTracker(){if(cur==='tracker'&&hnOpen==='tracker'){hnSetOpen('');renderSidebar();return;}hnSetOpen('tracker');setP('tracker');}
+// Pillar % colour: grey at 0%, green when the client has something open now, else blue (Sabel moving it).
+function hnPillarClr(pid,pc){if(!pc)return 'var(--k64748B,#64748B)';
+  try{const n=hnNeeds().now;if(n.some(r=>r.o&&r.o.pid===pid))return '#22C55E';}catch(e){}return '#5b9cf6';}
+function hnFirstOpenPillar(){const p=P.find(x=>{const m=phaseMini(x.id);return m.total&&m.done<m.total;});return p?p.id:'';}
 const HN_TRACKER_VIEWS=['tracker','focus','notes','runway','parked','hours'];
 function hnInTracker(){const c=String(cur);return HN_TRACKER_VIEWS.includes(c)||c.indexOf('prog:')===0||/^Week /.test(c)||P.some(p=>p.id===c);}
 function hnPct(){const gs=globalStats();return gs.total?Math.round(gs.complete/gs.total*100):0;}
@@ -2889,21 +2951,31 @@ function renderSidebar(){
   let h=`<div class="hn-mark"><img src="${logoSrc()}" alt="Sabel"></div><nav class="hn-nav">`;
   h+=btn('home','home','Home','',cur==='home');
   h+=btn('overview','layout-dashboard','Dashboard',need?`<span class="hn-badge" title="${need} thing${need===1?'':'s'} need${need===1?'s':''} you">${need}</span>`:'',cur==='overview');
-  h+=btn('tracker','list-details','Tracker',`<span class="hn-pct">${pct}%</span>`,hnInTracker());
+  const tOpen=hnOpen==='tracker',fOpen=hnOpen==='forms';
+  h+=`<button class="hn-btn${hnInTracker()?' on':''}" onclick="hnTracker()" aria-expanded="${tOpen}"><span class="ic"><i class="ti ti-list-details"></i></span><span class="lb">Tracker</span>${tOpen?'':`<span class="hn-pct">${pct}%</span>`}<i class="ti ti-chevron-${tOpen?'up':'down'} hn-chev"></i></button>`;
+  if(tOpen){
+    const hint=cur==='tracker'?hnFirstOpenPillar():'';
+    h+=`<div class="hn-sub tk">`+P.map(p=>{const m=phaseMini(p.id),pc=m.total?Math.round(m.done/m.total*100):0;
+      const pg=(typeof progPages==='function'?progPages():[]).filter(x=>x.frm===p.id).map(x=>{const i=PROG_IDS.indexOf(x.id)+1;
+        return `<button class="hn-pg${cur==='prog:'+x.id?' on':''}" onclick="setP('prog:${x.id}')" title="${esc(x.title||'')}"><i></i>Progression ${i}</button>`;}).join('');
+      const on=cur===p.id;
+      return `<button class="hn-pl${on?' on':''}${hint===p.id?' hint':''}" onclick="setGroupBy('pillar');setP('${p.id}')" title="${esc(p.l)}"><span class="lb">${esc(p.l)}</span><span class="pc" style="color:${on?'#fff':hnPillarClr(p.id,pc)}">${pc}%</span></button>`+pg;
+    }).join('')+`</div>`;
+  }
   if(forms.length){
-    h+=`<button class="hn-btn${inForm&&!hnFormsOpen?' on':''}" onclick="hnToggleForms()" aria-expanded="${hnFormsOpen}"><span class="ic"><i class="ti ti-forms"></i></span><span class="lb">Forms</span><i class="ti ti-chevron-${hnFormsOpen?'up':'down'} hn-chev"></i></button>`;
-    if(hnFormsOpen){
+    h+=`<button class="hn-btn${inForm&&!fOpen?' on':''}" onclick="hnToggleForms()" aria-expanded="${fOpen}"><span class="ic"><i class="ti ti-forms"></i></span><span class="lb">Forms</span><i class="ti ti-chevron-${fOpen?'up':'down'} hn-chev"></i></button>`;
+    if(fOpen){
       h+=`<div class="hn-sub">`+forms.map(f=>{const st=formState(f.id);const on=cur==='form:'+f.id;
         const started=st.total&&(st.done||(st.p&&(st.p.sections||[]).some(x=>(x.filled||0)>0)));
         const right=st.submitted?`<i class="ti ti-circle-check-filled" style="font-size:15px;color:#4ADE80" title="Sent to Sabel"></i>`
           :(started?`<span class="st">${st.done}/${st.total}</span>`:`<span class="hn-dot" title="Not started"></span>`);
-        return `<button class="hn-subbtn${on?' on':''}" onclick="setP('form:${f.id}')"><span class="lb">${esc(f.l)}</span>${right}</button>`;}).join('')+`</div>`;
+        return `<button class="hn-subbtn${on?' on':''}" onclick="hnSetOpen('forms');setP('form:${f.id}')"><span class="lb">${esc(f.l)}</span>${right}</button>`;}).join('')+`</div>`;
     }
   }
   h+=`</nav><div class="hn-foot">`;
   const gl=hnGoLive();
-  h+=`<div class="hn-proj"><div class="ey">Project</div><div class="nm">${esc(CLIENT_NAME)}</div>${HUB_RANGE?`<div class="dr">${esc(HUB_RANGE)}</div>`:''}${gl?`<div class="gl">Go-live ${gl.getDate()} ${HN_MON[gl.getMonth()]} ${gl.getFullYear()}</div>`:''}</div>`;
-  h+=`<div class="hn-help">Need help? ${SLACK_URL?`<a href="${esc(SLACK_URL)}" target="_blank" rel="noopener">Shared Slack channel &rarr;</a>`:'Ask in your shared Slack channel.'}</div>`;
+  h+=`<div class="hn-proj compact" title="${esc(HUB_RANGE)}"><div class="nm">${esc(CLIENT_NAME)}</div>${gl?`<div class="gl">Go-live ${gl.getDate()} ${HN_MON[gl.getMonth()]} ${gl.getFullYear()}</div>`:''}</div>`;
+  if(SLACK_URL)h+=`<div class="hn-help">Need help? <a href="${esc(SLACK_URL)}" target="_blank" rel="noopener">Shared Slack channel &rarr;</a></div>`;
   h+=`</div>`;
   sb.innerHTML=h;
   hnTopBar();
@@ -2964,8 +3036,8 @@ function homeView(){
       <div class="hm-box"><div class="ey">Sabel is working on this week</div>
         ${wk.length?wk.map(w=>`<div class="hm-wk"><i></i><div><b onclick="${w.prog?`setP('prog:${w.prog}')`:`gotoTask('${w.cid}')`}">${esc(w.t)}</b><span>${esc(w.sub)}</span></div></div>`).join(''):'<div style="font-size:14px;color:var(--k94A3B8,#94A3B8)">Nothing scheduled this week.</div>'}</div>
       <div class="hm-box"><div class="ey">Where the project stands</div>
-        ${top.map(x=>`<div class="hm-pl" onclick="setGroupBy('pillar');setP('${x.p.id}')"><span>${esc(x.p.l)}</span><span>${x.pct}%</span></div>`).join('')}
-        <div class="hm-more"><span>${more>0?'+ '+more+' more pillar'+(more===1?'':'s'):''}</span><button class="hm-link" style="margin-left:0" onclick="setP('tracker')">Tracker &rarr;</button></div></div>
+        ${top.map(x=>`<div class="hm-pl" onclick="hnSetOpen('tracker');setGroupBy('pillar');setP('${x.p.id}')"><span>${esc(x.p.l)}</span><span>${x.pct}%</span></div>`).join('')}
+        <div class="hm-more"><span>${more>0?'+ '+more+' more pillar'+(more===1?'':'s'):''}</span><button class="hm-link" style="margin-left:0" onclick="hnSetOpen('tracker');setP('tracker')">Tracker &rarr;</button></div></div>
     </div>
   </div>`;
 }
@@ -2998,7 +3070,65 @@ function trackerView(){
     <div class="tk-sec">Tools</div><div class="tk-more">${tools}</div>
   </div>`;
 }
+// One pillar at a time: header, staged deliverables, the task list, and the progression after it.
+let pvOpen=new Set();
+function pvToggle(cid){if(pvOpen.has(cid)){pvOpen.delete(cid);expandedCards.delete(cid);}else{pvOpen.add(cid);expandedCards.add(cid);}renderMain();}
+const PV_OWN={Richard:['rgba(192,132,252,.16)','#C084FC'],Chris:['rgba(96,165,250,.16)','#60A5FA'],Greg:['rgba(52,211,153,.16)','#34D399']};
+function pvOwner(t,isClient){
+  if(isClient||t.o===CLIENT_LABEL)return `<span class="pv-own" style="background:rgba(240,180,41,.16);color:#f0b429">You</span>`;
+  const c=PV_OWN[t.o];return c?`<span class="pv-own" style="background:${c[0]};color:${c[1]}">${esc(t.o)}</span>`:`<span class="pv-own" style="background:rgba(148,163,184,.14);color:var(--kCBD5E1,#CBD5E1)">${esc(t.o||'Sabel')}</span>`;
+}
+function pvWhen(t){
+  if(t.s==='Complete')return t.doneAt?'Done '+hnFmt(new Date(t.doneAt+'T00:00:00')):'Done';
+  const end=endWeek(t),cw=currentWeek();if(!end)return t.d||'';
+  return (end<=cw+1)?'Due '+hnDue(end):'Week '+(t.week&&t.wkEnd&&t.wkEnd>t.week?t.week+'–'+t.wkEnd:end);
+}
+function pvRow(t,cid,isClient){
+  const done=t.s==='Complete',od=isOverdue(t),cw=currentWeek();
+  const mine=(isClient||t.o===CLIENT_LABEL)&&!done&&(od||(t.week&&t.week<=cw));
+  const prog=!done&&!mine&&t.s==='In Progress';
+  const st=done?'done':(mine?'need':(prog?'prog':''));
+  const n=(t.log||[]).length,steps=(t.sub||[]).length;
+  const det=[t.tip&&isClient?t.tip:'',steps?(t.sub.filter(x=>x.s==='Complete').length+'/'+steps+' steps'):'',n?n+' note'+(n===1?'':'s'):''].filter(Boolean).join(' · ');
+  const open=pvOpen.has(cid);
+  return `<div class="pv-row${done?' done':''}${mine?' need':''}" onclick="pvToggle('${cid}')">
+      <button class="pv-st ${st}" onclick="event.stopPropagation();toggleComplete(event,'${cid}')" title="${done?'Mark not done':'Mark done'}">${done?'<i class="ti ti-check" style="font-size:12px"></i>':''}</button>
+      <div class="pv-tt"><b>${esc(t.t)}</b>${prog?'<span class="ip">IN PROGRESS</span>':''}${det?`<span class="d">${esc(det)}</span>`:''}</div>
+      ${pvOwner(t,isClient)}<span class="pv-when"${od&&!done?' style="color:#FF6B66"':''}>${esc(pvWhen(t))}</span>
+    </div>${open?`<div class="pv-open">${makeCard(t,cid,isClient,{noDrag:true})}</div>`:''}`;
+}
+function pillarView(pid){
+  const p=P.find(x=>x.id===pid);if(!p)return '';
+  const idx=P.indexOf(p)+1,m=phaseMini(pid),pc=m.total?Math.round(m.done/m.total*100):0;
+  const rows=[],staged=[];
+  ['client','sabel'].forEach(g=>(T[pid][g]||[]).forEach((t,i)=>{if(t.parked)return;const cid=pid+'-'+(g==='sabel'?'s':'c')+'-'+i;
+    if(isPhased(t)){if(!hiddenByDone(t))staged.push(makeCard(t,cid,false,{noDrag:true}));return;}
+    if(hiddenByDone(t))return;rows.push({t,cid,isClient:g==='client'});}));
+  // Order: needs you first, then in progress, then by week; done last.
+  const rank=r=>r.t.s==='Complete'?3:((r.isClient&&isOverdue(r.t))?0:(r.t.s==='In Progress'?1:2));
+  rows.sort((a,b)=>rank(a)-rank(b)||(endWeek(a.t)||99)-(endWeek(b.t)||99));
+  const pg=(typeof progPages==='function'?progPages():[]).find(x=>x.frm===pid);
+  let pgCard='';
+  if(pg){const i=PROG_IDS.indexOf(pg.id)+1;const sab=(pg.who||[]).filter(w=>w.s==='s').map(w=>w.n);
+    const when=pg.date?('booked for '+new Date(pg.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).replace('Sept','Sep')+(pg.time?', '+pg.time:'')):(pg.hint?'planned for '+pg.hint:'to be scheduled');
+    const stx={unscheduled:'',booked:'',held:' · held, waiting for the green light',green:' · green light given'}[pg.status]||'';
+    pgCard=`<div class="pv-pg"><div class="t"><div class="ey">Progression ${i} · after this pillar</div><b>${esc(pg.title||'')}</b><span>Session${sab.length?' with '+esc(sab.join(' and ')):''} · ${esc(when)}${stx}</span></div><button onclick="setP('prog:${pg.id}')">View agenda</button></div>`;}
+  const tools=typeof toolsOn==='undefined'||toolsOn;
+  const add=tools?`<div class="pv-add"><button class="add-task-btn" onclick="openAddMenu(event,'${pid}','client')"><i class="ti ti-plus" style="font-size:13px"></i>Add client action</button><button class="add-task-btn" onclick="openAddMenu(event,'${pid}','sabel')"><i class="ti ti-plus" style="font-size:13px"></i>Add Sabel action</button><button class="add-task-btn" onclick="addPhasedTask('${pid}')"><i class="ti ti-plus" style="font-size:13px"></i>Add staged deliverable</button></div>`:'';
+  const gate=typeof blockGateHTML==='function'?blockGateHTML(pid):'';
+  return `<div class="pv">
+    <div class="pv-head"><div class="t"><div class="pv-eye">Tracker · Pillar ${idx} of ${P.length}</div><div class="pv-h1">${esc(p.l)}</div><div class="pv-desc">${p.sub?esc(p.sub)+' · ':''}${esc(p.w||'')}</div></div>
+      <div class="tk-tog"><button class="on" onclick="setGroupBy('pillar');setP('${pid}')">By pillar</button><button onclick="setGroupBy('week');setP('tracker')">By week</button></div>
+      <div class="pv-prog"><div class="r"><span>Pillar progress</span><b>${pc}%</b></div><div class="bar"><i style="width:${pc}%;background:${p.c||'#5b9cf6'}"></i></div></div></div>
+    ${gate}
+    ${staged.length?`<div class="pv-stage">${staged.join('')}</div>`:''}
+    <div class="pv-list">${rows.length?rows.map(r=>pvRow(r.t,r.cid,r.isClient)).join(''):`<div style="padding:16px 20px;font-size:14px;color:var(--k94A3B8,#94A3B8)">${staged.length?'Everything here sits in the staged deliverables above.':'Nothing to show.'}${hideDone&&m.done?' Completed tasks are hidden.':''}</div>`}${add}</div>
+    ${pgCard}
+  </div>`;
+}
 (function(){const orig=renderMain;renderMain=function(){
+  if(groupBy!=='week'&&P.some(p=>p.id===cur)){const m=document.getElementById('main');if(m)m.innerHTML='<div class="mnw">'+pillarView(cur)+'</div>';if(typeof syncFormHost==='function')syncFormHost();return;}
+  if(/^Week /.test(String(cur))){orig.apply(this,arguments);const m=document.querySelector('#main .mnw');if(m){const d=document.createElement('div');d.className='wk-tog';d.innerHTML=`<div class="tk-tog"><button onclick="setGroupBy('pillar');setP('tracker')">By pillar</button><button class="on" onclick="setP('tracker')">By week</button></div>`;m.insertBefore(d,m.firstChild);}return;}
   if(cur==='tracker'){const m=document.getElementById('main');if(m)m.innerHTML='<div class="mnw">'+trackerView()+'</div>';if(typeof syncFormHost==='function')syncFormHost();return;}
   orig.apply(this,arguments);};})();
 // The phone drawer closes when a new nav button is pressed, as it did for the old ones.
