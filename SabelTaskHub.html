@@ -246,6 +246,45 @@ html.light .av{background:rgba(16,24,40,.08);color:var(--body)}
 .skel{height:64px;border-radius:14px;background:var(--surface);border:1px solid var(--line);animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.45}50%{opacity:.9}}
 
+/* parking needs a question */
+textarea.need{outline:2px solid var(--red2);outline-offset:2px;border-radius:6px}
+.needm{font-size:13px;font-weight:600;color:var(--red2);margin-top:8px}
+/* time */
+.pb.sm{padding:5px 12px;font-size:12.5px}
+.trow2{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tin{flex:1;min-width:150px;font:inherit;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--line2);border-radius:99px;padding:5px 12px;outline:none}
+.tin:focus{border-color:var(--blue)}
+.tin::placeholder{color:var(--faint)}
+.tlog{margin-top:8px;display:flex;flex-direction:column;gap:2px}
+.te{display:flex;align-items:baseline;gap:10px;font-size:13px;color:var(--mute);padding:2px 0}
+.te b{font-family:Archivo,sans-serif;font-weight:700;font-size:12.5px;color:var(--text);min-width:52px}
+.te span{flex:1}.te em{font-style:normal;color:var(--amber);font-weight:600}
+.te button{color:var(--faint);font-size:15px;line-height:1;padding:0 4px}
+.te button:hover{color:var(--red2)}
+.run{display:inline-flex;align-items:center;gap:5px}
+.run i{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:pulse 1.4s ease-in-out infinite}
+.dl small{font-weight:600;letter-spacing:0;text-transform:none;font-size:12.5px;color:var(--faint)}
+/* summary */
+.sbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sbar .seg{margin-left:0}
+.desk>.stats{align-items:center}
+.stat .av{vertical-align:middle;margin-right:2px}
+.sg{border-top:1px solid var(--line)}
+.sech+.sg{border-top:none}
+.sgh{display:flex;align-items:center;gap:9px;padding:9px 20px;background:var(--surface2);font-size:12.5px;color:var(--mute);border-bottom:1px solid var(--line)}
+.sgh b{font-family:Archivo,sans-serif;font-weight:700;font-size:13.5px;color:var(--text)}
+.sr{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:16px;align-items:center;padding:11px 20px;border-top:1px solid var(--line)}
+.sgh+.sr{border-top:none}
+.srt{min-width:0;display:block;width:100%}
+.srt b{display:block;font-size:14.5px;font-weight:600;color:var(--text);line-height:1.35}
+.srt:hover b{text-decoration:underline}
+.srw{font-size:12.5px;color:var(--mute);white-space:nowrap}
+.srtm{font-size:12.5px;color:var(--mute);white-space:nowrap;min-width:92px;text-align:right}
+.srtm b{font-family:Archivo,sans-serif;font-weight:700;color:var(--text)}
+.srtm.over b{color:var(--amber)}
+.sempty{padding:18px 20px;font-size:13.5px;color:var(--faint)}
+@media(max-width:720px){.sr{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:11px 14px}.srw{grid-column:1}.sgh{padding:9px 14px}}
+
 /* footer: sync, utilities, data checks */
 .foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 22px 28px;border-top:1px solid var(--line);font-size:12.5px;color:var(--faint)}
 .foot .live{display:inline-flex;align-items:center;gap:7px;color:var(--mute)}
@@ -323,13 +362,14 @@ const PK='sabel-taskhub-v1';
 
 /* ── state ──────────────────────────────────────────────────────────────── */
 /* localStorage holds UI state only: who, mode, the open task. */
-const S={who:'Everyone',mode:'list',open:null,draft:'',tag:false,audit:false,deskOpen:{},deskDraft:{},full:{},flt:'',client:'',editNote:null,delNote:''};   // flt: ''|'late'|'today'|'coord'; client: ''|trackerKey|'none'
-try{const p=JSON.parse(localStorage.getItem(PK)||'{}');['who','mode','open','audit'].forEach(k=>{if(p[k]!==undefined)S[k]=p[k];});}catch(e){}
+const S={who:'Everyone',mode:'list',open:null,draft:'',tag:false,audit:false,deskOpen:{},deskDraft:{},full:{},flt:'',client:'',editNote:null,delNote:'',needQ:false,timeDraft:'',tab:'desk',period:'week',group:'person'};   // flt: ''|'late'|'today'|'coord'; client: ''|trackerKey|'none'
+try{const p=JSON.parse(localStorage.getItem(PK)||'{}');['who','mode','open','audit','tab','period','group'].forEach(k=>{if(p[k]!==undefined)S[k]=p[k];});}catch(e){}
 if(S.mode!=='board')S.mode='list';
-function save(){try{localStorage.setItem(PK,JSON.stringify({who:S.who,mode:S.mode,open:S.open,audit:S.audit}));}catch(e){}}
+function save(){try{localStorage.setItem(PK,JSON.stringify({who:S.who,mode:S.mode,open:S.open,audit:S.audit,tab:S.tab,period:S.period,group:S.group}));}catch(e){}}
 const WHO=TEAM.concat(['Everyone',COORD]);
 const hashWho=()=>{const h=decodeURIComponent((location.hash||'').slice(1)).toLowerCase();return WHO.find(n=>n.toLowerCase()===h)||null;};
 if(hashWho())S.who=hashWho();
+if(/^#summary$/i.test(location.hash||'')){S.who=COORD;S.tab='summary';}
 if(WHO.indexOf(S.who)<0)S.who='Everyone';
 
 let TASKS=[],OTHER=[],RAW=[],CLIENTS={},HEALTH=[],LOADED_AT=0,HOURS_AT=0,FIRST=true,LIVE=['busy','Loading'];
@@ -345,7 +385,9 @@ const TRK={};   // trackerKey -> parsed tracker page, cached for the session
    Per-task overrides, keyed by the hub task id (<trackerKey>:<cid> or n:<notionId>):
      { status, base, wrote, sAt, by, doneAt, prevStatus, parked:{by,question,askedAt},
        flagged, notes:[{id,by,txt,at,tag,eAt,del}], title,
-       steps:{<step title, normalised>:{s,base,at,by,wrote}} }
+       steps:{<step title, normalised>:{s,base,at,by,wrote}},
+       time:[{id,by,start,end,mins,src:'timer'|'manual',eAt,del}],   // logged work
+       run:{<person>:{start,at}} }                                    // a running clock; start 0 = stopped
    One shared blob under TL_KEY. Every save re-reads the blob and merges per task
    (newest status wins, notes are unioned by id, steps by title), so two people saving at once do
    not drop each other's work. Until TL_KEY is allowlisted the store 404s and this
@@ -365,6 +407,12 @@ function mergeOv(a,b){
     m.notes=Object.keys(byId).map(k=>byId[k]).sort((p,q)=>p.at-q.at);
     const st={};[x.steps,y.steps].forEach(g=>Object.keys(g||{}).forEach(k=>{if(!st[k]||(g[k].at||0)>(st[k].at||0))st[k]=g[k];}));
     if(Object.keys(st).length)m.steps=st;else delete m.steps;
+    /* Time entries merge like notes (by id, newest edit wins, deletes are tombstones);
+       a clock is one per person per task, newest change wins. */
+    const tm={};(x.time||[]).concat(y.time||[]).forEach(n=>{if(n&&n.id&&(!tm[n.id]||(n.eAt||0)>(tm[n.id].eAt||0)))tm[n.id]=n;});
+    if(Object.keys(tm).length)m.time=Object.keys(tm).map(k=>tm[k]).sort((p,q)=>p.end-q.end);else delete m.time;
+    const rn={};[x.run,y.run].forEach(g=>Object.keys(g||{}).forEach(k=>{if(!rn[k]||(g[k].at||0)>(rn[k].at||0))rn[k]=g[k];}));
+    if(Object.keys(rn).length)m.run=rn;else delete m.run;
     out.tasks[id]=m;
   });
   return out;
@@ -704,7 +752,7 @@ const mapSt=s=>s==='Dependency'?'Pending':s==='Done'?'Complete':(s||'Pending');
 function project(){
   const all=RAW.map(t=>{
     const base=mapSt(t.status);
-    const x=Object.assign({},t,{status:base,waiting:t.status==='Dependency',notes:[],flagged:false,parked:null,prevStatus:''});
+    const x=Object.assign({},t,{status:base,waiting:t.status==='Dependency',notes:[],flagged:false,parked:null,prevStatus:'',time:[],run:{},sAt:0,sBy:''});
     const a=AUD[t.id];
     if(a){x.edited=true;if(a.owner)x.owner=a.owner;if(a.client!==undefined)x.key=a.client;}
     const o=OV.tasks[t.id];
@@ -720,12 +768,13 @@ function project(){
     }
     if(o){
       x.notes=(o.notes||[]).filter(n=>!n.del);x.flagged=!!o.flagged;x.back=o.back||null;
+      x.time=(o.time||[]).filter(n=>!n.del);x.run=o.run||{};
       if(o.status){
         /* The tracker (or Notion) has moved on since we acted, and not to what we set:
            someone changed it at source, so the source wins. */
         const moved=o.base!==undefined&&base!==o.base&&base!==o.wrote&&base!==o.status;
         if(!moved){
-          x.status=o.status;x.waiting=false;
+          x.status=o.status;x.waiting=false;x.sAt=o.sAt||0;x.sBy=o.by||'';
           /* A hub "Blocked" from before flagging became parking: it is back with its owner. */
           if(o.status==='Blocked'&&o.flagged&&base!=='Blocked')x.status='Pending';
           if(o.status==='Complete')x.doneAt=o.doneAt||x.doneAt;
@@ -772,6 +821,23 @@ function progHTML(t){
   const n=l.filter(s=>s.s==='Complete').length;
   return '<span class="pg" title="'+n+' of '+m+' steps done"><i><b style="width:'+Math.round(n/m*100)+'%"></b></i>'+n+'/'+m+'</span>';
 }
+/* Time. Minutes in, "1h 20m" out. */
+function fMins(m){m=Math.max(0,Math.round(m));if(m<60)return m+'m';const h=Math.floor(m/60),r=m%60;return h+'h'+(r?' '+r+'m':'');}
+const logged=t=>(t.time||[]).reduce((a,e)=>a+(+e.mins||0),0);
+const running=t=>Object.keys(t.run||{}).filter(p=>t.run[p]&&t.run[p].start);
+const elapsed=start=>Math.max(0,(Date.now()-start)/60000);
+const spent=t=>logged(t)+running(t).reduce((a,p)=>a+elapsed(t.run[p].start),0);
+/* "45", "45m", "1.5h", "1h 30m", "1:30" -> minutes, or 0 when it cannot be read. */
+function parseMins(s){
+  s=String(s||'').trim().toLowerCase();if(!s)return 0;
+  let m=s.match(/^(\d+):(\d{1,2})$/);if(m)return +m[1]*60+ +m[2];
+  m=s.match(/^(\d+(?:\.\d+)?)\s*h(?:ours?|rs?)?\s*(?:(\d+)\s*m(?:ins?)?)?$/);if(m)return Math.round(+m[1]*60)+(+m[2]||0);
+  m=s.match(/^(\d+(?:\.\d+)?)\s*(?:m|mins?|minutes?)?$/);if(m)return Math.round(+m[1]);
+  return 0;
+}
+/* Whose clock: your own, or the task owner's when looking at everyone's. */
+const clockOf=t=>(S.who==='Everyone'||onDesk())?t.owner:S.who;
+const runHTML=t=>running(t).map(p=>'<span class="tag blue run" title="'+esc(p)+'’s timer is running"><i></i><span data-run="'+t.run[p].start+'">'+fMins(elapsed(t.run[p].start))+'</span></span>').join('');
 const noteCount=t=>(t.notes?t.notes.length:0)+(t.log?t.log.length:0);
 const ini=n=>esc(String(n||'?').slice(0,2).toUpperCase());
 const av=(n,sm)=>'<span class="av'+(sm?' sm':'')+' '+esc(String(n||'').replace(/[^A-Za-z]/g,''))+'">'+ini(n)+'</span>';
@@ -814,10 +880,41 @@ function setStatus(id,status,by){
   if(status!=='Blocked'&&status!=='Parked')o.flagged=false;
   return o;
 }
+/* One running clock per person: starting one stops their others and logs them. */
+function stopRun(o,p,now){
+  const r=o.run&&o.run[p];if(!r||!r.start)return;
+  o.time=(o.time||[]).concat([{id:nid(),by:p,start:r.start,end:now,mins:Math.max(1,Math.round((now-r.start)/60000)),src:'timer'}]);
+  o.run[p]={start:0,at:now};
+}
+const stopAll=o=>{const now=Date.now();Object.keys(o.run||{}).forEach(p=>stopRun(o,p,now));};
+function startRun(id,p){
+  const now=Date.now();
+  Object.keys(OV.tasks).forEach(k=>stopRun(OV.tasks[k],p,now));
+  const o=ov(id);o.run=o.run||{};o.run[p]={start:now,at:now};
+}
+function toggleTimer(id){
+  const t=findTask(id);if(!t)return;
+  const p=clockOf(t),o=ov(id);o.title=t.title;
+  if(o.run&&o.run[p]&&o.run[p].start)stopRun(o,p,Date.now());else startRun(id,p);
+  commit();
+}
+function addTime(id){
+  const t=findTask(id),mins=parseMins(S.timeDraft);if(!t)return;
+  if(!mins){toast('Type a time like 45m, 1.5h or 1:30');return;}
+  const o=ov(id),now=Date.now();o.title=t.title;
+  o.time=(o.time||[]).concat([{id:nid(),by:clockOf(t),start:now,end:now,mins:mins,src:'manual'}]);
+  S.timeDraft='';commit();
+}
+function delTime(id,eid){
+  const e=(ov(id).time||[]).find(x=>x.id===eid);if(!e)return;
+  e.del=true;e.eAt=Date.now();commit();
+}
 /* Status change + the matching write to the client tracker, where there is one. */
 function act(id,status,by){
   const raw=RAW.find(x=>x.id===id);if(!raw)return;
-  const o=setStatus(id,status,by);if(!o)return;
+  const tk=findTask(id),o=setStatus(id,status,by);if(!o)return;
+  /* Start runs the clock, anything else stops it. A change made from the desk never starts one. */
+  if(status==='In Progress'&&by!==COORD&&tk)startRun(id,clockOf(tk));else stopAll(o);
   commit();
   writeThrough(raw,status).then(r=>{
     if(r.skip)return;
@@ -847,7 +944,7 @@ const NEXT={Pending:'In Progress','In Progress':'Complete',Complete:'Pending',Bl
 function cycle(id){const t=findTask(id);if(t&&NEXT[t.status])act(id,NEXT[t.status]);}
 /* "Blocked · flag Nikki" is parking with a blocked reason: one route to the desk,
    so there is never a task that says it is with her but is not on her desk. */
-function flagBlocked(id){park(id,'Blocked. Needs your action on this one.');}
+function flagBlocked(id){park(id,'Blocked: ');}
 /* Where a task goes when it comes back from the desk: what it was doing before,
    and never back to Blocked or Parked, or it would still read as not theirs. */
 const backTo=s=>s==='In Progress'?'In Progress':'Pending';
@@ -875,14 +972,22 @@ function postNote(id){
   if(tag){o.flagged=true;}
   S.draft='';S.tag=false;commit();
 }
-function park(id,fallback){
+/* Parking always carries a question in the parker's own words: without one the
+   desk gets a task and no idea what is being asked. */
+function park(id,prefix){
   const t=findTask(id);if(!t||t.status==='Parked')return;
-  const q=S.draft.trim()||fallback||'Can you check this one before I go further?';
+  if(!S.draft.trim()){
+    S.needQ=true;render();
+    const el=document.querySelector('[data-ta="draft"]');if(el)el.focus();
+    return;
+  }
+  const q=(prefix||'')+S.draft.trim();
   const prev=backTo(t.status);
   const o=setStatus(id,'Parked');
+  stopAll(o);
   o.prevStatus=prev;o.parked={by:author(),question:q,askedAt:Date.now()};o.flagged=true;
   addNote(o,author(),'@'+COORD+' '+q,true);
-  S.draft='';S.tag=false;S.open=null;save();commit();
+  S.draft='';S.tag=false;S.needQ=false;S.open=null;save();commit();
   if(REMOTE==='off'||REMOTE==='down')toast('Parked in this browser only. '+COORD+' cannot see it until shared saving is on.');
 }
 function answer(id,keep){
@@ -1038,6 +1143,15 @@ function kvHTML(t,withStatus){
     '<span>Due</span><b>'+(t.end?DOW[t.end.getDay()]+' '+fD(t.end):'No date')+(isLate(t)?' · '+esc(d.split(' · ')[0]):'')+'</b>'+
     '<span>Estimate</span><b>'+(e?e+' <small>from Notion</small>':'<small>none in Notion</small>')+'</b></div>';
 }
+function timeHTML(t){
+  const p=clockOf(t),on=!!(t.run[p]&&t.run[p].start),tot=spent(t),e=+t.est||0;
+  let h='<div><div class="dl">Time<small> · '+(tot?fMins(tot)+' logged':'nothing logged')+(e?' of '+fEst(e)+' estimated':'')+'</small></div>'+
+    '<div class="trow2"><button type="button" class="pb '+(on?'red':'blue')+' sm" data-act="timer">'+(on?'Stop timer · <span data-run="'+t.run[p].start+'">'+fMins(elapsed(t.run[p].start))+'</span>':'Start timer')+'</button>'+
+    running(t).filter(x=>x!==p).map(x=>'<span class="tag blue">'+esc(x)+'’s timer is running</span>').join('')+
+    '<input class="tin" data-ta="time" placeholder="or add time: 45m, 1.5h" value="'+esc(S.timeDraft)+'"><button type="button" class="pb sm" data-act="time-add">Add</button></div>';
+  if(t.time.length)h+='<div class="tlog">'+t.time.slice().sort((a,b)=>b.end-a.end).map(x=>'<div class="te" data-eid="'+esc(x.id)+'"><b>'+fMins(x.mins)+'</b><span>'+esc(x.by)+' · '+fStamp(x.end)+(x.src==='manual'?' · added by hand':'')+(x.mins>480?' · <em>long, check this</em>':'')+'</span><button type="button" data-act="time-del" aria-label="Delete this time entry">×</button></div>').join('')+'</div>';
+  return h+'</div>';
+}
 function linksHTML(t){
   const c=CLIENTS[t.key];let h='';
   if(c&&t.pid)h+='<a class="tl" href="'+esc(c.url+(c.deep?'#pillar/'+encodeURIComponent(t.pid):''))+'" target="_blank" rel="noopener">Open in client tracker &rarr;</a>';
@@ -1064,7 +1178,8 @@ function composerBtns(t){
     '<span class="sp"></span><button type="button" class="pb tagb'+(S.tag?' on':'')+'" data-act="tag">@'+COORD+'</button>'+
     '<button type="button" class="pb post" data-act="post">Post note</button></div>';
 }
-const draftTA=()=>'<textarea data-ta="draft" placeholder="Add a note, or type a question and park it with '+COORD+'…">'+esc(S.draft)+'</textarea>';
+const draftTA=()=>'<textarea data-ta="draft"'+(S.needQ?' class="need"':'')+' placeholder="'+(S.needQ?'What do you need from '+COORD+'? Type it here, then park.':'Add a note, or type a question and park it with '+COORD+'…')+'">'+esc(S.draft)+'</textarea>'+
+  (S.needQ?'<div class="needm">Add your question for '+COORD+' first. A task cannot be parked without one.</div>':'');
 
 /* ── header + title ─────────────────────────────────────────────────────── */
 function headerHTML(){
@@ -1073,14 +1188,16 @@ function headerHTML(){
   n.Everyone=a.filter(t=>!isDone(t)).length;n[COORD]=a.filter(t=>t.status==='Parked').length;
   return '<header class="top"><span class="sq"></span><span class="word">SABEL</span><span class="div"></span>'+
     '<span class="ch">Task list'+(onDesk()?'<em>· '+COORD+'’s desk</em>':'')+'</span>'+
-    (onDesk()?'':'<div class="seg"><button type="button" data-act="mode" data-m="list" class="'+(S.mode==='list'?'on':'')+'">List</button><button type="button" data-act="mode" data-m="board" class="'+(S.mode==='board'?'on':'')+'">Board</button></div>')+
+    (onDesk()?'<div class="seg"><button type="button" data-act="tab" data-t="desk" class="'+(S.tab!=='summary'?'on':'')+'">Desk</button><button type="button" data-act="tab" data-t="summary" class="'+(S.tab==='summary'?'on':'')+'">Summary</button></div>':'<div class="seg"><button type="button" data-act="mode" data-m="list" class="'+(S.mode==='list'?'on':'')+'">List</button><button type="button" data-act="mode" data-m="board" class="'+(S.mode==='board'?'on':'')+'">Board</button></div>')+
     '<div class="who">'+WHO.map(p=>'<button type="button" data-act="who" data-who="'+p+'" class="'+(S.who===p?'on':'')+(p===COORD?' co':'')+'">'+p+'<small>'+n[p]+'</small></button>').join('')+'</div></header>';
 }
 function titleHTML(mine){
   if(S.client&&!mine.some(t=>!isDone(t)&&(S.client==='none'?!CLIENTS[t.key]:t.key===S.client)))S.client='';
   const d=new Date(),eye=DOW[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]+' · '+d.getFullYear();
   let stats='';
-  if(onDesk()){
+  if(onDesk()&&S.tab==='summary'){
+    stats='';
+  }else if(onDesk()){
     const p=mine.filter(t=>t.status==='Parked').length;
     stats='<span class="stat amb">'+p+' task'+(p===1?'':'s')+' parked with you</span>';
   }else{
@@ -1097,7 +1214,7 @@ function titleHTML(mine){
       pill('coord',open.filter(t=>t.status==='Parked').length,'with '+COORD);
   }
   const name=S.who==='Everyone'?'Everyone':S.who;
-  return '<div class="trow"><div><div class="eye">'+eye+'</div><h2>'+esc(name)+'’s '+(onDesk()?'desk':S.mode==='board'?'board':'day')+'</h2></div><div class="stats">'+stats+'</div></div>';
+  return '<div class="trow"><div><div class="eye">'+eye+'</div><h2>'+(onDesk()&&S.tab==='summary'?'Team summary':esc(name)+'’s '+(onDesk()?'desk':S.mode==='board'?'board':'day'))+'</h2></div><div class="stats">'+stats+'</div></div>';
 }
 function bannerHTML(){
   if(REMOTE==='off')return '<div class="banner"><b>Shared saving is not switched on yet.</b> Notes and parked questions are kept in this browser only, so nobody else can see them. Start, Pause and Done still update the client tracker. (The store key <code>'+TL_KEY+'</code> needs adding to the webhook.)</div>';
@@ -1128,12 +1245,13 @@ function rowHTML(t){
   let meta='<span class="cl">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+(showOwner?'<span class="own">'+esc(t.owner)+'</span>':'')+progHTML(t)+tagsHTML(t);
   if(t.parked&&t.parked.question)meta+='<span class="q">'+quote(t.parked.question)+'</span>';
   if(n)meta+='<span>'+n+' note'+(n===1?'':'s')+'</span>';
+  meta+=runHTML(t)+(logged(t)?'<span>'+fMins(logged(t))+' logged</span>':'');
   let h='<div class="row'+(isLate(t)?' late':'')+(isDone(t)?' isdone':'')+(open?' open':'')+'" data-id="'+esc(t.id)+'"><div class="rh">'+
     '<button type="button" class="dot '+dc+'" data-act="dot" title="'+esc(t.status)+'" aria-label="Status: '+esc(t.status)+'">'+glyph+'</button>'+
     '<button type="button" class="rt" data-act="open"><b>'+esc(t.title)+'</b><span class="rm">'+meta+'</span></button>'+
     dueHTML(t)+estHTML(t)+'<span class="chev">&#9654;</span></div>';
   if(S.audit)h+=audHTML(t);
-  if(open)h+='<div class="det"><div>'+actionsHTML(t)+aboutHTML(t)+kvHTML(t)+linksHTML(t)+'</div>'+
+  if(open)h+='<div class="det"><div>'+actionsHTML(t)+aboutHTML(t)+kvHTML(t)+timeHTML(t)+linksHTML(t)+'</div>'+
     '<div><div class="dl" style="margin-top:0">Notes</div>'+notesHTML(t)+'<div class="comp">'+draftTA()+composerBtns(t)+'</div>'+
     '<div class="hint">Notes here are internal. The client does not see them.</div></div></div>';
   return h+'</div>';
@@ -1166,7 +1284,7 @@ function cardHTML(t){
   return '<div class="card'+(wn?' wn':isLate(t)?' late':'')+(S.open===t.id?' sel':'')+'" data-id="'+esc(t.id)+'" data-act="open">'+
     '<div class="c1"><b>'+esc(clientOf(t))+'</b>'+dueHTML(t,true)+'</div><div class="ct">'+esc(t.title)+'</div>'+
     (t.parked&&t.parked.question?'<div class="cq">'+quote(t.parked.question)+'</div>':'')+
-    '<div class="c3">'+av(t.owner,true)+(fEst(t.est)?'<b>'+fEst(t.est)+'</b>':'')+progHTML(t)+(n?'<span>'+n+' note'+(n===1?'':'s')+'</span>':'')+tg+'<span class="sp"></span>'+
+    '<div class="c3">'+av(t.owner,true)+(fEst(t.est)?'<b>'+fEst(t.est)+'</b>':'')+progHTML(t)+(n?'<span>'+n+' note'+(n===1?'':'s')+'</span>':'')+runHTML(t)+tg+'<span class="sp"></span>'+
     (t.status==='Parked'?'<span class="wait">Waiting on '+COORD+'</span>':(nx&&!(t.stages&&nx==='Done')?'<button type="button" class="nx" data-act="next">'+nx+'</button>':''))+'</div></div>';
 }
 function boardHTML(mine){
@@ -1183,7 +1301,7 @@ function drawerHTML(t){
     '<button type="button" class="x" data-act="close" aria-label="Close">×</button></div>'+
     '<div class="db"><div>'+actionsHTML(t)+'</div>'+
     (t.parked?'<div class="pc"><small>Parked with '+COORD+' · '+fStamp(t.parked.askedAt)+'</small>'+quote(t.parked.question)+'</div>':'')+
-    kvHTML(t,true)+aboutHTML(t)+linksHTML(t)+'<hr><div><div class="dl">Notes</div>'+notesHTML(t)+'</div></div>'+
+    kvHTML(t,true)+timeHTML(t)+aboutHTML(t)+linksHTML(t)+'<hr><div><div class="dl">Notes</div>'+notesHTML(t)+'</div></div>'+
     '<div class="df">'+draftTA()+composerBtns(t)+'<div class="hint">Notes here are internal. The client does not see them.</div></div></aside>';
 }
 
@@ -1214,6 +1332,54 @@ function deskHTML(mine){
   return h+'</div>';
 }
 
+/* ── view 4: summary (what is in progress, what got done, where the time went) ── */
+const PERIODS=[['today','Today'],['week','This week'],['7','Last 7 days'],['30','Last 30 days']];
+function periodStart(){
+  const t=today();
+  return S.period==='today'?t:S.period==='week'?weekBounds()[0]:addD(t,S.period==='30'?-29:-6);
+}
+function sumRowHTML(t,kind){
+  const sp=spent(t),e=+t.est||0,over=e&&sp>e*60;
+  let when='';
+  if(kind==='prog')when=t.sAt?'Started '+fStamp(t.sAt)+(t.sBy?' by '+esc(t.sBy):''):'In progress on the tracker';
+  else when='Done '+(dOf(t.doneAt)?fD(dOf(t.doneAt)):'')+(t.sBy?' by '+esc(t.sBy):' · on the tracker');
+  return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="goto"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+
+    '<span class="own">'+esc(t.owner)+'</span>'+progHTML(t)+runHTML(t)+(t.src?'<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>':'')+(noteCount(t)?'<span>'+noteCount(t)+' note'+(noteCount(t)===1?'':'s')+'</span>':'')+'</span></button>'+
+    '<span class="srw">'+when+'</span>'+(kind==='prog'?dueHTML(t):'')+
+    '<span class="srtm'+(over?' over':'')+'" title="Time logged against the estimate"><b>'+(sp?fMins(sp):'–')+'</b>'+(e?' / '+fEst(e):'')+'</span></div>';
+}
+function sumGroupsHTML(rows,kind){
+  const g={};rows.forEach(t=>{const k=S.group==='client'?clientOf(t):t.owner;(g[k]=g[k]||[]).push(t);});
+  const ks=Object.keys(g).sort((a,b)=>S.group==='client'?(a==='No client'?1:b==='No client'?-1:a.localeCompare(b)):TEAM.indexOf(a)-TEAM.indexOf(b));
+  return ks.map(k=>{
+    const sp=g[k].reduce((a,t)=>a+spent(t),0),es=g[k].reduce((a,t)=>a+(+t.est||0),0);
+    return '<div class="sg"><div class="sgh">'+(S.group==='client'?'':av(k,true))+'<b>'+esc(k)+'</b><span>'+g[k].length+' task'+(g[k].length===1?'':'s')+(sp?' · '+fMins(sp)+' logged':'')+(es?' · '+fTot(es)+' estimated':'')+'</span></div>'+g[k].map(t=>sumRowHTML(t,kind)).join('')+'</div>';
+  }).join('');
+}
+function summaryHTML(all){
+  const from=periodStart(),fromMs=from.getTime();
+  const prog=all.filter(t=>t.status==='In Progress').sort(byDue);
+  const done=all.filter(t=>isDone(t)&&dOf(t.doneAt)&&dOf(t.doneAt)>=from).sort((a,b)=>String(b.doneAt).localeCompare(String(a.doneAt))||byDue(a,b));
+  /* Time in the period, per person: finished entries that ended in it, plus running clocks. */
+  const per={};TEAM.forEach(p=>{per[p]=0;});
+  all.forEach(t=>{
+    t.time.forEach(e=>{if(e.end>=fromMs)per[e.by]=(per[e.by]||0)+(+e.mins||0);});
+    running(t).forEach(p=>{per[p]=(per[p]||0)+elapsed(t.run[p].start);});
+  });
+  const tot=Object.keys(per).reduce((a,p)=>a+per[p],0),pl=PERIODS.find(p=>p[0]===S.period)[1].toLowerCase();
+  let h='<div class="desk">'+
+    '<div class="sbar"><div class="seg">'+PERIODS.map(p=>'<button type="button" data-act="period" data-p="'+p[0]+'" class="'+(S.period===p[0]?'on':'')+'">'+p[1]+'</button>').join('')+'</div>'+
+    '<div class="seg"><button type="button" data-act="group" data-g="person" class="'+(S.group!=='client'?'on':'')+'">By person</button><button type="button" data-act="group" data-g="client" class="'+(S.group==='client'?'on':'')+'">By client</button></div></div>'+
+    '<div class="stats"><span class="stat"><b>'+prog.length+'</b>in progress now</span><span class="stat"><b>'+done.length+'</b>completed '+pl+'</span>'+
+    '<span class="stat"><b>'+(tot?fMins(tot):'0m')+'</b>logged '+pl+'</span>'+
+    Object.keys(per).filter(p=>per[p]).map(p=>'<span class="stat">'+av(p,true)+' <b>'+fMins(per[p])+'</b>'+esc(p)+'</span>').join('')+'</div>';
+  h+='<div class="secc"><div class="sech"><i style="background:var(--blue)"></i><b style="color:var(--blue)">In progress</b><span>Started and not finished, right now</span><small>'+prog.length+' task'+(prog.length===1?'':'s')+'</small></div>'+
+    (prog.length?sumGroupsHTML(prog,'prog'):'<div class="sempty">Nothing is in progress.</div>')+'</div>';
+  h+='<div class="secc"><div class="sech"><i style="background:var(--greenfill)"></i><b style="color:var(--green)">Completed</b><span>Marked done '+pl+', here or on a tracker</span><small>'+done.length+' task'+(done.length===1?'':'s')+'</small></div>'+
+    (done.length?sumGroupsHTML(done,'done'):'<div class="sempty">Nothing completed '+pl+'.</div>')+'</div>';
+  return h+'<div class="hint">Click a task to open it in its owner’s list. Time comes from the timers and entries in this Task list only.</div></div>';
+}
+
 /* ── render ─────────────────────────────────────────────────────────────── */
 function footHTML(){
   return '<div class="foot"><span class="live '+LIVE[0]+'" id="live"><i></i><span>'+esc(LIVE[1])+'</span></span>'+
@@ -1237,7 +1403,7 @@ function render(){
   }else{
     const mine=scope();
     h+=bannerHTML()+titleHTML(mine)+(S.audit&&!onDesk()&&S.mode==='list'?auditBarHTML():'');
-    h+=onDesk()?deskHTML(mine):S.mode==='board'?boardHTML(narrowed(mine)):listHTML(narrowed(mine));
+    h+=onDesk()?(S.tab==='summary'?summaryHTML(mine):deskHTML(mine)):S.mode==='board'?boardHTML(narrowed(mine)):listHTML(narrowed(mine));
     if(!onDesk()&&S.mode==='board'&&S.open)h+=drawerHTML(findTask(S.open));
   }
   app.innerHTML=h+footHTML();
@@ -1262,9 +1428,17 @@ document.addEventListener('click',e=>{
   switch(act){
     case 'flt':{const f=a.getAttribute('data-f');S.flt=(f&&S.flt!==f)?f:'';S.open=null;render();break;}
     case 'flt-clear':S.flt='';S.client='';render();break;
-    case 'who':S.who=a.getAttribute('data-who');S.flt='';S.client='';S.open=null;S.draft='';S.tag=false;history.replaceState(null,'','#'+S.who.toLowerCase());save();render();window.scrollTo(0,0);break;
+    case 'tab':S.tab=a.getAttribute('data-t');save();history.replaceState(null,'',S.tab==='summary'?'#summary':'#'+COORD.toLowerCase());render();window.scrollTo(0,0);break;
+    case 'period':S.period=a.getAttribute('data-p');save();render();break;
+    case 'group':S.group=a.getAttribute('data-g');save();render();break;
+    case 'goto':if(t){S.who=t.owner;S.mode='list';S.flt='';S.client='';S.open=id;S.draft='';save();history.replaceState(null,'','#'+S.who.toLowerCase());render();
+      const el=[].slice.call(document.querySelectorAll('.row')).find(r=>r.getAttribute('data-id')===id);if(el)el.scrollIntoView({block:'center'});}break;
+    case 'timer':toggleTimer(id);break;
+    case 'time-add':addTime(id);break;
+    case 'time-del':delTime(id,a.closest('[data-eid]').getAttribute('data-eid'));break;
+    case 'who':S.needQ=false;S.timeDraft='';S.who=a.getAttribute('data-who');S.flt='';S.client='';S.open=null;S.draft='';S.tag=false;history.replaceState(null,'','#'+S.who.toLowerCase());save();render();window.scrollTo(0,0);break;
     case 'mode':S.mode=a.getAttribute('data-m');S.open=null;S.draft='';S.tag=false;save();render();break;
-    case 'open':S.editNote=null;S.delNote='';S.open=(S.mode==='list'&&S.open===id)?null:id;S.draft='';S.tag=false;save();render();break;
+    case 'open':S.editNote=null;S.delNote='';S.needQ=false;S.timeDraft='';S.open=(S.mode==='list'&&S.open===id)?null:id;S.draft='';S.tag=false;save();render();break;
     case 'close':S.open=null;S.draft='';S.tag=false;save();render();break;
     case 'full':S.full[a.getAttribute('data-col')]=true;render();break;
     case 'dot':cycle(id);break;
@@ -1303,11 +1477,13 @@ document.addEventListener('click',e=>{
 const act2=act;   // inside the click handler `act` is the action name
 document.addEventListener('input',e=>{
   const ta=e.target.getAttribute&&e.target.getAttribute('data-ta');if(!ta)return;
-  if(ta==='draft')S.draft=e.target.value;
+  if(ta==='draft'){S.draft=e.target.value;if(S.needQ&&S.draft.trim()){S.needQ=false;e.target.classList.remove('need');const m=document.querySelector('.needm');if(m)m.remove();}}
+  else if(ta==='time')S.timeDraft=e.target.value;
   else if(ta==='note'){if(S.editNote)S.editNote.txt=e.target.value;}
   else S.deskDraft[ta.slice(5)]=e.target.value;
 });
 document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.getAttribute&&e.target.getAttribute('data-ta')==='time'){e.preventDefault();const host=e.target.closest('[data-id]');if(host)addTime(host.getAttribute('data-id'));return;}
   if(e.key==='Escape'&&S.open&&S.mode==='board'&&!onDesk()){S.open=null;save();render();return;}
   if(e.key!=='Enter'||!(e.metaKey||e.ctrlKey))return;
   const ta=e.target.getAttribute&&e.target.getAttribute('data-ta');
@@ -1319,9 +1495,11 @@ document.addEventListener('change',e=>{
   const f=e.target.getAttribute&&e.target.getAttribute('data-aud');if(!f)return;
   setAudit(e.target.closest('.row').getAttribute('data-id'),f,e.target.value);
 });
-window.addEventListener('hashchange',()=>{const w=hashWho();if(w&&w!==S.who){S.who=w;S.open=null;save();render();}});
+window.addEventListener('hashchange',()=>{if(/^#summary$/i.test(location.hash)){S.who=COORD;S.tab='summary';save();render();return;}const w=hashWho();if(w&&w!==S.who){S.who=w;S.open=null;save();render();}});
 
 /* ── go ─────────────────────────────────────────────────────────────────── */
+/* Running clocks tick on screen between renders. */
+setInterval(()=>{document.querySelectorAll('[data-run]').forEach(el=>{el.textContent=fMins(elapsed(+el.getAttribute('data-run')));});},20000);
 const typing=()=>{const ae=document.activeElement;return !!(ae&&ae.getAttribute&&ae.getAttribute('data-ta')&&ae.value);};
 render();
 pullOv().then(ch=>{if(!FIRST){project();render();}});
