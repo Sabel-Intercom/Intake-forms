@@ -64,6 +64,12 @@ h2{font-family:Archivo,sans-serif;font-weight:800;font-size:30px;letter-spacing:
 .stat.hot{border-color:rgba(225,6,0,.55);background:rgba(225,6,0,.12);color:var(--redsoft)}
 .stat.amb{border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.1);color:var(--amber);font-weight:600}
 .stat.amb b{color:var(--amber)}
+button.stat{cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease}
+button.stat:hover{border-color:var(--hl5)}
+button.stat.on{border-color:var(--text);box-shadow:0 0 0 1px var(--text) inset;color:var(--text)}
+button.stat.hot.on{border-color:var(--red2);box-shadow:0 0 0 1px var(--red2) inset}
+.csel{font:inherit;font-size:13px;font-weight:600;color:var(--body);padding:6px 10px;border-radius:99px;border:1px solid var(--hl2);background:var(--pill);max-width:230px;cursor:pointer}
+.csel.on{border-color:var(--text);color:var(--text)}
 .banner{margin:14px 22px 0;border:1px solid rgba(251,191,36,.45);background:rgba(251,191,36,.08);border-radius:12px;padding:10px 14px;font-size:13.5px;color:var(--body)}
 .banner b{color:var(--amber)}
 
@@ -135,6 +141,13 @@ h2{font-family:Archivo,sans-serif;font-weight:800;font-size:30px;letter-spacing:
 .step.d i{background:var(--greenfill);border-color:var(--greenfill)}
 .step.d span{color:var(--mute);text-decoration:line-through}
 .step small{color:var(--mute);font-size:12px;margin-left:5px}
+button.step{width:100%;background:none;border:0;font-family:inherit;text-align:left;cursor:pointer;border-radius:6px}
+button.step:hover i{border-color:var(--greenfill)}
+button.step:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.dl small{font-weight:500;text-transform:none;letter-spacing:0;color:var(--mute)}
+.pg{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pg i{display:block;width:40px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.pg b{display:block;height:100%;background:var(--greenfill)}
 .stage{font-size:13px;font-weight:600;color:var(--text);margin:8px 0 2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .nt{display:flex;gap:10px;margin-bottom:12px}
 .av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:rgba(255,255,255,.12);color:#C9CFDA}
@@ -148,6 +161,13 @@ html.light .av{background:rgba(16,24,40,.08);color:var(--body)}
 .nt .hd{font-size:13px;color:var(--mute)}
 .nt .hd b{color:var(--text);margin-right:6px}
 .nt .tx{font-size:14px;color:var(--body);line-height:1.45;margin-top:1px;white-space:pre-wrap;overflow-wrap:anywhere}
+.nx2{float:right;display:inline-flex;gap:10px;opacity:0;transition:opacity .15s ease}
+.nt:hover .nx2,.nt:focus-within .nx2{opacity:1}
+.nx2 button{font-size:12.5px;color:var(--mute)}
+.nx2 button:hover{color:var(--text);text-decoration:underline}
+.nx2 button.dn{color:var(--red2);font-weight:700}
+.ned{display:block;width:100%;margin-top:4px;border:1px solid var(--blue);border-radius:8px;background:var(--bg);padding:7px 9px;font-size:14px;min-height:60px;outline:none;resize:vertical}
+@media(hover:none){.nx2{opacity:1}}
 .none{font-size:13.5px;color:var(--faint);margin-bottom:12px}
 .comp{border:1px solid var(--line2);border-radius:10px;padding:10px;background:var(--bg)}
 .comp textarea{display:block;width:100%;border:none;outline:none;background:transparent;font-size:14px;resize:vertical;min-height:52px}
@@ -303,7 +323,7 @@ const PK='sabel-taskhub-v1';
 
 /* ── state ──────────────────────────────────────────────────────────────── */
 /* localStorage holds UI state only: who, mode, the open task. */
-const S={who:'Everyone',mode:'list',open:null,draft:'',tag:false,audit:false,deskOpen:{},deskDraft:{},full:{}};
+const S={who:'Everyone',mode:'list',open:null,draft:'',tag:false,audit:false,deskOpen:{},deskDraft:{},full:{},flt:'',client:'',editNote:null,delNote:''};   // flt: ''|'late'|'today'|'coord'; client: ''|trackerKey|'none'
 try{const p=JSON.parse(localStorage.getItem(PK)||'{}');['who','mode','open','audit'].forEach(k=>{if(p[k]!==undefined)S[k]=p[k];});}catch(e){}
 if(S.mode!=='board')S.mode='list';
 function save(){try{localStorage.setItem(PK,JSON.stringify({who:S.who,mode:S.mode,open:S.open,audit:S.audit}));}catch(e){}}
@@ -324,9 +344,10 @@ const TRK={};   // trackerKey -> parsed tracker page, cached for the session
 /* ── own store ──────────────────────────────────────────────────────────────
    Per-task overrides, keyed by the hub task id (<trackerKey>:<cid> or n:<notionId>):
      { status, base, wrote, sAt, by, doneAt, prevStatus, parked:{by,question,askedAt},
-       flagged, notes:[{id,by,txt,at,tag}], title }
+       flagged, notes:[{id,by,txt,at,tag,eAt,del}], title,
+       steps:{<step title, normalised>:{s,base,at,by,wrote}} }
    One shared blob under TL_KEY. Every save re-reads the blob and merges per task
-   (newest status wins, notes are unioned by id), so two people saving at once do
+   (newest status wins, notes are unioned by id, steps by title), so two people saving at once do
    not drop each other's work. Until TL_KEY is allowlisted the store 404s and this
    falls back to localStorage, which only this browser can see. */
 let OV={v:1,tasks:{}},REMOTE='unknown';   // 'ok' | 'off' (key not allowlisted) | 'down' | 'unknown'
@@ -337,8 +358,13 @@ function mergeOv(a,b){
   Object.keys(Object.assign({},a&&a.tasks,b&&b.tasks)).forEach(id=>{
     const x=a&&a.tasks&&a.tasks[id],y=b&&b.tasks&&b.tasks[id];
     if(!x||!y){out.tasks[id]=x||y;return;}
-    const m=Object.assign({},(y.sAt||0)>(x.sAt||0)?y:x),seen={};
-    m.notes=(x.notes||[]).concat(y.notes||[]).filter(n=>n&&n.id&&!seen[n.id]&&(seen[n.id]=1)).sort((p,q)=>p.at-q.at);
+    const m=Object.assign({},(y.sAt||0)>(x.sAt||0)?y:x),byId={};
+    /* Notes merge by id. An edit or delete stamps eAt, and the newest copy wins;
+       a deleted note stays as a tombstone (del) so a merge cannot bring it back. */
+    (x.notes||[]).concat(y.notes||[]).forEach(n=>{if(n&&n.id&&(!byId[n.id]||(n.eAt||0)>(byId[n.id].eAt||0)))byId[n.id]=n;});
+    m.notes=Object.keys(byId).map(k=>byId[k]).sort((p,q)=>p.at-q.at);
+    const st={};[x.steps,y.steps].forEach(g=>Object.keys(g||{}).forEach(k=>{if(!st[k]||(g[k].at||0)>(st[k].at||0))st[k]=g[k];}));
+    if(Object.keys(st).length)m.steps=st;else delete m.steps;
     out.tasks[id]=m;
   });
   return out;
@@ -436,7 +462,7 @@ function parseLit(src){
 }
 async function loadTracker(tr){
   if(TRK[tr.key])return TRK[tr.key];
-  const out={ok:false,week1:null,buildV:null,goLive:null,seed:null,weekStarts:null,pillars:{},deep:false};
+  const out={ok:false,week1:null,buildV:null,goLive:null,seed:null,weekStarts:null,pillars:{},deep:false,label:''};
   try{
     const r=await fetch(BASE+tr.file,{cache:'no-store'});
     if(r.ok){
@@ -447,8 +473,9 @@ async function loadTracker(tr){
       const tm=txt.match(/(?:const|var|let)\s+T\s*=\s*\{/);
       const pm=txt.match(/(?:const|var|let)\s+P\s*=\s*\[/);
       const wsm=txt.match(/WEEK_STARTS_DEFAULT\s*=\s*\{/);
+      const lm=txt.match(/CLIENT_LABEL\s*=\s*['"]([^'"]+)['"]/);
       out.ok=true;
-      out.week1=w1?w1[1]:null;out.buildV=bv?bv[1]:null;out.goLive=gl?gl[1]:null;
+      out.week1=w1?w1[1]:null;out.buildV=bv?bv[1]:null;out.goLive=gl?gl[1]:null;out.label=lm?lm[1]:'';
       out.seed=tm?parseLit(balanced(txt,tm.index,'{','}')):null;
       out.weekStarts=wsm?(parseLit(balanced(txt,wsm.index,'{','}'))||null):null;
       const P=pm?parseLit(balanced(txt,pm.index,'[',']')):null;
@@ -509,7 +536,7 @@ async function loadAll(){
   const hb=hoursRes.data||{};
   HOURS_AT=hb.savedAt||0;
   /* Notion rows by tracker key + title. The blob only carries OPEN Notion tasks. */
-  const nIdx={},nUsed={};
+  const nIdx={},nUsed={},drift={};
   (hb.tasks||[]).forEach(n=>{(nIdx[n.project||'']=nIdx[n.project||'']||{})[norm(n.title)]=n;});
   if(!hoursRes.reached||!hb.tasks)health.push({t:'Durations are missing',d:'The Notion estimates could not be read, so every task shows without a duration.'});
   else if(Date.now()-HOURS_AT>36*3600*1000)health.push({t:'Durations may be stale',d:'Notion estimates were last pushed '+ago(HOURS_AT)+'. They refresh when the Sabel hours menu bar plugin runs.'});
@@ -546,6 +573,21 @@ async function loadAll(){
     c.goLive=dOf(data.goLive||trk.goLive||'');
     const ws=Object.assign({},trk.weekStarts||{},data.weekStarts||{});
     const stt=data.statuses||{},cn=data.notes||{},cl=data.links||{};
+    c.ws=ws;
+    /* Notion often holds a step of a task as a row of its own. Hang that row on the
+       step (for its estimate) instead of listing it as a separate "Notion only" task.
+       A title that is also a task in its own right stays with that task. */
+    const top={};
+    Object.keys(data.taskData).forEach(pid=>((data.taskData[pid]||{}).sabel||[]).forEach(t=>{if(t&&!t.parked)top[norm(t.t)]=1;}));
+    const hook=s=>{
+      if(!s||!s.t||top[norm(s.t)])return s;
+      const m=(nIdx[tr.key]||{})[norm(s.t)];
+      if(!m||nUsed[m.id])return s;
+      nUsed[m.id]=1;
+      if(s.s==='Complete'&&isTeam(m.owner))(drift[tr.key]=drift[tr.key]||[]).push(m);
+      return Object.assign({},s,{est:m.est,nid:m.id});
+    };
+    const openEst=l=>l.reduce((a,s)=>a+(s.s==='Complete'?0:(+s.est||0)),0);
     Object.keys(data.taskData).forEach(pid=>{
       ((data.taskData[pid]||{}).sabel||[]).forEach((t,i)=>{
         if(!t)return;
@@ -554,12 +596,15 @@ async function loadAll(){
         const n=(nIdx[tr.key]||{})[norm(t.t)];if(n)nUsed[n.id]=1;
         const dt=datesOf(t,trk,ws,n);
         const ai=t.phases&&t.phases.length?activeStage(t):-1;
+        const sub=Array.isArray(t.sub)?t.sub.map(hook):[];
+        const stages=t.phases&&t.phases.length?t.phases.map((p,pi)=>({l:p.l||p.k||('Stage '+(pi+1)),o:who(p.o),sub:(p.sub||[]).map(hook),note:p.note||'',tip:p.tip||'',
+          start:p.week?weekStart(p.week,trk.week1,ws):null,now:pi===ai,done:ai<0||pi<ai})):null;
+        /* No Notion row for the task itself: what is left on its steps is its duration. */
+        const stepEst=openEst(stages?[].concat.apply([],stages.map(g=>g.sub)):sub);
         tasks.push({id:tr.key+':'+cid,key:tr.key,cid,pid,pillar:trk.pillars[pid]||pid,title:t.t,owner:who(t.o),lead:who(t.lead||''),
           status:stt[cid]||t.s||'Pending',start:dt.start,end:dt.end,late:dt.late,wk:dt.wk||0,wkEnd:dt.wkEnd||0,
-          est:n?n.est:(t.hrs||null),notion:n||null,desc:t.desc||'',bg:t.notes||'',card:cn[cid]||'',tip:t.tip||'',link:t.link||cl[cid]||'',
-          log:Array.isArray(t.log)?t.log:[],sub:Array.isArray(t.sub)?t.sub:[],
-          stages:t.phases&&t.phases.length?t.phases.map((p,pi)=>({l:p.l||p.k||('Stage '+(pi+1)),o:who(p.o),sub:p.sub||[],note:p.note||'',tip:p.tip||'',
-            start:p.week?weekStart(p.week,trk.week1,ws):null,now:pi===ai,done:ai<0||pi<ai})):null,
+          est:n?n.est:(t.hrs||stepEst||null),notion:n||null,desc:t.desc||'',bg:t.notes||'',card:cn[cid]||'',tip:t.tip||'',link:t.link||cl[cid]||'',
+          log:Array.isArray(t.log)?t.log:[],sub,stages,
           milestone:t.kind==='milestone',doneAt:t.doneAt||''});
       });
     });
@@ -572,7 +617,7 @@ async function loadAll(){
      real work, so they join the client's list tagged "Notion only". */
   const titleSt={};
   tasks.forEach(t=>{const k=t.key+'|'+norm(t.title);if(titleSt[k]!=='open')titleSt[k]=t.status==='Complete'?'done':'open';});
-  const drift={},notOn={},other=[];
+  const notOn={},other=[];
   (hb.tasks||[]).forEach(n=>{
     const o=who(n.owner);
     if(clients[n.project]){
@@ -595,7 +640,7 @@ async function loadAll(){
   Object.keys(drift).forEach(k=>health.push({t:clients[k].name+': '+drift[k].length+' task'+(drift[k].length>1?'s':'')+' done in the tracker but still open in Notion',
     d:'The tracker shows these complete. The Notion rows need closing.',list:drift[k].map(n=>n.title+' ('+who(n.owner)+')')}));
   Object.keys(notOn).forEach(k=>health.push({t:clients[k].name+': '+notOn[k].length+' Notion task'+(notOn[k].length>1?'s':'')+' not on the tracker',
-    d:'Shown in the list tagged "Notion only". Either an action from a client call, or a tracker task that was renamed or removed after Notion copied it.',list:notOn[k].map(n=>n.title+' ('+who(n.owner)+')')}));
+    d:'Shown in the list tagged "Notion only". Either an action from a client call, or a tracker task that was renamed or removed after Notion copied it. Rows that match a step inside a tracker task are shown on that step instead.',list:notOn[k].map(n=>n.title+' ('+who(n.owner)+')')}));
   const noEst={};
   tasks.forEach(t=>{if(!t.src&&t.status!=='Complete'&&isTeam(t.owner)&&!t.est)(noEst[t.key]=noEst[t.key]||[]).push(t);});
   Object.keys(noEst).forEach(k=>health.push({t:clients[k].name+': '+noEst[k].length+' open task'+(noEst[k].length>1?'s':'')+' with no duration',
@@ -663,14 +708,26 @@ function project(){
     const a=AUD[t.id];
     if(a){x.edited=true;if(a.owner)x.owner=a.owner;if(a.client!==undefined)x.key=a.client;}
     const o=OV.tasks[t.id];
+    /* Steps ticked here. Once the tick has reached the tracker (wrote) the tracker
+       is the record; until then, or where there is no write-through, ours shows. */
+    const so=(o&&o.steps)||{};
+    const stepOf=s=>{const v=so[norm(s.t)];return Object.assign({},s,{s:v&&!v.wrote?v.s:(s.s==='Complete'?'Complete':'Pending')});};
+    x.sub=(t.sub||[]).map(stepOf);
+    if(t.stages){
+      x.stages=t.stages.map(g=>Object.assign({},g,{sub:(g.sub||[]).map(stepOf)}));
+      const ai=x.stages.findIndex(g=>!(g.sub.length>0&&g.sub.every(s=>s.s==='Complete')));
+      x.stages.forEach((g,i)=>{g.now=i===ai;g.done=ai<0||i<ai;});
+    }
     if(o){
-      x.notes=o.notes||[];x.flagged=!!o.flagged;
+      x.notes=(o.notes||[]).filter(n=>!n.del);x.flagged=!!o.flagged;x.back=o.back||null;
       if(o.status){
         /* The tracker (or Notion) has moved on since we acted, and not to what we set:
            someone changed it at source, so the source wins. */
         const moved=o.base!==undefined&&base!==o.base&&base!==o.wrote&&base!==o.status;
         if(!moved){
           x.status=o.status;x.waiting=false;
+          /* A hub "Blocked" from before flagging became parking: it is back with its owner. */
+          if(o.status==='Blocked'&&o.flagged&&base!=='Blocked')x.status='Pending';
           if(o.status==='Complete')x.doneAt=o.doneAt||x.doneAt;
           if(o.status==='Parked'){x.parked=o.parked||null;x.prevStatus=o.prevStatus||'';}
         }
@@ -694,10 +751,27 @@ function scope(){
   const a=allTasks();
   return (S.who==='Everyone'||onDesk())?a.filter(t=>isTeam(t.owner)):a.filter(t=>t.owner===S.who);
 }
+/* The stat pills and the client dropdown narrow what the List and Board show. */
+function narrowed(mine){
+  return mine.filter(t=>{
+    if(S.client&&(S.client==='none'?!!CLIENTS[t.key]:t.key!==S.client))return false;
+    if(S.flt==='late')return isLate(t);
+    if(S.flt==='today')return !isDone(t)&&dueIn(t)===0;
+    if(S.flt==='coord')return t.status==='Parked';
+    return true;
+  });
+}
 const dueIn=t=>t.end?Math.round((t.end.getTime()-today().getTime())/864e5):null;
 const isLate=t=>!isDone(t)&&dueIn(t)!==null&&dueIn(t)<0;
 const clientOf=t=>CLIENTS[t.key]?CLIENTS[t.key].name:'No client';
 const doneToday=t=>isDone(t)&&String(t.doneAt||'').slice(0,10)===isoOf(today());
+const stepsOf=t=>t.stages?[].concat.apply([],t.stages.map(g=>g.sub)):(t.sub||[]);
+/* "3/9" with a thin bar: how far through its steps a task is. */
+function progHTML(t){
+  const l=stepsOf(t),m=l.length;if(!m)return '';
+  const n=l.filter(s=>s.s==='Complete').length;
+  return '<span class="pg" title="'+n+' of '+m+' steps done"><i><b style="width:'+Math.round(n/m*100)+'%"></b></i>'+n+'/'+m+'</span>';
+}
 const noteCount=t=>(t.notes?t.notes.length:0)+(t.log?t.log.length:0);
 const ini=n=>esc(String(n||'?').slice(0,2).toUpperCase());
 const av=(n,sm)=>'<span class="av'+(sm?' sm':'')+' '+esc(String(n||'').replace(/[^A-Za-z]/g,''))+'">'+ini(n)+'</span>';
@@ -736,6 +810,7 @@ function setStatus(id,status,by){
   o.base=mapSt(raw.status);o.status=status;o.sAt=Date.now();o.by=by||author();o.title=t.title;o.wrote=null;
   if(status==='Complete')o.doneAt=isoOf(today());else delete o.doneAt;
   if(status!=='Parked'){delete o.parked;delete o.prevStatus;}
+  delete o.back;
   if(status!=='Blocked'&&status!=='Parked')o.flagged=false;
   return o;
 }
@@ -750,12 +825,45 @@ function act(id,status,by){
     else toast('Saved here, but the client tracker was not updated: '+r.why);
   });
 }
+/* Tick or untick one step. Kept in our own store straight away, then written to the
+   client tracker, which also moves the parent the way the tracker page would. */
+function tickStep(id,key){
+  const t=findTask(id),raw=RAW.find(x=>x.id===id);if(!t||!raw)return;
+  const s=stepsOf(t).find(x=>norm(x.t)===key);if(!s)return;
+  const to=s.s==='Complete'?'Pending':'Complete',o=ov(id);
+  o.steps=o.steps||{};o.title=t.title;
+  const v=o.steps[key]={s:to,base:s.s,at:Date.now(),by:author()};
+  commit();
+  writeStep(raw,key,to).then(r=>{
+    if(r.skip)return;
+    if(!r.ok){toast('Ticked here, but the client tracker was not updated: '+r.why);return;}
+    v.wrote=true;v.at=Date.now();
+    stepsOf(raw).forEach(x=>{if(norm(x.t)===key)x.s=to;});
+    raw.status=r.status;raw.doneAt=r.doneAt;
+    saveLocalOv();project();render();pushOv();
+  });
+}
 const NEXT={Pending:'In Progress','In Progress':'Complete',Complete:'Pending',Blocked:'In Progress'};
 function cycle(id){const t=findTask(id);if(t&&NEXT[t.status])act(id,NEXT[t.status]);}
-function flagBlocked(id){
-  const t=findTask(id);if(!t||(t.status==='Blocked'&&t.flagged))return;
-  const o=setStatus(id,'Blocked');o.flagged=true;
-  addNote(o,author(),'@'+COORD+' needs your action on this one.',true);
+/* "Blocked · flag Nikki" is parking with a blocked reason: one route to the desk,
+   so there is never a task that says it is with her but is not on her desk. */
+function flagBlocked(id){park(id,'Blocked. Needs your action on this one.');}
+/* Where a task goes when it comes back from the desk: what it was doing before,
+   and never back to Blocked or Parked, or it would still read as not theirs. */
+const backTo=s=>s==='In Progress'?'In Progress':'Pending';
+function saveNoteEdit(id){
+  const e=S.editNote;if(!e)return;
+  const n=(ov(id).notes||[]).find(x=>x.id===e.id),txt=e.txt.trim();
+  S.editNote=null;
+  if(!n||!txt||txt===n.txt){render();return;}
+  n.txt=txt;n.eAt=Date.now();n.eBy=author();n.tag=new RegExp('@'+COORD,'i').test(txt);
+  commit();
+}
+function deleteNote(id,noteId){
+  const n=(ov(id).notes||[]).find(x=>x.id===noteId);
+  S.delNote='';
+  if(!n){render();return;}
+  n.del=true;n.txt='';n.eAt=Date.now();n.eBy=author();
   commit();
 }
 function postNote(id){
@@ -767,10 +875,10 @@ function postNote(id){
   if(tag){o.flagged=true;}
   S.draft='';S.tag=false;commit();
 }
-function park(id){
-  const t=findTask(id);if(!t)return;
-  const q=S.draft.trim()||'Can you check this one before I go further?';
-  const prev=t.status==='Parked'?(t.prevStatus||'Pending'):t.status;
+function park(id,fallback){
+  const t=findTask(id);if(!t||t.status==='Parked')return;
+  const q=S.draft.trim()||fallback||'Can you check this one before I go further?';
+  const prev=backTo(t.status);
   const o=setStatus(id,'Parked');
   o.prevStatus=prev;o.parked={by:author(),question:q,askedAt:Date.now()};o.flagged=true;
   addNote(o,author(),'@'+COORD+' '+q,true);
@@ -784,8 +892,9 @@ function answer(id,keep){
   if(txt)addNote(o,COORD,txt,false);
   delete S.deskDraft[id];
   if(keep){commit();return;}
-  const back=t.prevStatus&&t.prevStatus!=='Parked'?t.prevStatus:'Pending';
-  setStatus(id,back,COORD);commit();
+  const o2=setStatus(id,backTo(t.prevStatus),COORD);
+  o2.back={by:COORD,at:Date.now()};        // shows "Nikki replied" on the row until the owner next moves it
+  commit();
   toast('Handed back to '+t.owner);
 }
 
@@ -830,12 +939,67 @@ function writeThrough(raw,status){
   return p;
 }
 
+/* One step, same guards as writeThrough: same build, same task in the slot, and
+   the step found by title. Then the parent follows, by the tracker page's own rules:
+   a plain task completes with its last step and reopens when one is unticked
+   (toggleSub); a staged one takes the status, owner and week of its active stage
+   (syncPhased). */
+function writeStep(raw,key,to){
+  const c=CLIENTS[raw.key],trk=TRK[raw.key]||{};
+  if(!WRITE_THROUGH||raw.src||!c||c.seeded||c.legacy||!raw.cid)return Promise.resolve({skip:true});
+  const run=async()=>{
+    const m=await fetchKey(raw.key);
+    if(!m.reached||!m.data)return {ok:false,why:'the tracker store did not answer'};
+    const st=m.data;
+    if(String(st.buildV)!==String(c.buildV))return {ok:false,why:'the tracker has been rebuilt'};
+    const i=parseInt(raw.cid.slice(raw.cid.lastIndexOf('-')+1),10);
+    const t=((st.taskData&&st.taskData[raw.pid]&&st.taskData[raw.pid].sabel)||[])[i];
+    if(!t||norm(t.t)!==norm(raw.title))return {ok:false,why:'the task has moved on the tracker'};
+    const staged=!!(t.phases&&t.phases.length);
+    if(staged&&!trk.label)return {ok:false,why:'the tracker page could not be read'};
+    const x=(staged?[].concat.apply([],t.phases.map(p=>p.sub||[])):(t.sub||[])).find(s=>norm(s.t)===key);
+    if(!x)return {ok:false,why:'the step is no longer on the tracker'};
+    st.statuses=st.statuses||{};st.origStatus=st.origStatus||{};
+    const cur=st.statuses[raw.cid]||t.s,done=s=>s.s==='Complete';
+    x.s=to;
+    if(staged){
+      const ai=t.phases.findIndex(p=>!((p.sub||[]).length>0&&p.sub.every(done)));
+      if(ai<0){
+        const last=t.phases[t.phases.length-1];
+        if(cur!=='Complete')t.doneAt=t.doneAt||isoOf(today());
+        t.s='Complete';t.week=last.week||t.week;
+        if(last.wkEnd)t.wkEnd=last.wkEnd;else delete t.wkEnd;
+        t.o=t.lead||t.o;
+      }else{
+        const p=t.phases[ai],open=(p.sub||[]).find(s=>!done(s)),holder=(open&&open.o)||p.o||trk.label;
+        const ws=Object.assign({},trk.weekStarts||{},st.weekStarts||{});
+        let wk=0;for(let n=1;n<=104;n++){const d=weekStart(n,trk.week1,ws);if(d&&d<=today())wk=n;}
+        delete t.doneAt;
+        t.s=t.blocked?'Blocked':(holder===trk.label?'Dependency':((p.week&&p.week>wk&&!(p.sub||[]).some(done))?'Pending':'In Progress'));
+        t.o=holder;t.week=p.week||0;
+        if(p.wkEnd&&p.wkEnd>p.week)t.wkEnd=p.wkEnd;else delete t.wkEnd;
+      }
+    }else if(to==='Complete'){
+      if(t.sub.every(done)&&cur!=='Complete'){st.origStatus[raw.cid]=cur;t.s='Complete';t.doneAt=isoOf(today());}
+    }else if(cur==='Complete'){t.s='In Progress';delete st.origStatus[raw.cid];delete t.doneAt;}
+    else t.s=cur;
+    st.statuses[raw.cid]=t.s;
+    st.savedAt=Date.now();st.savedBy='task-hub';
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:raw.key,value:JSON.stringify(st)})});
+    return r.ok?{ok:true,status:t.s,doneAt:t.doneAt||''}:{ok:false,why:'the tracker refused the save ('+r.status+')'};
+  };
+  const p=(WQ[raw.key]||Promise.resolve()).then(run,run).catch(()=>({ok:false,why:'the tracker could not be reached'}));
+  WQ[raw.key]=p;
+  return p;
+}
+
 /* ── shared pieces ──────────────────────────────────────────────────────── */
 function tagsHTML(t){
   let h='';
   if(t.status==='In Progress')h+='<span class="tag blue">In progress</span>';
   if(t.status==='Parked')h+='<span class="tag red">Parked with '+COORD+'</span>';
-  if(t.status==='Blocked')h+='<span class="tag red">'+(t.flagged?'With '+COORD:'Blocked')+'</span>';
+  if(t.status==='Blocked')h+='<span class="tag red">Blocked</span>';
+  if(t.back&&t.status!=='Parked'&&!isDone(t))h+='<span class="tag amber">'+esc(t.back.by)+' replied</span>';
   if(t.waiting)h+='<span class="tag amber">Waiting</span>';
   if(t.src)h+='<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>';
   if(t.edited)h+='<span class="tag violet">Change queued</span>';
@@ -845,19 +1009,26 @@ function actionsHTML(t){
   let h='<div class="acts"><button type="button" class="pb blue" data-act="start">'+(t.status==='In Progress'?'Pause':'Start')+'</button>';
   if(!t.stages||isDone(t))h+='<button type="button" class="pb green" data-act="done">'+(isDone(t)?'Reopen':'Mark done')+'</button>';
   h+='<button type="button" class="pb red" data-act="flag">Blocked · flag '+COORD+'</button></div>';
-  if(t.stages&&!isDone(t))h+='<div class="hint">Staged deliverable: it completes when its steps are ticked in the client tracker.</div>';
+  if(t.stages&&!isDone(t))h+='<div class="hint">Staged deliverable: it completes when every step is ticked.</div>';
   return h;
 }
-function stepsHTML(steps){
-  return steps.map(s=>'<div class="step'+(s.s==='Complete'?' d':'')+'"><i></i><span>'+esc(s.t)+(s.o?'<small>'+esc(who(s.o))+'</small>':'')+'</span></div>').join('');
+/* Our own steps tick here. A step the client owns is theirs to tick, on the tracker. */
+function stepsHTML(t,steps,stageOwner){
+  return steps.map(s=>{
+    const d=s.s==='Complete',e=fEst(s.est),can=!t.src&&isTeam(s.o||stageOwner||t.owner);
+    const body='<i></i><span>'+esc(s.t)+(s.o?'<small>'+esc(who(s.o))+'</small>':'')+(e?'<small title="Estimate from Notion">'+e+'</small>':'')+'</span>';
+    return can?'<button type="button" class="step tick'+(d?' d':'')+'" data-act="step" data-step="'+esc(norm(s.t))+'" aria-pressed="'+d+'">'+body+'</button>'
+      :'<div class="step'+(d?' d':'')+'" title="A client step. It is ticked on the client tracker.">'+body+'</div>';
+  }).join('');
 }
+const stepHead=(t,l)=>{const a=stepsOf(t);return '<div class="dl">'+l+'<small> · '+a.filter(s=>s.s==='Complete').length+' of '+a.length+' done</small></div>';};
 function aboutHTML(t){
   let h='';
   const d=[t.desc,t.bg,t.card].filter(Boolean).join('\n\n');
   if(d)h+='<div><div class="dl">What this is</div><div class="dp">'+linkify(d)+'</div></div>';
-  if(t.stages)h+='<div><div class="dl">Stages</div>'+t.stages.map(s=>'<div class="stage">'+esc(s.l)+'<span class="tag '+(isTeam(s.o)?'blue':'amber')+'">'+esc(s.o||'Client')+'</span>'+
-    (s.done?'<span class="tag">Done</span>':s.now?'<span class="tag blue">Now</span>':'')+'</div>'+stepsHTML(s.sub)).join('')+'</div>';
-  else if(t.sub&&t.sub.length)h+='<div><div class="dl">Steps</div>'+stepsHTML(t.sub)+'</div>';
+  if(t.stages)h+='<div>'+stepHead(t,'Stages')+t.stages.map(s=>'<div class="stage">'+esc(s.l)+'<span class="tag '+(isTeam(s.o)?'blue':'amber')+'">'+esc(s.o||'Client')+'</span>'+
+    (s.done?'<span class="tag">Done</span>':s.now?'<span class="tag blue">Now</span>':'')+'</div>'+stepsHTML(t,s.sub,s.o)).join('')+'</div>';
+  else if(t.sub&&t.sub.length)h+='<div>'+stepHead(t,'Steps')+stepsHTML(t,t.sub)+'</div>';
   return h;
 }
 function kvHTML(t,withStatus){
@@ -876,9 +1047,17 @@ function linksHTML(t){
 }
 /* Tracker notes are what the client sees; ours are internal. Shown together, in time order. */
 function notesHTML(t){
-  const L=(t.log||[]).map(n=>({by:n.by||'Unknown',at:n.at||0,txt:n.txt,src:'tracker'})).concat((t.notes||[]).map(n=>({by:n.by,at:n.at,txt:n.txt}))).sort((a,b)=>a.at-b.at);
+  const L=(t.log||[]).map(n=>({by:n.by||'Unknown',at:n.at||0,txt:n.txt,src:'tracker'})).concat((t.notes||[]).map(n=>({id:n.id,by:n.by,at:n.at,txt:n.txt,eAt:n.eAt}))).sort((a,b)=>a.at-b.at);
   if(!L.length)return '<div class="none">No notes yet.</div>';
-  return L.map(n=>'<div class="nt">'+av(n.by)+'<div class="bd"><div class="hd"><b>'+esc(n.by)+'</b>'+fStamp(n.at)+(n.src?' · on the client tracker':'')+'</div><div class="tx">'+linkify(n.txt)+'</div></div></div>').join('');
+  return L.map(n=>{
+    const ed=S.editNote&&n.id&&S.editNote.id===n.id,del=n.id&&S.delNote===n.id;
+    /* Only our own notes can be changed here; tracker notes are edited on the tracker. */
+    const tools=n.id&&!ed?'<span class="nx2">'+(del?'<button type="button" class="dn" data-act="note-del-yes">Delete this note</button><button type="button" data-act="note-del-no">Keep</button>':
+      '<button type="button" data-act="note-edit">Edit</button><button type="button" data-act="note-del">Delete</button>')+'</span>':'';
+    return '<div class="nt"'+(n.id?' data-nid="'+esc(n.id)+'"':'')+'>'+av(n.by)+'<div class="bd"><div class="hd"><b>'+esc(n.by)+'</b>'+fStamp(n.at)+(n.eAt?' · edited':'')+(n.src?' · on the client tracker':'')+tools+'</div>'+
+      (ed?'<textarea class="ned" data-ta="note">'+esc(S.editNote.txt)+'</textarea><div class="cbtn"><span class="sp"></span><button type="button" class="pb" data-act="note-cancel">Cancel</button><button type="button" class="pb post" data-act="note-save">Save</button></div>'
+         :'<div class="tx">'+linkify(n.txt)+'</div>')+'</div></div>';
+  }).join('');
 }
 function composerBtns(t){
   return '<div class="cbtn">'+(t.status==='Parked'?'':'<button type="button" class="pb amber" data-act="park">Park with '+COORD+' ?</button>')+
@@ -898,6 +1077,7 @@ function headerHTML(){
     '<div class="who">'+WHO.map(p=>'<button type="button" data-act="who" data-who="'+p+'" class="'+(S.who===p?'on':'')+(p===COORD?' co':'')+'">'+p+'<small>'+n[p]+'</small></button>').join('')+'</div></header>';
 }
 function titleHTML(mine){
+  if(S.client&&!mine.some(t=>!isDone(t)&&(S.client==='none'?!CLIENTS[t.key]:t.key===S.client)))S.client='';
   const d=new Date(),eye=DOW[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]+' · '+d.getFullYear();
   let stats='';
   if(onDesk()){
@@ -906,10 +1086,15 @@ function titleHTML(mine){
   }else{
     const open=mine.filter(t=>!isDone(t)),late=open.filter(isLate).length;
     const hrs=open.reduce((s,t)=>s+(+t.est||0),0);
-    stats='<span class="stat'+(late?' hot':'')+'"><b>'+late+'</b>overdue</span>'+
-      '<span class="stat"><b>'+open.filter(t=>dueIn(t)===0).length+'</b>due today</span>'+
-      '<span class="stat"><b>'+fTot(hrs)+'</b>open</span>'+
-      '<span class="stat"><b>'+open.filter(t=>t.status==='Parked'||t.status==='Blocked').length+'</b>with '+COORD+'</span>';
+    const pill=(f,n,l,hot)=>'<button type="button" class="stat'+(hot?' hot':'')+(S.flt===f?' on':'')+'" data-act="flt" data-f="'+f+'" aria-pressed="'+(S.flt===f)+'"><b>'+n+'</b>'+l+'</button>';
+    const cc={};open.forEach(t=>{const k=CLIENTS[t.key]?t.key:'none';cc[k]=(cc[k]||0)+1;});
+    const ks=Object.keys(cc).sort((a,b)=>a==='none'?1:b==='none'?-1:CLIENTS[a].name.localeCompare(CLIENTS[b].name));
+    stats='<select class="csel'+(S.client?' on':'')+'" data-sel="client" aria-label="Client"><option value="">All clients</option>'+
+      ks.map(k=>'<option value="'+esc(k)+'"'+(S.client===k?' selected':'')+'>'+esc(k==='none'?'No client':CLIENTS[k].name)+' ('+cc[k]+')</option>').join('')+'</select>'+
+      pill('late',late,'overdue',late>0)+
+      pill('today',open.filter(t=>dueIn(t)===0).length,'due today')+
+      pill('',fTot(hrs),'open')+
+      pill('coord',open.filter(t=>t.status==='Parked').length,'with '+COORD);
   }
   const name=S.who==='Everyone'?'Everyone':S.who;
   return '<div class="trow"><div><div class="eye">'+eye+'</div><h2>'+esc(name)+'’s '+(onDesk()?'desk':S.mode==='board'?'board':'day')+'</h2></div><div class="stats">'+stats+'</div></div>';
@@ -940,7 +1125,7 @@ function rowHTML(t){
   const dc=t.status==='In Progress'?'prog':t.status==='Blocked'?'block':t.status==='Parked'?'park':isDone(t)?'done':'';
   const glyph=t.status==='Blocked'?'!':t.status==='Parked'?'?':isDone(t)?'✓':'';
   const n=noteCount(t);
-  let meta='<span class="cl">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+(showOwner?'<span class="own">'+esc(t.owner)+'</span>':'')+tagsHTML(t);
+  let meta='<span class="cl">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+(showOwner?'<span class="own">'+esc(t.owner)+'</span>':'')+progHTML(t)+tagsHTML(t);
   if(t.parked&&t.parked.question)meta+='<span class="q">'+quote(t.parked.question)+'</span>';
   if(n)meta+='<span>'+n+' note'+(n===1?'':'s')+'</span>';
   let h='<div class="row'+(isLate(t)?' late':'')+(isDone(t)?' isdone':'')+(open?' open':'')+'" data-id="'+esc(t.id)+'"><div class="rh">'+
@@ -957,7 +1142,7 @@ function listHTML(mine){
   const by={};mine.forEach(t=>{const s=secOf(t);if(s)(by[s]=by[s]||[]).push(t);});
   const secs=SECS.filter(s=>by[s[0]]);
   if(!secs.some(s=>s[0]!=='done'))
-    return '<div class="list"><div class="blank"><b>Clear.</b>Nothing open for '+esc(S.who==='Everyone'?'the team':S.who)+'.</div>'+(by.done?secHTML(SECS[5],by.done):'')+'</div>';
+    return '<div class="list"><div class="blank">'+(S.flt||S.client?'<b>Nothing matches.</b>No tasks under this filter. <button type="button" class="lk" data-act="flt-clear">Show everything</button>':'<b>Clear.</b>Nothing open for '+esc(S.who==='Everyone'?'the team':S.who)+'.')+'</div>'+(by.done?secHTML(SECS[5],by.done):'')+'</div>';
   return '<div class="list">'+secs.map(s=>secHTML(s,by[s[0]])).join('')+'</div>';
 }
 function secHTML(s,rows){
@@ -969,18 +1154,19 @@ function secHTML(s,rows){
 
 /* ── view 2: board ──────────────────────────────────────────────────────── */
 const COLS=[
-  ['next','Up next',['Pending'],'var(--soft)','Nothing queued'],
+  ['next','Up next',['Pending','Blocked'],'var(--soft)','Nothing queued'],
   ['prog','In progress',['In Progress'],'var(--blue)','Start something from Up next'],
-  ['coord','With '+COORD,['Blocked','Parked'],'var(--amber)','Nothing with '+COORD],
+  ['coord','With '+COORD,['Parked'],'var(--amber)','Nothing with '+COORD],
   ['done','Done',['Complete'],'var(--green)','Nothing finished yet']
 ];
 function cardHTML(t){
   const wn=t.status==='Blocked'||t.status==='Parked',n=noteCount(t);
+  const tg=t.status==='Blocked'?'<span class="tag red">Blocked</span>':(t.back&&!isDone(t)&&t.status!=='Parked'?'<span class="tag amber">'+esc(t.back.by)+' replied</span>':'');
   const nx=t.status==='Pending'?'Start':t.status==='In Progress'?'Done':t.status==='Blocked'?'Resume':isDone(t)?'Reopen':'';
   return '<div class="card'+(wn?' wn':isLate(t)?' late':'')+(S.open===t.id?' sel':'')+'" data-id="'+esc(t.id)+'" data-act="open">'+
     '<div class="c1"><b>'+esc(clientOf(t))+'</b>'+dueHTML(t,true)+'</div><div class="ct">'+esc(t.title)+'</div>'+
     (t.parked&&t.parked.question?'<div class="cq">'+quote(t.parked.question)+'</div>':'')+
-    '<div class="c3">'+av(t.owner,true)+(fEst(t.est)?'<b>'+fEst(t.est)+'</b>':'')+(n?'<span>'+n+' note'+(n===1?'':'s')+'</span>':'')+'<span class="sp"></span>'+
+    '<div class="c3">'+av(t.owner,true)+(fEst(t.est)?'<b>'+fEst(t.est)+'</b>':'')+progHTML(t)+(n?'<span>'+n+' note'+(n===1?'':'s')+'</span>':'')+tg+'<span class="sp"></span>'+
     (t.status==='Parked'?'<span class="wait">Waiting on '+COORD+'</span>':(nx&&!(t.stages&&nx==='Done')?'<button type="button" class="nx" data-act="next">'+nx+'</button>':''))+'</div></div>';
 }
 function boardHTML(mine){
@@ -1019,9 +1205,9 @@ function deskHTML(mine){
       (t.stages?'':'<button type="button" class="pb green" data-act="desk-done">Mark done</button>')+'</div></div>';
   }).join('');
   if(blocked.length){
-    h+='<div class="flab">Also flagged to you · blocked tasks</div><div class="bl">'+blocked.map(t=>{
+    h+='<div class="flab">Not parked with you · marked blocked at source</div><div class="bl">'+blocked.map(t=>{
       const n=noteCount(t);
-      return '<div class="bli" data-id="'+esc(t.id)+'"><div class="t"><b>'+esc(t.title)+'</b><span>'+esc(clientOf(t))+' · '+esc(t.owner)+(n?' · '+n+' note'+(n===1?'':'s'):'')+(t.flagged?'':(t.src?' · blocked in Notion':' · blocked on the tracker'))+'</span></div>'+
+      return '<div class="bli" data-id="'+esc(t.id)+'"><div class="t"><b>'+esc(t.title)+'</b><span>'+esc(clientOf(t))+' · '+esc(t.owner)+(n?' · '+n+' note'+(n===1?'':'s'):'')+(t.src?' · blocked in Notion':' · blocked on the tracker')+'</span></div>'+
         dueHTML(t)+'<button type="button" class="pb blue" data-act="unblock">Unblock</button></div>';
     }).join('')+'</div>';
   }
@@ -1051,7 +1237,7 @@ function render(){
   }else{
     const mine=scope();
     h+=bannerHTML()+titleHTML(mine)+(S.audit&&!onDesk()&&S.mode==='list'?auditBarHTML():'');
-    h+=onDesk()?deskHTML(mine):S.mode==='board'?boardHTML(mine):listHTML(mine);
+    h+=onDesk()?deskHTML(mine):S.mode==='board'?boardHTML(narrowed(mine)):listHTML(narrowed(mine));
     if(!onDesk()&&S.mode==='board'&&S.open)h+=drawerHTML(findTask(S.open));
   }
   app.innerHTML=h+footHTML();
@@ -1074,9 +1260,11 @@ document.addEventListener('click',e=>{
   const act=a.getAttribute('data-act'),host=a.closest('[data-id]'),id=host?host.getAttribute('data-id'):null;
   const t=id?findTask(id):null;
   switch(act){
-    case 'who':S.who=a.getAttribute('data-who');S.open=null;S.draft='';S.tag=false;history.replaceState(null,'','#'+S.who.toLowerCase());save();render();window.scrollTo(0,0);break;
+    case 'flt':{const f=a.getAttribute('data-f');S.flt=(f&&S.flt!==f)?f:'';S.open=null;render();break;}
+    case 'flt-clear':S.flt='';S.client='';render();break;
+    case 'who':S.who=a.getAttribute('data-who');S.flt='';S.client='';S.open=null;S.draft='';S.tag=false;history.replaceState(null,'','#'+S.who.toLowerCase());save();render();window.scrollTo(0,0);break;
     case 'mode':S.mode=a.getAttribute('data-m');S.open=null;S.draft='';S.tag=false;save();render();break;
-    case 'open':S.open=(S.mode==='list'&&S.open===id)?null:id;S.draft='';S.tag=false;save();render();break;
+    case 'open':S.editNote=null;S.delNote='';S.open=(S.mode==='list'&&S.open===id)?null:id;S.draft='';S.tag=false;save();render();break;
     case 'close':S.open=null;S.draft='';S.tag=false;save();render();break;
     case 'full':S.full[a.getAttribute('data-col')]=true;render();break;
     case 'dot':cycle(id);break;
@@ -1084,8 +1272,15 @@ document.addEventListener('click',e=>{
     case 'start':if(t)act2(id,t.status==='In Progress'?'Pending':'In Progress');break;
     case 'done':if(t)act2(id,isDone(t)?'Pending':'Complete');break;
     case 'flag':flagBlocked(id);break;
+    case 'step':e.stopPropagation();tickStep(id,a.getAttribute('data-step'));break;
     case 'tag':S.tag=!S.tag;render();break;
     case 'post':postNote(id);break;
+    case 'note-edit':{const nd=a.closest('[data-nid]').getAttribute('data-nid'),n=t&&t.notes.find(x=>x.id===nd);if(n){S.editNote={id:nd,txt:n.txt};S.delNote='';render();const el=document.querySelector('[data-ta="note"]');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}}break;}
+    case 'note-save':saveNoteEdit(id);break;
+    case 'note-cancel':S.editNote=null;render();break;
+    case 'note-del':S.delNote=a.closest('[data-nid]').getAttribute('data-nid');S.editNote=null;render();break;
+    case 'note-del-no':S.delNote='';render();break;
+    case 'note-del-yes':deleteNote(id,a.closest('[data-nid]').getAttribute('data-nid'));break;
     case 'park':park(id);break;
     case 'answer':answer(id,false);break;
     case 'reply':answer(id,true);break;
@@ -1108,15 +1303,19 @@ document.addEventListener('click',e=>{
 const act2=act;   // inside the click handler `act` is the action name
 document.addEventListener('input',e=>{
   const ta=e.target.getAttribute&&e.target.getAttribute('data-ta');if(!ta)return;
-  if(ta==='draft')S.draft=e.target.value;else S.deskDraft[ta.slice(5)]=e.target.value;
+  if(ta==='draft')S.draft=e.target.value;
+  else if(ta==='note'){if(S.editNote)S.editNote.txt=e.target.value;}
+  else S.deskDraft[ta.slice(5)]=e.target.value;
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&S.open&&S.mode==='board'&&!onDesk()){S.open=null;save();render();return;}
   if(e.key!=='Enter'||!(e.metaKey||e.ctrlKey))return;
   const ta=e.target.getAttribute&&e.target.getAttribute('data-ta');
   if(ta==='draft'&&S.open){e.preventDefault();postNote(S.open);}
+  if(ta==='note'){e.preventDefault();const host=e.target.closest('[data-id]');if(host)saveNoteEdit(host.getAttribute('data-id'));}
 });
 document.addEventListener('change',e=>{
+  if(e.target.getAttribute&&e.target.getAttribute('data-sel')==='client'){S.client=e.target.value;S.open=null;render();return;}
   const f=e.target.getAttribute&&e.target.getAttribute('data-aud');if(!f)return;
   setAudit(e.target.closest('.row').getAttribute('data-id'),f,e.target.value);
 });
