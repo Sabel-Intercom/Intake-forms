@@ -53,6 +53,8 @@ a{color:inherit}
 .who button small{font-family:Archivo,sans-serif;font-weight:700;font-size:11px;opacity:.8}
 .who button.on{background:var(--red);color:#fff;box-shadow:0 0 18px rgba(225,6,0,.5)}
 .who button.on.co{background:#FBBF24;color:var(--onamber);box-shadow:0 0 18px rgba(251,191,36,.45)}
+.theme{width:34px;height:34px;border-radius:50%;border:1px solid var(--hl2);background:var(--pill);color:var(--body);font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:border-color .15s ease,color .15s ease}
+.theme:hover{border-color:var(--red2);color:var(--text)}
 
 /* title row */
 .trow{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:22px 22px 6px}
@@ -246,6 +248,41 @@ html.light .av{background:rgba(16,24,40,.08);color:var(--body)}
 .skel{height:64px;border-radius:14px;background:var(--surface);border:1px solid var(--line);animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.45}50%{opacity:.9}}
 
+/* client menu: several at once */
+.cwrap{position:relative}
+.cbtn2{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--body);padding:6px 12px;border-radius:99px;border:1px solid var(--hl2);background:var(--pill);max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cbtn2:hover{border-color:var(--hl5)}
+.cbtn2.on{border-color:var(--text);color:var(--text);box-shadow:0 0 0 1px var(--text) inset}
+.cbtn2 i{font-style:normal;font-size:10px;color:var(--mute)}
+.cpop{position:absolute;z-index:30;top:calc(100% + 6px);right:0;width:280px;max-height:60vh;overflow:auto;background:var(--surface);border:1px solid var(--line2);border-radius:12px;box-shadow:0 24px 50px rgba(0,0,0,.5);padding:6px}
+.cph{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px 8px;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.cph button{font-size:12.5px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--blue)}
+.copt{display:flex;align-items:center;gap:10px;width:100%;padding:7px 8px;border-radius:8px;font-size:13.5px;color:var(--body)}
+.copt:hover{background:var(--raise)}
+.copt i{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--faint);flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:800;color:#fff}
+.copt.on i{background:var(--red);border-color:var(--red)}
+.copt.on i:after{content:'✓'}
+.copt.on{color:var(--text);font-weight:600}
+.copt span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.copt small{font-family:Archivo,sans-serif;font-weight:700;font-size:11.5px;color:var(--mute)}
+.cdone{display:block;width:100%;margin-top:6px;padding:8px;border-top:1px solid var(--line);text-align:center;font-size:13px;font-weight:700;color:var(--text)}
+/* home */
+.blank.sm{padding:22px}
+.blank.sm b{font-size:16px}
+.hmore{display:block;width:100%;padding:10px;border-top:1px solid var(--line);text-align:center;font-size:13px;font-weight:600;color:var(--mute)}
+.hmore:hover{color:var(--text);background:var(--surface2)}
+.hfoot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mute)}
+.tgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line)}
+.tcard{display:flex;flex-direction:column;gap:10px;padding:16px 20px;background:var(--surface);transition:background .15s ease}
+.tcard:hover{background:var(--raise)}
+.tch{display:flex;align-items:center;gap:10px}
+.tch b{font-family:Archivo,sans-serif;font-weight:700;font-size:16px;color:var(--text)}
+.tcs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;font-size:13px;color:var(--mute)}
+.tcs b{font-family:Archivo,sans-serif;font-weight:700;color:var(--text);margin-right:5px}
+.tcs .hot,.tcs .hot b{color:var(--red2)}
+.tcf{font-size:12.5px;color:var(--mute)}
+@media(max-width:720px){.tgrid{grid-template-columns:minmax(0,1fr)}.cpop{right:auto;left:0}}
+
 /* parking needs a question */
 textarea.need{outline:2px solid var(--red2);outline-offset:2px;border-radius:6px}
 .needm{font-size:13px;font-weight:600;color:var(--red2);margin-top:8px}
@@ -325,6 +362,12 @@ textarea.need{outline:2px solid var(--red2);outline-offset:2px;border-radius:6px
 .aud button{color:var(--blue);font-size:13px}
 .aud button:hover{text-decoration:underline}
 
+html.light .who button.on{box-shadow:none}
+html.light .pb.post{box-shadow:none}
+html.light .pb.hand{background:#F59E0B;border-color:#F59E0B;box-shadow:none}
+html.light .cpop,html.light .drawer{box-shadow:0 24px 50px rgba(16,24,40,.18)}
+html.light .card.late{box-shadow:none}
+html.light .sq{box-shadow:none}
 @media(prefers-reduced-motion:reduce){.skel,.foot .live.busy i{animation:none}}
 @media(max-width:720px){
   .top{padding:12px 16px}.who{margin-left:0}
@@ -362,10 +405,14 @@ const PK='sabel-taskhub-v1';
 
 /* ── state ──────────────────────────────────────────────────────────────── */
 /* localStorage holds UI state only: who, mode, the open task. */
-const S={who:'Everyone',mode:'list',open:null,draft:'',tag:false,audit:false,deskOpen:{},deskDraft:{},full:{},flt:'',client:'',editNote:null,delNote:'',needQ:false,timeDraft:'',tab:'desk',period:'week',group:'person'};   // flt: ''|'late'|'today'|'coord'; client: ''|trackerKey|'none'
-try{const p=JSON.parse(localStorage.getItem(PK)||'{}');['who','mode','open','audit','tab','period','group'].forEach(k=>{if(p[k]!==undefined)S[k]=p[k];});}catch(e){}
-if(S.mode!=='board')S.mode='list';
-function save(){try{localStorage.setItem(PK,JSON.stringify({who:S.who,mode:S.mode,open:S.open,audit:S.audit,tab:S.tab,period:S.period,group:S.group}));}catch(e){}}
+const S={who:'Everyone',mode:'home',open:null,draft:'',tag:false,audit:false,deskOpen:{},deskDraft:{},full:{},flt:'',editNote:null,delNote:'',needQ:false,timeDraft:'',tab:'home',period:'week',group:'person',csel:{},cOpen:false,more:{}};   // csel: person -> [client keys] they have filtered to   // flt: ''|'late'|'today'|'coord'; client: ''|trackerKey|'none'
+try{const p=JSON.parse(localStorage.getItem(PK)||'{}');['who','mode','open','audit','tab','period','group','csel'].forEach(k=>{if(p[k]!==undefined)S[k]=p[k];});
+  if(!p.hv){S.mode='home';S.tab='home';}   /* first visit since Home existed: land on it once */
+}catch(e){}
+if(['home','list','board'].indexOf(S.mode)<0)S.mode='home';
+if(['home','desk','summary'].indexOf(S.tab)<0)S.tab='home';
+if(!S.csel||typeof S.csel!=='object')S.csel={};
+function save(){try{localStorage.setItem(PK,JSON.stringify({hv:1,who:S.who,mode:S.mode,open:S.open,audit:S.audit,tab:S.tab,period:S.period,group:S.group,csel:S.csel}));}catch(e){}}
 const WHO=TEAM.concat(['Everyone',COORD]);
 const hashWho=()=>{const h=decodeURIComponent((location.hash||'').slice(1)).toLowerCase();return WHO.find(n=>n.toLowerCase()===h)||null;};
 if(hashWho())S.who=hashWho();
@@ -432,7 +479,7 @@ async function pullOv(){
   if(!remote)return false;
   const before=JSON.stringify(OV),merged=mergeOv(OV,remote);
   OV=merged;saveLocalOv();
-  if(JSON.stringify(merged)!==JSON.stringify(remote))pushOv();   // this browser held work the store had not seen
+  if(JSON.stringify(merged.tasks)!==JSON.stringify(mergeOv(remote,remote).tasks))pushOv();   // this browser held work the store had not seen
   return JSON.stringify(merged)!==before;
 }
 let PUSHQ=Promise.resolve();
@@ -801,9 +848,16 @@ function scope(){
   return (S.who==='Everyone'||onDesk())?a.filter(t=>isTeam(t.owner)):a.filter(t=>t.owner===S.who);
 }
 /* The stat pills and the client dropdown narrow what the List and Board show. */
+const ckey=t=>CLIENTS[t.key]?t.key:'none';
+const cLabel=k=>k==='none'?'No client':(CLIENTS[k]?CLIENTS[k].name:k);
+const selClients=()=>S.csel[S.who]||[];
+/* Just the client filter: what Home works from. */
+function byClient(mine){
+  const sel=selClients();
+  return sel.length?mine.filter(t=>sel.indexOf(ckey(t))>-1):mine;
+}
 function narrowed(mine){
-  return mine.filter(t=>{
-    if(S.client&&(S.client==='none'?!!CLIENTS[t.key]:t.key!==S.client))return false;
+  return byClient(mine).filter(t=>{
     if(S.flt==='late')return isLate(t);
     if(S.flt==='today')return !isDone(t)&&dueIn(t)===0;
     if(S.flt==='coord')return t.status==='Parked';
@@ -1188,33 +1242,40 @@ function headerHTML(){
   n.Everyone=a.filter(t=>!isDone(t)).length;n[COORD]=a.filter(t=>t.status==='Parked').length;
   return '<header class="top"><span class="sq"></span><span class="word">SABEL</span><span class="div"></span>'+
     '<span class="ch">Task list'+(onDesk()?'<em>· '+COORD+'’s desk</em>':'')+'</span>'+
-    (onDesk()?'<div class="seg"><button type="button" data-act="tab" data-t="desk" class="'+(S.tab!=='summary'?'on':'')+'">Desk</button><button type="button" data-act="tab" data-t="summary" class="'+(S.tab==='summary'?'on':'')+'">Summary</button></div>':'<div class="seg"><button type="button" data-act="mode" data-m="list" class="'+(S.mode==='list'?'on':'')+'">List</button><button type="button" data-act="mode" data-m="board" class="'+(S.mode==='board'?'on':'')+'">Board</button></div>')+
-    '<div class="who">'+WHO.map(p=>'<button type="button" data-act="who" data-who="'+p+'" class="'+(S.who===p?'on':'')+(p===COORD?' co':'')+'">'+p+'<small>'+n[p]+'</small></button>').join('')+'</div></header>';
+    (onDesk()?'<div class="seg"><button type="button" data-act="tab" data-t="home" class="'+(S.tab==='home'?'on':'')+'">Home</button><button type="button" data-act="tab" data-t="desk" class="'+(S.tab==='desk'?'on':'')+'">Desk</button><button type="button" data-act="tab" data-t="summary" class="'+(S.tab==='summary'?'on':'')+'">Summary</button></div>':'<div class="seg"><button type="button" data-act="mode" data-m="home" class="'+(S.mode==='home'?'on':'')+'">Home</button><button type="button" data-act="mode" data-m="list" class="'+(S.mode==='list'?'on':'')+'">List</button><button type="button" data-act="mode" data-m="board" class="'+(S.mode==='board'?'on':'')+'">Board</button></div>')+
+    '<div class="who">'+WHO.map(p=>'<button type="button" data-act="who" data-who="'+p+'" class="'+(S.who===p?'on':'')+(p===COORD?' co':'')+'">'+p+'<small>'+n[p]+'</small></button>').join('')+'</div>'+
+    '<button type="button" class="theme" data-act="theme" title="'+(LIGHT?'Switch to dark mode':'Switch to light mode')+'" aria-label="'+(LIGHT?'Switch to dark mode':'Switch to light mode')+'">'+(LIGHT?'&#9790;':'&#9728;')+'</button></header>';
 }
 function titleHTML(mine){
-  if(S.client&&!mine.some(t=>!isDone(t)&&(S.client==='none'?!CLIENTS[t.key]:t.key===S.client)))S.client='';
   const d=new Date(),eye=DOW[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]+' · '+d.getFullYear();
-  let stats='';
-  if(onDesk()&&S.tab==='summary'){
-    stats='';
-  }else if(onDesk()){
-    const p=mine.filter(t=>t.status==='Parked').length;
-    stats='<span class="stat amb">'+p+' task'+(p===1?'':'s')+' parked with you</span>';
+  const name=S.who==='Everyone'?'Everyone':S.who;
+  let stats='',title;
+  if(onDesk()){
+    title=S.tab==='summary'?'Team summary':S.tab==='home'?esc(name)+'’s home':esc(name)+'’s desk';
+    if(S.tab==='desk'){
+      const p=mine.filter(t=>t.status==='Parked').length;
+      stats='<span class="stat amb">'+p+' task'+(p===1?'':'s')+' parked with you</span>';
+    }
   }else{
-    const open=mine.filter(t=>!isDone(t)),late=open.filter(isLate).length;
+    title=esc(name)+'’s '+(S.mode==='board'?'board':S.mode==='home'?'home':'day');
+    /* Counts per client come from everything open, so a client stays in the menu while filtered out. */
+    const cc={};mine.forEach(t=>{if(!isDone(t))cc[ckey(t)]=(cc[ckey(t)]||0)+1;});
+    const ks=Object.keys(cc).sort((x,y)=>x==='none'?1:y==='none'?-1:cLabel(x).localeCompare(cLabel(y)));
+    const sel=selClients();
+    const open=byClient(mine).filter(t=>!isDone(t)),late=open.filter(isLate).length;
     const hrs=open.reduce((s,t)=>s+(+t.est||0),0);
-    const pill=(f,n,l,hot)=>'<button type="button" class="stat'+(hot?' hot':'')+(S.flt===f?' on':'')+'" data-act="flt" data-f="'+f+'" aria-pressed="'+(S.flt===f)+'"><b>'+n+'</b>'+l+'</button>';
-    const cc={};open.forEach(t=>{const k=CLIENTS[t.key]?t.key:'none';cc[k]=(cc[k]||0)+1;});
-    const ks=Object.keys(cc).sort((a,b)=>a==='none'?1:b==='none'?-1:CLIENTS[a].name.localeCompare(CLIENTS[b].name));
-    stats='<select class="csel'+(S.client?' on':'')+'" data-sel="client" aria-label="Client"><option value="">All clients</option>'+
-      ks.map(k=>'<option value="'+esc(k)+'"'+(S.client===k?' selected':'')+'>'+esc(k==='none'?'No client':CLIENTS[k].name)+' ('+cc[k]+')</option>').join('')+'</select>'+
+    const pill=(f,n,l,hot)=>'<button type="button" class="stat'+(hot?' hot':'')+(S.mode!=='home'&&S.flt===f?' on':'')+'" data-act="flt" data-f="'+f+'" aria-pressed="'+(S.flt===f)+'"><b>'+n+'</b>'+l+'</button>';
+    stats='<div class="cwrap"><button type="button" class="cbtn2'+(sel.length?' on':'')+'" data-act="cmenu" aria-expanded="'+S.cOpen+'">'+
+        (sel.length?(sel.length===1?esc(cLabel(sel[0])):sel.length+' clients'):'All clients')+'<i>&#9662;</i></button>'+
+      (S.cOpen?'<div class="cpop" role="group" aria-label="Clients"><div class="cph"><span>Show only these clients</span>'+(sel.length?'<button type="button" data-act="cclear">Clear</button>':'')+'</div>'+
+        ks.concat(sel.filter(k=>!cc[k])).map(k=>'<button type="button" class="copt'+(sel.indexOf(k)>-1?' on':'')+'" data-act="csel" data-k="'+esc(k)+'" aria-pressed="'+(sel.indexOf(k)>-1)+'"><i></i><span>'+esc(cLabel(k))+'</span><small>'+(cc[k]||0)+'</small></button>').join('')+
+        '<button type="button" class="cdone" data-act="cmenu">Done</button></div>':'')+'</div>'+
       pill('late',late,'overdue',late>0)+
       pill('today',open.filter(t=>dueIn(t)===0).length,'due today')+
       pill('',fTot(hrs),'open')+
       pill('coord',open.filter(t=>t.status==='Parked').length,'with '+COORD);
   }
-  const name=S.who==='Everyone'?'Everyone':S.who;
-  return '<div class="trow"><div><div class="eye">'+eye+'</div><h2>'+(onDesk()&&S.tab==='summary'?'Team summary':esc(name)+'’s '+(onDesk()?'desk':S.mode==='board'?'board':'day'))+'</h2></div><div class="stats">'+stats+'</div></div>';
+  return '<div class="trow"><div><div class="eye">'+eye+'</div><h2>'+title+'</h2></div><div class="stats">'+stats+'</div></div>';
 }
 function bannerHTML(){
   if(REMOTE==='off')return '<div class="banner"><b>Shared saving is not switched on yet.</b> Notes and parked questions are kept in this browser only, so nobody else can see them. Start, Pause and Done still update the client tracker. (The store key <code>'+TL_KEY+'</code> needs adding to the webhook.)</div>';
@@ -1260,7 +1321,7 @@ function listHTML(mine){
   const by={};mine.forEach(t=>{const s=secOf(t);if(s)(by[s]=by[s]||[]).push(t);});
   const secs=SECS.filter(s=>by[s[0]]);
   if(!secs.some(s=>s[0]!=='done'))
-    return '<div class="list"><div class="blank">'+(S.flt||S.client?'<b>Nothing matches.</b>No tasks under this filter. <button type="button" class="lk" data-act="flt-clear">Show everything</button>':'<b>Clear.</b>Nothing open for '+esc(S.who==='Everyone'?'the team':S.who)+'.')+'</div>'+(by.done?secHTML(SECS[5],by.done):'')+'</div>';
+    return '<div class="list"><div class="blank">'+(S.flt||selClients().length?'<b>Nothing matches.</b>No tasks under this filter. <button type="button" class="lk" data-act="flt-clear">Show everything</button>':'<b>Clear.</b>Nothing open for '+esc(S.who==='Everyone'?'the team':S.who)+'.')+'</div>'+(by.done?secHTML(SECS[5],by.done):'')+'</div>';
   return '<div class="list">'+secs.map(s=>secHTML(s,by[s[0]])).join('')+'</div>';
 }
 function secHTML(s,rows){
@@ -1332,6 +1393,55 @@ function deskHTML(mine){
   return h+'</div>';
 }
 
+/* ── home: what is started and not finished, and what is urgent, in your name ── */
+const HOME_CAP=8;
+function homeSec(key,label,sub,dot,col,border,rows,jump){
+  const cap=S.more[key]?rows.length:HOME_CAP,hrs=rows.reduce((a,t)=>a+(isDone(t)?0:(+t.est||0)),0);
+  return '<div class="secc"'+(border?' style="border-color:'+border+'"':'')+'><div class="sech"><i style="background:'+dot+'"></i><b style="color:'+col+'">'+esc(label)+'</b><span>'+esc(sub)+'</span>'+
+    '<small>'+rows.length+' task'+(rows.length===1?'':'s')+(hrs?' · '+fTot(hrs):'')+'</small></div>'+rows.slice(0,cap).map(rowHTML).join('')+
+    (rows.length>cap?'<button type="button" class="hmore" data-act="more" data-k="'+key+'">Show all '+rows.length+'</button>':'')+'</div>';
+}
+function homeHTML(mine){
+  const open=mine.filter(t=>!isDone(t));
+  const back=open.filter(t=>t.back&&t.status!=='Parked').sort(byDue);
+  const prog=open.filter(t=>t.status==='In Progress'&&!t.back).sort(byDue);
+  const urgent=open.filter(t=>t.status!=='In Progress'&&t.status!=='Parked'&&!t.back&&dueIn(t)!==null&&dueIn(t)<=0).sort(byDue);
+  const parked=open.filter(t=>t.status==='Parked').sort(byDue);
+  const whoTxt=S.who==='Everyone'?'the team':'you';
+  let h='<div class="list">';
+  if(back.length)h+=homeSec('back',COORD+' replied','Answered and handed back. Over to '+whoTxt+'.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',back);
+  h+=prog.length?homeSec('prog','Started, not finished','In progress now. Finish or pause these before picking up more.','var(--blue)','var(--blue)','rgba(96,165,250,.4)',prog)
+    :'<div class="blank sm"><b>Nothing started.</b>Pick something from Urgent below, or open the List.</div>';
+  h+=urgent.length?homeSec('urgent','Urgent','Overdue or due today, and not started.','var(--red2)','var(--red2)','rgba(225,6,0,.45)',urgent)
+    :'<div class="blank sm"><b>Nothing urgent.</b>Nothing overdue or due today that is not already under way.</div>';
+  if(parked.length)h+=homeSec('parked','Parked with '+COORD,'Waiting on an answer.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',parked);
+  const rest=open.length-back.length-prog.length-urgent.length-parked.length;
+  return h+'<div class="hfoot"><span>'+(rest>0?rest+' more open task'+(rest===1?'':'s')+' not due yet.':'That is everything open.')+'</span><button type="button" class="lk" data-act="mode" data-m="list">Open the full list</button></div></div>';
+}
+/* The coordinator's home: what is waiting on her, then the team at a glance. */
+function coordHomeHTML(all){
+  const open=all.filter(t=>!isDone(t));
+  const parked=open.filter(t=>t.status==='Parked').sort((a,b)=>((a.parked&&a.parked.askedAt)||0)-((b.parked&&b.parked.askedAt)||0));
+  const prog=open.filter(t=>t.status==='In Progress').sort(byDue);
+  const from=today().getTime();
+  let h='<div class="desk">';
+  h+='<div class="secc" style="border-color:'+(parked.length?'rgba(251,191,36,.45)':'var(--line2)')+'"><div class="sech"><i style="background:var(--amber)"></i><b style="color:var(--amber)">Waiting on you</b><span>Parked with you, oldest first</span><small>'+parked.length+' task'+(parked.length===1?'':'s')+'</small></div>'+
+    (parked.length?parked.map(t=>{const p=t.parked||{};return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="tab" data-t="desk"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl">'+esc(clientOf(t))+'</span><span class="own">'+esc(p.by||t.owner)+'</span><span class="q">'+quote(p.question||'')+'</span></span></button>'+
+      '<span class="srw">Parked '+fStamp(p.askedAt)+'</span>'+dueHTML(t)+'<button type="button" class="pb amber sm" data-act="tab" data-t="desk">Answer</button></div>';}).join('')
+     :'<div class="sempty">Nothing is parked with you.</div>')+'</div>';
+  h+='<div class="secc"><div class="sech"><i style="background:var(--soft)"></i><b style="color:var(--body)">The team right now</b><span>Click a name for their home</span></div><div class="tgrid">'+TEAM.map(p=>{
+    const m=open.filter(t=>t.owner===p),late=m.filter(isLate).length;
+    let tm=0;all.forEach(t=>{t.time.forEach(e=>{if(e.by===p&&e.end>=from)tm+=(+e.mins||0);});if(t.run[p]&&t.run[p].start)tm+=elapsed(t.run[p].start);});
+    const on=all.find(t=>t.run[p]&&t.run[p].start);
+    return '<button type="button" class="tcard" data-act="who" data-who="'+p+'"><span class="tch">'+av(p)+'<b>'+p+'</b></span>'+
+      '<span class="tcs"><span><b>'+m.filter(t=>t.status==='In Progress').length+'</b>in progress</span><span class="'+(late?'hot':'')+'"><b>'+late+'</b>overdue</span><span><b>'+m.filter(t=>dueIn(t)===0).length+'</b>due today</span><span><b>'+m.filter(t=>t.status==='Parked').length+'</b>with you</span></span>'+
+      '<span class="tcf">'+(on?'<span class="tag blue run"><i></i>'+esc(on.title.length>44?on.title.slice(0,42)+'…':on.title)+'</span>':'No timer running')+(tm?' · '+fMins(tm)+' logged today':'')+'</span></button>';
+  }).join('')+'</div></div>';
+  h+='<div class="secc"><div class="sech"><i style="background:var(--blue)"></i><b style="color:var(--blue)">Started, not finished</b><span>In progress across the team</span><small>'+prog.length+' task'+(prog.length===1?'':'s')+'</small></div>'+
+    (prog.length?sumGroupsHTML(prog,'prog'):'<div class="sempty">Nothing is in progress.</div>')+'</div>';
+  return h+'<div class="hfoot"><span>Completed work and time by period are on the Summary tab.</span><button type="button" class="lk" data-act="tab" data-t="summary">Open the summary</button></div></div>';
+}
+
 /* ── view 4: summary (what is in progress, what got done, where the time went) ── */
 const PERIODS=[['today','Today'],['week','This week'],['7','Last 7 days'],['30','Last 30 days']];
 function periodStart(){
@@ -1349,11 +1459,12 @@ function sumRowHTML(t,kind){
     '<span class="srtm'+(over?' over':'')+'" title="Time logged against the estimate"><b>'+(sp?fMins(sp):'–')+'</b>'+(e?' / '+fEst(e):'')+'</span></div>';
 }
 function sumGroupsHTML(rows,kind){
-  const g={};rows.forEach(t=>{const k=S.group==='client'?clientOf(t):t.owner;(g[k]=g[k]||[]).push(t);});
-  const ks=Object.keys(g).sort((a,b)=>S.group==='client'?(a==='No client'?1:b==='No client'?-1:a.localeCompare(b)):TEAM.indexOf(a)-TEAM.indexOf(b));
+  const byC=S.group==='client'&&S.tab==='summary';
+  const g={};rows.forEach(t=>{const k=byC?clientOf(t):t.owner;(g[k]=g[k]||[]).push(t);});
+  const ks=Object.keys(g).sort((a,b)=>byC?(a==='No client'?1:b==='No client'?-1:a.localeCompare(b)):TEAM.indexOf(a)-TEAM.indexOf(b));
   return ks.map(k=>{
     const sp=g[k].reduce((a,t)=>a+spent(t),0),es=g[k].reduce((a,t)=>a+(+t.est||0),0);
-    return '<div class="sg"><div class="sgh">'+(S.group==='client'?'':av(k,true))+'<b>'+esc(k)+'</b><span>'+g[k].length+' task'+(g[k].length===1?'':'s')+(sp?' · '+fMins(sp)+' logged':'')+(es?' · '+fTot(es)+' estimated':'')+'</span></div>'+g[k].map(t=>sumRowHTML(t,kind)).join('')+'</div>';
+    return '<div class="sg"><div class="sgh">'+(byC?'':av(k,true))+'<b>'+esc(k)+'</b><span>'+g[k].length+' task'+(g[k].length===1?'':'s')+(sp?' · '+fMins(sp)+' logged':'')+(es?' · '+fTot(es)+' estimated':'')+'</span></div>'+g[k].map(t=>sumRowHTML(t,kind)).join('')+'</div>';
   }).join('');
 }
 function summaryHTML(all){
@@ -1385,8 +1496,7 @@ function footHTML(){
   return '<div class="foot"><span class="live '+LIVE[0]+'" id="live"><i></i><span>'+esc(LIVE[1])+'</span></span>'+
     '<span>Tasks from the live client trackers · durations and call actions from Notion, pushed '+ago(HOURS_AT)+'</span><span class="sp"></span>'+
     '<button type="button" class="fb'+(S.audit?' on':'')+'" data-act="audit">'+(S.audit?'Audit on':'Audit'+(Object.keys(AUD).length?' · '+Object.keys(AUD).length:''))+'</button>'+
-    '<button type="button" class="fb" data-act="refresh">Refresh</button>'+
-    '<button type="button" class="fb" data-act="theme">'+(document.documentElement.classList.contains('light')?'Dark':'Light')+'</button></div>'+
+    '<button type="button" class="fb" data-act="refresh">Refresh</button></div>'+
     (HEALTH.length?'<details class="health"'+(S.healthOpen?' open':'')+'><summary>Data checks<span>'+HEALTH.length+' thing'+(HEALTH.length>1?'s':'')+' to look at</span></summary>'+
       HEALTH.map(x=>'<div class="hi"><b>'+esc(x.t)+'</b><br>'+esc(x.d)+(x.list?'<ul>'+x.list.map(i=>'<li>'+esc(i)+'</li>').join('')+'</ul>':'')+'</div>').join('')+'</details>':'');
 }
@@ -1403,7 +1513,8 @@ function render(){
   }else{
     const mine=scope();
     h+=bannerHTML()+titleHTML(mine)+(S.audit&&!onDesk()&&S.mode==='list'?auditBarHTML():'');
-    h+=onDesk()?(S.tab==='summary'?summaryHTML(mine):deskHTML(mine)):S.mode==='board'?boardHTML(narrowed(mine)):listHTML(narrowed(mine));
+    h+=onDesk()?(S.tab==='summary'?summaryHTML(mine):S.tab==='home'?coordHomeHTML(mine):deskHTML(mine))
+      :S.mode==='board'?boardHTML(narrowed(mine)):S.mode==='home'?homeHTML(byClient(mine)):listHTML(narrowed(mine));
     if(!onDesk()&&S.mode==='board'&&S.open)h+=drawerHTML(findTask(S.open));
   }
   app.innerHTML=h+footHTML();
@@ -1417,28 +1528,42 @@ function renderFail(){
 
 /* ── events ─────────────────────────────────────────────────────────────── */
 function applyTheme(light){document.documentElement.classList.toggle('light',light);}
-let LIGHT=false;try{LIGHT=localStorage.getItem('sabel-hub-theme')==='light';}catch(e){}
+/* Theme: a choice made here sticks; otherwise follow the device setting, live. */
+let LIGHT=false,THEME_SET=false;
+try{const t=localStorage.getItem('sabel-hub-theme');THEME_SET=t==='light'||t==='dark';LIGHT=THEME_SET?t==='light':!!(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches);}catch(e){}
 applyTheme(LIGHT);
+if(window.matchMedia)try{window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',e=>{if(!THEME_SET){LIGHT=e.matches;applyTheme(LIGHT);render();}});}catch(e){}
 function refreshAll(){Object.keys(TRK).forEach(k=>delete TRK[k]);pullOv();loadAll();}
 
 document.addEventListener('click',e=>{
+  if(S.cOpen&&!e.target.closest('.cwrap')){S.cOpen=false;if(!e.target.closest('[data-act]')){render();return;}}
   const a=e.target.closest('[data-act]');if(!a)return;
   const act=a.getAttribute('data-act'),host=a.closest('[data-id]'),id=host?host.getAttribute('data-id'):null;
   const t=id?findTask(id):null;
   switch(act){
-    case 'flt':{const f=a.getAttribute('data-f');S.flt=(f&&S.flt!==f)?f:'';S.open=null;render();break;}
-    case 'flt-clear':S.flt='';S.client='';render();break;
-    case 'tab':S.tab=a.getAttribute('data-t');save();history.replaceState(null,'',S.tab==='summary'?'#summary':'#'+COORD.toLowerCase());render();window.scrollTo(0,0);break;
+    case 'flt':{const f=a.getAttribute('data-f');
+      if(S.mode==='home'){S.mode='list';S.flt=f;save();}else S.flt=(f&&S.flt!==f)?f:'';
+      S.open=null;render();break;}
+    case 'flt-clear':S.flt='';delete S.csel[S.who];save();render();break;
+    case 'cmenu':S.cOpen=!S.cOpen;render();break;
+    case 'csel':{const k=a.getAttribute('data-k'),l=(S.csel[S.who]||[]).slice(),i=l.indexOf(k);
+      if(i>-1)l.splice(i,1);else l.push(k);
+      if(l.length)S.csel[S.who]=l;else delete S.csel[S.who];
+      S.open=null;save();render();break;}
+    case 'cclear':delete S.csel[S.who];S.open=null;save();render();break;
+    case 'more':S.more[a.getAttribute('data-k')]=true;render();break;
+    case 'tab':S.tab=a.getAttribute('data-t');S.open=null;save();history.replaceState(null,'',S.tab==='summary'?'#summary':'#'+COORD.toLowerCase());render();window.scrollTo(0,0);break;
     case 'period':S.period=a.getAttribute('data-p');save();render();break;
     case 'group':S.group=a.getAttribute('data-g');save();render();break;
-    case 'goto':if(t){S.who=t.owner;S.mode='list';S.flt='';S.client='';S.open=id;S.draft='';save();history.replaceState(null,'','#'+S.who.toLowerCase());render();
+    case 'goto':if(t){S.who=t.owner;S.mode='list';S.flt='';S.open=id;
+      if(selClients().length&&selClients().indexOf(ckey(t))<0)delete S.csel[S.who];   // their client filter would hide itS.draft='';save();history.replaceState(null,'','#'+S.who.toLowerCase());render();
       const el=[].slice.call(document.querySelectorAll('.row')).find(r=>r.getAttribute('data-id')===id);if(el)el.scrollIntoView({block:'center'});}break;
     case 'timer':toggleTimer(id);break;
     case 'time-add':addTime(id);break;
     case 'time-del':delTime(id,a.closest('[data-eid]').getAttribute('data-eid'));break;
-    case 'who':S.needQ=false;S.timeDraft='';S.who=a.getAttribute('data-who');S.flt='';S.client='';S.open=null;S.draft='';S.tag=false;history.replaceState(null,'','#'+S.who.toLowerCase());save();render();window.scrollTo(0,0);break;
-    case 'mode':S.mode=a.getAttribute('data-m');S.open=null;S.draft='';S.tag=false;save();render();break;
-    case 'open':S.editNote=null;S.delNote='';S.needQ=false;S.timeDraft='';S.open=(S.mode==='list'&&S.open===id)?null:id;S.draft='';S.tag=false;save();render();break;
+    case 'who':S.needQ=false;S.timeDraft='';S.who=a.getAttribute('data-who');S.flt='';S.cOpen=false;S.more={};S.open=null;S.draft='';S.tag=false;history.replaceState(null,'','#'+S.who.toLowerCase());save();render();window.scrollTo(0,0);break;
+    case 'mode':S.mode=a.getAttribute('data-m');S.flt='';S.more={};S.open=null;S.draft='';S.tag=false;save();render();break;
+    case 'open':S.editNote=null;S.delNote='';S.needQ=false;S.timeDraft='';S.open=(S.mode!=='board'&&S.open===id)?null:id;S.draft='';S.tag=false;save();render();break;
     case 'close':S.open=null;S.draft='';S.tag=false;save();render();break;
     case 'full':S.full[a.getAttribute('data-col')]=true;render();break;
     case 'dot':cycle(id);break;
@@ -1462,7 +1587,7 @@ document.addEventListener('click',e=>{
     case 'unblock':act2(id,'In Progress',COORD);break;
     case 'desk-toggle':S.deskOpen[id]=!S.deskOpen[id];render();break;
     case 'refresh':refreshAll();break;
-    case 'theme':LIGHT=!LIGHT;applyTheme(LIGHT);try{localStorage.setItem('sabel-hub-theme',LIGHT?'light':'dark');}catch(x){}render();break;
+    case 'theme':LIGHT=!LIGHT;THEME_SET=true;applyTheme(LIGHT);try{localStorage.setItem('sabel-hub-theme',LIGHT?'light':'dark');}catch(x){}render();break;
     case 'audit':S.audit=!S.audit;if(S.audit&&!onDesk())S.mode='list';save();render();break;
     case 'aud-off':S.audit=false;save();render();break;
     case 'aud-undo':delete AUD[id];saveAud();project();render();break;
@@ -1484,6 +1609,7 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&e.target.getAttribute&&e.target.getAttribute('data-ta')==='time'){e.preventDefault();const host=e.target.closest('[data-id]');if(host)addTime(host.getAttribute('data-id'));return;}
+  if(e.key==='Escape'&&S.cOpen){S.cOpen=false;render();return;}
   if(e.key==='Escape'&&S.open&&S.mode==='board'&&!onDesk()){S.open=null;save();render();return;}
   if(e.key!=='Enter'||!(e.metaKey||e.ctrlKey))return;
   const ta=e.target.getAttribute&&e.target.getAttribute('data-ta');
@@ -1491,7 +1617,6 @@ document.addEventListener('keydown',e=>{
   if(ta==='note'){e.preventDefault();const host=e.target.closest('[data-id]');if(host)saveNoteEdit(host.getAttribute('data-id'));}
 });
 document.addEventListener('change',e=>{
-  if(e.target.getAttribute&&e.target.getAttribute('data-sel')==='client'){S.client=e.target.value;S.open=null;render();return;}
   const f=e.target.getAttribute&&e.target.getAttribute('data-aud');if(!f)return;
   setAudit(e.target.closest('.row').getAttribute('data-id'),f,e.target.value);
 });
