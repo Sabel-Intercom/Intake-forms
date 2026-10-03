@@ -534,6 +534,17 @@ html.light .pg-fld{color-scheme:light}
 .pg-notes{display:block;width:100%;box-sizing:border-box;min-height:80px;font:inherit;font-size:13px;line-height:1.5;color:var(--kE2E8F0);background:var(--k12151D);border:1px solid var(--k2A3145);border-radius:8px;padding:9px 11px;resize:vertical}
 .pg-notes:focus{outline:none;border-color:#E10600}
 .pg-foot{display:flex;justify-content:space-between;gap:10px;margin:18px 0 8px}
+.pg-skip-tool{display:flex;justify-content:flex-end;margin:0 0 8px}
+body.tools-off .pg-skip-tool{display:none}
+.pg-skip-tool button,.pg-skip-bar button,.pg-skl-r button{background:var(--k161B26);border:1px solid var(--k2A3145);border-radius:8px;color:var(--k94A3B8);font:inherit;font-size:11px;padding:5px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.pg-skip-tool button:hover,.pg-skl-r button:hover,.pg-skip-bar button:hover{color:var(--kE2E8F0);border-color:var(--k334155)}
+.pg-skip-bar{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:10px 14px;border:1px dashed var(--kFBBF24);border-radius:10px;color:var(--kCBD5E1);font-size:12px}
+.pg-skip-bar>i{color:var(--kFBBF24);font-size:15px}.pg-skip-bar span{flex:1}
+.pg-skl{margin:14px 0 4px;border:1px dashed var(--k2A3145);border-radius:10px;padding:10px 12px}
+.pg-skl-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--kCBD5E1);margin-bottom:6px}
+.pg-skl-h i{color:var(--k64748B)}.pg-skl-h span{color:var(--k64748B);font-size:11px}
+.pg-skl-r{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--k1E2433);font-size:12px;color:var(--k94A3B8)}
+.pg-skl-r .tt{flex:1;display:flex;flex-direction:column}.pg-skl-r small{color:var(--k64748B);font-size:10.5px}
 .pg-foot button{background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:10px;color:var(--k94A3B8);font:inherit;font-size:12px;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;max-width:48%}
 .pg-foot button:hover{color:var(--kE2E8F0);border-color:var(--k2A3145)}.pg-foot b{color:var(--kE2E8F0);font-weight:600}
 @media(max-width:760px){.pg-cols{grid-template-columns:minmax(0,1fr)}.pg-cols>div+div{border-left:0;border-top:1px solid var(--k1E2433)}.pg-you .pg-cols>div+div{border-top-color:rgba(251,191,36,.3)}.pg-route .to{font-size:20px}.pg-in.sm{flex-basis:72px}}
@@ -2798,7 +2809,7 @@ function notesView(){
 
 // ── Block banner (reads the progression pages) ───────
 function blockGateHTML(pid){
-  const p=progPages().find(x=>x.to===pid);if(!p||p.status==='green')return '';const i=PROG_IDS.indexOf(p.id)+1;
+  const p=progPages().find(x=>x.to===pid);if(!p||p.status==='green')return '';const i=progNum(p.id);
   return `<div class="block-gate"><i class="ti ti-arrow-bar-to-down" style="font-size:14px"></i><span>This block opens with <a href="#" onclick="event.preventDefault();setP('prog:${p.id}')" style="color:var(--k60A5FA)">progression ${i}: ${esc(p.title||'')}</a> (${esc(progWhen(p)||'to be scheduled')}). The build runs once it has a green light.</span></div>`;
 }
 
@@ -3065,7 +3076,22 @@ const PROG_IDS=Object.keys(PROG_SEED);
 const PROG_TPL={brings:{t:'',got:false,owner:''},prep:{t:'',done:false,owner:''},built:{t:'',done:false},snags:{t:''},decide:{q:'',a:''},agenda:{m:'',t:''},leave:{t:'',done:false},actions:{t:'',owner:'',due:'',done:false}};
 const PROG_STATUS={unscheduled:'To be scheduled',booked:'Booked',held:'Held',green:'Green light'};
 function progSt(p){return PROG_STATUS[p.status]?p.status:'unscheduled';}
-function progPages(){return PROG_IDS.map(id=>PROG[id]).filter(Boolean);}
+function progAll(){return PROG_IDS.map(id=>PROG[id]).filter(Boolean);}
+// A page marked not required (p.skip) is hidden everywhere: sidebar, Tracker page, Dashboard,
+// pillar banners, Home. It stays in the saved state, so it can be restored (3 Oct 2026).
+function progPages(){return progAll().filter(p=>!p.skip);}
+function progSkipped(){return progAll().filter(p=>p.skip);}
+function progNum(id){return progPages().findIndex(p=>p.id===id)+1;}
+function progSkip(id,on){const p=PROG[id];if(!p)return;
+  if(on){if(!softConfirm('pgskip-'+id,'Click again to mark this session not required. It will be hidden from the tracker; you can restore it from the Tracker page'))return;
+    p.skip=true;p.skipBy=(typeof noteName!=='undefined'&&noteName)||'';p.skipOn=new Date().toISOString().slice(0,10);
+    scheduleAutoSave();showToast('Session marked not required and hidden');setP(p.frm||'tracker');}
+  else{p.skip=false;scheduleAutoSave();showToast('Session restored');if(cur==='prog:'+id)render();else setP('prog:'+id);}
+}
+// Tracker page, editing tools on: the sessions marked not required, each with Restore.
+function progSkippedHTML(){const sk=progSkipped();if(!sk.length||!toolsOn)return '';
+  return `<div class="pg-skl"><div class="pg-skl-h"><i class="ti ti-eye-off"></i><b>Progression sessions not required</b><span>Hidden from the tracker. Restore one to show it again.</span></div>${sk.map(p=>{const a=P.find(x=>x.id===p.frm)||{l:''},b=P.find(x=>x.id===p.to)||{l:''};
+    return `<div class="pg-skl-r"><span class="tt">${esc(p.title||'')}<small>${esc(a.l)} → ${esc(b.l)}${p.skipOn?' · hidden '+esc(p.skipOn)+(p.skipBy?' by '+esc(p.skipBy):''):''}</small></span><button onclick="progSkip('${p.id}',false)"><i class="ti ti-eye"></i>Restore</button></div>`;}).join('')}</div>`;}
 function progDot(p){const st=progSt(p);return `<b class="pg-dot ${st}" title="${PROG_STATUS[st]||st}"></b>`;}
 function progWhen(p){
   if(!p.date)return '';
@@ -3077,7 +3103,7 @@ function progSortKey(p){return p.date?new Date(p.date+'T00:00:00').getTime():(p.
 function progNext(){return progPages().filter(p=>p.status!=='green').sort((a,b)=>progSortKey(a)-progSortKey(b))[0]||null;}
 function progNavHTML(pid){
   if(groupBy!=='pillar')return '';
-  return progPages().filter(p=>p.to===pid).map(p=>{const i=PROG_IDS.indexOf(p.id)+1;const act=cur==='prog:'+p.id;
+  return progPages().filter(p=>p.to===pid).map(p=>{const i=progNum(p.id);const act=cur==='prog:'+p.id;
     return `<button class="pg-si${act?' act':''}" onclick="setP('prog:${p.id}')" title="Progression ${i}: ${esc(p.title||'')}"><i class="ti ti-arrow-bar-to-down"></i><span class="t"><small>Progression ${i}</small><span>${esc(p.title||'')}</span></span>${progDot(p)}</button>`;}).join('');
 }
 // Dashboard: every progression meeting in one compact list, with its date once one is set.
@@ -3249,14 +3275,17 @@ function progMeterHTML(p){const c=progCounts(p);const it=(a,b,l)=>`<span class="
 function progMeter(id){const el=document.getElementById('pg-meter');if(el&&PROG[id])el.innerHTML=progMeterHTML(PROG[id]);}
 function progView(id){
   const p=PROG[id];if(!p)return '<div style="color:var(--k64748B)">This progression page no longer exists.</div>';
-  const idx=PROG_IDS.indexOf(id),cl=esc(CLIENT_LABEL);
+  const idx=progNum(id)-1,cl=esc(CLIENT_LABEL),act=progPages();
+  if(p.skip&&!toolsOn)return '<div style="color:var(--k64748B)">This session is not needed for this project.</div>';
   const pf=P.find(x=>x.id===p.frm)||{l:'Start',c:'#475569'},pt=P.find(x=>x.id===p.to)||{l:'',c:'#E10600'};
   const L=(t,x)=>`<div class="pg-l">${t}</div>${x}`;
-  const prev=PROG_IDS[idx-1],w=progWhen(p);
-  return `<div class="pg">
+  const prev=idx>0?act[idx-1].id:null,w=progWhen(p);
+  const skipBar=p.skip?`<div class="pg-skip-bar"><i class="ti ti-eye-off"></i><span><b>Not required.</b> This session is hidden from the tracker${p.skipOn?' (marked '+esc(p.skipOn)+(p.skipBy?' by '+esc(p.skipBy):'')+')':''}.</span><button onclick="progSkip('${id}',false)"><i class="ti ti-eye"></i>Restore</button></div>`
+    :`<div class="pg-skip-tool"><button onclick="progSkip('${id}',true)" title="Hide this session if it is not needed for this project"><i class="ti ti-eye-off"></i>Not required</button></div>`;
+  return `<div class="pg">${skipBar}
   <div class="pg-break" style="--c1:${pf.c};--c2:${pt.c}">
     <div class="pg-bh">
-      <div class="pg-eye">${p.code?`<span class="pg-code">${esc(p.code)}</span>`:''}<span>Progression ${idx+1} of ${PROG_IDS.length}</span>${progDot(p)}<span>${PROG_STATUS[progSt(p)]}${w?' · '+esc(w):''}</span>${(s=>s.status==='accepted'?'<span style="color:var(--k4ADE80)">· module accepted</span>':s.status==='requested'?'<span style="color:var(--kFBBF24)">· sign-off waiting</span>':'')(progSO(p))}</div>
+      <div class="pg-eye">${p.code?`<span class="pg-code">${esc(p.code)}</span>`:''}<span>${p.skip?'Progression · not required':'Progression '+(idx+1)+' of '+act.length}</span>${progDot(p)}<span>${PROG_STATUS[progSt(p)]}${w?' · '+esc(w):''}</span>${(s=>s.status==='accepted'?'<span style="color:var(--k4ADE80)">· module accepted</span>':s.status==='requested'?'<span style="color:var(--kFBBF24)">· sign-off waiting</span>':'')(progSO(p))}</div>
       <div class="pg-route"><span class="from">${esc(pf.l)}</span><i class="ti ti-arrow-right"></i><span class="to">${esc(pt.l)}</span></div>
       <div style="margin-top:8px">${pgT(id,'title','Session name')}</div>
       <div style="margin-top:4px">${pgT(id,'purpose','What this session is for, in one line')}</div>
@@ -3362,7 +3391,7 @@ function renderSidebar(){
   if(tOpen){
     const hint=cur==='tracker'?hnFirstOpenPillar():'';
     h+=`<div class="hn-sub tk">`+P.map(p=>{const m=phaseMini(p.id),pc=m.total?Math.round(m.done/m.total*100):0;
-      const pg=(typeof progPages==='function'?progPages():[]).filter(x=>x.frm===p.id).map(x=>{const i=PROG_IDS.indexOf(x.id)+1;
+      const pg=(typeof progPages==='function'?progPages():[]).filter(x=>x.frm===p.id).map(x=>{const i=progNum(x.id);
         return `<button class="hn-pg${cur==='prog:'+x.id?' on':''}" onclick="setP('prog:${x.id}')" title="${esc(x.title||'')}"><i></i>Progression ${i}</button>`;}).join('');
       const on=cur===p.id;
       return `<button class="hn-pl${on?' on':''}${hint===p.id?' hint':''}" onclick="setGroupBy('pillar');setP('${p.id}')" title="${esc(p.l)}"><span class="lb">${esc(p.l)}</span><span class="pc" style="color:${on?'#fff':hnPillarClr(p.id,pc)}">${pc}%</span></button>`+pg;
@@ -3424,7 +3453,7 @@ function hnSabelWeek(){
   const rows=out.slice(0,3);
   if(typeof progPages==='function'){const nx=progPages().find(p=>p.date&&p.status!=='green'&&p.status!=='held');
     if(nx){const d=new Date(nx.date+'T00:00:00'),days=(d-new Date().setHours(0,0,0,0))/86400000;
-      if(days>=0&&days<=7){const i=PROG_IDS.indexOf(nx.id)+1;rows.splice(Math.min(rows.length,2),rows.length>2?1:0,{t:'Progression '+i+' · '+(nx.title||''),sub:'Session with you · '+d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).replace('Sept','Sep')+(nx.time?', '+nx.time:''),prog:nx.id});}}}
+      if(days>=0&&days<=7){const i=progNum(nx.id);rows.splice(Math.min(rows.length,2),rows.length>2?1:0,{t:'Progression '+i+' · '+(nx.title||''),sub:'Session with you · '+d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).replace('Sept','Sep')+(nx.time?', '+nx.time:''),prog:nx.id});}}}
   return rows;
 }
 function hhAgo(ts){if(!ts)return 'not yet';const s=(Date.now()-ts)/1000;if(s<90)return 'just now';if(s<3600)return Math.round(s/60)+' min ago';if(s<86400)return Math.round(s/3600)+'h ago';
@@ -3500,7 +3529,7 @@ function trackerView(){
   if(typeof toggleTools==='function')tools+=tile(toolsOn?'tool':'lock',toolsOn?'Hide editing tools':'Show editing tools','',"toggleTools();renderMain()",true);
   return `<div class="tk">
     <div class="tk-head"><h1>Tracker</h1><div class="tk-tog"><button class="${byWeek?'':'on'}" onclick="setGroupBy('pillar');setP('tracker')">By pillar</button><button class="${byWeek?'on':''}" onclick="setGroupBy('week');setP('tracker')">By week</button></div></div>
-    <div class="tk-list">${list}</div>
+    <div class="tk-list">${list}</div>${!byWeek&&typeof progSkippedHTML==='function'?progSkippedHTML():''}
     <div class="tk-sec">Views</div><div class="tk-more">${more}</div>
     <div class="tk-sec">Tools</div><div class="tk-more">${tools}</div>
   </div>`;
@@ -3660,7 +3689,7 @@ function pillarView(pid){
     </div>`;};
   const pg=(typeof progPages==='function'?progPages():[]).find(x=>x.frm===pid);
   let pgCard='';
-  if(pg){const i=PROG_IDS.indexOf(pg.id)+1;const sab=(pg.who||[]).filter(w=>w.s==='s').map(w=>w.n);
+  if(pg){const i=progNum(pg.id);const sab=(pg.who||[]).filter(w=>w.s==='s').map(w=>w.n);
     const when=pg.date?new Date(pg.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).replace('Sept','Sep')+(pg.time?', '+pg.time:''):(pg.hint||'to be scheduled');
     pgCard=`<div class="pv-pg"><div class="t"><div class="ey">Progression ${i} · after this pillar</div><b>${esc(pg.title||'')}${sab.length?' · with '+esc(sab.join(' and ')):''} · ${esc(when)}</b></div><button onclick="setP('prog:${pg.id}')">View agenda</button></div>`;}
   const gate=typeof blockGateHTML==='function'?blockGateHTML(pid):'';
