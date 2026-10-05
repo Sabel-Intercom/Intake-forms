@@ -312,7 +312,7 @@ html.dark .err{background:var(--bad-soft)}
    CONFIG
    ===================================================================== */
 const API = 'https://sabel-webhook.vercel.app/api/readiness';
-const FORM_V = '2026-09-29a';
+const FORM_V = '2026-10-05a';
 /* URL parameters (see client-hub/CONTRACT.md):
    ?client=<slug>   picks this client's saved copy on the server (readiness-<slug>-v1) and keeps
                     their draft separate from anyone else's on the same browser.
@@ -496,7 +496,25 @@ const SECTIONS = [
        {on:['Another platform pushes them in','We have not decided yet','Not sure'],id:'c8b',
         label:'Tell us what you know so far',
         ph:'Type here',
-        ex:'Customers log into our app, but our Shopify store also creates them when they place an order.\nOur CRM pushes every customer into Intercom overnight.'}]]}
+        ex:'Customers log into our app, but our Shopify store also creates them when they place an order.\nOur CRM pushes every customer into Intercom overnight.'}]]},
+
+  {t:'ask',id:'c9',q:'Which system holds your main customer and order records?',
+   why:'Your source of truth: the one system your team trusts when two disagree. Fin and your team look customers up there.',
+   more:'<p>Most businesses have one system they treat as the real record of who a customer is and what they have ordered. For some it is their online store. For others it is their own platform, a CRM, or an operations system that the store feeds into.</p><p>We connect Intercom to that system so Fin and your team see the right details. If it is not your online store, we may connect to it directly instead of, or as well as, the store.</p>',
+   f:[['c9a','Choose the closest','select','Our online store, e.g. Shopify|Our own website, app or platform|Our CRM or customer database|Another system our store feeds into|Not sure',
+       {on:['Our own website, app or platform','Our CRM or customer database','Another system our store feeds into','Not sure'],id:'c9b',
+        label:'Name it, and tell us how your team looks a customer up today',
+        ph:'Type here',
+        ex:'Kinder. Our store sends every order to it, and the team searches it by email or order number.\nOur own platform. Agents search by customer ID in the admin panel.'}]]},
+
+  {t:'ask',id:'c10',q:'Do you use Intercom’s Shopify app?',
+   why:'It creates customers in Intercom by itself, and that cannot be switched off. If Shopify is not your main record, it can create duplicates.',
+   more:'<p>Intercom’s Shopify app copies your Shopify customers and recent orders into Intercom automatically. That is useful when Shopify is your main record.</p><p>The catch is that the app always creates customers itself, using Shopify’s own customer IDs, and there is no setting to stop it. If another system is your main record, the same person can arrive twice: once from the app and once from that system.</p><p>Removing the app stops the duplicates. You lose the automatic order details it adds, which only matters if your main system does not already give us those. Not sure? Choose that and we will talk it through with you.</p>',
+   f:[['c10a','Choose the closest','select','Installed, and we want to keep it|Installed, but we plan to remove it|Not installed|We do not use Shopify|Not sure',
+       {on:['Installed, and we want to keep it','Installed, but we plan to remove it','Not sure'],id:'c10b',
+        label:'Anything we should know',
+        ph:'Type here (optional)',
+        ex:'We use it mainly so the chat appears on our store.\nWe removed it from our old store last year because of duplicate customers.'}]]}
  ]
 },
 {
