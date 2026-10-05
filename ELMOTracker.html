@@ -436,6 +436,75 @@ details.words dt{color:var(--kE2E8F0);font-weight:600}details.words dd{color:var
 .sd-copy .full{grid-column:1/-1}
 .sd-copy label{font-size:10px;color:var(--k64748B,var(--k64748B));display:block;margin-bottom:2px}
 @media(max-width:640px){.sd-call{grid-template-columns:minmax(0,1fr)}.sd-lab{font-size:11.5px}.sd-sub{font-size:10.5px}.sd-legend{display:none}.sd-copy{grid-template-columns:minmax(0,1fr)}}
+/* ── v10 (5 Oct 2026): staged deliverables as in-column cards ─────────────────── */
+:root{--sx-amb:#f0b429;--sx-blu:#5b9cf6}
+html.light{--sx-amb:#b45309;--sx-blu:#2563eb}
+.pc.sxc.sabel{background:rgba(91,156,246,.04)}
+.pc.sxc.client{background:rgba(240,180,41,.04)}
+.sx-ico{font-size:16px;flex-shrink:0;margin-top:1px;width:16px;text-align:center}
+.sx-pdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.sx-l2{font-size:11px;color:var(--kCBD5E1,var(--kCBD5E1));margin-top:3px;line-height:1.4}
+.sx-l2 .m{color:var(--k64748B,var(--k64748B))}
+.sx-l2.ok{color:var(--k4ADE80,var(--k4ADE80))}
+.sx-dots{display:inline-flex;gap:4px;margin-left:4px;align-items:center}
+.sx-dots i{width:7px;height:7px;border-radius:50%;display:inline-block;box-sizing:border-box}
+.sx-turn{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;border-radius:20px;padding:3px 10px;border:1px solid;white-space:nowrap;line-height:1.3}
+.sx-turn i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block;flex-shrink:0}
+.sx-turn.amb{color:var(--sx-amb);background:rgba(240,180,41,.12);border-color:rgba(240,180,41,.45)}
+.sx-turn.blu{color:var(--sx-blu);background:rgba(91,156,246,.12);border-color:rgba(91,156,246,.45)}
+.sx-turn.done{color:var(--k4ADE80,var(--k4ADE80));background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.4)}
+.sx-turn.sm{font-size:10px;padding:0 7px;gap:5px;font-weight:500}
+.sx-turn.sm i{width:6px;height:6px}
+.sx-status{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.sx-status b{font-size:12.5px;font-weight:500;color:var(--kE2E8F0,var(--kE2E8F0))}
+.sx-status .m{font-size:12px;color:var(--k94A3B8,var(--k94A3B8))}
+.sx-body{margin:10px -11px -7px;padding:14px 14px 10px;border-top:1px solid var(--k1E2433,var(--k1E2433));background:var(--k0F1117,var(--k0F1117));cursor:default}
+.sx-stp{position:relative;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr))}
+.sx-line,.sx-fill{position:absolute;top:12px;height:2px;border-radius:2px}
+.sx-line{background:var(--k2A3145,var(--k2A3145))}
+.sx-col{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;background:none;border:0;font:inherit;color:inherit;cursor:pointer;padding:0 4px;position:relative}
+.sx-node{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;box-sizing:border-box;position:relative;z-index:1;background:var(--k0F1117,var(--k0F1117));border:1.5px solid #3a4457;color:var(--k94A3B8,var(--k94A3B8));transition:transform .12s}
+.sx-col:hover .sx-node{transform:scale(1.08)}
+.sx-node i{font-size:13px}
+.sx-node.now{background:#5b9cf6;border-color:#5b9cf6;color:var(--k0F1117);box-shadow:0 0 0 4px rgba(91,156,246,.2);font-weight:700}
+.sx-node.nowclient{background:#f0b429;border-color:#f0b429;color:var(--k0F1117);box-shadow:0 0 0 4px rgba(240,180,41,.2);font-weight:700}
+.sx-node.client{border-color:#f0b429;color:var(--sx-amb)}
+.sx-node.done{background:var(--k4ADE80,var(--k4ADE80));border-color:var(--k4ADE80,var(--k4ADE80));color:var(--k0F1117)}
+.sx-col.sel .sx-node{box-shadow:0 0 0 4px rgba(148,163,184,.22)}
+.sx-lab{font-size:11.5px;color:var(--kCBD5E1,var(--kCBD5E1));line-height:1.3}
+.sx-lab.now{color:var(--sx-blu);font-weight:600}
+.sx-lab.nowclient{color:var(--sx-amb);font-weight:600}
+.sx-lab.done{color:var(--k94A3B8,var(--k94A3B8))}
+.sx-own{font-size:9.5px;font-weight:600;color:var(--k94A3B8,var(--k94A3B8));background:rgba(148,163,184,.12);border-radius:20px;padding:0 6px;white-space:nowrap;flex-shrink:0;line-height:1.6}
+.sx-own.amb{color:var(--sx-amb);background:rgba(240,180,41,.12)}
+.sx-bw{position:relative;margin-top:16px}
+.sx-car{position:absolute;top:-8px;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:8px solid var(--k2A3145,var(--k2A3145))}
+.sx-car.amb{border-bottom-color:rgba(240,180,41,.35)}
+.sx-car.blu{border-bottom-color:rgba(91,156,246,.35)}
+.sx-blk{border:1px solid var(--k2A3145,var(--k2A3145));border-radius:10px;padding:12px 14px;background:var(--k161B26,var(--k161B26))}
+.sx-blk.amb{background:rgba(240,180,41,.08);border-color:rgba(240,180,41,.35)}
+.sx-blk.blu{background:rgba(91,156,246,.08);border-color:rgba(91,156,246,.35)}
+.sx-bh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.sx-bh .h{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--k94A3B8,var(--k94A3B8))}
+.sx-blk.amb .sx-bh .h{color:var(--sx-amb)}
+.sx-blk.blu .sx-bh .h{color:var(--sx-blu)}
+.sx-bh .w{font-size:11px;color:var(--k94A3B8,var(--k94A3B8))}
+.sx-bt{font-size:13px;color:var(--kE2E8F0,var(--kE2E8F0));line-height:1.5}
+.sx-items{display:flex;flex-direction:column;gap:4px;margin-top:10px;padding-top:10px;border-top:1px solid var(--k2A3145,var(--k2A3145))}
+.sx-blk.amb .sx-items{border-top-color:rgba(240,180,41,.2)}
+.sx-blk.blu .sx-items{border-top-color:rgba(91,156,246,.2)}
+.sx-item{display:flex;align-items:center;gap:8px}
+.sx-item .chk-btn{padding:0!important;display:inline-flex;align-items:center}
+.sx-item .chk-btn i{font-size:15px!important}
+.sx-it{font-size:12px;color:var(--kE2E8F0,var(--kE2E8F0));flex:1;min-width:0;line-height:1.4}
+.sx-it.d{color:var(--k64748B,var(--k64748B));text-decoration:line-through}
+.sx-i{font-size:12px;color:var(--k64748B,var(--k64748B));cursor:help;flex-shrink:0}
+.sx-bf{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;font-size:11px;color:var(--k94A3B8,var(--k94A3B8))}
+.sx-bf .r{color:var(--k64748B,var(--k64748B))}
+.sx-bf .r b{color:var(--kCBD5E1,var(--kCBD5E1));font-weight:500}
+.sx-foot{margin-top:12px!important;padding-top:10px;border-top:1px solid var(--k1E2433,var(--k1E2433))}
+.phase-cols .pc.sxc{border:1px solid var(--k1E2433,var(--k1E2433));border-radius:9px;margin-bottom:6px}
+@media(max-width:640px){.sx-lab{font-size:10.5px}.sx-col .sx-own{display:none}.sx-bf .r{flex-basis:100%}}
 
 /* ── Progression pages ─────────────────────────────────────────────────────── */
 .pg-si{display:flex;align-items:center;gap:7px;width:100%;border:none;border-top:1px dashed var(--k2A3145);border-bottom:1px dashed var(--k2A3145);background:rgba(225,6,0,.05);color:var(--k94A3B8);font:inherit;padding:6px 12px 6px 14px;cursor:pointer;text-align:left}
@@ -2400,7 +2469,7 @@ function resolveTask(cid){
       const ai=activePhaseIdx(t);if(phaseOpen[cid]===undefined||phaseDone(t.phases[phaseOpen[cid]]))phaseOpen[cid]=ai<0?t.phases.length-1:ai;
       render();scheduleAutoSave();
     }
-    function hoistPhased(){
+    function hoistPhasedOld(){
       // Pillar and week boards: staged deliverables sit in their own full-width
       // strip above the two columns, so the columns keep the simple one-offs.
       if(cur==='overview'||cur==='runway'||cur==='parked')return;
@@ -2962,119 +3031,127 @@ function sdClientText(t,st){
   const open=(st.p.sub||[]).filter(s=>s.s!=='Complete').map(s=>s.t);
   return open.length?open.join('; ')+'.':sdYou(st.p.l)+'.';
 }
-function sdStepper(t,cid,all,ai){
+// ── v10 (5 Oct 2026): staged deliverables live in the baton-holder's column ─────
+// Collapsed: a row like any task. Expanded: stepper with owner badges and ONE block under
+// the chosen stage (its sentence, its checklist, due + next). No strip, no tab row.
+function sdSide(t){const ai=activePhaseIdx(t);if(ai<0)return 'sabel';return sdCopy(t,t.phases[ai]).clientAction?'client':'sabel';}
+function sdSortWeek(t){const ai=activePhaseIdx(t);if(ai<0)return 0;const p=t.phases[ai];return p.week?sdEndWk(p):999;}
+function sdWho(t,st){if(st.c.clientAction)return CLIENT_LABEL;const team=typeof SABEL_TEAM!=='undefined'?SABEL_TEAM:[];
+  return st.c.ownerLabel||(team.includes(st.p.o)?st.p.o:(team.includes(t.lead)?t.lead:'Sabel'));}
+const SD_VERB=/^(configure|build|map|set|test|run|import|migrate|review|write|draft|design|create|prepare|connect|train|launch|publish|check|update|install|deliver|share|send|plan|load|sample|clean|export|tune|switch|add|confirm|book|record|monitor|fix|copy)\b/i;
+function sdThird(w){return /(sh|ch|ss|x|z|o)$/i.test(w)?w+'es':(/[^aeiou]y$/i.test(w)?w.slice(0,-1)+'ies':w+'s');}
+// "Chris configures" for a Sabel stage that starts with a verb; otherwise the stage name.
+// A client stage reads as its name ("Decide what history to keep") or, lower, "you install".
+function sdPhrase(t,st,lower){const l=String(st.p.l||'').trim();
+  if(st.c.clientAction)return lower?sdYours(l):(l.charAt(0).toUpperCase()+l.slice(1));
+  const m=SD_VERB.exec(l);if(m){const w=m[1];return sdWho(t,st)+' '+sdThird(w.toLowerCase())+l.slice(w.length);}
+  return lower?sdLow(l):l;}
+function sdDots(all){return `<span class="sx-dots">${all.map(st=>{const s=st.state;const bg=s==='done'?'var(--k4ADE80,var(--k4ADE80))':(s==='now'?'#5b9cf6':(s==='nowclient'?'#f0b429':'transparent'));
+  const bd=s==='client'?'#f0b429':(s==='up'?'#3a4457':bg);return `<i title="${esc(st.p.l)}" style="background:${bg};border:1.5px solid ${bd}"></i>`;}).join('')}</span>`;}
+function sdTurnPill(cu){if(!cu)return '<span class="sx-turn done"><i></i>Done</span>';
+  return cu.c.clientAction?'<span class="sx-turn amb"><i></i>Your turn</span>':'<span class="sx-turn blu"><i></i>Sabel\'s turn</span>';}
+function sdStepper(t,cid,all,ai,oi){
   const n=all.length,step=100/n,left=step/2;
   let end=ai<0?n-1:ai,grad='#5b9cf6';
-  if(ai<0)grad='var(--k4ADE80)';
-  else if(all[ai].state==='now'&&all[ai+1]&&all[ai+1].state==='client'){end=ai+1;const cut=end?Math.round(ai/end*100):0;grad=`linear-gradient(90deg,#5b9cf6 ${cut}%,#f0b429 100%)`;}
+  if(ai<0)grad='var(--k4ADE80,var(--k4ADE80))';
   else if(all[ai].state==='nowclient')grad=ai?`linear-gradient(90deg,#5b9cf6 ${Math.round((ai-1)/ai*100)}%,#f0b429 100%)`:'#f0b429';
   const fillW=end*step;
-  return `<div class="sd-stp" style="--n:${n}">
-    <div class="sd-line" style="left:${left}%;right:${left}%"></div>
-    ${fillW>0?`<div class="sd-fill" style="left:${left}%;width:${fillW}%;background:${grad}"></div>`:''}
-    ${all.map(st=>`<button class="sd-col" onclick="sdOpenStage(event,'${cid}',${st.i})" title="${esc(st.p.l)}${st.p.tip?': '+esc(st.p.tip):''}">
-      <span class="sd-node ${st.state}">${st.state==='done'?'<i class="ti ti-check" style="font-size:14px"></i>':st.i+1}</span>
-      <span class="sd-lab ${st.state==='client'||st.state==='nowclient'?'client':(st.state==='up'?'up':'')}">${esc(sdLabel(st))}</span>
-      <span class="sd-sub ${st.state==='now'?'now':(st.state==='nowclient'?'nowclient':'')}">${esc(sdSubLabel(st,all,ai))}</span>
-    </button>`).join('')}
+  return `<div class="sx-stp" style="--n:${n}">
+    <div class="sx-line" style="left:${left}%;right:${left}%"></div>
+    ${fillW>0?`<div class="sx-fill" style="left:${left}%;width:${fillW}%;background:${grad}"></div>`:''}
+    ${all.map(st=>{const cl=st.c.clientAction;return `<button class="sx-col${st.i===oi&&st.i!==ai?' sel':''}" onclick="sdOpenStage(event,'${cid}',${st.i})" title="${esc(st.p.l)}${st.p.tip?': '+esc(st.p.tip):''}">
+      <span class="sx-node ${st.state}">${st.state==='done'?'<i class="ti ti-check"></i>':st.i+1}</span>
+      <span class="sx-lab ${st.state}">${esc(sdLabel(st))}</span>
+      <span class="sx-own${cl?' amb':''}">${esc(cl?CLIENT_LABEL:'Sabel')}</span>
+    </button>`;}).join('')}
   </div>`;
 }
-function sdCallouts(t,all,ai){
-  if(ai<0)return `<div class="sd-call one"><div class="sd-box green"><div class="h">All done</div><div class="t">Every stage of this deliverable is complete.</div></div></div>`;
-  const cu=all[ai];
-  const helper=st=>st.c.helperText||'We will let you know when it is ready.';
-  if(cu.state==='nowclient'){
-    const due=sdDue(cu.p);
-    return `<div class="sd-call one"><div class="sd-box amber"><div class="h">We need you to</div><div class="t">${esc(sdClientText(t,cu))}</div><div class="m">${due?'Due '+due+(cu.c.helperText?' · ':''):''}${cu.c.helperText?esc(cu.c.helperText):''}</div></div></div>`;
-  }
-  const nx=all.slice(ai+1).find(x=>!x.done&&x.c.clientAction);
-  const due=sdDue(cu.p);
-  const blue=`<div class="sd-box blue"><div class="h">What's happening now</div><div class="t">${esc(sdNowText(t,cu))}</div>${due?`<div class="m">Due ${due}</div>`:''}</div>`;
-  if(!nx)return `<div class="sd-call one">${blue}</div>`;
-  return `<div class="sd-call">${blue}<div class="sd-box amber"><div class="h">Then we need you to</div><div class="t">${esc(sdClientText(t,nx))}</div><div class="m">${esc(helper(nx))}</div></div></div>`;
+function sdBlock(t,cid,all,ai,oi){
+  const st=all[oi];if(!st)return '';const n=all.length,p=st.p,active=oi===ai;
+  const tone=active?(st.c.clientAction?'amb':'blu'):'neu';
+  const head=active?`Stage ${oi+1} · ${st.c.clientAction?'We need you to':"What's happening now"}`:`Stage ${oi+1} · ${esc(p.l)}`;
+  const when=active?(sdRange(p)?'Now · '+sdRange(p):'Now'):sdSubLabel(st,all,ai);
+  const txt=active?(st.c.clientAction?sdClientText(t,st):sdNowText(t,st)):(st.c.clientAction?sdClientText(t,st):(st.c.nowText||p.tip||''));
+  const items=(p.sub||[]).map((x,i)=>{const sd=x.s==='Complete';const o=x.o||p.o||'Client';const isC=o==='Client'||o===CLIENT_LABEL;
+    return `<div class="sx-item"><button class="chk-btn" onclick="togglePhaseSub(event,'${cid}',${oi},${i})" title="${sd?'Mark incomplete':'Mark done'}"><i class="ti ti-${sd?'circle-check-filled':'circle'}" style="color:${sd?'var(--k4ADE80,var(--k4ADE80))':'var(--k64748B,var(--k64748B))'}"></i></button>
+      <span class="sx-it${sd?' d':''}">${esc(x.t)}</span>
+      ${x.tip?`<i class="ti ti-info-circle sx-i" onmouseenter="showPhaseTip(event,'${cid}',${oi},${i})" onmousemove="moveTip(event)" onmouseleave="hideTip()"></i>`:''}
+      <span class="sx-own${isC?' amb':''}">${esc(isC?CLIENT_LABEL:o)}</span></div>`;}).join('');
+  const nx=all[oi+1],due=sdDue(p);
+  const footL=[st.state!=='done'&&due?'Due '+due:'',st.c.helperText?esc(st.c.helperText):''].filter(Boolean).join(' · ');
+  const footR=nx?`Next: <b>${esc(sdPhrase(t,nx,false))}</b>, ${esc(sdLow(sdSubLabel(nx,all,ai)))}`:'Last stage';
+  const car=((oi+.5)/n*100).toFixed(2);
+  return `<div class="sx-car ${tone}" style="left:${car}%"></div>
+    <div class="sx-blk ${tone}">
+      <div class="sx-bh"><span class="h">${head}</span><span class="w">${esc(when)}</span></div>
+      ${txt?`<div class="sx-bt">${esc(txt)}</div>`:''}
+      ${items?`<div class="sx-items">${items}</div>`:''}
+      ${p.note?`<div class="stage-note">${esc(p.note)}</div>`:''}
+      <div class="sx-bf"><span>${footL}</span><span style="flex:1"></span><span class="r">${footR}</span></div>
+    </div>`;
 }
-function sdChecklist(t,cid,ai){
-  const oi=phaseOpen[cid]!==undefined?phaseOpen[cid]:(ai<0?t.phases.length-1:ai);
-  const p=t.phases[oi];if(!p)return '';
-  const tabs=t.phases.map((q,i)=>`<button class="sd-tab${i===oi?' on':''}" onclick="sdOpenStage(event,'${cid}',${i})">${i+1} · ${esc(q.l)}</button>`).join('');
-  return `<div class="sd-check" onclick="event.stopPropagation()">
-    <div class="sd-tabs">${tabs}</div>
-    <div class="sub-rail">${(p.sub||[]).map((x,i)=>{const sd=x.s==='Complete';const o=x.o||p.o||'Client';const c=OW[o]||OW.Client||{c:'var(--k94A3B8)',bg:'rgba(148,163,184,.1)'};return `<div style="display:flex;align-items:center;gap:7px;padding:3px 0">
-      <button class="chk-btn" onclick="togglePhaseSub(event,'${cid}',${oi},${i})" title="${sd?'Mark incomplete':'Mark done'}" style="padding-top:0;align-items:center"><i class="ti ti-${sd?'circle-check-filled':'circle'}" style="font-size:15px;color:${sd?'var(--k4ADE80)':'var(--k334155)'}"></i></button>
-      <span style="font-size:12px;flex:1;min-width:0;line-height:1.4;color:${sd?'var(--k475569)':'var(--kE2E8F0)'};${sd?'text-decoration:line-through':''}">${esc(x.t)}</span>
-      ${x.tip?`<i class="ti ti-info-circle" onmouseenter="showPhaseTip(event,'${cid}',${oi},${i})" onmousemove="moveTip(event)" onmouseleave="hideTip()" style="font-size:12px;color:var(--k475569);cursor:help;flex-shrink:0"></i>`:''}
-      <span class="bdg" style="color:${c.c};background:${c.bg};font-size:10px;padding:1px 7px">${esc(o)}</span>
-    </div>`;}).join('')||'<div style="font-size:12px;color:var(--k64748B)">Nothing listed for this stage yet.</div>'}</div>
-    ${p.note?`<div class="stage-note">${esc(p.note)}</div>`:''}
-  </div>`;
-}
-// Open by default: a deliverable whose current stage is under way, or, when nothing on
-// the board is under way yet, the one whose current stage comes first.
-function sdAutoOpen(t,cid){
-  const ai=activePhaseIdx(t);if(ai<0)return false;const p=t.phases[ai];
-  if(!(p.week&&p.week>currentWeek()&&!phaseStarted(p)))return true;
-  const parts=String(cid).split('-');const pid=parts.slice(0,parts.length-2).join('-');
-  const list=((T[pid]||{}).sabel||[]).filter(x=>isPhased(x)&&!x.parked&&activePhaseIdx(x)>=0);
-  const wk=x=>{const q=x.phases[activePhaseIdx(x)];return q.week||999;};
-  if(list.some(x=>{const q=x.phases[activePhaseIdx(x)];return !(q.week&&q.week>currentWeek()&&!phaseStarted(q));}))return false;
-  const first=list.slice().sort((a,b)=>wk(a)-wk(b))[0];
-  return first===t;
-}
-function sdIsOpen(t,cid){return expandedCards.has(cid)||(!sdCollapsed.has(cid)&&sdAutoOpen(t,cid));}
-function sdTog(cid){const t=resolveTask(cid);if(!t)return;
-  if(sdIsOpen(t,cid)){expandedCards.delete(cid);sdCollapsed.add(cid);}else{expandedCards.add(cid);sdCollapsed.delete(cid);}
-  renderMain();}
-function sdToggleCheck(e,cid){e.stopPropagation();if(sdCheckOpen.has(cid))sdCheckOpen.delete(cid);else sdCheckOpen.add(cid);renderMain();}
-function sdOpenStage(e,cid,i){e.stopPropagation();closeStatusPicker();closeOwnerPicker();phaseOpen[cid]=i;expandedCards.add(cid);sdCollapsed.delete(cid);sdCheckOpen.add(cid);renderMain();}
+function sdIsOpen(t,cid){return expandedCards.has(cid);}
+function sdTog(cid){if(expandedCards.has(cid))expandedCards.delete(cid);else expandedCards.add(cid);renderMain();}
+function sdOpenStage(e,cid,i){e.stopPropagation();closeStatusPicker();closeOwnerPicker();phaseOpen[cid]=i;expandedCards.add(cid);renderMain();}
 function phasedCard(t,cid,ctx){
   syncPhased(t);
   const done=t.s==='Complete',all=sdStages(t),ai=activePhaseIdx(t),n=all.length,isOpen=sdIsOpen(t,cid);
+  const cu=ai<0?null:all[ai],side=sdSide(t);
   const chip=typeof noteChip==='function'?noteChip(t,cid):'';
-  const dot=ctx&&ctx.c?`<span title="${esc(ctx.l||'')}" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${ctx.c};margin-right:7px;vertical-align:2px"></span>`:'';
-  const pill=ai<0?`All ${n} stages done`:`Stage ${ai+1} of ${n}`;
-  if(!isOpen){
-    const parts=[];
-    if(ai<0)parts.push('<span style="color:var(--k4ADE80)">All stages done</span>');
-    else{
-      parts.push(pill);
-      const cu=all[ai],r=sdRange(cu.p);
-      parts.push(`<span class="${cu.state==='nowclient'?'a':'b'}">${esc(cu.state==='nowclient'?sdYou(cu.p.l):cu.p.l)}</span>${r?', '+r:''}`);
-      all.slice(ai+1).forEach(st=>parts.push('then '+(st.c.clientAction?`<span class="a">${esc(sdYours(st.p.l))}</span>`:esc(st.p.l))));
-    }
-    const dots=all.map(st=>{const s=st.state;const bg=s==='done'?'var(--k4ADE80)':(s==='now'?'#5b9cf6':(s==='nowclient'?'#f0b429':'transparent'));
-      const bd=s==='client'?'#f0b429':(s==='up'?'#3a4457':bg);return `<i title="${esc(st.p.l)}" style="background:${bg};border:1.5px solid ${bd}"></i>`;}).join('');
-    return `<div id="card-${cid}" class="task phased sd${done?' done':''}" draggable="false"><div class="task-inner">
-      <div class="sd-head" onclick="sdTog('${cid}')">
-        <div class="sd-tt"><div class="sd-title">${dot}${esc(t.t)}</div><div class="sd-sum">${parts.join(' · ')}</div></div>
-        <div class="sd-right">${chip}<span class="sd-dots">${dots}</span><i class="ti ti-chevron-down" style="font-size:14px;color:var(--k64748B)"></i></div>
-      </div></div></div>`;
-  }
-  const oi=phaseOpen[cid]!==undefined?phaseOpen[cid]:(ai<0?n-1:ai);
-  const items=((t.phases[oi]||{}).sub||[]).length;
+  const dot=ctx&&ctx.c?`<span title="${esc(ctx.l||'')}" class="sx-pdot" style="background:${ctx.c}"></span>`:'';
+  const icoC=!cu?'var(--k4ADE80,var(--k4ADE80))':(cu.c.clientAction?'var(--sx-amb)':'var(--sx-blu)');
+  const due=cu?sdDue(cu.p):'';
+  let line2;
+  if(!cu)line2=`<div class="sx-l2 ok">All ${n} stages done</div>`;
+  else{const nx=all[ai+1];const nxW=nx?(nx.p.week?'around '+sdDue(nx.p):sdLow(sdSubLabel(nx,all,ai))):'';
+    line2=`<div class="sx-l2">Stage ${ai+1} of ${n} — ${esc(sdPhrase(t,cu,false))}${nx?` <span class="m">· then ${esc(sdPhrase(t,nx,true))}${nxW?', '+esc(nxW):''}</span>`:''}</div>`;}
+  const who=cu?sdWho(t,cu):(t.lead||'Sabel');
+  const own=cu&&cu.c.clientAction?'<span class="sx-turn amb sm"><i></i>Your turn</span>'
+    :`<span class="pill" style="${typeof pvOwnerStyle==='function'?pvOwnerStyle(who):''}">${esc(who)}</span>`;
+  const head=`<div class="pc-top">
+      <i class="ti ti-route sx-ico" style="color:${icoC}"></i>
+      <div class="pc-m">
+        <div class="pc-t">${dot}${esc(t.t)}</div>
+        ${isOpen?`${sdDesc(t)?`<div class="pc-d sx-d">${esc(sdDesc(t))}</div>`:''}<div class="sx-status">${sdTurnPill(cu)}<b>${cu?`Stage ${ai+1} of ${n} — ${esc(sdPhrase(t,cu,false))}`:`All ${n} stages done`}</b>${due?`<span class="m">· due ${due}</span>`:''}</div>`
+          :`${line2}<div class="pc-pills">${own}${due?`<span class="pill">Due ${due}</span>`:''}<span class="pill blue">${n} stages</span>${sdDots(all)}</div>`}
+      </div>
+      ${isOpen?chip:''}
+      <button class="pc-chev" onclick="event.stopPropagation();sdTog('${cid}')" title="${isOpen?'Close details':'Open details: stages, checklist and notes'}"><i class="ti ti-chevron-${isOpen?'up':'down'}"></i></button>
+    </div>`;
+  const cls=`pc sxc ${side}${done?' done':''}${isOpen?' open':''}`;
+  if(!isOpen)return `<div id="card-${cid}" class="${cls}" draggable="false" onclick="sdTog('${cid}')">${head}</div>`;
+  const oi=phaseOpen[cid]!==undefined&&t.phases[phaseOpen[cid]]?phaseOpen[cid]:(ai<0?n-1:ai);
   const curNotes=cardNotes[cid]!==undefined?cardNotes[cid]:(t.notes||'');
   const curLink=cardLinks[cid]!==undefined?cardLinks[cid]:(t.link||'');
-  const checkOpen=sdCheckOpen.has(cid);
-  return `<div id="card-${cid}" class="task phased sd${done?' done':''}" draggable="false"><div class="task-inner">
-    <div class="sd-head" onclick="sdTog('${cid}')">
-      <div class="sd-tt"><div class="sd-title">${dot}${esc(t.t)}</div>${sdDesc(t)?`<div class="sd-desc">${esc(sdDesc(t))}</div>`:''}</div>
-      <div class="sd-right">${chip}<span class="sd-pill">${pill}</span></div>
-    </div>
-    <div class="sd-body" onclick="event.stopPropagation()">
-      ${sdStepper(t,cid,all,ai)}
-      ${sdCallouts(t,all,ai)}
-      <div class="sd-foot">
-        <button class="sd-link" onclick="sdToggleCheck(event,'${cid}')"><i class="ti ti-list-check" style="font-size:13px"></i>${checkOpen?'Hide checklist':'Show checklist ('+items+')'}</button>
-        ${curLink?`<a href="${esc(curLink)}" target="_blank" rel="noopener" class="sd-link" onclick="event.stopPropagation()"><i class="ti ti-external-link" style="font-size:12px"></i>Open the guide</a>`:''}
+  return `<div id="card-${cid}" class="${cls}" draggable="false" onclick="sdTog('${cid}')">${head}
+    <div class="sx-body" onclick="event.stopPropagation()">
+      ${sdStepper(t,cid,all,ai,oi)}
+      <div class="sx-bw">${sdBlock(t,cid,all,ai,oi)}</div>
+      <div class="sd-foot sx-foot">
         ${typeof notesHTML==='function'?`<button class="sd-link" onclick="sdToggleNotes(event,'${cid}')"><i class="ti ti-message-circle" style="font-size:13px"></i>${sdNotesOpen.has(cid)?'Hide notes':'Notes ('+((t.log||[]).length)+')'}</button>`:''}
+        ${curLink?`<a href="${esc(curLink)}" target="_blank" rel="noopener" class="sd-link" onclick="event.stopPropagation()"><i class="ti ti-external-link" style="font-size:12px"></i>Open the guide</a>`:''}
         <span style="flex:1"></span>
         <button class="sd-btn" onclick="toggleComplete(event,'${cid}')" title="${done?'Reopen the last stage':'Mark every stage done'}"><i class="ti ti-${done?'rotate':'checks'}" style="font-size:12px"></i>${done?'Reopen':'Mark all done'}</button>
         <button onclick="toggleEdit(event,'${cid}')" class="sd-btn"><i class="ti ti-${editCards.has(cid)?'x':'pencil'}" style="font-size:12px"></i>${editCards.has(cid)?'Done editing':'Edit deliverable'}</button>
       </div>
-      ${checkOpen?sdChecklist(t,cid,ai):''}
       ${editCards.has(cid)?phasedEditHTML(t,cid):''}
-      ${typeof notesHTML==='function'?(sdNotesOpen.has(cid)?`<div style="margin-top:8px">${notesHTML(t,cid,curNotes)}</div>`:''):(curNotes?`<div style="margin-top:8px;font-size:12px;color:var(--k94A3B8);white-space:pre-wrap">${esc(curNotes)}</div>`:'')}
+      ${typeof notesHTML==='function'?(sdNotesOpen.has(cid)?`<div style="margin-top:8px">${notesHTML(t,cid,curNotes)}</div>`:''):(curNotes?`<div style="margin-top:8px;font-size:12px;color:var(--k94A3B8,var(--k94A3B8));white-space:pre-wrap">${esc(curNotes)}</div>`:'')}
     </div>
-  </div></div>`;
+  </div>`;
+}
+// Week board (older layout): no strip either. Each staged card moves into the column of
+// whoever holds the baton, slotted in by the active stage's due week.
+function hoistPhased(){
+  if(cur==='overview'||cur==='runway'||cur==='parked')return;
+  const main=document.getElementById('main');const cols=main&&main.querySelector('.phase-cols');if(!cols)return;
+  const lists=[...cols.children].map(c=>c.querySelector(':scope > div'));if(lists.length<2||!lists[0]||!lists[1])return;
+  const key=el=>{const t=resolveTask(String(el.id||'').replace(/^card-/,''));if(!t)return 999;
+    return t.s==='Complete'?9000+(isPhased(t)?0:(endWeek(t)||0)):(isPhased(t)?sdSortWeek(t):(endWeek(t)||999));};
+  [...cols.querySelectorAll('.sxc')].forEach(card=>{const t=resolveTask(card.id.replace(/^card-/,''));if(!t)return;
+    const list=lists[sdSide(t)==='client'?0:1];list.querySelectorAll(':scope > .empty-col').forEach(e=>e.remove());
+    const k=key(card);
+    const before=[...list.children].find(el=>el!==card&&String(el.id||'').indexOf('card-')===0&&key(el)>k)||list.querySelector(':scope > .add-task-btn');
+    list.insertBefore(card,before||null);});
 }
 // The note bubble on a deliverable opens its (collapsed) notes as well.
 (function(){if(typeof noteOpen!=='function')return;const o=noteOpen;noteOpen=function(e,cid){sdNotesOpen.add(cid);return o.apply(this,arguments);};})();
@@ -3704,18 +3781,19 @@ function pvCard(t,cid){
 function pillarView(pid){
   const p=P.find(x=>x.id===pid);if(!p)return '';
   const idx=P.indexOf(p)+1,m=phaseMini(pid),pc=m.total?Math.round(m.done/m.total*100):0;
-  const cols={client:[],sabel:[]},staged=[];let openN=0,doneN=0;const hid={client:0,sabel:0};
+  const cols={client:[],sabel:[]};let openN=0,doneN=0;const hid={client:0,sabel:0};
   ['client','sabel'].forEach(g=>(T[pid][g]||[]).forEach((t,i)=>{if(t.parked)return;const cid=pid+'-'+(g==='sabel'?'s':'c')+'-'+i;
-    if(isPhased(t)){if(!hiddenByDone(t))staged.push(makeCard(t,cid,false,{noDrag:true}));if(t.s==='Complete')doneN++;else openN++;return;}
+    // Staged deliverables sit in the column of whoever holds the baton (v10).
+    if(isPhased(t)){syncPhased(t);const sd=sdSide(t);if(t.s==='Complete')doneN++;else openN++;if(hiddenByDone(t)){hid[sd]++;return;}cols[sd].push({t,cid,staged:true});return;}
     const side=pvIsSabel(t)?'sabel':'client';if(t.s==='Complete')doneN++;else openN++;
     if(hiddenByDone(t)){hid[side]++;return;}cols[side].push({t,cid});}));
-  const key=o=>o.t.s==='Complete'?9000+(endWeek(o.t)||0):(endWeek(o.t)||999);
+  const key=o=>o.t.s==='Complete'?9000+(o.staged?0:(endWeek(o.t)||0)):(o.staged?sdSortWeek(o.t):(endWeek(o.t)||999));
   ['client','sabel'].forEach(k=>cols[k].sort((a,b)=>key(a)-key(b)));
   const tools=pvTools();
   const col=(side)=>{const list=cols[side];const isC=side==='client';
     return `<div class="pcol ${side}" ondragover="pvDragOver(event)" ondragleave="pvDragLeave(event)" ondrop="pvDrop(event,'${side}')">
       <div class="pcol-h"><b>${isC?esc(CLIENT_LABEL)+' tasks':"Sabel's tasks"} · ${list.filter(o=>o.t.s!=='Complete').length}</b><span>${isC?'Earliest first':"What we're doing for you"}</span></div>
-      ${list.length?list.map(o=>pvCard(o.t,o.cid)).join(''):`<div class="pcol-e">${isC?'Nothing for '+esc(CLIENT_LABEL)+' here.':'Nothing for Sabel here.'}</div>`}
+      ${list.length?list.map(o=>o.staged?makeCard(o.t,o.cid,false,{noDrag:true}):pvCard(o.t,o.cid)).join(''):`<div class="pcol-e">${isC?'Nothing for '+esc(CLIENT_LABEL)+' here.':'Nothing for Sabel here.'}</div>`}
       <div class="pcol-f"><span>${hid[side]?hid[side]+' done · hidden':''}</span>${tools?`<button onclick="openAddMenu(event,'${pid}','${side}')">+ Add a task</button>`:''}</div>
     </div>`;};
   const pg=(typeof progPages==='function'?progPages():[]).find(x=>x.frm===pid);
@@ -3732,7 +3810,6 @@ function pillarView(pid){
       <div class="tk-tog"><button class="on" onclick="setGroupBy('pillar');setP('${pid}')">By pillar</button><button onclick="setGroupBy('week');setP('tracker')">By week</button></div>
       <div class="pv-prog"><div class="r"><span>Progress</span><b>${pc}%</b></div><div class="bar"><i style="width:${pc}%;background:#16A34A"></i></div></div></div>
     ${gate}
-    ${staged.length?`<div class="pv-stage">${staged.join('')}</div>`:''}
     <div class="pcols">${col('client')}${col('sabel')}</div>
     ${pgCard}
   </div>`;
