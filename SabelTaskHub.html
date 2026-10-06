@@ -86,6 +86,29 @@ button.stat.hot.on{border-color:var(--red2);box-shadow:0 0 0 1px var(--red2) ins
 .row{border-top:1px solid var(--line)}
 .sech+.row{border-top:none}
 .rh{display:grid;grid-template-columns:22px minmax(0,1fr) auto auto 14px;gap:14px;align-items:center;padding:12px 20px}
+/* rows a person can drag: grip, star, and in the zone a number plus controls */
+.row.dr .rh{grid-template-columns:14px 22px minmax(0,1fr) auto auto 26px 14px;gap:12px;padding-left:14px}
+.row.dr.inz .rh{grid-template-columns:14px 22px 22px minmax(0,1fr) auto auto auto 14px}
+.grip{color:var(--faint);font-size:13px;letter-spacing:-3px;cursor:grab;user-select:none;line-height:1;text-align:center}
+.grip:active{cursor:grabbing}
+.row.dragging{opacity:.45}
+.fzs{width:26px;height:26px;border-radius:50%;font-size:16px;line-height:1;color:var(--faint);display:inline-flex;align-items:center;justify-content:center;transition:color .15s ease,background .15s ease}
+.fzs:hover{color:var(--amber);background:var(--raise)}
+.fzs.on{color:var(--amber)}
+.fzn{font-family:Archivo,sans-serif;font-weight:800;font-size:13px;color:var(--red2);text-align:center}
+.fzc{display:inline-flex;align-items:center;gap:2px}
+.fzc button{width:24px;height:24px;border-radius:6px;font-size:10px;color:var(--faint);display:inline-flex;align-items:center;justify-content:center}
+.fzc button:hover{color:var(--text);background:var(--raise)}
+.fzc .fzx{font-size:17px}
+.fzc .fzx:hover{color:var(--red2)}
+.fzone{border-color:rgba(225,6,0,.45);box-shadow:0 24px 60px -40px rgba(225,6,0,.5)}
+.fzone.empty{border-style:dashed;box-shadow:none}
+.fzone.over{border-color:var(--red2);background:rgba(225,6,0,.04)}
+.fzone .sech .lk{margin-left:12px}
+.fzempty{padding:26px 20px;text-align:center;font-size:13.5px;color:var(--faint)}
+.fzone.over .fzempty{color:var(--text)}
+.row.dropb{box-shadow:inset 0 2px 0 var(--red2)}
+.row.dropa{box-shadow:inset 0 -2px 0 var(--red2)}
 .row.late .rh{background:rgba(225,6,0,.06)}
 .row.open .rh{background:var(--surface2)}
 .dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--faint);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;line-height:1;color:#fff;flex-shrink:0;transition:box-shadow .15s ease,border-color .15s ease}
@@ -283,6 +306,34 @@ html.light .av{background:rgba(16,24,40,.08);color:var(--body)}
 .tcf{font-size:12.5px;color:var(--mute)}
 @media(max-width:720px){.tgrid{grid-template-columns:minmax(0,1fr)}.cpop{right:auto;left:0}}
 
+/* reminders */
+.rtile{border-color:rgba(251,191,36,.35)}
+.rform{display:flex;flex-direction:column;gap:8px;padding:14px 20px;border-bottom:1px solid var(--line)}
+.rin{font:inherit;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--line2);border-radius:10px;padding:8px 12px;outline:none;width:100%}
+.rin:focus{border-color:var(--amber)}
+.rin::placeholder{color:var(--faint)}
+.rrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rdue{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--mute)}
+.rdue input{font:inherit;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:4px 8px;color-scheme:dark}
+html.light .rdue input{color-scheme:light}
+.rto{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;color:var(--mute)}
+.rwho{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--hl2);border-radius:99px;padding:3px 10px 3px 4px;font-size:13px;font-weight:600;color:var(--soft)}
+.rwho.all{padding-left:10px}
+.rwho:hover{border-color:var(--hl5);color:var(--text)}
+.rwho.on{border-color:var(--amber);background:rgba(251,191,36,.14);color:var(--text)}
+.ritem{display:flex;align-items:flex-start;gap:12px;padding:12px 20px;border-top:1px solid var(--line)}
+.rform+.ritem{border-top:none}
+.rt2{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.rt2>b{font-size:14.5px;font-weight:600;color:var(--text)}
+.rt2 .dp{font-size:13.5px}
+.ritem .fzx{font-size:18px;color:var(--faint);padding:0 4px}
+.ritem .fzx:hover{color:var(--red2)}
+/* client set by hand */
+.lk2{font-size:12.5px;font-weight:600;color:var(--blue);margin-left:8px}
+.lk2:hover{text-decoration:underline}
+.clrow{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center}
+.clrow select{font:inherit;font-size:13px;font-weight:600;color:var(--text);background:var(--surface);border:1px solid var(--hl3);border-radius:8px;padding:4px 8px;max-width:240px}
+.clrow .tin{flex:0 1 200px;min-width:140px}
 /* parking needs a question */
 textarea.need{outline:2px solid var(--red2);outline-offset:2px;border-radius:6px}
 .needm{font-size:13px;font-weight:600;color:var(--red2);margin-top:8px}
@@ -374,6 +425,9 @@ html.light .sq{box-shadow:none}
   .trow{padding:18px 16px 6px}.list{padding:14px 12px 24px}.banner,.abar{margin:12px 12px 0}
   .rh{grid-template-columns:20px minmax(0,1fr) auto;padding:12px 14px;gap:8px 12px}
   .rh .due{grid-column:2;grid-row:2;text-align:left}.rh .est{grid-column:3;grid-row:1}.rh .chev{display:none}
+  .row.dr .rh{grid-template-columns:20px minmax(0,1fr) auto auto;padding-left:14px}.row.dr .grip{display:none}
+  .row.dr .rh .est{grid-column:3}.row.dr .rh .fzs{grid-column:4;grid-row:1}
+  .row.dr.inz .rh{grid-template-columns:22px 20px minmax(0,1fr) auto auto}.row.dr.inz .rh .due{grid-column:3}.row.dr.inz .rh .est{grid-column:4}.row.dr.inz .rh .fzc{grid-column:5;grid-row:1}
   .det{grid-template-columns:minmax(0,1fr);gap:8px;padding:12px 14px 16px}
   .aud{padding:10px 14px 12px}
   .board{display:flex;overflow-x:auto;padding:14px 12px 24px}.board>.col{min-width:260px;flex:0 0 260px}
@@ -405,7 +459,7 @@ const PK='sabel-taskhub-v1';
 
 /* ── state ──────────────────────────────────────────────────────────────── */
 /* localStorage holds UI state only: who, mode, the open task. */
-const S={who:'Everyone',mode:'home',open:null,draft:'',tag:false,audit:false,deskOpen:{},deskDraft:{},full:{},flt:'',editNote:null,delNote:'',needQ:false,timeDraft:'',tab:'home',period:'week',group:'person',csel:{},cOpen:false,more:{}};   // csel: person -> [client keys] they have filtered to   // flt: ''|'late'|'today'|'coord'; client: ''|trackerKey|'none'
+const S={who:'Everyone',mode:'home',open:null,draft:'',tag:false,audit:false,deskOpen:{},deskDraft:{},full:{},flt:'',editNote:null,delNote:'',rem:{title:'',note:'',due:'',to:[]},clEdit:'',clDraft:'',needQ:false,timeDraft:'',tab:'home',period:'week',group:'person',csel:{},cOpen:false,more:{}};   // csel: person -> [client keys] they have filtered to   // flt: ''|'late'|'today'|'coord'; client: ''|trackerKey|'none'
 try{const p=JSON.parse(localStorage.getItem(PK)||'{}');['who','mode','open','audit','tab','period','group','csel'].forEach(k=>{if(p[k]!==undefined)S[k]=p[k];});
   if(!p.hv){S.mode='home';S.tab='home';}   /* first visit since Home existed: land on it once */
 }catch(e){}
@@ -434,7 +488,8 @@ const TRK={};   // trackerKey -> parsed tracker page, cached for the session
        flagged, notes:[{id,by,txt,at,tag,eAt,del}], title,
        steps:{<step title, normalised>:{s,base,at,by,wrote}},
        time:[{id,by,start,end,mins,src:'timer'|'manual',eAt,del}],   // logged work
-       run:{<person>:{start,at}} }                                    // a running clock; start 0 = stopped
+       run:{<person>:{start,at}},
+       client:{key,name,by,at} }                                      // set by hand, for a task Notion filed under no client                                    // a running clock; start 0 = stopped
    One shared blob under TL_KEY. Every save re-reads the blob and merges per task
    (newest status wins, notes are unioned by id, steps by title), so two people saving at once do
    not drop each other's work. Until TL_KEY is allowlisted the store 404s and this
@@ -458,10 +513,18 @@ function mergeOv(a,b){
        a clock is one per person per task, newest change wins. */
     const tm={};(x.time||[]).concat(y.time||[]).forEach(n=>{if(n&&n.id&&(!tm[n.id]||(n.eAt||0)>(tm[n.id].eAt||0)))tm[n.id]=n;});
     if(Object.keys(tm).length)m.time=Object.keys(tm).map(k=>tm[k]).sort((p,q)=>p.end-q.end);else delete m.time;
+    const cl=[x.client,y.client].filter(Boolean).sort((p,q)=>(q.at||0)-(p.at||0))[0];
+    if(cl)m.client=cl;else delete m.client;
     const rn={};[x.run,y.run].forEach(g=>Object.keys(g||{}).forEach(k=>{if(!rn[k]||(g[k].at||0)>(rn[k].at||0))rn[k]=g[k];}));
     if(Object.keys(rn).length)m.run=rn;else delete m.run;
     out.tasks[id]=m;
   });
+  /* Focus Zone: each person's ordered list of task ids. Newest change wins. */
+  const fz={};[a&&a.focus,b&&b.focus].forEach(g=>Object.keys(g||{}).forEach(p=>{if(!fz[p]||(g[p].at||0)>(fz[p].at||0))fz[p]=g[p];}));
+  if(Object.keys(fz).length)out.focus=fz;
+  /* Reminders: tasks made here and pushed to people. By id, newest edit wins, deletes are tombstones. */
+  const rm={};[a&&a.reminders,b&&b.reminders].forEach(g=>Object.keys(g||{}).forEach(id=>{if(!rm[id]||(g[id].eAt||0)>(rm[id].eAt||0))rm[id]=g[id];}));
+  if(Object.keys(rm).length)out.reminders=rm;
   return out;
 }
 async function readRemoteOv(){
@@ -479,7 +542,8 @@ async function pullOv(){
   if(!remote)return false;
   const before=JSON.stringify(OV),merged=mergeOv(OV,remote);
   OV=merged;saveLocalOv();
-  if(JSON.stringify(merged.tasks)!==JSON.stringify(mergeOv(remote,remote).tasks))pushOv();   // this browser held work the store had not seen
+  const same=mergeOv(remote,remote);
+  if(JSON.stringify([merged.tasks,merged.focus,merged.reminders])!==JSON.stringify([same.tasks,same.focus,same.reminders]))pushOv();   // this browser held work the store had not seen
   return JSON.stringify(merged)!==before;
 }
 let PUSHQ=Promise.resolve();
@@ -713,8 +777,12 @@ async function loadAll(){
   const titleSt={};
   tasks.forEach(t=>{const k=t.key+'|'+norm(t.title);if(titleSt[k]!=='open')titleSt[k]=t.status==='Complete'?'done':'open';});
   const notOn={},other=[];
+  /* A Notion task may carry a client name but no tracker key (the row was never
+     stamped). If a tracker client has that name, file the task under it. */
+  const byName={};Object.keys(clients).forEach(k=>{byName[norm(clients[k].name)]=k;});
   (hb.tasks||[]).forEach(n=>{
     const o=who(n.owner);
+    if(!clients[n.project]&&n.client&&byName[norm(n.client)])n=Object.assign({},n,{project:byName[norm(n.client)]});
     if(clients[n.project]){
       if(nUsed[n.id]||!isTeam(o))return;
       const st=titleSt[n.project+'|'+norm(n.title)];
@@ -729,7 +797,7 @@ async function loadAll(){
       return;
     }
     if(!isTeam(o)||/^\(OOS\b/i.test(n.title||''))return;
-    other.push({id:'n:'+n.id,key:'',title:n.title,owner:o,status:n.status||'Pending',est:n.est,start:dOf(n.start||n.end),end:dOf(n.end||n.start),late:dOf(n.end||n.start),
+    other.push({id:'n:'+n.id,key:n.client?'name:'+n.client:'',clientAuto:n.client||'',title:n.title,owner:o,status:n.status||'Pending',est:n.est,start:dOf(n.start||n.end),end:dOf(n.end||n.start),late:dOf(n.end||n.start),
       src:/^call:/.test(n.project||'')?'Meeting action':'Notion task',ref:(n.project||'').replace(/^call:/,''),notion:n});
   });
   Object.keys(drift).forEach(k=>health.push({t:clients[k].name+': '+drift[k].length+' task'+(drift[k].length>1?'s':'')+' done in the tracker but still open in Notion',
@@ -795,9 +863,24 @@ function audHTML(t){
 }
 
 /* ── the list as it stands: trackers + Notion, then the audit queue, then our own store ── */
+/* Reminders live in OV.reminders; each becomes a task for every person it was pushed to,
+   so Home, List, the Focus Zone, notes and Mark done all work on it unchanged. */
+function reminderRaws(){
+  const R=OV.reminders||{},out=[];
+  Object.keys(R).forEach(id=>{
+    const r=R[id];if(!r||r.del)return;
+    (r.to||[]).forEach(p=>{
+      const d=r.due?dOf(r.due):null;
+      out.push({id:'r:'+id+':'+p,key:'',cid:'',pid:'',pillar:'',title:r.title,owner:p,lead:'',status:'Pending',start:d,end:d,late:d,
+        est:r.est||null,notion:null,desc:r.note||'',bg:'',card:'',tip:'',link:'',log:[],sub:[],stages:null,doneAt:'',src:'Reminder',rem:r});
+    });
+  });
+  return out;
+}
+const rawOf=id=>RAW.find(x=>x.id===id)||reminderRaws().find(x=>x.id===id)||null;
 const mapSt=s=>s==='Dependency'?'Pending':s==='Done'?'Complete':(s||'Pending');
 function project(){
-  const all=RAW.map(t=>{
+  const all=RAW.concat(reminderRaws()).map(t=>{
     const base=mapSt(t.status);
     const x=Object.assign({},t,{status:base,waiting:t.status==='Dependency',notes:[],flagged:false,parked:null,prevStatus:'',time:[],run:{},sAt:0,sBy:''});
     const a=AUD[t.id];
@@ -816,6 +899,10 @@ function project(){
     if(o){
       x.notes=(o.notes||[]).filter(n=>!n.del);x.flagged=!!o.flagged;x.back=o.back||null;
       x.time=(o.time||[]).filter(n=>!n.del);x.run=o.run||{};
+      if(t.src&&o.client&&(o.client.key||o.client.name)){
+        x.key=o.client.key&&CLIENTS[o.client.key]?o.client.key:'name:'+o.client.name;
+        x.clientManual=o.client;
+      }
       if(o.status){
         /* The tracker (or Notion) has moved on since we acted, and not to what we set:
            someone changed it at source, so the source wins. */
@@ -848,8 +935,10 @@ function scope(){
   return (S.who==='Everyone'||onDesk())?a.filter(t=>isTeam(t.owner)):a.filter(t=>t.owner===S.who);
 }
 /* The stat pills and the client dropdown narrow what the List and Board show. */
-const ckey=t=>CLIENTS[t.key]?t.key:'none';
-const cLabel=k=>k==='none'?'No client':(CLIENTS[k]?CLIENTS[k].name:k);
+/* A client is a tracker key, or "name:<Client>" for one with no tracker (set by hand). */
+const isNameKey=k=>/^name:/.test(k||'');
+const ckey=t=>CLIENTS[t.key]?t.key:isNameKey(t.key)?t.key:'none';
+const cLabel=k=>k==='none'?'No client':CLIENTS[k]?CLIENTS[k].name:isNameKey(k)?k.slice(5):k;
 const selClients=()=>S.csel[S.who]||[];
 /* Just the client filter: what Home works from. */
 function byClient(mine){
@@ -866,7 +955,15 @@ function narrowed(mine){
 }
 const dueIn=t=>t.end?Math.round((t.end.getTime()-today().getTime())/864e5):null;
 const isLate=t=>!isDone(t)&&dueIn(t)!==null&&dueIn(t)<0;
-const clientOf=t=>CLIENTS[t.key]?CLIENTS[t.key].name:'No client';
+const clientOf=t=>CLIENTS[t.key]?CLIENTS[t.key].name:isNameKey(t.key)?t.key.slice(5):'No client';
+/* Client names already set by hand, so the same spelling is offered again. */
+function manualNames(){const s={};Object.keys(OV.tasks).forEach(id=>{const c=OV.tasks[id].client;if(c&&c.name&&!c.key)s[c.name]=1;});return Object.keys(s).sort();}
+function setClient(id,key,name){
+  const t=findTask(id);if(!t||!t.src)return;
+  const o=ov(id);o.title=t.title;
+  o.client={key:key||'',name:name||(key&&CLIENTS[key]?CLIENTS[key].name:''),by:author(),at:Date.now()};
+  S.clEdit='';S.clDraft='';commit();
+}
 const doneToday=t=>isDone(t)&&String(t.doneAt||'').slice(0,10)===isoOf(today());
 const stepsOf=t=>t.stages?[].concat.apply([],t.stages.map(g=>g.sub)):(t.sub||[]);
 /* "3/9" with a thin bar: how far through its steps a task is. */
@@ -923,9 +1020,41 @@ function toast(msg){const el=document.getElementById('toast');el.textContent=msg
 const ov=id=>OV.tasks[id]||(OV.tasks[id]={notes:[]});
 const nid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 function commit(){saveLocalOv();project();render();pushOv();}
+/* ── Focus Zone: a person's own order for the day ── */
+const focusIds=p=>((OV.focus||{})[p]||{}).ids||[];
+const inFocus=(t,p)=>focusIds(p||S.who).indexOf(t.id)>-1;
+function setFocus(p,ids){
+  const seen={},clean=ids.filter(id=>id&&!seen[id]&&(seen[id]=1)&&findTask(id));
+  OV.focus=OV.focus||{};OV.focus[p]={ids:clean,at:Date.now()};
+  commit();
+}
+function addReminder(){
+  const r=S.rem,title=r.title.trim();
+  if(!title){toast('Type what not to forget first');return;}
+  if(!r.to.length){toast('Pick who it is for');return;}
+  OV.reminders=OV.reminders||{};
+  const id=nid();
+  OV.reminders[id]={id,title,note:r.note.trim(),due:r.due||'',to:r.to.slice(),by:author(),at:Date.now(),eAt:Date.now()};
+  S.rem={title:'',note:'',due:'',to:[]};
+  commit();toast('Reminder sent to '+r.to.join(', '));
+}
+function delReminder(rid){const r=(OV.reminders||{})[rid];if(!r)return;r.del=true;r.eAt=Date.now();commit();}
+function focusToggle(id){
+  if(!isTeam(S.who))return;
+  const ids=focusIds(S.who).slice(),i=ids.indexOf(id);
+  if(i>-1)ids.splice(i,1);else ids.push(id);
+  setFocus(S.who,ids);
+}
+/* Put id at position idx (dropping it from wherever it was). */
+function focusPlace(id,idx){
+  const ids=focusIds(S.who).filter(x=>x!==id);
+  ids.splice(Math.max(0,Math.min(idx,ids.length)),0,id);
+  setFocus(S.who,ids);
+}
+function focusMove(id,d){const ids=focusIds(S.who),i=ids.indexOf(id);if(i<0)return;focusPlace(id,i+d);}
 function addNote(o,by,txt,tag){o.notes=(o.notes||[]).concat([{id:nid(),by:by,txt:txt,at:Date.now(),tag:!!tag}]);}
 function setStatus(id,status,by){
-  const t=findTask(id),raw=RAW.find(x=>x.id===id);if(!t||!raw)return;
+  const t=findTask(id),raw=rawOf(id);if(!t||!raw)return;
   const o=ov(id);
   o.base=mapSt(raw.status);o.status=status;o.sAt=Date.now();o.by=by||author();o.title=t.title;o.wrote=null;
   if(status==='Complete')o.doneAt=isoOf(today());else delete o.doneAt;
@@ -965,7 +1094,7 @@ function delTime(id,eid){
 }
 /* Status change + the matching write to the client tracker, where there is one. */
 function act(id,status,by){
-  const raw=RAW.find(x=>x.id===id);if(!raw)return;
+  const raw=rawOf(id);if(!raw)return;
   const tk=findTask(id),o=setStatus(id,status,by);if(!o)return;
   /* Start runs the clock, anything else stops it. A change made from the desk never starts one. */
   if(status==='In Progress'&&by!==COORD&&tk)startRun(id,clockOf(tk));else stopAll(o);
@@ -979,7 +1108,7 @@ function act(id,status,by){
 /* Tick or untick one step. Kept in our own store straight away, then written to the
    client tracker, which also moves the parent the way the tracker page would. */
 function tickStep(id,key){
-  const t=findTask(id),raw=RAW.find(x=>x.id===id);if(!t||!raw)return;
+  const t=findTask(id),raw=rawOf(id);if(!t||!raw)return;
   const s=stepsOf(t).find(x=>norm(x.t)===key);if(!s)return;
   const to=s.s==='Complete'?'Pending':'Complete',o=ov(id);
   o.steps=o.steps||{};o.title=t.title;
@@ -1160,7 +1289,9 @@ function tagsHTML(t){
   if(t.status==='Blocked')h+='<span class="tag red">Blocked</span>';
   if(t.back&&t.status!=='Parked'&&!isDone(t))h+='<span class="tag amber">'+esc(t.back.by)+' replied</span>';
   if(t.waiting)h+='<span class="tag amber">Waiting</span>';
-  if(t.src)h+='<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>';
+  if(t.src==='Reminder')h+='<span class="tag amber">Reminder from '+esc(t.rem&&t.rem.by||COORD)+'</span>';
+  else if(t.src)h+='<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>';
+  if(t.clientManual)h+='<span class="tag violet" title="Client set by hand by '+esc(t.clientManual.by||'')+'">Client added by hand</span>';
   if(t.edited)h+='<span class="tag violet">Change queued</span>';
   return h;
 }
@@ -1190,9 +1321,25 @@ function aboutHTML(t){
   else if(t.sub&&t.sub.length)h+='<div>'+stepHead(t,'Steps')+stepsHTML(t,t.sub)+'</div>';
   return h;
 }
+function clientKV(t){
+  if(!t.src)return '<span>Client</span><b>'+esc(clientOf(t))+'</b>';
+  const m=t.clientManual;
+  if(S.clEdit!==t.id){
+    return '<span>Client</span><b>'+esc(clientOf(t))+(m?' <small>set by hand'+(m.by?' by '+esc(m.by):'')+'</small>':(t.clientAuto?' <small>from Notion</small>':''))+
+      ' <button type="button" class="lk2" data-act="cl-edit">'+(CLIENTS[t.key]||isNameKey(t.key)?'Change':'Set client')+'</button></b>';
+  }
+  const ks=Object.keys(CLIENTS).sort((a,b)=>CLIENTS[a].name.localeCompare(CLIENTS[b].name)),names=manualNames();
+  const cur=CLIENTS[t.key]?t.key:isNameKey(t.key)?t.key:'';
+  return '<span>Client</span><b><span class="clrow"><select data-sel="cl" aria-label="Client"><option value=""'+(cur?'':' selected')+'>No client</option>'+
+    '<optgroup label="Clients with a tracker">'+ks.map(k=>'<option value="'+esc(k)+'"'+(cur===k?' selected':'')+'>'+esc(CLIENTS[k].name)+'</option>').join('')+'</optgroup>'+
+    (names.length?'<optgroup label="Added by hand">'+names.map(n=>'<option value="name:'+esc(n)+'"'+(cur==='name:'+n?' selected':'')+'>'+esc(n)+'</option>').join('')+'</optgroup>':'')+
+    '<option value="__new">Another client…</option></select>'+
+    (S.clDraft!==null&&S.clEdit===t.id&&S.clNew?'<input class="tin" data-ta="clname" placeholder="Client name, e.g. FoundU" value="'+esc(S.clDraft)+'"><button type="button" class="pb sm" data-act="cl-save">Save</button>':'')+
+    '<button type="button" class="lk2" data-act="cl-cancel">Cancel</button></span></b>';
+}
 function kvHTML(t,withStatus){
   const d=dueLabel(t)[0],e=fEst(t.est);
-  return '<div class="kv">'+(withStatus?'<span>Status</span><b>'+esc(t.status)+'</b>':'<span>Client</span><b>'+esc(clientOf(t))+'</b>')+
+  return '<div class="kv">'+(withStatus?'<span>Status</span><b>'+esc(t.status)+'</b>':'')+clientKV(t)+
     '<span>Owner</span><b>'+esc(t.owner)+'</b>'+
     '<span>Due</span><b>'+(t.end?DOW[t.end.getDay()]+' '+fD(t.end):'No date')+(isLate(t)?' · '+esc(d.split(' · ')[0]):'')+'</b>'+
     '<span>Estimate</span><b>'+(e?e+' <small>from Notion</small>':'<small>none in Notion</small>')+'</b></div>';
@@ -1228,7 +1375,7 @@ function notesHTML(t){
   }).join('');
 }
 function composerBtns(t){
-  return '<div class="cbtn">'+(t.status==='Parked'?'':'<button type="button" class="pb amber" data-act="park">Park with '+COORD+' ?</button>')+
+  return '<div class="cbtn">'+(t.status==='Parked'||onDesk()?'':'<button type="button" class="pb amber" data-act="park">Park with '+COORD+' ?</button>')+
     '<span class="sp"></span><button type="button" class="pb tagb'+(S.tag?' on':'')+'" data-act="tag">@'+COORD+'</button>'+
     '<button type="button" class="pb post" data-act="post">Post note</button></div>';
 }
@@ -1307,10 +1454,16 @@ function rowHTML(t){
   if(t.parked&&t.parked.question)meta+='<span class="q">'+quote(t.parked.question)+'</span>';
   if(n)meta+='<span>'+n+' note'+(n===1?'':'s')+'</span>';
   meta+=runHTML(t)+(logged(t)?'<span>'+fMins(logged(t))+' logged</span>':'');
-  let h='<div class="row'+(isLate(t)?' late':'')+(isDone(t)?' isdone':'')+(open?' open':'')+'" data-id="'+esc(t.id)+'"><div class="rh">'+
+  const canF=isTeam(S.who)&&!onDesk(),fz=canF&&inFocus(t),zone=!!t._zone;
+  let h='<div class="row'+(isLate(t)?' late':'')+(isDone(t)?' isdone':'')+(open?' open':'')+(canF?' dr':'')+(zone?' inz':'')+'" data-id="'+esc(t.id)+'"><div class="rh">'+
+    (canF?'<span class="grip" draggable="true" title="Drag to the Focus Zone, or to reorder it" aria-hidden="true">&#8942;&#8942;</span>':'')+
+    (zone?'<span class="fzn">'+t._zone+'</span>':'')+
     '<button type="button" class="dot '+dc+'" data-act="dot" title="'+esc(t.status)+'" aria-label="Status: '+esc(t.status)+'">'+glyph+'</button>'+
     '<button type="button" class="rt" data-act="open"><b>'+esc(t.title)+'</b><span class="rm">'+meta+'</span></button>'+
-    dueHTML(t)+estHTML(t)+'<span class="chev">&#9654;</span></div>';
+    dueHTML(t)+estHTML(t)+
+    (zone?'<span class="fzc"><button type="button" data-act="fz-up" title="Move up" aria-label="Move up">&#9650;</button><button type="button" data-act="fz-down" title="Move down" aria-label="Move down">&#9660;</button><button type="button" class="fzx" data-act="focus" title="Remove from the Focus Zone" aria-label="Remove from the Focus Zone">&times;</button></span>'
+         :canF?'<button type="button" class="fzs'+(fz?' on':'')+'" data-act="focus" title="'+(fz?'In your Focus Zone. Click to remove.':'Add to your Focus Zone')+'" aria-pressed="'+fz+'">'+(fz?'&#9733;':'&#9734;')+'</button>':'')+
+    '<span class="chev">&#9654;</span></div>';
   if(S.audit)h+=audHTML(t);
   if(open)h+='<div class="det"><div>'+actionsHTML(t)+aboutHTML(t)+kvHTML(t)+timeHTML(t)+linksHTML(t)+'</div>'+
     '<div><div class="dl" style="margin-top:0">Notes</div>'+notesHTML(t)+'<div class="comp">'+draftTA()+composerBtns(t)+'</div>'+
@@ -1401,22 +1554,54 @@ function homeSec(key,label,sub,dot,col,border,rows,jump){
     '<small>'+rows.length+' task'+(rows.length===1?'':'s')+(hrs?' · '+fTot(hrs):'')+'</small></div>'+rows.slice(0,cap).map(rowHTML).join('')+
     (rows.length>cap?'<button type="button" class="hmore" data-act="more" data-k="'+key+'">Show all '+rows.length+'</button>':'')+'</div>';
 }
+function focusZoneHTML(mine){
+  const ids=focusIds(S.who),byId={};mine.forEach(t=>{byId[t.id]=t;});
+  const rows=ids.map(id=>byId[id]).filter(t=>t&&!isDone(t)).map((t,i)=>Object.assign({},t,{_zone:i+1}));
+  const hrs=rows.reduce((a,t)=>a+(+t.est||0),0),sp=rows.reduce((a,t)=>a+spent(t),0);
+  return '<div class="secc fzone'+(rows.length?'':' empty')+'" data-zone="1"><div class="sech"><i style="background:var(--red2)"></i><b style="color:var(--text)">Focus Zone</b><span>Your order for today. Drag tasks in by the ⋮⋮ handle, or press ☆ on any task.</span>'+
+    '<small>'+(rows.length?rows.length+' task'+(rows.length===1?'':'s')+(hrs?' · '+fTot(hrs):'')+(sp?' · '+fMins(sp)+' logged':''):'')+'</small>'+
+    (rows.length?'<button type="button" class="lk" data-act="fz-clear">Clear</button>':'')+'</div>'+
+    (rows.length?rows.map(rowHTML).join(''):'<div class="fzempty">Nothing here yet. Drag a task up from below, or press ☆ on it.</div>')+'</div>';
+}
 function homeHTML(mine){
-  const open=mine.filter(t=>!isDone(t));
+  const canF=isTeam(S.who);
+  const zone=canF?focusZoneHTML(mine):'';
+  const fset={};if(canF)focusIds(S.who).forEach(id=>{fset[id]=1;});
+  const open=mine.filter(t=>!isDone(t)&&!fset[t.id]&&t.src!=='Reminder');
+  const rems=mine.filter(t=>!isDone(t)&&!fset[t.id]&&t.src==='Reminder').sort(byDue);
   const back=open.filter(t=>t.back&&t.status!=='Parked').sort(byDue);
   const prog=open.filter(t=>t.status==='In Progress'&&!t.back).sort(byDue);
   const urgent=open.filter(t=>t.status!=='In Progress'&&t.status!=='Parked'&&!t.back&&dueIn(t)!==null&&dueIn(t)<=0).sort(byDue);
   const parked=open.filter(t=>t.status==='Parked').sort(byDue);
   const whoTxt=S.who==='Everyone'?'the team':'you';
-  let h='<div class="list">';
+  let h='<div class="list">'+zone;
+  if(rems.length)h+=homeSec('rem','Don’t forget…','Pushed to '+whoTxt+' by '+COORD+'. Tick it off when done.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',rems);
   if(back.length)h+=homeSec('back',COORD+' replied','Answered and handed back. Over to '+whoTxt+'.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',back);
   h+=prog.length?homeSec('prog','Started, not finished','In progress now. Finish or pause these before picking up more.','var(--blue)','var(--blue)','rgba(96,165,250,.4)',prog)
     :'<div class="blank sm"><b>Nothing started.</b>Pick something from Urgent below, or open the List.</div>';
   h+=urgent.length?homeSec('urgent','Urgent','Overdue or due today, and not started.','var(--red2)','var(--red2)','rgba(225,6,0,.45)',urgent)
     :'<div class="blank sm"><b>Nothing urgent.</b>Nothing overdue or due today that is not already under way.</div>';
   if(parked.length)h+=homeSec('parked','Parked with '+COORD,'Waiting on an answer.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',parked);
-  const rest=open.length-back.length-prog.length-urgent.length-parked.length;
+  const rest=open.length-back.length-prog.length-urgent.length-parked.length+(canF?0:0);
   return h+'<div class="hfoot"><span>'+(rest>0?rest+' more open task'+(rest===1?'':'s')+' not due yet.':'That is everything open.')+'</span><button type="button" class="lk" data-act="mode" data-m="list">Open the full list</button></div></div>';
+}
+/* "Don't forget…": make a task here and push it to one or more people. */
+function reminderTileHTML(all){
+  const R=OV.reminders||{},live=Object.keys(R).map(k=>R[k]).filter(r=>r&&!r.del).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);
+  const doneBy=(r,p)=>{const t=all.find(x=>x.id==='r:'+r.id+':'+p);return !!(t&&isDone(t));};
+  let h='<div class="secc rtile"><div class="sech"><i style="background:var(--amber)"></i><b style="color:var(--amber)">Don’t forget…</b><span>Add a task here and push it to the team. It lands on their Home and can go in their Focus Zone.</span></div>'+
+    '<div class="rform"><input class="rin" data-ta="rtitle" placeholder="What not to forget, e.g. Complete Fin certifications" value="'+esc(S.rem.title)+'">'+
+    '<input class="rin" data-ta="rnote" placeholder="A note, link or why it matters (optional)" value="'+esc(S.rem.note)+'">'+
+    '<div class="rrow"><label class="rdue">Due <input type="date" data-sel="rdue" value="'+esc(S.rem.due)+'"></label>'+
+    '<span class="rto">For '+TEAM.map(p=>'<button type="button" class="rwho'+(S.rem.to.indexOf(p)>-1?' on':'')+'" data-act="r-who" data-p="'+p+'" aria-pressed="'+(S.rem.to.indexOf(p)>-1)+'">'+av(p,true)+p+'</button>').join('')+
+    '<button type="button" class="rwho all" data-act="r-who" data-p="*">Everyone</button></span>'+
+    '<span class="sp"></span><button type="button" class="pb hand" data-act="r-add">Add reminder</button></div></div>'+
+    (live.length?live.map(r=>'<div class="ritem" data-rid="'+esc(r.id)+'"><div class="rt2"><b>'+esc(r.title)+'</b>'+(r.note?'<span class="dp">'+linkify(r.note)+'</span>':'')+
+      '<span class="rm">'+(r.due&&dOf(r.due)?'<span>Due '+fD(dOf(r.due))+'</span>':'')+'<span>Added '+fStamp(r.at)+(r.by?' by '+esc(r.by):'')+'</span>'+
+      (r.to||[]).map(p=>'<span class="tag'+(doneBy(r,p)?' green':'')+'">'+esc(p)+(doneBy(r,p)?' ✓':'')+'</span>').join('')+'</span></div>'+
+      '<button type="button" class="fzx" data-act="r-del" title="Remove this reminder for everyone" aria-label="Remove this reminder">&times;</button></div>').join('')
+     :'<div class="sempty">No reminders out at the moment.</div>');
+  return h+'</div>';
 }
 /* The coordinator's home: what is waiting on her, then the team at a glance. */
 function coordHomeHTML(all){
@@ -1429,16 +1614,19 @@ function coordHomeHTML(all){
     (parked.length?parked.map(t=>{const p=t.parked||{};return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="tab" data-t="desk"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl">'+esc(clientOf(t))+'</span><span class="own">'+esc(p.by||t.owner)+'</span><span class="q">'+quote(p.question||'')+'</span></span></button>'+
       '<span class="srw">Parked '+fStamp(p.askedAt)+'</span>'+dueHTML(t)+'<button type="button" class="pb amber sm" data-act="tab" data-t="desk">Answer</button></div>';}).join('')
      :'<div class="sempty">Nothing is parked with you.</div>')+'</div>';
+  h+=reminderTileHTML(all);
   h+='<div class="secc"><div class="sech"><i style="background:var(--soft)"></i><b style="color:var(--body)">The team right now</b><span>Click a name for their home</span></div><div class="tgrid">'+TEAM.map(p=>{
     const m=open.filter(t=>t.owner===p),late=m.filter(isLate).length;
     let tm=0;all.forEach(t=>{t.time.forEach(e=>{if(e.by===p&&e.end>=from)tm+=(+e.mins||0);});if(t.run[p]&&t.run[p].start)tm+=elapsed(t.run[p].start);});
     const on=all.find(t=>t.run[p]&&t.run[p].start);
     return '<button type="button" class="tcard" data-act="who" data-who="'+p+'"><span class="tch">'+av(p)+'<b>'+p+'</b></span>'+
       '<span class="tcs"><span><b>'+m.filter(t=>t.status==='In Progress').length+'</b>in progress</span><span class="'+(late?'hot':'')+'"><b>'+late+'</b>overdue</span><span><b>'+m.filter(t=>dueIn(t)===0).length+'</b>due today</span><span><b>'+m.filter(t=>t.status==='Parked').length+'</b>with you</span></span>'+
+      (focusIds(p).length?'<span class="tcf">Focus Zone: '+focusIds(p).filter(id=>{const t=findTask(id);return t&&!isDone(t);}).length+' task'+(focusIds(p).length===1?'':'s')+'</span>':'')+
       '<span class="tcf">'+(on?'<span class="tag blue run"><i></i>'+esc(on.title.length>44?on.title.slice(0,42)+'…':on.title)+'</span>':'No timer running')+(tm?' · '+fMins(tm)+' logged today':'')+'</span></button>';
   }).join('')+'</div></div>';
-  h+='<div class="secc"><div class="sech"><i style="background:var(--blue)"></i><b style="color:var(--blue)">Started, not finished</b><span>In progress across the team</span><small>'+prog.length+' task'+(prog.length===1?'':'s')+'</small></div>'+
-    (prog.length?sumGroupsHTML(prog,'prog'):'<div class="sempty">Nothing is in progress.</div>')+'</div>';
+  h+='<div class="secc"><div class="sech"><i style="background:var(--blue)"></i><b style="color:var(--blue)">Started, not finished</b><span>In progress across the team. Open a task to act on it as yourself.</span><small>'+prog.length+' task'+(prog.length===1?'':'s')+'</small></div>'+
+    (prog.length?TEAM.filter(p=>prog.some(t=>t.owner===p)).map(p=>'<div class="sg"><div class="sgh">'+av(p,true)+'<b>'+p+'</b><span>'+prog.filter(t=>t.owner===p).length+' task'+(prog.filter(t=>t.owner===p).length===1?'':'s')+'</span></div>'+prog.filter(t=>t.owner===p).map(rowHTML).join('')+'</div>').join('')
+      :'<div class="sempty">Nothing is in progress.</div>')+'</div>';
   return h+'<div class="hfoot"><span>Completed work and time by period are on the Summary tab.</span><button type="button" class="lk" data-act="tab" data-t="summary">Open the summary</button></div></div>';
 }
 
@@ -1563,7 +1751,17 @@ document.addEventListener('click',e=>{
     case 'time-del':delTime(id,a.closest('[data-eid]').getAttribute('data-eid'));break;
     case 'who':S.needQ=false;S.timeDraft='';S.who=a.getAttribute('data-who');S.flt='';S.cOpen=false;S.more={};S.open=null;S.draft='';S.tag=false;history.replaceState(null,'','#'+S.who.toLowerCase());save();render();window.scrollTo(0,0);break;
     case 'mode':S.mode=a.getAttribute('data-m');S.flt='';S.more={};S.open=null;S.draft='';S.tag=false;save();render();break;
-    case 'open':S.editNote=null;S.delNote='';S.needQ=false;S.timeDraft='';S.open=(S.mode!=='board'&&S.open===id)?null:id;S.draft='';S.tag=false;save();render();break;
+    case 'cl-edit':S.clEdit=id;S.clNew=false;S.clDraft='';render();break;
+    case 'cl-cancel':S.clEdit='';S.clNew=false;S.clDraft='';render();break;
+    case 'cl-save':{const n=S.clDraft.trim();if(!n){toast('Type the client’s name first');break;}setClient(id,'',n);break;}
+    case 'r-who':{const p=a.getAttribute('data-p');if(p==='*')S.rem.to=S.rem.to.length===TEAM.length?[]:TEAM.slice();else{const i=S.rem.to.indexOf(p);if(i>-1)S.rem.to.splice(i,1);else S.rem.to.push(p);}render();break;}
+    case 'r-add':addReminder();break;
+    case 'r-del':if(confirm('Remove this reminder for everyone it was sent to?'))delReminder(a.closest('[data-rid]').getAttribute('data-rid'));break;
+    case 'focus':focusToggle(id);break;
+    case 'fz-up':focusMove(id,-1);break;
+    case 'fz-down':focusMove(id,1);break;
+    case 'fz-clear':if(confirm('Clear your Focus Zone? The tasks stay in your list.'))setFocus(S.who,[]);break;
+    case 'open':S.clEdit='';S.clNew=false;S.editNote=null;S.delNote='';S.needQ=false;S.timeDraft='';S.open=(S.mode!=='board'&&S.open===id)?null:id;S.draft='';S.tag=false;save();render();break;
     case 'close':S.open=null;S.draft='';S.tag=false;save();render();break;
     case 'full':S.full[a.getAttribute('data-col')]=true;render();break;
     case 'dot':cycle(id);break;
@@ -1604,10 +1802,15 @@ document.addEventListener('input',e=>{
   const ta=e.target.getAttribute&&e.target.getAttribute('data-ta');if(!ta)return;
   if(ta==='draft'){S.draft=e.target.value;if(S.needQ&&S.draft.trim()){S.needQ=false;e.target.classList.remove('need');const m=document.querySelector('.needm');if(m)m.remove();}}
   else if(ta==='time')S.timeDraft=e.target.value;
+  else if(ta==='clname')S.clDraft=e.target.value;
+  else if(ta==='rtitle')S.rem.title=e.target.value;
+  else if(ta==='rnote')S.rem.note=e.target.value;
   else if(ta==='note'){if(S.editNote)S.editNote.txt=e.target.value;}
   else S.deskDraft[ta.slice(5)]=e.target.value;
 });
 document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.getAttribute&&/^r(title|note)$/.test(e.target.getAttribute('data-ta')||'')){e.preventDefault();addReminder();return;}
+  if(e.key==='Enter'&&e.target.getAttribute&&e.target.getAttribute('data-ta')==='clname'){e.preventDefault();const host=e.target.closest('[data-id]');const n=S.clDraft.trim();if(host&&n)setClient(host.getAttribute('data-id'),'',n);return;}
   if(e.key==='Enter'&&e.target.getAttribute&&e.target.getAttribute('data-ta')==='time'){e.preventDefault();const host=e.target.closest('[data-id]');if(host)addTime(host.getAttribute('data-id'));return;}
   if(e.key==='Escape'&&S.cOpen){S.cOpen=false;render();return;}
   if(e.key==='Escape'&&S.open&&S.mode==='board'&&!onDesk()){S.open=null;save();render();return;}
@@ -1617,10 +1820,51 @@ document.addEventListener('keydown',e=>{
   if(ta==='note'){e.preventDefault();const host=e.target.closest('[data-id]');if(host)saveNoteEdit(host.getAttribute('data-id'));}
 });
 document.addEventListener('change',e=>{
+  if(e.target.getAttribute&&e.target.getAttribute('data-sel')==='rdue'){S.rem.due=e.target.value;return;}
+  if(e.target.getAttribute&&e.target.getAttribute('data-sel')==='cl'){
+    const id=e.target.closest('[data-id]').getAttribute('data-id'),val=e.target.value;
+    if(val==='__new'){S.clNew=true;render();const el=document.querySelector('[data-ta="clname"]');if(el)el.focus();return;}
+    if(isNameKey(val))setClient(id,'',val.slice(5));else setClient(id,val,'');
+    return;
+  }
   const f=e.target.getAttribute&&e.target.getAttribute('data-aud');if(!f)return;
   setAudit(e.target.closest('.row').getAttribute('data-id'),f,e.target.value);
 });
 window.addEventListener('hashchange',()=>{if(/^#summary$/i.test(location.hash)){S.who=COORD;S.tab='summary';save();render();return;}const w=hashWho();if(w&&w!==S.who){S.who=w;S.open=null;save();render();}});
+
+/* ── drag and drop into and within the Focus Zone ───────────────────────────
+   Only the ⋮⋮ grip starts a drag, so text in a row still selects normally. The
+   zone shows a line where the task will land; nothing re-renders until the drop. */
+let DRAG=null,DROP_AT=-1;
+function zoneRows(){return [].slice.call(document.querySelectorAll('.fzone .row'));}
+function clearDropMark(){document.querySelectorAll('.row.dropb,.row.dropa').forEach(r=>r.classList.remove('dropb','dropa'));const z=document.querySelector('.fzone');if(z)z.classList.remove('over');}
+document.addEventListener('dragstart',e=>{
+  const g=e.target.closest&&e.target.closest('.grip');if(!g)return;
+  const row=g.closest('.row');DRAG=row.getAttribute('data-id');
+  row.classList.add('dragging');
+  try{e.dataTransfer.setData('text/plain',DRAG);e.dataTransfer.effectAllowed='move';e.dataTransfer.setDragImage(row,24,20);}catch(x){}
+});
+document.addEventListener('dragend',()=>{document.querySelectorAll('.row.dragging').forEach(r=>r.classList.remove('dragging'));clearDropMark();DRAG=null;});
+document.addEventListener('dragover',e=>{
+  if(!DRAG)return;
+  const z=e.target.closest&&e.target.closest('.fzone');
+  if(!z){clearDropMark();DROP_AT=-1;return;}
+  e.preventDefault();e.dataTransfer.dropEffect='move';
+  const rows=zoneRows().filter(r=>r.getAttribute('data-id')!==DRAG);
+  let idx=rows.length;
+  for(let i=0;i<rows.length;i++){const b=rows[i].getBoundingClientRect();if(e.clientY<b.top+b.height/2){idx=i;break;}}
+  clearDropMark();z.classList.add('over');
+  if(rows.length){if(idx<rows.length)rows[idx].classList.add('dropb');else rows[rows.length-1].classList.add('dropa');}
+  DROP_AT=idx;
+});
+document.addEventListener('drop',e=>{
+  if(!DRAG)return;
+  const z=e.target.closest&&e.target.closest('.fzone');
+  if(!z){DRAG=null;clearDropMark();return;}
+  e.preventDefault();
+  const id=DRAG,at=DROP_AT;DRAG=null;clearDropMark();
+  if(at>=0)focusPlace(id,at);
+});
 
 /* ── go ─────────────────────────────────────────────────────────────────── */
 /* Running clocks tick on screen between renders. */
