@@ -134,6 +134,10 @@ header .sub{font-size:12px;color:var(--muted);margin-top:3px}
 .side .empty a{color:var(--blue)}
 .stagebadge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;border:1px solid var(--border);border-radius:20px;padding:2px 9px;color:var(--muted)}
 .stagebadge i{width:7px;height:7px;border-radius:50%}
+.stagebadge select{background:transparent;border:0;color:var(--body);font:inherit;font-weight:600;padding:0 2px;cursor:pointer}
+.stagebadge select:focus{outline:1px solid var(--border)}
+.stagebadge select option{background:var(--card,#1a1a1a);color:var(--body)}
+.stagebadge.busy{opacity:.6}
 .btn.theme{display:inline-flex;align-items:center;gap:6px;align-self:center}
 .btn.theme svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
 
@@ -223,6 +227,21 @@ table.ed input[type=checkbox]{width:15px;height:15px;accent-color:var(--green);m
 .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 @media(max-width:900px){.two{grid-template-columns:1fr}}
 .empty{color:var(--mono);font-size:12px;font-style:italic;padding:6px 0}
+/* 02 · question bank, 10 · recap (6 Oct 2026) */
+.qbank{margin:4px 0 6px;padding-left:20px;color:var(--w);font-size:13.5px;line-height:1.7}
+.qbank li::marker{color:var(--red);font-weight:700}
+.recap{display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;background:var(--topic);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:8px;padding:6px 14px 12px;margin-top:10px}
+@media(max-width:900px){.recap{grid-template-columns:1fr}}
+.recap h5{margin:10px 0 3px;font-size:10.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--mono);font-weight:700}
+.recap ul{margin:0;padding-left:18px;color:var(--w);font-size:13px;line-height:1.6}
+.recap p{margin:0;color:var(--w);font-size:13px}
+.recap p.none{color:var(--mono);font-style:italic;font-size:12px}
+.recap .by{color:var(--muted);font-size:11.5px}
+.recap .rwarn{grid-column:1/-1;color:var(--amber);font-size:12px;margin-top:6px}
+.wraprow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-top:12px;font-size:12.5px}
+.wraprow label{display:flex;align-items:center;gap:7px;cursor:pointer}
+.wraprow input[type=checkbox]{width:15px;height:15px;accent-color:var(--red)}
+.wraprow .stamp2{font-size:11px;color:var(--green);font-family:var(--code)}
 .saved{font-size:10.5px;color:var(--mono);height:14px;margin-top:6px;font-family:var(--code)}
 
 .welcome{background:var(--card);border:1px dashed var(--border);border-radius:10px;padding:40px 30px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7}
@@ -370,7 +389,7 @@ var OPEN={};   /* section open/closed state, per session */
    the portal marks them Active, and comes back if the stage is moved back. Notion and
    trackers.json still pre-fill a record; they no longer decide who is listed. */
 var STAGE_ORDER=['Discovery','Onboarding','Active','Offboarding','Outreach','Complete'];
-var STAGE_LABEL={Discovery:'Scoping',Onboarding:'Onboarding',Active:'Active',Offboarding:'Offboarding',Outreach:'Outreach',Complete:'Complete',none:'Not in portal'};
+var STAGE_LABEL={Discovery:'Scoping',Onboarding:'Onboarding',Active:'Active',Offboarding:'Offboarding',Outreach:'Outreach',Complete:'Complete',none:'Not in Internal Ops'};
 var STAGE_VAR={Discovery:'--sScope',Onboarding:'--sOnb',Active:'--sAct',Offboarding:'--sOff',Outreach:'--sOut',Complete:'--sDone',none:'--grey'};
 var VIEWS=[
   {k:'kickoff',label:'Scoping + Onboarding',tip:'Default: every client the portal has not yet marked Active'},
@@ -439,10 +458,30 @@ function blankRecord(name){
               {item:'Third-party integration access (e.g. Slack, Jira, Shopify, CRM)', status:'pending', owner:'Client', note:''} ],
     decisions:[ {topic:'Historical data', options:'A: migrate everything · B: start fresh · C: migrate a defined subset', decision:'', owner:'Client', due:''} ],
     actions:[], risks:[],
-    notesClient:'', notesInternal:'', callDone:false, callDate:'', summaryAt:''
+    notesClient:'', notesInternal:'', callDone:false, callDate:'', summaryAt:'',
+    /* Added 6 Oct 2026 after Fin Partner Services' kick-off assessment (outcomes/KPIs,
+       escalation path, closing recap). Older records get these via upgradeRec(). */
+    outcomes:{ source:'', vision:'', sixMonths:'', leadership:'', measures:[] },
+    comms:  { channel:'Shared Slack channel', cadence:'Weekly call at the check-in slot', goLiveWeek:'Daily check-in in the week of go-live',
+              updates:'Written update every Friday, with an On track / At risk / Off track status',
+              blocker:'Anything that puts a milestone date at risk, or work that has waited more than 2 business days on one side',
+              escalation:[ {level:'1 · Day to day', sabel:'Sabel consultant', client:'Project lead', how:'Raise it in the Slack channel. Reply within 1 business day.'},
+                           {level:'2 · Blocker not cleared in 2 business days', sabel:'Richard Le Bas, Founder & Director', client:'Project sponsor', how:'Short call within 2 business days to agree a fix and, if needed, a new date.'},
+                           {level:'3 · Go-live date or scope at risk', sabel:'Richard Le Bas, with the Intercom relationship manager', client:'Executive sponsor', how:'Status moves to At risk or Off track and Intercom is told the same day.'} ] },
+    wrap:   { recapRead:false, aligned:false, alignedBy:'', alignedAt:'', corrections:'' }
   };
 }
-function rec(id){ if(!STORE.clients[id]||STORE.clients[id].removed) STORE.clients[id]=blankRecord(); return STORE.clients[id]; }
+/* Records saved before a field existed get its default, without touching anything already there. */
+function upgradeRec(r){
+  if(!r||r.removed) return r;
+  var d=blankRecord(r.name);
+  ['outcomes','comms','wrap'].forEach(function(k){
+    if(!r[k]||typeof r[k]!=='object'){ r[k]=d[k]; return; }
+    Object.keys(d[k]).forEach(function(f){ if(r[k][f]===undefined) r[k][f]=d[k][f]; });
+  });
+  return r;
+}
+function rec(id){ if(!STORE.clients[id]||STORE.clients[id].removed) STORE.clients[id]=blankRecord(); return upgradeRec(STORE.clients[id]); }
 function has(id){ var r=STORE.clients[id]; return !!(r&&!r.removed); }
 
 function loadLocal(){
@@ -550,7 +589,10 @@ function readiness(r){
   if(!r.timeline.goLive) miss.push('go-live');
   if(!r.people.client.length) miss.push('client contact');
   if(!Object.keys(r.people.sabel).some(function(k){return r.people.sabel[k];})) miss.push('Sabel team');
-  return {n:9-miss.length, of:9, miss:miss};
+  /* Outcomes count as ready once we know what Intercom handed over, even if that is nothing:
+     the call then asks the questions instead of confirming answers. */
+  if(!(r.outcomes&&(r.outcomes.source||r.outcomes.measures.length))) miss.push('KPIs from Intercom handover');
+  return {n:10-miss.length, of:10, miss:miss};
 }
 
 /* ── stage views ── */
@@ -565,8 +607,34 @@ function inView(c,k){
   return s===k;
 }
 function stageDot(s){ return 'var('+(STAGE_VAR[s]||'--grey')+')'; }
+/* The stage is changeable here: it writes only stage + stageManual on that one portal client,
+   the same two fields Internal Ops' Status dropdown writes, so the two pages never clobber each other. */
+var STAGE_PICK=['Discovery','Onboarding','Active','Offboarding','Complete'];
 function stageBadge(c){ if(!c||!c.id) return ''; var s=stageOf(c);
-  return '<span class="stagebadge hideP" id="stageBadge" title="Stage in the Onboarding / Offboarding portal"><i style="background:'+stageDot(s)+'"></i>'+(s==='none'?'Not in portal':'Portal · '+STAGE_LABEL[s])+'</span>'; }
+  if(s==='none') return '<span class="stagebadge hideP" id="stageBadge" title="No client with this name in Internal Ops, so there is no stage to change"><i style="background:'+stageDot(s)+'"></i>Not in Internal Ops</span>';
+  var opts=STAGE_PICK.concat(STAGE_PICK.indexOf(s)<0?[s]:[]).map(function(k){ return '<option value="'+k+'"'+(k===s?' selected':'')+'>'+STAGE_LABEL[k]+'</option>'; }).join('');
+  return '<label class="stagebadge hideP" id="stageBadge" title="Client stage (same as Status in Internal Ops). Moving a client to Active takes them out of the Scoping + Onboarding view."><i style="background:'+stageDot(s)+'"></i>Stage<select onchange="setStage(\''+c.id+'\',this.value,this)">'+opts+'</select></label>'; }
+function setStage(id,stage,sel){
+  var c=CLIENTS.filter(function(x){return x.id===id;})[0]; if(!c||!c.portal) return;
+  var was=stageOf(c), pid=c.portal.id, wrap=document.getElementById('stageBadge');
+  if(stage===was) return;
+  if(!confirm('Move '+c.name+' from '+STAGE_LABEL[was]+' to '+STAGE_LABEL[stage]+'?\n\nThis changes the client\'s stage everywhere (Internal Ops, Project Dashboard). It is set by hand, so gate progress in Internal Ops will not move it on its own until you pick "back to automatic" there.')){ if(sel) sel.value=was; return; }
+  if(wrap) wrap.classList.add('busy'); if(sel) sel.disabled=true;
+  fetchJSON(API+'?key='+PORTAL_KEY+'&_t='+Date.now()).then(function(j){
+    var d=j&&j.data; if(!d||!Array.isArray(d.clients)) throw new Error('could not read the client list');
+    var p=d.clients.filter(function(x){ return pid?x.id===pid:norm(x.name)===id; })[0]; if(!p) throw new Error('client not found');
+    p.stage=stage; p.stageManual=true;
+    return fetch(API+'?key='+PORTAL_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:d})}).then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      PORTAL=d.clients; build(); renderList();
+      var el=document.getElementById('stageBadge'), nc=CLIENTS.filter(function(x){return x.id===CUR;})[0]; if(el&&nc) el.outerHTML=stageBadge(nc);
+      stampSaved('Stage set to '+STAGE_LABEL[stage]);
+    });
+  }).catch(function(e){
+    alert('The stage was not changed: '+(e&&e.message||e)+'. Try again, or change it under Status in Internal Ops.');
+    if(sel){ sel.value=was; sel.disabled=false; } if(wrap) wrap.classList.remove('busy');
+  });
+}
 function kickState(c){ var r=has(c.id)?STORE.clients[c.id]:null; return !r?'new':(r.callDone?'held':'prep'); }
 function setView(k){ VIEW=k; try{ localStorage.setItem(VIEW_KEY,k); }catch(e){} renderList(); var l=document.getElementById('list'); if(l) l.scrollTop=0; }
 function renderStages(){
@@ -601,7 +669,7 @@ function renderList(){
   });
   if(!shown){
     var other=q?CLIENTS.filter(function(c){ return listable(c)&&!inView(c,VIEW)&&c.name.toLowerCase().indexOf(q)>-1; }):[];
-    h='<div class="empty" style="padding:12px">'+(q?'Nothing in this view matches.':'No clients at this stage in the portal.')+
+    h='<div class="empty" style="padding:12px">'+(q?'Nothing in this view matches.':'No clients at this stage.')+
       (other.length?'<br>In other stages: '+other.slice(0,5).map(function(c){ return '<a href="#" onclick="setView(\''+stageOf(c)+'\');openClient(\''+c.id+'\');return false">'+esc(c.name)+'</a> ('+STAGE_LABEL[stageOf(c)]+')'; }).join(', '):'')+'</div>';
   }
   var cn=document.getElementById('curname'); if(cn){ var cc=CLIENTS.filter(function(x){return x.id===CUR;})[0]; cn.textContent=cc?cc.name:(has(CUR)?(STORE.clients[CUR].name||CUR):''); }
@@ -731,9 +799,85 @@ function moveCell(path,i,n){
 function moveRow(path,i,dir){ var l=getPath(rec(CUR),path), j=i+dir; if(j<0||j>=l.length) return; var x=l.splice(i,1)[0]; l.splice(j,0,x); saveStore(); renderRec(); }
 function rowX(fn){ return '<td class="x"><button class="btn x" title="Remove" onclick="'+fn+'">×</button></td>'; }
 
+/* ── 02 · Outcomes, 06 · Communication and escalation, 10 · Wrap-up (6 Oct 2026) ──
+   From Fin Partner Services' feedback on Chris's kick-off assessment: draw out the client's
+   goals and KPIs, agree an escalation path, and close with a recap and an alignment check.
+   KPIs should arrive from Intercom's sales discovery; the call confirms them, it does not
+   start from nothing. */
+var OUT_SRC=[['','Not checked yet'],['supplied','Supplied by Intercom (sales discovery)'],['partial','Partly supplied by Intercom'],['none','None supplied: we ask on the call']];
+var OUT_Q=[
+  'What made now the right time to bring in Intercom and Fin?',
+  'Six months after go-live, what would tell you this was a success?',
+  'How will your leadership judge whether the rollout worked?',
+  'Which numbers do you watch today, and where are they now?',
+  'If one thing changed for your customers, what would you want it to be?'
+];
+function outcomesCard(r){
+  var o=r.outcomes, nm=esc(r.basics.shortName||r.name||'the client'), mt='';
+  if(o.measures.length){
+    mt='<table class="ed"><tr><th>Business goal</th><th style="width:17%">KPI</th><th style="width:11%">Today</th><th style="width:11%">Target</th><th style="width:130px">By when</th><th style="width:13%">Who tracks it</th><th></th></tr>';
+    o.measures.forEach(function(x,i){ var p='outcomes.measures.'+i+'.';
+      mt+='<tr><td>'+inp(p+'goal',x.goal,{ph:'e.g. Free agents for complex cases'})+'</td><td>'+inp(p+'kpi',x.kpi,{ph:'e.g. Fin resolution rate'})+'</td><td>'+inp(p+'baseline',x.baseline,{ph:'baseline'})+'</td><td>'+inp(p+'target',x.target,{ph:'target'})+'</td><td>'+inp(p+'by',x.by,{type:'date'})+'</td><td>'+inp(p+'owner',x.owner,{ph:'name'})+'</td>'+rowX('delRow(\'outcomes.measures\','+i+')')+'</tr>'; });
+    mt+='</table>';
+  } else mt='<div class="empty">No success measures yet. Copy in any KPIs from the Intercom handover, then add what the client tells you.</div>';
+  return card('02','Outcomes and what good looks like','why they bought it',
+    '<div class="hint"><b>Before the call:</b> ask the Intercom relationship manager for the KPIs from sales discovery (resolution or automation targets, CSAT, response times, cost or headcount goals) and copy them into the table. If none come back, set the source to “None supplied”.<br><br>'+
+    '<b>On the call:</b> confirm what Intercom passed on, then ask two or three of the questions. When the client describes a bigger idea (for example using Intercom for brand messaging or upselling), stay on it: ask what it would mean for the business and how they would know it was working before moving on to setup detail.<br><br>'+
+    'Keep the answers in their words. Every target needs a number today, a number to hit, a date and a person who tracks it, or it is a hope rather than a KPI.</div>'+
+    '<div class="grid hideP">'+field('KPIs from Intercom handover <span class="auto">· internal</span>','outcomes.source',o.source,{type:'select',options:OUT_SRC})+'</div>'+
+    '<h4 class="sh">Questions for this part of the call</h4><ol class="qbank">'+OUT_Q.map(function(q){return '<li>'+esc(q)+'</li>';}).join('')+'</ol>'+
+    '<div class="grid">'+
+    field('What '+nm+' wants from this, in their words','outcomes.vision',o.vision,{type:'textarea',rows:3,wide:true,ph:'The vision as they describe it. Quote them where you can.'})+
+    field('Success six months after go-live','outcomes.sixMonths',o.sixMonths,{type:'textarea',rows:2,ph:'What will be different?'})+
+    field('How leadership will judge the rollout','outcomes.leadership',o.leadership,{type:'textarea',rows:2,ph:'Who reports on it, to whom, and on which numbers'})+
+    '</div><h4 class="sh">Success measures<span class="spacer"></span><button class="btn sm" onclick="addRow(\'outcomes.measures\',{goal:\'\',kpi:\'\',baseline:\'\',target:\'\',by:\'\',owner:\'\'})">+ Add measure</button></h4>'+mt);
+}
+function commsCard(r){
+  var c=r.comms, nm=esc(r.basics.shortName||r.name||'Client');
+  var et='<table class="ed"><tr><th class="mv"></th><th style="width:22%">When</th><th>Sabel</th><th>'+nm+'</th><th style="width:32%">How it works</th><th></th></tr>';
+  c.escalation.forEach(function(x,i){ var p='comms.escalation.'+i+'.';
+    et+='<tr>'+moveCell('comms.escalation',i,c.escalation.length)+'<td>'+inp(p+'level',x.level,{type:'textarea',rows:2})+'</td><td>'+inp(p+'sabel',x.sabel,{type:'textarea',rows:2})+'</td><td>'+inp(p+'client',x.client,{type:'textarea',rows:2,ph:'name and role'})+'</td><td>'+inp(p+'how',x.how,{type:'textarea',rows:2})+'</td>'+rowX('delRow(\'comms.escalation\','+i+')')+'</tr>'; });
+  et+='</table>';
+  return card('06','Communication and escalation','the safety net between meetings',
+    '<div class="hint">Agree how you will talk, then what happens when something gets stuck between those touchpoints. Read the three levels aloud and fill in the client’s names for each one. Level 3 is the same moment the project turns amber or red in Rocketlane.</div>'+
+    '<div class="grid">'+
+    field('Where we talk day to day','comms.channel',c.channel)+field('Regular sync','comms.cadence',c.cadence)+
+    field('Go-live week','comms.goLiveWeek',c.goLiveWeek)+field('Written updates','comms.updates',c.updates,{type:'grow'})+
+    field('What counts as a blocker','comms.blocker',c.blocker,{type:'grow',wide:true})+
+    '</div><h4 class="sh">Escalation path<span class="spacer"></span><button class="btn sm" onclick="addRow(\'comms.escalation\',{level:\'\',sabel:\'\',client:\'\',how:\'\'})">+ Add level</button></h4>'+et);
+}
+function recapHTML(r){
+  function li(xs,f){ return xs.length?'<ul>'+xs.map(f).join('')+'</ul>':'<p class="none">None recorded.</p>'; }
+  function who(o,d){ return ' <span class="by">'+esc(o||'no owner')+(d?' · '+fmt(d):'')+'</span>'; }
+  var made=r.decisions.filter(function(x){return x.topic&&x.decision;}),
+      open=r.decisions.filter(function(x){return x.topic&&!x.decision;}),
+      act=r.actions.filter(function(x){return x.t&&!x.done;}),
+      ms=r.outcomes.measures.filter(function(x){return x.kpi||x.goal;}),
+      noOwner=act.filter(function(x){return !x.owner;}).length+open.filter(function(x){return !x.owner;}).length;
+  var h='<div class="rcol"><h5>We’re aiming for</h5>'+li(ms,function(x){return '<li>'+esc(x.kpi||x.goal)+(x.target?': '+esc(x.target):'')+(x.by?' by '+fmt(x.by):'')+(x.owner?' <span class="by">'+esc(x.owner)+'</span>':'')+'</li>';})+
+    '<h5>Decided today</h5>'+li(made,function(x){return '<li>'+esc(x.topic)+': '+esc(x.decision)+'</li>';})+
+    '<h5>Still to decide</h5>'+li(open,function(x){return '<li>'+esc(x.topic)+who(x.owner,x.due)+'</li>';})+'</div>'+
+    '<div class="rcol"><h5>Next steps</h5>'+li(act,function(x){return '<li>'+esc(x.t)+who(x.owner,x.due)+'</li>';})+
+    '<h5>Next time we speak</h5><p>'+esc(r.timeline.checkin||'Check-in slot not set')+(r.timeline.goLive?' · Go-live '+fmt(r.timeline.goLive):'')+'</p>'+
+    '<h5>If something gets stuck</h5><p>'+esc((r.comms.escalation[0]||{}).how||'Escalation path not set')+'</p></div>';
+  if(noOwner) h+='<div class="rwarn hideP">'+noOwner+' item'+(noOwner===1?' has':'s have')+' no owner. Name someone before you close the call.</div>';
+  return h;
+}
+function wrapCard(r){
+  var w=r.wrap;
+  return card('10','Wrap-up: recap and alignment','the last five minutes',
+    '<div class="hint">Leave five minutes. Read this recap aloud, then ask: “Does this match your understanding? Is anything missing or wrong?” Fix anything live, note it below, and tick the alignment box with the name of the person who confirmed. Export the Summary and send it within 24 hours as the written record.</div>'+
+    '<div class="recap" id="recapBox">'+recapHTML(r)+'</div>'+
+    '<div class="wraprow"><label><input type="checkbox" data-p="wrap.recapRead"'+(w.recapRead?' checked':'')+'> Recap read back on the call</label>'+
+    '<label><input type="checkbox" data-p="wrap.aligned"'+(w.aligned?' checked':'')+'> Everyone confirmed this is right</label>'+
+    '<span class="f" style="min-width:220px">'+inp('wrap.alignedBy',w.alignedBy,{ph:'Confirmed by (name, role)'})+'</span>'+
+    '<span class="stamp2" id="alignedStamp">'+(w.alignedAt?'confirmed '+esc(fmt(w.alignedAt.slice(0,10))):'')+'</span></div>'+
+    '<div class="f wide" style="margin-top:10px"><label>Corrected during the recap</label>'+inp('wrap.corrections',w.corrections,{type:'textarea',rows:2,ph:'Anything the client changed or added when you read it back'})+'</div>');
+}
+
 function renderRec(){
   var el=document.getElementById('rec');
-  if(!CUR){ el.innerHTML='<div class="welcome"><b>Pick a client on the left</b> to open their kick-off record.<br>The list follows each client’s stage in the Onboarding / Offboarding portal: Scoping and Onboarding show by default, and a client drops out of that view once the portal marks them Active. Use the stage buttons above to look back at Active, Offboarding or Complete clients.<br>The basics fill themselves from Notion the first time you open a client. Scope, timeline and people are seeded from the SOW or typed in, then edited live on the call.</div>'; return; }
+  if(!CUR){ el.innerHTML='<div class="welcome"><b>Pick a client on the left</b> to open their kick-off record.<br>The list follows each client’s stage: Scoping and Onboarding show by default. To move a client on (for example Onboarding to Active once the kick-off is done), open them and change <b>Stage</b> next to their name; it is the same Status as in Internal Ops. Use the stage buttons above to look back at Active, Offboarding or Complete clients.<br>The basics fill themselves from Notion the first time you open a client. Scope, timeline and people are seeded from the SOW or typed in, then edited live on the call.</div>'; return; }
   var r=rec(CUR), b=r.basics, rd=readiness(r), c=CLIENTS.filter(function(x){return x.id===CUR;})[0]||{};
   var h='';
 
@@ -775,28 +919,31 @@ function renderRec(){
     field('Engagement type','basics.type',b.type,{type:'select',blank:'—',options:['Project','Migration','Both','Retainer']})+
     '</div><h4 class="sh">Scope summary: the five Sabel pillars</h4>'+pl);
 
-  /* 02 scope */
+  /* 02 outcomes */
+  h+=outcomesCard(r);
+
+  /* 03 scope */
   function scopeTable(list,path,ph){
     if(!list.length) return '<div class="empty">Nothing yet. Add a line, or seed from the SOW.</div>';
     var t='<table class="ed"><tr><th></th><th>Deliverable</th><th style="width:38%">Detail / boundary</th><th></th></tr>';
     list.forEach(function(x,i){ t+='<tr><td class="n">'+(i+1)+'</td><td>'+inp(path+'.'+i+'.t',x.t,{ph:ph})+'</td><td>'+inp(path+'.'+i+'.note',x.note,{ph:'optional'})+'</td>'+rowX('delRow(\''+path+'\','+i+')')+'</tr>'; });
     return t+'</table>';
   }
-  h+=card('02','Scope: in and out','the reason the call exists',
+  h+=card('03','Scope: in and out','the reason the call exists',
     '<div class="hint">Read <b>both</b> lists aloud on the call and get a yes to each. Out-of-scope lines are the anti-scope-creep guardrail: take them from the SOW exclusions, and add anything the client asks about that is not covered.</div>'+
     '<div class="f wide"><label>Scope in one paragraph</label>'+inp('scope.summary',r.scope.summary,{type:'textarea',rows:3,ph:'What Sabel is delivering, in plain English'})+'</div>'+
     '<div class="two"><div><h4 class="sh">In scope<span class="spacer"></span><button class="btn sm" onclick="addRow(\'scope.inScope\',{t:\'\',note:\'\'})">+ Add</button></h4>'+scopeTable(r.scope.inScope,'scope.inScope','Deliverable Sabel will do')+'</div>'+
     '<div><h4 class="sh">Out of scope<span class="spacer"></span><button class="btn sm" onclick="addRow(\'scope.outScope\',{t:\'\',note:\'\'})">+ Add</button></h4>'+scopeTable(r.scope.outScope,'scope.outScope','Explicitly not included')+'</div></div>'+
     '<div class="f wide" style="margin-top:12px"><label>Change control (read on the call)</label>'+inp('scope.changeControl',r.scope.changeControl,{type:'textarea',rows:2})+'</div>');
 
-  /* 03 timeline */
+  /* 04 timeline */
   var tl=r.timeline, ph='';
   if(tl.phases.length){
     ph='<table class="ed"><tr><th></th><th>Phase</th><th style="width:140px">Start</th><th style="width:140px">End</th><th style="width:30%">Milestone / note</th><th></th></tr>';
     tl.phases.forEach(function(x,i){ ph+='<tr><td class="n">'+(i+1)+'</td><td>'+inp('timeline.phases.'+i+'.label',x.label,{ph:'e.g. Foundations'})+'</td><td>'+inp('timeline.phases.'+i+'.start',x.start,{type:'date'})+'</td><td>'+inp('timeline.phases.'+i+'.end',x.end,{type:'date'})+'</td><td>'+inp('timeline.phases.'+i+'.note',x.note,{ph:'optional'})+'</td>'+rowX('delRow(\'timeline.phases\','+i+')')+'</tr>'; });
     ph+='</table>';
   } else ph='<div class="empty">No phases yet. Add the tube-map stations here; they feed the tracker build.</div>';
-  h+=card('03','Timeline and key dates','feeds the tracker in week one',
+  h+=card('04','Timeline and key dates','feeds the tracker in week one',
     '<div class="grid">'+
     field('Kick-off call','timeline.kickoff',tl.kickoff,{type:'date'})+field('Build starts','timeline.buildStart',tl.buildStart,{type:'date'})+
     field('Weekly check-in slot','timeline.checkin',tl.checkin,{ph:'e.g. Thursdays 10:00 AEST'})+field('Go-live','timeline.goLive',tl.goLive,{type:'date'})+
@@ -806,7 +953,7 @@ function renderRec(){
     field('Historical migration run','timeline.historicalMigration',tl.historicalMigration||'',{type:'date'})+field('Source platform contract ends','timeline.sourceContractEnd',tl.sourceContractEnd||'',{type:'date'})+
     '</div><h4 class="sh">Phases<span class="spacer"></span><button class="btn sm" onclick="addRow(\'timeline.phases\',{label:\'\',start:\'\',end:\'\',note:\'\'})">+ Add phase</button></h4>'+ph);
 
-  /* 04 people */
+  /* 05 people */
   var st='';
   SABEL_TEAM.forEach(function(m){ var on=!!r.people.sabel[m[0]]; st+='<label class="pill'+(on?' on':'')+'"><input type="checkbox" data-p="people.sabel.'+esc(m[0])+'"'+(on?' checked':'')+'>'+esc(m[0])+'<small>'+esc(m[1])+'</small></label>'; });
   var ct='';
@@ -818,30 +965,33 @@ function renderRec(){
   var rt='<table class="ed raci"><tr><th class="mv"></th><th>Area</th><th>Sabel</th><th>'+esc(b.shortName||r.name||'Client')+'</th><th></th></tr>';
   r.raci.forEach(function(x,i){ rt+='<tr>'+moveCell('raci',i,r.raci.length)+'<td class="topic">'+inp('raci.'+i+'.area',x.area,{cls:'topic'})+'</td><td>'+inp('raci.'+i+'.sabel',x.sabel)+'</td><td>'+inp('raci.'+i+'.client',x.client)+'</td>'+rowX('delRow(\'raci\','+i+')')+'</tr>'; });
   rt+='</table>';
-  h+=card('04','Who is who, and who does what','no unowned work',
+  h+=card('05','Who is who, and who does what','no unowned work',
     '<h4 class="sh">Sabel team on this engagement</h4><div class="pills">'+st+'</div>'+
     '<h4 class="sh">Client contacts<span class="spacer"></span><button class="btn sm" onclick="addRow(\'people.client\',{name:\'\',role:\'\',email:\'\',involvement:\'\'})">+ Add contact</button></h4>'+ct+
     '<h4 class="sh">Who does what<span class="spacer"></span><button class="btn sm" onclick="addRow(\'raci\',{area:\'\',sabel:\'\',client:\'\'})">+ Add row</button></h4>'+rt);
 
-  /* 05 access */
+  /* 06 communication and escalation */
+  h+=commsCard(r);
+
+  /* 07 access */
   var at='<table class="ed"><tr><th>Check (run live on the call)</th><th style="width:120px">Result</th><th style="width:120px">Follow-up owner</th><th style="width:30%">Note</th><th></th></tr>';
   r.access.forEach(function(x,i){ at+='<tr><td>'+inp('access.'+i+'.item',x.item)+'</td><td>'+inp('access.'+i+'.status',x.status,{type:'select',options:ACCESS_ST,colour:true})+'</td><td>'+inp('access.'+i+'.owner',x.owner,{list:'owners'})+'</td><td>'+inp('access.'+i+'.note',x.note)+'</td>'+rowX('delRow(\'access\','+i+')')+'</tr>'; });
   at+='</table>';
-  h+=card('05','Access check','a timed, live step, not a to-do',
+  h+=card('07','Access check','a timed, live step, not a to-do',
     '<div class="hint">Do this on the call, screen shared: the client opens the Drive folder and Slack; you confirm Intercom admin. Anything that fails gets an owner and lands in Next steps.</div>'+at+
     '<div style="margin-top:8px"><button class="btn sm" onclick="addRow(\'access\',{item:\'\',status:\'pending\',owner:\'\',note:\'\'})">+ Add check</button></div>');
 
-  /* 06 decisions */
+  /* 08 decisions */
   var dt='';
   if(r.decisions.length){
     dt='<table class="ed"><tr><th style="width:18%">Decision</th><th>Options (neutral)</th><th style="width:24%">Decision made</th><th style="width:110px">Owner</th><th style="width:130px">Due</th><th></th></tr>';
     r.decisions.forEach(function(x,i){ dt+='<tr><td>'+inp('decisions.'+i+'.topic',x.topic)+'</td><td>'+inp('decisions.'+i+'.options',x.options,{type:'textarea',rows:2})+'</td><td>'+inp('decisions.'+i+'.decision',x.decision,{type:'textarea',rows:2,ph:'leave blank if pending'})+'</td><td>'+inp('decisions.'+i+'.owner',x.owner,{list:'owners'})+'</td><td>'+inp('decisions.'+i+'.due',x.due,{type:'date'})+'</td>'+rowX('delRow(\'decisions\','+i+')')+'</tr>'; });
     dt+='</table>';
   } else dt='<div class="empty">No decisions pending.</div>';
-  h+=card('06','Decisions the client needs to make','present the trade-off, never steer',
+  h+=card('08','Decisions the client needs to make','present the trade-off, never steer',
     dt+'<div style="margin-top:8px"><button class="btn sm" onclick="addRow(\'decisions\',{topic:\'\',options:\'\',decision:\'\',owner:\'Client\',due:\'\'})">+ Add decision</button></div>');
 
-  /* 07 actions and risks */
+  /* 09 actions and risks */
   var act='';
   if(r.actions.length){
     act='<table class="ed"><tr><th></th><th>Action</th><th style="width:120px">Owner</th><th style="width:130px">Due</th><th style="width:130px">When</th><th></th></tr>';
@@ -854,12 +1004,15 @@ function renderRec(){
     r.risks.forEach(function(x,i){ rk+='<tr><td>'+inp('risks.'+i+'.t',x.t)+'</td><td>'+inp('risks.'+i+'.owner',x.owner,{list:'owners'})+'</td><td>'+inp('risks.'+i+'.status',x.status,{type:'select',options:RISK_ST,colour:true})+'</td>'+rowX('delRow(\'risks\','+i+')')+'</tr>'; });
     rk+='</table>';
   } else rk='<div class="empty">Nothing open.</div>';
-  h+=card('07','Next steps, risks and open items','every line has a name on it',
+  h+=card('09','Next steps, risks and open items','every line has a name on it',
     '<h4 class="sh">Next steps<span class="spacer"></span><button class="btn sm" onclick="addRow(\'actions\',{t:\'\',owner:\'\',due:\'\',when:\'now\',done:false})">+ Add action</button></h4>'+act+
     '<h4 class="sh">Risks and open items<span class="spacer"></span><button class="btn sm" onclick="addRow(\'risks\',{t:\'\',owner:\'\',status:\'open\'})">+ Add</button></h4>'+rk);
 
-  /* 08 notes */
-  h+=card('08','Notes','',
+  /* 10 wrap-up */
+  h+=wrapCard(r);
+
+  /* 11 notes */
+  h+=card('11','Notes','',
     '<div class="two"><div class="f"><label>Other notes <span class="auto">· goes in the summary</span></label>'+inp('notesClient',r.notesClient,{type:'textarea',rows:6,ph:'Anything else agreed on the call that the client should see'})+'</div>'+
     '<div class="f hideP"><label>Internal notes <span style="color:var(--amber)">· never exported</span></label>'+inp('notesInternal',r.notesInternal,{type:'textarea',rows:6,ph:'Rates, concerns, things to watch'})+'</div></div>');
 
@@ -878,6 +1031,8 @@ function onEdit(e){
   var r=rec(CUR), v=t.type==='checkbox'?t.checked:t.value;
   if(t.classList&&t.classList.contains('line')&&typeof v==='string'&&v.indexOf('\n')>-1){ v=v.replace(/\s*\n\s*/g,' '); t.value=v; }
   setPath(r,p,v);
+  if(p==='wrap.aligned'){ r.wrap.alignedAt=v?new Date().toISOString():''; var as=document.getElementById('alignedStamp'); if(as) as.textContent=v?'confirmed '+fmt(r.wrap.alignedAt.slice(0,10)):''; }
+  var rb=document.getElementById('recapBox'); if(rb&&/^(decisions|actions|outcomes\.measures|timeline\.(checkin|goLive)|comms\.escalation)/.test(p)) rb.innerHTML=recapHTML(r);
   if(t.tagName==='SELECT'&&t.hasAttribute('data-c')){ var opts=/status/.test(p)&&/access/.test(p)?ACCESS_ST:RISK_ST; t.setAttribute('data-c',colourOf(opts,v)); }
   if(t.type==='checkbox'&&t.closest('.pill')){ t.closest('.pill').classList.toggle('on',t.checked); var row=t.closest('.pillrow'); if(row){ var pn=row.querySelector('.pn'); if(pn) pn.disabled=!t.checked; } }
   if(t.type==='checkbox'&&/^actions\./.test(p)) t.closest('tr').classList.toggle('done',t.checked);
@@ -940,45 +1095,56 @@ function importJSON(){
    ══════════════════════════════════════════════════════════════════════════ */
 function summaryHTML(r){
   var b=r.basics, tl=r.timeline, name=b.shortName||r.name, legal=b.legalName||name;
-  function sec(t,body){ return '<div class="ssec"><h2>'+t+'</h2>'+body+'</div>'; }
+  var SN=0; function sec(t,body){ SN++; return '<div class="ssec"><h2>'+(SN<10?'0':'')+SN+' · '+t+'</h2>'+body+'</div>'; }
   function tbl(head,rows){ if(!rows.length) return '<p class="mu">Nothing recorded.</p>'; return '<table class="st"><tr>'+head.map(function(x){return '<th>'+x+'</th>';}).join('')+'</tr>'+rows.map(function(rw){ return '<tr>'+rw.map(function(c){return '<td>'+c+'</td>';}).join('')+'</tr>'; }).join('')+'</table>'; }
   function cap(rows){ return '<table class="st cap">'+rows.filter(function(x){return x[1];}).map(function(x){ return '<tr><td>'+x[0]+'</td><td>'+esc(x[1])+'</td></tr>'; }).join('')+'</table>'; }
   function list(items,f){ if(!items.length) return '<p class="mu">None recorded.</p>'; return '<ul class="sl">'+items.map(f).join('')+'</ul>'; }
   var h='<div class="shead"><img src="'+LOGO_LIGHT+'" alt="Sabel"><span class="hr">Kick-off Summary · '+esc(name)+'</span></div>';
-  h+='<div class="scover"><div class="seye">SABEL · KICK-OFF SUMMARY</div><h1>'+esc(legal)+'</h1><p class="st">What we agreed on the kick-off call'+(r.callDate?' on '+fmt(r.callDate):'')+': scope, timeline, who does what, and what happens next.</p><div class="rule"></div></div>';
+  h+='<div class="scover"><div class="seye">SABEL · KICK-OFF SUMMARY</div><h1>'+esc(legal)+'</h1><p class="st">What we agreed on the kick-off call'+(r.callDate?' on '+fmt(r.callDate):'')+': what success looks like, scope, timeline, who does what, how we escalate, and what happens next.</p><div class="rule"></div></div>';
 
   var pn=b.pillarNotes||{};
   var pill=PILLARS.map(function(p){ return [p[1]+' '+p[2], b.pillars[p[0]]?'Yes':'No', b.pillars[p[0]]?(pn[p[0]]||''):'']; });
-  h+=sec('01 · Engagement basics', cap([['Client',legal],['Contracted hours',b.hours?b.hours+' hours':''],['Intercom subscription',b.subscription],['Workspace App ID',b.appId],['Engagement type',b.type],['Signed',b.signed?b.signed+(b.signedSource?' via '+b.signedSource:''):'']])+
+  h+=sec('Engagement basics', cap([['Client',legal],['Contracted hours',b.hours?b.hours+' hours':''],['Intercom subscription',b.subscription],['Workspace App ID',b.appId],['Engagement type',b.type],['Signed',b.signed?b.signed+(b.signedSource?' via '+b.signedSource:''):'']])+
      '<h3>Scope summary</h3>'+tbl(['Sabel pillar','In scope','What it covers here'],pill.map(function(x){return [esc(x[0]),x[1],esc(x[2])];})));
 
-  h+=sec('02 · Scope', (r.scope.summary?'<p>'+esc(r.scope.summary)+'</p>':'')+
+  var o=r.outcomes, ms=o.measures.filter(function(x){return x.kpi||x.goal;});
+  if(o.vision||o.sixMonths||o.leadership||ms.length)
+    h+=sec('What success looks like', (o.vision?'<div class="callout" style="font-style:normal;color:#334155">'+esc(o.vision).replace(/\n/g,'<br>')+'</div>':'')+
+       cap([['Six months after go-live',o.sixMonths],['How leadership will judge it',o.leadership]])+
+       (ms.length?'<h3>Success measures</h3>'+tbl(['Goal','KPI','Today','Target','By','Tracked by'],ms.map(function(x){return [esc(x.goal),esc(x.kpi),esc(x.baseline),esc(x.target),fmt(x.by),esc(x.owner)];})):''));
+
+  h+=sec('Scope', (r.scope.summary?'<p>'+esc(r.scope.summary)+'</p>':'')+
      '<h3>In scope</h3>'+list(r.scope.inScope,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';})+
      '<h3>Out of scope</h3>'+list(r.scope.outScope,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';})+
      (r.scope.changeControl?'<div class="callout">'+esc(r.scope.changeControl)+'</div>':''));
 
-  h+=sec('03 · Timeline and key dates', cap([['Kick-off call',fmt(tl.kickoff)],['Build starts',fmt(tl.buildStart)],['Weekly check-in',tl.checkin],['Sample migration',fmt(tl.sampleMigration)],['Historical migration',fmt(tl.historicalMigration)],['Go-live',fmt(tl.goLive)+(tl.goLiveNote?' · '+tl.goLiveNote:'')],[(tl.sourcePlatform||'Source platform')+' contract ends',fmt(tl.sourceContractEnd)],['Blackout dates',tl.blackout]])+
+  h+=sec('Timeline and key dates', cap([['Kick-off call',fmt(tl.kickoff)],['Build starts',fmt(tl.buildStart)],['Weekly check-in',tl.checkin],['Sample migration',fmt(tl.sampleMigration)],['Historical migration',fmt(tl.historicalMigration)],['Go-live',fmt(tl.goLive)+(tl.goLiveNote?' · '+tl.goLiveNote:'')],[(tl.sourcePlatform||'Source platform')+' contract ends',fmt(tl.sourceContractEnd)],['Blackout dates',tl.blackout]])+
      (tl.phases.length?'<h3>Phases</h3>'+tbl(['Phase','From','To','Milestone'],tl.phases.map(function(p){return [esc(p.label),fmt(p.start),fmt(p.end),esc(p.note)];})):''));
 
   var sab=SABEL_TEAM.filter(function(m){return r.people.sabel[m[0]];});
-  h+=sec('04 · Who is who', '<h3>Your Sabel team</h3>'+tbl(['Name','Role'],sab.map(function(m){return [esc(m[0]),esc(m[1])];}))+
+  h+=sec('Who is who', '<h3>Your Sabel team</h3>'+tbl(['Name','Role'],sab.map(function(m){return [esc(m[0]),esc(m[1])];}))+
      '<h3>At '+esc(name)+'</h3>'+tbl(['Name','Role','Email','Involvement'],r.people.client.map(function(p){return [esc(p.name),esc(p.role),esc(p.email),esc(p.involvement)];})));
 
-  h+=sec('05 · Who does what', tbl(['Area','Sabel','You'],r.raci.filter(function(x){return x.area;}).map(function(x){return [esc(x.area),esc(x.sabel),esc(x.client)];})));
+  var cm=r.comms;
+  h+=sec('How we work together', cap([['Day to day',cm.channel],['Regular sync',cm.cadence],['Go-live week',cm.goLiveWeek],['Written updates',cm.updates],['What counts as a blocker',cm.blocker]])+
+     '<h3>If something gets stuck</h3>'+tbl(['When','Sabel','You','How it works'],cm.escalation.filter(function(x){return x.level;}).map(function(x){return [esc(x.level),esc(x.sabel),esc(x.client),esc(x.how)];})));
+
+  h+=sec('Who does what', tbl(['Area','Sabel','You'],r.raci.filter(function(x){return x.area;}).map(function(x){return [esc(x.area),esc(x.sabel),esc(x.client)];})));
 
   var acc=r.access.filter(function(x){return x.item;});
-  h+=sec('06 · Access check', tbl(['Check','Result','Follow-up'],acc.map(function(x){ var s=ACCESS_ST.filter(function(o){return o[0]===x.status;})[0]||ACCESS_ST[0]; return [esc(x.item),'<span class="stat '+x.status+'">'+s[1]+'</span>',esc(x.status==='pass'||x.status==='na'?(x.note||''):((x.owner?x.owner+': ':'')+(x.note||'to resolve')))]; })));
+  h+=sec('Access check', tbl(['Check','Result','Follow-up'],acc.map(function(x){ var s=ACCESS_ST.filter(function(o){return o[0]===x.status;})[0]||ACCESS_ST[0]; return [esc(x.item),'<span class="stat '+x.status+'">'+s[1]+'</span>',esc(x.status==='pass'||x.status==='na'?(x.note||''):((x.owner?x.owner+': ':'')+(x.note||'to resolve')))]; })));
 
   var dec=r.decisions.filter(function(x){return x.topic;});
-  if(dec.length) h+=sec('07 · Decisions', tbl(['Decision','Options','Outcome','Owner','By'],dec.map(function(x){return [esc(x.topic),esc(x.options),x.decision?esc(x.decision):'<i>Pending</i>',esc(x.owner),fmt(x.due)];})));
+  if(dec.length) h+=sec('Decisions', tbl(['Decision','Options','Outcome','Owner','By'],dec.map(function(x){return [esc(x.topic),esc(x.options),x.decision?esc(x.decision):'<i>Pending</i>',esc(x.owner),fmt(x.due)];})));
 
   var act=r.actions.filter(function(x){return x.t&&!x.done;}), ab='';
   HORIZON.forEach(function(hz){ var xs=act.filter(function(a){return (a.when||'now')===hz[0];}); if(!xs.length) return;
     ab+='<h3>'+hz[1]+'</h3>'+tbl(['Action','Owner','Due'],xs.map(function(a){return [esc(a.t),esc(a.owner),fmt(a.due)];})); });
-  h+=sec((dec.length?'08':'07')+' · Next steps', ab||'<p class="mu">No open actions.</p>');
+  var w=r.wrap, al=w.aligned?'<div class="callout" style="font-style:normal;color:#334155">Read back and confirmed on the call'+(w.alignedBy?' by '+esc(w.alignedBy):'')+(w.alignedAt?' on '+fmt(w.alignedAt.slice(0,10)):'')+'.'+(w.corrections?' Corrected at the time: '+esc(w.corrections):'')+'</div>':'';
+  h+=sec('Next steps', (ab||'<p class="mu">No open actions.</p>')+al);
 
   var rk=r.risks.filter(function(x){return x.t&&x.status!=='closed';});
-  if(rk.length) h+=sec((dec.length?'09':'08')+' · Risks and open items', tbl(['Item','Owner','Status'],rk.map(function(x){ var s=RISK_ST.filter(function(o){return o[0]===x.status;})[0]||RISK_ST[0]; return [esc(x.t),esc(x.owner),s[1]]; })));
+  if(rk.length) h+=sec('Risks and open items', tbl(['Item','Owner','Status'],rk.map(function(x){ var s=RISK_ST.filter(function(o){return o[0]===x.status;})[0]||RISK_ST[0]; return [esc(x.t),esc(x.owner),s[1]]; })));
   if(r.notesClient) h+=sec('Other notes','<p>'+esc(r.notesClient).replace(/\n/g,'<br>')+'</p>');
   h+='<div class="sfoot"><span>PERFECT MADE POSSIBLE · sabelcustomersuccess.com</span><span>Prepared '+fmt(iso(new Date()))+'</span></div>';
   return h;
