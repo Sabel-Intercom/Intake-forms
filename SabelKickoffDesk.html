@@ -302,13 +302,138 @@ textarea.grow.line{white-space:pre;overflow:hidden}
 textarea.grow.line:focus{white-space:pre-wrap;overflow:auto}
 textarea.grow.line.open{white-space:pre-wrap}
 
-/* ── PRESENT MODE: screen-share safe. One client, nothing else. ── */
-body.present .side,body.present #banners,body.present header .sub,body.present .hideP{display:none!important}
-body.present .layout{grid-template-columns:1fr}
-body.present .wrap{max-width:1100px}
-body.present .rhead{border-color:var(--red)}
-.presentbar{display:none;align-items:center;gap:10px;background:var(--sel);border:1px solid var(--rB);border-radius:7px;padding:8px 13px;margin-bottom:12px;font-size:12.5px;color:var(--rT)}
-body.present .presentbar{display:flex}
+/* ── PRESENT MODE (6 Oct 2026): a full-screen, client-facing walkthrough. One section per
+   screen, read-only except for the access check, the decisions and the recap confirmation,
+   which are tapped live with the client. Follows the light/dark toggle. ── */
+body.presenting{overflow:hidden}
+#pres{position:fixed;inset:0;z-index:55;background:var(--bg);color:var(--body);display:none;flex-direction:column;font-family:var(--sans)}
+#pres.on{display:flex}
+.ptop{display:flex;align-items:center;gap:14px;padding:14px 26px;border-bottom:1px solid var(--border);flex:none}
+.ptop .pname{font-weight:800;color:var(--w);font-size:14px;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.ptop .pname .bar{display:inline-block;width:3px;height:16px;background:var(--red);border-radius:2px}
+.pnav{flex:1;display:flex;justify-content:center;gap:4px;min-width:0;overflow:hidden}
+.pnav button{background:transparent;border:0;border-top:2px solid var(--track);color:var(--mono);font:inherit;font-size:11px;font-weight:600;padding:8px 6px 0;cursor:pointer;flex:1 1 0;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+.pnav button:hover{color:var(--w)} .pnav button.done{border-top-color:var(--muted)} .pnav button.on{border-top-color:var(--red);color:var(--w)}
+@media(max-width:1000px){.pnav button span{display:none}.pnav button{max-width:40px}}
+.ptop .btn.theme{display:inline-flex}
+.ptop .btn.notes.on{background:var(--sel);border-color:var(--rB);color:var(--rT)}
+.pbody{flex:1;min-height:0;display:flex;position:relative}
+.pstage{flex:1;min-width:0;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:48px 72px 40px}
+.slide{width:100%;max-width:1060px;animation:pin .22s ease-out}
+@keyframes pin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.slide .eye{font-family:var(--code);color:var(--red);font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+.slide h1{margin:0 0 8px;font-size:40px;line-height:1.1;font-weight:800;color:var(--w);letter-spacing:-.01em;text-wrap:pretty}
+.slide .lede{font-size:19px;line-height:1.5;color:var(--muted);margin:0 0 30px;max-width:760px;text-wrap:pretty}
+.slide p{font-size:17px;line-height:1.55}
+.slide .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px 44px;margin-top:18px}
+.slide .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
+@media(max-width:900px){.slide .cols,.slide .cols3{grid-template-columns:1fr}.pstage{padding:28px 22px}.slide h1{font-size:30px}}
+.slide h2{margin:0 0 12px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mono);font-weight:700;display:flex;align-items:center;gap:10px}
+.slide h2 b{font-family:var(--code);color:var(--red);font-weight:700}
+.slide h2.in b{color:var(--green)} .slide h2.out b{color:var(--rose)}
+ol.pl{margin:0;padding:0;list-style:none;counter-reset:n}
+ol.pl li{counter-increment:n;display:grid;grid-template-columns:34px 1fr;gap:2px 10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:17px;color:var(--w);line-height:1.4}
+ol.pl li::before{content:counter(n,decimal-leading-zero);font-family:var(--code);font-size:12px;color:var(--mono);padding-top:5px}
+ol.pl li small{grid-column:2;font-size:14px;color:var(--muted)}
+.pq{border-left:3px solid var(--red);padding:6px 0 6px 20px;font-size:24px;line-height:1.4;color:var(--w);margin:0 0 24px;max-width:820px;text-wrap:pretty}
+.pq.q{font-size:20px;color:var(--muted);font-style:italic}
+.pcall{background:var(--topic);border:1px solid var(--border);border-radius:10px;padding:16px 20px;font-size:16px;line-height:1.5;color:var(--body);margin-top:28px}
+.pcall b{color:var(--w)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.kv div{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kv label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);font-weight:700;margin-bottom:5px}
+.kv span{font-size:16px;color:var(--w);line-height:1.4}
+.kv span.na{color:var(--mono);font-style:italic;font-size:14px}
+.mcard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.mcard .g{font-size:14px;color:var(--muted);margin-bottom:6px}
+.mcard .k{font-size:18px;font-weight:700;color:var(--w);line-height:1.3}
+.mcard .t{display:flex;align-items:baseline;gap:8px;margin-top:10px;font-family:var(--code);font-size:13px;color:var(--mono)}
+.mcard .t b{font-size:22px;color:var(--green);font-weight:700;font-family:var(--sans)}
+.mcard .t s{text-decoration:none;color:var(--muted)}
+.mcard .t i{color:var(--red);font-style:normal}
+.mcard .w{font-size:12px;color:var(--mono);margin-top:6px}
+.pillars{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:0 0 28px}
+@media(max-width:900px){.pillars{grid-template-columns:1fr 1fr}}
+.pillars div{border:1px solid var(--border);border-radius:10px;padding:12px 13px;opacity:.38}
+.pillars div.on{opacity:1;border-color:var(--red);background:var(--card)}
+.pillars small{display:block;font-family:var(--code);font-size:11px;color:var(--red);margin-bottom:4px}
+.pillars b{display:block;font-size:14px;color:var(--w);line-height:1.25}
+.pillars span{display:block;font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.4}
+.tline{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:10px;margin:36px 0 34px;padding-top:26px}
+.tline::before{content:"";position:absolute;left:4%;right:4%;top:10px;height:3px;background:var(--track);border-radius:2px}
+.tline div{position:relative;text-align:center;padding:0 4px}
+.tline div::before{content:"";position:absolute;left:50%;top:-24px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--bg);border:3px solid var(--muted)}
+.tline div.hot::before{border-color:var(--red);background:var(--red)}
+.tline b{display:block;font-size:15px;color:var(--w);line-height:1.3}
+.tline span{display:block;font-family:var(--code);font-size:12.5px;color:var(--muted);margin-top:4px}
+.tline small{display:block;font-size:12px;color:var(--mono);margin-top:3px}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.person{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.person i{flex:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:14px;color:#fff;background:var(--red)}
+.person.c i{background:var(--blue)}
+.person b{display:block;font-size:15px;color:var(--w)} .person span{display:block;font-size:12.5px;color:var(--muted);line-height:1.35}
+table.pt{width:100%;border-collapse:collapse;margin-top:6px;font-size:15px}
+table.pt th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);padding:0 12px 8px 0;font-weight:700}
+table.pt td{padding:11px 12px 11px 0;border-top:1px solid var(--line);vertical-align:top;color:var(--body);line-height:1.4}
+table.pt td:first-child{color:var(--w);font-weight:600;width:34%}
+.esc{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+@media(max-width:900px){.esc{grid-template-columns:1fr}}
+.esc div{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--amber);border-radius:10px;padding:14px 16px}
+.esc div:first-child{border-top-color:var(--green)} .esc div:last-child{border-top-color:var(--rose)}
+.esc b{display:block;font-size:15px;color:var(--w);margin-bottom:8px}
+.esc span{display:block;font-size:13.5px;color:var(--muted);line-height:1.45;margin-top:4px} .esc span em{color:var(--body);font-style:normal}
+.tap{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.acc{display:flex;flex-direction:column;gap:10px}
+.acc .row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;transition:border-color .15s}
+.acc .row:hover{border-color:var(--muted)}
+.acc .row b{font-size:17px;color:var(--w);font-weight:600;line-height:1.35} .acc .row small{display:block;font-size:13px;color:var(--muted);margin-top:3px}
+.ast{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:7px 14px;border-radius:20px;border:1px solid var(--border);color:var(--muted);min-width:96px;justify-content:center}
+.ast i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.ast.pass{border-color:var(--gB);background:var(--gBg);color:var(--green)} .ast.fail{border-color:var(--rB);background:var(--sel);color:var(--rose)} .ast.pending{border-color:var(--aB);color:var(--amber)} .ast.na{color:var(--mono)}
+.dec{display:flex;flex-direction:column;gap:14px}
+.dec .d{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px}
+.dec .d.made{border-color:var(--gB)}
+.dec .d h3{margin:0 0 12px;font-size:20px;color:var(--w);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dec .d h3 .by{font-size:12px;font-weight:600;color:var(--mono);font-family:var(--code)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.opt{border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:15px;color:var(--body);line-height:1.4;display:flex;gap:10px;align-items:flex-start}
+.opt i{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--mono);margin-top:2px;font-style:normal}
+.opt:hover{border-color:var(--muted)}
+.opt.on{border-color:var(--green);background:var(--gBg);color:var(--w)} .opt.on i{border-color:var(--green);background:var(--green);color:#fff;font-size:11px;text-align:center;line-height:14px}
+.opt.free{color:var(--w);border-style:dashed}
+.dec .d .pend{font-size:13px;color:var(--amber);margin-top:10px}
+.prec{display:grid;grid-template-columns:1fr 1fr;gap:6px 44px}
+@media(max-width:900px){.prec{grid-template-columns:1fr}}
+.prec h5{margin:18px 0 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mono);font-weight:700}
+.prec ul{margin:0;padding-left:20px;color:var(--w);font-size:16px;line-height:1.55} .prec ul li::marker{color:var(--red)}
+.prec p{margin:0;color:var(--w);font-size:16px} .prec p.none{color:var(--mono);font-style:italic;font-size:14px}
+.prec .by{color:var(--muted);font-size:13px} .prec .rwarn{display:none}
+.confirm{margin-top:30px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px}
+.confirm.on{border-color:var(--gB);background:var(--gBg)}
+.confirm .q{flex:1;min-width:240px;font-size:20px;color:var(--w);font-weight:700}
+.confirm .q small{display:block;font-size:13px;color:var(--muted);font-weight:400;margin-top:4px}
+.confirm .cbtn{border:1px solid var(--border);border-radius:8px;padding:12px 20px;font-size:15px;font-weight:700;color:var(--w);background:var(--bg)}
+.confirm.on .cbtn{background:var(--green);border-color:var(--green);color:#fff}
+.pempty{color:var(--mono);font-size:16px;font-style:italic;padding:14px 0}
+.pfoot{flex:none;display:flex;align-items:center;gap:14px;padding:12px 26px;border-top:1px solid var(--border);font-size:12px;color:var(--mono)}
+.pfoot .cnt{font-family:var(--code);color:var(--muted)}
+.pfoot .keys{flex:1;text-align:center} .pfoot kbd{font-family:var(--code);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:11px;color:var(--muted)}
+.parrow{background:var(--card);border:1px solid var(--border);color:var(--w);border-radius:8px;width:40px;height:34px;font-size:16px;cursor:pointer}
+.parrow:hover{border-color:var(--red)} .parrow:disabled{opacity:.3;cursor:default}
+.parrow.next{width:auto;padding:0 16px;font-size:13px;font-weight:700;background:var(--red);border-color:var(--red);color:#fff}
+/* presenter drawer: internal. Closed by default; the whole screen is shared, so it says so. */
+.pdrawer{flex:none;width:0;overflow:hidden;border-left:1px solid var(--border);background:var(--card);transition:width .2s;display:flex;flex-direction:column}
+.pdrawer.on{width:360px}
+.pdrawer .in{width:360px;padding:16px 18px 24px;overflow:auto;flex:1}
+.pdrawer h4{margin:0 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);font-weight:700}
+.pdrawer .warn{font-size:11.5px;color:var(--mono);margin-bottom:14px;line-height:1.45}
+.pdrawer h5{margin:16px 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);font-weight:700}
+.pdrawer .guide{font-size:12.5px;line-height:1.55;color:var(--body)} .pdrawer .guide b{color:var(--w)}
+.pdrawer .qs{margin:0;padding-left:18px;font-size:12.5px;line-height:1.6;color:var(--body)} .pdrawer .qs li::marker{color:var(--red)}
+.pdrawer textarea,.pdrawer input{width:100%;background:var(--field);border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--body);font-size:12.5px;font-family:var(--sans)}
+.pdrawer textarea{min-height:70px;resize:vertical;line-height:1.5} .pdrawer textarea:focus,.pdrawer input:focus{outline:none;border-color:var(--red)}
+.pdrawer .add{display:grid;grid-template-columns:1fr 90px auto;gap:6px;margin-top:6px}
+.pdrawer .done{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5} .pdrawer .done b{color:var(--w);font-weight:600}
 
 @media print{
   body{background:#fff}
@@ -334,7 +459,6 @@ body.present .presentbar{display:flex}
 </header>
 
 <div id="banners"></div>
-<div class="presentbar"><b>Presenting</b><span>Only this client is on screen. The client list, internal notes and commercial details are hidden. Press Esc or Exit to get them back.</span><span class="spacer"></span><button class="btn" onclick="setPresent(false)">Exit presenting</button></div>
 
 <div class="stages hideP" id="stages" aria-label="Show clients by portal stage"></div>
 <div class="layout">
@@ -355,6 +479,27 @@ body.present .presentbar{display:flex}
     <textarea id="mArea" spellcheck="false"></textarea>
     <div class="err" id="mErr"></div>
     <div class="mr"><button class="btn" onclick="closeModal()">Close</button><button class="btn primary" id="mOk" onclick="importJSON()">Import</button></div>
+  </div>
+</div>
+
+<div id="pres" aria-label="Kick-off walkthrough">
+  <div class="ptop">
+    <div class="pname"><span class="bar"></span><span id="pclient"></span></div>
+    <div class="pnav" id="pnav"></div>
+    <button type="button" class="btn notes" id="pnotesBtn" onclick="toggleDrawer()" title="Presenter notes (N)">Notes</button>
+    <button type="button" class="btn theme" id="pthemeBtn" onclick="toggleTheme()"></button>
+    <button type="button" class="btn primary" onclick="showSummary()">Summary</button>
+    <button type="button" class="btn" onclick="setPresent(false)">Exit</button>
+  </div>
+  <div class="pbody">
+    <div class="pstage" id="pstage"></div>
+    <aside class="pdrawer" id="pdrawer"><div class="in" id="pdrawerIn"></div></aside>
+  </div>
+  <div class="pfoot">
+    <span class="cnt" id="pcnt"></span>
+    <span class="keys"><kbd>←</kbd> <kbd>→</kbd> move · <kbd>N</kbd> notes · <kbd>Esc</kbd> exit · tap a check or an option to record it live</span>
+    <button type="button" class="parrow" id="pprev" onclick="goSlide(PS-1)">←</button>
+    <button type="button" class="parrow next" id="pnext" onclick="goSlide(PS+1)">Next →</button>
   </div>
 </div>
 
@@ -496,6 +641,7 @@ function loadLocal(){
    does the reverse every 45s so a seed or a colleague's edit shows up without a reload. */
 var DIRTY=false;
 function saveStore(){
+  if(DEMO){ stampSaved('demo: not saved'); return; }
   STORE.updated=new Date().toISOString();
   if(CUR&&STORE.clients[CUR]) STORE.clients[CUR].updated=STORE.updated;
   try{ localStorage.setItem(LOCAL_KEY,JSON.stringify(STORE)); }catch(e){}
@@ -886,7 +1032,7 @@ function renderRec(){
      '<button class="btn hideP" onclick="prefill(CUR,true);saveStore();renderRec()">Refresh from Notion</button>'+
      '<button class="btn hideP" onclick="showJSON()">Copy JSON</button>'+
      '<button class="btn hideP" onclick="showImport()">Import JSON</button>'+
-     '<button class="btn" id="presentBtn" onclick="setPresent(!document.body.classList.contains(\'present\'))">'+(document.body.classList.contains('present')?'Exit presenting':'Present')+'</button>'+
+     '<button class="btn" id="presentBtn" onclick="setPresent(true)" title="Full-screen walkthrough for the call: one section per screen">Present</button>'+
      '<button class="btn primary" onclick="showSummary()">Summary</button></div>';
   var links=[];
   if(b.notionUrl) links.push('<a href="'+esc(b.notionUrl)+'" target="_blank">Notion project</a>');
@@ -1046,14 +1192,187 @@ document.addEventListener('keydown',function(e){ var t=e.target; if(e.key==='Ent
 document.addEventListener('click',function(e){
   var t=e.target; if(t&&t.tagName==='INPUT'&&t.type==='date'&&typeof t.showPicker==='function'){ try{ t.showPicker(); }catch(err){} }
 });
+/* ══════════════════════════════════════════════════════════════════════════
+   4b · PRESENT: the client-facing walkthrough (6 Oct 2026)
+   Ten screens built from the record, read-only except where the call records
+   something: access checks (tap to cycle), decisions (tap an option) and the
+   closing confirmation. Everything written goes through the same record and
+   saveStore(), so the desk and the Summary see it immediately.
+   ══════════════════════════════════════════════════════════════════════════ */
+var PS=0, PDRAWER=false;
 function setPresent(on){
   if(on&&!CUR) return;
-  document.body.classList.toggle('present',on);
-  var b=document.getElementById('presentBtn'); if(b) b.textContent=on?'Exit presenting':'Present';
+  document.body.classList.toggle('presenting',on);
+  document.getElementById('pres').classList.toggle('on',on);
   try{ sessionStorage.setItem('kickoff_present',on?'1':''); }catch(e){}
+  if(on){ try{ PS=Math.max(0,parseInt(sessionStorage.getItem('kickoff_slide')||'0',10)||0); }catch(e){} renderPres(); }
+  else { renderRec(); }
   window.scrollTo(0,0);
 }
-document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&document.body.classList.contains('present')) setPresent(false); });
+function presOn(){ return document.getElementById('pres').classList.contains('on'); }
+function goSlide(i){ var n=presSlides(rec(CUR)).length; PS=Math.max(0,Math.min(n-1,i)); try{ sessionStorage.setItem('kickoff_slide',PS); }catch(e){} renderPres(); }
+function toggleDrawer(){ PDRAWER=!PDRAWER; document.getElementById('pdrawer').classList.toggle('on',PDRAWER); document.getElementById('pnotesBtn').classList.toggle('on',PDRAWER); if(PDRAWER) renderDrawer(); }
+document.addEventListener('keydown',function(e){
+  if(!presOn()) return;
+  var t=e.target, typing=t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName);
+  if(e.key==='Escape'){ if(document.getElementById('summary').classList.contains('on')) return; if(typing){ t.blur(); return; } setPresent(false); return; }
+  if(typing) return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){ e.preventDefault(); goSlide(PS+1); }
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); goSlide(PS-1); }
+  else if(e.key==='Home') goSlide(0); else if(e.key==='End') goSlide(99);
+  else if(e.key==='n'||e.key==='N') toggleDrawer();
+});
+function ini(n){ return String(n||'?').trim().split(/\s+/).slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase(); }
+function pEmpty(t){ return '<div class="pempty">'+t+'</div>'; }
+function presSlides(r){
+  var b=r.basics, nm=esc(b.shortName||r.name||'you'), legal=esc(b.legalName||r.name||CUR), tl=r.timeline, o=r.outcomes, cm=r.comms, S=[];
+  var pn=b.pillarNotes||{};
+  function eye(n,t){ return '<div class="eye">'+(n<10?'0':'')+n+' · '+t+'</div>'; }
+  function li(xs,f,empty){ return xs.length?'<ol class="pl">'+xs.map(f).join('')+'</ol>':pEmpty(empty||'Nothing recorded yet.'); }
+  function kv(rows){ var xs=rows.filter(function(x){return x[1];}); if(!xs.length) return ''; return '<div class="kv">'+xs.map(function(x){return '<div><label>'+x[0]+'</label><span>'+esc(x[1])+'</span></div>';}).join('')+'</div>'; }
+  var sab=SABEL_TEAM.filter(function(m){return r.people.sabel[m[0]];});
+
+  /* 1 · welcome */
+  var agenda=['What success looks like','Scope: in and out','Timeline and key dates','Who is who','How we work together','Access check','Decisions','Next steps','Recap'];
+  S.push({k:'welcome',label:'Welcome',html:
+    '<div class="eye">Sabel · Kick-off'+(tl.kickoff?' · '+fmt(tl.kickoff):'')+'</div><h1>'+legal+'</h1>'+
+    '<p class="lede">Thank you for making the time. In the next hour we agree what this project is for, what it covers, when things happen and who does what. Nothing here is final until you say it is.</p>'+
+    '<div class="cols"><div><h2>What we will cover</h2><ol class="pl">'+agenda.map(function(a){return '<li>'+a+'</li>';}).join('')+'</ol></div>'+
+    '<div><h2>Your Sabel team</h2>'+(sab.length?'<div class="people" style="grid-template-columns:1fr">'+sab.map(function(m){return '<div class="person"><i>'+ini(m[0])+'</i><div><b>'+esc(m[0])+'</b><span>'+esc(m[1])+'</span></div></div>';}).join('')+'</div>':pEmpty('Team not set yet.'))+
+    (b.type||b.hours?'<h2 style="margin-top:22px">The engagement</h2>'+kv([['Type',b.type],['Contracted hours',b.hours?b.hours+' hours':''],['Intercom plan',b.subscription]]):'')+'</div></div>'});
+
+  /* 2 · outcomes */
+  var ms=o.measures.filter(function(x){return x.kpi||x.goal;});
+  S.push({k:'outcomes',label:'Success',html:eye(1,'What success looks like')+'<h1>Why we are doing this</h1>'+
+    (o.vision?'<p class="lede">In your words:</p><blockquote class="pq">'+esc(o.vision).replace(/\n/g,'<br>')+'</blockquote>':'<p class="lede">Before we talk about setup, we want to hear what this needs to achieve for '+nm+'.</p>'+OUT_Q.slice(0,3).map(function(q){return '<blockquote class="pq q">'+esc(q)+'</blockquote>';}).join(''))+
+    kv([['Six months after go-live',o.sixMonths],['How leadership will judge it',o.leadership]])+
+    (ms.length?'<h2 style="margin-top:28px">The numbers we will track</h2><div class="cols3" style="margin-top:0">'+ms.map(function(x){return '<div class="mcard">'+(x.goal?'<div class="g">'+esc(x.goal)+'</div>':'')+'<div class="k">'+esc(x.kpi||'KPI to confirm')+'</div>'+((x.baseline||x.target)?'<div class="t">'+(x.baseline?'<s>'+esc(x.baseline)+'</s><i>→</i>':'')+(x.target?'<b>'+esc(x.target)+'</b>':'')+'</div>':'')+((x.by||x.owner)?'<div class="w">'+(x.by?'by '+fmt(x.by):'')+(x.owner?(x.by?' · ':'')+'tracked by '+esc(x.owner):'')+'</div>':'')+'</div>';}).join('')+'</div>':'')});
+
+  /* 3 · scope */
+  S.push({k:'scope',label:'Scope',html:eye(2,'Scope')+'<h1>What is in, and what is not</h1>'+
+    (r.scope.summary?'<p class="lede">'+esc(r.scope.summary)+'</p>':'<p class="lede">Two lists. We read both aloud and want a yes to each line.</p>')+
+    '<div class="pillars">'+PILLARS.map(function(p){ var on=!!b.pillars[p[0]]; return '<div class="'+(on?'on':'')+'"><small>'+p[1]+'</small><b>'+p[2]+'</b>'+(on&&pn[p[0]]?'<span>'+esc(pn[p[0]])+'</span>':(on?'':'<span>Not in this engagement</span>'))+'</div>'; }).join('')+'</div>'+
+    '<div class="cols"><div><h2 class="in"><b>✓</b> In scope</h2>'+li(r.scope.inScope,function(x){return '<li>'+esc(x.t)+(x.note?'<small>'+esc(x.note)+'</small>':'')+'</li>';},'Scope lines are seeded from the SOW.')+'</div>'+
+    '<div><h2 class="out"><b>✕</b> Out of scope</h2>'+li(r.scope.outScope,function(x){return '<li>'+esc(x.t)+(x.note?'<small>'+esc(x.note)+'</small>':'')+'</li>';},'No exclusions recorded.')+'</div></div>'+
+    (r.scope.changeControl?'<div class="pcall"><b>If something new comes up.</b> '+esc(r.scope.changeControl)+'</div>':'')});
+
+  /* 4 · timeline */
+  var st=[['Kick-off',tl.kickoff,'',true],['Build starts',tl.buildStart,''],['Sample migration',tl.sampleMigration,tl.sourcePlatform?'from '+tl.sourcePlatform:''],['Historical migration',tl.historicalMigration,''],['Go-live',tl.goLive,tl.goLiveNote,true],[(tl.sourcePlatform||'Source platform')+' contract ends',tl.sourceContractEnd,'']].filter(function(x){return x[1];}).sort(function(a,b){return a[1]<b[1]?-1:1;});
+  S.push({k:'timeline',label:'Timeline',html:eye(3,'Timeline')+'<h1>When things happen</h1>'+
+    '<p class="lede">'+(tl.goLive?'We are working towards go-live on <b style="color:var(--w)">'+fmt(tl.goLive)+'</b>. These are the dates that matter between now and then.':'The go-live date is the one we most need to agree today.')+'</p>'+
+    (st.length?'<div class="tline">'+st.map(function(x){return '<div class="'+(x[3]?'hot':'')+'"><b>'+esc(x[0])+'</b><span>'+fmt(x[1])+'</span>'+(x[2]?'<small>'+esc(x[2])+'</small>':'')+'</div>';}).join('')+'</div>':pEmpty('No dates set yet.'))+
+    kv([['Weekly check-in',tl.checkin],['Dates to work around',tl.blackout]])+
+    (tl.phases.length?'<h2 style="margin-top:28px">Phases</h2><table class="pt"><tr><th>Phase</th><th>From</th><th>To</th><th>Milestone</th></tr>'+tl.phases.map(function(p){return '<tr><td>'+esc(p.label)+'</td><td>'+fmt(p.start)+'</td><td>'+fmt(p.end)+'</td><td>'+esc(p.note)+'</td></tr>';}).join('')+'</table>':'')});
+
+  /* 5 · people */
+  S.push({k:'people',label:'People',html:eye(4,'Who is who')+'<h1>The people on this project</h1>'+
+    '<div class="cols"><div><h2>From Sabel</h2>'+(sab.length?'<div class="people" style="grid-template-columns:1fr">'+sab.map(function(m){return '<div class="person"><i>'+ini(m[0])+'</i><div><b>'+esc(m[0])+'</b><span>'+esc(m[1])+'</span></div></div>';}).join('')+'</div>':pEmpty('Not set.'))+'</div>'+
+    '<div><h2>From '+nm+'</h2>'+(r.people.client.length?'<div class="people" style="grid-template-columns:1fr">'+r.people.client.map(function(p){return '<div class="person c"><i>'+ini(p.name)+'</i><div><b>'+esc(p.name||'Name to confirm')+'</b><span>'+esc([p.role,p.involvement].filter(Boolean).join(' · '))+'</span></div></div>';}).join('')+'</div>':pEmpty('Who is our approver, our technical contact and our content owner?'))+'</div></div>'+
+    (r.raci.some(function(x){return x.area;})?'<h2 style="margin-top:30px">Who does what</h2><table class="pt"><tr><th>Area</th><th>Sabel</th><th>'+nm+'</th></tr>'+r.raci.filter(function(x){return x.area;}).map(function(x){return '<tr><td>'+esc(x.area)+'</td><td>'+esc(x.sabel)+'</td><td>'+esc(x.client)+'</td></tr>';}).join('')+'</table>':'')});
+
+  /* 6 · ways of working */
+  var el=cm.escalation.filter(function(x){return x.level;});
+  S.push({k:'comms',label:'Working together',html:eye(5,'How we work together')+'<h1>How we will stay in step</h1>'+
+    kv([['Day to day',cm.channel],['Regular sync',cm.cadence],['Go-live week',cm.goLiveWeek],['Written updates',cm.updates]])+
+    (cm.blocker?'<div class="pcall"><b>What counts as a blocker.</b> '+esc(cm.blocker)+'</div>':'')+
+    (el.length?'<h2 style="margin-top:30px">If something gets stuck</h2><div class="esc">'+el.map(function(x){return '<div><b>'+esc(x.level)+'</b><span>Sabel: <em>'+esc(x.sabel)+'</em></span><span>'+nm+': <em>'+esc(x.client||'to be named')+'</em></span><span style="margin-top:10px">'+esc(x.how)+'</span></div>';}).join('')+'</div>':'')});
+
+  /* 7 · access (tap to cycle) */
+  var acc=r.access.filter(function(x){return x.item;});
+  S.push({k:'access',label:'Access',html:eye(6,'Access check')+'<h1>Let us check the doors are open</h1><p class="lede">We do this live rather than as a to-do. Anything that is not ready gets a name and a date before we finish.</p>'+
+    (acc.length?'<div class="acc">'+r.access.map(function(x,i){ if(!x.item) return ''; var s=ACCESS_ST.filter(function(z){return z[0]===x.status;})[0]||ACCESS_ST[0];
+      return '<div class="row tap" onclick="cycleAccess('+i+')" title="Tap to change"><div><b>'+esc(x.item)+'</b>'+((x.status!=='pass'&&x.status!=='na'&&(x.owner||x.note))?'<small>'+esc(x.owner?x.owner+(x.note?': ':''):'')+esc(x.note)+'</small>':'')+'</div><span class="ast '+x.status+'"><i></i>'+s[1]+'</span></div>'; }).join('')+'</div>':pEmpty('No access checks listed.'))});
+
+  /* 8 · decisions (tap an option) */
+  var dec=r.decisions.filter(function(x){return x.topic;});
+  S.push({k:'decisions',label:'Decisions',html:eye(7,'Decisions')+'<h1>Choices that are yours to make</h1><p class="lede">Each one has a trade-off. We lay out the options; you choose, now or by the date shown.</p>'+
+    (dec.length?'<div class="dec">'+r.decisions.map(function(x,i){ if(!x.topic) return ''; var opts=splitOpts(x.options), made=!!x.decision, custom=made&&opts.indexOf(x.decision)<0;
+      return '<div class="d'+(made?' made':'')+'"><h3>'+esc(x.topic)+'<span class="by">'+esc(x.owner||'')+(x.due?' · by '+fmt(x.due):'')+'</span></h3><div class="opts">'+
+        opts.map(function(op){ var on=x.decision===op; return '<div class="opt tap'+(on?' on':'')+'" onclick="pickDecision('+i+',this)" data-v="'+esc(op)+'"><i>'+(on?'✓':'')+'</i><span>'+esc(op)+'</span></div>'; }).join('')+
+        (custom?'<div class="opt on free tap" onclick="pickDecision('+i+',this)" data-v="'+esc(x.decision)+'"><i>✓</i><span>'+esc(x.decision)+'</span></div>':'')+'</div>'+
+        (made?'':'<div class="pend">Not decided yet'+(x.due?' · needed by '+fmt(x.due):'')+'</div>')+'</div>'; }).join('')+'</div>':pEmpty('Nothing to decide right now.'))});
+
+  /* 9 · next steps and risks */
+  var act=r.actions.filter(function(x){return x.t&&!x.done;}), rk=r.risks.filter(function(x){return x.t&&x.status!=='closed';});
+  var ab=HORIZON.map(function(hz){ var xs=act.filter(function(a){return (a.when||'now')===hz[0];}); if(!xs.length) return ''; return '<div><h2>'+hz[1]+'</h2><ol class="pl">'+xs.map(function(a){return '<li>'+esc(a.t)+'<small>'+esc(a.owner||'owner to confirm')+(a.due?' · '+fmt(a.due):'')+'</small></li>';}).join('')+'</ol></div>'; }).join('');
+  S.push({k:'next',label:'Next steps',html:eye(8,'Next steps')+'<h1>What happens from here</h1><p class="lede">Every line has a name on it. If one does not, tell us whose it should be.</p>'+
+    (ab?'<div class="cols3" style="margin-top:0">'+ab+'</div>':pEmpty('Next steps are added as we go through the call; anything we agree today lands here.'))+
+    (rk.length?'<h2 style="margin-top:30px">Things we are watching</h2><table class="pt"><tr><th>Item</th><th>Owner</th><th>Status</th></tr>'+rk.map(function(x){ var s=RISK_ST.filter(function(z){return z[0]===x.status;})[0]||RISK_ST[0]; return '<tr><td>'+esc(x.t)+'</td><td>'+esc(x.owner)+'</td><td>'+s[1]+'</td></tr>'; }).join('')+'</table>':'')});
+
+  /* 10 · recap and confirmation */
+  var w=r.wrap;
+  S.push({k:'recap',label:'Recap',html:eye(9,'Recap')+'<h1>What we agreed today</h1><p class="lede">A written version of this goes to you within 24 hours.</p>'+
+    '<div class="prec">'+recapHTML(r)+'</div>'+
+    '<div class="confirm tap'+(w.aligned?' on':'')+'" onclick="toggleAligned()"><div class="q">Does this match your understanding?<small>'+(w.aligned?'Confirmed'+(w.alignedBy?' by '+esc(w.alignedBy):'')+(w.alignedAt?' · '+fmt(w.alignedAt.slice(0,10)):''):'Tap to confirm once everyone agrees. Anything missing or wrong, we fix it now.')+'</small></div><span class="cbtn">'+(w.aligned?'✓ Confirmed':'Yes, that is right')+'</span></div>'});
+  return S;
+}
+function splitOpts(s){ return String(s||'').split(/\s+·\s+|\s*;\s*|\s*\|\s*|\n+/).map(function(x){return x.trim();}).filter(Boolean); }
+function renderPres(){
+  if(!presOn()||!CUR) return;
+  var r=rec(CUR), S=presSlides(r); if(PS>=S.length) PS=S.length-1;
+  document.getElementById('pclient').textContent=r.basics.shortName||r.name||CUR;
+  document.getElementById('pnav').innerHTML=S.map(function(s,i){ return '<button type="button" class="'+(i===PS?'on':(i<PS?'done':''))+'" onclick="goSlide('+i+')" title="'+esc(s.label)+'">'+(i+1)+' <span>'+esc(s.label)+'</span></button>'; }).join('');
+  var stage=document.getElementById('pstage'); stage.innerHTML='<div class="slide" data-k="'+S[PS].k+'">'+S[PS].html+'</div>'; stage.scrollTop=0;
+  document.getElementById('pcnt').textContent=(PS+1)+' / '+S.length;
+  document.getElementById('pprev').disabled=PS===0;
+  var nx=document.getElementById('pnext'); nx.textContent=PS===S.length-1?'Finish →':'Next →'; nx.onclick=PS===S.length-1?function(){ setPresent(false); }:function(){ goSlide(PS+1); };
+  var tb=document.getElementById('pthemeBtn'), light=document.documentElement.getAttribute('data-theme')==='light'; tb.innerHTML=light?ICON_MOON+'Dark':ICON_SUN+'Light';
+  if(PDRAWER) renderDrawer();
+}
+function cycleAccess(i){ var r=rec(CUR), x=r.access[i]; if(!x) return; var order=['pending','pass','fail','na'], j=(order.indexOf(x.status)+1)%order.length; x.status=order[j];
+  if(x.status==='fail'&&!x.owner) x.owner='Client'; saveStore(); renderPres(); }
+function pickDecision(i,el){ var r=rec(CUR), x=r.decisions[i]; if(!x) return; var v=el.getAttribute('data-v'); x.decision=x.decision===v?'':v; saveStore(); renderPres(); }
+function toggleAligned(){ var r=rec(CUR); r.wrap.aligned=!r.wrap.aligned; r.wrap.alignedAt=r.wrap.aligned?new Date().toISOString():''; r.wrap.recapRead=true;
+  if(r.wrap.aligned&&!r.wrap.alignedBy){ var p=r.people.client[0]; if(p&&p.name) r.wrap.alignedBy=p.name+(p.role?', '+p.role:''); } saveStore(); renderPres(); }
+/* the drawer: the "i" guidance for the current screen plus quick capture. It is on the shared
+   screen when open, so the header says so. */
+var PGUIDE={
+  welcome:'Set the tone: this is their project, we are here to make it land. Say how long the call runs and that the written summary follows within 24 hours.',
+  outcomes:'Confirm what Intercom passed on, then ask two or three questions. When they describe a bigger idea, stay on it. Capture answers in their words; add measures with a number today, a target, a date and a person.',
+  scope:'Read both lists aloud and get a yes to each. Anything they ask about that is not covered goes straight onto the out-of-scope list, or into a change request.',
+  timeline:'Go-live is the date to lock. Ask about holidays, freezes and launches before you confirm anything.',
+  people:'Approver, technical contact, content owner: three names minimum. Who does what is the anti-"we thought you were doing that" table.',
+  comms:'Read the three escalation levels aloud and fill in their names for each. Level 3 is the same moment the project turns amber or red.',
+  access:'Tap a row to change its result as you check it live. Fails get an owner automatically; add a date in the desk afterwards.',
+  decisions:'Present the trade-off, never steer. Tap the option they choose; tap again to clear. Undecided items carry their due date into the recap.',
+  next:'Every line needs a name. Use the box below to add actions as they come up without leaving this screen.',
+  recap:'Leave five minutes. Read the recap aloud, then ask: does this match your understanding? Tap confirm when everyone agrees; note any correction below.'
+};
+function renderDrawer(){
+  var r=rec(CUR), S=presSlides(r), k=S[PS].k, el=document.getElementById('pdrawerIn');
+  var act=r.actions.filter(function(x){return x.t&&!x.done;});
+  el.innerHTML='<h4>Presenter notes</h4><div class="warn">Internal. This panel is on the shared screen while open: close it (N) before you hand back to the client.</div>'+
+    '<h5>'+esc(S[PS].label)+'</h5><div class="guide">'+esc(PGUIDE[k]||'')+'</div>'+
+    (k==='outcomes'?'<h5>Questions</h5><ol class="qs">'+OUT_Q.map(function(q){return '<li>'+esc(q)+'</li>';}).join('')+'</ol>':'')+
+    '<h5>Add a next step</h5><div class="add"><input id="pact" placeholder="What happens next" onkeydown="if(event.key===\'Enter\') addPresAction()"><input id="pown" placeholder="Owner" list="owners"><button class="btn sm" onclick="addPresAction()">Add</button></div>'+
+    (act.length?'<div class="done">'+act.slice(-4).map(function(a){return '<b>'+esc(a.t)+'</b>'+(a.owner?' · '+esc(a.owner):'')+'<br>';}).join('')+'</div>':'')+
+    '<h5>Notes for the summary</h5><textarea data-p="notesClient" placeholder="Anything agreed that the client should see">'+esc(r.notesClient)+'</textarea>'+
+    '<h5>Internal notes <span style="color:var(--amber)">· never exported</span></h5><textarea data-p="notesInternal" placeholder="Concerns, things to watch">'+esc(r.notesInternal)+'</textarea>'+
+    (k==='recap'?'<h5>Corrected during the recap</h5><textarea data-p="wrap.corrections" placeholder="What they changed or added">'+esc(r.wrap.corrections)+'</textarea>':'');
+}
+function addPresAction(){ var t=document.getElementById('pact'), o=document.getElementById('pown'); if(!t||!t.value.trim()) return;
+  rec(CUR).actions.push({t:t.value.trim(),owner:o.value.trim(),due:'',when:'now',done:false}); saveStore(); renderPres(); renderDrawer(); var n=document.getElementById('pact'); if(n) n.focus(); }
+/* demo record for trying the walkthrough without a live feed: SabelKickoffDesk.html?demo */
+var DEMO=/[?&]demo\b/.test(location.search), DEMO_PRESENT=DEMO&&location.hash==='#present';
+function demoRecord(){
+  var r=blankRecord('Northwind Travel'); r.basics.legalName='Northwind Travel Ltd'; r.basics.shortName='Northwind'; r.basics.hours='120'; r.basics.type='Both'; r.basics.subscription='Advanced, 8 seats';
+  r.basics.pillars={foundations:true,automation:true,fin:true,migration:true}; r.basics.pillarNotes={foundations:'Two brands, one workspace; email, Messenger and WhatsApp',automation:'Booking-change routing, Jira for refunds',fin:'Help Centre rebuild, Fin on the top 40 intents',migration:'Zendesk tickets, 24 months'};
+  r.scope.summary='Sabel moves Northwind from Zendesk to Intercom across two brands, rebuilds the Help Centre, launches Fin on booking and refund questions, and migrates two years of ticket history.';
+  r.scope.inScope=[{t:'Workspace, teams, inboxes and routing for both brands',note:''},{t:'Email, Messenger and WhatsApp channels',note:'Instagram DMs not included'},{t:'Help Centre structure and 40 priority articles',note:'Northwind supplies the content'},{t:'Fin AI Agent on booking changes and refunds',note:'Tuned for four weeks after go-live'},{t:'Jira integration for refund escalations',note:''},{t:'Zendesk migration via Migr8Now',note:'Sample, full run, delta at cutover'}];
+  r.scope.outScope=[{t:'Instagram and TikTok DMs',note:'Can be scoped as an add-on'},{t:'Custom reporting outside Intercom',note:''},{t:'Articles beyond the agreed 40',note:''},{t:'Salesforce integration',note:'Not in the SOW'}];
+  r.timeline={kickoff:'2026-10-13',buildStart:'2026-10-20',checkin:'Thursdays 10:00 AEDT',goLive:'2026-12-01',goLiveNote:'All channels open in Intercom',blackout:'No changes 23 Dec to 4 Jan',sourcePlatform:'Zendesk',sampleMigration:'2026-11-05',historicalMigration:'2026-11-24',sourceContractEnd:'2026-12-31',phases:[]};
+  r.people.sabel={'Chris Singh':true,'Greg Deng':true,'Nikki Coughlan':true};
+  r.people.client=[{name:'Priya Nair',role:'Head of Customer Care',email:'',involvement:'Approver and day-to-day lead'},{name:'Tom Okafor',role:'Systems Lead',email:'',involvement:'Technical contact, Jira and SSO'},{name:'Mei Lin',role:'Content Manager',email:'',involvement:'Owns Help Centre content'}];
+  r.comms.escalation[0].client='Priya Nair, Head of Customer Care'; r.comms.escalation[1].client='Daniel Reyes, COO';
+  r.access[2].status='pass'; r.access[3].status='fail'; r.access[3].owner='Tom Okafor'; r.access[3].note='Zendesk API token needed';
+  r.decisions=[{topic:'Historical data',options:'A: migrate everything · B: start fresh · C: migrate a defined subset',decision:'',owner:'Priya Nair',due:'2026-10-20'},{topic:'Fin tone of voice',options:'Match the brand voice guide · Neutral and short · Agent-style, first person',decision:'Match the brand voice guide',owner:'Mei Lin',due:''}];
+  r.actions=[{t:'Share Zendesk API token with Greg',owner:'Tom Okafor',due:'2026-10-15',when:'now',done:false},{t:'Send brand voice guide and top 40 article list',owner:'Mei Lin',due:'2026-10-17',when:'now',done:false},{t:'Confirm historical data decision',owner:'Priya Nair',due:'2026-10-20',when:'w12',done:false}];
+  r.risks=[{t:'Zendesk contract ends 31 Dec; cutover must land before the holiday freeze',owner:'Chris',status:'watching'}];
+  r.outcomes.source='partial'; r.outcomes.vision='We want customers to get a straight answer about their booking at 11pm without waiting for the morning shift, and we want the team off copy-paste work.';
+  r.outcomes.sixMonths='Half of booking-change conversations resolved by Fin; the care team spends its time on complex itineraries.'; r.outcomes.leadership='Monthly board pack: resolution rate, CSAT and cost per conversation.';
+  r.outcomes.measures=[{goal:'Answers out of hours',kpi:'Fin resolution rate',baseline:'0%',target:'45%',by:'2027-03-01',owner:'Priya Nair'},{goal:'Faster first replies',kpi:'Median first response',baseline:'4h 10m',target:'under 30m',by:'2027-01-31',owner:'Priya Nair'},{goal:'Keep quality up',kpi:'CSAT',baseline:'4.1',target:'4.5',by:'2027-03-01',owner:'Priya Nair'}];
+  r.updated=new Date().toISOString(); return r;
+}
 function refreshReady(){ var el=document.querySelector('.ready'); if(!el) return; var rd=readiness(rec(CUR));
   el.innerHTML='<span>Ready for the call</span><div class="bar"><i style="width:'+Math.round(rd.n/rd.of*100)+'%"></i></div><b>'+rd.n+'/'+rd.of+'</b>'+(rd.miss.length?'<span class="miss">still needs: '+esc(rd.miss.join(', '))+'</span>':'<span style="color:var(--green)">all set</span>'); }
 function addRow(path,row){ var r=rec(CUR); getPath(r,path).push(row); saveStore(); renderRec(); renderList();
@@ -1189,8 +1508,11 @@ function loadAll(){
   ]).then(function(){ LIVE.at=new Date(); build(); banners(); renderList(); setStamp(); });
 }
 applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'light':'dark');
+var _applyTheme=applyTheme; applyTheme=function(t){ _applyTheme(t); if(presOn()) renderPres(); };
 loadLocal(); renderRec();
+if(DEMO){ STORE.clients.demo=demoRecord(); build(); renderList(); openClient('demo'); setView('all'); if(DEMO_PRESENT) setPresent(true); }
 probeStore().then(loadAll).then(function(){
+  if(DEMO){ STORE.clients.demo=demoRecord(); build(); renderList(); openClient('demo'); if(DEMO_PRESENT) setPresent(true); return; }
   var hash=(location.hash||'').replace('#',''); if(hash&&CLIENTS.some(function(c){return c.id===hash;})){ openClient(hash); var hc=CLIENTS.filter(function(c){return c.id===hash;})[0]; if(hc&&!inView(hc,VIEW)) setView(listable(hc)?stageOf(hc):'all'); }
   try{ if(sessionStorage.getItem('kickoff_present')==='1'&&CUR) setPresent(true); }catch(e){}
 });
