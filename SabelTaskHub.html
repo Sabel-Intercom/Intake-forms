@@ -1716,9 +1716,11 @@ function renderFail(){
 
 /* ── events ─────────────────────────────────────────────────────────────── */
 function applyTheme(light){document.documentElement.classList.toggle('light',light);}
+window.addEventListener('storage',e=>{if(e.key!=='sabel-ops-theme'||!e.newValue)return;LIGHT=e.newValue==='light';THEME_SET=true;applyTheme(LIGHT);render();});
 /* Theme: a choice made here sticks; otherwise follow the device setting, live. */
 let LIGHT=false,THEME_SET=false;
-try{const t=localStorage.getItem('sabel-hub-theme');THEME_SET=t==='light'||t==='dark';LIGHT=THEME_SET?t==='light':!!(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches);}catch(e){}
+/* Inside the Ops Hub the shell's Theme button writes sabel-ops-theme; that wins when set, so every tab agrees. */
+try{const t=localStorage.getItem('sabel-ops-theme')||localStorage.getItem('sabel-hub-theme');THEME_SET=t==='light'||t==='dark';LIGHT=THEME_SET?t==='light':!!(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches);}catch(e){}
 applyTheme(LIGHT);
 if(window.matchMedia)try{window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',e=>{if(!THEME_SET){LIGHT=e.matches;applyTheme(LIGHT);render();}});}catch(e){}
 function refreshAll(){Object.keys(TRK).forEach(k=>delete TRK[k]);pullOv();loadAll();}
@@ -1785,7 +1787,7 @@ document.addEventListener('click',e=>{
     case 'unblock':act2(id,'In Progress',COORD);break;
     case 'desk-toggle':S.deskOpen[id]=!S.deskOpen[id];render();break;
     case 'refresh':refreshAll();break;
-    case 'theme':LIGHT=!LIGHT;THEME_SET=true;applyTheme(LIGHT);try{localStorage.setItem('sabel-hub-theme',LIGHT?'light':'dark');}catch(x){}render();break;
+    case 'theme':LIGHT=!LIGHT;THEME_SET=true;applyTheme(LIGHT);try{localStorage.setItem('sabel-hub-theme',LIGHT?'light':'dark');localStorage.setItem('sabel-ops-theme',LIGHT?'light':'dark');if(window.parent!==window)window.parent.document.documentElement.setAttribute('data-theme',LIGHT?'light':'dark');}catch(x){}render();break;
     case 'audit':S.audit=!S.audit;if(S.audit&&!onDesk())S.mode='list';save();render();break;
     case 'aud-off':S.audit=false;save();render();break;
     case 'aud-undo':delete AUD[id];saveAud();project();render();break;

@@ -81,8 +81,9 @@
     <nav class="tabs">
       <button class="tab on" id="t-home"      onclick="show('home')">Home</button>
       <button class="tab"    id="t-internal"  onclick="show('internal')">Internal Ops</button>
-      <button class="tab"    id="t-readiness" onclick="show('readiness')">Readiness Check</button>
+      <button class="tab"    id="t-tasks"     onclick="show('tasks')">Task Hub</button>
       <button class="tab"    id="t-kickoff"   onclick="show('kickoff')">Kick-off Desk</button>
+      <button class="tab"    id="t-readiness" onclick="show('readiness')">Readiness Check</button>
       <button class="tab"    id="t-feedback"  onclick="show('feedback')">Feedback Dashboard</button>
     </nav>
     <div class="nav-right">Internal use only</div>
@@ -107,13 +108,13 @@
           <p>One page per client: SOW hours and links, what the project covers, every step by gate with yours highlighted, and a Today view of what needs you next.</p>
           <span class="go">Open Internal Ops <span class="arrow">&rarr;</span></span>
         </button>
-        <button class="pillar" onclick="show('readiness')">
+        <button class="pillar" onclick="show('tasks')">
           <span class="badge internal">Internal</span>
           <div class="ico">&#10003;</div>
-          <h2>Readiness Submissions</h2>
-          <div class="sub">What each client has ready before kickoff</div>
-          <p>Every Readiness Check a client submits: their answers section by section, the red and amber items with owners and dates, and the three hard gates to check before kickoff is booked.</p>
-          <span class="go">Open submissions <span class="arrow">&rarr;</span></span>
+          <h2>Task Hub</h2>
+          <div class="sub">The team&rsquo;s to-do list, from the trackers</div>
+          <p>Every open tracker task per person, with Home, List and Board views, a Focus Zone, timers and parked questions. Nikki&rsquo;s desk answers what the team hands back and shows the week&rsquo;s summary.</p>
+          <span class="go">Open task hub <span class="arrow">&rarr;</span></span>
         </button>
         <button class="pillar" onclick="show('kickoff')">
           <span class="badge internal">Internal</span>
@@ -122,6 +123,14 @@
           <div class="sub">Scope, timeline, who does what &mdash; per client</div>
           <p>One record per client for the kick-off call: scope in and out, key dates, contacts, the live access check, decisions and next steps. Pre-filled from Notion, edited on the call, exported as a client-ready summary.</p>
           <span class="go">Open kick-off desk <span class="arrow">&rarr;</span></span>
+        </button>
+        <button class="pillar" onclick="show('readiness')">
+          <span class="badge internal">Internal</span>
+          <div class="ico">&#10003;</div>
+          <h2>Readiness Submissions</h2>
+          <div class="sub">What each client has ready before kickoff</div>
+          <p>Every Readiness Check a client submits: their answers section by section, the red and amber items with owners and dates, and the three hard gates to check before kickoff is booked.</p>
+          <span class="go">Open submissions <span class="arrow">&rarr;</span></span>
         </button>
         <button class="pillar" onclick="show('feedback')">
           <span class="badge internal">Internal</span>
@@ -147,10 +156,9 @@
     <iframe id="frame-internal" data-src="SabelInternalOps.html" title="Internal Ops"></iframe>
   </section>
 
-
-  <!-- READINESS SUBMISSIONS -->
-  <section class="view" id="readiness">
-    <iframe id="frame-readiness" data-src="SabelReadinessAdmin.html" title="Readiness Submissions"></iframe>
+  <!-- TASK HUB -->
+  <section class="view" id="tasks">
+    <iframe id="frame-tasks" data-src="SabelTaskHub.html" title="Task Hub"></iframe>
   </section>
 
   <!-- KICK-OFF DESK -->
@@ -158,16 +166,18 @@
     <iframe id="frame-kickoff" data-src="SabelKickoffDesk.html" title="Kick-off Desk"></iframe>
   </section>
 
-  <!-- DASHBOARD -->
+  <!-- READINESS SUBMISSIONS -->
+  <section class="view" id="readiness">
+    <iframe id="frame-readiness" data-src="SabelReadinessAdmin.html" title="Readiness Submissions"></iframe>
+  </section>
 
-  <!-- FEEDBACK -->
   <section class="view" id="feedback">
     <iframe id="frame-feedback" data-src="SabelFeedbackDashboard.html" title="Feedback Dashboard"></iframe>
   </section>
 </div>
 
 <script>
-  var VIEWS = ['home','internal','readiness','kickoff','feedback'];
+  var VIEWS = ['home','internal','tasks','kickoff','readiness','feedback'];
 
   // Each tab is a separate page in an iframe, with its own cache entry — so
   // refreshing the hub does not necessarily re-fetch the tool inside it, and a
@@ -175,9 +185,11 @@
   // browser holds it. Stamping the version onto the src makes it a new URL, so
   // a deploy is picked up immediately.
   // BUMP THIS whenever you push a new version of any tab's page.
-  var ASSET_V = '2026-10-07e';
+  var ASSET_V = '2026-10-07f';
   function versioned(src){
-    return src + (src.indexOf('?') > -1 ? '&' : '?') + 'v=' + ASSET_V;
+    // Keep any #fragment after the version stamp, so a deep link into a tab still works.
+    var i = src.indexOf('#'), hash = i > -1 ? src.slice(i) : '', base = i > -1 ? src.slice(0, i) : src;
+    return base + (base.indexOf('?') > -1 ? '&' : '?') + 'v=' + ASSET_V + hash;
   }
   (function(){ try{ var th=localStorage.getItem('sabel-ops-theme'); if(th==='dark'||th==='light') document.documentElement.setAttribute('data-theme',th); }catch(e){} })();
   function toggleTheme(){
@@ -187,7 +199,7 @@
     document.documentElement.setAttribute('data-theme', next);
     try{ localStorage.setItem('sabel-ops-theme', next); }catch(e){}
     // The tabs are our own pages on the same origin: tell each loaded one directly.
-    VIEWS.forEach(function(v){ var f=document.getElementById('frame-'+v); try{ if(f && f.contentDocument) f.contentDocument.documentElement.setAttribute('data-theme', next); }catch(e){} });
+    VIEWS.forEach(function(v){ var f=document.getElementById('frame-'+v); try{ if(f && f.contentDocument){ var d=f.contentDocument.documentElement; d.setAttribute('data-theme', next); d.classList.toggle('light', next==='light'); } }catch(e){} });
   }
   function show(view){
     VIEWS.forEach(function(v){
