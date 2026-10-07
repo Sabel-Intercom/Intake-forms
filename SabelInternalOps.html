@@ -348,6 +348,7 @@ a{color:inherit}
 .form{padding:2px 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .form .full{grid-column:1/-1}
 .form label{display:grid;gap:3px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.form .fnote{display:block;font-size:11px;color:var(--muted);margin-top:3px;font-weight:400}
 .form input,.form select,.form textarea{font-family:var(--text);font-size:14px;letter-spacing:0;text-transform:none;color:var(--ink);background:var(--raise);border:1px solid var(--line2);border-radius:6px;padding:6px 8px;width:100%;min-width:0}
 .form textarea{min-height:80px;resize:vertical}
 details.fold>summary{list-style:none;cursor:pointer}
@@ -654,9 +655,24 @@ const MIGRATION_PHASES = [
   ["nikki","Slack channel archived"]]}
 ];
 MIGRATION_PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], t:s[1], tag:""})); });
+/* Consultation only: no build, no migration. Two gates, so the client has a place in the
+   hub, a lead, hours from Notion and a close-out, without a delivery journey it never runs. */
+const CONSULT_PHASES = [
+ {id:"c0", code:"C1", when:"On signing", name:"Engaged", gate:"Hours agreed and the channel is open.", steps:[
+  ["nikki","Add the client here: lead and the hours in Notion"],
+  ["nikki","Slack channel open, main contact confirmed"],
+  ["lead","Check-in cadence agreed with the client"],
+  ["lead","Warns at 75% of hours; new scope by written change request"]]},
+ {id:"c1", code:"Close", when:"Hours used", name:"Close-out", gate:"Engagement closed.", steps:[
+  ["nikki","Completion confirmation saved in 00_Project Admin"],
+  ["nikki","Feedback or testimonial prompt sent"],
+  ["nikki","Status closed in Notion; client removed from routine prompts"],
+  ["nikki","Slack channel archived"]]}
+];
+CONSULT_PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], t:s[1], tag:""})); });
 /* Migration clients set up on the 12-gate list before 22 Sep 2026 land on the matching migration gate. */
 const P_TO_M = {p0:"m0",p1:"m1",p2:"m2",p3:"m2",p4:"m2",p5:"m2",p6:"m3",p7:"m3",p8:"m3",p9:"m4",p10:"m4",p11:"m4"};
-function phasesForType(t){ return t==="audit" ? AUDIT_PHASES : t==="migration" ? MIGRATION_PHASES : PHASES; }
+function phasesForType(t){ return t==="audit" ? AUDIT_PHASES : t==="migration" ? MIGRATION_PHASES : t==="consult" ? CONSULT_PHASES : PHASES; }
 function phasesFor(c){ return phasesForType(projectType(c)); }
 function startFor(t,pid){ const L=phasesForType(t); if(L.some(p=>p.id===pid)) return pid; if(t==="migration" && P_TO_M[pid]) return P_TO_M[pid]; return L[0].id; }
 function pidxOf(c,pid){ const L=phasesFor(c); if(projectType(c)==="migration" && P_TO_M[pid]) pid=P_TO_M[pid]; for(let i=0;i<L.length;i++){ if(L[i].id===pid) return i; } return 0; }
@@ -669,7 +685,7 @@ const CRIT_DEFAULT = new Set(["p0-1","p0-5","p0-6","p0-7","p0-8","p0-9","p0-10",
   "a0-2","a0-3","a0-4","a1-0","a1-2"]);
 /* Gates that come before the first client session: kickoff, the discovery workshop, or the migration run. */
 const PRE_KICKOFF = {p0:1,p1:1,p2:1, m0:1,m1:1,m2:1, a0:1,a1:1};
-const LISTS = [["main","Full project and Build only",PHASES],["migration","Migration only",MIGRATION_PHASES],["audit","Audit only",AUDIT_PHASES]];
+const LISTS = [["main","Build and Build + Migration",PHASES],["migration","Migration",MIGRATION_PHASES],["audit","Audit",AUDIT_PHASES],["consult","Consultation only",CONSULT_PHASES]];
 const BASE = {};
 LISTS.forEach(([,,L])=>L.forEach(p=>{
   p.steps.forEach(s=>{ s.crit=CRIT_DEFAULT.has(s.id); if(s.tag==="mo"){ s.hide=true; s.tag=""; } });   /* migration-only steps now live in the migration list */
@@ -706,7 +722,11 @@ function preKickoff(c){
   return {open, past: curIdx(c)>last};
 }
 const STAGE_LABEL = {Discovery:"Scoping", Onboarding:"Onboarding", Active:"Active", Offboarding:"Closing", Complete:"Complete", Outreach:"Sales follow-up"};
-const OLD_TYPE = {full:"Both", build:"Project", migration:"Migration", audit:"Audit"};
+/* The record's project type, one vocabulary (7 Oct 2026). The dashboard and the trackers
+   read these same words. Older spellings (Project, Both) are still understood on read and
+   rewritten on load, so no record is ever left unreadable. */
+const OLD_TYPE = {build:"Build", migration:"Migration", full:"Build + Migration", audit:"Audit", consult:"Consultation only"};
+const TYPE_KEY = {"Build":"build","Project":"build","Migration":"migration","Build + Migration":"full","Both":"full","Audit":"audit","Consultation only":"consult"};
 const WAITING = {client:"the client", sabel:"us", other:"someone else"};
 const optHtml = (arr,val,blank) => (blank!=null?'<option value="">'+blank+'</option>':'')+arr.map(a=>{ const [v,l]=Array.isArray(a)?a:[a,a]; return '<option value="'+esc(v)+'"'+(String(val)===String(v)?' selected':'')+'>'+esc(l)+'</option>'; }).join("");
 
@@ -756,7 +776,9 @@ const byId = id => clients().find(c=>c.id===id);
 function notionFor(c){
   if(c.hub && c.hub.notionId) return S.notion.find(p=>p.id===c.hub.notionId) || null;
   const n = norm(c.name); if(!n) return null;
-  return S.notion.find(p=>norm(p.name)===n) || null;
+  /* Exact name first: norm() drops "#2", which sent Re-Leased #2 to the closed Re-Leased row. */
+  const x = String(c.name).trim().toLowerCase();
+  return S.notion.find(p=>String(p.name).trim().toLowerCase()===x) || S.notion.find(p=>norm(p.name)===n) || null;
 }
 function kickoffFor(c){
   const k = S.kickoff||{};
@@ -775,12 +797,16 @@ function trackerUrlFor(c){
 }
 function projectType(c){
   if(c.hub && c.hub.type) return c.hub.type;
-  if(c.type==="Migration") return "migration";
-  if(c.type==="Audit") return "audit";
-  if(c.type==="Project") return "build";
-  return "full";
+  return TYPE_KEY[c.type] || "full";
 }
-const TYPE_LABEL = {full:"Full project", build:"Build only", migration:"Migration only", audit:"Audit only"};
+function typeSet(c){ return !!((c.hub && c.hub.type) || TYPE_KEY[c.type]); }
+const TYPE_LABEL = {build:"Build", migration:"Migration", full:"Build + Migration", audit:"Audit", consult:"Consultation only"};
+/* Rewrites old type spellings on the record so every reader sees one vocabulary. */
+function normaliseTypes(){
+  let n=0;
+  clients().forEach(c=>{ const want = c.type ? OLD_TYPE[TYPE_KEY[c.type]] : ""; if(want && want!==c.type){ c.type=want; touch(c,["type"]); n++; } });
+  return n;
+}
 function stepsFor(c, p){
   const t = projectType(c);
   return p.steps.filter(s => !s.tag || (s.tag==="b" && t!=="migration") || (s.tag==="m" && t!=="build") || (s.tag==="mo" && t==="migration"));
@@ -825,13 +851,14 @@ function band(c){
   if(c.stage==="Complete") return "closed";
   if(!hasHub(c)) return c.stage==="Offboarding" ? "closing" : "setup";
   if(projectType(c)==="audit") return curIdx(c)>=AUDIT_PHASES.length ? "closed" : "audit";
+  if(projectType(c)==="consult") return curIdx(c)>=CONSULT_PHASES.length ? "closed" : "consult";
   if(projectType(c)==="migration"){ const m=curIdx(c); return m<=2 ? "onboarding" : m===3 ? "migration" : m===4 ? "closing" : "closed"; }
   const i=curIdx(c);
   if(i<=5) return "onboarding"; if(i===6) return "build"; if(i<=8) return "golive"; if(i<=10) return "stabilise"; if(i===11) return "closing"; return "closed";
 }
 const BANDS = [
   ["scoping","Scoping"],["setup","Not set up in the hub"],["audit","Audit"],["onboarding","Onboarding · S0"],["build","Build · S1 to S5"],["migration","Migration run"],
-  ["golive","UAT and go-live"],["stabilise","Stabilise and Day-30"],["hold","On hold"],["closing","Closing"],["closed","Closed"]
+  ["golive","UAT and go-live"],["stabilise","Stabilise and Day-30"],["consult","Consultation"],["hold","On hold"],["closing","Closing"],["closed","Closed"]
 ];
 function inDelivery(c){ return hasHub(c) && !["scoping","closed","hold","sales"].includes(band(c)); }
 
@@ -859,16 +886,16 @@ function warnings(c){
   const n=notionFor(c), tk=trackerKeyFor(c), td=tk && S.trk[tk];
   if(S.loaded.notion && !n) w.push(["Not linked to a Notion project","Link it in Details so hours, scope and SOW links show."]);
   if(n && !n.sabelDoc && !n.intercomSow) w.push(["No SOW link in Notion","Add the Sabel doc or Intercom SOW link to the Notion project."]);
-  if(n && n.hours && c.hours && Number(n.hours)!==Number(c.hours)) w.push(["Hours differ: Notion "+n.hours+"h, portal "+c.hours+"h","Confirm the contracted figure and correct the other."]);
-  if(td && td.data && td.data.goLive && c.goLiveDate && td.data.goLive!==c.goLiveDate) w.push(["Go-live differs: hub "+fmt(c.goLiveDate)+", tracker "+fmt(td.data.goLive),"The hub date is the one to keep. Update the tracker to match."]);
+  if(n && (n.hours==null || n.hours==="")) w.push(["No hours on the Notion project","Hours come from Notion now. Add Contract hours to the project there."]);
+  if(!typeSet(c)) w.push(["No project type set","Build, Migration, Build + Migration, Audit or Consultation only, in Details."]);
   if(tk && td && td.status===404) w.push(["Tracker key not registered: "+tk,"Add it to ALLOWED_KEYS in sabel-webhook, otherwise the tracker cannot save."]);
   if(tk && S.loaded.reg && !S.reg.some(t=>t.key===tk)) w.push(["Not in trackers.json: "+tk,"Add an entry so the dashboard and weekly sweeps find it."]);
-  if(hasHub(c) && !["audit","migration"].includes(projectType(c)) && curIdx(c)>=5 && curIdx(c)<PHASES.length && !tk) w.push(["No tracker key yet","Needed once the blueprint is signed."]);
-  if(c.goLiveDate && !c.day30Date && projectType(c)!=="migration") w.push(["No Day-30 date","Set it once go-live is confirmed (go-live plus 30 days)."]);
-  if(hasHub(c) && !["audit","migration"].includes(projectType(c)) && curIdx(c)<=2 && !((c.hub.sowInputs||[]).length)) w.push(["No SOW client inputs listed","Add the SOW's Client Inputs Required in Details, so they show in the client's Readiness Check."]);
+  if(hasHub(c) && !["audit","migration","consult"].includes(projectType(c)) && curIdx(c)>=5 && curIdx(c)<PHASES.length && !tk) w.push(["No tracker key yet","Needed once the blueprint is signed."]);
+  if(c.goLiveDate && !c.day30Date && !["migration","consult"].includes(projectType(c))) w.push(["No Day-30 date","Set it once go-live is confirmed (go-live plus 30 days)."]);
+  if(hasHub(c) && !["audit","migration","consult"].includes(projectType(c)) && curIdx(c)<=2 && !((c.hub.sowInputs||[]).length)) w.push(["No SOW client inputs listed","Add the SOW's Client Inputs Required in Details, so they show in the client's Readiness Check."]);
   if(hasHub(c) && (S.inputsStatus||{})[c.id]==="unregistered") w.push(["SOW client inputs not published","Add readiness-inputs-v1 to ALLOWED_KEYS in sabel-webhook, then edit the list again."]);
   if(hasHub(c) && !c.contactName && !(n&&n.contact)) w.push(["No client contact","Add the main contact in Details."]);
-  if(hasHub(c) && !c.tier && projectType(c)!=="migration") w.push(["No tier set","Light, Standard or Enterprise, from the SOW triggers."]);
+  if(hasHub(c) && !c.tier && !["migration","consult"].includes(projectType(c))) w.push(["No tier set","Light, Standard or Enterprise, from the SOW triggers."]);
   return w;
 }
 
@@ -893,6 +920,7 @@ async function loadAll(){
   ]);
   applyChecklists();
   setSave(S.errors.portal ? "offline" : "idle");
+  if(S.loaded.portal) normaliseTypes();
   routeFromHash(); render();
   loadTrackers();
 }
@@ -901,6 +929,7 @@ async function loadTrackers(){
   await Promise.all(keys.map(k=>getJSON(API+"?key="+encodeURIComponent(k))
     .then(j=>{ S.trk[k]={ok:true, data:j.data||null}; })
     .catch(e=>{ S.trk[k]={ok:false, status:e.status||0}; })));
+  syncGoLive();
   render();
 }
 async function refreshPortal(){
@@ -1042,8 +1071,21 @@ function renderBadges(){
   const tc=$("today-count"); tc.hidden=!n; tc.textContent=n;
   const sd=salesDue().length, sc2=$("sales-count"); sc2.hidden=!sd; sc2.textContent=sd;
 }
-/* Go-live from the client record, else the tracker's own date. */
-function goLiveOf(c){ const tk=trackerKeyFor(c), td=tk&&S.trk[tk]; return c.goLiveDate || (td&&td.data&&td.data.goLive) || ""; }
+/* The tracker's go-live is the one that counts (7 Oct 2026). The record carries a copy so
+   every other reader of client-portal-v1 sees the same date; syncGoLive() keeps it current. */
+function trackerGoLive(c){ const tk=trackerKeyFor(c), td=tk&&S.trk[tk]; return (td&&td.ok&&td.data&&td.data.goLive) || ""; }
+function goLiveOf(c){ return trackerGoLive(c) || c.goLiveDate || ""; }
+function syncGoLive(){
+  let n=0;
+  clients().forEach(c=>{
+    if(["Complete","Outreach"].includes(c.stage)) return;
+    const g=trackerGoLive(c); if(!g || g===c.goLiveDate) return;
+    c.goLiveDate=g; c.goLiveSource="tracker"; const f=["goLiveDate","goLiveSource"];
+    if(!c.day30Date && projectType(c)!=="migration"){ c.day30Date=addDays(g,30); f.push("day30Date"); }
+    touch(c,f); n++;
+  });
+  return n;
+}
 /* Critical steps that are due: open, critical, and the gate is due within 3 days or overdue
    (a gate with no date counts once the client has reached it). Only clients in delivery. */
 function critDue(c){
@@ -1437,7 +1479,7 @@ function scopingPanel(c){
 }
 function setupPanel(c){
   const again = hasHub(c);
-  const guess = again ? startFor(projectType(c), c.hub.startPhase) : projectType(c)==="audit" ? "a0" : projectType(c)==="migration" ? (c.stage==="Offboarding" ? "m4" : c.stage==="Active" ? "m3" : "m0") : c.stage==="Offboarding" ? "p11" : (c.goLiveDate && daysTo(c.goLiveDate)<0 ? "p9" : c.stage==="Active" ? "p6" : "p0");
+  const guess = again ? startFor(projectType(c), c.hub.startPhase) : projectType(c)==="audit" ? "a0" : projectType(c)==="consult" ? "c0" : projectType(c)==="migration" ? (c.stage==="Offboarding" ? "m4" : c.stage==="Active" ? "m3" : "m0") : c.stage==="Offboarding" ? "p11" : (c.goLiveDate && daysTo(c.goLiveDate)<0 ? "p9" : c.stage==="Active" ? "p6" : "p0");
   return '<section class="setup"><h3>Where is '+esc(c.name)+' up to?</h3><p>'+(again?'Change the gate this client started at in the hub. Ticks and closed gates you have already recorded are kept.':'This client started before the hub. Pick the gate they are at now. Earlier gates are treated as closed, so only the steps from here on need ticking.')+'</p>'+
     '<div class="row"><label>Current gate<select id="start-phase">'+phasesFor(c).map(p=>'<option value="'+p.id+'"'+(p.id===guess?' selected':'')+'>'+esc(p.code+' · '+p.name)+'</option>').join("")+'</select></label>'+
     '<label>Project type<select id="start-type">'+Object.entries(TYPE_LABEL).map(([k,v])=>'<option value="'+k+'"'+(k===projectType(c)?' selected':'')+'>'+v+'</option>').join("")+'</select></label>'+
@@ -1533,9 +1575,11 @@ function asidePanels(c,n,ko,tk,td,w){
     '<label>Proposal sent<input type="date" data-field="proposalSent" data-id="'+c.id+'" value="'+esc(c.proposalSent||"")+'"></label>'+
     '<label>Signed<input type="date" data-field="signedDate" data-id="'+c.id+'" value="'+esc(c.signedDate||"")+'"></label>'+
     '<label>Kickoff<input type="date" data-field="hub.kickoffDate" data-id="'+c.id+'" value="'+esc(hub.kickoffDate||"")+'"></label>'+
-    '<label>Go-live<input type="date" data-field="goLiveDate" data-id="'+c.id+'" value="'+esc(c.goLiveDate||"")+'"></label>'+
+    (trackerGoLive(c)
+      ? '<label>Go-live<input type="date" value="'+esc(trackerGoLive(c))+'" disabled title="Set in the client tracker"><span class="fnote">From the tracker'+(trackerUrlFor(c)?' · <a href="'+esc(trackerUrlFor(c))+'" target="_blank" rel="noopener">change it there</a>':'')+'</span></label>'
+      : '<label>Go-live<input type="date" data-field="goLiveDate" data-id="'+c.id+'" value="'+esc(c.goLiveDate||"")+'"><span class="fnote">'+(tk?'No date in the tracker yet':'No tracker, so this is the date')+'</span></label>')+
     '<label>Day-30 review<input type="date" data-field="day30Date" data-id="'+c.id+'" value="'+esc(c.day30Date||"")+'" placeholder="go-live + 30"></label>'+
-    '<label>Hours (portal)<input type="text" inputmode="decimal" data-field="hours" data-id="'+c.id+'" value="'+esc(c.hours||"")+'"></label>'+
+    '<label>Hours<input type="text" value="'+esc((n&&n.hours)!=null&&n.hours!==""?n.hours:"")+'" disabled placeholder="'+(n?'none in Notion':'not linked to Notion')+'"><span class="fnote">From the Notion project'+(c.hours&&n&&n.hours!=null&&Number(n.hours)!==Number(c.hours)?' · old typed value '+esc(c.hours)+'h ignored':'')+'</span></label>'+
     '<label>Tracker key<input type="text" data-field="trackerKey" data-id="'+c.id+'" value="'+esc(c.trackerKey||"")+'" placeholder="'+esc((n&&n.trackerKey)||"client-tracker-v1")+'"></label>'+
     '<label>Slack channel ID<input type="text" data-field="slackChannel" data-id="'+c.id+'" value="'+esc(c.slackChannel||"")+'" placeholder="C0…"></label>'+
     '<label class="full">Drive folder URL<input type="url" data-field="hub.driveUrl" data-id="'+c.id+'" value="'+esc(hub.driveUrl||"")+'"></label>'+
@@ -1817,7 +1861,7 @@ function createClient(o){
     ensureHub(c,"p0"); c.hub.notionId = n.id;
   }
   if(o.type) c.type = OLD_TYPE[o.type] || "";
-  if(o.stage==="Onboarding" || o.type==="audit"){ ensureHub(c, o.type==="audit" ? "a0" : o.type==="migration" ? "m0" : "p0"); c.hub.type = o.type || "full"; }
+  if(o.stage==="Onboarding" || o.type==="audit" || o.type==="consult"){ ensureHub(c, o.type==="audit" ? "a0" : o.type==="consult" ? "c0" : o.type==="migration" ? "m0" : "p0"); c.hub.type = o.type || "full"; }
   if(c.hub) c.hub.startPhase = startFor(projectType(c), c.hub.startPhase);
   S.portal.clients.push(c); touch(c,["*"]); openClient(c.id);
   return c;

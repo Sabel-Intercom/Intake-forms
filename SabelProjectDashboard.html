@@ -687,7 +687,7 @@ function guessType(tasks){
 /* The onboarding portal already records this per client as Migration / Project /
    Both, so read it rather than asking anyone to set it twice. The pillar guess
    below is only for clients the portal has no type for. */
-var PORTAL_TYPE = {'Migration':'migration','Project':'build','Both':'full',
+var PORTAL_TYPE = {'Migration':'migration','Project':'build','Both':'full','Build':'build','Build + Migration':'full',
                    'migration':'migration','project':'build','both':'full'};
 var TYPE_LABEL = {full:'Full project', migration:'Migration only', build:'Build only'};
 var TYPE_SHORT = {full:'Full', migration:'Migration', build:'Build'};
