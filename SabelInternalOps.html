@@ -416,6 +416,27 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
 .salescard .panel-h .sub .chip{margin-left:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
+/* ---------- who + help ---------- */
+.who{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
+.who select{font:inherit;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--raise);border:1px solid var(--line2);border-radius:6px;padding:4px 6px;cursor:pointer}
+#help-dlg{width:min(760px,94vw);max-height:88vh;overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--body);padding:0;box-shadow:var(--shadow)}
+#help-dlg::backdrop{background:rgba(0,0,0,.45)}
+.help{padding:22px 26px 26px;font-size:14px;line-height:1.55}
+.help .dh{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.help h2{margin:0;font-family:var(--display);font-size:20px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.help h3{margin:18px 0 6px;font-family:var(--display);font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.02em;text-transform:uppercase}
+.help p{margin:0 0 8px}
+.help ul{margin:0 0 8px;padding-left:20px}
+.help li{margin:3px 0}
+.help table{border-collapse:collapse;width:100%;font-size:13.5px;margin:4px 0 8px}
+.help th,.help td{text-align:left;padding:6px 8px;border-top:1px solid var(--line);vertical-align:top}
+.help th{color:var(--muted);font-weight:600;font-size:12px;letter-spacing:.05em;text-transform:uppercase;border-top:0}
+.help code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:var(--sunk);padding:1px 5px;border-radius:4px;color:var(--ink)}
+.help b{color:var(--ink)}
+.changes{display:grid;gap:2px;padding:4px 16px 12px}
+.changes div{display:grid;grid-template-columns:62px 60px 1fr;gap:8px;font-size:12.5px;color:var(--body)}
+.changes div span:first-child,.changes div span:nth-child(2){color:var(--muted)}
+
 /* ---------- board: the command table, grouped by go-live window ---------- */
 .bd{display:grid;gap:16px}
 .bdhead{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
@@ -486,17 +507,19 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
       <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="q" type="search" placeholder="Find a client  ( / )" autocomplete="off">
     </div>
+    <label class="who" title="Changes are recorded under this name"><span>Working as</span><select id="who"><option>Nikki</option><option>Chris</option><option>Richard</option><option>Greg</option></select></label>
     <span class="savepill" id="savepill"><i></i><span>Loading</span></span>
+    <button class="btn sm ghost" data-act="help" title="How this page works">?</button>
     <button class="btn primary" data-act="add-client">+ Add client</button>
     <details class="tools" id="tools">
       <summary class="btn sm ghost">More</summary>
       <div class="menu">
         <a href="SabelKickoffDesk.html" target="_blank" rel="noopener">Kick-off Desk<small>Run and record the kickoff call</small></a>
         <a href="SabelReadinessAdmin.html" target="_blank" rel="noopener">Readiness submissions<small>Client answers and RAG</small></a>
-        <a href="SabelProjectDashboard.html" target="_blank" rel="noopener">Tracker dashboard<small>Every client tracker, live</small></a>
         <a href="SabelFeedbackDashboard.html" target="_blank" rel="noopener">Feedback<small>What clients are telling us</small></a>
         <a href="SabelMigrationIntake.html#admin" target="_blank" rel="noopener">Migration intake<small>Mapping form admin view</small></a>
         <a href="https://claude.ai/artifact/HGy9CJpb3iR2WHLX9h9S5m" target="_blank" rel="noopener">Delivery Run Sheet<small>The framework this hub follows</small></a>
+        <button type="button" data-act="help">How this page works<small>Read this if Nikki is away</small></button>
         <button type="button" data-act="theme">Switch light or dark<small>Theme for this browser</small></button>
       </div>
     </details>
@@ -504,6 +527,53 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
   <div class="scroll" id="scroll"><div class="page" id="view"><div class="loading">Loading Internal Ops: clients, Notion and trackers…</div></div></div>
 </div>
 
+<dialog id="help-dlg"><div class="help">
+  <div class="dh"><h2>How this page works</h2><form method="dialog"><button class="btn sm">Close</button></form></div>
+  <p>Internal Ops is the one place that holds what we know about every client: who they are, what we are building, where they are up to, and the dates. Everything else (the Board, the trackers, the Kick-off Desk, the Task Hub) reads from here. Nikki runs it day to day; if she is away, this page tells you where things stand and what to do.</p>
+
+  <h3>The tabs</h3>
+  <ul>
+    <li><b>Overview</b>: every client in delivery as a card, grouped by where they are in the journey. "Needs attention" at the top is the chase list: overdue gates, open critical steps, blocked tracker tasks.</li>
+    <li><b>Board</b>: one row per client, grouped by how close their go-live is. Progress, overdue and blocked counts come from the client's tracker. Use it on the Monday call.</li>
+    <li><b>Today</b>: Nikki's own steps that are due, across all clients.</li>
+    <li><b>Sales follow-up</b>: clients we have pitched to and are waiting on. Not in delivery.</li>
+    <li><b>Checklists</b>: the standard steps behind each gate. Editing here changes the template for every client.</li>
+  </ul>
+
+  <h3>Where each thing comes from</h3>
+  <table>
+    <tr><th>Field</th><th>Source</th><th>To change it</th></tr>
+    <tr><td>Stage, lead, tier, type, contact, signed and kickoff dates, on hold</td><td>This page</td><td>Open the client, edit in Details or use the buttons at the top.</td></tr>
+    <tr><td>Go-live</td><td>The client's tracker</td><td>Change it in the tracker; this page copies it within a minute of loading. Only a client with no tracker has an editable go-live here.</td></tr>
+    <tr><td>Progress, overdue, blocked</td><td>The client's tracker</td><td>Work the tasks in the tracker. Nothing here edits tasks.</td></tr>
+    <tr><td>Hours on SOW, scope, SOW links</td><td>Notion, Sabel Ops › Projects</td><td>Edit the Notion project. If a client shows "not linked to Notion", pick the project in Details.</td></tr>
+    <tr><td>Gate ticks and notes</td><td>This page</td><td>Tick steps on the client's journey. Closing a gate moves the stage automatically unless the stage was set by hand.</td></tr>
+  </table>
+
+  <h3>Project types</h3>
+  <p><b>Build</b> (an Intercom build, no migration), <b>Migration</b> (data in, no build), <b>Build + Migration</b> (both), <b>Audit</b>, and <b>Consultation only</b> (hours of advice, no delivery journey; its date on the Board is the next check-in, set in Details). The type picks which gate list the client follows.</p>
+
+  <h3>On hold</h3>
+  <p>"Park" on the Board and "Put on hold" on the client are the same thing. A held client leaves the Board and the Today list, keeps everything recorded, and comes back with "Resume". Always give a reason and a check-back date.</p>
+
+  <h3>If you need to do something while Nikki is away</h3>
+  <ul>
+    <li><b>Pick your name</b> in "Working as" at the top first, so the change is recorded under you.</li>
+    <li><b>A client signed</b>: "+ Add client", choose "Signed, start at Day 0", the type and the lead. The runbook steps appear on the client.</li>
+    <li><b>A client is stuck</b>: open them, "Put on hold", say why and when to check back.</li>
+    <li><b>A go-live moved</b>: change it in the tracker, not here.</li>
+    <li><b>Something looks wrong</b>: the warnings panel on each client says what is missing and where to fix it. Leave a note on the step rather than guessing.</li>
+  </ul>
+
+  <h3>Things that look like problems but are not</h3>
+  <ul>
+    <li><b>A client is missing from Overview</b>: scoping, on hold and closed clients sit in folded groups at the bottom; sales follow-ups are under their own tab.</li>
+    <li><b>The band says Onboarding but the stage says Active</b>: the band follows the gates, the stage can be set by hand. Tick the gates the client has passed, or use "Change starting gate".</li>
+    <li><b>"rebuilt" on a Board row</b>: the tracker was rebuilt after its last save, so it shows its freshly built plan. Statuses ticked before the rebuild are gone from the tracker too.</li>
+    <li><b>"Not saved, will retry"</b> in the top right: the connection dropped. Leave the tab open; it retries. Changes are kept in this browser meanwhile.</li>
+  </ul>
+  <p style="color:var(--muted);font-size:12.5px;margin-top:14px">Record: <code>client-portal-v1</code> on the Sabel webhook · trackers on GitHub Pages · hours from Notion. Retired on 7 Oct 2026: the Project Dashboard, Client Portal, Portfolio, Weekly Updates and Client Contracts pages; this page replaced them.</p>
+</div></dialog>
 <dialog id="add-dlg">
   <form method="dialog" id="add-form">
     <div class="dh">Add a client</div>
@@ -785,6 +855,11 @@ const WAITING = {client:"the client", sabel:"us", other:"someone else"};
 const optHtml = (arr,val,blank) => (blank!=null?'<option value="">'+blank+'</option>':'')+arr.map(a=>{ const [v,l]=Array.isArray(a)?a:[a,a]; return '<option value="'+esc(v)+'"'+(String(val)===String(v)?' selected':'')+'>'+esc(l)+'</option>'; }).join("");
 
 /* ---------- state ---------- */
+const WHO_KEY = "sabel-ops-who";
+function who(){ try{ return localStorage.getItem(WHO_KEY) || "Nikki"; }catch(_){ return "Nikki"; } }
+/* Plain words for the record fields a change log line can carry. */
+const FIELD_LABEL = {stage:"stage", stageManual:"stage", type:"type", owner:"lead", tier:"tier", hold:"on hold", goLiveDate:"go-live", goLiveSource:"go-live", day30Date:"Day-30",
+  signedDate:"signed date", proposalSent:"proposal date", contactName:"contact", contactEmail:"contact", trackerKey:"tracker key", slackChannel:"Slack channel", intake:"came via", outreach:"sales follow-up", notes:"notes", "*":"added the client"};
 const S = {
   portal:null, notion:[], reg:[], kickoff:{}, trk:{},
   loaded:{portal:false,notion:false,reg:false,kick:false}, errors:{},
@@ -858,7 +933,7 @@ const TYPE_LABEL = {build:"Build", migration:"Migration", full:"Build + Migratio
 /* Rewrites old type spellings on the record so every reader sees one vocabulary. */
 function normaliseTypes(){
   let n=0;
-  clients().forEach(c=>{ const want = c.type ? OLD_TYPE[TYPE_KEY[c.type]] : ""; if(want && want!==c.type){ c.type=want; touch(c,["type"]); n++; } });
+  clients().forEach(c=>{ const want = c.type ? OLD_TYPE[TYPE_KEY[c.type]] : ""; if(want && want!==c.type){ c.type=want; touch(c,["type"],"system"); n++; } });
   return n;
 }
 function stepsFor(c, p){
@@ -1200,11 +1275,16 @@ function setSave(s){
   el.className="savepill "+s;
   el.querySelector("span").textContent = {loading:"Loading",idle:"Up to date",saving:"Saving…",saved:"Saved",offline:"Not saved, will retry"}[s]||s;
 }
-function touch(c, fields){
+function touch(c, fields, by){
   if(!S.dirty.has(c.id)) S.dirty.set(c.id, new Set());
   const set=S.dirty.get(c.id); (fields||[]).forEach(f=>set.add(f));
   if(c.hub) c.hub.updated = new Date().toISOString();
   set.add("hub");
+  /* Who changed what, so the team can read the record when Nikki is away. Steps and
+     notes live under hub, so a change with no named field is one of those. */
+  const what = [...new Set((fields||[]).map(f=>FIELD_LABEL[f]||f.replace(/^hub\./,"")))].join(", ") || "steps or notes";
+  c.updatedBy = by || who(); c.log = (Array.isArray(c.log)?c.log:[]).concat([{at:new Date().toISOString(), by:c.updatedBy, what}]).slice(-40);
+  set.add("log"); set.add("updatedBy");
   cachePortal(); setSave("saving");
   clearTimeout(saveTimer); saveTimer=setTimeout(flush, 900);
 }
@@ -1332,7 +1412,7 @@ function syncGoLive(){
     const g=trackerGoLive(c); if(!g || g===c.goLiveDate) return;
     c.goLiveDate=g; c.goLiveSource="tracker"; const f=["goLiveDate","goLiveSource"];
     if(!c.day30Date && projectType(c)!=="migration"){ c.day30Date=addDays(g,30); f.push("day30Date"); }
-    touch(c,f); n++;
+    touch(c,f,"tracker"); n++;
   });
   return n;
 }
@@ -1811,6 +1891,11 @@ function asidePanels(c,n,ko,tk,td,w){
   }
   h += '</div></section>';
 
+  /* recent changes */
+  const log=(Array.isArray(c.log)?c.log:[]).slice(-8).reverse();
+  if(log.length) h += '<section class="panel"><div class="panel-h"><h3>Recent changes</h3><span class="sub">last '+log.length+(c.updatedBy?' · latest by '+esc(c.updatedBy):'')+'</span></div><div class="changes">'+
+    log.map(l=>'<div><span>'+esc(fmt(String(l.at||"").slice(0,10)))+'</span><span>'+esc(l.by||"")+'</span><span>'+esc(l.what||"")+'</span></div>').join("")+'</div></section>';
+
   /* details */
   const hub=c.hub||{};
   const opt = optHtml;
@@ -1962,6 +2047,7 @@ document.addEventListener("click", e=>{
   switch(a){
     case "today": return goToday();
     case "overview": return goOverview();
+    case "help": $("help-dlg").showModal(); return;
     case "board-park": { if(!c) return; S.holdEdit=c.id; openClient(c.id); return; }
     case "board-type": S.prefs.board=Object.assign({}, S.prefs.board||{}, {type:t.dataset.v}); savePrefs(); return render(true);
     case "board-status": S.prefs.board=Object.assign({}, S.prefs.board||{}, {status:t.dataset.v}); savePrefs(); return render(true);
@@ -2002,6 +2088,7 @@ document.addEventListener("click", e=>{
       const curDark = document.documentElement.getAttribute("data-theme")==="dark" || (!document.documentElement.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
       const next = curDark?"light":"dark"; document.documentElement.setAttribute("data-theme",next);
       try{ localStorage.setItem("sabel-ops-theme",next); }catch(_){}
+      try{ if(window.parent!==window) window.parent.document.documentElement.setAttribute("data-theme",next); }catch(_){}
       return;
     }
     case "tick": {
@@ -2082,6 +2169,7 @@ document.addEventListener("change", e=>{
   refocusField(t.dataset.id, t.dataset.field);
 });
 /* "toggle" does not bubble, so this listens in the capture phase. */
+(function(){ const el=$("who"); if(!el) return; el.value=who(); el.addEventListener("change", ()=>{ try{ localStorage.setItem(WHO_KEY, el.value); }catch(_){} }); })();
 document.addEventListener("toggle", e=>{ const d=e.target; if(d && d.dataset && d.dataset.fold) S.foldOpen[d.dataset.fold]=d.open; }, true);
 let noteTimer=null;
 document.addEventListener("input", e=>{

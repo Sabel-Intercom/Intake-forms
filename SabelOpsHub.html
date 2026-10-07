@@ -9,8 +9,24 @@
     --bg:#0B0B0C; --card:#0F1113; --card2:#141618; --card3:#191C20; --card4:#1E2228;
     --w:#FFFFFF; --red:#E10600; --redDim:rgba(225,6,0,0.15); --body:#E2E8F0;
     --muted:#94A3B8; --border:#2A3547; --border2:#1A2232; --mono:#64748B;
-    --green:#4ADE80; --blue:#60A5FA;
+    --green:#4ADE80; --blue:#60A5FA; --navbg:rgba(11,11,12,0.92); --logo:none;
   }
+  /* Light theme: same key as Internal Ops (sabel-ops-theme), so the shell and the tabs agree. Follows the OS when unset. */
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#F5F5F3; --card:#FFFFFF; --card2:#F1F2F3; --card3:#E9EBEE; --card4:#E3E5E8;
+      --w:#14171A; --redDim:rgba(225,6,0,0.08); --body:#3A4046; --muted:#6B7480; --border:#D2D6DB; --border2:#E3E5E8; --mono:#8C95A1;
+      --green:#15803D; --blue:#1D4ED8; --navbg:rgba(245,245,243,0.92); --logo:brightness(0);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#F5F5F3; --card:#FFFFFF; --card2:#F1F2F3; --card3:#E9EBEE; --card4:#E3E5E8;
+    --w:#14171A; --redDim:rgba(225,6,0,0.08); --body:#3A4046; --muted:#6B7480; --border:#D2D6DB; --border2:#E3E5E8; --mono:#8C95A1;
+    --green:#15803D; --blue:#1D4ED8; --navbg:rgba(245,245,243,0.92); --logo:brightness(0);
+  }
+  .home-head img{filter:var(--logo);}
+  .theme{margin-left:12px;padding:5px 10px;border-radius:5px;font-size:11px;font-weight:700;color:var(--muted);background:transparent;border:1px solid var(--border2);cursor:pointer;}
+  .theme:hover{color:var(--w);border-color:var(--border);}
   *{margin:0;padding:0;box-sizing:border-box;}
   html,body{height:100%;}
   body{background:var(--bg);color:var(--body);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
@@ -20,7 +36,7 @@
   #shell::before{content:"";position:fixed;top:0;bottom:0;left:50%;width:1px;background:linear-gradient(180deg,transparent,rgba(225,6,0,0.12),transparent);pointer-events:none;z-index:0;}
 
   /* top nav */
-  header.nav{position:relative;z-index:3;display:flex;align-items:center;gap:14px;padding:14px 26px;border-bottom:1px solid var(--border2);background:rgba(11,11,12,0.92);backdrop-filter:blur(6px);}
+  header.nav{position:relative;z-index:3;display:flex;align-items:center;gap:14px;padding:14px 26px;border-bottom:1px solid var(--border2);background:var(--navbg);backdrop-filter:blur(6px);}
   nav.tabs{display:flex;gap:4px;flex-wrap:wrap;}
   .tab{padding:7px 15px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:0.03em;color:var(--muted);background:transparent;border:1px solid transparent;cursor:pointer;transition:.14s;}
   .tab:hover{color:var(--w);}
@@ -70,6 +86,7 @@
       <button class="tab"    id="t-feedback"  onclick="show('feedback')">Feedback Dashboard</button>
     </nav>
     <div class="nav-right">Internal use only</div>
+    <button class="theme" id="theme-btn" onclick="toggleTheme()" title="Light or dark, for this browser">Theme</button>
   </header>
 
   <!-- HOME -->
@@ -158,9 +175,19 @@
   // browser holds it. Stamping the version onto the src makes it a new URL, so
   // a deploy is picked up immediately.
   // BUMP THIS whenever you push a new version of any tab's page.
-  var ASSET_V = '2026-10-07c';
+  var ASSET_V = '2026-10-07d';
   function versioned(src){
     return src + (src.indexOf('?') > -1 ? '&' : '?') + 'v=' + ASSET_V;
+  }
+  (function(){ try{ var th=localStorage.getItem('sabel-ops-theme'); if(th==='dark'||th==='light') document.documentElement.setAttribute('data-theme',th); }catch(e){} })();
+  function toggleTheme(){
+    var cur = document.documentElement.getAttribute('data-theme');
+    var dark = cur==='dark' || (!cur && matchMedia('(prefers-color-scheme: dark)').matches);
+    var next = dark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try{ localStorage.setItem('sabel-ops-theme', next); }catch(e){}
+    // The tabs are our own pages on the same origin: tell each loaded one directly.
+    VIEWS.forEach(function(v){ var f=document.getElementById('frame-'+v); try{ if(f && f.contentDocument) f.contentDocument.documentElement.setAttribute('data-theme', next); }catch(e){} });
   }
   function show(view){
     VIEWS.forEach(function(v){
