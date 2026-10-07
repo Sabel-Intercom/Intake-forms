@@ -151,16 +151,18 @@ a{color:inherit}
 .cgroup-h h2{margin:0;font-family:var(--display);font-size:14px;font-weight:700;color:var(--ink)}
 .cgroup-h span{font-size:12.5px;color:var(--muted)}
 .cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
-.ccard{text-align:left;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--good);border-radius:10px;padding:12px 14px 12px 13px;display:grid;gap:10px;cursor:pointer;min-width:0}
+/* A <button> keeps its content width in a grid cell, so it must be told to fill it; otherwise the gate bar and the due label spill past the edge. */
+.ccard{text-align:left;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--good);border-radius:10px;padding:12px 14px 12px 13px;display:grid;gap:10px;cursor:pointer;min-width:0;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;font:inherit;color:inherit}
 .ccard:hover{border-color:var(--faint);border-left-color:inherit}
 .ccard.late{border-left-color:var(--accent)} .ccard.soon{border-left-color:var(--warn)}
-.ccard .c1{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.ccard .c1{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;min-width:0}
+.ccard .c1>div:first-child{flex:1 1 auto;min-width:0}
 .ccard .nm{font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ccard .meta{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ccard .due{font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap;text-align:right}
+.ccard .due{font-size:12.5px;font-weight:600;color:var(--muted);white-space:normal;text-align:right;flex:0 1 auto;min-width:0;max-width:60%}
 .ccard .due.late{color:var(--accent)} .ccard .due.soon{color:var(--warn)}
-.ccard .segs{display:flex;gap:3px}
-.ccard .segs i{flex:1;height:6px;border-radius:2px;background:var(--line)}
+.ccard .segs{display:flex;gap:3px;min-width:0}
+.ccard .segs i{flex:1 1 0;min-width:0;height:6px;border-radius:2px;background:var(--line)}
 .ccard .segs i.done{background:var(--good)} .ccard .segs i.cur{background:var(--accent)}
 .ccard .c2row{display:flex;justify-content:space-between;gap:8px;font-size:13px}
 .ccard .c2row b{color:var(--ink);font-weight:600} .ccard .c2row span{color:var(--muted)}
