@@ -67,7 +67,6 @@
       <button class="tab"    id="t-internal"  onclick="show('internal')">Internal Ops</button>
       <button class="tab"    id="t-readiness" onclick="show('readiness')">Readiness Check</button>
       <button class="tab"    id="t-kickoff"   onclick="show('kickoff')">Kick-off Desk</button>
-      <button class="tab"    id="t-dashboard" onclick="show('dashboard')">Project Dashboard</button>
       <button class="tab"    id="t-feedback"  onclick="show('feedback')">Feedback Dashboard</button>
     </nav>
     <div class="nav-right">Internal use only</div>
@@ -107,14 +106,6 @@
           <p>One record per client for the kick-off call: scope in and out, key dates, contacts, the live access check, decisions and next steps. Pre-filled from Notion, edited on the call, exported as a client-ready summary.</p>
           <span class="go">Open kick-off desk <span class="arrow">&rarr;</span></span>
         </button>
-        <button class="pillar" onclick="show('dashboard')">
-          <span class="badge internal">Internal</span>
-          <div class="ico">&#9636;</div>
-          <h2>Project Tracker Dashboard</h2>
-          <div class="sub">Where every client tracker is at — live</div>
-          <p>A single team view across all client project trackers: run sheet, stage board and command table — live task progress, blockers and owner workload pulled straight from the trackers themselves.</p>
-          <span class="go">Open dashboard <span class="arrow">&rarr;</span></span>
-        </button>
         <button class="pillar" onclick="show('feedback')">
           <span class="badge internal">Internal</span>
           <div class="ico">&#128172;</div>
@@ -151,9 +142,6 @@
   </section>
 
   <!-- DASHBOARD -->
-  <section class="view" id="dashboard">
-    <iframe id="frame-dashboard" data-src="SabelProjectDashboard.html" title="Project Dashboard"></iframe>
-  </section>
 
   <!-- FEEDBACK -->
   <section class="view" id="feedback">
@@ -162,7 +150,7 @@
 </div>
 
 <script>
-  var VIEWS = ['home','internal','readiness','kickoff','dashboard','feedback'];
+  var VIEWS = ['home','internal','readiness','kickoff','feedback'];
 
   // Each tab is a separate page in an iframe, with its own cache entry — so
   // refreshing the hub does not necessarily re-fetch the tool inside it, and a
@@ -170,7 +158,7 @@
   // browser holds it. Stamping the version onto the src makes it a new URL, so
   // a deploy is picked up immediately.
   // BUMP THIS whenever you push a new version of any tab's page.
-  var ASSET_V = '2026-10-07b';
+  var ASSET_V = '2026-10-07c';
   function versioned(src){
     return src + (src.indexOf('?') > -1 ? '&' : '?') + 'v=' + ASSET_V;
   }

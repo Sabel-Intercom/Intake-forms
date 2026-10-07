@@ -415,6 +415,59 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
 .salesgrid{display:grid;gap:14px}
 .salescard .panel-h .sub .chip{margin-left:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---------- board: the command table, grouped by go-live window ---------- */
+.bd{display:grid;gap:16px}
+.bdhead{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.bdhead h1{margin:0;font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em;color:var(--ink)}
+.bdhead .sub{font-size:13px;color:var(--muted)}
+.bdctl{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.bdctl .lbl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.bwrap{overflow-x:auto}
+.board{min-width:1120px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.bhead,.brow{display:grid;grid-template-columns:minmax(200px,1.3fr) 150px 118px 84px 84px 190px minmax(200px,1.1fr) 160px;align-items:center}
+.bhead>*,.brow>*{padding:0 12px;min-width:0}
+.bhead{position:sticky;top:0;z-index:3;background:var(--sunk);border-bottom:1px solid var(--line2);border-radius:12px 12px 0 0}
+.bhead>span{padding:9px 12px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.bgrp{position:sticky;top:36px;z-index:2;display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--raise);border-top:1px solid var(--line);border-bottom:1px solid var(--line);border-left:3px solid var(--line2)}
+.bgrp .gl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.bgrp .gh{font-size:12px;color:var(--muted)}
+.bgrp .gc{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--line2);padding:0 8px;border-radius:99px}
+.brow{border-bottom:1px solid var(--line);border-left:3px solid transparent}
+.brow:last-child{border-bottom:0;border-radius:0 0 12px 12px}
+.brow:hover{background:var(--raise)}
+.brow>:first-child{padding:11px 12px}
+.brow .nm{font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.brow .nm:hover{text-decoration:underline}
+.brow .ld{font-size:12px;color:var(--muted)}
+.brow .ld.warn{color:var(--warn)}
+.brow .rb{margin-left:6px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:5px;padding:1px 6px;vertical-align:middle}
+.brow .rb.risk{background:var(--accent-soft);color:var(--accent-ink)}
+.brow .rb.reb{background:var(--warn-soft);color:var(--warn)}
+.brow select.tsel{width:100%;font:inherit;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line2);border-radius:6px;padding:3px 6px;cursor:pointer}
+.brow .stg{display:inline-block;font-size:11px;font-weight:600;border-radius:5px;padding:1px 7px;background:var(--sunk);color:var(--body);white-space:nowrap}
+.brow .gld{font-weight:700;color:var(--ink);font-size:13.5px}
+.brow .cnt{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;font-weight:700}
+.brow .cnt.red{color:var(--accent)} .brow .cnt.amb{color:var(--warn)} .brow .cnt.grn{color:var(--good)} .brow .cnt.grey{color:var(--muted)}
+.brow .prog{display:flex;align-items:center;gap:9px}
+.brow .prog .bar{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden;display:block}
+.brow .prog .bar i{display:block;height:100%}
+.brow .prog .pt{font-family:ui-monospace,Menlo,monospace;font-size:12px;width:76px;white-space:nowrap}
+.brow .prog .pt b{color:var(--ink)} .brow .prog .pt span{color:var(--muted)}
+.brow .open{display:flex;flex-wrap:wrap;gap:4px}
+.brow .oc{font-size:11px;font-weight:600;border-radius:4px;padding:1px 6px;white-space:nowrap}
+.brow .oc.od{background:var(--accent-soft);color:var(--accent-ink)} .brow .oc.bl{background:var(--warn-soft);color:var(--warn)} .brow .oc.wk{background:var(--info-soft);color:var(--info)} .brow .oc.cl{background:var(--sunk);color:var(--muted)}
+.brow .act{display:flex;justify-content:flex-end;gap:5px}
+.bempty{padding:22px 16px;color:var(--muted);text-align:center}
+.pillrow{display:inline-flex;gap:4px;flex-wrap:wrap}
+.pillrow button{border:1px solid var(--line2);background:var(--surface);color:var(--muted);font:inherit;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:99px;cursor:pointer}
+.pillrow button:hover{color:var(--ink);border-color:var(--ink)}
+.pillrow button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.holdbar{display:grid;gap:4px;padding:10px 14px;border:1px dashed var(--line2);border-radius:10px;font-size:13px;color:var(--muted)}
+.holdbar b{color:var(--body)}
+.holdbar button{text-align:left;border:0;background:transparent;font:inherit;color:var(--muted);cursor:pointer;padding:2px 0}
+.holdbar button:hover{color:var(--ink)}
+.holdbar button b{margin-right:6px}
 </style>
 </head>
 <body>
@@ -423,6 +476,7 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
     <div class="brand"><img src="data:image/png;base64,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" alt="Sabel"><b>Internal Ops</b></div>
     <nav class="nav" aria-label="Views">
       <button class="navbtn" id="nav-overview" data-act="overview">Overview</button>
+      <button class="navbtn" id="nav-board" data-act="board">Board</button>
       <button class="navbtn" id="nav-today" data-act="today">Today <span class="count" id="today-count" hidden></span></button>
       <button class="navbtn" id="nav-sales" data-act="sales">Sales follow-up <span class="count" id="sales-count" hidden></span></button>
       <button class="navbtn" id="nav-lists" data-act="lists">Checklists</button>
@@ -900,6 +954,200 @@ function warnings(c){
 }
 
 /* =====================================================================
+   BOARD DATA
+   The command table used to live on its own page (SabelProjectDashboard.html,
+   retired 7 Oct 2026) with its own copies of type, parking and go-live. It
+   now reads the client record and the trackers, and writes only the record.
+   What follows is the part of that page that read trackers, kept as it was:
+   the three tracker shapes, the week grid, and the build-stamp rule.
+   ===================================================================== */
+const TRKF = {};   /* trackerKey -> {week1, buildV, goLive, seed, weekStarts}, read once from the tracker's HTML */
+const TRKF_EMPTY = {week1:null, buildV:null, goLive:null, seed:null, weekStarts:null};
+/* One balanced {...} literal out of a source file, string-aware. */
+function braceBlock(src, from){
+  let i=src.indexOf('{', from); if(i<0) return '';
+  let depth=0, q='', e=false;
+  for(let j=i;j<src.length;j++){
+    const ch=src.charAt(j);
+    if(q){ if(e) e=false; else if(ch==='\\') e=true; else if(ch===q) q=''; continue; }
+    if(ch==='"'||ch==="'"||ch==='`'){ q=ch; continue; }
+    if(ch==='{') depth++; else if(ch==='}'){ depth--; if(!depth) return src.slice(i,j+1); }
+  }
+  return '';
+}
+/* Current trackers write their plan as JSON; older ones as a JS object literal. */
+function parseObjLiteral(src){
+  if(!src) return null;
+  try{ return JSON.parse(src); }catch(e){}
+  try{ return (new Function('return ('+src+');'))(); }catch(e){}
+  return null;
+}
+function trackerFileFor(key){
+  const reg=S.reg.find(t=>t.key===key); if(reg&&reg.file) return reg.file;
+  const c=clients().find(x=>trackerKeyFor(x)===key); return (c&&c.trackerFile)||"";
+}
+function loadTrackerFile(key){
+  if(TRKF[key]) return Promise.resolve();
+  const file=trackerFileFor(key); if(!file){ TRKF[key]=TRKF_EMPTY; return Promise.resolve(); }
+  return fetch(PAGES+file,{cache:"no-store"}).then(r=>r.ok?r.text():"").then(txt=>{
+    const w1=txt.match(/WEEK1_START\s*=\s*['"]([\d-]{10})['"]/), bv=txt.match(/BUILD_V\s*=\s*['"]?(\d+)/),
+          gl=txt.match(/GO_LIVE\s*=\s*['"]([\d-]{10})['"]/), tm=txt.match(/(?:const|var|let)\s+T\s*=\s*\{/), wsm=txt.match(/WEEK_STARTS_DEFAULT\s*=\s*\{/);
+    TRKF[key]={week1:w1?w1[1]:null, buildV:bv?bv[1]:null, goLive:gl?gl[1]:null,
+      seed:tm?parseObjLiteral(braceBlock(txt,tm.index)):null, weekStarts:wsm?(parseObjLiteral(braceBlock(txt,wsm.index))||null):null};
+  }).catch(()=>{ TRKF[key]=TRKF_EMPTY; });
+}
+/* A tracker stamps BUILD_V into its saved state and throws that state away on load
+   when the stamp has moved on. Same rule here, so this shows what the tracker shows. */
+function planFor(key){
+  const trk=TRKF[key]||TRKF_EMPTY, td=S.trk[key], saved=(td&&td.ok)?td.data:null;
+  const rebuilt=!!(trk.buildV && saved && saved.buildV!==undefined && String(saved.buildV)!==String(trk.buildV));
+  if(trk.seed && (!saved||rebuilt)) return {data:{taskData:trk.seed, weekStarts:trk.weekStarts||{}, goLive:trk.goLive||""}, rebuilt, seeded:true};
+  return {data:saved, rebuilt:false, seeded:false};
+}
+const SKILL_MONTHS={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function skillDate(d){
+  if(!d) return ""; const ms=String(d).match(/([A-Z][a-z]{2})\s*(\d{1,2})/g); if(!ms) return "";
+  const m=ms[ms.length-1].match(/([A-Z][a-z]{2})\s*(\d{1,2})/), mo=SKILL_MONTHS[m[1]]; if(mo==null) return "";
+  return new Date().getFullYear()+"-"+String(mo+1).padStart(2,"0")+"-"+String(+m[2]).padStart(2,"0");
+}
+function weekEndDate(n, week1, weekStarts){
+  let d; if(weekStarts&&weekStarts[n]) d=new Date(weekStarts[n]+"T00:00:00"); else { d=new Date(week1+"T00:00:00"); d.setDate(d.getDate()+(n-1)*7); }
+  if(isNaN(d.getTime())) return ""; d.setDate(d.getDate()+6); return isoLocal(d);
+}
+function taskDue(t, week1, weekStarts){
+  if(t.week && t.week>=1 && week1){ const wk=(t.wkEnd&&t.wkEnd>t.week)?t.wkEnd:t.week; return weekEndDate(wk,week1,weekStarts); }
+  return skillDate(t.d);
+}
+/* Three tracker shapes, one list of {task, owner, status, end, dep}. Parked tasks are out of scope and skipped. */
+function phasesFrom(data, key){
+  if(!data) return null;
+  if(data.taskData && typeof data.taskData==="object"){
+    const st=data.statuses||{}, trk=TRKF[key]||TRKF_EMPTY, w1=trk.week1||null, ws=data.weekStarts||{};
+    return Object.keys(data.taskData).map(pid=>{
+      const grp=data.taskData[pid]||{}, tasks=[];
+      ["sabel","client"].forEach(side=>{ const sfx=side==="sabel"?"-s-":"-c-";
+        (grp[side]||[]).forEach((t,i)=>{ if(!t||t.parked) return; tasks.push({task:t.t, owner:t.o, status:st[pid+sfx+i]||t.s, end:taskDue(t,w1,ws), dep:side==="client"}); }); });
+      return {id:pid, tasks};
+    });
+  }
+  const ph=Array.isArray(data)?data:(Array.isArray(data.phases)?data.phases:null);
+  if(ph) return ph.map(p=>({id:p.id, tasks:(p.tasks||[]).map(k=>({task:k.task, owner:k.owner, status:k.status, end:k.end||k.start||"", dep:!!k.dep}))}));
+  if(Array.isArray(data.groups)) return data.groups.map((g,i)=>({id:g.id||("phase"+i), tasks:(g.items||[]).map(it=>({task:it.task, owner:it.owner, end:it.iso||it.date||"", dep:!!it.dep, status:it.done?"Complete":it.status==="red"?"Blocked":"In Progress"}))}));
+  return null;
+}
+function weekEndIso(){ const d=new Date(); d.setHours(0,0,0,0); const dow=(d.getDay()+6)%7; d.setDate(d.getDate()+(6-dow)); return isoLocal(d); }
+/* Everything one board row needs, from the record and the tracker. */
+function boardRow(c){
+  const tk=trackerKeyFor(c), pl=tk?planFor(tk):{data:null,rebuilt:false}, phases=pl.data?phasesFrom(pl.data,tk):null;
+  let total=0, done=0, overdue=0, blocked=0, week=0, client=0;
+  const T=today(), WE=weekEndIso();
+  if(phases) phases.forEach(p=>p.tasks.forEach(k=>{
+    total++; const st=String(k.status||"").toLowerCase();
+    if(st==="complete"||st==="done"){ done++; return; }
+    if(st==="blocked"||st==="dependency"){ blocked++; return; }
+    if(k.dep) client++;
+    if(k.end){ if(k.end<T) overdue++; else if(k.end<=WE) week++; }
+  }));
+  /* Consultation only has no go-live: its date is the next check-in, set in Details. */
+  const type=projectType(c), chk=(type==="consult"&&c.hub&&c.hub.checkIn)||"", gl=type==="consult"?"":goLiveOf(c);
+  const when=gl||chk, days=when?daysTo(when):null, pct=total?Math.round(100*done/total):0;
+  return {c, tk, has:!!phases, total, done, pct, overdue, blocked, week, client, gl, chk, days, type,
+    rebuilt:!!pl.rebuilt, url:trackerUrlFor(c), atRisk:(days!==null&&days>=0&&days<=30&&!!phases&&pct<25&&type!=="consult")};
+}
+/* On the board: signed and in delivery, not on hold. Held clients are listed under the table. */
+function boardClients(){ return clients().filter(c=>["Onboarding","Active","Offboarding"].includes(c.stage) && !onHold(c)); }
+
+/* =====================================================================
+   BOARD VIEW
+   ===================================================================== */
+const BOARD_GROUPS=[
+  {k:"week",    label:"This week",         tone:"var(--accent)", hint:"landing in the next 7 days"},
+  {k:"two",     label:"Next two weeks",    tone:"var(--warn)",   hint:""},
+  {k:"later",   label:"Later",             tone:"var(--good)",   hint:""},
+  {k:"past",    label:"Date has passed",   tone:"var(--muted)",  hint:"close off or move the date"},
+  {k:"consult", label:"Consultation only", tone:"var(--info)",   hint:"the date is the next check-in, set in Details"},
+  {k:"none",    label:"No go-live set",    tone:"var(--faint)",  hint:"set a date in the tracker, or here if there is no tracker"}
+];
+function boardGroup(r){
+  if(r.type==="consult") return "consult";
+  if(r.days===null) return "none";
+  if(r.days<0) return "past";
+  if(r.days<=7) return "week";
+  if(r.days<=21) return "two";
+  return "later";
+}
+const BOARD_STATUS=[["","All"],["overdue","Overdue"],["week","Due this week"],["blocked","Blocked"]];
+const BOARD_SORT=[["gl","Go-live"],["pct","Progress"],["overdue","Overdue"],["name","Name"]];
+function boardPrefs(){ return Object.assign({type:"", status:"", sort:"gl"}, S.prefs.board||{}); }
+function boardSort(list, k, sort){
+  const nm=(a,b)=>a.c.name.localeCompare(b.c.name);
+  return list.slice().sort((a,b)=>{
+    if(sort==="pct") return (a.pct-b.pct)||nm(a,b);
+    if(sort==="overdue") return (b.overdue-a.overdue)||(b.blocked-a.blocked)||nm(a,b);
+    if(sort==="name") return nm(a,b);
+    if(a.days===null||b.days===null) return nm(a,b);
+    return (k==="past" ? b.days-a.days : a.days-b.days)||nm(a,b);
+  });
+}
+function boardRowHTML(r){
+  const c=r.c, lead=c.owner||"";
+  const cnt = r.days===null ? '<span class="cnt grey">—</span>'
+    : r.days===0 ? '<span class="cnt red">today</span>'
+    : r.days<0 ? '<span class="cnt grey">+'+(-r.days)+'d</span>'
+    : '<span class="cnt '+(r.days<=7?"red":r.days<=21?"amb":"grn")+'">T‑'+r.days+'d</span>';
+  const fill = r.pct<25?"var(--accent)":r.pct<70?"var(--info)":"var(--good)";
+  const prog = r.has
+    ? '<span class="bar"><i style="width:'+r.pct+'%;background:'+fill+'"></i></span><span class="pt"><b>'+r.pct+'%</b> <span>'+r.done+'/'+r.total+'</span></span>'
+    : '<span class="bar"></span><span class="pt"><span>'+(r.tk?"Not started":"No tracker")+'</span></span>';
+  let open="";
+  if(r.has){
+    if(r.overdue) open+='<span class="oc od">'+r.overdue+' overdue</span>';
+    if(r.blocked) open+='<span class="oc bl">'+r.blocked+' blocked</span>';
+    if(r.week) open+='<span class="oc wk">'+r.week+' due this week</span>';
+  }
+  const stageLabel = (BANDS.find(b=>b[0]===band(c))||[])[1] || STAGE_LABEL[c.stage] || c.stage;
+  return '<div class="brow" id="brow-'+c.id+'">'+
+    '<div><div class="nm" data-act="open" data-id="'+c.id+'">'+esc(c.name)+
+      (r.atRisk?'<span class="rb risk" title="Go-live inside 30 days and the tracker under a quarter done">at risk</span>':'')+
+      (r.rebuilt?'<span class="rb reb" title="The tracker was rebuilt after its last save, so the tracker discarded that saved state. This shows the rebuilt plan, the same one the tracker shows.">rebuilt</span>':'')+'</div>'+
+      '<div class="ld'+(lead?"":" warn")+'">'+(lead?"Lead "+esc(lead):"No lead set")+'</div></div>'+
+    '<div><select class="tsel" data-field="hub.type" data-id="'+c.id+'" title="Project type, saved to the client record">'+optHtml(Object.entries(TYPE_LABEL),r.type)+'</select></div>'+
+    '<div><span class="stg">'+esc(stageLabel)+'</span></div>'+
+    '<div>'+(r.gl?'<span class="gld">'+esc(fmt(r.gl))+'</span>':r.chk?'<span class="gld" title="Next check-in">'+esc(fmt(r.chk))+'</span>':'<span class="cnt grey">—</span>')+'</div>'+
+    '<div>'+cnt+'</div>'+
+    '<div class="prog">'+prog+'</div>'+
+    '<div class="open">'+open+'</div>'+
+    '<div class="act">'+(r.url?'<a class="btn sm" href="'+esc(r.url)+'" target="_blank" rel="noopener">Tracker ↗</a>':'')+
+      '<button class="btn sm ghost" data-act="board-park" data-id="'+c.id+'" title="Put this client on hold">Park</button></div>'+
+  '</div>';
+}
+function boardView(){
+  const P=boardPrefs();
+  const all=boardClients().map(boardRow);
+  const rows=all.filter(r=>(!P.type||r.type===P.type) && (!P.status || (P.status==="overdue"?r.overdue>0 : P.status==="week"?(r.week>0||r.overdue>0) : r.blocked>0)));
+  const soon=rows.filter(r=>r.type!=="consult"&&r.days!==null&&r.days>=0&&r.days<=14).length;
+  const pills=(act,opts,cur)=>'<div class="pillrow">'+opts.map(([v,l])=>'<button data-act="'+act+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'">'+esc(l)+'</button>').join("")+'</div>';
+  let h=loadBanner()+'<div class="bd">';
+  h+='<div class="bdhead"><div><div class="eyebrow">Board</div><h1>Command table</h1></div>'+
+     '<span class="sub">'+rows.length+' client'+(rows.length===1?"":"s")+' · '+soon+' landing in 14 days</span></div>';
+  h+='<div class="bdctl">'+pills("board-type",[["","All types"]].concat(Object.entries(TYPE_LABEL)),P.type)+pills("board-status",BOARD_STATUS,P.status)+
+     '<span class="spacer"></span><span class="lbl">Sort within group</span>'+pills("board-sort",BOARD_SORT,P.sort)+'</div>';
+  h+='<div class="sub" style="font-size:13px;color:var(--muted)">Grouped by how close each go-live is. Type and Park write to the client record; the go-live and the progress come from the client’s tracker. Tasks are worked in the tracker.</div>';
+  let body="";
+  BOARD_GROUPS.forEach(g=>{
+    const list=boardSort(rows.filter(r=>boardGroup(r)===g.k), g.k, P.sort); if(!list.length) return;
+    body+='<div class="bgrp" style="border-left-color:'+g.tone+'"><span class="gl" style="color:'+g.tone+'">'+esc(g.label)+'</span>'+(g.hint?'<span class="gh">'+esc(g.hint)+'</span>':'')+'<span class="gc">'+list.length+'</span></div>'+list.map(boardRowHTML).join("");
+  });
+  if(!body) body='<div class="bempty">No clients match.</div>';
+  h+='<div class="bwrap"><div class="board"><div class="bhead"><span>Client</span><span>Type</span><span>Stage</span><span>Go-live</span><span>Countdown</span><span>Progress</span><span>Open actions</span><span></span></div>'+body+'</div></div>';
+  const held=clients().filter(onHold).sort((a,b)=>a.name.localeCompare(b.name));
+  if(held.length){
+    h+='<div class="holdbar"><b>On hold · '+held.length+'</b>'+held.map(c=>'<button data-act="open" data-id="'+c.id+'"><b>'+esc(c.name)+'</b>'+esc([c.hold.reason, c.hold.checkBack?"check back "+fmt(c.hold.checkBack):"", c.hold.since?"since "+fmt(c.hold.since):""].filter(Boolean).join(" · "))+'</button>').join("")+'</div>';
+  }
+  return h+'</div>';
+}
+
+/* =====================================================================
    LOAD
    ===================================================================== */
 function cachePortal(){ try{ localStorage.setItem(CACHE_KEY, JSON.stringify(S.portal)); }catch(e){} }
@@ -929,6 +1177,7 @@ async function loadTrackers(){
   await Promise.all(keys.map(k=>getJSON(API+"?key="+encodeURIComponent(k))
     .then(j=>{ S.trk[k]={ok:true, data:j.data||null}; })
     .catch(e=>{ S.trk[k]={ok:false, status:e.status||0}; })));
+  await Promise.all(keys.map(loadTrackerFile));
   syncGoLive();
   render();
 }
@@ -1058,10 +1307,11 @@ function render(soft){
   if(!S.portal){ return; }
   if(S.view==="client" && byId(S.clientId)) v.innerHTML = clientView(byId(S.clientId));
   else if(S.view==="lists") v.innerHTML = listsView();
+  else if(S.view==="board") v.innerHTML = boardView();
   else if(S.view==="sales") v.innerHTML = salesView();
   else if(S.view==="today") v.innerHTML = todayView();
   else { S.view="overview"; v.innerHTML = overviewView(); }
-  ["overview","today","sales","lists"].forEach(k=>$("nav-"+k).classList.toggle("on", S.view===k));
+  ["overview","board","today","sales","lists"].forEach(k=>$("nav-"+k).classList.toggle("on", S.view===k));
   renderBadges();
   if(soft) sc.scrollTop=top;
 }
@@ -1073,7 +1323,7 @@ function renderBadges(){
 }
 /* The tracker's go-live is the one that counts (7 Oct 2026). The record carries a copy so
    every other reader of client-portal-v1 sees the same date; syncGoLive() keeps it current. */
-function trackerGoLive(c){ const tk=trackerKeyFor(c), td=tk&&S.trk[tk]; return (td&&td.ok&&td.data&&td.data.goLive) || ""; }
+function trackerGoLive(c){ const tk=trackerKeyFor(c); if(!tk) return ""; const pl=planFor(tk); return (pl.data&&pl.data.goLive) || ""; }
 function goLiveOf(c){ return trackerGoLive(c) || c.goLiveDate || ""; }
 function syncGoLive(){
   let n=0;
@@ -1578,7 +1828,9 @@ function asidePanels(c,n,ko,tk,td,w){
     (trackerGoLive(c)
       ? '<label>Go-live<input type="date" value="'+esc(trackerGoLive(c))+'" disabled title="Set in the client tracker"><span class="fnote">From the tracker'+(trackerUrlFor(c)?' · <a href="'+esc(trackerUrlFor(c))+'" target="_blank" rel="noopener">change it there</a>':'')+'</span></label>'
       : '<label>Go-live<input type="date" data-field="goLiveDate" data-id="'+c.id+'" value="'+esc(c.goLiveDate||"")+'"><span class="fnote">'+(tk?'No date in the tracker yet':'No tracker, so this is the date')+'</span></label>')+
-    '<label>Day-30 review<input type="date" data-field="day30Date" data-id="'+c.id+'" value="'+esc(c.day30Date||"")+'" placeholder="go-live + 30"></label>'+
+    (projectType(c)==="consult"
+      ? '<label>Next check-in<input type="date" data-field="hub.checkIn" data-id="'+c.id+'" value="'+esc(hub.checkIn||"")+'"><span class="fnote">Shown on the Board in place of a go-live</span></label>'
+      : '<label>Day-30 review<input type="date" data-field="day30Date" data-id="'+c.id+'" value="'+esc(c.day30Date||"")+'" placeholder="go-live + 30"></label>')+
     '<label>Hours<input type="text" value="'+esc((n&&n.hours)!=null&&n.hours!==""?n.hours:"")+'" disabled placeholder="'+(n?'none in Notion':'not linked to Notion')+'"><span class="fnote">From the Notion project'+(c.hours&&n&&n.hours!=null&&Number(n.hours)!==Number(c.hours)?' · old typed value '+esc(c.hours)+'h ignored':'')+'</span></label>'+
     '<label>Tracker key<input type="text" data-field="trackerKey" data-id="'+c.id+'" value="'+esc(c.trackerKey||"")+'" placeholder="'+esc((n&&n.trackerKey)||"client-tracker-v1")+'"></label>'+
     '<label>Slack channel ID<input type="text" data-field="slackChannel" data-id="'+c.id+'" value="'+esc(c.slackChannel||"")+'" placeholder="C0…"></label>'+
@@ -1701,7 +1953,7 @@ function listsView(){
 function openClient(id){ S.view="client"; S.clientId=id; S.scopeOpen=false; location.hash="c="+id; render(); $("scroll").scrollTop=0; }
 function goOverview(){ S.view="overview"; S.clientId=null; history.replaceState(null,"",location.pathname+location.search+"#overview"); render(); $("scroll").scrollTop=0; }
 function goToday(){ S.view="today"; S.clientId=null; history.replaceState(null,"",location.pathname+location.search+"#today"); render(); $("scroll").scrollTop=0; }
-function routeFromHash(){ const m=location.hash.match(/c=([^&]+)/); if(m && byId(decodeURIComponent(m[1]))){ S.view="client"; S.clientId=decodeURIComponent(m[1]); } else if(["#lists","#sales","#today","#overview"].includes(location.hash)){ S.view=location.hash.slice(1); } }
+function routeFromHash(){ const m=location.hash.match(/c=([^&]+)/); if(m && byId(decodeURIComponent(m[1]))){ S.view="client"; S.clientId=decodeURIComponent(m[1]); } else if(["#lists","#sales","#today","#overview","#board"].includes(location.hash)){ S.view=location.hash.slice(1); } }
 window.addEventListener("hashchange", ()=>{ routeFromHash(); render(); });
 
 document.addEventListener("click", e=>{
@@ -1710,7 +1962,11 @@ document.addEventListener("click", e=>{
   switch(a){
     case "today": return goToday();
     case "overview": return goOverview();
-    case "sales": case "lists": S.view=a; S.clientId=null; history.replaceState(null,"",location.pathname+location.search+"#"+a); render(); $("scroll").scrollTop=0; return;
+    case "board-park": { if(!c) return; S.holdEdit=c.id; openClient(c.id); return; }
+    case "board-type": S.prefs.board=Object.assign({}, S.prefs.board||{}, {type:t.dataset.v}); savePrefs(); return render(true);
+    case "board-status": S.prefs.board=Object.assign({}, S.prefs.board||{}, {status:t.dataset.v}); savePrefs(); return render(true);
+    case "board-sort": S.prefs.board=Object.assign({}, S.prefs.board||{}, {sort:t.dataset.v}); savePrefs(); return render(true);
+    case "board": case "sales": case "lists": S.view=a; S.clientId=null; history.replaceState(null,"",location.pathname+location.search+"#"+a); render(); $("scroll").scrollTop=0; return;
     case "list-tab": S.listTab=t.dataset.v; return render(true);
     case "ed-add": { const pid=t.dataset.pid, id=pid+"-x"+Date.now().toString(36);
       editChecklists(E=>{ (E.added[pid]=E.added[pid]||[]).push({id, o:"nikki", t:"New step", tag:"", crit:false}); });
