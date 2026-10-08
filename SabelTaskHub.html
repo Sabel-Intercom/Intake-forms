@@ -313,6 +313,9 @@ html.light .av{background:rgba(16,24,40,.08);color:var(--body)}
 .rin:focus{border-color:var(--amber)}
 .rin::placeholder{color:var(--faint)}
 .rrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rchase{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--line);background:rgba(251,191,36,.07);font-size:13px;color:var(--mute)}
+.rchase b{color:var(--text)}
+.rchase a,.ritem .rm a{color:var(--blue)}
 .rdue{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--mute)}
 .rdue input{font:inherit;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:4px 8px;color-scheme:dark}
 html.light .rdue input{color-scheme:light}
@@ -468,9 +471,22 @@ if(['home','desk','summary'].indexOf(S.tab)<0)S.tab='home';
 if(!S.csel||typeof S.csel!=='object')S.csel={};
 function save(){try{localStorage.setItem(PK,JSON.stringify({hv:1,who:S.who,mode:S.mode,open:S.open,audit:S.audit,tab:S.tab,period:S.period,group:S.group,csel:S.csel}));}catch(e){}}
 const WHO=TEAM.concat(['Everyone',COORD]);
-const hashWho=()=>{const h=decodeURIComponent((location.hash||'').slice(1)).toLowerCase();return WHO.find(n=>n.toLowerCase()===h)||null;};
+const hashWho=()=>{const h=decodeURIComponent((location.hash||'').slice(1).split('?')[0]).toLowerCase();return WHO.find(n=>n.toLowerCase()===h)||null;};
+/* A chase sent from Open Loops: #nikki?chase=<JSON {t,to,c,u,s,k,n}>. It fills the
+   "Don't forget…" form on Nikki's Home; nothing is saved until she presses Send. */
+function readChase(){
+  const m=/[?&]chase=([^&]*)/.exec(location.hash||'');if(!m)return null;
+  let d=null;try{d=JSON.parse(decodeURIComponent(m[1]));}catch(e){return null;}
+  if(!d||typeof d!=='object'||!d.t)return null;
+  const cut=(v,n)=>String(v==null?'':v).replace(/[\u0000-\u001f]/g,' ').trim().slice(0,n);
+  const url=cut(d.u,600),okUrl=/^https:\/\/([a-z0-9-]+\.)*slack\.com\/|^https:\/\/mail\.google\.com\//i.test(url)?url:'';
+  const since=cut(d.s,40),ok=since&&!isNaN(Date.parse(since))?new Date(since).toISOString():'';
+  const to=TEAM.filter(p=>String(d.to||'').split(/[,\s]+/).some(x=>x.toLowerCase()===p.toLowerCase()));
+  return {title:cut(d.t,160),note:cut(d.n,400),due:'',to:to,kind:'chase',client:cut(d.c,80),url:okUrl,since:ok,sk:cut(d.k,120)};
+}
 if(hashWho())S.who=hashWho();
 if(/^#summary$/i.test(location.hash||'')){S.who=COORD;S.tab='summary';}
+{const ch=readChase();if(ch){S.who=COORD;S.tab='home';S.rem=ch;S.fromLoops=true;try{history.replaceState(null,'','#'+COORD.toLowerCase());}catch(e){}}}
 if(WHO.indexOf(S.who)<0)S.who='Everyone';
 
 let TASKS=[],OTHER=[],RAW=[],CLIENTS={},HEALTH=[],LOADED_AT=0,HOURS_AT=0,FIRST=true,LIVE=['busy','Loading'];
@@ -874,12 +890,28 @@ function reminderRaws(){
     const r=R[id];if(!r||r.del)return;
     (r.to||[]).forEach(p=>{
       const d=r.due?dOf(r.due):null;
-      out.push({id:'r:'+id+':'+p,key:'',cid:'',pid:'',pillar:'',title:r.title,owner:p,lead:'',status:'Pending',start:d,end:d,late:d,
-        est:r.est||null,notion:null,desc:r.note||'',bg:'',card:'',tip:'',link:'',log:[],sub:[],stages:null,doneAt:'',src:'Reminder',rem:r});
+      out.push({id:'r:'+id+':'+p,key:r.kind==='chase'?chaseKey(r.client):'',cid:'',pid:'',pillar:'',title:r.title,owner:p,lead:'',status:'Pending',start:d,end:d,late:d,
+        est:r.est||null,notion:null,desc:r.note||'',bg:'',card:'',tip:'',link:r.url||'',log:[],sub:[],stages:null,doneAt:'',src:'Reminder',rem:r});
     });
   });
   return out;
 }
+/* Open Loops writes client names its own way ("Clever Cards"); match a tracker client
+   ignoring spaces and case, otherwise file it under the name like a hand-set client. */
+const squash=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+function chaseKey(name){
+  if(!name)return '';
+  const k=Object.keys(CLIENTS).find(k=>squash(CLIENTS[k].name)===squash(name)||squash(k).indexOf(squash(name))===0);
+  return k||'name:'+name;
+}
+const isChase=t=>!!(t&&t.rem&&t.rem.kind==='chase');
+/* How long the client has been waiting: "5h", "1d 4h". */
+function waitAge(iso){
+  const ms=Date.now()-Date.parse(iso||'');if(!iso||isNaN(ms)||ms<0)return '';
+  const h=Math.floor(ms/3600000),d=Math.floor(h/24);
+  return d?d+'d'+(h%24?' '+h%24+'h':''):h?h+'h':Math.max(1,Math.floor(ms/60000))+'m';
+}
+const waitHot=iso=>Date.now()-Date.parse(iso||'')>48*3600000;
 const rawOf=id=>RAW.find(x=>x.id===id)||reminderRaws().find(x=>x.id===id)||null;
 const mapSt=s=>s==='Dependency'?'Pending':s==='Done'?'Complete':(s||'Pending');
 function project(){
@@ -1036,10 +1068,15 @@ function addReminder(){
   if(!title){toast('Type what not to forget first');return;}
   if(!r.to.length){toast('Pick who it is for');return;}
   OV.reminders=OV.reminders||{};
+  if(r.kind==='chase'&&r.sk){
+    const dup=Object.keys(OV.reminders).map(k=>OV.reminders[k]).find(x=>x&&!x.del&&x.sk===r.sk&&(x.to||[]).some(p=>r.to.indexOf(p)>-1));   /* same message to someone else = a reassign, allowed */
+    if(dup){toast('Already sent to '+(dup.to||[]).join(', ')+' on '+fStamp(dup.at));S.rem={title:'',note:'',due:'',to:[]};S.fromLoops=false;render();return;}
+  }
   const id=nid();
   OV.reminders[id]={id,title,note:r.note.trim(),due:r.due||'',to:r.to.slice(),by:author(),at:Date.now(),eAt:Date.now()};
-  S.rem={title:'',note:'',due:'',to:[]};
-  commit();toast('Reminder sent to '+r.to.join(', '));
+  if(r.kind==='chase')Object.assign(OV.reminders[id],{kind:'chase',client:r.client||'',url:r.url||'',since:r.since||'',sk:r.sk||''});
+  S.rem={title:'',note:'',due:'',to:[]};S.fromLoops=false;
+  commit();toast((r.kind==='chase'?'Chase':'Reminder')+' sent to '+r.to.join(', '));
 }
 function delReminder(rid){const r=(OV.reminders||{})[rid];if(!r)return;r.del=true;r.eAt=Date.now();commit();}
 function focusToggle(id){
@@ -1176,6 +1213,15 @@ function park(id,prefix){
   S.draft='';S.tag=false;S.needQ=false;S.open=null;save();commit();
   if(REMOTE==='off'||REMOTE==='down')toast('Parked in this browser only. '+COORD+' cannot see it until shared saving is on.');
 }
+function notMine(id){
+  const t=findTask(id);if(!t||t.status==='Parked')return;
+  const q='Not mine, please reassign this client chase'+(S.draft.trim()?': '+S.draft.trim():'');
+  const prev=backTo(t.status),o=setStatus(id,'Parked');
+  stopAll(o);
+  o.prevStatus=prev;o.parked={by:author(),question:q,askedAt:Date.now()};o.flagged=true;
+  addNote(o,author(),'@'+COORD+' '+q,true);
+  S.draft='';S.tag=false;S.needQ=false;S.open=null;save();commit();
+}
 function answer(id,keep){
   const t=findTask(id);if(!t)return;
   const txt=(S.deskDraft[id]||'').trim(),o=ov(id);
@@ -1292,13 +1338,17 @@ function tagsHTML(t){
   if(t.status==='Blocked')h+='<span class="tag red">Blocked</span>';
   if(t.back&&t.status!=='Parked'&&!isDone(t))h+='<span class="tag amber">'+esc(t.back.by)+' replied</span>';
   if(t.waiting)h+='<span class="tag amber">Waiting</span>';
-  if(t.src==='Reminder')h+='<span class="tag amber">Reminder from '+esc(t.rem&&t.rem.by||COORD)+'</span>';
+  if(isChase(t)){const a=waitAge(t.rem.since);h+='<span class="tag '+(waitHot(t.rem.since)&&!isDone(t)?'red':'amber')+'">Client waiting'+(a&&!isDone(t)?' '+a:'')+'</span><span class="tag">From '+esc(t.rem.by||COORD)+'</span>';}
+  else if(t.src==='Reminder')h+='<span class="tag amber">Reminder from '+esc(t.rem&&t.rem.by||COORD)+'</span>';
   else if(t.src)h+='<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>';
   if(t.clientManual)h+='<span class="tag violet" title="Client set by hand by '+esc(t.clientManual.by||'')+'">Client added by hand</span>';
   if(t.edited)h+='<span class="tag violet">Change queued</span>';
   return h;
 }
 function actionsHTML(t){
+  if(isChase(t))return '<div class="acts"><button type="button" class="pb green" data-act="done">'+(isDone(t)?'Reopen':'Replied')+'</button>'+
+    (isDone(t)||t.status==='Parked'?'':'<button type="button" class="pb amber" data-act="notmine">Not mine</button>')+'</div>'+
+    '<div class="hint">Reply to the client in the thread, then press Replied. Not mine sends it back to '+COORD+' to reassign.</div>';
   let h='<div class="acts"><button type="button" class="pb blue" data-act="start">'+(t.status==='In Progress'?'Pause':'Start')+'</button>';
   if(!t.stages||isDone(t))h+='<button type="button" class="pb green" data-act="done">'+(isDone(t)?'Reopen':'Mark done')+'</button>';
   h+='<button type="button" class="pb red" data-act="flag">Blocked · flag '+COORD+'</button></div>';
@@ -1359,7 +1409,7 @@ function timeHTML(t){
 function linksHTML(t){
   const c=CLIENTS[t.key];let h='';
   if(c&&t.pid)h+='<a class="tl" href="'+esc(c.url+(c.deep?'#pillar/'+encodeURIComponent(t.pid):''))+'" target="_blank" rel="noopener">Open in client tracker &rarr;</a>';
-  if(t.link&&/^https?:\/\//.test(t.link))h+='<a class="tl'+(h?' sub2':'')+'" href="'+esc(t.link)+'" target="_blank" rel="noopener">Reference link</a>';
+  if(t.link&&/^https?:\/\//.test(t.link))h+='<a class="tl'+(h?' sub2':'')+'" href="'+esc(t.link)+'" target="_blank" rel="noopener">'+(isChase(t)?'Open the client message':'Reference link')+'</a>';
   if(t.src&&t.notion&&t.notion.id)h+='<a class="tl'+(h?' sub2':'')+'" href="https://www.notion.so/'+esc(String(t.notion.id).replace(/-/g,''))+'" target="_blank" rel="noopener">Open Notion row &rarr;</a>';
   return h?'<div>'+h+'</div>':'';
 }
@@ -1571,13 +1621,16 @@ function homeHTML(mine){
   const zone=canF?focusZoneHTML(mine):'';
   const fset={};if(canF)focusIds(S.who).forEach(id=>{fset[id]=1;});
   const open=mine.filter(t=>!isDone(t)&&!fset[t.id]&&t.src!=='Reminder');
-  const rems=mine.filter(t=>!isDone(t)&&!fset[t.id]&&t.src==='Reminder').sort(byDue);
+  const remsAll=mine.filter(t=>!isDone(t)&&!fset[t.id]&&t.src==='Reminder'&&t.status!=='Parked');
+  const chases=remsAll.filter(isChase).sort((a,b)=>Date.parse(a.rem.since||a.rem.at||0)-Date.parse(b.rem.since||b.rem.at||0));
+  const rems=remsAll.filter(t=>!isChase(t)).sort(byDue);
   const back=open.filter(t=>t.back&&t.status!=='Parked').sort(byDue);
   const prog=open.filter(t=>t.status==='In Progress'&&!t.back).sort(byDue);
   const urgent=open.filter(t=>t.status!=='In Progress'&&t.status!=='Parked'&&!t.back&&dueIn(t)!==null&&dueIn(t)<=0).sort(byDue);
   const parked=open.filter(t=>t.status==='Parked').sort(byDue);
   const whoTxt=S.who==='Everyone'?'the team':'you';
   let h='<div class="list">'+zone;
+  if(chases.length)h+=homeSec('chase','Client waiting','A client is waiting on a reply. Longest wait first.','var(--red2)','var(--red2)','rgba(225,6,0,.45)',chases);
   if(rems.length)h+=homeSec('rem','Don’t forget…','Pushed to '+whoTxt+' by '+COORD+'. Tick it off when done.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',rems);
   if(back.length)h+=homeSec('back',COORD+' replied','Answered and handed back. Over to '+whoTxt+'.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',back);
   h+=prog.length?homeSec('prog','Started, not finished','In progress now. Finish or pause these before picking up more.','var(--blue)','var(--blue)','rgba(96,165,250,.4)',prog)
@@ -1593,14 +1646,18 @@ function reminderTileHTML(all){
   const R=OV.reminders||{},live=Object.keys(R).map(k=>R[k]).filter(r=>r&&!r.del).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);
   const doneBy=(r,p)=>{const t=all.find(x=>x.id==='r:'+r.id+':'+p);return !!(t&&isDone(t));};
   let h='<div class="secc rtile"><div class="sech"><i style="background:var(--amber)"></i><b style="color:var(--amber)">Don’t forget…</b><span>Add a task here and push it to the team. It lands on their Home and can go in their Focus Zone.</span></div>'+
+    (S.rem.kind==='chase'?'<div class="rchase"><span class="tag '+(waitHot(S.rem.since)?'red':'amber')+'">Client waiting'+(waitAge(S.rem.since)?' '+waitAge(S.rem.since):'')+'</span>'+
+      (S.rem.client?'<b>'+esc(S.rem.client)+'</b>':'')+'<span>From Open Loops. Check the title and who it is for, then send.</span>'+
+      (S.rem.url?'<a href="'+esc(S.rem.url)+'" target="_blank" rel="noopener">Open the client message</a>':'')+
+      '<span class="sp"></span><button type="button" class="lk" data-act="r-clear">Clear</button></div>':'')+
     '<div class="rform"><input class="rin" data-ta="rtitle" placeholder="What not to forget, e.g. Complete Fin certifications" value="'+esc(S.rem.title)+'">'+
     '<input class="rin" data-ta="rnote" placeholder="A note, link or why it matters (optional)" value="'+esc(S.rem.note)+'">'+
     '<div class="rrow"><label class="rdue">Due <input type="date" data-sel="rdue" value="'+esc(S.rem.due)+'"></label>'+
     '<span class="rto">For '+TEAM.map(p=>'<button type="button" class="rwho'+(S.rem.to.indexOf(p)>-1?' on':'')+'" data-act="r-who" data-p="'+p+'" aria-pressed="'+(S.rem.to.indexOf(p)>-1)+'">'+av(p,true)+p+'</button>').join('')+
     '<button type="button" class="rwho all" data-act="r-who" data-p="*">Everyone</button></span>'+
-    '<span class="sp"></span><button type="button" class="pb hand" data-act="r-add">Add reminder</button></div></div>'+
+    '<span class="sp"></span><button type="button" class="pb hand" data-act="r-add">'+(S.rem.kind==='chase'?'Send chase':'Add reminder')+'</button></div></div>'+
     (live.length?live.map(r=>'<div class="ritem" data-rid="'+esc(r.id)+'"><div class="rt2"><b>'+esc(r.title)+'</b>'+(r.note?'<span class="dp">'+linkify(r.note)+'</span>':'')+
-      '<span class="rm">'+(r.due&&dOf(r.due)?'<span>Due '+fD(dOf(r.due))+'</span>':'')+'<span>Added '+fStamp(r.at)+(r.by?' by '+esc(r.by):'')+'</span>'+
+      '<span class="rm">'+(r.kind==='chase'?'<span class="tag amber">Client waiting</span>'+(r.client?'<span>'+esc(r.client)+'</span>':'')+(r.url?'<a href="'+esc(r.url)+'" target="_blank" rel="noopener">Message</a>':''):'')+(r.due&&dOf(r.due)?'<span>Due '+fD(dOf(r.due))+'</span>':'')+'<span>Added '+fStamp(r.at)+(r.by?' by '+esc(r.by):'')+'</span>'+
       (r.to||[]).map(p=>'<span class="tag'+(doneBy(r,p)?' green':'')+'">'+esc(p)+(doneBy(r,p)?' ✓':'')+'</span>').join('')+'</span></div>'+
       '<button type="button" class="fzx" data-act="r-del" title="Remove this reminder for everyone" aria-label="Remove this reminder">&times;</button></div>').join('')
      :'<div class="sempty">No reminders out at the moment.</div>');
@@ -1773,6 +1830,8 @@ document.addEventListener('click',e=>{
     case 'next':e.stopPropagation();cycle(id);break;
     case 'start':if(t)act2(id,t.status==='In Progress'?'Pending':'In Progress');break;
     case 'done':if(t)act2(id,isDone(t)?'Pending':'Complete');break;
+    case 'notmine':notMine(id);break;
+    case 'r-clear':S.rem={title:'',note:'',due:'',to:[]};S.fromLoops=false;render();break;
     case 'flag':flagBlocked(id);break;
     case 'step':e.stopPropagation();tickStep(id,a.getAttribute('data-step'));break;
     case 'tag':S.tag=!S.tag;render();break;
