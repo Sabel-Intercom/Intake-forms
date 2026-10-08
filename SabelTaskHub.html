@@ -667,6 +667,9 @@ function skillDate(d){
 }
 /* start = Monday of the first week, end = Friday of the last, late = after that Sunday. */
 function datesOf(t,trk,ws,n){
+  /* An exact date (or a date range) on the tracker beats its week. */
+  if(t.due){const a=new Date(t.due+'T00:00:00'),b=new Date(((t.dueEnd&&t.dueEnd>t.due)?t.dueEnd:t.due)+'T00:00:00');
+    if(!isNaN(a)&&!isNaN(b))return {start:a,end:b,late:b,wk:t.week||0,wkEnd:(t.wkEnd&&t.wkEnd>t.week)?t.wkEnd:0};}
   if(t.week&&t.week>=1&&trk.week1){
     const a=weekStart(t.week,trk.week1,ws),lw=weekStart((t.wkEnd&&t.wkEnd>t.week)?t.wkEnd:t.week,trk.week1,ws);
     if(a&&lw)return {start:a,end:addD(lw,4),late:addD(lw,6),wk:t.week,wkEnd:(t.wkEnd&&t.wkEnd>t.week)?t.wkEnd:0};

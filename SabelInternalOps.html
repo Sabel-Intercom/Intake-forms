@@ -1092,6 +1092,7 @@ function weekEndDate(n, week1, weekStarts){
   if(isNaN(d.getTime())) return ""; d.setDate(d.getDate()+6); return isoLocal(d);
 }
 function taskDue(t, week1, weekStarts){
+  if(t.due) return (t.dueEnd&&t.dueEnd>t.due)?t.dueEnd:t.due;   // exact date or range: the last day counts
   if(t.week && t.week>=1 && week1){ const wk=(t.wkEnd&&t.wkEnd>t.week)?t.wkEnd:t.week; return weekEndDate(wk,week1,weekStarts); }
   return skillDate(t.d);
 }
