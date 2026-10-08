@@ -315,6 +315,11 @@ html.light .av{background:rgba(16,24,40,.08);color:var(--body)}
 .rrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .rchase{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--line);background:rgba(251,191,36,.07);font-size:13px;color:var(--mute)}
 .rchase b{color:var(--text)}
+.bitem{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 20px;border-top:1px solid var(--line)}
+.bitem .rt2{flex:1;min-width:220px}
+.bitem .rm a{color:var(--blue)}
+.brow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 20px;border-top:1px solid var(--line)}
+.berr{color:var(--red2);font-size:13px}
 .rchase a,.ritem .rm a{color:var(--blue)}
 .rdue{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--mute)}
 .rdue input{font:inherit;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:4px 8px;color-scheme:dark}
@@ -477,16 +482,21 @@ const hashWho=()=>{const h=decodeURIComponent((location.hash||'').slice(1).split
 function readChase(){
   const m=/[?&]chase=([^&]*)/.exec(location.hash||'');if(!m)return null;
   let d=null;try{d=JSON.parse(decodeURIComponent(m[1]));}catch(e){return null;}
+  /* Open Loops' "Send all" passes a list: each becomes a row Nikki checks before Send all. */
+  if(Array.isArray(d)){const b=d.slice(0,40).map(oneChase).filter(Boolean);return b.length?{batch:b}:null;}
+  return oneChase(d);
+}
+function oneChase(d){
   if(!d||typeof d!=='object'||!d.t)return null;
   const cut=(v,n)=>String(v==null?'':v).replace(/[\u0000-\u001f]/g,' ').trim().slice(0,n);
   const url=cut(d.u,600),okUrl=/^https:\/\/([a-z0-9-]+\.)*slack\.com\/|^https:\/\/mail\.google\.com\//i.test(url)?url:'';
   const since=cut(d.s,40),ok=since&&!isNaN(Date.parse(since))?new Date(since).toISOString():'';
   const to=TEAM.filter(p=>String(d.to||'').split(/[,\s]+/).some(x=>x.toLowerCase()===p.toLowerCase()));
-  return {title:cut(d.t,160),note:cut(d.n,400),due:'',to:to,kind:'chase',client:cut(d.c,80),url:okUrl,since:ok,sk:cut(d.k,120)};
+  return {title:cut(d.t,160),note:cut(d.n,400),due:'',to:to.slice(0,1),kind:'chase',client:cut(d.c,80),url:okUrl,since:ok,sk:cut(d.k,120)};
 }
 if(hashWho())S.who=hashWho();
 if(/^#summary$/i.test(location.hash||'')){S.who=COORD;S.tab='summary';}
-{const ch=readChase();if(ch){S.who=COORD;S.tab='home';S.rem=ch;S.fromLoops=true;try{history.replaceState(null,'','#'+COORD.toLowerCase());}catch(e){}}}
+{const ch=readChase();if(ch){S.who=COORD;S.tab='home';if(ch.batch)S.batch=ch.batch;else S.rem=ch;S.fromLoops=true;try{history.replaceState(null,'','#'+COORD.toLowerCase());}catch(e){}}}
 if(WHO.indexOf(S.who)<0)S.who='Everyone';
 
 let TASKS=[],OTHER=[],RAW=[],CLIENTS={},HEALTH=[],LOADED_AT=0,HOURS_AT=0,FIRST=true,LIVE=['busy','Loading'];
@@ -1641,6 +1651,35 @@ function homeHTML(mine){
   const rest=open.length-back.length-prog.length-urgent.length-parked.length+(canF?0:0);
   return h+'<div class="hfoot"><span>'+(rest>0?rest+' more open task'+(rest===1?'':'s')+' not due yet.':'That is everything open.')+'</span><button type="button" class="lk" data-act="mode" data-m="list">Open the full list</button></div></div>';
 }
+/* A batch from Open Loops "Send all": one row per client message, person preset, removable. */
+function batchHTML(){
+  const B=S.batch||[];if(!B.length)return '';
+  const R=OV.reminders||{},sent=b=>b.sk&&Object.keys(R).some(k=>R[k]&&!R[k].del&&R[k].sk===b.sk&&(R[k].to||[]).some(p=>b.to.indexOf(p)>-1));
+  return '<div class="secc rtile"><div class="sech"><i style="background:var(--red2)"></i><b style="color:var(--red2)">Clients waiting from Open Loops</b><span>Check who each one is for, then send them all.</span><small>'+B.length+' to send</small></div>'+
+    B.map((b,i)=>'<div class="bitem" data-bi="'+i+'"><div class="rt2"><b>'+esc(b.title)+'</b>'+
+      '<span class="rm"><span class="tag '+(waitHot(b.since)?'red':'amber')+'">Waiting'+(waitAge(b.since)?' '+waitAge(b.since):'')+'</span>'+(b.client?'<span>'+esc(b.client)+'</span>':'')+
+      (b.url?'<a href="'+esc(b.url)+'" target="_blank" rel="noopener">Message</a>':'')+(sent(b)?'<span class="tag green">Already sent</span>':'')+'</span></div>'+
+      '<span class="rto">'+TEAM.map(p=>'<button type="button" class="rwho'+(b.to.indexOf(p)>-1?' on':'')+'" data-act="b-who" data-p="'+p+'" aria-pressed="'+(b.to.indexOf(p)>-1)+'">'+av(p,true)+p+'</button>').join('')+'</span>'+
+      '<button type="button" class="fzx" data-act="b-del" title="Leave this one out" aria-label="Leave this one out">&times;</button></div>').join('')+
+    '<div class="brow">'+(S.batchErr?'<span class="berr">'+esc(S.batchErr)+'</span>':'')+'<span class="sp"></span><button type="button" class="lk" data-act="b-clear">Cancel</button>'+
+    '<button type="button" class="pb hand" data-act="b-send">Send all '+B.length+'</button></div></div>';
+}
+function sendBatch(){
+  const B=S.batch||[];
+  const missing=B.filter(b=>!b.to.length).length;
+  if(missing){S.batchErr='Pick a person for '+missing+' chase'+(missing===1?'':'s')+', or remove '+(missing===1?'it':'them')+' with ×.';render();return;}
+  OV.reminders=OV.reminders||{};
+  const R=OV.reminders,now=Date.now();let n=0,skip=0;const who={};
+  B.forEach(b=>{
+    if(b.sk&&Object.keys(R).some(k=>R[k]&&!R[k].del&&R[k].sk===b.sk&&(R[k].to||[]).some(p=>b.to.indexOf(p)>-1))){skip++;return;}
+    const id=nid();
+    R[id]={id,title:b.title,note:b.note||'',due:'',to:b.to.slice(),by:author(),at:now,eAt:now,kind:'chase',client:b.client||'',url:b.url||'',since:b.since||'',sk:b.sk||''};
+    n++;b.to.forEach(p=>{who[p]=(who[p]||0)+1;});
+  });
+  S.batch=null;S.batchErr='';S.fromLoops=false;
+  commit();
+  toast(n?'Sent '+n+' chase'+(n===1?'':'s')+': '+Object.keys(who).map(p=>p+' '+who[p]).join(', ')+(skip?'. '+skip+' already sent.':''):'All of these were already sent.');
+}
 /* "Don't forget…": make a task here and push it to one or more people. */
 function reminderTileHTML(all){
   const R=OV.reminders||{},live=Object.keys(R).map(k=>R[k]).filter(r=>r&&!r.del).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);
@@ -1674,6 +1713,7 @@ function coordHomeHTML(all){
     (parked.length?parked.map(t=>{const p=t.parked||{};return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="tab" data-t="desk"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl">'+esc(clientOf(t))+'</span><span class="own">'+esc(p.by||t.owner)+'</span><span class="q">'+quote(p.question||'')+'</span></span></button>'+
       '<span class="srw">Parked '+fStamp(p.askedAt)+'</span>'+dueHTML(t)+'<button type="button" class="pb amber sm" data-act="tab" data-t="desk">Answer</button></div>';}).join('')
      :'<div class="sempty">Nothing is parked with you.</div>')+'</div>';
+  h+=batchHTML();
   h+=reminderTileHTML(all);
   h+='<div class="secc"><div class="sech"><i style="background:var(--soft)"></i><b style="color:var(--body)">The team right now</b><span>Click a name for their home</span></div><div class="tgrid">'+TEAM.map(p=>{
     const m=open.filter(t=>t.owner===p),late=m.filter(isLate).length;
@@ -1831,6 +1871,10 @@ document.addEventListener('click',e=>{
     case 'start':if(t)act2(id,t.status==='In Progress'?'Pending':'In Progress');break;
     case 'done':if(t)act2(id,isDone(t)?'Pending':'Complete');break;
     case 'notmine':notMine(id);break;
+    case 'b-who':{const b=S.batch[+a.closest('[data-bi]').getAttribute('data-bi')],p=a.getAttribute('data-p');b.to=b.to[0]===p?[]:[p];S.batchErr='';render();break;}
+    case 'b-del':S.batch.splice(+a.closest('[data-bi]').getAttribute('data-bi'),1);if(!S.batch.length)S.batch=null;render();break;
+    case 'b-clear':S.batch=null;S.batchErr='';S.fromLoops=false;render();break;
+    case 'b-send':sendBatch();break;
     case 'r-clear':S.rem={title:'',note:'',due:'',to:[]};S.fromLoops=false;render();break;
     case 'flag':flagBlocked(id);break;
     case 'step':e.stopPropagation();tickStep(id,a.getAttribute('data-step'));break;
