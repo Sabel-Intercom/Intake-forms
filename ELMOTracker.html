@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sabel × ELMO Software · Client hub</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
 :root{--k0F1117:#0F1117;--k12151D:#12151D;--k12151E:#12151E;--k161B26:#161B26;--k1E2433:#1E2433;--k2A3145:#2A3145;--k2A3547:#2A3547;--k242A38:#242A38;--kE2E8F0:#E2E8F0;--kCBD5E1:#CBD5E1;--k94A3B8:#A3ACBC;--k64748B:#7F8A9C;--k475569:#6B7689;--k334155:#334155;--k4ADE80:#4ADE80;--kF87171:#F87171;--kFBBF24:#FBBF24;--k60A5FA:#60A5FA;--kFB923C:#FB923C;--kC084FC:#C084FC;--kA78BFA:#A78BFA;--k2DD4BF:#2DD4BF;--k38BDF8:#38BDF8;--k34D399:#34D399;--kF2F4F8:#F2F4F8;--kC9CFDA:#C9CFDA;--kA7AFBE:#A7AFBE;--k8B93A3:#8B93A3;--k5F6878:#5F6878;--k12161F:#12161F;--k1A2030:#1A2030;--kFF4D45:#FF4D45;--kFFB3AF:#FFB3AF;}
@@ -1091,8 +1092,13 @@ html body .pw{grid-template-columns:224px minmax(0,1fr)!important}
 .qsteps{display:flex;flex-direction:column;gap:5px}
 .qi{display:flex;align-items:center;gap:8px}
 .qi .qic{background:none;border:0;padding:0;cursor:pointer;display:inline-flex}
+.qb .qsa{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;color:var(--k64748B,#64748B);margin:2px 0 -4px}
+.qb .qsa button{margin-left:auto;background:none;border:0;padding:0;font:inherit;font-size:11px;font-weight:600;color:var(--k60A5FA,#60A5FA);cursor:pointer}
+.qb .qsa button:hover{text-decoration:underline}
 .qi .qic i{font-size:14px;color:var(--k64748B,#64748B)}
 .qi .qic i.ti-circle-check-filled{color:#16A34A}
+.qic i.ti-circle-dot{color:var(--k60A5FA,#60A5FA)}
+.qi.p .qit{color:var(--kE2E8F0,#E2E8F0)}
 .qi .qit{font-size:12px;color:var(--kE2E8F0,#E2E8F0);flex:1;min-width:0;line-height:1.4;outline:none;border-radius:3px}
 .qi .qit.d{color:var(--k94A3B8,#94A3B8);text-decoration:line-through}
 .qi .qit[contenteditable]:hover{box-shadow:0 0 0 1px var(--k2A3145,#2A3145)}
@@ -1179,6 +1185,137 @@ html.light .qsn button.nowS{background:#2563EB;border-color:#2563EB;color:#fff}
 html.light .qsn button.nowC{background:#F59E0B;border-color:#F59E0B;color:#101828}
 html.light .qsn button.sel{background:#475467;border-color:#475467;color:#fff}
 @media(max-width:760px){.qcols{grid-template-columns:minmax(0,1fr);gap:22px}.qc{margin:4px -6px;padding:10px 8px 12px}.qb{margin-left:0}}
+
+/* ── Project tracker as a flow ── */
+.fl{color:var(--kE2E8F0,#E2E8F0)}
+.fl-wrap{max-width:1120px;margin:0 auto;padding:8px 0 90px}
+.fl-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,1fr);gap:40px;align-items:end}
+@media(max-width:760px){.fl-hero{grid-template-columns:1fr;gap:26px}}
+.fl-eye{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--k8B93A3,#8B93A3)}
+.fl-eye i{width:28px;height:1px;background:#E10600;box-shadow:0 0 8px rgba(225,6,0,.8)}
+.fl-h1{margin:14px 0 0;font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(32px,4.5vw,52px);line-height:1;letter-spacing:-.035em;color:var(--kF2F4F8,#F2F4F8);text-wrap:balance}
+.fl-h1 span{color:var(--kFF4D45,#FF4D45)}
+.fl-sub{margin:16px 0 0;font-size:15px;line-height:1.55;color:var(--kA7AFBE,#A7AFBE);max-width:520px;text-wrap:pretty}
+.fl-prog{display:flex;flex-direction:column;gap:14px}
+.fl-prog .r{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--kA7AFBE,#A7AFBE)}
+.fl-prog .r b{font-family:Archivo,sans-serif;font-size:22px;color:var(--kF2F4F8,#F2F4F8)}
+.fl-prog .t{height:6px;border-radius:99px;background:var(--k1E2433,#1E2433);overflow:hidden}
+.fl-prog .t i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#E10600,var(--kFF4D45,#FF4D45));box-shadow:0 0 12px rgba(255,77,69,.8)}
+.fl-pills{display:flex;gap:8px;flex-wrap:wrap}
+.fl-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:99px;border:1px solid var(--k2A3145,#2A3145);background:var(--k161B26,#161B26);font-size:13px;color:var(--kC9CFDA,#C9CFDA)}
+.fl-pill b{font-family:Archivo,sans-serif;color:var(--kF2F4F8,#F2F4F8);font-weight:700}
+.fl-pill.need{border-color:rgba(225,6,0,.55);background:rgba(225,6,0,.12);color:var(--kFFB3AF,#FFB3AF);font-family:inherit;cursor:pointer}
+.fl-pill.need:hover{border-color:var(--kFF4D45,#FF4D45);background:rgba(225,6,0,.2)}
+.fl-pill.need .go{opacity:.8}
+.fl-pill.need b{color:var(--kF2F4F8,#F2F4F8)}
+.fl-pill.need i{width:7px;height:7px;border-radius:50%;background:var(--kFF4D45,#FF4D45);animation:flpulse 2s infinite}
+@keyframes flpulse{0%,100%{box-shadow:0 0 0 0 rgba(225,6,0,.55)}70%{box-shadow:0 0 0 8px rgba(225,6,0,0)}}
+.fl-card{margin-top:40px;border:1px solid var(--k1E2433,#1E2433);border-radius:16px;background:linear-gradient(160deg,var(--k161B26,#161B26),var(--k12151D,#12151D));padding:18px 22px 22px}
+.fl-cardh{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.fl-lab{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--k64748B,#64748B)}
+.fl-hint{font-size:12px;color:var(--k64748B,#64748B)}
+.fl-chain{position:relative;margin-top:22px}
+.fl-track{position:absolute;left:4%;right:4%;top:19px;height:2px;background:var(--k2A3145,#2A3145)}
+.fl-fill{position:absolute;left:4%;top:19px;height:2px;background:linear-gradient(90deg,var(--k4ADE80,#4ADE80),var(--k60A5FA,#60A5FA));box-shadow:0 0 10px rgba(96,165,250,.6)}
+.fl-nodes{position:relative;display:flex;align-items:flex-start}
+.fl-node{display:flex;flex-direction:column;align-items:center;gap:10px;background:transparent;border:none;cursor:pointer;padding:0 3px;font-family:inherit;color:inherit;text-align:center;flex:3 1 0;min-width:0}
+.fl-node.pg{flex:.75 1 0}
+.fl-nodes.dense .fl-node .l{font-size:10px;line-height:1.25}
+.fl-nodes.dense .fl-node .c{width:34px;height:34px;font-size:12px}
+.fl-nodes.dense .fl-node.pg .c{width:22px;height:22px;font-size:8px;margin-top:6px}
+.fl-node:hover{opacity:.85}
+.fl-node .c{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:Archivo,sans-serif;font-weight:800;font-size:13px;box-sizing:border-box;background:var(--k0F1117,#0F1117);border:2px dashed var(--k475569,#475569);color:var(--k64748B,#64748B);box-shadow:0 0 0 4px var(--k0F1117,#0F1117)}
+.fl-node.pg .c{width:26px;height:26px;margin-top:7px;font-size:9px;border-width:1.5px}
+.fl-node.pg .s{margin-top:2px}
+.fl-node.done .c{background:var(--k4ADE80,#4ADE80);border:2px solid var(--k4ADE80,#4ADE80);color:var(--k0F1117,#0F1117)}
+.fl-node.active .c{background:var(--k161B26,#161B26);color:var(--kF2F4F8,#F2F4F8)}
+.fl-node.pg.active .c{border:1.5px solid var(--k60A5FA,#60A5FA);box-shadow:0 0 0 4px var(--k0F1117,#0F1117),0 0 12px rgba(96,165,250,.6)}
+.fl-node .l{font-size:11px;font-weight:600;line-height:1.3;color:var(--k8B93A3,#8B93A3);text-wrap:balance;overflow-wrap:anywhere}
+.fl-node.pg .l{font-size:10px;font-weight:500}
+.fl-node.done .l,.fl-node.active .l{color:var(--kF2F4F8,#F2F4F8)}
+.fl-node .s{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.08em;color:var(--k8B93A3,#8B93A3)}
+.fl-node.done .s{color:var(--k4ADE80,#4ADE80)}.fl-node.active .s{color:var(--k60A5FA,#60A5FA)}
+.fl-bh{margin-top:40px;display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.fl-legend{display:flex;gap:16px;align-items:center;font-size:12px;color:var(--k64748B,#64748B);flex-wrap:wrap}
+.fl-legend span{display:inline-flex;align-items:center;gap:6px}
+.fl-legend i{width:10px;height:10px;border-radius:3px;box-sizing:border-box;display:inline-block}
+.fl-hide{display:inline-flex;align-items:center;gap:8px;padding:5px 10px 5px 6px;border-radius:99px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;background:var(--k161B26,#161B26);border:1px solid var(--k2A3145,#2A3145);color:var(--k94A3B8,#94A3B8)}
+.fl-hide .sw{position:relative;width:26px;height:14px;border-radius:99px;background:var(--k2A3145,#2A3145);display:inline-block}
+.fl-hide .sw::after{content:'';position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:#fff;transition:left .15s}
+.fl-hide.on{background:rgba(74,222,128,.14);border-color:rgba(74,222,128,.5);color:var(--k4ADE80,#4ADE80)}
+.fl-hide.on .sw{background:#22C55E}.fl-hide.on .sw::after{left:14px}
+.fl-blocks{position:relative;margin-top:20px;display:flex;flex-direction:column;gap:14px}
+.fl-spine{position:absolute;left:23px;top:24px;bottom:24px;width:2px;background:linear-gradient(var(--k2A3145,#2A3145),var(--k2A3145,#2A3145) 60%,transparent)}
+.fl-row{position:relative;display:grid;grid-template-columns:48px minmax(0,1fr);gap:18px;align-items:start}
+.fl-num{position:relative;z-index:1;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-family:Archivo,sans-serif;font-weight:800;font-size:15px;background:var(--k0F1117,#0F1117);border:2px solid var(--k475569,#475569);color:var(--kF2F4F8,#F2F4F8);box-sizing:border-box}
+.fl-row.up .fl-num{color:var(--k64748B,#64748B)}
+.fl-blk{border:1px solid var(--k1E2433,#1E2433);border-radius:16px;background:linear-gradient(160deg,var(--k161B26,#161B26),var(--k12151D,#12151D));overflow:hidden;transition:border-color .2s}
+.fl-blk.open{box-shadow:0 14px 40px rgba(0,0,0,.35)}
+.fl-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;width:100%;text-align:left;background:transparent;border:none;cursor:pointer;padding:20px 22px;font-family:inherit;color:inherit}
+.fl-head:hover{background:rgba(255,255,255,.025)}
+.fl-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--k64748B,#64748B)}
+.fl-state{padding:2px 8px;border-radius:99px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:0;text-transform:none;font-size:11px;font-weight:600;background:var(--k1E2433,#1E2433);color:var(--k8B93A3,#8B93A3)}
+.fl-state.done{background:rgba(74,222,128,.14);color:var(--k4ADE80,#4ADE80)}.fl-state.active{background:rgba(96,165,250,.14);color:var(--k60A5FA,#60A5FA)}
+.fl-title{margin-top:8px;font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(20px,2.4vw,26px);line-height:1.1;letter-spacing:-.02em;color:var(--kF2F4F8,#F2F4F8)}
+.fl-desc{margin-top:6px;font-size:14px;color:var(--kA7AFBE,#A7AFBE);text-wrap:pretty}
+.fl-prow{margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--kA7AFBE,#A7AFBE)}
+.fl-prow .bar{flex:1 1 180px;max-width:320px;height:4px;border-radius:99px;background:var(--k1E2433,#1E2433);overflow:hidden}
+.fl-prow .bar i{display:block;height:100%;border-radius:99px}
+.fl-prow b{color:var(--kF2F4F8,#F2F4F8)}
+.fl-need{display:inline-flex;align-items:center;gap:6px;color:var(--kFFB3AF,#FFB3AF)}
+.fl-need i{width:6px;height:6px;border-radius:50%;background:var(--kFF4D45,#FF4D45)}
+.fl-need b{color:var(--kF2F4F8,#F2F4F8)}
+.fl-chev{width:36px;height:36px;border-radius:50%;border:1px solid var(--k2A3145,#2A3145);display:grid;place-items:center;color:var(--k8B93A3,#8B93A3);font-size:18px;line-height:1;transition:transform .25s}
+.fl-blk.open .fl-chev{transform:rotate(180deg)}
+.fl-body{border-top:1px solid var(--k1E2433,#1E2433);padding:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;background:var(--k0F1117,#0F1117)}
+.fl-colh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--k1E2433,#1E2433)}
+.fl-colh b{font-family:Archivo,sans-serif;font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--k8B93A3,#8B93A3)}
+.fl-colh.you b{color:var(--kFFB3AF,#FFB3AF)}
+.fl-colh span{font-size:12px;color:var(--k64748B,#64748B)}
+.fl-empty{padding:16px 0;font-size:13px;color:var(--k64748B,#64748B);font-style:italic}
+.fl-task{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:12px;align-items:start;padding:10px 12px;margin:0 0 6px;border:1px solid var(--k2A3145,#2A3145);border-radius:10px;cursor:pointer;transition:border-color .15s}
+.fl-task:hover{border-color:var(--k64748B,#64748B)}
+.fl-open{padding:0 0 6px}
+.fl-open .qc{margin:0;border-color:var(--flc,var(--k2A3145,#2A3145));border-width:1px}
+.fl-task:hover .fl-ti{color:var(--kF2F4F8,#F2F4F8)}
+.fl-box{margin-top:2px;width:18px;height:18px;border-radius:5px;display:grid;place-items:center;font-size:12px;font-weight:800;line-height:1;color:var(--k0F1117,#0F1117);box-sizing:border-box;background:transparent;border:1.5px solid var(--k475569,#475569)}
+.fl-task.done .fl-box{background:var(--k4ADE80,#4ADE80);border:1px solid var(--k4ADE80,#4ADE80)}
+.fl-task.now .fl-box{background:var(--k60A5FA,#60A5FA);border:1px solid var(--k60A5FA,#60A5FA)}
+.fl-task.wait .fl-box{background:rgba(225,6,0,.12);border:1.5px dashed var(--kFF4D45,#FF4D45)}
+.fl-ti{font-size:14px;line-height:1.4;color:var(--kC9CFDA,#C9CFDA);text-wrap:pretty}
+.fl-task.done .fl-ti{color:var(--k64748B,#64748B);text-decoration:line-through}
+.fl-task.now .fl-ti,.fl-task.wait .fl-ti{color:var(--kF2F4F8,#F2F4F8)}
+.fl-tm{margin-top:3px;font-size:11.5px;color:var(--k64748B,#64748B)}
+.fl-task.wait .fl-tm{color:var(--kFFB3AF,#FFB3AF)}.fl-task.now .fl-tm{color:var(--k60A5FA,#60A5FA)}
+.fl-due{font-size:11.5px;padding-top:3px;white-space:nowrap;color:var(--k8B93A3,#8B93A3)}
+/* arriving from the "need you" pill: the Dashboard's "What we need from" card glows red for a moment */
+@keyframes flglow{0%{box-shadow:0 0 0 0 rgba(225,6,0,0)}18%{box-shadow:0 0 0 3px rgba(225,6,0,.75),0 0 34px rgba(225,6,0,.6)}100%{box-shadow:0 0 0 0 rgba(225,6,0,0)}}
+.fl-glow{animation:flglow 2.6s ease-out;border-color:var(--kFF4D45,#FF4D45)!important}
+/* progression sessions: smaller cards between the blocks */
+.fl-prow-pg{position:relative;display:grid;grid-template-columns:48px minmax(0,1fr);gap:18px;align-items:center}
+.fl-pgnum{position:relative;z-index:1;width:30px;height:30px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:10px;background:var(--k0F1117,#0F1117);border:1.5px solid var(--k475569,#475569);color:var(--k8B93A3,#8B93A3);box-sizing:border-box}
+.fl-pgnum.done{background:var(--k4ADE80,#4ADE80);border-color:var(--k4ADE80,#4ADE80);color:var(--k0F1117,#0F1117)}.fl-pgnum.active{border-color:var(--k60A5FA,#60A5FA);color:var(--kF2F4F8,#F2F4F8);box-shadow:0 0 12px rgba(96,165,250,.5)}
+.fl-pg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;text-align:left;background:var(--k12151D,#12151D);border:1px dashed var(--k2A3145,#2A3145);border-radius:12px;padding:12px 16px;font-family:inherit;color:inherit;cursor:pointer;max-width:720px}
+.fl-pg:hover{border-color:var(--k60A5FA,#60A5FA);border-style:solid}
+.fl-pg .m{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--k64748B,#64748B);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.fl-pg .m .st{padding:1px 7px;border-radius:99px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:0;text-transform:none;font-size:10.5px;font-weight:600;background:var(--k1E2433,#1E2433);color:var(--k8B93A3,#8B93A3)}
+.fl-pg .m .st.done{background:rgba(74,222,128,.14);color:var(--k4ADE80,#4ADE80)}.fl-pg .m .st.active{background:rgba(96,165,250,.14);color:var(--k60A5FA,#60A5FA)}
+.fl-pg .t{margin-top:4px;font-family:Archivo,sans-serif;font-weight:700;font-size:14.5px;color:var(--kE2E8F0,#E2E8F0)}
+.fl-pg .go{font-size:12px;color:var(--k8B93A3,#8B93A3);white-space:nowrap}
+/* Home: two doors side by side, tracker in red, dashboard in slate (Sabel proposal palette) */
+.hh-two{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.hh-two .hh-dash{grid-column:auto}
+.hh-two .hh-dt{font-size:clamp(22px,2.4vw,28px)}
+.hh-two .hh-dc{font-size:14px}
+.hh-dash.slate{border-color:rgba(91,125,177,.45);background:linear-gradient(135deg,rgba(42,59,87,.6) 0%,var(--hh-card-mid) 55%,var(--k161B26,#161B26) 100%);box-shadow:none}
+.hh-dash.slate:hover{border-color:#5B7DB1;box-shadow:0 0 0 1px rgba(91,125,177,.3) inset,0 30px 70px -24px rgba(42,59,87,.9)}
+.hh-dash.slate .hh-scan{background:linear-gradient(90deg,transparent,rgba(91,125,177,.9),transparent)}
+.hh-dash.slate .hh-tile{background:#2A3B57;box-shadow:0 0 22px rgba(42,59,87,.7)}
+.hh-dash.slate .hh-ic em{color:var(--kA7AFBE,#A7AFBE)}
+.hh-dash.slate .hh-dt span{color:#8FB3F0}
+.hh-dash.slate .hh-meter .t i{background:linear-gradient(90deg,#2A3B57,#5B7DB1);box-shadow:0 0 12px rgba(91,125,177,.6)}
+.hh-dash.slate .hh-cta{background:#2A3B57;box-shadow:0 0 24px rgba(42,59,87,.6)}
+.hh-dash.slate .hh-wait{color:var(--kA7AFBE,#A7AFBE)}
 </style>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap">
 <style id="v9-compact">
@@ -1330,6 +1467,229 @@ html.light .pv-pg{background:rgba(225,6,0,.03)!important}
 .hn-badge{font-weight:600!important}
 
 </style>
+
+<style id="sd-skin-d">
+/* ── Sabel document skin · Concept D (9 Oct 2026) ─────────────────────────────
+   Palette and type from the proposal / report system. Dark values only; the
+   light theme keeps the html.light overrides defined above. */
+:root{
+  --k0F1117:#0B0B0C;--k12151D:#0E0E10;--k12151E:#0E0E10;--k12161F:#0E0E10;--k161B26:#131315;--k1A2030:#191a1d;--k242A38:#191a1d;
+  --k1E2433:#26262a;--k2A3145:#2f2f34;--k2A3547:#2f2f34;--k334155:#3a3a40;
+  --kE2E8F0:#ECEAE8;--kF2F4F8:#ECEAE8;--kCBD5E1:#d4d0ce;--kC9CFDA:#d4d0ce;--k94A3B8:#a09a98;--kA7AFBE:#a09a98;--k64748B:#8a8482;--k8B93A3:#8a8482;--k475569:#6e6968;--k5F6878:#6e6968;
+  --k4ADE80:#5EE0A1;--k34D399:#5EE0A1;--k60A5FA:#6FB4FF;--k38BDF8:#6FB4FF;--kFBBF24:#F0B429;--kF87171:#FF7A6B;--kFF4D45:#ff5a52;--kFFB3AF:#ffb3ad;
+  --sd-slate:#191e27;--sd-slateline:#2a303c;--sd-amber:#F0B429;--sd-blue:#6FB4FF;--sd-green:#5EE0A1;--sd-red:#E10600;--sd-redsoft:#ff7a70;
+  --hh-grid:rgba(255,255,255,.03);--hh-fade:rgba(11,11,12,.6);
+}
+html.light{--sd-slate:#FFFFFF;--sd-slateline:#E4E7EC;--sd-redsoft:#C2140E}
+body,.hh,.mn,#top-bar,.sb{font-family:'DM Sans',-apple-system,'Helvetica Neue',sans-serif!important}
+.sd-k,#hn-left,.hn-sec,.sd-proj .k,.sd-proj .gl,.sd-ruler .lab,.sd-ruler .lab span,.sd-wst .h,.sd-mono{font-family:'DM Mono',ui-monospace,Menlo,monospace!important}
+.mn{padding-left:2rem!important;padding-right:2rem!important}
+#top-bar.hn-top{background:rgba(11,11,12,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--k1E2433)}
+html.light #top-bar.hn-top{background:rgba(255,255,255,.86)}
+#hn-left{letter-spacing:.14em;text-transform:uppercase;font-size:10.5px!important;color:var(--k94A3B8)}
+#hn-left .sep{color:var(--sd-red);margin:0 8px}
+
+/* sidebar */
+.sb.hn{background:var(--k12151D)!important;border-right:1px solid var(--k1E2433)}
+.hn-mark{padding:6px 8px 14px!important}
+.hn-mark img{height:20px!important}
+.hn-tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--k475569);margin-left:auto;margin-right:6px}
+.sd-proj{position:relative;overflow:hidden;background:var(--sd-slate);border:1px solid var(--sd-slateline);border-radius:12px;padding:12px 12px 12px 16px;margin:0 2px 16px}
+.sd-proj::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--sd-red)}
+.sd-proj .k{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--k94A3B8)}
+.sd-proj .n{font-size:14px;font-weight:600;color:var(--kE2E8F0);margin-top:3px}
+.sd-proj .r{display:flex;align-items:baseline;justify-content:space-between;margin-top:10px}
+.sd-proj .r b{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--kE2E8F0)}
+.sd-proj .r span{font-size:11.5px;color:var(--k94A3B8)}
+.sd-proj .bar{height:5px;border-radius:999px;background:var(--k1E2433);overflow:hidden;margin-top:7px}
+.sd-proj .bar i{display:block;height:100%;background:var(--sd-red);border-radius:999px;transform-origin:left;animation:sd-grow 1.2s cubic-bezier(.2,.7,.2,1) both}
+.sd-proj .gl{font-size:10.5px;color:var(--k94A3B8);margin-top:9px;letter-spacing:.02em}
+.sd-proj .gl b{color:var(--kE2E8F0);font-weight:500}
+.hn-sec{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--k475569);padding:10px 10px 6px}
+.hn-btn{height:34px!important;font-size:13px!important;font-weight:500!important;color:var(--k94A3B8)!important;border-radius:9px!important;border-left:2px solid transparent!important}
+.hn-btn:hover{background:var(--k1A2030)!important;color:var(--kE2E8F0)!important}
+.hn-btn.on,html.light .hn-btn.on{background:var(--k1A2030)!important;color:var(--kE2E8F0)!important;border-left-color:var(--sd-red)!important}
+.hn-btn .ic i{color:inherit}
+.hn-badge{background:var(--sd-amber)!important;color:#0B0B0C!important;font-weight:600!important;border-radius:999px!important}
+.hn-pct{color:var(--k475569)!important}
+.hn-right{margin-left:auto;font-size:11px;color:var(--k475569)}
+.hn-right.sent{color:var(--sd-green)}
+.hn-right.dot{width:7px;height:7px;border-radius:50%;background:var(--sd-amber);animation:sd-blink 1.6s ease-in-out infinite}
+.sd-team{border:1px solid var(--k1E2433);border-radius:12px;padding:12px;font-size:11.5px;color:var(--k94A3B8);line-height:1.45;margin:0 2px}
+.sd-team .k{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--k475569);margin-bottom:8px}
+.sd-team .av{display:flex;gap:6px;margin-bottom:8px}
+.sd-av{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:11px;flex:none}
+.sd-av.c{background:rgba(96,165,250,.16);color:#60A5FA}.sd-av.g{background:rgba(52,211,153,.16);color:#34D399}.sd-av.r{background:rgba(192,132,252,.16);color:#C084FC}.sd-av.x{background:rgba(240,180,41,.16);color:#F0B429}
+.hn-help{font-size:11.5px!important}
+body.sb-mini .sd-proj,body.sb-mini .sd-team,body.sb-mini .hn-sec,body.sb-mini .hn-tag,body.sb-mini .hn-right{display:none!important}
+
+/* home: Concept D */
+.sd{color:var(--kE2E8F0);font-size:15px;line-height:1.5;max-width:1344px;margin:0 auto;padding:8px 0 40px}
+.sd a{color:inherit;text-decoration:none}
+.sd button{font-family:inherit}
+.sd-hero{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;align-items:end;margin-top:18px}
+.sd-hero .l{grid-column:span 7}
+.sd-hero .rgt{grid-column:span 5;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.sd-kick{font-family:'DM Mono',monospace;font-size:11.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--sd-red);margin-bottom:16px}
+.sd-h1{margin:0;font-size:46px;line-height:1.04;font-weight:700;letter-spacing:-.02em;color:var(--kE2E8F0)}
+.sd-h1 span{font-weight:300;color:var(--k94A3B8)}
+.sd-sub{margin:16px 0 0;max-width:560px;font-size:15.5px;color:var(--k94A3B8)}
+.sd-card{position:relative;overflow:hidden;background:var(--sd-slate);border:1px solid var(--sd-slateline);border-radius:12px;padding:18px 20px 18px 24px;transition:transform .22s ease,border-color .22s ease}
+.sd-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--sd-red)}
+.sd-card:hover{transform:translateY(-2px);border-color:var(--k334155)}
+.sd-card .k,.sd-lab{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--k94A3B8)}
+.sd-card .big{font-size:46px;line-height:1;font-weight:700;letter-spacing:-.03em;margin-top:8px;color:var(--kE2E8F0)}
+.sd-card .big small{font-size:15px;font-weight:400;color:var(--k94A3B8);margin-left:8px;letter-spacing:0}
+.sd-card .n{font-size:28px;font-weight:700;letter-spacing:-.02em;margin-top:6px}
+.sd-card .n small{font-size:13px;font-weight:400;color:var(--k94A3B8);margin-left:4px;letter-spacing:0}
+.sd-card .t{font-size:13px;margin-top:8px;color:var(--kE2E8F0)}
+.sd-card .d{font-size:12px;color:var(--k94A3B8);margin-top:2px}
+.sd-card .h{font-size:14.5px;font-weight:600;margin-top:8px;line-height:1.3;color:var(--kE2E8F0)}
+.sd-plain{background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:12px}
+.sd-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px}
+.sd-ring .w{position:relative;width:110px;height:110px}
+.sd-ring .w div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sd-ring .w b{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1;color:var(--kE2E8F0)}
+.sd-ring .w small{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--k475569);margin-top:4px}
+.sd-ring .s{font-size:12px;color:var(--k94A3B8)}
+.sd-ring circle.p{animation:sd-draw 1.6s cubic-bezier(.2,.7,.2,1) both;animation-delay:.2s}
+.sd-four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px}
+.sd-four .sd-card.y .n{color:var(--sd-amber)}.sd-four .sd-card.b .n{color:var(--sd-blue)}.sd-four .sd-card.g .n{color:var(--sd-green)}
+.sd-four .sd-card{cursor:pointer}
+
+/* week ruler */
+.sd-ruler{background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:12px;padding:16px 18px 14px;margin-top:18px}
+.sd-ruler .cells{display:grid;gap:3px}
+.sd-ruler .c{height:8px;border-radius:3px;background:var(--k1E2433);position:relative;cursor:pointer;transform-origin:left}
+.sd-ruler .c.done{background:var(--sd-green)}
+.sd-ruler .c.now{background:var(--sd-blue)}
+.sd-ruler .c.gl{background:var(--sd-red)}
+.sd-ruler .c.now::after{content:"";position:absolute;left:50%;top:-13px;width:7px;height:7px;margin-left:-3px;border-radius:50%;background:var(--sd-amber);animation:sd-pulse 2.2s ease-out infinite}
+.sd-ruler .c:hover{filter:brightness(1.3)}
+.sd-ruler .lab{display:grid;gap:3px;margin-top:8px;font-size:9.5px;color:var(--k475569);text-align:center;white-space:nowrap;overflow:hidden}
+.sd-ruler .lab span.now{color:var(--sd-amber);font-weight:500}
+.sd-ruler .lab span.gl{color:var(--sd-red);font-weight:500}
+.sd-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.sd-chip{font-size:12px;padding:5px 10px;border-radius:999px;background:var(--k1A2030);border:1px solid var(--k1E2433);color:var(--k94A3B8);cursor:pointer;font-family:inherit;transition:border-color .15s}
+.sd-chip b{color:var(--kE2E8F0);font-weight:600}
+.sd-chip:hover{border-color:var(--k334155)}
+.sd-chip.red{background:rgba(225,6,0,.12);border-color:rgba(225,6,0,.4);color:var(--sd-redsoft)}
+.sd-ruler .top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px}
+.sd-leg{font-size:11.5px;color:var(--k94A3B8);display:flex;gap:14px;flex-wrap:wrap}
+.sd-leg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+/* sections */
+.sd-sech{display:flex;align-items:baseline;gap:14px;margin:34px 0 14px;flex-wrap:wrap}
+.sd-sech .num{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--sd-red)}
+.sd-sech h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em;color:var(--kE2E8F0)}
+.sd-sech .r{margin-left:auto;font-size:12.5px;color:var(--k94A3B8);display:flex;gap:8px;align-items:center}
+.sd-sech .r a,.sd-sech .r button{color:var(--sd-redsoft);background:none;border:0;font:inherit;cursor:pointer;padding:0}
+
+/* three-column board */
+.sd-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.sd-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.sd-colh{display:flex;align-items:center;gap:10px;padding:0 4px 6px;border-bottom:2px solid var(--k1E2433)}
+.sd-colh .k{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase}
+.sd-colh span{font-size:12px;color:var(--k94A3B8)}
+.sd-col.y .sd-colh{border-color:var(--sd-amber)}.sd-col.y .k{color:var(--sd-amber)}
+.sd-col.b .sd-colh{border-color:var(--sd-blue)}.sd-col.b .k{color:var(--sd-blue)}
+.sd-col.g .sd-colh{border-color:var(--sd-green)}.sd-col.g .k{color:var(--sd-green)}
+.sd-tile{background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:9px;transition:transform .22s ease,border-color .22s ease,background .22s}
+.sd-tile:hover{transform:translateY(-2px);border-color:var(--k334155)}
+.sd-tile.od{border-color:rgba(240,180,41,.45)}
+.sd-tile .m{display:flex;justify-content:space-between;gap:10px;font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--k475569)}
+.sd-tile .m b{color:var(--sd-amber);font-weight:500}
+.sd-tile .m .late{color:var(--kF87171)}
+.sd-tile .tt{font-size:14.5px;font-weight:600;line-height:1.3;color:var(--kE2E8F0)}
+.sd-tile .dd{font-size:12.5px;color:var(--k94A3B8)}
+.sd-tile .ctx{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--k475569);flex-wrap:wrap}
+.sd-pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;background:var(--k1A2030);color:var(--k94A3B8);border:1px solid var(--k1E2433)}
+.sd-tile .act{display:flex;gap:6px;margin-top:2px}
+.sd-btn{flex:1;font:inherit;font-size:12.5px;font-weight:600;padding:9px 10px;border-radius:8px;border:1px solid var(--k334155);background:var(--k1A2030);color:var(--kE2E8F0);cursor:pointer;transition:background .2s,color .2s}
+.sd-btn:hover{background:var(--kE2E8F0);color:#0B0B0C}
+.sd-btn.red{flex:none;border:0;background:var(--sd-red);color:#fff;padding:9px 14px}
+.sd-btn.red:hover{background:#ff2a24;color:#fff}
+.sd-row{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid var(--k1E2433);cursor:pointer;transition:background .15s}
+.sd-row:last-child{border-bottom:0}
+.sd-row:hover{background:var(--k1A2030)}
+.sd-row .tt{font-size:13.5px;font-weight:600;line-height:1.3;color:var(--kE2E8F0)}
+.sd-row .dd{font-size:11.5px;color:var(--k94A3B8);margin-top:2px}
+.sd-row .ck{flex:none;margin-top:2px;color:var(--sd-green)}
+.sd-later{padding:12px 14px;border:1px dashed var(--k1E2433);border-radius:12px;font-size:12px;color:var(--k475569);display:flex;flex-direction:column;gap:5px}
+.sd-later .k{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.sd-later a,.sd-later button{color:var(--sd-redsoft);background:none;border:0;font:inherit;cursor:pointer;padding:0;text-align:left}
+.sd-empty{padding:16px;border:1px dashed var(--k1E2433);border-radius:12px;font-size:12.5px;color:var(--k94A3B8);display:flex;align-items:center;gap:8px}
+.sd-empty i{color:var(--sd-green);font-size:16px}
+.sd-more{font-size:12px;color:var(--sd-redsoft);padding:0 4px;background:none;border:0;font-family:inherit;cursor:pointer;text-align:left}
+
+/* workstream table */
+.sd-wst{background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:12px;overflow:hidden}
+.sd-wst .h,.sd-wst .rw{display:grid;grid-template-columns:minmax(0,2.2fr) 110px minmax(0,2fr) 80px 80px 80px;gap:14px;align-items:center;padding:11px 18px}
+.sd-wst .h{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--k475569);border-bottom:1px solid var(--k1E2433)}
+.sd-wst .h .y{color:var(--sd-amber)}.sd-wst .h .b{color:var(--sd-blue)}
+.sd-wst .rw{border-bottom:1px solid var(--k1E2433);font-size:13.5px;cursor:pointer;transition:background .15s}
+.sd-wst .rw:last-child{border-bottom:0}
+.sd-wst .rw:hover{background:var(--k1A2030)}
+.sd-wst .nm{display:flex;align-items:center;gap:10px;min-width:0;color:var(--kE2E8F0)}
+.sd-wst .nm i{width:8px;height:8px;border-radius:2px;flex:none}
+.sd-wst .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sd-wst .wk{font-size:11.5px;color:var(--k94A3B8)}
+.sd-wst .bar{height:6px;border-radius:999px;background:var(--k1E2433);overflow:hidden}
+.sd-wst .bar i{display:block;height:100%;border-radius:999px;transform-origin:left;animation:sd-grow 1.3s cubic-bezier(.2,.7,.2,1) both;animation-delay:.25s}
+.sd-wst .num{text-align:right;font-family:'DM Mono',monospace;font-size:11.5px;color:var(--kE2E8F0)}
+.sd-wst .num.dim{color:var(--k475569)}.sd-wst .num.y{color:var(--sd-amber)}.sd-wst .num.b{color:var(--sd-blue)}
+
+/* decisions + materials */
+.sd-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.sd-list{background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:12px;overflow:hidden}
+.sd-list .it{padding:11px 16px;border-bottom:1px solid var(--k1E2433);cursor:pointer;transition:background .15s}
+.sd-list .it:last-child{border-bottom:0}
+.sd-list .it:hover{background:var(--k1A2030)}
+.sd-list .it b{display:block;font-size:13.5px;font-weight:500;color:var(--kE2E8F0)}
+.sd-list .it span{display:block;font-size:11.5px;color:var(--k475569);margin-top:1px}
+.sd-mats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sd-mat{display:flex;gap:12px;align-items:center;padding:13px 14px;background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:12px;cursor:pointer;text-align:left;font-family:inherit;color:inherit;transition:transform .22s ease,border-color .22s ease,background .22s}
+.sd-mat:hover{transform:translateY(-2px);border-color:var(--k334155);background:var(--k1A2030)}
+.sd-mat .ic{flex:none;width:36px;height:36px;border-radius:9px;background:rgba(225,6,0,.12);display:flex;align-items:center;justify-content:center;color:var(--sd-red);font-size:17px}
+.sd-mat .ic.y{background:rgba(240,180,41,.12);color:var(--sd-amber)}
+.sd-mat .ic.g{background:rgba(94,224,161,.12);color:var(--sd-green)}
+.sd-mat b{display:block;font-size:13.5px;font-weight:600;color:var(--kE2E8F0)}
+.sd-mat span{display:block;font-size:11.5px;color:var(--k475569)}
+.sd-mat span.y{color:var(--sd-amber)}.sd-mat span.g{color:var(--sd-green)}
+.sd-next{margin-top:12px;padding:13px 16px 13px 20px}
+.sd-foot{margin-top:36px;border-top:1px solid var(--k1E2433);padding-top:16px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--k475569)}
+.sd-foot i.dot{color:var(--sd-red);font-style:normal}
+
+/* Concept D keeps the sidebar and top bar on Home (the old landing hid them).
+   Desktop only: on phones the original off-canvas sidebar rules apply. */
+body.on-home #top-bar{display:flex!important}
+body.on-home #main .mnw{max-width:1344px!important;margin:0 auto!important}
+@media(min-width:701px){
+  body.on-home .sb{display:flex!important}
+  html body.on-home .pw{grid-template-columns:var(--sbw) minmax(0,1fr)!important}
+  body.on-home .mn{padding:calc(var(--tbh) + 1rem) 2rem 1.5rem!important}
+}
+@media(max-width:700px){
+  body.on-home #sb-toggle{display:inline-flex!important}
+  body.on-home .mn{padding:3.6rem 12px 1.5rem!important;min-width:0;overflow-x:hidden}
+  body.on-home .sb{display:flex!important}
+}
+.sd-sech .r button{margin-right:8px}
+
+/* motion */
+.sd-rise{animation:sd-rise .75s cubic-bezier(.2,.7,.2,1) both}
+@keyframes sd-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes sd-grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes sd-draw{from{stroke-dashoffset:302}to{stroke-dashoffset:var(--to)}}
+@keyframes sd-pulse{0%,100%{box-shadow:0 0 0 0 rgba(240,180,41,.45)}60%{box-shadow:0 0 0 9px rgba(240,180,41,0)}}
+@keyframes sd-blink{0%,100%{opacity:1}50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){.sd-rise,.sd-wst .bar i,.sd-proj .bar i,.sd-ring circle.p,.sd-ruler .c.now::after,.hn-right.dot{animation:none!important}}
+
+/* responsive */
+@media(max-width:1180px){.sd-four{grid-template-columns:repeat(2,minmax(0,1fr))}.sd-board{grid-template-columns:1fr}.sd-wst .h,.sd-wst .rw{grid-template-columns:minmax(0,2fr) 90px minmax(0,1.6fr) 60px 50px 50px}}
+@media(max-width:900px){.sd-hero{grid-template-columns:1fr}.sd-hero .l,.sd-hero .rgt{grid-column:auto}.sd-h1{font-size:36px}.sd-two{grid-template-columns:1fr}.sd-wst{overflow-x:auto}.sd-wst .h,.sd-wst .rw{min-width:640px}}
+@media(max-width:600px){.sd-four{grid-template-columns:1fr}.sd-hero .rgt{grid-template-columns:1fr}.sd-ruler .lab{display:none}.sd-mats{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <button id="sb-toggle" onclick="toggleSidebar()" title="Open the project menu"><i class="ti ti-menu-2" style="font-size:14px"></i>Menu</button>
@@ -1412,7 +1772,7 @@ const SOW={
   "note": "Scope per the Statement of Work dated 14 August 2026, 239.6 hours, re-planned on the 21 September kick-off. Anything beyond this is handled as a change request."
 };
 
-const T={"setup": {"sabel": [{"t": "Run the kick-off call", "o": "Chris", "s": "Complete", "d": "", "week": 1, "notes": "Held Mon 21 Sep (Fireflies: Sabel/Elmo kick off and prioritisation). Go-live set for Thu 17 Dec; ChurnZero, partner routing, Confluence, Salesforce and Glean held until after go-live.", "link": ""}, {"t": "Discovery and scope lock: build backlog and acceptance criteria", "o": "Chris", "s": "Pending", "d": "", "week": 1, "notes": "SOW discovery line. Lock the build backlog and exit tests per workstream against the 17 Dec plan.", "link": "", "wkEnd": 2}, {"t": "Update SOW page and milestone dates to the Sep to Dec plan", "o": "Richard", "s": "Pending", "d": "", "week": 1, "notes": "Kickoff action: the SOW page and PMO milestones still show the August dates and the EU region.", "link": "", "call": "2026-09-21"}, {"t": "Technical session with ELMO engineering (Thu 24 Sep, ELMO office)", "o": "Chris", "s": "Pending", "d": "", "week": 1, "notes": "Greg attends with Ramesh from ELMO engineering: data sync, audiences and company attributes, Jira, Messenger auth.", "link": "", "call": "2026-09-21"}, {"t": "AU workspace verification: access, API credentials, separation", "o": "Greg", "s": "Pending", "d": "", "week": 1, "notes": "Replaces the SOW EU verification line: the EU instance is discarded, no migration needed. Richard accepted access 18 Sep (app.au.intercom.com); Greg added. Confirm separation from Breathe HR and Rotageek.", "link": ""}, {"t": "Weekly working session and status report to ELMO and Intercom PS", "o": "Chris", "s": "Pending", "d": "", "week": 1, "notes": "SOW governance line: weekly session with Michael Ho, milestone exit reviews, risk and dependency register, weekly status to ELMO and Intercom PS. Chris plans a couple of days a week, some in the ELMO office for workshops.", "link": "", "wkEnd": 11}], "client": [{"t": "Give Sabel admin access to Intercom", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Grant the Sabel team admin access to your Intercom workspace so we can configure on your behalf.", "notes": "Accepted 18 Sep; Greg confirmed added on the kickoff call.", "link": "https://app.au.intercom.com/a/apps/_/settings/workspace/teammates"}, {"t": "Give us Zendesk admin and API access", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Give us admin and API token access to Zendesk so we can map tickets, contacts and fields and extract the knowledge base.", "notes": "Kickoff action 11, owner Liam.", "link": "", "call": "2026-09-21", "log": [{"by": "Chris", "at": 1790119036058, "txt": "https://snappass.elmotalent.com.au/snappass86c98d26c55c492aaaec10b988f7102e~pUcqmAnC-Jtw1ikZQUdqZ8jiFkTrLO0ZdAvbKrNJmPQ%3D"}], "doneAt": "2026-09-24"}, {"t": "Set up a shared Slack channel with Sabel", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Your IT team sets up the shared project channel and invites Chris, Richard, Greg and Nikki.", "notes": "Kickoff action 7: ELMO IT to create it and add Sabel.", "link": "", "call": "2026-09-21", "doneAt": "2026-09-23", "log": [{"by": "Michael Ho", "at": 1790651830190, "txt": "Created: #sabel_elmo_intercom"}]}, {"t": "Confirm your project team and AI knowledge manager", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Confirm your project manager, technical contacts and the knowledge and AI manager who will own Fin after handover.", "notes": "", "link": "", "log": [{"by": "Chris", "at": 1790208937971, "txt": "This will be Alison"}], "doneAt": "2026-09-28", "decision": {"seeded": true, "v": "Allison Freeman is the AI knowledge manager. Team: Michael Ho (project lead), Liam Murphy (support manager), Peter Darley", "by": "ELMO", "at": "2026-09-24", "src": "https://app.fireflies.ai/view/01M38BDYAWVYPWZBEXX0NSAP38?t=705", "srcLabel": "Call 24 Sep (Fireflies)"}}, {"t": "Send brand assets for ELMO and ELMO UK", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Send logo files, sender names and reply addresses for ELMO and the UK brand so we can brand the workspace and Messenger.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1790565909021, "txt": "Liam already provided: https://drive.google.com/drive/folders/166jQLFPKgu9C2cFCTKKSLiEPcC3pVvYr?usp=sharing"}], "doneAt": "2026-09-28"}, {"t": "Sign off the agreed scope and build list", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "tip": "Review the locked scope, backlog and exit tests so both teams work to the same plan to 17 December.", "notes": "", "link": "", "kind": "milestone", "doneAt": "2026-10-07"}, {"t": "Complete the readiness check", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "form": "readiness", "tip": "One form that covers: access to Intercom and Zendesk, your email addresses and how emails should look, how you recognise customers, your team and seats, your help articles, the systems Fin needs, what Fin may say, and your hours and reply times. Each section ticks off here as you finish it.", "notes": "", "link": "https://sabel-intercom.github.io/Intake-forms/SabelReadinessCheck.html?client=elmo&name=ELMO%20Software", "sub": [{"t": "Access and getting set up", "s": "Complete"}, {"t": "Email and web addresses", "s": "Complete"}, {"t": "How you recognise your customers", "s": "Complete"}, {"t": "Your team and seats", "s": "Complete"}, {"t": "Moving your existing conversations", "s": "Complete"}, {"t": "Your help content", "s": "Complete"}, {"t": "Other systems Fin needs to reach", "s": "Complete"}, {"t": "What Fin is allowed to say", "s": "Pending"}, {"t": "Your business", "s": "Complete"}], "formSync": "2026-10-07T22:07:58.248Z|2026-10-07T03:26:04.228Z", "doneAt": "2026-10-07"}, {"t": "Complete the migration details form", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "form": "migration", "tip": "Tells us how your Zendesk tickets move across: how much history, access, cutover timing, tags, inboxes, statuses, ticket types, fields, agents, contacts, companies and who signs off the sample. Each section ticks off here as you finish it.", "notes": "", "link": "https://sabel-intercom.github.io/Intake-forms/SabelMigrationIntake_ELMO.html", "sub": [{"t": "Project details", "s": "Complete"}, {"t": "What we have agreed so far", "s": "Complete"}, {"t": "History, brands and channels", "s": "Complete"}, {"t": "Access and readiness", "s": "Complete"}, {"t": "Migration and cutover settings", "s": "Complete"}, {"t": "Tags", "s": "Complete"}, {"t": "Filter (timeframe)", "s": "Complete"}, {"t": "Team inbox mappings", "s": "Complete"}, {"t": "Ticket status mapping", "s": "Complete"}, {"t": "Ticket type mapping", "s": "Complete"}, {"t": "Custom attributes", "s": "Complete"}, {"t": "Agent settings (agent mapping)", "s": "Complete"}, {"t": "Contact settings", "s": "Complete"}, {"t": "Company settings", "s": "Complete"}, {"t": "Sample review and sign-off", "s": "Complete"}], "formSync": "2026-10-07T02:38:53.628Z|2026-10-07T02:38:53.628Z", "doneAt": "2026-10-07"}]}, "identity": {"sabel": [{"t": "Messenger for logged-in users", "desc": "Chat inside ELMO for authenticated users only, bridging to your own chat interface later", "lead": "Chris", "o": "Chris", "s": "Pending", "d": "", "week": 4, "notes": "", "link": "https://developers.intercom.com/installing-intercom/web/installation", "phases": [{"k": "build", "l": "Configure", "o": "Chris", "week": 4, "sub": [{"t": "Set up the Messenger for logged-in users only", "s": "Pending", "o": "Chris", "tip": "", "call": "2026-09-21"}], "tip": "Look, behaviour and who can see it", "note": "Kickoff action 5: the chatbot must only serve authorised users. Messenger bridges to ELMO's own chat interface, which is not in this SOW."}, {"k": "install", "l": "Install", "o": "ELMO", "week": 5, "sub": [{"t": "Add the Messenger code to your app", "s": "Pending", "o": "ELMO", "tip": "Your developer adds the Intercom code snippet so the Messenger can appear. The guide has the exact code, and we can join a call if needed.", "link": "https://developers.intercom.com/installing-intercom/web/installation"}, {"t": "Secure the Messenger for logged-in customers (JWT)", "s": "Pending", "o": "ELMO", "tip": "Your developer sets up JSON Web Tokens so Intercom can verify each logged-in user. This keeps Fin to authorised users only and must be live before launch.", "link": "https://developers.intercom.com/installing-intercom/web/identity-verification"}, {"t": "Send customer details into the Messenger", "s": "Pending", "o": "ELMO", "tip": "Your developer sends user details (name, email, user ID, company and product stack) into the Messenger so conversations arrive with context and route correctly.", "link": "https://developers.intercom.com/installing-intercom/web/attributes-objects"}], "tip": "Your developers add the snippet, identity verification and user attributes"}, {"k": "validate", "l": "Test together", "o": "Chris", "week": 6, "sub": [{"t": "Messenger tested with real logged-in users", "s": "Pending", "o": "Chris", "tip": "Only verified users reach the Messenger and Fin"}], "tip": "We check only verified users reach the Messenger and Fin"}], "gate": true}, {"t": "Review contact duplication risk and merge approach", "o": "Greg", "s": "Pending", "d": "", "week": 1, "notes": "Kickoff action 4 (flagged for Richard/Greg). Richard asked 21 Sep whether the contact merge API now covers user into user.", "link": "", "wkEnd": 2, "call": "2026-09-21"}, {"t": "Audience design: reusable segments by product stack, brand and region", "o": "Chris", "s": "Pending", "d": "", "week": 2, "wkEnd": 3, "notes": "Richard step 2. Built from the data points agreed in the identity session; every later rule (content, Fin, routing) applies by audience.", "link": ""}], "client": [{"t": "Name the ELMO engineer who owns the data sync", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Name the ELMO engineer who owns the data sync and company attributes, with sprint capacity confirmed.", "notes": "", "link": "", "log": [{"by": "Chris", "at": 1790209555799, "txt": "TBC"}, {"by": "Michael Ho", "at": 1790556332094, "txt": "Carl Schutte - PM who looks after Data - carl.schutte@elmosoftware.com.au", "edited": 1790649485314}], "doneAt": "2026-09-28", "decision": {"seeded": true, "v": "Carl Schutte, the PM who looks after data (carl.schutte@elmosoftware.com.au)", "by": "ELMO (Michael Ho)", "at": "2026-09-28", "src": "", "srcLabel": "Tracker note"}}, {"t": "Show us how your product modules map to customer data", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "tip": "Share how your product modules and customer data map together so routing and attributes use the right fields.", "notes": "", "link": "", "doneAt": "2026-10-07"}, {"t": "Build the company and contact data sync", "o": "ELMO", "s": "In Progress", "d": "", "week": 3, "tip": "Your engineering team builds the sync that keeps companies and contacts current in Intercom. Backfill first, then scheduled updates.", "notes": "", "link": "", "wkEnd": 6}, {"t": "Agree your audience list", "o": "ELMO", "s": "Complete", "d": "", "week": 3, "notes": "", "link": "", "tip": "Confirm the customer groups that need different answers or routing, for example by product stack, brand or region.", "log": [{"by": "Michael Ho", "at": 1790812823765, "txt": "Audience list created and mapped to respective articles."}], "doneAt": "2026-10-01", "decision": {"seeded": true, "v": "Audiences built from company attributes (each module and integration), plus a HAM Restriction attribute; mapped to articles", "by": "ELMO (Michael Ho)", "at": "2026-10-01", "src": "https://scss-group.slack.com/archives/C0C42LUVB9N/p1790823599612719?thread_ts=1790822174.266619&cid=C0C42LUVB9N", "srcLabel": "Slack #sabel_elmo_intercom"}}]}, "content": {"sabel": [{"t": "Zendesk knowledge base migration to the Help Centre", "o": "Chris", "s": "Pending", "d": "", "week": 2, "notes": "Kickoff action 8: coordinate the sample Zendesk content migration first.", "link": "", "wkEnd": 4, "sub": [{"t": "Sample content migration", "s": "Pending"}, {"t": "Review your help articles for gaps and duplicates", "s": "Pending"}, {"t": "Full import with collections, images and links", "s": "Pending"}, {"t": "Rotageek articles re-worded for ELMO", "s": "Pending"}, {"t": "Reorganise your help articles so Fin can use them", "s": "Pending"}], "call": "2026-09-21"}, {"t": "Academy connected via API", "o": "Greg", "s": "Pending", "d": "", "week": 4, "notes": "", "link": "", "wkEnd": 6}, {"t": "Slack product channel distillation into draft internal content", "o": "Greg", "s": "Pending", "d": "", "week": 5, "notes": "Offline analysis only. Slack is never a live customer-facing source; drafts go to the knowledge manager for review.", "link": "", "wkEnd": 7}, {"t": "Partner help centre ingestion: options, then build", "o": "Greg", "s": "Pending", "d": "", "week": 6, "notes": "Four to five partner products. Replaces manual re-creation of partner content.", "link": "", "wkEnd": 9}], "client": [{"t": "Name who will look after the Help Centre", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "tip": "Confirm your knowledge and AI manager as the Help Centre owner so they can review content as we load it.", "notes": "", "link": "", "doneAt": "2026-09-24"}, {"t": "Tell us which website pages Fin should read", "o": "ELMO", "s": "Complete", "d": "", "week": 3, "tip": "Tell us which website pages Fin should and should not learn from. We will walk you through the selection.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1791338128765, "txt": "https://elmosoftware.com.au/about/data-security\nhttps://elmosoftware.com.au/service-agreement"}], "doneAt": "2026-10-07"}, {"t": "Give us API access to the Academy", "o": "ELMO", "s": "Complete", "d": "", "week": 3, "tip": "Provide API access to the Academy so gated training content can be connected without making it public.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1791338347141, "txt": "Provided in: https://drive.google.com/drive/folders/13fmkG52gTH4tPCHJjd2QIkr7jp85amEF"}], "doneAt": "2026-10-07"}, {"t": "Approve the Help Centre content", "o": "ELMO", "s": "Dependency", "d": "", "week": 5, "tip": "Your knowledge manager reviews the migrated Help Centre ahead of the Fin pilot.", "notes": "", "link": "", "kind": "milestone"}, {"t": "List the Slack channels we may review", "o": "ELMO", "s": "Dependency", "d": "", "week": 4, "tip": "List the Slack product channels we may analyse offline to draft internal knowledge.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1791344812678, "txt": "#product_remunereation\n#product_analytics\n#product_api integrations\n#product_hrcore\n#product_learning\n#product_onboarding\n#product_performance\n#product_platform\n#product_recruitment\n#product_payroll_integrations"}]}, {"t": "Give us access to partner help centres", "o": "ELMO", "s": "Dependency", "d": "", "week": 5, "tip": "Give us access to each partner help centre and confirm how each partner's content should be hosted.", "notes": "", "link": ""}, {"t": "Review and approve drafted articles", "o": "ELMO", "s": "Dependency", "d": "", "week": 8, "tip": "Your knowledge manager reviews the articles we draft from Slack and ticket history before anything reaches customers.", "notes": "", "link": "", "wkEnd": 10}, {"t": "Website added as a crawled content source", "o": "ELMO", "s": "Complete", "d": "", "week": 3, "notes": "Walk the ELMO team through page include and exclude selection. Re-checked every 7 days.", "link": "", "tip": "", "log": [{"by": "Michael Ho", "at": 1791340420690, "txt": "https://elmosoftware.com.au/about/data-security\nhttps://elmosoftware.com.au/service-agreement"}], "doneAt": "2026-10-07"}]}, "finbrain": {"sabel": [{"t": "Fin internal pilot", "desc": "Your support team tries Fin before any customer sees it", "lead": "Chris", "o": "ELMO", "s": "Dependency", "d": "", "week": 2, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Provide", "o": "ELMO", "week": 2, "sub": [{"t": "List topics Fin must pass to your team", "s": "Complete", "o": "ELMO", "tip": "List the conversation types Fin must hand straight to your team, such as cancellations, payroll incidents and complaints.", "call": "2026-09-21"}, {"t": "Send your tone of voice and a few example replies", "s": "Pending", "o": "ELMO", "tip": "Share tone-of-voice guidance and a few example responses you are happy with so Fin mirrors your brand language."}], "tip": "What Fin must never answer, and how ELMO sounds", "wkEnd": 3}, {"k": "build", "l": "Build", "o": "Chris", "week": 4, "sub": [{"t": "Set when Fin passes a customer to your team, and topics it must avoid", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Write Fin's guidance from your tone of voice and example replies", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Handover rules and brand voice", "note": "Cancellations, contractual disputes, payroll incidents and complaints go straight to the team."}, {"k": "validate", "l": "Pilot", "o": "ELMO", "week": 5, "sub": [{"t": "Fin internal pilot for the support team", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Tell us where Fin got answers wrong in the pilot", "s": "Pending", "o": "ELMO", "tip": "Your support team uses Fin internally and tells us where answers are wrong, thin or missing."}], "tip": "Support uses Fin internally and flags weak answers", "wkEnd": 6}, {"k": "approve", "l": "Go / no-go", "o": "ELMO", "week": 6, "sub": [{"t": "Decide if Fin is ready for customers", "s": "Pending", "o": "ELMO", "tip": "Agree the pilot results are good enough to take Fin into UAT."}], "tip": "Agree the pilot results are good enough to take Fin into UAT.", "gate": true}], "gate": true, "wkEnd": 3}, {"t": "Replicate Zendesk fields, forms and tag taxonomy", "o": "Chris", "s": "Pending", "d": "", "week": 2, "notes": "Kickoff action 3: guidance on tag migration and taxonomy. Chris plans to use the Zendesk data to build Fin attributes from tickets and tags.", "link": "", "wkEnd": 4, "sub": [{"t": "Field map document", "s": "Pending"}, {"t": "Tag taxonomy and guidance", "s": "Pending"}, {"t": "Forms to ticket types and conversation data", "s": "Pending"}, {"t": "Retirement list applied", "s": "Pending"}], "call": "2026-09-21"}, {"t": "Build Fin attributes from Zendesk ticket data and tags", "o": "Chris", "s": "Pending", "d": "", "week": 3, "notes": "Chris, 21 Sep: use the Zendesk data to build Fin attributes from ticket data and tags.", "link": "", "wkEnd": 4}, {"t": "Test Fin with real customer questions and adjust", "o": "Chris", "s": "Pending", "d": "", "week": 5, "notes": "", "link": "", "wkEnd": 9, "sub": [{"t": "Preview", "s": "Pending"}, {"t": "Batch test on real questions", "s": "Pending"}]}, {"t": "Glean / Elmo Assist replacement", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "Not an integration: Fin replaces Elmo Assist for support. Held until after go-live on the 21 Sep kickoff.", "link": "", "parked": true, "est": "TBC"}], "client": [{"t": "Send your Zendesk tags and how you use them", "o": "ELMO", "s": "Dependency", "d": "", "week": 1, "tip": "Export your current tags and explain how the team uses them so we can rebuild the taxonomy.", "notes": "", "link": "", "log": [{"by": "Chris", "at": 1790209641816, "txt": "Will move with migration but will need to be tagged the same as ZD when migrated into Intercom"}]}, {"t": "Tell us which Zendesk fields, forms and tags to drop", "o": "ELMO", "s": "Dependency", "d": "", "week": 2, "tip": "Tell us which Zendesk fields, forms or tags should not come across so we only rebuild what you still use.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1791409615979, "txt": "Forms\n- General Administration V2\n- Learning / Course Builder (want this split into Learning and Course Builder as individual ticket types)\n- Recruitment\n- Onboarding\n- Documents\n- HR Core\n- Integrations\n- Payroll Metrics\n- Employment Hero Payroll\n- Definitiv Payroll\n- Remuneration\n- Succession\n- PeoplePulse\n- HROnboard\n- ELMO Survey\n- Billing and Accounts"}]}]}, "workflows": {"sabel": [{"t": "Email sending from your own domain", "desc": "So replies to customers come from ELMO addresses, not Intercom ones", "lead": "Chris", "o": "Chris", "s": "In Progress", "d": "", "week": 2, "notes": "", "link": "https://www.intercom.com/help/en/articles/9744849-connect-your-email-support-channel", "phases": [{"k": "build", "l": "Records issued", "o": "Chris", "week": 2, "sub": [{"t": "We send you the three email records", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "We send you the exact records to add"}, {"k": "provide", "l": "Add records", "o": "ELMO", "week": 2, "sub": [{"t": "Add three email records to your domain (DKIM, return-path, DMARC)", "s": "Pending", "o": "ELMO", "tip": "Two CNAME records and one DMARC record that let Intercom send email as ELMO, so it does not land in spam. We send the exact values; whoever manages your domain adds them.", "link": "https://www.intercom.com/help/en/articles/182-sending-email-from-your-own-address"}], "tip": "Two CNAME records and one DMARC record, added by your IT or domain admin", "gate": true}, {"k": "validate", "l": "Verify", "o": "Chris", "week": 3, "sub": [{"t": "Check Intercom can send email from your domain", "s": "Pending", "o": "Chris", "tip": "We confirm Intercom can send as ELMO"}], "tip": "We confirm Intercom can send email as ELMO"}], "gate": true}, {"t": "Set up your Intercom account and branding", "o": "Chris", "s": "Pending", "d": "", "week": 1, "notes": "", "link": "", "wkEnd": 2}, {"t": "Build team inboxes per product stack (HRO, Payroll, HR)", "o": "Chris", "s": "Pending", "d": "", "week": 2, "notes": "", "link": "", "wkEnd": 3, "sub": [{"t": "HRO inbox and team", "s": "Pending"}, {"t": "Payroll inbox and team", "s": "Pending"}, {"t": "HR inbox and team", "s": "Pending"}, {"t": "Seats and roles", "s": "Pending"}]}, {"t": "Set rules that send conversations to the right team, including out of hours and overflow", "o": "Chris", "s": "Pending", "d": "", "week": 3, "notes": "Kickoff action 1: start the foundational build for workflows.", "link": "", "wkEnd": 5, "call": "2026-09-21"}, {"t": "Set up SLA rules and office hours per product stack and brand, plus reporting views", "o": "Chris", "s": "Pending", "d": "", "week": 4, "notes": "High 0-4h, Medium 24h, Low 3 working days.", "link": "", "wkEnd": 5}, {"t": "ELMO UK brand replication", "o": "Chris", "s": "Pending", "d": "", "week": 3, "notes": "", "link": ""}, {"t": "Messenger-first intake: forms into conversations", "o": "Chris", "s": "Pending", "d": "", "week": 6, "notes": "Forms move into the Messenger; any page-hosted form posts into Fin via the API. Pre-conversation data capture replaces form fields.", "link": "", "wkEnd": 7}, {"t": "CSAT, NPS and CX score configuration and reporting", "o": "Chris", "s": "Pending", "d": "", "week": 7, "notes": "", "link": ""}], "client": [{"t": "Send the list of teammates and their roles", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Send the list of teammates, their roles and who reports to whom so we can set up seats, teams and permissions.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1790564374092, "txt": "https://docs.google.com/spreadsheets/d/1olt-Q_9UA60qmsnIblbS-YrWaorOkKAyjb2UDF6wEBc/edit?usp=sharing"}, {"by": "Michael Ho", "at": 1790564409176, "txt": "Will need to include additional access for Product in the future. TBD", "edited": 1790564421483}], "doneAt": "2026-09-28"}, {"t": "Send business hours and holidays for AU, NZ and UK", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Share business hours for AU, NZ and UK plus public holidays and closures so we can set operating hours.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1790564240409, "txt": "Monday \u2013 Friday 6:30 AM to 7:30 PM AEST (excluding NSW and National public holidays)"}], "doneAt": "2026-09-28", "decision": {"seeded": true, "v": "AU: Mon to Fri 6:30am to 7:30pm AEST, excluding NSW and national public holidays. NZ and UK still to come", "by": "ELMO (Liam Murphy, Michael Ho)", "at": "2026-09-24", "src": "https://scss-group.slack.com/archives/C0C42LUVB9N/p1790211994242489", "srcLabel": "Slack #sabel_elmo_intercom"}}, {"t": "Confirm SLA targets per product", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "tip": "Confirm the SLA targets per stack and per brand where they differ from the standard tiers.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1790564323517, "txt": "Not applicable - should be the same across the board."}], "doneAt": "2026-09-28", "decision": {"seeded": true, "v": "One set of SLA targets for every product (no per-product targets)", "by": "ELMO (Michael Ho)", "at": "2026-09-28", "src": "", "srcLabel": "Tracker note"}}]}, "integrations": {"sabel": [{"t": "Jira and Slack connected", "desc": "Escalate to engineering and notify teams without leaving the inbox", "lead": "Chris", "o": "ELMO", "s": "Dependency", "d": "", "week": 2, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Access", "o": "ELMO", "week": 2, "sub": [{"t": "Give us Jira access and escalation rules", "s": "Pending", "o": "ELMO", "tip": "Give us access to the Jira projects and confirm which issues escalate where for each product stack."}, {"t": "Approve the Intercom app in Slack", "s": "Pending", "o": "ELMO", "tip": "Your Slack workspace admin approves the Intercom app so notifications can flow into your channels."}], "tip": "Jira projects, escalation rules and Slack admin approval", "wkEnd": 3}, {"k": "build", "l": "Build", "o": "Chris", "week": 3, "sub": [{"t": "Jira for Tickets: issue mapping, field sync and escalation workflow", "s": "Pending", "o": "Chris", "tip": "", "call": "2026-09-21"}, {"t": "Slack two-way app: notification routing and channel mapping", "s": "Pending", "o": "Chris", "tip": "", "call": "2026-09-21"}], "tip": "Issue mapping, field sync and channel routing", "wkEnd": 5}, {"k": "validate", "l": "Test", "o": "Greg", "week": 6, "sub": [{"t": "Test integration round trips and data sync", "s": "Pending", "o": "Greg", "tip": ""}], "tip": "Round trips checked end to end"}, {"k": "approve", "l": "Sign-off", "o": "ELMO", "week": 6, "sub": [{"t": "Sign off Jira and Slack", "s": "Pending", "o": "ELMO", "tip": "Confirm the Jira and Slack round trips work for your support and engineering teams."}], "tip": "Confirm the Jira and Slack round trips work for your support and engineering teams.", "gate": true}], "gate": true, "wkEnd": 3}, {"t": "Specify escalation routing and field mapping with ELMO engineering", "o": "Greg", "s": "Pending", "d": "", "week": 2, "notes": "Follows the 24 Sep technical session.", "link": ""}, {"t": "Salesforce two-way app", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "SOW phase 2, pending ELMO data cleanup. Syncs from install date forward only, no backfill.", "link": "", "parked": true, "est": "TBC"}, {"t": "ELMO custom chat interface calling Fin via API", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "Running in parallel at ELMO; not costed in the SOW. The Messenger bridges the December launch.", "link": "", "parked": true, "est": "TBC"}], "client": []}, "migration": {"sabel": [{"t": "Zendesk ticket history into Intercom", "desc": "About 200,000 tickets, so agents can see past conversations after go-live", "lead": "Richard", "o": "ELMO", "s": "Dependency", "d": "", "week": 2, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Decide", "o": "ELMO", "week": 2, "sub": [{"t": "Decide how much history to keep for former customers", "s": "Pending", "o": "ELMO", "tip": "Confirm how we tell active from former customers and whether former customers keep 4 or 5 years of history.", "decision": {"seeded": true, "v": "3 years of ticket history (said for all tickets, not only former customers)", "by": "ELMO (Michael Ho)", "at": "2026-10-01", "src": "https://scss-group.slack.com/archives/C0C42LUVB9N/p1790825354372409?thread_ts=1790823675.963439&cid=C0C42LUVB9N", "srcLabel": "Slack #sabel_elmo_intercom"}}, {"t": "Name who will check the migrated tickets", "s": "Complete", "o": "ELMO", "tip": "Name the person who will check the sample migration and sign off the final dataset.", "decision": {"v": "Michael Ho", "by": "ELMO", "at": "2026-10-07", "src": "https://sabel-intercom.github.io/Intake-forms/SabelReadinessCheck.html?client=elmo&name=ELMO%20Software", "srcLabel": "", "hist": []}, "dec": true}], "tip": "Who counts as a former customer, and who checks our work", "wkEnd": 3}, {"k": "build", "l": "Map", "o": "Richard", "week": 3, "sub": [{"t": "Map tickets, contacts, organisations, statuses, tags and fields", "s": "Pending", "o": "Richard", "tip": ""}], "tip": "How each Zendesk field lands in Intercom", "wkEnd": 4, "note": "Migr8Now. About 200,000 tickets. Active customers full history, former customers per the agreed cutoff."}, {"k": "approve", "l": "Approve map", "o": "ELMO", "week": 4, "sub": [{"t": "Approve how tickets will move across", "s": "Pending", "o": "ELMO", "tip": "Review and sign off the migration mapping before we run the full migration."}], "tip": "Review and sign off the migration mapping before we run the full migration.", "gate": true}, {"k": "build", "l": "Sample, then full run", "o": "Richard", "week": 5, "sub": [{"t": "Run sample migration batch, validate vs source records", "s": "Pending", "o": "Richard", "tip": ""}, {"t": "Execute full historical migration", "s": "Pending", "o": "Richard", "tip": ""}, {"t": "Sample-based QA and validation report", "s": "Pending", "o": "Richard", "tip": ""}], "tip": "A sample batch first, then the full load and a validation report", "wkEnd": 9}, {"k": "signoff", "l": "Sign-off", "o": "ELMO", "week": 10, "sub": [{"t": "Sign off the migrated ticket history", "s": "Pending", "o": "ELMO", "tip": "Review the validation report and approve the migrated history before Zendesk is stood down."}], "tip": "Review the validation report and approve the migrated history before Zendesk is stood down.", "gate": true}], "gate": true, "wkEnd": 3, "log": [{"by": "ELMO", "at": 1791351809472, "txt": "Decision (Name who will check the migrated tickets): Michael Ho"}, {"by": "ELMO", "at": 1791351831364, "txt": "Decision (Name who will check the migrated tickets): Michael Ho"}]}, {"t": "Offline knowledge extraction from ticket history", "o": "Richard", "s": "Pending", "d": "", "week": 7, "notes": "Historical and former-customer tickets are mined into draft articles, never used as Fin training data.", "link": "", "wkEnd": 9}], "client": [{"t": "Agree when Zendesk stops taking new tickets", "o": "ELMO", "s": "Dependency", "d": "", "week": 8, "tip": "Agree when Zendesk stops taking new tickets and the window for the final delta migration.", "notes": "", "link": ""}]}, "uat": {"sabel": [{"t": "Test every channel, routing rule, SLA, Fin and the integrations from start to finish", "o": "Chris", "s": "Pending", "d": "", "week": 10, "notes": "UAT week, w/c 23 Nov.", "link": ""}, {"t": "Run Fin through test questions and fix what fails", "o": "Chris", "s": "Pending", "d": "", "week": 10, "notes": "", "link": "", "wkEnd": 11}, {"t": "Training per cohort", "o": "Chris", "s": "Pending", "d": "", "week": 10, "notes": "", "link": "", "wkEnd": 11, "sub": [{"t": "Agents: inbox, Copilot and escalations", "s": "Pending"}, {"t": "Team leads: reporting, SLAs and workflows", "s": "Pending"}, {"t": "Knowledge manager deep dive: sources, Fin tuning, article lifecycle", "s": "Pending"}]}, {"t": "Complete our go-live readiness check", "o": "Richard", "s": "Pending", "d": "", "week": 11, "notes": "", "link": ""}], "client": [{"t": "Send who needs training and when", "o": "ELMO", "s": "Dependency", "d": "", "week": 8, "tip": "Send the agent, team lead and knowledge manager lists and the times that suit each group.", "notes": "", "link": ""}, {"t": "Name testers for HRO, Payroll and HR", "o": "ELMO", "s": "Dependency", "d": "", "week": 9, "tip": "Name testers for HRO, Payroll and HR who can run end-to-end tests in the week of 23 November.", "notes": "", "link": ""}, {"t": "Agree what must pass before go-live", "o": "ELMO", "s": "Dependency", "d": "", "week": 9, "tip": "Agree what must pass before go-live and who makes the final call.", "notes": "", "link": ""}, {"t": "Give the final go-ahead for go-live", "o": "ELMO", "s": "Dependency", "d": "", "week": 11, "tip": "Provide written sign-off that the platform is ready before we switch live traffic on 17 December.", "notes": "", "link": "", "gate": true, "kind": "milestone"}]}, "golive": {"sabel": [{"t": "Move tickets that arrived during the build", "o": "Richard", "s": "Pending", "d": "", "week": 13, "notes": "Runs about 2 hours before the go-live meeting.", "link": "", "dayOff": -120}, {"t": "Run the go-live call", "o": "Richard", "s": "Pending", "d": "", "week": 13, "notes": "Thu 17 Dec. The go-live moment. Delta migration completes about 2 hours before this call.", "link": "", "dayOff": 0}, {"t": "Stop new tickets arriving in Zendesk", "o": "Greg", "s": "Pending", "d": "", "week": 13, "notes": "", "link": "", "dayOff": 0}, {"t": "Switch Intercom on for email, forms and the Messenger", "o": "Chris", "s": "Pending", "d": "", "week": 13, "notes": "", "link": "", "dayOff": 0}, {"t": "Switch Fin on for customers", "o": "Chris", "s": "Pending", "d": "", "week": 13, "notes": "", "link": "", "dayOff": 30}, {"t": "Stay on hand through launch day", "o": "Chris", "s": "Pending", "d": "", "week": 13, "notes": "", "link": "", "dayOff": 60}], "client": [{"t": "Tell your team about go-live", "o": "ELMO", "s": "Dependency", "d": "", "week": 13, "tip": "Let your wider team know Intercom goes live on 17 December so agents are ready before the first customer conversation.", "notes": ""}]}, "post": {"sabel": [{"t": "Hypercare: daily monitoring and PM check-ins", "o": "Chris", "s": "Pending", "d": "", "week": 13, "notes": "Kickoff action 9. Covers the late Nov to Feb quiet period.", "link": "", "wkEnd": 15, "call": "2026-09-21"}, {"t": "Review how Fin and your team did in week 1", "o": "Chris", "s": "Pending", "d": "", "week": 14, "notes": "", "link": ""}, {"t": "Improve Fin where it struggled", "o": "Chris", "s": "Pending", "d": "", "week": 15, "notes": "", "link": ""}, {"t": "Fix the remaining small issues", "o": "Chris", "s": "Pending", "d": "", "week": 14, "notes": "", "link": "", "wkEnd": 15}, {"t": "Confluence as an internal source for Copilot", "o": "Chris", "s": "Pending", "d": "", "week": 14, "notes": "In the SOW. Deferred to after go-live on the 21 Sep kickoff; pull forward if time allows.", "link": ""}, {"t": "Partner routing escalation flow", "o": "Chris", "s": "Pending", "d": "", "week": 14, "notes": "In the SOW. Deferred to after go-live on the 21 Sep kickoff; pull forward if time allows.", "link": "", "wkEnd": 15}, {"t": "ChurnZero metrics sync: scope and build", "o": "Greg", "s": "Pending", "d": "", "week": 14, "notes": "In the SOW. Deferred to after go-live on the 21 Sep kickoff. Native sync is one way only; ELMO needs conversation volume and CSAT per account in ChurnZero.", "link": "", "wkEnd": 17}, {"t": "Hand over documents to your knowledge manager and close the Slack channel", "o": "Richard", "s": "Pending", "d": "", "week": 17, "notes": "", "link": ""}], "client": [{"t": "Share agent feedback after week 1", "o": "ELMO", "s": "Dependency", "d": "", "week": 14, "tip": "After the first week live, share agent feedback to guide the Fin tuning pass.", "notes": "", "link": ""}, {"t": "Give us Confluence access and the spaces to include", "o": "ELMO", "s": "Dependency", "d": "", "week": 14, "tip": "Give us Confluence access and the spaces agents should be able to search from the inbox.", "notes": "", "link": ""}, {"t": "Send ChurnZero metrics and API access", "o": "ELMO", "s": "Dependency", "d": "", "week": 14, "tip": "Confirm the exact metrics your CSM team uses in ChurnZero and provide API access.", "notes": "", "link": ""}]}};  // [CLIENT] injected from the Python T_DATA block above
+const T={"setup": {"sabel": [{"t": "Run the kick-off call", "o": "Chris", "s": "Complete", "d": "", "week": 1, "notes": "Held Mon 21 Sep (Fireflies: Sabel/Elmo kick off and prioritisation). Go-live set for Thu 17 Dec; ChurnZero, partner routing, Confluence, Salesforce and Glean held until after go-live.", "link": ""}, {"t": "Discovery and scope lock: build backlog and acceptance criteria", "o": "Chris", "s": "Complete", "d": "", "week": 1, "notes": "SOW discovery line. Lock the build backlog and exit tests per workstream against the 17 Dec plan.", "link": "", "wkEnd": 2, "doneAt": "2026-10-09"}, {"t": "Update SOW page and milestone dates to the Sep to Dec plan", "o": "Richard", "s": "Complete", "d": "", "week": 1, "notes": "Kickoff action: the SOW page and PMO milestones still show the August dates and the EU region.", "link": "", "call": "2026-09-21", "doneAt": "2026-10-09"}, {"t": "Technical session with ELMO engineering (Thu 24 Sep, ELMO office)", "o": "Chris", "s": "Complete", "d": "", "week": 1, "notes": "Greg attends with Ramesh from ELMO engineering: data sync, audiences and company attributes, Jira, Messenger auth.", "link": "", "call": "2026-09-21", "doneAt": "2026-10-09"}, {"t": "AU workspace verification: access, API credentials, separation", "o": "Greg", "s": "In Progress", "d": "", "week": 1, "notes": "Replaces the SOW EU verification line: the EU instance is discarded, no migration needed. Richard accepted access 18 Sep (app.au.intercom.com); Greg added. Confirm separation from Breathe HR and Rotageek.", "link": ""}, {"t": "Weekly working session and status report to ELMO and Intercom PS", "o": "Chris", "s": "In Progress", "d": "", "week": 1, "notes": "SOW governance line: weekly session with Michael Ho, milestone exit reviews, risk and dependency register, weekly status to ELMO and Intercom PS. Chris plans a couple of days a week, some in the ELMO office for workshops.", "link": "", "wkEnd": 11}], "client": [{"t": "Give Sabel admin access to Intercom", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Grant the Sabel team admin access to your Intercom workspace so we can configure on your behalf.", "notes": "Accepted 18 Sep; Greg confirmed added on the kickoff call.", "link": "https://app.au.intercom.com/a/apps/_/settings/workspace/teammates"}, {"t": "Give us Zendesk admin and API access", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Give us admin and API token access to Zendesk so we can map tickets, contacts and fields and extract the knowledge base.", "notes": "Kickoff action 11, owner Liam.", "link": "", "call": "2026-09-21", "log": [{"by": "Chris", "at": 1790119036058, "txt": "https://snappass.elmotalent.com.au/snappass86c98d26c55c492aaaec10b988f7102e~pUcqmAnC-Jtw1ikZQUdqZ8jiFkTrLO0ZdAvbKrNJmPQ%3D"}], "doneAt": "2026-09-24"}, {"t": "Set up a shared Slack channel with Sabel", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Your IT team sets up the shared project channel and invites Chris, Richard, Greg and Nikki.", "notes": "Kickoff action 7: ELMO IT to create it and add Sabel.", "link": "", "call": "2026-09-21", "doneAt": "2026-09-23", "log": [{"by": "Michael Ho", "at": 1790651830190, "txt": "Created: #sabel_elmo_intercom"}]}, {"t": "Confirm your project team and AI knowledge manager", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Confirm your project manager, technical contacts and the knowledge and AI manager who will own Fin after handover.", "notes": "", "link": "", "log": [{"by": "Chris", "at": 1790208937971, "txt": "This will be Alison"}], "doneAt": "2026-09-28", "decision": {"seeded": true, "v": "Allison Freeman is the AI knowledge manager. Team: Michael Ho (project lead), Liam Murphy (support manager), Peter Darley", "by": "ELMO", "at": "2026-09-24", "src": "https://app.fireflies.ai/view/01M38BDYAWVYPWZBEXX0NSAP38?t=705", "srcLabel": "Call 24 Sep (Fireflies)"}}, {"t": "Send brand assets for ELMO and ELMO UK", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Send logo files, sender names and reply addresses for ELMO and the UK brand so we can brand the workspace and Messenger.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1790565909021, "txt": "Liam already provided: https://drive.google.com/drive/folders/166jQLFPKgu9C2cFCTKKSLiEPcC3pVvYr?usp=sharing"}], "doneAt": "2026-09-28"}, {"t": "Sign off the agreed scope and build list", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "tip": "Review the locked scope, backlog and exit tests so both teams work to the same plan to 17 December.", "notes": "", "link": "", "kind": "milestone", "doneAt": "2026-10-07"}, {"t": "Complete the readiness check", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "form": "readiness", "tip": "One form that covers: access to Intercom and Zendesk, your email addresses and how emails should look, how you recognise customers, your team and seats, your help articles, the systems Fin needs, what Fin may say, and your hours and reply times. Each section ticks off here as you finish it.", "notes": "", "link": "https://sabel-intercom.github.io/Intake-forms/SabelReadinessCheck.html?client=elmo&name=ELMO%20Software", "sub": [{"t": "Access and getting set up", "s": "Complete"}, {"t": "Email and web addresses", "s": "Complete"}, {"t": "How you recognise your customers", "s": "Complete"}, {"t": "Your team and seats", "s": "Complete"}, {"t": "Moving your existing conversations", "s": "Complete"}, {"t": "Your help content", "s": "Complete"}, {"t": "Other systems Fin needs to reach", "s": "Complete"}, {"t": "What Fin is allowed to say", "s": "Pending"}, {"t": "Your business", "s": "Complete"}], "formSync": "2026-10-07T22:07:58.248Z|2026-10-07T03:26:04.228Z", "doneAt": "2026-10-07"}, {"t": "Complete the migration details form", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "form": "migration", "tip": "Tells us how your Zendesk tickets move across: how much history, access, cutover timing, tags, inboxes, statuses, ticket types, fields, agents, contacts, companies and who signs off the sample. Each section ticks off here as you finish it.", "notes": "", "link": "https://sabel-intercom.github.io/Intake-forms/SabelMigrationIntake_ELMO.html", "sub": [{"t": "Project details", "s": "Complete"}, {"t": "What we have agreed so far", "s": "Complete"}, {"t": "History, brands and channels", "s": "Complete"}, {"t": "Access and readiness", "s": "Complete"}, {"t": "Migration and cutover settings", "s": "Complete"}, {"t": "Tags", "s": "Complete"}, {"t": "Filter (timeframe)", "s": "Complete"}, {"t": "Team inbox mappings", "s": "Complete"}, {"t": "Ticket status mapping", "s": "Complete"}, {"t": "Ticket type mapping", "s": "Complete"}, {"t": "Custom attributes", "s": "Complete"}, {"t": "Agent settings (agent mapping)", "s": "Complete"}, {"t": "Contact settings", "s": "Complete"}, {"t": "Company settings", "s": "Complete"}, {"t": "Sample review and sign-off", "s": "Complete"}], "formSync": "2026-10-07T02:38:53.628Z|2026-10-07T02:38:53.628Z", "doneAt": "2026-10-07"}]}, "identity": {"sabel": [{"t": "Messenger for logged-in users", "desc": "Chat inside ELMO for authenticated users only, bridging to your own chat interface later", "lead": "Chris", "o": "Chris", "s": "Pending", "d": "", "week": 4, "notes": "", "link": "https://developers.intercom.com/installing-intercom/web/installation", "phases": [{"k": "build", "l": "Configure", "o": "Chris", "week": 4, "sub": [{"t": "Set up the Messenger for logged-in users only", "s": "Pending", "o": "Chris", "tip": "", "call": "2026-09-21"}], "tip": "Look, behaviour and who can see it", "note": "Kickoff action 5: the chatbot must only serve authorised users. Messenger bridges to ELMO's own chat interface, which is not in this SOW."}, {"k": "install", "l": "Install", "o": "ELMO", "week": 5, "sub": [{"t": "Add the Messenger code to your app", "s": "Pending", "o": "ELMO", "tip": "Your developer adds the Intercom code snippet so the Messenger can appear. The guide has the exact code, and we can join a call if needed.", "link": "https://developers.intercom.com/installing-intercom/web/installation"}, {"t": "Secure the Messenger for logged-in customers (JWT)", "s": "Pending", "o": "ELMO", "tip": "Your developer sets up JSON Web Tokens so Intercom can verify each logged-in user. This keeps Fin to authorised users only and must be live before launch.", "link": "https://developers.intercom.com/installing-intercom/web/identity-verification"}, {"t": "Send customer details into the Messenger", "s": "Pending", "o": "ELMO", "tip": "Your developer sends user details (name, email, user ID, company and product stack) into the Messenger so conversations arrive with context and route correctly.", "link": "https://developers.intercom.com/installing-intercom/web/attributes-objects"}], "tip": "Your developers add the snippet, identity verification and user attributes"}, {"k": "validate", "l": "Test together", "o": "Chris", "week": 6, "sub": [{"t": "Messenger tested with real logged-in users", "s": "Pending", "o": "Chris", "tip": "Only verified users reach the Messenger and Fin"}], "tip": "We check only verified users reach the Messenger and Fin"}], "gate": true}, {"t": "Review contact duplication risk and merge approach", "o": "Greg", "s": "Pending", "d": "", "week": 1, "notes": "Kickoff action 4 (flagged for Richard/Greg). Richard asked 21 Sep whether the contact merge API now covers user into user.", "link": "", "wkEnd": 2, "call": "2026-09-21"}, {"t": "Audience design: reusable segments by product stack, brand and region", "o": "Chris", "s": "Pending", "d": "", "week": 2, "wkEnd": 3, "notes": "Richard step 2. Built from the data points agreed in the identity session; every later rule (content, Fin, routing) applies by audience.", "link": ""}], "client": [{"t": "Name the ELMO engineer who owns the data sync", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Name the ELMO engineer who owns the data sync and company attributes, with sprint capacity confirmed.", "notes": "", "link": "", "log": [{"by": "Chris", "at": 1790209555799, "txt": "TBC"}, {"by": "Michael Ho", "at": 1790556332094, "txt": "Carl Schutte - PM who looks after Data - carl.schutte@elmosoftware.com.au", "edited": 1790649485314}], "doneAt": "2026-09-28", "decision": {"seeded": true, "v": "Carl Schutte, the PM who looks after data (carl.schutte@elmosoftware.com.au)", "by": "ELMO (Michael Ho)", "at": "2026-09-28", "src": "", "srcLabel": "Tracker note"}}, {"t": "Show us how your product modules map to customer data", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "tip": "Share how your product modules and customer data map together so routing and attributes use the right fields.", "notes": "", "link": "", "doneAt": "2026-10-07"}, {"t": "Build the company and contact data sync", "o": "ELMO", "s": "In Progress", "d": "", "week": 3, "tip": "Your engineering team builds the sync that keeps companies and contacts current in Intercom. Backfill first, then scheduled updates.", "notes": "", "link": "", "wkEnd": 6}, {"t": "Agree your audience list", "o": "ELMO", "s": "Complete", "d": "", "week": 3, "notes": "", "link": "", "tip": "Confirm the customer groups that need different answers or routing, for example by product stack, brand or region.", "log": [{"by": "Michael Ho", "at": 1790812823765, "txt": "Audience list created and mapped to respective articles."}], "doneAt": "2026-10-01", "decision": {"seeded": true, "v": "Audiences built from company attributes (each module and integration), plus a HAM Restriction attribute; mapped to articles", "by": "ELMO (Michael Ho)", "at": "2026-10-01", "src": "https://scss-group.slack.com/archives/C0C42LUVB9N/p1790823599612719?thread_ts=1790822174.266619&cid=C0C42LUVB9N", "srcLabel": "Slack #sabel_elmo_intercom"}}]}, "content": {"sabel": [{"t": "Zendesk knowledge base migration to the Help Centre", "o": "Chris", "s": "Pending", "d": "", "week": 2, "notes": "Kickoff action 8: coordinate the sample Zendesk content migration first.", "link": "", "wkEnd": 4, "sub": [{"t": "Sample content migration", "s": "Pending"}, {"t": "Review your help articles for gaps and duplicates", "s": "Pending"}, {"t": "Full import with collections, images and links", "s": "Pending"}, {"t": "Rotageek articles re-worded for ELMO", "s": "Pending"}, {"t": "Reorganise your help articles so Fin can use them", "s": "Pending"}], "call": "2026-09-21"}, {"t": "Academy connected via API", "o": "Greg", "s": "Pending", "d": "", "week": 4, "notes": "", "link": "", "wkEnd": 6}, {"t": "Slack product channel distillation into draft internal content", "o": "Greg", "s": "Pending", "d": "", "week": 5, "notes": "Offline analysis only. Slack is never a live customer-facing source; drafts go to the knowledge manager for review.", "link": "", "wkEnd": 7}, {"t": "Partner help centre ingestion: options, then build", "o": "Greg", "s": "Pending", "d": "", "week": 6, "notes": "Four to five partner products. Replaces manual re-creation of partner content.", "link": "", "wkEnd": 9}], "client": [{"t": "Name who will look after the Help Centre", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "tip": "Confirm your knowledge and AI manager as the Help Centre owner so they can review content as we load it.", "notes": "", "link": "", "doneAt": "2026-09-24"}, {"t": "Tell us which website pages Fin should read", "o": "ELMO", "s": "Complete", "d": "", "week": 3, "tip": "Tell us which website pages Fin should and should not learn from. We will walk you through the selection.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1791338128765, "txt": "https://elmosoftware.com.au/about/data-security\nhttps://elmosoftware.com.au/service-agreement"}], "doneAt": "2026-10-07"}, {"t": "Give us API access to the Academy", "o": "ELMO", "s": "Complete", "d": "", "week": 3, "tip": "Provide API access to the Academy so gated training content can be connected without making it public.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1791338347141, "txt": "Provided in: https://drive.google.com/drive/folders/13fmkG52gTH4tPCHJjd2QIkr7jp85amEF"}], "doneAt": "2026-10-07"}, {"t": "Approve the Help Centre content", "o": "ELMO", "s": "Dependency", "d": "", "week": 5, "tip": "Your knowledge manager reviews the migrated Help Centre ahead of the Fin pilot.", "notes": "", "link": "", "kind": "milestone"}, {"t": "List the Slack channels we may review", "o": "ELMO", "s": "Dependency", "d": "", "week": 4, "tip": "List the Slack product channels we may analyse offline to draft internal knowledge.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1791344812678, "txt": "#product_remunereation\n#product_analytics\n#product_api integrations\n#product_hrcore\n#product_learning\n#product_onboarding\n#product_performance\n#product_platform\n#product_recruitment\n#product_payroll_integrations\n#product_benefits\n#product_rotageek\n#product_survey\n#product_salary_intelligence\n#product_coursebuilder\n#product_course_library\n#product_succession\n#product_elmohub", "edited": 1791431962850}]}, {"t": "Give us access to partner help centres", "o": "ELMO", "s": "Dependency", "d": "", "week": 5, "tip": "Give us access to each partner help centre and confirm how each partner's content should be hosted.", "notes": "", "link": ""}, {"t": "Review and approve drafted articles", "o": "ELMO", "s": "Dependency", "d": "", "week": 8, "tip": "Your knowledge manager reviews the articles we draft from Slack and ticket history before anything reaches customers.", "notes": "", "link": "", "wkEnd": 10}, {"t": "Website added as a crawled content source", "o": "ELMO", "s": "Complete", "d": "", "week": 3, "notes": "Walk the ELMO team through page include and exclude selection. Re-checked every 7 days.", "link": "", "tip": "", "log": [{"by": "Michael Ho", "at": 1791340420690, "txt": "https://elmosoftware.com.au/about/data-security\nhttps://elmosoftware.com.au/service-agreement"}], "doneAt": "2026-10-07"}]}, "finbrain": {"sabel": [{"t": "Fin internal pilot", "desc": "Your support team tries Fin before any customer sees it", "lead": "Chris", "o": "ELMO", "s": "Dependency", "d": "", "week": 2, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Provide", "o": "ELMO", "week": 2, "sub": [{"t": "List topics Fin must pass to your team", "s": "Complete", "o": "ELMO", "tip": "List the conversation types Fin must hand straight to your team, such as cancellations, payroll incidents and complaints.", "call": "2026-09-21"}, {"t": "Send your tone of voice and a few example replies", "s": "Pending", "o": "ELMO", "tip": "Share tone-of-voice guidance and a few example responses you are happy with so Fin mirrors your brand language."}], "tip": "What Fin must never answer, and how ELMO sounds", "wkEnd": 3}, {"k": "build", "l": "Build", "o": "Chris", "week": 4, "sub": [{"t": "Set when Fin passes a customer to your team, and topics it must avoid", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Write Fin's guidance from your tone of voice and example replies", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Handover rules and brand voice", "note": "Cancellations, contractual disputes, payroll incidents and complaints go straight to the team."}, {"k": "validate", "l": "Pilot", "o": "ELMO", "week": 5, "sub": [{"t": "Fin internal pilot for the support team", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Tell us where Fin got answers wrong in the pilot", "s": "Pending", "o": "ELMO", "tip": "Your support team uses Fin internally and tells us where answers are wrong, thin or missing."}], "tip": "Support uses Fin internally and flags weak answers", "wkEnd": 6}, {"k": "approve", "l": "Go / no-go", "o": "ELMO", "week": 6, "sub": [{"t": "Decide if Fin is ready for customers", "s": "Pending", "o": "ELMO", "tip": "Agree the pilot results are good enough to take Fin into UAT."}], "tip": "Agree the pilot results are good enough to take Fin into UAT.", "gate": true}], "gate": true, "wkEnd": 3}, {"t": "Replicate Zendesk fields, forms and tag taxonomy", "o": "Chris", "s": "Pending", "d": "", "week": 2, "notes": "Kickoff action 3: guidance on tag migration and taxonomy. Chris plans to use the Zendesk data to build Fin attributes from tickets and tags.", "link": "", "wkEnd": 4, "sub": [{"t": "Field map document", "s": "Pending"}, {"t": "Tag taxonomy and guidance", "s": "Pending"}, {"t": "Forms to ticket types and conversation data", "s": "Pending"}, {"t": "Retirement list applied", "s": "Pending"}], "call": "2026-09-21"}, {"t": "Build Fin attributes from Zendesk ticket data and tags", "o": "Chris", "s": "Pending", "d": "", "week": 3, "notes": "Chris, 21 Sep: use the Zendesk data to build Fin attributes from ticket data and tags.", "link": "", "wkEnd": 4}, {"t": "Test Fin with real customer questions and adjust", "o": "Chris", "s": "Pending", "d": "", "week": 5, "notes": "", "link": "", "wkEnd": 9, "sub": [{"t": "Preview", "s": "Pending"}, {"t": "Batch test on real questions", "s": "Pending"}]}, {"t": "Glean / Elmo Assist replacement", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "Not an integration: Fin replaces Elmo Assist for support. Held until after go-live on the 21 Sep kickoff.", "link": "", "parked": true, "est": "TBC"}], "client": [{"t": "Send your Zendesk tags and how you use them", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Export your current tags and explain how the team uses them so we can rebuild the taxonomy.", "notes": "", "link": "", "log": [{"by": "Chris", "at": 1790209641816, "txt": "Will move with migration but will need to be tagged the same as ZD when migrated into Intercom"}, {"by": "Michael Ho", "at": 1791433679173, "txt": "Only tags used in the last 6 months"}], "doneAt": "2026-10-08"}, {"t": "Tell us which Zendesk fields, forms and tags to drop", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "tip": "Tell us which Zendesk fields, forms or tags should not come across so we only rebuild what you still use.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1791409615979, "txt": "Forms\n- General Administration V2\n- Learning / Course Builder (want this split into Learning and Course Builder as individual ticket types)\n- Recruitment\n- Onboarding\n- Documents\n- HR Core\n- Integrations\n- Payroll Metrics\n- Employment Hero Payroll\n- Definitiv Payroll\n- Remuneration\n- Succession\n- PeoplePulse\n- HROnboard\n- ELMO Survey\n- Billing and Accounts"}, {"by": "Michael Ho", "at": 1791427710194, "txt": "Tags - anything used in the last 6 months."}, {"by": "Michael Ho", "at": 1791498570536, "txt": "Ticket Form Fields\nhttps://docs.google.com/spreadsheets/d/1I_4kSnXkvJXFPMn7UB8thpcT_-o9vQqlA20wqJEa09Y/edit?gid=0#gid=0", "edited": 1791498748467}, {"by": "Michael Ho", "at": 1791498762514, "txt": "Organisation fields already setup as Company attributes in Intercom"}], "doneAt": "2026-10-09"}]}, "workflows": {"sabel": [{"t": "Email sending from your own domain", "desc": "So replies to customers come from ELMO addresses, not Intercom ones", "lead": "Chris", "o": "Chris", "s": "In Progress", "d": "", "week": 2, "notes": "", "link": "https://www.intercom.com/help/en/articles/9744849-connect-your-email-support-channel", "phases": [{"k": "build", "l": "Records issued", "o": "Chris", "week": 2, "sub": [{"t": "We send you the three email records", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "We send you the exact records to add"}, {"k": "provide", "l": "Add records", "o": "ELMO", "week": 2, "sub": [{"t": "Add three email records to your domain (DKIM, return-path, DMARC)", "s": "Pending", "o": "ELMO", "tip": "Two CNAME records and one DMARC record that let Intercom send email as ELMO, so it does not land in spam. We send the exact values; whoever manages your domain adds them.", "link": "https://www.intercom.com/help/en/articles/182-sending-email-from-your-own-address"}], "tip": "Two CNAME records and one DMARC record, added by your IT or domain admin", "gate": true}, {"k": "validate", "l": "Verify", "o": "Chris", "week": 3, "sub": [{"t": "Check Intercom can send email from your domain", "s": "Pending", "o": "Chris", "tip": "We confirm Intercom can send as ELMO"}], "tip": "We confirm Intercom can send email as ELMO"}], "gate": true}, {"t": "Set up your Intercom account and branding", "o": "Chris", "s": "Pending", "d": "", "week": 1, "notes": "", "link": "", "wkEnd": 2}, {"t": "Build team inboxes per product stack (HRO, Payroll, HR)", "o": "Chris", "s": "Pending", "d": "", "week": 2, "notes": "", "link": "", "wkEnd": 3, "sub": [{"t": "HRO inbox and team", "s": "Pending"}, {"t": "Payroll inbox and team", "s": "Pending"}, {"t": "HR inbox and team", "s": "Pending"}, {"t": "Seats and roles", "s": "Pending"}]}, {"t": "Set rules that send conversations to the right team, including out of hours and overflow", "o": "Chris", "s": "Pending", "d": "", "week": 3, "notes": "Kickoff action 1: start the foundational build for workflows.", "link": "", "wkEnd": 5, "call": "2026-09-21"}, {"t": "Set up SLA rules and office hours per product stack and brand, plus reporting views", "o": "Chris", "s": "Pending", "d": "", "week": 4, "notes": "High 0-4h, Medium 24h, Low 3 working days.", "link": "", "wkEnd": 5}, {"t": "ELMO UK brand replication", "o": "Chris", "s": "Pending", "d": "", "week": 3, "notes": "", "link": ""}, {"t": "Messenger-first intake: forms into conversations", "o": "Chris", "s": "Pending", "d": "", "week": 6, "notes": "Forms move into the Messenger; any page-hosted form posts into Fin via the API. Pre-conversation data capture replaces form fields.", "link": "", "wkEnd": 7}, {"t": "CSAT, NPS and CX score configuration and reporting", "o": "Chris", "s": "Pending", "d": "", "week": 7, "notes": "", "link": ""}], "client": [{"t": "Send the list of teammates and their roles", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Send the list of teammates, their roles and who reports to whom so we can set up seats, teams and permissions.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1790564374092, "txt": "https://docs.google.com/spreadsheets/d/1olt-Q_9UA60qmsnIblbS-YrWaorOkKAyjb2UDF6wEBc/edit?usp=sharing"}, {"by": "Michael Ho", "at": 1790564409176, "txt": "Will need to include additional access for Product in the future. TBD", "edited": 1790564421483}], "doneAt": "2026-09-28"}, {"t": "Send business hours and holidays for AU, NZ and UK", "o": "ELMO", "s": "Complete", "d": "", "week": 1, "tip": "Share business hours for AU, NZ and UK plus public holidays and closures so we can set operating hours.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1790564240409, "txt": "Monday \u2013 Friday 6:30 AM to 7:30 PM AEST (excluding NSW and National public holidays)"}], "doneAt": "2026-09-28", "decision": {"seeded": true, "v": "AU: Mon to Fri 6:30am to 7:30pm AEST, excluding NSW and national public holidays. NZ and UK still to come", "by": "ELMO (Liam Murphy, Michael Ho)", "at": "2026-09-24", "src": "https://scss-group.slack.com/archives/C0C42LUVB9N/p1790211994242489", "srcLabel": "Slack #sabel_elmo_intercom"}}, {"t": "Confirm SLA targets per product", "o": "ELMO", "s": "Complete", "d": "", "week": 2, "tip": "Confirm the SLA targets per stack and per brand where they differ from the standard tiers.", "notes": "", "link": "", "log": [{"by": "Michael Ho", "at": 1790564323517, "txt": "Not applicable - should be the same across the board."}], "doneAt": "2026-09-28", "decision": {"seeded": true, "v": "One set of SLA targets for every product (no per-product targets)", "by": "ELMO (Michael Ho)", "at": "2026-09-28", "src": "", "srcLabel": "Tracker note"}}]}, "integrations": {"sabel": [{"t": "Jira and Slack connected", "desc": "Escalate to engineering and notify teams without leaving the inbox", "lead": "Chris", "o": "ELMO", "s": "Dependency", "d": "", "week": 2, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Access", "o": "ELMO", "week": 2, "sub": [{"t": "Give us Jira access and escalation rules", "s": "Pending", "o": "ELMO", "tip": "Give us access to the Jira projects and confirm which issues escalate where for each product stack."}, {"t": "Approve the Intercom app in Slack", "s": "Pending", "o": "ELMO", "tip": "Your Slack workspace admin approves the Intercom app so notifications can flow into your channels."}], "tip": "Jira projects, escalation rules and Slack admin approval", "wkEnd": 3}, {"k": "build", "l": "Build", "o": "Chris", "week": 3, "sub": [{"t": "Jira for Tickets: issue mapping, field sync and escalation workflow", "s": "Pending", "o": "Chris", "tip": "", "call": "2026-09-21"}, {"t": "Slack two-way app: notification routing and channel mapping", "s": "Pending", "o": "Chris", "tip": "", "call": "2026-09-21"}], "tip": "Issue mapping, field sync and channel routing", "wkEnd": 5}, {"k": "validate", "l": "Test", "o": "Greg", "week": 6, "sub": [{"t": "Test integration round trips and data sync", "s": "Pending", "o": "Greg", "tip": ""}], "tip": "Round trips checked end to end"}, {"k": "approve", "l": "Sign-off", "o": "ELMO", "week": 6, "sub": [{"t": "Sign off Jira and Slack", "s": "Pending", "o": "ELMO", "tip": "Confirm the Jira and Slack round trips work for your support and engineering teams."}], "tip": "Confirm the Jira and Slack round trips work for your support and engineering teams.", "gate": true}], "gate": true, "wkEnd": 3}, {"t": "Specify escalation routing and field mapping with ELMO engineering", "o": "Greg", "s": "Pending", "d": "", "week": 2, "notes": "Follows the 24 Sep technical session.", "link": ""}, {"t": "Salesforce two-way app", "o": "Chris", "s": "Pending", "d": "", "week": 0, "notes": "SOW phase 2, pending ELMO data cleanup. Syncs from install date forward only, no backfill.", "link": "", "parked": true, "est": "TBC"}, {"t": "ELMO custom chat interface calling Fin via API", "o": "Greg", "s": "Pending", "d": "", "week": 0, "notes": "Running in parallel at ELMO; not costed in the SOW. The Messenger bridges the December launch.", "link": "", "parked": true, "est": "TBC"}], "client": []}, "migration": {"sabel": [{"t": "Zendesk ticket history into Intercom", "desc": "About 200,000 tickets, so agents can see past conversations after go-live", "lead": "Richard", "o": "ELMO", "s": "Dependency", "d": "", "week": 2, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Decide", "o": "ELMO", "week": 2, "sub": [{"t": "Decide how much history to keep for former customers", "s": "Pending", "o": "ELMO", "tip": "Confirm how we tell active from former customers and whether former customers keep 4 or 5 years of history.", "decision": {"seeded": true, "v": "3 years of ticket history (said for all tickets, not only former customers)", "by": "ELMO (Michael Ho)", "at": "2026-10-01", "src": "https://scss-group.slack.com/archives/C0C42LUVB9N/p1790825354372409?thread_ts=1790823675.963439&cid=C0C42LUVB9N", "srcLabel": "Slack #sabel_elmo_intercom"}}, {"t": "Name who will check the migrated tickets", "s": "Complete", "o": "ELMO", "tip": "Name the person who will check the sample migration and sign off the final dataset.", "decision": {"v": "Michael Ho", "by": "ELMO", "at": "2026-10-07", "src": "https://sabel-intercom.github.io/Intake-forms/SabelReadinessCheck.html?client=elmo&name=ELMO%20Software", "srcLabel": "", "hist": []}, "dec": true}], "tip": "Who counts as a former customer, and who checks our work", "wkEnd": 3}, {"k": "build", "l": "Map", "o": "Richard", "week": 3, "sub": [{"t": "Map tickets, contacts, organisations, statuses, tags and fields", "s": "Pending", "o": "Richard", "tip": ""}], "tip": "How each Zendesk field lands in Intercom", "wkEnd": 4, "note": "Migr8Now. About 200,000 tickets. Active customers full history, former customers per the agreed cutoff."}, {"k": "approve", "l": "Approve map", "o": "ELMO", "week": 4, "sub": [{"t": "Approve how tickets will move across", "s": "Pending", "o": "ELMO", "tip": "Review and sign off the migration mapping before we run the full migration."}], "tip": "Review and sign off the migration mapping before we run the full migration.", "gate": true}, {"k": "build", "l": "Sample, then full run", "o": "Richard", "week": 5, "sub": [{"t": "Run sample migration batch, validate vs source records", "s": "Pending", "o": "Richard", "tip": ""}, {"t": "Execute full historical migration", "s": "Pending", "o": "Richard", "tip": ""}, {"t": "Sample-based QA and validation report", "s": "Pending", "o": "Richard", "tip": ""}], "tip": "A sample batch first, then the full load and a validation report", "wkEnd": 9}, {"k": "signoff", "l": "Sign-off", "o": "ELMO", "week": 10, "sub": [{"t": "Sign off the migrated ticket history", "s": "Pending", "o": "ELMO", "tip": "Review the validation report and approve the migrated history before Zendesk is stood down."}], "tip": "Review the validation report and approve the migrated history before Zendesk is stood down.", "gate": true}], "gate": true, "wkEnd": 3, "log": [{"by": "ELMO", "at": 1791351809472, "txt": "Decision (Name who will check the migrated tickets): Michael Ho"}, {"by": "ELMO", "at": 1791351831364, "txt": "Decision (Name who will check the migrated tickets): Michael Ho"}]}, {"t": "Offline knowledge extraction from ticket history", "o": "Richard", "s": "Pending", "d": "", "week": 7, "notes": "Historical and former-customer tickets are mined into draft articles, never used as Fin training data.", "link": "", "wkEnd": 9}], "client": [{"t": "Agree when Zendesk stops taking new tickets", "o": "ELMO", "s": "Dependency", "d": "", "week": 8, "tip": "Agree when Zendesk stops taking new tickets and the window for the final delta migration.", "notes": "", "link": ""}]}, "uat": {"sabel": [{"t": "Test every channel, routing rule, SLA, Fin and the integrations from start to finish", "o": "Chris", "s": "Pending", "d": "", "week": 10, "notes": "UAT week, w/c 23 Nov.", "link": ""}, {"t": "Run Fin through test questions and fix what fails", "o": "Chris", "s": "Pending", "d": "", "week": 10, "notes": "", "link": "", "wkEnd": 11}, {"t": "Training per cohort", "o": "Chris", "s": "Pending", "d": "", "week": 10, "notes": "", "link": "", "wkEnd": 11, "sub": [{"t": "Agents: inbox, Copilot and escalations", "s": "Pending"}, {"t": "Team leads: reporting, SLAs and workflows", "s": "Pending"}, {"t": "Knowledge manager deep dive: sources, Fin tuning, article lifecycle", "s": "Pending"}]}, {"t": "Complete our go-live readiness check", "o": "Richard", "s": "Pending", "d": "", "week": 11, "notes": "", "link": ""}], "client": [{"t": "Send who needs training and when", "o": "ELMO", "s": "Dependency", "d": "", "week": 8, "tip": "Send the agent, team lead and knowledge manager lists and the times that suit each group.", "notes": "", "link": ""}, {"t": "Name testers for HRO, Payroll and HR", "o": "ELMO", "s": "Dependency", "d": "", "week": 9, "tip": "Name testers for HRO, Payroll and HR who can run end-to-end tests in the week of 23 November.", "notes": "", "link": ""}, {"t": "Agree what must pass before go-live", "o": "ELMO", "s": "Dependency", "d": "", "week": 9, "tip": "Agree what must pass before go-live and who makes the final call.", "notes": "", "link": ""}, {"t": "Give the final go-ahead for go-live", "o": "ELMO", "s": "Dependency", "d": "", "week": 11, "tip": "Provide written sign-off that the platform is ready before we switch live traffic on 17 December.", "notes": "", "link": "", "gate": true, "kind": "milestone"}]}, "golive": {"sabel": [{"t": "Move tickets that arrived during the build", "o": "Richard", "s": "Pending", "d": "", "week": 13, "notes": "Runs about 2 hours before the go-live meeting.", "link": "", "dayOff": -120}, {"t": "Run the go-live call", "o": "Richard", "s": "Pending", "d": "", "week": 13, "notes": "Thu 17 Dec. The go-live moment. Delta migration completes about 2 hours before this call.", "link": "", "dayOff": 0}, {"t": "Stop new tickets arriving in Zendesk", "o": "Greg", "s": "Pending", "d": "", "week": 13, "notes": "", "link": "", "dayOff": 0}, {"t": "Switch Intercom on for email, forms and the Messenger", "o": "Chris", "s": "Pending", "d": "", "week": 13, "notes": "", "link": "", "dayOff": 0}, {"t": "Switch Fin on for customers", "o": "Chris", "s": "Pending", "d": "", "week": 13, "notes": "", "link": "", "dayOff": 30}, {"t": "Stay on hand through launch day", "o": "Chris", "s": "Pending", "d": "", "week": 13, "notes": "", "link": "", "dayOff": 60}], "client": [{"t": "Tell your team about go-live", "o": "ELMO", "s": "Dependency", "d": "", "week": 13, "tip": "Let your wider team know Intercom goes live on 17 December so agents are ready before the first customer conversation.", "notes": ""}]}, "post": {"sabel": [{"t": "Hypercare: daily monitoring and PM check-ins", "o": "Chris", "s": "Pending", "d": "", "week": 13, "notes": "Kickoff action 9. Covers the late Nov to Feb quiet period.", "link": "", "wkEnd": 15, "call": "2026-09-21"}, {"t": "Review how Fin and your team did in week 1", "o": "Chris", "s": "Pending", "d": "", "week": 14, "notes": "", "link": ""}, {"t": "Improve Fin where it struggled", "o": "Chris", "s": "Pending", "d": "", "week": 15, "notes": "", "link": ""}, {"t": "Fix the remaining small issues", "o": "Chris", "s": "Pending", "d": "", "week": 14, "notes": "", "link": "", "wkEnd": 15}, {"t": "Confluence as an internal source for Copilot", "o": "Chris", "s": "Pending", "d": "", "week": 14, "notes": "In the SOW. Deferred to after go-live on the 21 Sep kickoff; pull forward if time allows.", "link": ""}, {"t": "Partner routing escalation flow", "o": "Chris", "s": "Pending", "d": "", "week": 14, "notes": "In the SOW. Deferred to after go-live on the 21 Sep kickoff; pull forward if time allows.", "link": "", "wkEnd": 15}, {"t": "ChurnZero metrics sync: scope and build", "o": "Greg", "s": "Pending", "d": "", "week": 14, "notes": "In the SOW. Deferred to after go-live on the 21 Sep kickoff. Native sync is one way only; ELMO needs conversation volume and CSAT per account in ChurnZero.", "link": "", "wkEnd": 17}, {"t": "Hand over documents to your knowledge manager and close the Slack channel", "o": "Richard", "s": "Pending", "d": "", "week": 17, "notes": "", "link": ""}], "client": [{"t": "Share agent feedback after week 1", "o": "ELMO", "s": "Dependency", "d": "", "week": 14, "tip": "After the first week live, share agent feedback to guide the Fin tuning pass.", "notes": "", "link": ""}, {"t": "Give us Confluence access and the spaces to include", "o": "ELMO", "s": "Dependency", "d": "", "week": 14, "tip": "Give us Confluence access and the spaces agents should be able to search from the inbox.", "notes": "", "link": ""}, {"t": "Send ChurnZero metrics and API access", "o": "ELMO", "s": "Dependency", "d": "", "week": 14, "tip": "Confirm the exact metrics your CSM team uses in ChurnZero and provide API access.", "notes": "", "link": ""}]}};  // [CLIENT] injected from the Python T_DATA block above
 // Client hub forms, injected from FORMS_DATA. Only forms with a matching client
 // task ('form' key) are included, so a build without a migration has no
 // migration form anywhere.
@@ -2521,7 +2881,7 @@ function resolveTask(cid){
       return `<div class="stage-det">
         <div class="dh"><span><b>${esc(p.l)}</b>${p.tip?' · '+esc(p.tip):''}</span><span style="white-space:nowrap">${m?(n===m?'all done':n+' of '+m+' done'):''}</span></div>
         <div class="sub-rail">${(p.sub||[]).map((x,i)=>{const sd=x.s==='Complete';const o=x.o||p.o||CLIENT_LABEL;const c=OW[o]||OW[CLIENT_LABEL];return `<div style="display:flex;align-items:center;gap:7px;padding:3px 0">
-          <button class="chk-btn" onclick="togglePhaseSub(event,'${cid}',${oi},${i})" title="${sd?'Mark incomplete':'Mark done'}" style="padding-top:0;align-items:center"><i class="ti ti-${sd?'circle-check-filled':'circle'}" style="font-size:15px;color:${sd?'var(--k4ADE80)':'var(--k334155)'}"></i></button>
+          <button class="chk-btn" onclick="togglePhaseSub(event,'${cid}',${oi},${i})" title="${stepTip(x.s)}" style="padding-top:0;align-items:center"><i class="ti ti-${stepIcon(x.s)}" style="font-size:15px;color:${sd?'var(--k4ADE80)':(x.s==='In Progress'?'var(--k60A5FA)':'var(--k334155)')}"></i></button>
           <span style="font-size:12px;flex:1;min-width:0;line-height:1.4;color:${sd?'var(--k475569)':'var(--kE2E8F0)'};${sd?'text-decoration:line-through':''}">${gloss(esc(x.t))}</span>
           ${x.tip?`<i class="ti ti-info-circle" onmouseenter="showPhaseTip(event,'${cid}',${oi},${i})" onmousemove="moveTip(event)" onmouseleave="hideTip()" style="font-size:12px;color:var(--k475569);cursor:help;flex-shrink:0"></i>`:''}
           <span class="bdg" style="color:${c.c};background:${c.bg};font-size:10px;padding:1px 7px">${esc(o)}</span>
@@ -2560,7 +2920,7 @@ function resolveTask(cid){
     function togglePhaseSub(e,cid,pi,si){
       e.stopPropagation();
       const t=resolveTask(cid);const x=t&&t.phases[pi]&&t.phases[pi].sub[si];if(!x)return;
-      x.s=x.s==='Complete'?'Pending':'Complete';
+      x.s=stepNext(x.s);
       syncPhased(t);
       const ai=activePhaseIdx(t);if(phaseOpen[cid]===undefined||phaseDone(t.phases[phaseOpen[cid]]))phaseOpen[cid]=ai<0?t.phases.length-1:ai;
       render();scheduleAutoSave();
@@ -3565,7 +3925,7 @@ function progView(id){
 const HUB_RANGE="Sep 2026-Jan 2027";
 const SLACK_URL="";
 const HUB_PTYPE="full";
-const TIP={"markDone": "Mark done", "markNotDone": "Mark not done", "editTitle": "Click to edit the title", "editPencil": "Edit the title", "owner": "Who is doing this. Click to change", "date": "When it is due. Click to change", "status": "Where it is up to. Click to change", "openDetails": "Open details: description, steps and notes", "closeDetails": "Close details", "editDesc": "Click to edit the description", "stepDone": "Mark step done", "stepNotDone": "Mark step not done", "editStep": "Click to edit this step", "removeStep": "Remove step", "recordDecision": "Write down what was agreed for this task", "editDecision": "Change or add detail to this decision", "decisionMissing": "This was ticked without saying what was decided. Click to add it", "menuCollapse": "Collapse menu", "menuExpand": "Expand menu"};
+const TIP={"markDone": "Mark done", "markNotDone": "Mark not done", "editTitle": "Click to edit the title", "editPencil": "Edit the title", "owner": "Who is doing this. Click to change", "date": "When it is due. Click to change", "status": "Where it is up to. Click to change", "openDetails": "Open details: description, steps and notes", "closeDetails": "Close details", "editDesc": "Click to edit the description", "stepStart": "Mark step in progress", "stepDone": "Mark step done", "stepNotDone": "Mark step not done", "editStep": "Click to edit this step", "removeStep": "Remove step", "recordDecision": "Write down what was agreed for this task", "editDecision": "Change or add detail to this decision", "decisionMissing": "This was ticked without saying what was decided. Click to add it", "menuCollapse": "Collapse menu", "menuExpand": "Expand menu"};
 function tip(k){return esc(TIP[k]||"");}
 
 // ── Hub navigation and Home (1 Oct 2026) ────────────────────────────────────────
@@ -3588,41 +3948,35 @@ function hnDue(wk){if(!wk||wk>=999)return '';const d=new Date(weekStartDate(wk))
 function hnGoLive(){if(!goLiveDate)return null;const d=new Date(goLiveDate+'T00:00:00');if(isNaN(d))return null;return d;}
 function renderSidebar(){
   const sb=document.getElementById('sidebar');if(!sb)return;sb.classList.add('hn');
-  const need=hnNeeds().now.length,pct=hnPct(),forms=typeof formsActive==='function'?formsActive():[];
-  const inForm=String(cur).indexOf('form:')===0;
-  const btn=(id,icon,label,right,on)=>`<button class="hn-btn${on?' on':''}" onclick="setP('${id}')"><span class="ic"><i class="ti ti-${icon}"></i></span><span class="lb">${label}</span>${right||''}</button>`;
-  let h=`<div class="hn-mark"><img src="${logoSrc()}" alt="Sabel"></div><nav class="hn-nav">`;
-  h+=btn('home','home','Home','',cur==='home');
-  h+=btn('overview','layout-dashboard','Dashboard',need?`<span class="hn-badge" title="${need} thing${need===1?'':'s'} need${need===1?'s':''} you">${need}</span>`:'',cur==='overview');
-  const tOpen=hnOpen==='tracker',fOpen=hnOpen==='forms';
-  h+=`<button class="hn-btn${hnInTracker()?' on':''}" onclick="hnTracker()" aria-expanded="${tOpen}"><span class="ic"><i class="ti ti-list-details"></i></span><span class="lb">Tracker</span>${tOpen?'':`<span class="hn-pct">${pct}%</span>`}<i class="ti ti-chevron-${tOpen?'up':'down'} hn-chev"></i></button>`;
-  if(tOpen){
-    const hint=cur==='tracker'?hnFirstOpenPillar():'';
-    h+=`<div class="hn-sub tk">`+P.map(p=>{const m=phaseMini(p.id),pc=m.total?Math.round(m.done/m.total*100):0;
-      const pg=(typeof progPages==='function'?progPages():[]).filter(x=>x.frm===p.id).map(x=>{const i=progNum(x.id);
-        return `<button class="hn-pg${cur==='prog:'+x.id?' on':''}" onclick="setP('prog:${x.id}')" title="${esc(x.title||'')}"><i></i>Progression ${i}</button>`;}).join('');
-      const on=cur===p.id;
-      return `<button class="hn-pl${on?' on':''}${hint===p.id?' hint':''}" onclick="setGroupBy('pillar');setP('${p.id}')" title="${esc(p.l)}"><span class="lb">${esc(p.l)}</span><span class="pc" style="color:${on?'#fff':hnPillarClr(p.id,pc)}">${pc}%</span></button>`+pg;
-    }).join('')+`</div>`;
-  }
-  if(forms.length){
-    h+=`<button class="hn-btn${inForm&&!fOpen?' on':''}" onclick="hnToggleForms()" aria-expanded="${fOpen}"><span class="ic"><i class="ti ti-forms"></i></span><span class="lb">Forms</span><i class="ti ti-chevron-${fOpen?'up':'down'} hn-chev"></i></button>`;
-    if(fOpen){
-      h+=`<div class="hn-sub">`+forms.map(f=>{const st=formState(f.id);const on=cur==='form:'+f.id;
-        const started=st.total&&(st.done||(st.p&&(st.p.sections||[]).some(x=>(x.filled||0)>0)));
-        const right=st.submitted?`<i class="ti ti-circle-check-filled" style="font-size:15px;color:#4ADE80" title="Sent to Sabel"></i>`
-          :(started?`<span class="st">${st.done}/${st.total}</span>`:`<span class="hn-dot" title="Not started"></span>`);
-        return `<button class="hn-subbtn${on?' on':''}" onclick="hnSetOpen('forms');setP('form:${f.id}')"><span class="lb">${esc(f.l)}</span>${right}</button>`;}).join('')+`</div>`;
-    }
-  }
+  const need=hnNeeds().now.length,pct=hnPct(),gs=globalStats(),forms=typeof formsActive==='function'?formsActive():[];
+  const btn=(id,icon,label,right,on,go)=>`<button class="hn-btn${on?' on':''}" data-tip="${esc(label)}" onclick="${go||("setP('"+id+"')")}"><span class="ic"><i class="ti ti-${icon}"></i></span><span class="lb">${label}</span>${right||''}</button>`;
+  let h=`<div class="hn-mark"><img src="${logoSrc()}" alt="Sabel"><span class="hn-tag">Hub</span></div>`;
+  const g=ovGoLive();
+  h+=`<div class="sd-proj"><div class="k">${esc(CLIENT_NAME)}</div><div class="n">Intercom build</div><div class="r"><b>${pct}%</b><span>${Math.round(gs.complete)} of ${gs.total}</span></div><div class="bar"><i style="width:${pct}%"></i></div>${g?`<div class="gl">Go-live <b>${esc(sdFmtW(g.gl))}</b>${g.d>0?' · '+g.d+' days':(g.d===0?' · today':' · live')}</div>`:''}</div>`;
+  h+=`<nav class="hn-nav"><div class="hn-sec">Tracker</div>`;
+  h+=btn('home','home','Home',need?`<span class="hn-badge" title="${need} thing${need===1?'':'s'} need${need===1?'s':''} you">${need}</span>`:'',cur==='home');
+  h+=btn('flow','route','Project tracker',(cur!=='flow'?`<span class="hn-pct">${pct}%</span>`:''),cur==='flow'||hnInTracker());
+  h+=btn('overview','layout-dashboard','Dashboard','',cur==='overview');
+  if(typeof decisionsView==='function')h+=btn('decisions','gavel','Decisions',(typeof decCount==='function'&&decCount())?`<span class="hn-right">${decCount()}</span>`:'',cur==='decisions');
+  if(goLiveDate)h+=btn('runway','rocket','Go-live checklist','',cur==='runway');
+  if(typeof notesUnread==='function'){const u=notesUnread();h+=btn('notes','messages','Notes',u?`<span class="hn-badge">${u}</span>`:'',cur==='notes');}
+  const mats=[];
+  if(typeof SOW!=='undefined'&&SOW&&((SOW.hours>0)||(SOW.inScope&&SOW.inScope.length)))mats.push(btn('scope','file-text','Scope of work','',false,"setP('overview');ovExpand('scope')"));
+  forms.forEach(f=>{const st=formState(f.id);const on=cur==='form:'+f.id;
+    const right=st.submitted?`<i class="ti ti-circle-check-filled hn-right sent" title="Sent to Sabel"></i>`:(st.total&&st.done?`<span class="hn-right">${st.done}/${st.total}</span>`:(st.link?`<span class="hn-right dot" title="Not started"></span>`:''));
+    mats.push(btn('form:'+f.id,f.icon||'clipboard-check',esc(f.l),right,on));});
+  if(typeof openStatusReport==='function')mats.push(btn('report','file-analytics','Status report','',false,'openStatusReport()'));
+  if(typeof parkedCount==='function'&&parkedCount())mats.push(btn('parked','archive','Out of scope',`<span class="hn-right">${parkedCount()}</span>`,cur==='parked'));
+  if(INTERNAL)mats.push(btn('hours','clock-dollar','Hours','',cur==='hours'));
+  if(mats.length)h+=`<div class="hn-sec">Materials</div>`+mats.join('');
   h+=`</nav><div class="hn-foot">`;
-  const gl=hnGoLive();
-  h+=`<div class="hn-proj compact" title="${esc(HUB_RANGE)}"><div class="nm">${esc(CLIENT_NAME)}</div>${gl?`<div class="gl">Go-live ${gl.getDate()} ${HN_MON[gl.getMonth()]} ${gl.getFullYear()}</div>`:''}</div>`;
+  h+=`<div class="sd-team"><div class="k">Your Sabel team</div><div class="av">${SABEL_TEAM.map(sdAv).join('')}</div>${hhTeam().replace(/^Your Sabel team: /,'').replace(/ · /g,'. ')}.</div>`;
   if(SLACK_URL)h+=`<div class="hn-help">Need help? <a href="${esc(SLACK_URL)}" target="_blank" rel="noopener">Shared Slack channel &rarr;</a></div>`;
   h+=`</div>`;
   sb.innerHTML=h;
   hnTopBar();
 }
+
 function hnTopBar(){
   const tb=document.getElementById('top-bar');if(!tb)return;tb.classList.add('hn-top');
   let left=document.getElementById('hn-left');if(!left){left=document.createElement('div');left.id='hn-left';tb.insertBefore(left,tb.firstChild);}
@@ -3669,51 +4023,147 @@ function hhAgo(ts){if(!ts)return 'not yet';const s=(Date.now()-ts)/1000;if(s<90)
 function hhTeam(){const mig=typeof formById==='function'&&formById('migration')&&formTask('migration');
   return `Your Sabel team: <b>Chris</b> builds · <b>Richard</b> ${mig?'runs the migration':'runs the project'} · <b>Greg</b> connects your systems`;}
 // Home: a welcome and doors. Navigation only, nothing to fill in.
-function homeView(){
-  const pct=hnPct(),need=hnNeeds().now.length,cw=currentWeek(),glw=typeof goLiveWeek==='function'?goLiveWeek():0,g=ovGoLive();
-  const ptype=HUB_PTYPE==='migration'?'Migration':(HUB_PTYPE==='build'?'Build':'Full project');
-  const pills=[];
-  if(cw>=1)pills.push(`<span class="hh-pill"><b>Week ${cw}</b> of ${glw>=cw?glw:cw}</span>`);
-  if(g&&g.d>=0)pills.push(`<span class="hh-pill">Go-live in <b>${g.d} day${g.d===1?'':'s'}</b> · ${esc(g.gl.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).replace('Sept','Sep'))}</span>`);
-  else if(g)pills.push(`<span class="hh-pill">Live since <b>${esc(g.long)}</b></span>`);
-  if(need)pills.push(`<span class="hh-pill need"><i></i><b>${need}</b> thing${need===1?'':'s'} need${need===1?'s':''} you</span>`);
-  const forms=(typeof formsActive==='function'?formsActive():[]).map(f=>{const st=formState(f.id);
-    const started=st.total&&(st.done||(st.p&&(st.p.sections||[]).some(x=>(x.filled||0)>0)));
-    const status=st.submitted?['var(--k4ADE80,#4ADE80)','var(--k4ADE80,#4ADE80)','Sent']:(started?['var(--kFBBF24,#FBBF24)','var(--kFBBF24,#FBBF24)',st.done+' of '+st.total+' sections']:['var(--k8B93A3,#8B93A3)','var(--k5F6878,#5F6878)','Not started']);
-    const w=st.submitted?100:(st.total?Math.round(st.done/st.total*100):0);
-    const copy=f.id==='readiness'?'Tell us how your team works today so we build the right thing.':(f.id==='migration'?'What moves from your old helpdesk into Intercom, and how.':esc(f.blurb||''));
-    return `<a class="hh-card" href="#form/${f.id}"><div class="hh-cr"><span class="hh-lab">Form · ${esc(f.l)}</span><span class="hh-st" style="color:${status[0]}"><i style="background:${status[1]};box-shadow:0 0 8px ${status[1]}"></i>${esc(status[2])}</span></div>
-      <div class="hh-ct">Take me to my ${esc(f.l)}</div><div class="hh-cc">${copy}</div>
-      <div class="hh-cf"><div class="t"><i style="width:${w}%;background:${status[1]}"></i></div><span class="hh-go">${started||st.submitted?'Continue':'Start'} &rarr;</span></div></a>`;}).join('');
-  const more=[];
-  if(typeof notesUnread==='function')more.push(`<a class="hh-mi" href="#notes"><b>Notes<span>&rarr;</span></b><em>The thread on every task</em></a>`);
-  if(typeof decisionsView==='function')more.push(`<a class="hh-mi" href="#decisions"><b>Decisions<span>&rarr;</span></b><em>What we agreed, and where</em></a>`);
-  if(goLiveDate)more.push(`<a class="hh-mi" href="#runway"><b>Go-live checklist<span>&rarr;</span></b><em>What must be true before the day</em></a>`);
-  if(typeof SOW!=='undefined'&&SOW&&((SOW.hours>0)||(SOW.inScope&&SOW.inScope.length)))more.push(`<button class="hh-mi" onclick="setP('overview');ovExpand('scope')"><b>What's in scope<span>&rarr;</span></b><em>The agreed SOW, nothing more</em></button>`);
-  if(typeof parkedCount==='function'&&parkedCount())more.push(`<a class="hh-mi" href="#parked"><b>Out of scope<span>&rarr;</span></b><em>Ideas parked for later</em></a>`);
-  return `<div class="hh"><div class="hh-glow"></div><div class="hh-fade"></div>
-    <header class="hh-top"><div class="hh-brand"><span class="hh-sq"></span><span class="hh-word">SABEL</span><span class="hh-div"></span><span class="hh-ch">Client hub</span></div>
-      <div class="hh-right"><span class="hh-live"><i></i>Live · synced ${esc(hhAgo(remoteStamp))}</span><button class="hh-menu" onclick="toggleSidebar(true)">Menu</button></div></header>
-    <main class="hh-main">
-      <section class="hh-hero"><div class="hh-eye"><i></i><span>Sabel × ${esc(CLIENT_NAME)} · ${ptype}</span></div>
-        <h1 class="hh-h1">Welcome back,<br><span>${esc(CLIENT_NAME)}</span>.</h1>
-        <p class="hh-sub">This is your hub for the Intercom build. Everything we are doing together lives here — pick where you want to go.</p>
-        <div class="hh-pills">${pills.join('')}</div></section>
-      <section class="hh-sec"><div class="hh-sech"><span class="hh-lab">Where to</span><span class="hh-note">Everything on this page is a door — nothing to fill in here</span></div>
-        <div class="hh-grid">
-          <a class="hh-dash" href="#overview"><div class="hh-scan"></div>
-            <div class="hh-dl"><div class="hh-ic"><span class="hh-tile"><span></span></span><em>Dashboard</em></div>
-              <div class="hh-dt">Take me to my <span>Dashboard</span></div>
-              <div class="hh-dc">A snapshot of how your scope is tracking — what has moved since you last looked, what we need from you, and what is coming up.</div>
-              <div class="hh-meter"><div class="r"><span>Plan progress</span><b>${pct}%</b></div><div class="t"><i style="width:${pct}%"></i></div></div></div>
-            <div class="hh-dr">${need?`<span class="hh-wait"><b>${need}</b> waiting on you</span>`:''}<span class="hh-cta">Open dashboard <span>&rarr;</span></span></div></a>
-          ${forms}
-          <a class="hh-card" href="#focus"><span class="hh-lab">Focus list</span><div class="hh-ct">Take me to my Focus list</div><div class="hh-cc">Everything still open, most urgent first. Handy on a call.</div><div class="hh-cf" style="justify-content:flex-end"><span class="hh-go">Open &rarr;</span></div></a>
-        </div></section>
-      ${more.length?`<section class="hh-sec" style="gap:12px"><span class="hh-lab">Also in your hub</span><div class="hh-more">${more.join('')}</div></section>`:''}
-      <footer class="hh-foot"><span>${hhTeam()}</span><span>Questions? Reply in your shared Slack channel.</span></footer>
-    </main></div>`;
+// ── Home · Concept D (Sabel document skin, 9 Oct 2026) ────────────────────────
+// Sidebar hub with the Runway hero: title, go-live countdown and progress ring,
+// four header cards, the week ruler, then the three-column board (your court,
+// Sabel's court, done recently), one line per workstream, decisions and
+// materials. Reads the same state as every other view; writes nothing new.
+const SDD_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function sdFmt(d){return d.getDate()+' '+SDD_MON[d.getMonth()];}
+function sdFmtW(d){return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).replace('Sept','Sep');}
+function sdAv(name){const n=String(name||'');const k=n==='Chris'?'c':(n==='Greg'?'g':(n==='Richard'?'r':'x'));return `<span class="sd-av ${k}" title="${esc(n)}">${esc(pvInitials(n))}</span>`;}
+function sdPillar(pid){return P.find(p=>p.id===pid)||null;}
+function sdOpenPillar(pid){if(typeof flowOpenAndScroll==='function'){cur='flow';if(!flowOpen)flowOpen=new Set();flowOpen.add(pid);flowPending=pid;render();return;}setP(pid);}
+// Everything Sabel is on this week (the hnSabelWeek rule, without the cap).
+function sdSabelRows(){
+  const cw=currentWeek(),out=[];
+  ovAll().forEach(o=>{
+    if(o.side!=='sabel')return;const t=o.t;
+    if(isPhased(t)){const ai=activePhaseIdx(t);if(ai<0)return;const p=t.phases[ai],h=phaseHolder(p);
+      if(!SABEL_TEAM.includes(h))return;const end=p.wkEnd||p.week;if(!(p.week&&p.week<=cw&&end>=cw)&&!phaseStarted(p))return;
+      const x=(p.sub||[]).find(s=>s.s!=='Complete');out.push({t:x?x.t:p.l,sub:t.t+' · '+o.pl,cid:o.cid,k:end||99,o:h,st:'In progress',pc:o.pc});return;}
+    if(t.s==='Complete')return;const end=t.wkEnd||t.week;
+    if(t.s==='In Progress'||t.s==='Blocked'||(t.week&&t.week<=cw&&end>=cw)){
+      const st=t.s==='Blocked'?'Blocked':(t.s==='In Progress'?'In progress':(t.ongoing?'Ongoing':'This week'));
+      out.push({t:t.t,sub:o.pl+(end&&end<99?' · by '+hnDue(end):''),cid:o.cid,k:end||99,o:t.o,st,pc:o.pc});}
+  });
+  out.sort((a,b)=>a.k-b.k);return out;
 }
+function sdDoneRecent(n){
+  const rows=ovAll().filter(o=>o.t.s==='Complete').map(o=>({o,at:o.t.doneAt||''}));
+  rows.sort((a,b)=>b.at.localeCompare(a.at));return rows.slice(0,n);
+}
+function sdNextSession(){
+  if(typeof progPages!=='function')return null;const today=new Date();today.setHours(0,0,0,0);
+  const open=progPages().filter(p=>p.status!=='green'&&p.status!=='held'&&!(p.date&&new Date(p.date+'T00:00:00')<today));
+  open.sort((a,b)=>(a.date||'9')<(b.date||'9')?-1:(a.date||'9')>(b.date||'9')?1:((a.week||99)-(b.week||99)));
+  return open[0]||null;
+}
+function sdSessionLine(p){const bits=[];if(p.date){const d=new Date(p.date+'T00:00:00');bits.push(sdFmtW(d)+(p.time?', '+p.time:''));}else if(p.week)bits.push('Week '+p.week);if(p.length)bits.push(p.length);if(p.where)bits.push(p.where);bits.push(p.status==='booked'?'booked':(p.status==='unscheduled'?'to be scheduled':PROG_STATUS[p.status]||''));return bits.filter(Boolean).join(' · ');}
+function sdRulerHTML(cw,glw){
+  const mx=Math.max(maxWeek(),glw?glw+4:0,cw);const cells=[],labs=[];let lastM=-1;
+  for(let n=1;n<=mx;n++){const d=weekStartDate(n);const cls=n===glw?'gl':(n===cw?'now':(n<cw?'done':''));
+    const lab=n===cw?'now':(n===glw?'go-live':(d.getMonth()!==lastM?sdFmt(d):String(d.getDate())));lastM=d.getMonth();
+    cells.push(`<div class="c ${cls}" title="Week ${n} · week of ${sdFmt(d)}" onclick="setGroupBy('week');setP('Week ${n}')"></div>`);
+    labs.push(`<span class="${cls}">${lab}</span>`);}
+  const chips=[];
+  if(typeof progPages==='function'){const today=new Date();today.setHours(0,0,0,0);
+    progPages().filter(p=>p.status!=='green'&&p.status!=='held'&&!(p.date&&new Date(p.date+'T00:00:00')<today)).sort((a,b)=>(a.week||99)-(b.week||99)).slice(0,4)
+      .forEach(p=>chips.push(`<button class="sd-chip" onclick="setP('prog:${p.id}')"><b>W${p.week||'?'}</b> ${esc(p.title||'Working session')}${p.length?' · '+esc(p.length):''}${p.status==='unscheduled'?' · to book':''}</button>`));}
+  const g=ovGoLive();if(g&&glw)chips.push(`<button class="sd-chip red" onclick="setP('runway')"><b>W${glw}</b> Go-live · ${esc(sdFmtW(g.gl))}</button>`);
+  const first=weekStartDate(1),last=weekStartDate(mx);
+  return `<div class="sd-ruler sd-rise" style="animation-delay:.3s"><div class="top"><span class="sd-lab">The ${mx} weeks · ${esc(sdFmt(first))} to ${esc(sdFmt(new Date(last.getTime()+6*86400000)))}</span>
+    <span class="sd-leg"><span><i style="background:var(--sd-green)"></i>Weeks done</span><span><i style="background:var(--sd-blue)"></i>This week</span><span><i style="background:var(--sd-red)"></i>Go-live</span></span></div>
+    <div class="cells" style="grid-template-columns:repeat(${mx},minmax(0,1fr))">${cells.join('')}</div>
+    <div class="lab" style="grid-template-columns:repeat(${mx},minmax(0,1fr))">${labs.join('')}</div>
+    ${chips.length?`<div class="sd-chips">${chips.join('')}</div>`:''}</div>`;
+}
+function sdYouTile(r){
+  const t=r.o.t,title=r.phased&&r.x?r.x.t:t.t;const a=hnRowAction(r);const due=hnDue(r.key);const ph=sdPillar(r.o.pid);
+  const kind=r.phased?('Step '+(r.si+1)+' of '+((r.p&&r.p.sub||[]).length||1)+' · '+esc(r.gl||'Provide')):(t.s==='In Progress'?'In progress':(t.form?'Form':esc(r.gl||'Provide')));
+  const when=r.od?`<span class="late">Overdue${due?' · was due '+esc(due):''}</span>`:(due?`<span>Due ${esc(due)}</span>`:'');
+  const desc=r.phased?(r.x&&(r.x.clientText||r.x.tip||'')):(t.tip||t.notes||'');
+  const ctx=r.phased?esc(t.t):(ph?esc(ph.l):'');
+  return `<article class="sd-tile${r.od?' od':''}"><div class="m"><b>${kind}</b>${when}</div><div class="tt">${esc(title)}</div>${desc?`<div class="dd">${esc(String(desc).slice(0,160))}${String(desc).length>160?'…':''}</div>`:''}
+    <div class="ctx">${ph?`<span class="sd-pill" style="color:${ph.c};border-color:${ph.c}33">${ctx}</span>`:''}<span>${esc(CLIENT_LABEL)}</span></div>
+    <div class="act">${a.l==='Open'?`<button class="sd-btn red" style="flex:1" onclick="${a.go}">Open and update</button>`:`<button class="sd-btn" onclick="gotoTask('${r.o.cid}')">Open</button><button class="sd-btn red" onclick="${a.go}">${a.l}</button>`}</div></article>`;
+}
+function sdMaterials(){
+  const m=[];
+  if(typeof SOW!=='undefined'&&SOW&&((SOW.hours>0)||(SOW.inScope&&SOW.inScope.length)))m.push(`<button class="sd-mat" onclick="setP('overview');ovExpand('scope')"><span class="ic"><i class="ti ti-file-text"></i></span><span><b>Scope of work</b><span>${esc(HUB_RANGE)} · what is in and out</span></span></button>`);
+  (typeof formsActive==='function'?formsActive():[]).forEach(f=>{const st=formState(f.id);const cls=st.submitted?'g':(st.link?'y':'');
+    m.push(`<button class="sd-mat" onclick="setP('form:${f.id}')"><span class="ic ${cls}"><i class="ti ti-${f.icon||'clipboard-check'}"></i></span><span><b>${esc(f.l)}</b><span class="${cls}">${esc(st.label)}</span></span></button>`);});
+  if(goLiveDate)m.push(`<button class="sd-mat" onclick="setP('runway')"><span class="ic"><i class="ti ti-rocket"></i></span><span><b>Go-live checklist</b><span>${typeof gateItems==='function'?gateItems().filter(o=>o.t.s!=='Complete').length+' still to clear':'What must be true before the day'}</span></span></button>`);
+  if(typeof openStatusReport==='function')m.push(`<button class="sd-mat" onclick="openStatusReport()"><span class="ic"><i class="ti ti-file-analytics"></i></span><span><b>Status report</b><span>Snapshot of today, as a PDF</span></span></button>`);
+  if(typeof notesUnread==='function'){const u=notesUnread();m.push(`<button class="sd-mat" onclick="setP('notes')"><span class="ic${u?' y':''}"><i class="ti ti-messages"></i></span><span><b>Notes</b><span class="${u?'y':''}">${u?u+' new':'The thread on every task'}</span></span></button>`);}
+  if(typeof parkedCount==='function'&&parkedCount())m.push(`<button class="sd-mat" onclick="setP('parked')"><span class="ic"><i class="ti ti-archive"></i></span><span><b>Out of scope</b><span>${parkedCount()} parked for later</span></span></button>`);
+  return m.join('');
+}
+function homeView(){
+  const gs=globalStats(),pct=hnPct(),g=ovGoLive(),cw=currentWeek(),glw=typeof goLiveWeek==='function'?goLiveWeek():0;
+  const needs=hnNeeds(),now=needs.now,later=needs.later,od=now.filter(r=>r.od).length;
+  const sab=sdSabelRows(),done=sdDoneRecent(7),nx=sdNextSession();
+  const doneN=Math.round(gs.complete);
+  const owners=[...new Set(sab.map(r=>r.o).filter(Boolean))];
+  const ringOff=Math.round(302*(1-Math.min(100,Math.max(0,pct))/100));
+  const topPillar=P.map(p=>({p,m:phaseMini(p.id)})).filter(x=>x.m.total&&x.m.done<x.m.total).sort((a,b)=>(b.m.done/b.m.total)-(a.m.done/a.m.total))[0];
+  const subline=now.length?`${now.length===1?'One thing is':now.length+' things are'} in your court${od?', '+od+' overdue':''}. Sabel is on ${sab.length} ${sab.length===1?'item':'items'} this week.${g&&g.d>0?' Go-live is '+g.d+' days out.':''}`
+    :`Nothing is waiting on you right now. Sabel is on ${sab.length} ${sab.length===1?'item':'items'} this week.${g&&g.d>0?' Go-live is '+g.d+' days out.':''}`;
+  // hero
+  let h=`<div class="sd"><section class="sd-hero"><div class="l sd-rise"><div class="sd-kick">Sabel × ${esc(CLIENT_NAME)} · Intercom build</div>
+      <h1 class="sd-h1">Your Intercom build,<br><span>at a glance.</span></h1><p class="sd-sub">${esc(subline)}</p></div>
+    <div class="rgt sd-rise" style="animation-delay:.12s">`;
+  if(g){h+=`<div class="sd-card" title="${esc(GO_LIVE_NOTE||'')}"><div class="k">Go-live</div><div class="big">${g.d>0?g.d+'<small>days</small>':(g.d===0?'Today':'Live')}</div><div class="t">${esc(g.long)}</div>${GO_LIVE_NOTE?`<div class="d">${esc(GO_LIVE_NOTE)}.</div>`:''}</div>`;}
+  else h+=`<div class="sd-card"><div class="k">Go-live</div><div class="h">Date to be set</div><div class="d">We will add it once agreed.</div></div>`;
+  h+=`<div class="sd-plain sd-ring"><div class="w"><svg viewBox="0 0 110 110" width="110" height="110" aria-hidden="true"><circle cx="55" cy="55" r="48" fill="none" stroke="var(--k1E2433)" stroke-width="8"></circle><circle class="p" cx="55" cy="55" r="48" fill="none" stroke="#E10600" stroke-width="8" stroke-linecap="round" stroke-dasharray="302" stroke-dashoffset="${ringOff}" transform="rotate(-90 55 55)" style="--to:${ringOff}"></circle></svg><div><b>${pct}%</b><small>complete</small></div></div><div class="s">${doneN} of ${gs.total} tasks done</div></div>
+    </div></section>`;
+  // four header cards
+  h+=`<section class="sd-four">
+    <div class="sd-card y sd-rise" style="animation-delay:.2s" onclick="document.getElementById('sd-board').scrollIntoView({behavior:'smooth'})"><div class="k">Waiting on you</div><div class="n">${now.length}<small>now</small></div><div class="d">${later.length?later.length+' more open later in the plan':(now.length?'Nothing else queued yet':'Nothing queued')}</div></div>
+    <div class="sd-card b sd-rise" style="animation-delay:.27s" onclick="document.getElementById('sd-board').scrollIntoView({behavior:'smooth'})"><div class="k">Sabel is building</div><div class="n">${sab.length}<small>this week</small></div><div class="d">${owners.length?esc(owners.length>1?owners.slice(0,-1).join(', ')+' and '+owners[owners.length-1]:owners[0]):'Your Sabel team'}</div></div>
+    <div class="sd-card g sd-rise" style="animation-delay:.34s" onclick="setP('flow')"><div class="k">Done so far</div><div class="n">${doneN}<small>of ${gs.total}</small></div><div class="d">${topPillar?esc(topPillar.p.l)+' '+Math.round(topPillar.m.done/topPillar.m.total*100)+'% through':'Across '+P.length+' workstreams'}</div></div>
+    <div class="sd-card sd-rise" style="animation-delay:.41s" onclick="${nx?`setP('prog:${nx.id}')`:`setP('flow')`}"><div class="k">Next session</div>${nx?`<div class="h">${esc((nx.code?nx.code+' · ':'')+(nx.title||'Working session'))}</div><div class="d">${esc(sdSessionLine(nx))}</div>`:`<div class="h">No session booked</div><div class="d">We will schedule the next working session with you.</div>`}</div>
+  </section>`;
+  // ruler
+  h+=sdRulerHTML(cw,glw);
+  // board
+  const youTiles=now.slice(0,3).map(sdYouTile).join('');
+  const laterRows=later.slice(0,3).map(r=>{const t=r.o.t,title=r.phased&&r.x?r.x.t:t.t;const d=hnDue(r.key);return `<span>${d?'By '+esc(d)+' · ':''}${esc(title)}</span>`;}).join('');
+  const sabRows=sab.slice(0,6).map(r=>`<article class="sd-tile" style="flex-direction:row;gap:12px;align-items:flex-start;cursor:pointer" onclick="gotoTask('${r.cid}')">${sdAv(r.o)}<div style="min-width:0"><div class="tt">${esc(r.t)}</div><div class="dd">${esc(r.sub)}${r.st==='Blocked'?' · <span style="color:var(--kF87171)">held up</span>':(r.st==='Ongoing'?' · ongoing':'')}</div></div></article>`).join('');
+  const doneRows=done.map(x=>{const o=x.o;const by=o.side==='client'?CLIENT_LABEL:(o.t.o||'Sabel');const d=x.at?new Date(x.at+'T00:00:00'):null;return `<div class="sd-row" onclick="gotoTask('${o.cid}')"><i class="ti ti-check ck"></i><div style="min-width:0"><div class="tt">${esc(o.t.t)}</div><div class="dd">${d&&!isNaN(d)?sdFmt(d)+' · ':''}${esc(by)} · ${esc(o.pl)}</div></div></div>`;}).join('');
+  h+=`<div class="sd-sech" id="sd-board"><span class="num">01 — THIS WEEK</span><h2>Whose move it is</h2><div class="r">${cw>=1?'Week '+cw+(glw>=cw?' of '+glw:''):'Before week 1'} · ${esc(weekRangeLabel(Math.max(cw,1)))}</div></div>
+  <section class="sd-board">
+    <div class="sd-col y sd-rise" style="animation-delay:.1s"><div class="sd-colh"><span class="k">Your court</span><span>${now.length} now${later.length?' · '+later.length+' later':''}</span></div>
+      ${youTiles||`<div class="sd-empty"><i class="ti ti-circle-check-filled"></i>Nothing is waiting on ${esc(CLIENT_LABEL)} right now.</div>`}
+      ${now.length>3?`<button class="sd-more" onclick="setP('overview')">All ${now.length} waiting on you →</button>`:''}
+      ${later.length?`<div class="sd-later"><span class="k">Later</span>${laterRows}${later.length>3?`<button onclick="setP('overview')">${later.length-3} more →</button>`:''}</div>`:''}</div>
+    <div class="sd-col b sd-rise" style="animation-delay:.18s"><div class="sd-colh"><span class="k">Sabel's court</span><span>${sab.length} this week</span></div>
+      ${sabRows||`<div class="sd-empty" style="color:var(--k94A3B8)"><i class="ti ti-tool" style="color:var(--sd-blue)"></i>Nothing scheduled for Sabel this week.</div>`}
+      ${sab.length>6?`<button class="sd-more" onclick="setP('flow')">All ${sab.length} in progress →</button>`:''}</div>
+    <div class="sd-col g sd-rise" style="animation-delay:.26s"><div class="sd-colh"><span class="k">Done recently</span><span>${doneN} so far</span></div>
+      ${doneRows?`<div class="sd-plain">${doneRows}</div>`:`<div class="sd-empty" style="color:var(--k94A3B8)"><i class="ti ti-circle" style="color:var(--k475569)"></i>Nothing finished yet.</div>`}
+      ${doneN>done.length?`<button class="sd-more" onclick="setP('flow')">All ${doneN} completed →</button>`:''}</div>
+  </section>`;
+  // workstreams
+  const rows=P.map((p,i)=>{const m=phaseMini(p.id);const pc=m.total?Math.round(m.done/m.total*100):0;
+    const you=inScope(p.id,'client').filter(t=>t.s!=='Complete').length,sa=inScope(p.id,'sabel').filter(t=>t.s!=='Complete').length;
+    const started=m.done>0||you||sa;
+    return `<div class="rw" onclick="sdOpenPillar('${p.id}')"><div class="nm"><i style="background:${p.c}"></i><span>${esc(p.l)}</span></div><div class="wk">${esc((p.w||'').replace('Weeks ','').replace('Week ',''))}</div><div class="bar"><i style="width:${pc}%;background:${pc===100?'var(--sd-green)':p.c};animation-delay:${.25+i*.04}s"></i></div><div class="num">${Math.round(m.done)}/${m.total}</div><div class="num ${you?'y':'dim'}">${you}</div><div class="num ${sa?'b':'dim'}">${sa}</div></div>`;}).join('');
+  h+=`<div class="sd-sech"><span class="num">02 — PROGRESS</span><h2>${P.length} workstreams, one line each</h2><div class="r"><button onclick="setP('flow')">Open the full tracker →</button></div></div>
+  <section class="sd-wst sd-rise" style="animation-delay:.3s"><div class="h"><span>Workstream</span><span>Weeks</span><span>Progress</span><span style="text-align:right">Done</span><span class="y" style="text-align:right">You</span><span class="b" style="text-align:right">Sabel</span></div>${rows}</section>`;
+  // decisions + materials
+  let dec=[];try{dec=(typeof decItems==='function'?decItems():[]).filter(d=>d.obj&&d.obj.decision&&d.obj.decision.v).sort((a,b)=>String(b.obj.decision.at||'').localeCompare(String(a.obj.decision.at||'')));}catch(e){dec=[];}
+  const decRows=dec.slice(0,6).map(d=>{const x=d.obj.decision;return `<div class="it" onclick="setP('decisions')"><b>${esc(d.title)}</b><span>${esc(String(x.v).slice(0,110))}${String(x.v).length>110?'…':''}</span><span>${[decDate(x.at),x.by?esc(x.by):''].filter(Boolean).join(' · ')}</span></div>`;}).join('');
+  h+=`<section class="sd-two" style="margin-top:34px">
+    <div><div class="sd-sech" style="margin-top:0"><span class="num">03 — AGREED</span><h2>Decisions on record</h2><div class="r">${dec.length?`<button onclick="setP('decisions')">All ${dec.length} →</button>`:''}</div></div>
+      ${decRows?`<div class="sd-list sd-rise" style="animation-delay:.36s">${decRows}</div>`:`<div class="sd-empty" style="color:var(--k94A3B8)"><i class="ti ti-gavel" style="color:var(--k475569)"></i>No decisions recorded yet. They appear here as tasks are agreed.</div>`}</div>
+    <div><div class="sd-sech" style="margin-top:0"><span class="num">04 — FILES</span><h2>Project materials</h2></div><div class="sd-mats">${sdMaterials()}</div>
+      ${nx?`<div class="sd-card sd-next" onclick="setP('prog:${nx.id}')" style="cursor:pointer"><div class="k">Next working session</div><div class="h" style="font-size:14px">${esc((nx.code?nx.code+' · ':'')+(nx.title||'Working session'))}</div><div class="d">${esc(sdSessionLine(nx))}${nx.prep&&nx.prep.length?' · '+nx.prep.filter(x=>!x.done).length+' prep item'+(nx.prep.filter(x=>!x.done).length===1?'':'s')+' for you':''}</div></div>`:''}</div>
+  </section>`;
+  h+=`<footer class="sd-foot"><span>Perfect made possible <i class="dot">·</i> sabelcustomersuccess.com</span><span>${hhTeam().replace(/<[^>]+>/g,'')}</span><span>Live · synced ${esc(hhAgo(remoteStamp))}</span></footer></div>`;
+  return h;
+}
+
 // Tracker page: the plan by pillar or week, plus everything that used to sit in the sidebar.
 function hnBar(pct,c){return `<div class="bar"><i style="width:${pct}%;background:${c}"></i></div>`;}
 function trackerView(){
@@ -3965,8 +4415,8 @@ function qRow(t,cid,ctx){
 }
 // ── Open row: simple task ──
 function qSteps(t,cid,ed){const steps=t.sub||[];if(!steps.length&&!ed)return '';
-  return `<div class="qsteps">${steps.map((x,i)=>{const sd=x.s==='Complete';
-    return `<div class="qi"${ed?` draggable="true" ondragstart="pvSubStart(event,'${cid}',${i})" ondragover="event.preventDefault()" ondrop="pvSubDrop(event,'${cid}',${i})"`:''}><button class="qic" onclick="toggleSub(event,'${cid}',${i})" title="${sd?tip('stepNotDone'):tip('stepDone')}"><i class="ti ti-${sd?'circle-check-filled':'circle'}"></i></button>
+  return `<div class="qsteps">${steps.map((x,i)=>{const sd=x.s==='Complete',sp=x.s==='In Progress';
+    return `<div class="qi${sp?' p':''}"${ed?` draggable="true" ondragstart="pvSubStart(event,'${cid}',${i})" ondragover="event.preventDefault()" ondrop="pvSubDrop(event,'${cid}',${i})"`:''}><button class="qic" onclick="toggleSub(event,'${cid}',${i})" title="${stepTip(x.s)}"><i class="ti ti-${stepIcon(x.s)}"></i></button>
       <span class="qit${sd?' d':''}"${ed?` contenteditable="true" spellcheck="false" title="${tip('editStep')}" data-orig="${esc(x.t)}" onkeydown="pvKey(event,this)" onblur="pvSaveSub('${cid}',${i},this)"`:''}>${esc(x.t)}</span>
       ${x.tip?`<i class="ti ti-info-circle qii" title="${esc(x.tip)}"></i>`:''}
       ${ed?`<button class="qirm" onclick="removeSub(event,'${cid}',${i})" title="${tip('removeStep')}">&times;</button>`:''}</div>
@@ -4006,8 +4456,14 @@ function qNotesTog(cid){if(qNotes.has(cid))qNotes.delete(cid);else qNotes.add(ci
 function qEditTog(cid){if(qEdit.has(cid))qEdit.delete(cid);else{qEdit.add(cid);setTimeout(()=>pvEditTitle(cid),30);}renderMain();}
 // ── Open row: staged deliverable ──
 function qStageLabel(t,st){return st.c.clientAction?sdYou(st.p.l):sdPhrase(t,st,false);}
+// Stages open and close one by one (9 Oct 2026): qStOpen holds the stages shown per card.
+// Every stage starts open when the task is opened; Collapse all / Expand all act on the whole list.
+let qStOpen={};
+function qStSet(cid,oi){if(!qStOpen[cid]){const t=resolveTask(cid);qStOpen[cid]=new Set((t&&t.phases||[]).map((_,i)=>i));}return qStOpen[cid];}
 function qStage(e,cid,i){e.stopPropagation();const t=resolveTask(cid);if(!t)return;const ai=activePhaseIdx(t);
-  if(phaseOpen[cid]===i||(phaseOpen[cid]===undefined&&i===ai))delete phaseOpen[cid];else phaseOpen[cid]=i;renderMain();}
+  const s=qStSet(cid,phaseOpen[cid]!==undefined&&t.phases[phaseOpen[cid]]?phaseOpen[cid]:ai);if(s.has(i))s.delete(i);else s.add(i);renderMain();}
+function qStageAll(e,cid,on){e.stopPropagation();const t=resolveTask(cid);if(!t)return;qStOpen[cid]=new Set(on?t.phases.map((_,i)=>i):[]);renderMain();}
+(function(){const o=togglePhaseSub;togglePhaseSub=function(e,cid,pi,si){const r=o.apply(this,arguments);const t=resolveTask(cid);if(t&&qStOpen[cid]){const na=activePhaseIdx(t);if(na>=0)qStOpen[cid].add(na);}return r;};})();
 function qMarkStage(e,cid){e.stopPropagation();const t=resolveTask(cid);if(!t)return;const ai=activePhaseIdx(t);if(ai<0)return;const p=t.phases[ai];
   if(!(p.sub||[]).length){showToast('This stage has no checklist yet. Use Edit to add one.');return;}
   p.sub.forEach(x=>x.s='Complete');syncPhased(t);delete phaseOpen[cid];render();scheduleAutoSave();showToast('Stage '+(ai+1)+' done');}
@@ -4015,14 +4471,15 @@ function qStaged(t,cid){
   syncPhased(t);
   const done=t.s==='Complete',all=sdStages(t),ai=activePhaseIdx(t),n=all.length,cu=ai<0?null:all[ai];
   const oi=phaseOpen[cid]!==undefined&&t.phases[phaseOpen[cid]]?phaseOpen[cid]:ai;
+  const openSet=qStSet(cid,oi),allOpen=all.every(st=>openSet.has(st.i));
   const nextC=all.find(x=>x.i>ai&&ai>=0&&!x.done&&x.c.clientAction);
   const desc=sdDesc(t),cnt=(t.log||[]).length,sab=qSide(t)==='sabel';
-  const stages=all.map(st=>{const i=st.i,shown=i===oi,act=i===ai,last=i===n-1;
+  const stages=all.map(st=>{const i=st.i,shown=openSet.has(i),act=i===ai,last=i===n-1;
     const cls=st.done?'ok':(shown&&!act?'sel':(act?(st.c.clientAction?'nowC':'nowS'):(st.c.clientAction?'c':'')));
     const when=st.done?sdSubLabel(st,all,ai):(act?'Now'+(sdDue(st.p)?' · due '+sdDue(st.p):''):(st.p.week?'around '+sdDue(st.p):sdLow(sdSubLabel(st,all,ai))));
     let body;
     if(shown){const txt=st.c.clientAction?sdClientText(t,st):(act?sdNowText(t,st):(st.c.nowText||st.p.tip||''));
-      const items=(st.p.sub||[]).map((x,si)=>{const sd=x.s==='Complete';return `<div class="qi"><button class="qic" onclick="togglePhaseSub(event,'${cid}',${i},${si})" title="${sd?'Mark incomplete':'Mark done'}"><i class="ti ti-${sd?'circle-check-filled':'circle'}"></i></button><span class="qit${sd?' d':''}">${esc(x.t)}</span>${x.tip?`<i class="ti ti-info-circle qii" onmouseenter="showPhaseTip(event,'${cid}',${i},${si})" onmousemove="moveTip(event)" onmouseleave="hideTip()"></i>`:''}</div>${typeof decLine==='function'?`<div class="qidc">${decLine(x,cid+':p:'+i+':'+si)}</div>`:''}`;}).join('');
+      const items=(st.p.sub||[]).map((x,si)=>{const sd=x.s==='Complete',sp=x.s==='In Progress';return `<div class="qi${sp?' p':''}"><button class="qic" onclick="togglePhaseSub(event,'${cid}',${i},${si})" title="${stepTip(x.s)}"><i class="ti ti-${stepIcon(x.s)}"></i></button><span class="qit${sd?' d':''}">${esc(x.t)}</span>${x.tip?`<i class="ti ti-info-circle qii" onmouseenter="showPhaseTip(event,'${cid}',${i},${si})" onmousemove="moveTip(event)" onmouseleave="hideTip()"></i>`:''}</div>${typeof decLine==='function'?`<div class="qidc">${decLine(x,cid+':p:'+i+':'+si)}</div>`:''}`;}).join('');
       body=`<div class="qsl"><span class="l b">${esc(qStageLabel(t,st))}</span><span class="w">${esc(when)}</span></div>${txt?`<div class="qss">${esc(txt)}</div>`:''}${items?`<div class="qsteps">${items}</div>`:''}${st.p.note?`<div class="stage-note">${esc(st.p.note)}</div>`:''}`;}
     else body=`<div class="qsl"><span class="l">${esc(qStageLabel(t,st))}</span>${nextC&&nextC.i===i?'<span class="y">'+esc(CLIENT_LABEL)+'\'s turn next</span>':''}<span class="${act?'w':'m'}">${esc(when)}</span></div>`;
     return `<div class="qsn"><button class="${cls}" onclick="qStage(event,'${cid}',${i})" title="${esc(st.p.l)}">${st.done?'<i class="ti ti-check"></i>':i+1}</button>${last?'':'<span class="ln"></span>'}</div><div class="qsb${last?' last':''}">${body}</div>`;}).join('');
@@ -4031,6 +4488,7 @@ function qStaged(t,cid){
     <div class="qrh" onclick="qToggle('${cid}')"><i class="ti ti-route qrt" style="color:${qBaton(t)}"></i><span class="qt">${esc(t.t)}</span>${sab?'<span></span>':''}<button class="qx" title="${tip('closeDetails')}" onclick="event.stopPropagation();qToggle('${cid}')"><i class="ti ti-chevron-up"></i></button></div>
     <div class="qb" onclick="event.stopPropagation()">
       ${desc?`<div class="qdesc">${esc(desc)}</div>`:''}
+      <div class="qsa"><span>${n} stages</span><button onclick="qStageAll(event,'${cid}',${allOpen?'false':'true'})">${allOpen?'Collapse all':'Expand all'}</button></div>
       <div class="qst">${stages}</div>
       <div class="qpills"><span class="qp ro">${esc(who)}</span>${cu?`<button class="qp" onclick="qStageDueMenu(event,'${cid}')" title="Set an exact due date for this stage">${due?'Due '+due:'Set a due date'}<i class="ti ti-chevron-down"></i></button>`:''}<span class="qp blue ro">${cu?`Stage ${ai+1} of ${n}`:`All ${n} stages done`}</span><span class="sp"></span>${qLink(t,cid)}</div>
       <div class="qft">
@@ -4178,6 +4636,132 @@ function qSettings(t,cid){
   if(/^Week /.test(c)&&qOldWeek!==c){qOldWeek='';const m=document.getElementById('main');if(m)m.innerHTML='<div class="mnw">'+qWeekView(c)+'</div>';if(typeof syncFormHost==='function')syncFormHost();return;}
   return orig.apply(this,arguments);};})();
 
+
+// ── Project tracker as a flow (8 Oct 2026) ──
+let flowOpen=null,flowPending='';
+function flowClientOwned(side,t){return side==='client'||t.o===CLIENT_LABEL;}
+function flowKind(side,t,now){const w=t.week||0;
+  if(t.s==='Complete')return 'done';
+  if(t.s==='In Progress')return 'now';
+  if(t.s==='Dependency'&&flowClientOwned(side,t)&&w>0&&w<=now)return 'wait';
+  return 'up';}
+function flowDue(t,k){
+  if(k==='done')return ['Done','var(--k475569,#475569)'];
+  const d=(typeof dueDate==='function')?dueDate(t):null;
+  if(!d)return ['Date TBC','var(--k8B93A3,#8B93A3)'];
+  const txt=(typeof isDueRange==='function'&&isDueRange(t))?dueText(t):'Due '+hnFmt(d);
+  return [txt,isOverdue(t)?'var(--kFF4D45,#FF4D45)':'var(--k8B93A3,#8B93A3)'];}
+/* Tint from a pillar colour: '#3B82F6' or a theme token 'var(--k64748B)'. */
+function flowTint(c,a){const m=/([0-9a-f]{6})\b/i.exec(String(c||''));if(!m)return '';const n=parseInt(m[1],16);return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`;}
+function flowTask(side,t,cid,now,pc){
+  const k=flowKind(side,t,now),isC=flowClientOwned(side,t),w=t.week||0;
+  const who=isC?'you':(t.o||'Sabel');
+  const meta=k==='done'?'Done':k==='now'?(isC?'In progress · with you':'In progress · '+esc(t.o||'Sabel')):k==='wait'?('Waiting on you'+(side==='sabel'?' before Sabel can continue':'')):(((w>0&&w<=now)?'Open · ':'Upcoming · ')+esc(who));
+  const due=flowDue(t,k);
+  const title=esc(t.t)+(isPhased(t)&&t.phases&&t.phases.length?' · '+t.phases.length+' stages':'');
+  const open=typeof pvOpen!=='undefined'&&pvOpen.has(cid);
+  const tint=pc?`border-color:${flowTint(pc,.45)};background:${flowTint(pc,.06)}`:'';
+  const html=open
+    ? `<div class="fl-open" style="--flc:${flowTint(pc,.6)||'var(--k2A3145,#2A3145)'}">${isPhased(t)?qStaged(t,cid):qOpen(t,cid)}</div>`
+    : `<div class="fl-task ${k}" style="${tint}" onclick="flowRow('${cid}')" title="Open this task"><span class="fl-box">${k==='done'?'✓':k==='now'?'›':''}</span><div><div class="fl-ti">${title}</div><div class="fl-tm">${meta}</div></div><span class="fl-due" style="color:${due[1]}">${due[0]}</span></div>`;
+  return {k,done:k==='done',needYou:k==='wait'||(k==='now'&&isC),week:w,html};}
+function flowRow(cid){if(typeof pvOpen==='undefined')return;if(pvOpen.has(cid))pvOpen.delete(cid);else pvOpen.add(cid);renderMain();}
+function flowPillar(p,i,now){
+  const cols={client:[],sabel:[]};let start=0,end=0;
+  ['client','sabel'].forEach(side=>(T[p.id]&&T[p.id][side]||[]).forEach((t,idx)=>{if(t.parked)return;
+    const cid=p.id+'-'+(side==='sabel'?'s':'c')+'-'+idx;cols[side].push(flowTask(side,t,cid,now,p.c));
+    if(t.week&&t.week>=1){if(!start||t.week<start)start=t.week;const e=endWeek(t);if(e>end)end=e;}}));
+  cols.client.sort((a,b)=>a.week-b.week);cols.sabel.sort((a,b)=>a.week-b.week);
+  const all=cols.client.concat(cols.sabel),total=all.length,done=all.filter(x=>x.done).length,need=all.filter(x=>x.needYou).length;
+  const state=(total&&done===total)?'done':(start&&start<=now)?'active':'up';
+  const sun=n=>{const d=new Date(weekStartDate(n));d.setDate(d.getDate()+6);return d;};
+  const weeks=start?(start===end?'Week '+start:'Weeks '+start+'–'+end):'Not scheduled';
+  const dates=start?hnFmt(weekStartDate(start))+' – '+hnFmt(sun(end||start)):'';
+  const stateLabel=state==='done'?'Complete':state==='active'?'In motion':(start?'Opens week '+start:'Not scheduled');
+  return {kind:'pillar',p,i,num:String(i+1).padStart(2,'0'),start,end,weeks,dates,state,stateLabel,total,done,need,cols,
+    pct:total?Math.round(done/total*100):0,cDone:cols.client.filter(x=>x.done).length,sDone:cols.sabel.filter(x=>x.done).length};}
+/* Progression sessions sit after the pillar they follow (x.frm). */
+function flowProgs(pid,now){
+  if(typeof progPages!=='function')return [];
+  return progPages().filter(x=>x.frm===pid).map(x=>{const st=typeof progSt==='function'?progSt(x):'unscheduled';
+    const state=(st==='held'||st==='green')?'done':(st==='booked'?'active':'up');
+    const when=typeof progWhen==='function'?progWhen(x):'';
+    return {kind:'prog',x,n:progNum(x.id),state,label:(typeof PROG_STATUS!=='undefined'&&PROG_STATUS[st])||'',when,week:x.week||0};});}
+/* The "need you" pill goes to the Dashboard and lands on "What we need from <client>". */
+function flowNeed(){setP('overview');setTimeout(()=>{
+  const el=[...document.querySelectorAll('#main *')].find(e=>e.children.length<=3&&/^What we need from/.test(e.textContent.trim()));if(!el)return;
+  // The card is the first ancestor that paints a background (the heading itself sits in a bare row).
+  let box=el;while(box.parentElement&&box.id!=='main'){const bg=getComputedStyle(box).backgroundColor;if(bg&&bg!=='rgba(0, 0, 0, 0)'&&bg!=='transparent')break;box=box.parentElement;}
+  if(box.id==='main')box=el.parentElement||el;
+  const sc=box.closest('.mn'),ov=sc?getComputedStyle(sc).overflowY:'visible',top=box.getBoundingClientRect().top;
+  if(sc&&(ov==='auto'||ov==='scroll'))sc.scrollTo({top:sc.scrollTop+top-sc.getBoundingClientRect().top-64,behavior:'smooth'});
+  else window.scrollTo({top:top+window.scrollY-64,behavior:'smooth'});
+  box.classList.remove('fl-glow');void box.offsetWidth;box.classList.add('fl-glow');setTimeout(()=>box.classList.remove('fl-glow'),2800);},80);}
+function flowToggle(pid){if(!flowOpen)flowOpen=new Set();if(flowOpen.has(pid))flowOpen.delete(pid);else flowOpen.add(pid);renderMain();}
+function flowScroll(id){const el=document.getElementById(id);if(!el)return;
+  const sc=el.closest('.mn'),ov=sc?getComputedStyle(sc).overflowY:'visible';
+  if(sc&&(ov==='auto'||ov==='scroll'))sc.scrollTo({top:sc.scrollTop+el.getBoundingClientRect().top-sc.getBoundingClientRect().top-24,behavior:'smooth'});
+  else window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-24,behavior:'smooth'});}
+function flowOpenAndScroll(pid){if(!flowOpen)flowOpen=new Set();flowOpen.add(pid);if(cur!=='flow'){flowPending=pid;setP('flow');return;}renderMain();setTimeout(()=>flowScroll('flow-'+pid),30);}
+function flowAfterRender(){if(flowPending){const pid=flowPending;flowPending='';setTimeout(()=>flowScroll('flow-'+pid),60);}}
+function flowView(){
+  const now=currentWeek(),rows=P.map((p,i)=>flowPillar(p,i,now));
+  if(!flowOpen){flowOpen=new Set();const first=rows.find(r=>r.state==='active')||rows.find(r=>r.state!=='done')||rows[0];if(first)flowOpen.add(first.p.id);}
+  const allT=rows.reduce((a,r)=>a+r.total,0),allD=rows.reduce((a,r)=>a+r.done,0),needTotal=rows.reduce((a,r)=>a+r.need,0);
+  const pct=allT?Math.round(allD/allT*100):0;
+  // The chain and the list interleave: pillar, then its progression sessions, then the next pillar.
+  const seq=[];rows.forEach(r=>{seq.push(r);flowProgs(r.p.id,now).forEach(g=>seq.push(g));});
+  let last=-1;seq.forEach((r,i)=>{if(r.state!=='up')last=i;});
+  const chainW=last<0?'0%':(seq.length>1?(last/(seq.length-1)*92):0)+'%';
+  const ptype=HUB_PTYPE==='migration'?'Migration':(HUB_PTYPE==='build'?'Build':'Full project');
+  const glw=typeof goLiveWeek==='function'?goLiveWeek():0,g=hnGoLive();
+  const pills=[];
+  if(now>=1)pills.push(`<span class="fl-pill"><b>Week ${now}</b> of ${glw>=now?glw:Math.max(now,maxWeek())}</span>`);
+  if(g)pills.push(`<span class="fl-pill">Go-live <b>${hnFmt(g)}</b></span>`);
+  if(needTotal)pills.push(`<button class="fl-pill need" onclick="flowNeed()" title="See what we need from you on the Dashboard"><i></i><b>${needTotal}</b> need you <span class="go">&rarr;</span></button>`);
+  const nodes=seq.map(r=>r.kind==='pillar'
+    ? `<button class="fl-node ${r.state}" onclick="flowOpenAndScroll('${r.p.id}')" title="${esc(r.p.l)}">
+        <span class="c" style="${r.state==='active'?`border:2px solid ${r.p.c};box-shadow:0 0 0 4px var(--k0F1117,#0F1117),0 0 0 6px ${r.p.c},0 0 18px ${r.p.c}88`:''}">${r.state==='done'?'✓':r.num}</span>
+        <span class="l">${esc(r.p.l)}</span>
+        <span class="s">${r.state==='done'?'DONE':r.state==='active'?r.done+'/'+r.total:(r.start?'WK '+r.start:'TBC')}</span></button>`
+    : `<button class="fl-node pg ${r.state}" onclick="setP('prog:${r.x.id}')" title="Progression ${r.n}: ${esc(r.x.title||'')}${r.label?' · '+esc(r.label):''}">
+        <span class="c">${r.state==='done'?'✓':'P'+r.n}</span>
+        <span class="s">${esc(r.state==='done'?'HELD':(r.when?r.when.split(' · ')[0].replace(/^\w+ /,'').toUpperCase():(r.week?'WK '+r.week:'TBC')))}</span></button>`).join('');
+  const col=(r,side)=>{const list=r.cols[side].filter(x=>!hideDone||!x.done);
+    const head=side==='client'?`<div class="fl-colh you"><b>Your side · ${esc(CLIENT_NAME)}</b><span>${r.cDone}/${r.cols.client.length}</span></div>`:`<div class="fl-colh"><b>Sabel side</b><span>${r.sDone}/${r.cols.sabel.length}</span></div>`;
+    const body=list.length?list.map(x=>x.html).join(''):(r.cols[side].length?`<div class="fl-empty">Everything here is done.</div>`:`<div class="fl-empty">${side==='client'?'Nothing on your side for this block.':'Nothing for Sabel in this block.'}</div>`);
+    return `<div>${head}<div style="display:flex;flex-direction:column;padding-top:8px">${body}</div></div>`;};
+  const blocks=seq.map(r=>{
+    if(r.kind==='prog')return `<div class="fl-prow-pg" id="flow-prog-${r.x.id}"><div class="fl-pgnum ${r.state}">P${r.n}</div>
+      <button class="fl-pg" onclick="setP('prog:${r.x.id}')"><div><div class="m"><span>Progression ${r.n}</span>${r.when?`<span>${esc(r.when)}</span>`:''}<span class="st ${r.state}">${esc(r.label||'')}</span></div><div class="t">${esc(r.x.title||'Progression session')}</div></div><span class="go">Open session &rarr;</span></button></div>`;
+    const open=flowOpen.has(r.p.id);
+    return `<div class="fl-row ${r.state}" id="flow-${r.p.id}">
+      <div class="fl-num" style="border-color:${r.p.c};${r.state==='active'?`box-shadow:0 0 16px ${r.p.c}66`:''}">${r.num}</div>
+      <div class="fl-blk${open?' open':''}" style="${open?`border-color:${r.p.c}`:''}">
+        <button class="fl-head" onclick="flowToggle('${r.p.id}')" aria-expanded="${open}">
+          <div style="min-width:0"><div class="fl-meta"><span style="color:${r.p.c}">${esc(r.weeks)}</span>${r.dates?`<span>${esc(r.dates)}</span>`:''}<span class="fl-state ${r.state}">${esc(r.stateLabel)}</span></div>
+            <div class="fl-title">${esc(r.p.l)}</div>${r.p.sub?`<div class="fl-desc">${esc(r.p.sub)}</div>`:''}
+            <div class="fl-prow"><div class="bar"><i style="width:${r.pct}%;background:${r.p.c}"></i></div><span><b>${r.done}</b> of ${r.total} done</span>${r.need?`<span class="fl-need"><i></i><b>${r.need}</b> need you</span>`:''}</div></div>
+          <div class="fl-chev">⌄</div></button>
+        ${open?`<div class="fl-body">${col(r,'client')}${col(r,'sabel')}</div>`:''}
+      </div></div>`;}).join('');
+  const nProg=seq.filter(r=>r.kind==='prog').length;
+  return `<div class="fl"><div class="fl-wrap">
+    <div class="fl-hero"><div><div class="fl-eye"><i></i>Sabel × ${esc(CLIENT_NAME)} · ${ptype}</div>
+        <h1 class="fl-h1">Your build,<br><span>start to finish.</span></h1>
+        <p class="fl-sub">Every block of the project in one flow. Open any block to see the checklist — what's on your side, what's on ours. Click a task to work on it here.</p></div>
+      <div class="fl-prog"><div class="r"><span>Overall progress</span><b>${pct}%</b></div><div class="t"><i style="width:${pct}%"></i></div><div class="fl-pills">${pills.join('')}</div></div></div>
+    <div class="fl-card"><div class="fl-cardh"><span class="fl-lab">Checkpoints · kick-off → handover</span><span class="fl-hint">Click a checkpoint to open that block</span></div>
+      <div class="fl-chain"><div class="fl-track"></div><div class="fl-fill" style="width:${chainW}"></div><div class="fl-nodes${seq.length>14?' dense':''}">${nodes}</div></div></div>
+    <div class="fl-bh"><span class="fl-lab">${rows.length} blocks${nProg?' · '+nProg+' sessions':''} · in order</span>
+      <div class="fl-legend"><button class="fl-hide${hideDone?' on':''}" onclick="toggleHideDone()"><span class="sw"></span>Hide completed</button>
+        <span><i style="background:var(--k4ADE80,#4ADE80)"></i>Done</span><span><i style="background:var(--k60A5FA,#60A5FA)"></i>In progress</span><span><i style="border:1.5px dashed var(--kFF4D45,#FF4D45)"></i>Waiting on ${esc(CLIENT_NAME)}</span><span><i style="border:1.5px solid var(--k475569,#475569)"></i>Upcoming</span></div></div>
+    <div class="fl-blocks"><div class="fl-spine"></div>${blocks}</div>
+  </div></div>`;}
+(function(){const orig=renderMain;renderMain=function(){
+  if(cur==='flow'){const m=document.getElementById('main');if(m)m.innerHTML='<div class="mnw">'+flowView()+'</div>';if(typeof syncFormHost==='function')syncFormHost();flowAfterRender();return;}
+  return orig.apply(this,arguments);};})();
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function bdg(txt,c,bg){return`<span class="bdg" style="color:${c};background:${bg}">${txt}</span>`;}
@@ -4320,16 +4904,25 @@ function subCounts(t){
   const m=(t.sub||[]).length;
   return{n:(t.sub||[]).filter(x=>x.s==='Complete').length,m};
 }
+/* A step has three states (8 Oct 2026): not started → in progress → done → not started.
+   stepNext/stepIcon are shared by every place a step is ticked, including stage items. */
+function stepNext(s){return s==='Complete'?'Pending':(s==='In Progress'?'Complete':'In Progress');}
+function stepIcon(s){return s==='Complete'?'circle-check-filled':(s==='In Progress'?'circle-dot':'circle');}
+function stepTip(s){return s==='Complete'?tip('stepNotDone'):(s==='In Progress'?tip('stepDone'):tip('stepStart'));}
 function toggleSub(e,cid,i){
   e.stopPropagation();
   const t=resolveTask(cid); if(!t||!t.sub||!t.sub[i])return;
   const st=t.sub[i];
-  if(st.s==='Complete'){
-    st.s='Pending';
+  st.s=stepNext(st.s);
+  if(st.s==='Pending'){
     // Unticking a sub-task of a Complete parent reopens the parent.
     if(t.s==='Complete'){t.s='In Progress';delete origStatus[cid];delete t.doneAt;}
+  }else if(st.s==='In Progress'){
+    // Starting a step starts the parent, unless it is already under way or waiting on someone;
+    // a parent marked done is reopened, since one of its steps is clearly not finished.
+    if(t.s==='Pending'){origStatus[cid]=t.s;t.s='In Progress';}
+    else if(t.s==='Complete'){t.s='In Progress';delete origStatus[cid];delete t.doneAt;}
   }else{
-    st.s='Complete';
     // Ticking the last open sub-task completes the parent.
     if(t.sub.every(x=>x.s==='Complete')&&t.s!=='Complete'){origStatus[cid]=t.s;t.s='Complete';t.doneAt=isoDate(new Date());}
   }
@@ -4363,6 +4956,7 @@ function syncParentFromSubs(t){
   const all=t.sub.every(x=>x.s==='Complete');
   if(all&&t.s!=='Complete'){t.s='Complete';t.doneAt=isoDate(new Date());}
   else if(!all&&t.s==='Complete'){t.s='In Progress';delete t.doneAt;}
+  else if(!all&&t.s==='Pending'&&t.sub.some(x=>x.s==='In Progress')){t.s='In Progress';}
 }
 function cidParts(cid){
   const p=cid.split('-');
@@ -6490,6 +7084,7 @@ function syncHash(){
   else if(cur==='hours')h='#hoursview';
   else if(String(cur).indexOf('form:')===0)h='#form/'+String(cur).slice(5);
   else if(cur==='home')h='#home';
+  else if(cur==='flow')h='#flow';
   else if(cur==='tracker')h='#tracker';
   else if(cur!=='overview')h=groupBy==='week'?('#week/'+String(cur).replace(/\D/g,'')):('#pillar/'+cur);
   if(location.hash!==h)history.replaceState(null,'',h);
@@ -6498,6 +7093,7 @@ window.addEventListener('hashchange',()=>{applyHash();render();});
 function applyHash(){
   const raw=location.hash||'';
   if(raw==='#home'){cur='home';return;}
+  const flm=/^#flow(?:\/([\w-]+))?$/.exec(raw);if(flm){cur='flow';if(flm[1]&&P.some(p=>p.id===flm[1])){if(!flowOpen)flowOpen=new Set();flowOpen.add(flm[1]);flowPending=flm[1];}return;}
   if(raw==='#tracker'){cur='tracker';return;}
   if(raw==='#summary'){cur='overview';return;}  // the old Project overview link
   const fm=/^#form\/([\w-]+)$/.exec(raw);
