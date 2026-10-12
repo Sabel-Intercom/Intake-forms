@@ -1273,6 +1273,9 @@ html.light .qsn button.sel{background:#475467;border-color:#475467;color:#fff}
 .fl-colh.you b{color:var(--kFFB3AF,#FFB3AF)}
 .fl-colh span{font-size:12px;color:var(--k64748B,#64748B)}
 .fl-empty{padding:16px 0;font-size:13px;color:var(--k64748B,#64748B);font-style:italic}
+.fl-add{align-self:flex-start;margin-top:8px;display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px dashed var(--k475569,#475569);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--k94A3B8,#94A3B8);cursor:pointer;font-family:inherit}
+.fl-add:hover{border-color:var(--k64748B,#64748B);color:var(--kE2E8F0,#E2E8F0)}
+.fl-add i{font-size:12px}
 .fl-task{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:12px;align-items:start;padding:10px 12px;margin:0 0 6px;border:1px solid var(--k2A3145,#2A3145);border-radius:10px;cursor:pointer;transition:border-color .15s}
 .fl-task:hover{border-color:var(--k64748B,#64748B)}
 .fl-open{padding:0 0 6px}
@@ -1514,6 +1517,7 @@ html.light #top-bar.hn-top{background:rgba(255,255,255,.86)}
 .hn-pct{color:var(--k475569)!important}
 .hn-right{margin-left:auto;font-size:11px;color:var(--k475569)}
 .hn-right.sent{color:var(--sd-green)}
+.hn-right.sd-on{color:var(--sd-green)}
 .hn-right.dot{width:7px;height:7px;border-radius:50%;background:var(--sd-amber);animation:sd-blink 1.6s ease-in-out infinite}
 .sd-team{border:1px solid var(--k1E2433);border-radius:12px;padding:12px;font-size:11.5px;color:var(--k94A3B8);line-height:1.45;margin:0 2px}
 .sd-team .k{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--k475569);margin-bottom:8px}
@@ -3969,6 +3973,9 @@ function renderSidebar(){
   if(typeof parkedCount==='function'&&parkedCount())mats.push(btn('parked','archive','Out of scope',`<span class="hn-right">${parkedCount()}</span>`,cur==='parked'));
   if(INTERNAL)mats.push(btn('hours','clock-dollar','Hours','',cur==='hours'));
   if(mats.length)h+=`<div class="hn-sec">Materials</div>`+mats.join('');
+  // Editing tools switch (12 Oct 2026): remembered per browser, off by default in the client file.
+  if(typeof toggleTools==='function'){const on=typeof toolsOn!=='undefined'&&toolsOn;
+    h+=`<div class="hn-sec">Editing</div>`+btn('tools',on?'tool':'lock',on?'Hide editing tools':'Show editing tools',on?'<span class="hn-right sd-on">On</span>':'',false,'toggleTools();renderMain()');}
   h+=`</nav><div class="hn-foot">`;
   h+=`<div class="sd-team"><div class="k">Your Sabel team</div><div class="av">${SABEL_TEAM.map(sdAv).join('')}</div>${hhTeam().replace(/^Your Sabel team: /,'').replace(/ · /g,'. ')}.</div>`;
   if(SLACK_URL)h+=`<div class="hn-help">Need help? <a href="${esc(SLACK_URL)}" target="_blank" rel="noopener">Shared Slack channel &rarr;</a></div>`;
@@ -4704,7 +4711,14 @@ function flowScroll(id){const el=document.getElementById(id);if(!el)return;
   else window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-24,behavior:'smooth'});}
 function flowOpenAndScroll(pid){if(!flowOpen)flowOpen=new Set();flowOpen.add(pid);if(cur!=='flow'){flowPending=pid;setP('flow');return;}renderMain();setTimeout(()=>flowScroll('flow-'+pid),30);}
 function flowAfterRender(){if(flowPending){const pid=flowPending;flowPending='';setTimeout(()=>flowScroll('flow-'+pid),60);}}
+// Editing tools on (12 Oct 2026): a blank task added from a flow block opens in place, ready to edit.
+let flowAddWrapped=false;
+function flowWrapAdd(){if(flowAddWrapped||typeof addTask!=='function')return;flowAddWrapped=true;const base=addTask;
+  addTask=function(phId,grp){base(phId,grp);if(cur!=='flow'||typeof pvOpen==='undefined')return;
+    const cid=phId+'-'+(grp==='sabel'?'s':'c')+'-'+(T[phId][grp].length-1);pvOpen.add(cid);if(typeof qEdit!=='undefined')qEdit.add(cid);
+    renderMain();setTimeout(()=>{if(typeof pvEditTitle==='function')pvEditTitle(cid);},40);};}
 function flowView(){
+  flowWrapAdd();
   const now=currentWeek(),rows=P.map((p,i)=>flowPillar(p,i,now));
   if(!flowOpen){flowOpen=new Set();const first=rows.find(r=>r.state==='active')||rows.find(r=>r.state!=='done')||rows[0];if(first)flowOpen.add(first.p.id);}
   const allT=rows.reduce((a,r)=>a+r.total,0),allD=rows.reduce((a,r)=>a+r.done,0),needTotal=rows.reduce((a,r)=>a+r.need,0);
@@ -4730,7 +4744,8 @@ function flowView(){
   const col=(r,side)=>{const list=r.cols[side].filter(x=>!hideDone||!x.done);
     const head=side==='client'?`<div class="fl-colh you"><b>Your side · ${esc(CLIENT_NAME)}</b><span>${r.cDone}/${r.cols.client.length}</span></div>`:`<div class="fl-colh"><b>Sabel side</b><span>${r.sDone}/${r.cols.sabel.length}</span></div>`;
     const body=list.length?list.map(x=>x.html).join(''):(r.cols[side].length?`<div class="fl-empty">Everything here is done.</div>`:`<div class="fl-empty">${side==='client'?'Nothing on your side for this block.':'Nothing for Sabel in this block.'}</div>`);
-    return `<div>${head}<div style="display:flex;flex-direction:column;padding-top:8px">${body}</div></div>`;};
+    const add=(typeof pvTools==='function'&&pvTools()&&typeof openAddMenu==='function')?`<button class="fl-add" onclick="openAddMenu(event,'${r.p.id}','${side}')"><i class="ti ti-plus"></i>Add a task</button>`:'';
+    return `<div>${head}<div style="display:flex;flex-direction:column;padding-top:8px">${body}${add}</div></div>`;};
   const blocks=seq.map(r=>{
     if(r.kind==='prog')return `<div class="fl-prow-pg" id="flow-prog-${r.x.id}"><div class="fl-pgnum ${r.state}">P${r.n}</div>
       <button class="fl-pg" onclick="setP('prog:${r.x.id}')"><div><div class="m"><span>Progression ${r.n}</span>${r.when?`<span>${esc(r.when)}</span>`:''}<span class="st ${r.state}">${esc(r.label||'')}</span></div><div class="t">${esc(r.x.title||'Progression session')}</div></div><span class="go">Open session &rarr;</span></button></div>`;
