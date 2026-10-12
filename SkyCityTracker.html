@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sabel × SkyCity Malta · Client hub</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
 :root{--k0F1117:#0F1117;--k12151D:#12151D;--k12151E:#12151E;--k161B26:#161B26;--k1E2433:#1E2433;--k2A3145:#2A3145;--k2A3547:#2A3547;--k242A38:#242A38;--kE2E8F0:#E2E8F0;--kCBD5E1:#CBD5E1;--k94A3B8:#A3ACBC;--k64748B:#7F8A9C;--k475569:#6B7689;--k334155:#334155;--k4ADE80:#4ADE80;--kF87171:#F87171;--kFBBF24:#FBBF24;--k60A5FA:#60A5FA;--kFB923C:#FB923C;--kC084FC:#C084FC;--kA78BFA:#A78BFA;--k2DD4BF:#2DD4BF;--k38BDF8:#38BDF8;--k34D399:#34D399;--kF2F4F8:#F2F4F8;--kC9CFDA:#C9CFDA;--kA7AFBE:#A7AFBE;--k8B93A3:#8B93A3;--k5F6878:#5F6878;--k12161F:#12161F;--k1A2030:#1A2030;--kFF4D45:#FF4D45;--kFFB3AF:#FFB3AF;}
@@ -1091,8 +1092,13 @@ html body .pw{grid-template-columns:224px minmax(0,1fr)!important}
 .qsteps{display:flex;flex-direction:column;gap:5px}
 .qi{display:flex;align-items:center;gap:8px}
 .qi .qic{background:none;border:0;padding:0;cursor:pointer;display:inline-flex}
+.qb .qsa{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;color:var(--k64748B,#64748B);margin:2px 0 -4px}
+.qb .qsa button{margin-left:auto;background:none;border:0;padding:0;font:inherit;font-size:11px;font-weight:600;color:var(--k60A5FA,#60A5FA);cursor:pointer}
+.qb .qsa button:hover{text-decoration:underline}
 .qi .qic i{font-size:14px;color:var(--k64748B,#64748B)}
 .qi .qic i.ti-circle-check-filled{color:#16A34A}
+.qic i.ti-circle-dot{color:var(--k60A5FA,#60A5FA)}
+.qi.p .qit{color:var(--kE2E8F0,#E2E8F0)}
 .qi .qit{font-size:12px;color:var(--kE2E8F0,#E2E8F0);flex:1;min-width:0;line-height:1.4;outline:none;border-radius:3px}
 .qi .qit.d{color:var(--k94A3B8,#94A3B8);text-decoration:line-through}
 .qi .qit[contenteditable]:hover{box-shadow:0 0 0 1px var(--k2A3145,#2A3145)}
@@ -1179,6 +1185,137 @@ html.light .qsn button.nowS{background:#2563EB;border-color:#2563EB;color:#fff}
 html.light .qsn button.nowC{background:#F59E0B;border-color:#F59E0B;color:#101828}
 html.light .qsn button.sel{background:#475467;border-color:#475467;color:#fff}
 @media(max-width:760px){.qcols{grid-template-columns:minmax(0,1fr);gap:22px}.qc{margin:4px -6px;padding:10px 8px 12px}.qb{margin-left:0}}
+
+/* ── Project tracker as a flow ── */
+.fl{color:var(--kE2E8F0,#E2E8F0)}
+.fl-wrap{max-width:1120px;margin:0 auto;padding:8px 0 90px}
+.fl-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,1fr);gap:40px;align-items:end}
+@media(max-width:760px){.fl-hero{grid-template-columns:1fr;gap:26px}}
+.fl-eye{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--k8B93A3,#8B93A3)}
+.fl-eye i{width:28px;height:1px;background:#E10600;box-shadow:0 0 8px rgba(225,6,0,.8)}
+.fl-h1{margin:14px 0 0;font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(32px,4.5vw,52px);line-height:1;letter-spacing:-.035em;color:var(--kF2F4F8,#F2F4F8);text-wrap:balance}
+.fl-h1 span{color:var(--kFF4D45,#FF4D45)}
+.fl-sub{margin:16px 0 0;font-size:15px;line-height:1.55;color:var(--kA7AFBE,#A7AFBE);max-width:520px;text-wrap:pretty}
+.fl-prog{display:flex;flex-direction:column;gap:14px}
+.fl-prog .r{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--kA7AFBE,#A7AFBE)}
+.fl-prog .r b{font-family:Archivo,sans-serif;font-size:22px;color:var(--kF2F4F8,#F2F4F8)}
+.fl-prog .t{height:6px;border-radius:99px;background:var(--k1E2433,#1E2433);overflow:hidden}
+.fl-prog .t i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#E10600,var(--kFF4D45,#FF4D45));box-shadow:0 0 12px rgba(255,77,69,.8)}
+.fl-pills{display:flex;gap:8px;flex-wrap:wrap}
+.fl-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:99px;border:1px solid var(--k2A3145,#2A3145);background:var(--k161B26,#161B26);font-size:13px;color:var(--kC9CFDA,#C9CFDA)}
+.fl-pill b{font-family:Archivo,sans-serif;color:var(--kF2F4F8,#F2F4F8);font-weight:700}
+.fl-pill.need{border-color:rgba(225,6,0,.55);background:rgba(225,6,0,.12);color:var(--kFFB3AF,#FFB3AF);font-family:inherit;cursor:pointer}
+.fl-pill.need:hover{border-color:var(--kFF4D45,#FF4D45);background:rgba(225,6,0,.2)}
+.fl-pill.need .go{opacity:.8}
+.fl-pill.need b{color:var(--kF2F4F8,#F2F4F8)}
+.fl-pill.need i{width:7px;height:7px;border-radius:50%;background:var(--kFF4D45,#FF4D45);animation:flpulse 2s infinite}
+@keyframes flpulse{0%,100%{box-shadow:0 0 0 0 rgba(225,6,0,.55)}70%{box-shadow:0 0 0 8px rgba(225,6,0,0)}}
+.fl-card{margin-top:40px;border:1px solid var(--k1E2433,#1E2433);border-radius:16px;background:linear-gradient(160deg,var(--k161B26,#161B26),var(--k12151D,#12151D));padding:18px 22px 22px}
+.fl-cardh{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.fl-lab{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--k64748B,#64748B)}
+.fl-hint{font-size:12px;color:var(--k64748B,#64748B)}
+.fl-chain{position:relative;margin-top:22px}
+.fl-track{position:absolute;left:4%;right:4%;top:19px;height:2px;background:var(--k2A3145,#2A3145)}
+.fl-fill{position:absolute;left:4%;top:19px;height:2px;background:linear-gradient(90deg,var(--k4ADE80,#4ADE80),var(--k60A5FA,#60A5FA));box-shadow:0 0 10px rgba(96,165,250,.6)}
+.fl-nodes{position:relative;display:flex;align-items:flex-start}
+.fl-node{display:flex;flex-direction:column;align-items:center;gap:10px;background:transparent;border:none;cursor:pointer;padding:0 3px;font-family:inherit;color:inherit;text-align:center;flex:3 1 0;min-width:0}
+.fl-node.pg{flex:.75 1 0}
+.fl-nodes.dense .fl-node .l{font-size:10px;line-height:1.25}
+.fl-nodes.dense .fl-node .c{width:34px;height:34px;font-size:12px}
+.fl-nodes.dense .fl-node.pg .c{width:22px;height:22px;font-size:8px;margin-top:6px}
+.fl-node:hover{opacity:.85}
+.fl-node .c{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:Archivo,sans-serif;font-weight:800;font-size:13px;box-sizing:border-box;background:var(--k0F1117,#0F1117);border:2px dashed var(--k475569,#475569);color:var(--k64748B,#64748B);box-shadow:0 0 0 4px var(--k0F1117,#0F1117)}
+.fl-node.pg .c{width:26px;height:26px;margin-top:7px;font-size:9px;border-width:1.5px}
+.fl-node.pg .s{margin-top:2px}
+.fl-node.done .c{background:var(--k4ADE80,#4ADE80);border:2px solid var(--k4ADE80,#4ADE80);color:var(--k0F1117,#0F1117)}
+.fl-node.active .c{background:var(--k161B26,#161B26);color:var(--kF2F4F8,#F2F4F8)}
+.fl-node.pg.active .c{border:1.5px solid var(--k60A5FA,#60A5FA);box-shadow:0 0 0 4px var(--k0F1117,#0F1117),0 0 12px rgba(96,165,250,.6)}
+.fl-node .l{font-size:11px;font-weight:600;line-height:1.3;color:var(--k8B93A3,#8B93A3);text-wrap:balance;overflow-wrap:anywhere}
+.fl-node.pg .l{font-size:10px;font-weight:500}
+.fl-node.done .l,.fl-node.active .l{color:var(--kF2F4F8,#F2F4F8)}
+.fl-node .s{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.08em;color:var(--k8B93A3,#8B93A3)}
+.fl-node.done .s{color:var(--k4ADE80,#4ADE80)}.fl-node.active .s{color:var(--k60A5FA,#60A5FA)}
+.fl-bh{margin-top:40px;display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.fl-legend{display:flex;gap:16px;align-items:center;font-size:12px;color:var(--k64748B,#64748B);flex-wrap:wrap}
+.fl-legend span{display:inline-flex;align-items:center;gap:6px}
+.fl-legend i{width:10px;height:10px;border-radius:3px;box-sizing:border-box;display:inline-block}
+.fl-hide{display:inline-flex;align-items:center;gap:8px;padding:5px 10px 5px 6px;border-radius:99px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;background:var(--k161B26,#161B26);border:1px solid var(--k2A3145,#2A3145);color:var(--k94A3B8,#94A3B8)}
+.fl-hide .sw{position:relative;width:26px;height:14px;border-radius:99px;background:var(--k2A3145,#2A3145);display:inline-block}
+.fl-hide .sw::after{content:'';position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:#fff;transition:left .15s}
+.fl-hide.on{background:rgba(74,222,128,.14);border-color:rgba(74,222,128,.5);color:var(--k4ADE80,#4ADE80)}
+.fl-hide.on .sw{background:#22C55E}.fl-hide.on .sw::after{left:14px}
+.fl-blocks{position:relative;margin-top:20px;display:flex;flex-direction:column;gap:14px}
+.fl-spine{position:absolute;left:23px;top:24px;bottom:24px;width:2px;background:linear-gradient(var(--k2A3145,#2A3145),var(--k2A3145,#2A3145) 60%,transparent)}
+.fl-row{position:relative;display:grid;grid-template-columns:48px minmax(0,1fr);gap:18px;align-items:start}
+.fl-num{position:relative;z-index:1;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-family:Archivo,sans-serif;font-weight:800;font-size:15px;background:var(--k0F1117,#0F1117);border:2px solid var(--k475569,#475569);color:var(--kF2F4F8,#F2F4F8);box-sizing:border-box}
+.fl-row.up .fl-num{color:var(--k64748B,#64748B)}
+.fl-blk{border:1px solid var(--k1E2433,#1E2433);border-radius:16px;background:linear-gradient(160deg,var(--k161B26,#161B26),var(--k12151D,#12151D));overflow:hidden;transition:border-color .2s}
+.fl-blk.open{box-shadow:0 14px 40px rgba(0,0,0,.35)}
+.fl-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;width:100%;text-align:left;background:transparent;border:none;cursor:pointer;padding:20px 22px;font-family:inherit;color:inherit}
+.fl-head:hover{background:rgba(255,255,255,.025)}
+.fl-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--k64748B,#64748B)}
+.fl-state{padding:2px 8px;border-radius:99px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:0;text-transform:none;font-size:11px;font-weight:600;background:var(--k1E2433,#1E2433);color:var(--k8B93A3,#8B93A3)}
+.fl-state.done{background:rgba(74,222,128,.14);color:var(--k4ADE80,#4ADE80)}.fl-state.active{background:rgba(96,165,250,.14);color:var(--k60A5FA,#60A5FA)}
+.fl-title{margin-top:8px;font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(20px,2.4vw,26px);line-height:1.1;letter-spacing:-.02em;color:var(--kF2F4F8,#F2F4F8)}
+.fl-desc{margin-top:6px;font-size:14px;color:var(--kA7AFBE,#A7AFBE);text-wrap:pretty}
+.fl-prow{margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--kA7AFBE,#A7AFBE)}
+.fl-prow .bar{flex:1 1 180px;max-width:320px;height:4px;border-radius:99px;background:var(--k1E2433,#1E2433);overflow:hidden}
+.fl-prow .bar i{display:block;height:100%;border-radius:99px}
+.fl-prow b{color:var(--kF2F4F8,#F2F4F8)}
+.fl-need{display:inline-flex;align-items:center;gap:6px;color:var(--kFFB3AF,#FFB3AF)}
+.fl-need i{width:6px;height:6px;border-radius:50%;background:var(--kFF4D45,#FF4D45)}
+.fl-need b{color:var(--kF2F4F8,#F2F4F8)}
+.fl-chev{width:36px;height:36px;border-radius:50%;border:1px solid var(--k2A3145,#2A3145);display:grid;place-items:center;color:var(--k8B93A3,#8B93A3);font-size:18px;line-height:1;transition:transform .25s}
+.fl-blk.open .fl-chev{transform:rotate(180deg)}
+.fl-body{border-top:1px solid var(--k1E2433,#1E2433);padding:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;background:var(--k0F1117,#0F1117)}
+.fl-colh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--k1E2433,#1E2433)}
+.fl-colh b{font-family:Archivo,sans-serif;font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--k8B93A3,#8B93A3)}
+.fl-colh.you b{color:var(--kFFB3AF,#FFB3AF)}
+.fl-colh span{font-size:12px;color:var(--k64748B,#64748B)}
+.fl-empty{padding:16px 0;font-size:13px;color:var(--k64748B,#64748B);font-style:italic}
+.fl-task{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:12px;align-items:start;padding:10px 12px;margin:0 0 6px;border:1px solid var(--k2A3145,#2A3145);border-radius:10px;cursor:pointer;transition:border-color .15s}
+.fl-task:hover{border-color:var(--k64748B,#64748B)}
+.fl-open{padding:0 0 6px}
+.fl-open .qc{margin:0;border-color:var(--flc,var(--k2A3145,#2A3145));border-width:1px}
+.fl-task:hover .fl-ti{color:var(--kF2F4F8,#F2F4F8)}
+.fl-box{margin-top:2px;width:18px;height:18px;border-radius:5px;display:grid;place-items:center;font-size:12px;font-weight:800;line-height:1;color:var(--k0F1117,#0F1117);box-sizing:border-box;background:transparent;border:1.5px solid var(--k475569,#475569)}
+.fl-task.done .fl-box{background:var(--k4ADE80,#4ADE80);border:1px solid var(--k4ADE80,#4ADE80)}
+.fl-task.now .fl-box{background:var(--k60A5FA,#60A5FA);border:1px solid var(--k60A5FA,#60A5FA)}
+.fl-task.wait .fl-box{background:rgba(225,6,0,.12);border:1.5px dashed var(--kFF4D45,#FF4D45)}
+.fl-ti{font-size:14px;line-height:1.4;color:var(--kC9CFDA,#C9CFDA);text-wrap:pretty}
+.fl-task.done .fl-ti{color:var(--k64748B,#64748B);text-decoration:line-through}
+.fl-task.now .fl-ti,.fl-task.wait .fl-ti{color:var(--kF2F4F8,#F2F4F8)}
+.fl-tm{margin-top:3px;font-size:11.5px;color:var(--k64748B,#64748B)}
+.fl-task.wait .fl-tm{color:var(--kFFB3AF,#FFB3AF)}.fl-task.now .fl-tm{color:var(--k60A5FA,#60A5FA)}
+.fl-due{font-size:11.5px;padding-top:3px;white-space:nowrap;color:var(--k8B93A3,#8B93A3)}
+/* arriving from the "need you" pill: the Dashboard's "What we need from" card glows red for a moment */
+@keyframes flglow{0%{box-shadow:0 0 0 0 rgba(225,6,0,0)}18%{box-shadow:0 0 0 3px rgba(225,6,0,.75),0 0 34px rgba(225,6,0,.6)}100%{box-shadow:0 0 0 0 rgba(225,6,0,0)}}
+.fl-glow{animation:flglow 2.6s ease-out;border-color:var(--kFF4D45,#FF4D45)!important}
+/* progression sessions: smaller cards between the blocks */
+.fl-prow-pg{position:relative;display:grid;grid-template-columns:48px minmax(0,1fr);gap:18px;align-items:center}
+.fl-pgnum{position:relative;z-index:1;width:30px;height:30px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:10px;background:var(--k0F1117,#0F1117);border:1.5px solid var(--k475569,#475569);color:var(--k8B93A3,#8B93A3);box-sizing:border-box}
+.fl-pgnum.done{background:var(--k4ADE80,#4ADE80);border-color:var(--k4ADE80,#4ADE80);color:var(--k0F1117,#0F1117)}.fl-pgnum.active{border-color:var(--k60A5FA,#60A5FA);color:var(--kF2F4F8,#F2F4F8);box-shadow:0 0 12px rgba(96,165,250,.5)}
+.fl-pg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;width:100%;text-align:left;background:var(--k12151D,#12151D);border:1px dashed var(--k2A3145,#2A3145);border-radius:12px;padding:12px 16px;font-family:inherit;color:inherit;cursor:pointer;max-width:720px}
+.fl-pg:hover{border-color:var(--k60A5FA,#60A5FA);border-style:solid}
+.fl-pg .m{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--k64748B,#64748B);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.fl-pg .m .st{padding:1px 7px;border-radius:99px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:0;text-transform:none;font-size:10.5px;font-weight:600;background:var(--k1E2433,#1E2433);color:var(--k8B93A3,#8B93A3)}
+.fl-pg .m .st.done{background:rgba(74,222,128,.14);color:var(--k4ADE80,#4ADE80)}.fl-pg .m .st.active{background:rgba(96,165,250,.14);color:var(--k60A5FA,#60A5FA)}
+.fl-pg .t{margin-top:4px;font-family:Archivo,sans-serif;font-weight:700;font-size:14.5px;color:var(--kE2E8F0,#E2E8F0)}
+.fl-pg .go{font-size:12px;color:var(--k8B93A3,#8B93A3);white-space:nowrap}
+/* Home: two doors side by side, tracker in red, dashboard in slate (Sabel proposal palette) */
+.hh-two{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.hh-two .hh-dash{grid-column:auto}
+.hh-two .hh-dt{font-size:clamp(22px,2.4vw,28px)}
+.hh-two .hh-dc{font-size:14px}
+.hh-dash.slate{border-color:rgba(91,125,177,.45);background:linear-gradient(135deg,rgba(42,59,87,.6) 0%,var(--hh-card-mid) 55%,var(--k161B26,#161B26) 100%);box-shadow:none}
+.hh-dash.slate:hover{border-color:#5B7DB1;box-shadow:0 0 0 1px rgba(91,125,177,.3) inset,0 30px 70px -24px rgba(42,59,87,.9)}
+.hh-dash.slate .hh-scan{background:linear-gradient(90deg,transparent,rgba(91,125,177,.9),transparent)}
+.hh-dash.slate .hh-tile{background:#2A3B57;box-shadow:0 0 22px rgba(42,59,87,.7)}
+.hh-dash.slate .hh-ic em{color:var(--kA7AFBE,#A7AFBE)}
+.hh-dash.slate .hh-dt span{color:#8FB3F0}
+.hh-dash.slate .hh-meter .t i{background:linear-gradient(90deg,#2A3B57,#5B7DB1);box-shadow:0 0 12px rgba(91,125,177,.6)}
+.hh-dash.slate .hh-cta{background:#2A3B57;box-shadow:0 0 24px rgba(42,59,87,.6)}
+.hh-dash.slate .hh-wait{color:var(--kA7AFBE,#A7AFBE)}
 </style>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap">
 <style id="v9-compact">
@@ -1330,6 +1467,229 @@ html.light .pv-pg{background:rgba(225,6,0,.03)!important}
 .hn-badge{font-weight:600!important}
 
 </style>
+
+<style id="sd-skin-d">
+/* ── Sabel document skin · Concept D (9 Oct 2026) ─────────────────────────────
+   Palette and type from the proposal / report system. Dark values only; the
+   light theme keeps the html.light overrides defined above. */
+:root{
+  --k0F1117:#0B0B0C;--k12151D:#0E0E10;--k12151E:#0E0E10;--k12161F:#0E0E10;--k161B26:#131315;--k1A2030:#191a1d;--k242A38:#191a1d;
+  --k1E2433:#26262a;--k2A3145:#2f2f34;--k2A3547:#2f2f34;--k334155:#3a3a40;
+  --kE2E8F0:#ECEAE8;--kF2F4F8:#ECEAE8;--kCBD5E1:#d4d0ce;--kC9CFDA:#d4d0ce;--k94A3B8:#a09a98;--kA7AFBE:#a09a98;--k64748B:#8a8482;--k8B93A3:#8a8482;--k475569:#6e6968;--k5F6878:#6e6968;
+  --k4ADE80:#5EE0A1;--k34D399:#5EE0A1;--k60A5FA:#6FB4FF;--k38BDF8:#6FB4FF;--kFBBF24:#F0B429;--kF87171:#FF7A6B;--kFF4D45:#ff5a52;--kFFB3AF:#ffb3ad;
+  --sd-slate:#191e27;--sd-slateline:#2a303c;--sd-amber:#F0B429;--sd-blue:#6FB4FF;--sd-green:#5EE0A1;--sd-red:#E10600;--sd-redsoft:#ff7a70;
+  --hh-grid:rgba(255,255,255,.03);--hh-fade:rgba(11,11,12,.6);
+}
+html.light{--sd-slate:#FFFFFF;--sd-slateline:#E4E7EC;--sd-redsoft:#C2140E}
+body,.hh,.mn,#top-bar,.sb{font-family:'DM Sans',-apple-system,'Helvetica Neue',sans-serif!important}
+.sd-k,#hn-left,.hn-sec,.sd-proj .k,.sd-proj .gl,.sd-ruler .lab,.sd-ruler .lab span,.sd-wst .h,.sd-mono{font-family:'DM Mono',ui-monospace,Menlo,monospace!important}
+.mn{padding-left:2rem!important;padding-right:2rem!important}
+#top-bar.hn-top{background:rgba(11,11,12,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--k1E2433)}
+html.light #top-bar.hn-top{background:rgba(255,255,255,.86)}
+#hn-left{letter-spacing:.14em;text-transform:uppercase;font-size:10.5px!important;color:var(--k94A3B8)}
+#hn-left .sep{color:var(--sd-red);margin:0 8px}
+
+/* sidebar */
+.sb.hn{background:var(--k12151D)!important;border-right:1px solid var(--k1E2433)}
+.hn-mark{padding:6px 8px 14px!important}
+.hn-mark img{height:20px!important}
+.hn-tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--k475569);margin-left:auto;margin-right:6px}
+.sd-proj{position:relative;overflow:hidden;background:var(--sd-slate);border:1px solid var(--sd-slateline);border-radius:12px;padding:12px 12px 12px 16px;margin:0 2px 16px}
+.sd-proj::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--sd-red)}
+.sd-proj .k{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--k94A3B8)}
+.sd-proj .n{font-size:14px;font-weight:600;color:var(--kE2E8F0);margin-top:3px}
+.sd-proj .r{display:flex;align-items:baseline;justify-content:space-between;margin-top:10px}
+.sd-proj .r b{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--kE2E8F0)}
+.sd-proj .r span{font-size:11.5px;color:var(--k94A3B8)}
+.sd-proj .bar{height:5px;border-radius:999px;background:var(--k1E2433);overflow:hidden;margin-top:7px}
+.sd-proj .bar i{display:block;height:100%;background:var(--sd-red);border-radius:999px;transform-origin:left;animation:sd-grow 1.2s cubic-bezier(.2,.7,.2,1) both}
+.sd-proj .gl{font-size:10.5px;color:var(--k94A3B8);margin-top:9px;letter-spacing:.02em}
+.sd-proj .gl b{color:var(--kE2E8F0);font-weight:500}
+.hn-sec{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--k475569);padding:10px 10px 6px}
+.hn-btn{height:34px!important;font-size:13px!important;font-weight:500!important;color:var(--k94A3B8)!important;border-radius:9px!important;border-left:2px solid transparent!important}
+.hn-btn:hover{background:var(--k1A2030)!important;color:var(--kE2E8F0)!important}
+.hn-btn.on,html.light .hn-btn.on{background:var(--k1A2030)!important;color:var(--kE2E8F0)!important;border-left-color:var(--sd-red)!important}
+.hn-btn .ic i{color:inherit}
+.hn-badge{background:var(--sd-amber)!important;color:#0B0B0C!important;font-weight:600!important;border-radius:999px!important}
+.hn-pct{color:var(--k475569)!important}
+.hn-right{margin-left:auto;font-size:11px;color:var(--k475569)}
+.hn-right.sent{color:var(--sd-green)}
+.hn-right.dot{width:7px;height:7px;border-radius:50%;background:var(--sd-amber);animation:sd-blink 1.6s ease-in-out infinite}
+.sd-team{border:1px solid var(--k1E2433);border-radius:12px;padding:12px;font-size:11.5px;color:var(--k94A3B8);line-height:1.45;margin:0 2px}
+.sd-team .k{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--k475569);margin-bottom:8px}
+.sd-team .av{display:flex;gap:6px;margin-bottom:8px}
+.sd-av{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:11px;flex:none}
+.sd-av.c{background:rgba(96,165,250,.16);color:#60A5FA}.sd-av.g{background:rgba(52,211,153,.16);color:#34D399}.sd-av.r{background:rgba(192,132,252,.16);color:#C084FC}.sd-av.x{background:rgba(240,180,41,.16);color:#F0B429}
+.hn-help{font-size:11.5px!important}
+body.sb-mini .sd-proj,body.sb-mini .sd-team,body.sb-mini .hn-sec,body.sb-mini .hn-tag,body.sb-mini .hn-right{display:none!important}
+
+/* home: Concept D */
+.sd{color:var(--kE2E8F0);font-size:15px;line-height:1.5;max-width:1344px;margin:0 auto;padding:8px 0 40px}
+.sd a{color:inherit;text-decoration:none}
+.sd button{font-family:inherit}
+.sd-hero{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;align-items:end;margin-top:18px}
+.sd-hero .l{grid-column:span 7}
+.sd-hero .rgt{grid-column:span 5;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.sd-kick{font-family:'DM Mono',monospace;font-size:11.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--sd-red);margin-bottom:16px}
+.sd-h1{margin:0;font-size:46px;line-height:1.04;font-weight:700;letter-spacing:-.02em;color:var(--kE2E8F0)}
+.sd-h1 span{font-weight:300;color:var(--k94A3B8)}
+.sd-sub{margin:16px 0 0;max-width:560px;font-size:15.5px;color:var(--k94A3B8)}
+.sd-card{position:relative;overflow:hidden;background:var(--sd-slate);border:1px solid var(--sd-slateline);border-radius:12px;padding:18px 20px 18px 24px;transition:transform .22s ease,border-color .22s ease}
+.sd-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--sd-red)}
+.sd-card:hover{transform:translateY(-2px);border-color:var(--k334155)}
+.sd-card .k,.sd-lab{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--k94A3B8)}
+.sd-card .big{font-size:46px;line-height:1;font-weight:700;letter-spacing:-.03em;margin-top:8px;color:var(--kE2E8F0)}
+.sd-card .big small{font-size:15px;font-weight:400;color:var(--k94A3B8);margin-left:8px;letter-spacing:0}
+.sd-card .n{font-size:28px;font-weight:700;letter-spacing:-.02em;margin-top:6px}
+.sd-card .n small{font-size:13px;font-weight:400;color:var(--k94A3B8);margin-left:4px;letter-spacing:0}
+.sd-card .t{font-size:13px;margin-top:8px;color:var(--kE2E8F0)}
+.sd-card .d{font-size:12px;color:var(--k94A3B8);margin-top:2px}
+.sd-card .h{font-size:14.5px;font-weight:600;margin-top:8px;line-height:1.3;color:var(--kE2E8F0)}
+.sd-plain{background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:12px}
+.sd-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px}
+.sd-ring .w{position:relative;width:110px;height:110px}
+.sd-ring .w div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sd-ring .w b{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1;color:var(--kE2E8F0)}
+.sd-ring .w small{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--k475569);margin-top:4px}
+.sd-ring .s{font-size:12px;color:var(--k94A3B8)}
+.sd-ring circle.p{animation:sd-draw 1.6s cubic-bezier(.2,.7,.2,1) both;animation-delay:.2s}
+.sd-four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px}
+.sd-four .sd-card.y .n{color:var(--sd-amber)}.sd-four .sd-card.b .n{color:var(--sd-blue)}.sd-four .sd-card.g .n{color:var(--sd-green)}
+.sd-four .sd-card{cursor:pointer}
+
+/* week ruler */
+.sd-ruler{background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:12px;padding:16px 18px 14px;margin-top:18px}
+.sd-ruler .cells{display:grid;gap:3px}
+.sd-ruler .c{height:8px;border-radius:3px;background:var(--k1E2433);position:relative;cursor:pointer;transform-origin:left}
+.sd-ruler .c.done{background:var(--sd-green)}
+.sd-ruler .c.now{background:var(--sd-blue)}
+.sd-ruler .c.gl{background:var(--sd-red)}
+.sd-ruler .c.now::after{content:"";position:absolute;left:50%;top:-13px;width:7px;height:7px;margin-left:-3px;border-radius:50%;background:var(--sd-amber);animation:sd-pulse 2.2s ease-out infinite}
+.sd-ruler .c:hover{filter:brightness(1.3)}
+.sd-ruler .lab{display:grid;gap:3px;margin-top:8px;font-size:9.5px;color:var(--k475569);text-align:center;white-space:nowrap;overflow:hidden}
+.sd-ruler .lab span.now{color:var(--sd-amber);font-weight:500}
+.sd-ruler .lab span.gl{color:var(--sd-red);font-weight:500}
+.sd-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.sd-chip{font-size:12px;padding:5px 10px;border-radius:999px;background:var(--k1A2030);border:1px solid var(--k1E2433);color:var(--k94A3B8);cursor:pointer;font-family:inherit;transition:border-color .15s}
+.sd-chip b{color:var(--kE2E8F0);font-weight:600}
+.sd-chip:hover{border-color:var(--k334155)}
+.sd-chip.red{background:rgba(225,6,0,.12);border-color:rgba(225,6,0,.4);color:var(--sd-redsoft)}
+.sd-ruler .top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px}
+.sd-leg{font-size:11.5px;color:var(--k94A3B8);display:flex;gap:14px;flex-wrap:wrap}
+.sd-leg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+/* sections */
+.sd-sech{display:flex;align-items:baseline;gap:14px;margin:34px 0 14px;flex-wrap:wrap}
+.sd-sech .num{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--sd-red)}
+.sd-sech h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em;color:var(--kE2E8F0)}
+.sd-sech .r{margin-left:auto;font-size:12.5px;color:var(--k94A3B8);display:flex;gap:8px;align-items:center}
+.sd-sech .r a,.sd-sech .r button{color:var(--sd-redsoft);background:none;border:0;font:inherit;cursor:pointer;padding:0}
+
+/* three-column board */
+.sd-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.sd-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.sd-colh{display:flex;align-items:center;gap:10px;padding:0 4px 6px;border-bottom:2px solid var(--k1E2433)}
+.sd-colh .k{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase}
+.sd-colh span{font-size:12px;color:var(--k94A3B8)}
+.sd-col.y .sd-colh{border-color:var(--sd-amber)}.sd-col.y .k{color:var(--sd-amber)}
+.sd-col.b .sd-colh{border-color:var(--sd-blue)}.sd-col.b .k{color:var(--sd-blue)}
+.sd-col.g .sd-colh{border-color:var(--sd-green)}.sd-col.g .k{color:var(--sd-green)}
+.sd-tile{background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:9px;transition:transform .22s ease,border-color .22s ease,background .22s}
+.sd-tile:hover{transform:translateY(-2px);border-color:var(--k334155)}
+.sd-tile.od{border-color:rgba(240,180,41,.45)}
+.sd-tile .m{display:flex;justify-content:space-between;gap:10px;font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--k475569)}
+.sd-tile .m b{color:var(--sd-amber);font-weight:500}
+.sd-tile .m .late{color:var(--kF87171)}
+.sd-tile .tt{font-size:14.5px;font-weight:600;line-height:1.3;color:var(--kE2E8F0)}
+.sd-tile .dd{font-size:12.5px;color:var(--k94A3B8)}
+.sd-tile .ctx{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--k475569);flex-wrap:wrap}
+.sd-pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;background:var(--k1A2030);color:var(--k94A3B8);border:1px solid var(--k1E2433)}
+.sd-tile .act{display:flex;gap:6px;margin-top:2px}
+.sd-btn{flex:1;font:inherit;font-size:12.5px;font-weight:600;padding:9px 10px;border-radius:8px;border:1px solid var(--k334155);background:var(--k1A2030);color:var(--kE2E8F0);cursor:pointer;transition:background .2s,color .2s}
+.sd-btn:hover{background:var(--kE2E8F0);color:#0B0B0C}
+.sd-btn.red{flex:none;border:0;background:var(--sd-red);color:#fff;padding:9px 14px}
+.sd-btn.red:hover{background:#ff2a24;color:#fff}
+.sd-row{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid var(--k1E2433);cursor:pointer;transition:background .15s}
+.sd-row:last-child{border-bottom:0}
+.sd-row:hover{background:var(--k1A2030)}
+.sd-row .tt{font-size:13.5px;font-weight:600;line-height:1.3;color:var(--kE2E8F0)}
+.sd-row .dd{font-size:11.5px;color:var(--k94A3B8);margin-top:2px}
+.sd-row .ck{flex:none;margin-top:2px;color:var(--sd-green)}
+.sd-later{padding:12px 14px;border:1px dashed var(--k1E2433);border-radius:12px;font-size:12px;color:var(--k475569);display:flex;flex-direction:column;gap:5px}
+.sd-later .k{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.sd-later a,.sd-later button{color:var(--sd-redsoft);background:none;border:0;font:inherit;cursor:pointer;padding:0;text-align:left}
+.sd-empty{padding:16px;border:1px dashed var(--k1E2433);border-radius:12px;font-size:12.5px;color:var(--k94A3B8);display:flex;align-items:center;gap:8px}
+.sd-empty i{color:var(--sd-green);font-size:16px}
+.sd-more{font-size:12px;color:var(--sd-redsoft);padding:0 4px;background:none;border:0;font-family:inherit;cursor:pointer;text-align:left}
+
+/* workstream table */
+.sd-wst{background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:12px;overflow:hidden}
+.sd-wst .h,.sd-wst .rw{display:grid;grid-template-columns:minmax(0,2.2fr) 110px minmax(0,2fr) 80px 80px 80px;gap:14px;align-items:center;padding:11px 18px}
+.sd-wst .h{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--k475569);border-bottom:1px solid var(--k1E2433)}
+.sd-wst .h .y{color:var(--sd-amber)}.sd-wst .h .b{color:var(--sd-blue)}
+.sd-wst .rw{border-bottom:1px solid var(--k1E2433);font-size:13.5px;cursor:pointer;transition:background .15s}
+.sd-wst .rw:last-child{border-bottom:0}
+.sd-wst .rw:hover{background:var(--k1A2030)}
+.sd-wst .nm{display:flex;align-items:center;gap:10px;min-width:0;color:var(--kE2E8F0)}
+.sd-wst .nm i{width:8px;height:8px;border-radius:2px;flex:none}
+.sd-wst .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sd-wst .wk{font-size:11.5px;color:var(--k94A3B8)}
+.sd-wst .bar{height:6px;border-radius:999px;background:var(--k1E2433);overflow:hidden}
+.sd-wst .bar i{display:block;height:100%;border-radius:999px;transform-origin:left;animation:sd-grow 1.3s cubic-bezier(.2,.7,.2,1) both;animation-delay:.25s}
+.sd-wst .num{text-align:right;font-family:'DM Mono',monospace;font-size:11.5px;color:var(--kE2E8F0)}
+.sd-wst .num.dim{color:var(--k475569)}.sd-wst .num.y{color:var(--sd-amber)}.sd-wst .num.b{color:var(--sd-blue)}
+
+/* decisions + materials */
+.sd-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.sd-list{background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:12px;overflow:hidden}
+.sd-list .it{padding:11px 16px;border-bottom:1px solid var(--k1E2433);cursor:pointer;transition:background .15s}
+.sd-list .it:last-child{border-bottom:0}
+.sd-list .it:hover{background:var(--k1A2030)}
+.sd-list .it b{display:block;font-size:13.5px;font-weight:500;color:var(--kE2E8F0)}
+.sd-list .it span{display:block;font-size:11.5px;color:var(--k475569);margin-top:1px}
+.sd-mats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sd-mat{display:flex;gap:12px;align-items:center;padding:13px 14px;background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:12px;cursor:pointer;text-align:left;font-family:inherit;color:inherit;transition:transform .22s ease,border-color .22s ease,background .22s}
+.sd-mat:hover{transform:translateY(-2px);border-color:var(--k334155);background:var(--k1A2030)}
+.sd-mat .ic{flex:none;width:36px;height:36px;border-radius:9px;background:rgba(225,6,0,.12);display:flex;align-items:center;justify-content:center;color:var(--sd-red);font-size:17px}
+.sd-mat .ic.y{background:rgba(240,180,41,.12);color:var(--sd-amber)}
+.sd-mat .ic.g{background:rgba(94,224,161,.12);color:var(--sd-green)}
+.sd-mat b{display:block;font-size:13.5px;font-weight:600;color:var(--kE2E8F0)}
+.sd-mat span{display:block;font-size:11.5px;color:var(--k475569)}
+.sd-mat span.y{color:var(--sd-amber)}.sd-mat span.g{color:var(--sd-green)}
+.sd-next{margin-top:12px;padding:13px 16px 13px 20px}
+.sd-foot{margin-top:36px;border-top:1px solid var(--k1E2433);padding-top:16px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--k475569)}
+.sd-foot i.dot{color:var(--sd-red);font-style:normal}
+
+/* Concept D keeps the sidebar and top bar on Home (the old landing hid them).
+   Desktop only: on phones the original off-canvas sidebar rules apply. */
+body.on-home #top-bar{display:flex!important}
+body.on-home #main .mnw{max-width:1344px!important;margin:0 auto!important}
+@media(min-width:701px){
+  body.on-home .sb{display:flex!important}
+  html body.on-home .pw{grid-template-columns:var(--sbw) minmax(0,1fr)!important}
+  body.on-home .mn{padding:calc(var(--tbh) + 1rem) 2rem 1.5rem!important}
+}
+@media(max-width:700px){
+  body.on-home #sb-toggle{display:inline-flex!important}
+  body.on-home .mn{padding:3.6rem 12px 1.5rem!important;min-width:0;overflow-x:hidden}
+  body.on-home .sb{display:flex!important}
+}
+.sd-sech .r button{margin-right:8px}
+
+/* motion */
+.sd-rise{animation:sd-rise .75s cubic-bezier(.2,.7,.2,1) both}
+@keyframes sd-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes sd-grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes sd-draw{from{stroke-dashoffset:302}to{stroke-dashoffset:var(--to)}}
+@keyframes sd-pulse{0%,100%{box-shadow:0 0 0 0 rgba(240,180,41,.45)}60%{box-shadow:0 0 0 9px rgba(240,180,41,0)}}
+@keyframes sd-blink{0%,100%{opacity:1}50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){.sd-rise,.sd-wst .bar i,.sd-proj .bar i,.sd-ring circle.p,.sd-ruler .c.now::after,.hn-right.dot{animation:none!important}}
+
+/* responsive */
+@media(max-width:1180px){.sd-four{grid-template-columns:repeat(2,minmax(0,1fr))}.sd-board{grid-template-columns:1fr}.sd-wst .h,.sd-wst .rw{grid-template-columns:minmax(0,2fr) 90px minmax(0,1.6fr) 60px 50px 50px}}
+@media(max-width:900px){.sd-hero{grid-template-columns:1fr}.sd-hero .l,.sd-hero .rgt{grid-column:auto}.sd-h1{font-size:36px}.sd-two{grid-template-columns:1fr}.sd-wst{overflow-x:auto}.sd-wst .h,.sd-wst .rw{min-width:640px}}
+@media(max-width:600px){.sd-four{grid-template-columns:1fr}.sd-hero .rgt{grid-template-columns:1fr}.sd-ruler .lab{display:none}.sd-mats{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <button id="sb-toggle" onclick="toggleSidebar()" title="Open the project menu"><i class="ti ti-menu-2" style="font-size:14px"></i>Menu</button>
@@ -1413,7 +1773,7 @@ const SOW={
   note: 'Scope per the kick-off call guide dated 27 August 2026, 35 contracted hours. Anything beyond this is handled as a change request.'
 };
 
-const T={"setup": {"sabel": [{"t": "Create Slack Connect channel and share with SkyCity team", "o": "Chris", "s": "Complete", "d": "", "week": 1, "notes": "", "link": "", "doneAt": "2026-09-23"}, {"t": "Share pre-call context and SOW with client champion", "o": "Richard", "s": "Complete", "d": "", "week": 1, "notes": "Kick-off guide issued 27 Aug 2026.", "link": ""}, {"t": "Kick-off call: scope, contacts and ways of working", "o": "Chris", "s": "Complete", "d": "", "week": 1, "notes": "Kick-off 8 Sep 2026. Weekly check-in slot Tuesday 9-10am.", "link": "", "doneAt": "2026-09-23"}, {"t": "Send kick-off intake form and file returned responses", "o": "Richard", "s": "Complete", "d": "", "week": 1, "notes": "", "link": "", "doneAt": "2026-09-29"}], "client": [{"t": "Return the completed kick-off intake form", "o": "SkyCity", "s": "In Progress", "d": "", "week": 5, "tip": "Complete and return the intake form so we can confirm scope, brands, channels and requirements before build starts.", "notes": "", "link": ""}, {"t": "Grant Sabel admin seats on the Intercom workspace", "o": "SkyCity", "s": "Complete", "d": "", "week": 1, "tip": "Add the Sabel team as admins on your Intercom workspace so we can configure it on your behalf.", "notes": "", "link": "https://app.eu.intercom.com/a/apps/_/settings/teammates", "doneAt": "2026-09-16"}, {"t": "Confirm workspace App ID, data hosting region and plan tier", "o": "SkyCity", "s": "Complete", "d": "", "week": 1, "tip": "We need the workspace App ID, the data hosting region (EU assumed) and the plan tier plus seat count, so we build in the right place from day one.", "notes": "Handover lists region, App ID and seat count as MISSING.", "link": "https://app.eu.intercom.com/a/apps/_/settings/workspace/general", "doneAt": "2026-09-29"}, {"t": "Brand assets pack (logos, sender names, reply addresses)", "o": "SkyCity", "s": "Dependency", "d": "", "week": 9, "tip": "Send logo files, sender names and reply-address preferences so we can brand the workspace, Messenger and Help Centre.", "notes": "Kamayani advised they do not have a brand book at this point 24 Sep.", "link": ""}, {"t": "Agree a secure method for sharing credentials", "o": "SkyCity", "s": "Complete", "d": "", "week": 1, "tip": "Credentials are never stored in Drive or Slack. We agree a secure channel for API keys and tokens before anything is shared.", "notes": "", "link": "", "doneAt": "2026-09-29"}, {"t": "Historical data decision: migrate, archive or partial", "o": "SkyCity", "s": "Complete", "d": "", "week": 2, "kind": "milestone", "tip": "Decide whether LiveAgent history is migrated, archived in place, or partially migrated. This changes the timeline, so it is needed before build starts.", "notes": "Section 12 of the kick-off guide. Currently out of scope.", "link": "", "doneAt": "2026-09-29"}, {"t": "Clarify audit readiness criteria with the NGA / project team", "o": "SkyCity", "s": "Complete", "d": "", "week": 2, "notes": "", "link": "", "tip": "", "doneAt": "2026-09-24"}, {"t": "Support the discussions on testing capacity for the build", "o": "SkyCity", "s": "Dependency", "d": "", "week": 9, "notes": "", "link": "", "tip": ""}, {"t": "Review the Fin guidance and content for accuracy", "o": "SkyCity", "s": "Dependency", "d": "", "week": 6, "notes": "", "link": "", "tip": ""}]}, "foundations": {"sabel": [{"t": "Inbox, teams and routing", "desc": "Where conversations land, and who sees what", "lead": "Chris", "o": "Chris", "s": "In Progress", "d": "", "week": 2, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Provide", "o": "SkyCity", "week": 2, "sub": [{"t": "Business hours, holidays and out-of-hours handling", "s": "Complete", "o": "SkyCity", "tip": "Confirm operating hours (24/7 planned), any closures and how out-of-hours conversations should be handled."}, {"t": "Confirm agent list and seat types", "s": "Complete", "o": "SkyCity", "tip": "Confirm the named agents, who needs a full seat and who needs a Lite (view-only) seat, across support, payments and player safety.", "link": "https://app.eu.intercom.com/a/apps/_/settings/teammates"}, {"t": "SLA targets per channel confirmed", "s": "Complete", "o": "SkyCity", "tip": "Confirm target response times per channel and conversation type so we can set inbox SLAs and alerts."}], "tip": "Hours, agents, seats and SLA targets", "wkEnd": 3, "doneAt": "2026-10-02"}, {"k": "build", "l": "Build", "o": "Chris", "week": 2, "sub": [{"t": "Draft inbox and team structure for 11 agents", "s": "Complete", "o": "Chris", "tip": ""}, {"t": "Build team inboxes and saved views", "s": "Complete", "o": "Chris", "tip": ""}, {"t": "Routing rules by channel, topic and escalation path", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Ticket types, statuses and SLA targets", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Team inboxes, views, routing rules, ticket types and SLAs", "wkEnd": 3}, {"k": "approve", "l": "Approve", "o": "SkyCity", "week": 3, "sub": [{"t": "Inbox structure and routing approval", "s": "Pending", "o": "SkyCity", "tip": "Review and confirm the inbox and routing setup before we finalise assignment rules."}], "tip": "You confirm the structure before it goes further", "gate": true}, {"k": "validate", "l": "Validate", "o": "Chris", "week": 6, "sub": [{"t": "Run routing tests per channel, topic and escalation path", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Confirm assignment and SLA behaviour looks right to you", "s": "Pending", "o": "SkyCity", "tip": ""}], "tip": "Routing tests before go-live"}], "wkEnd": 3}, {"t": "Email domain", "desc": "Sending from your own address", "lead": "Chris", "o": "SkyCity", "s": "Dependency", "d": "", "week": 2, "notes": "", "link": "", "phases": [{"k": "build", "l": "Issue records", "o": "SkyCity", "week": 2, "sub": [{"t": "Issue the SPF, DKIM and DMARC records to SkyCity", "s": "Pending", "o": "SkyCity", "tip": ""}], "tip": "We send the three records your domain host needs"}, {"k": "install", "l": "Add records", "o": "SkyCity", "week": 2, "sub": [{"t": "Add email DNS records (SPF, DKIM, DMARC) at your domain host", "s": "Pending", "o": "SkyCity", "tip": "We send you the exact records. Your IT or domain admin adds them at your domain host. Intercom cannot send email as your brand until these are in place.", "link": "https://www.intercom.com/help/en/articles/9744849-connect-your-email-support-channel"}], "tip": "Added at your domain host"}, {"k": "validate", "l": "Verify", "o": "Chris", "week": 2, "sub": [{"t": "Verify the domain in Intercom once the records propagate", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Send and receive a test email from the connected address", "s": "Pending", "o": "SkyCity", "tip": ""}], "tip": "Confirmed working both ways"}], "gate": true}, {"t": "Web Messenger", "desc": "Chat on the redesigned site and in the apps", "lead": "Chris", "o": "Chris", "s": "In Progress", "d": "", "week": 3, "notes": "", "link": "", "phases": [{"k": "build", "l": "Configure", "o": "Chris", "week": 3, "sub": [{"t": "Configure Messenger for web and native apps", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Messenger set up and styled in Intercom"}, {"k": "install", "l": "Install", "o": "SkyCity", "week": 3, "sub": [{"t": "Install Messenger code snippet on the redesigned site", "s": "Pending", "o": "SkyCity", "tip": "Your developer adds the Intercom snippet to the site so the Messenger can appear. It is a small copy-paste job, and we can join a call if they hit any issues.", "link": "https://developers.intercom.com/installing-intercom/web/installation"}, {"t": "Secure the Messenger with identity verification (JWT)", "s": "Pending", "o": "SkyCity", "tip": "Your developer sets up JSON Web Tokens so Intercom can verify who each logged-in player really is. This stops anyone impersonating a player in chat.", "link": "https://developers.intercom.com/installing-intercom/web/identity-verification"}, {"t": "Pass logged-in player attributes to the Messenger", "s": "Pending", "o": "SkyCity", "tip": "Your developer sends basic player details (name, email, player ID and useful custom fields) into the Messenger, so conversations arrive with context.", "link": "https://developers.intercom.com/installing-intercom/web/attributes-objects"}], "tip": "Your developers add the snippet, identity verification and player attributes", "wkEnd": 4, "note": "Identity verification is a go-live blocker: without it, players could be impersonated in chat."}, {"k": "validate", "l": "Validate", "o": "SkyCity", "week": 4, "sub": [{"t": "Open the Messenger on the site as a logged-in player and send a test message", "s": "Pending", "o": "SkyCity", "tip": ""}, {"t": "Confirm player attributes arrive and identity verification passes", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Prove it works end to end before Fin is switched on"}], "gate": true}, {"t": "Workspace and brand config: region, hours, seats", "o": "Chris", "s": "Pending", "d": "", "week": 6, "notes": "", "link": ""}, {"t": "Historical ticket migration from LiveAgent", "o": "Richard", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Out of scope unless the section 12 historical data decision says otherwise. Adds roughly two weeks.", "link": ""}], "client": [{"t": "Confirm inbox email and telephony setup with Cecilie", "o": "SkyCity", "s": "Dependency", "d": "", "week": 7, "notes": "", "link": "", "tip": "", "call": "2026-09-23"}]}, "automation": {"sabel": [{"t": "EveryMatrix player-data connector", "desc": "Player profile, KYC and RG status beside every conversation", "lead": "Greg", "o": "SkyCity", "s": "Dependency", "d": "", "week": 1, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Access", "o": "SkyCity", "week": 1, "sub": [{"t": "Issue EveryMatrix API credentials and sandbox access", "s": "Pending", "o": "SkyCity", "tip": "Nothing in the integration can be built until API access is in place. This is the single biggest item on the critical path."}], "tip": "API credentials and sandbox access, agreed through the secure channel", "note": "Credentials are a go-live blocker. Nothing can be built against EveryMatrix until sandbox access lands."}, {"k": "provide", "l": "Provide", "o": "SkyCity", "week": 2, "sub": [{"t": "Provide the EveryMatrix API specification", "s": "Pending", "o": "SkyCity", "tip": "Share the current API specification so we can map the fields Fin and agents will read."}, {"t": "Provide test player accounts in the sandbox", "s": "Pending", "o": "SkyCity", "tip": "We need a few test player accounts so we can validate lookups safely without touching real player data."}, {"t": "Confirm which player data fields Fin and agents may access", "s": "Pending", "o": "SkyCity", "tip": "Confirm exactly which player fields (balance, bet history, KYC and RG status) may be surfaced in Intercom, and to whom."}], "tip": "API spec, test players, and which player fields Fin and agents may see", "wkEnd": 3}, {"k": "build", "l": "Specify + build", "o": "Greg", "week": 2, "sub": [{"t": "Specify and review EveryMatrix REST API endpoints", "s": "Pending", "o": "Greg", "tip": ""}, {"t": "Confirm session token authentication approach end to end", "s": "Pending", "o": "Greg", "tip": ""}, {"t": "Build the connector against the sandbox", "s": "Pending", "o": "Greg", "tip": ""}, {"t": "Error handling and fallback when the API is unavailable", "s": "Pending", "o": "Greg", "tip": ""}, {"t": "Configure sidebar: player profile, KYC/RG status, history", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Endpoints agreed, connector built against the sandbox, sidebar configured", "wkEnd": 5}, {"k": "validate", "l": "Validate", "o": "Greg", "week": 5, "sub": [{"t": "Test connector and validate field mapping", "s": "Pending", "o": "Greg", "tip": ""}], "tip": "Field mapping checked against real player records"}, {"k": "signoff", "l": "Sign-off", "o": "SkyCity", "week": 5, "sub": [{"t": "Confirm the player data shown in the sidebar is correct and permitted", "s": "Pending", "o": "SkyCity", "tip": "Open three real players in the sandbox and compare the sidebar with EveryMatrix."}], "tip": "You confirm the data is right, and that nothing shows that should not", "gate": true}], "parked": true}, {"t": "Custom attributes and workflow automation rules", "o": "Chris", "s": "Pending", "d": "", "week": 8, "notes": "", "link": ""}, {"t": "Additional brand instances and multi-brand routing", "o": "Greg", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Up to 7 app instances for the NZ brand expansion. Phase 3.", "link": ""}, {"t": "Chat metadata export to the SkyCity data warehouse", "o": "Greg", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Start, end and pickup times plus daily volume. Not in this SOW.", "link": ""}, {"t": "Custom development inside EveryMatrix", "o": "Greg", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Explicitly out of scope in the kick-off guide, section 09.", "link": ""}], "client": []}, "fin": {"sabel": [{"t": "Fin AI Agent", "desc": "Brand voice, regulated-topic guardrails, escalation", "lead": "Chris", "o": "Chris", "s": "In Progress", "d": "", "week": 4, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Provide", "o": "SkyCity", "week": 3, "sub": [{"t": "Tone-of-voice guide and 3-5 approved response examples", "s": "Complete", "o": "SkyCity", "tip": "Share tone-of-voice guidance and a few example responses you are happy with, so Fin mirrors your brand language."}, {"t": "Confirm the Fin content approver and approval turnaround", "s": "Complete", "o": "SkyCity", "tip": "Name who approves what Fin is allowed to say, and the turnaround they can commit to. Slow approvals are the most common cause of Fin slipping."}, {"t": "Language handling preference confirmed", "s": "Complete", "o": "SkyCity", "tip": "Confirm whether Fin should detect language automatically or use the profile language, and which languages are in scope for this phase."}, {"t": "Regulated-topic boundaries for Fin agreed in writing", "s": "Complete", "o": "SkyCity", "tip": "Responsible gambling, self-exclusion, AML and KYC need explicit written boundaries before Fin goes anywhere near a live player."}], "tip": "Voice, approver, language, and the regulated-topic boundaries in writing", "wkEnd": 4, "note": "The regulated-topic boundaries are a go-live blocker: Fin cannot go live without them agreed in writing.", "doneAt": "2026-10-02"}, {"k": "build", "l": "Build", "o": "Chris", "week": 4, "sub": [{"t": "Configure Fin persona and tone to brand voice", "s": "Complete", "o": "Chris", "tip": ""}, {"t": "Build Fin guardrails for regulated topics", "s": "Complete", "o": "Chris", "tip": ""}, {"t": "Configure Fin across all connected channels", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Configure Fin escalation, handover and fallback", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Persona, guardrails, channels, escalation and fallback", "wkEnd": 5}, {"k": "validate", "l": "Validate", "o": "Chris", "week": 4, "sub": [{"t": "Test Fin sample queries and iterate during build", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "UAT testers confirmed and available", "s": "Pending", "o": "SkyCity", "tip": "Identify testers to run end-to-end testing across all channels and Fin before go-live. Johan to confirm the window."}, {"t": "Run Fin UAT scenarios and iterate configuration", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Test the regulated-topic guardrails as a player: RG, self-exclusion, AML, KYC", "s": "Pending", "o": "SkyCity", "tip": "Ask Fin the questions it must not answer, and confirm it hands over cleanly."}], "tip": "Sample queries during the build, then UAT scenarios with your testers", "wkEnd": 6}, {"k": "signoff", "l": "Sign-off", "o": "SkyCity", "week": 6, "sub": [{"t": "Fin ready for go-live, confirmed by your lead", "s": "Pending", "o": "SkyCity", "tip": "A one-line confirmation in Slack is enough."}], "tip": "The gate before Fin is switched on", "gate": true}], "gate": true, "wkEnd": 5}, {"t": "Help Centre content", "desc": "Articles Fin can read from", "lead": "Chris", "o": "Chris", "s": "In Progress", "d": "", "week": 3, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Provide", "o": "SkyCity", "week": 3, "sub": [{"t": "Supply Help Centre source content and top player topics", "s": "Complete", "o": "SkyCity", "tip": "Send whatever content exists today plus your top 10 to 20 player questions, so we know what Fin needs to answer first."}, {"t": "Help Centre owner confirmed for ongoing maintenance", "s": "Complete", "o": "SkyCity", "tip": "Nominate your internal Help Centre owner to maintain content after handover."}], "tip": "Source content, top player topics and an owner", "doneAt": "2026-10-02"}, {"k": "build", "l": "Audit, restructure, publish", "o": "Chris", "week": 3, "sub": [{"t": "Audit existing content: gaps, duplicates, outdated", "s": "Complete", "o": "Chris", "tip": ""}, {"t": "Restructure collections and categories for Fin readability", "s": "Complete", "o": "Chris", "tip": ""}, {"t": "Publish cleaned article set in the Help Centre", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Cleaned and reshaped so Fin answers from it well", "wkEnd": 4}, {"k": "install", "l": "Domain", "o": "SkyCity", "week": 4, "sub": [{"t": "Confirm Help Centre domain and add the DNS record", "s": "Pending", "o": "SkyCity", "tip": "Choose the Help Centre address and add the DNS record we send, so the Help Centre sits on your own domain.", "link": "https://www.intercom.com/help/en/articles/271-set-up-a-custom-domain-for-your-help-center"}], "tip": "The Help Centre on your own domain"}, {"k": "review", "l": "Review", "o": "SkyCity", "week": 4, "sub": [{"t": "Review the published Help Centre and flag anything missing or wrong", "s": "Pending", "o": "SkyCity", "tip": "Read it as a player would. Anything missing here is something Fin cannot answer."}], "tip": "You check nothing was lost", "gate": true}], "wkEnd": 4}, {"t": "Maori language enablement for Fin and Messenger", "o": "Chris", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Legal requirement for the NZ rollout. Phase 3, not this engagement.", "link": ""}, {"t": "QA/CSAT scoring and compliance alerting", "o": "Chris", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "SkyCity evaluating Scorebuddy alongside Intercom QA. Decision pending.", "link": ""}, {"t": "Ongoing content writing after handover", "o": "Chris", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Out of scope in the kick-off guide, section 09.", "link": ""}], "client": [{"t": "Upload and organise knowledge base SOPs and FAQs", "o": "SkyCity", "s": "In Progress", "d": "", "week": 8, "notes": "", "link": "", "tip": "", "call": "2026-09-23"}]}, "uat": {"sabel": [{"t": "Team enablement", "desc": "Training and handover for the 11 agents", "lead": "Chris", "o": "SkyCity", "s": "Dependency", "d": "", "week": 6, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Provide", "o": "SkyCity", "week": 6, "sub": [{"t": "Confirm attendee list and session times for training", "s": "Pending", "o": "SkyCity", "tip": "One session for the full team, then a short one for admins."}], "tip": "Who attends, and when"}, {"k": "deliver", "l": "Deliver", "o": "Chris", "week": 6, "sub": [{"t": "Live team training, inbox and Fin handover", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Live training and handover"}]}, {"t": "E2E testing: channels, Fin workflows and connectors", "o": "Chris", "s": "Pending", "d": "", "week": 10, "notes": "", "link": "", "parked": true}, {"t": "Sabel go-live readiness checklist completed", "o": "Richard", "s": "Pending", "d": "", "week": 10, "gate": true, "notes": "", "link": ""}, {"t": "Hours consumed check against contracted hours", "o": "Richard", "s": "Pending", "d": "", "week": 10, "notes": "", "link": ""}], "client": [{"t": "Go-live readiness sign-off", "o": "SkyCity", "s": "Dependency", "d": "", "week": 10, "kind": "milestone", "gate": true, "tip": "Provide written sign-off that the platform is ready before we switch live traffic.", "notes": "", "link": ""}]}, "golive": {"sabel": [{"t": "Legacy chat (LiveAgent via GIG) closed to inbound", "o": "Greg", "s": "Pending", "d": "", "week": 11, "dayOff": -60, "notes": "", "link": ""}, {"t": "Go-live meeting: cutover coordination call", "o": "Richard", "s": "Pending", "d": "", "week": 11, "dayOff": 0, "notes": "The go-live moment.", "link": ""}, {"t": "Open Intercom to inbound across all channels", "o": "Chris", "s": "Pending", "d": "", "week": 11, "dayOff": 30, "notes": "", "link": ""}, {"t": "Activate Fin AI Agent on all configured channels", "o": "Chris", "s": "Pending", "d": "", "week": 11, "dayOff": 60, "notes": "", "link": ""}, {"t": "Sabel on standby for go-live support", "o": "Chris", "s": "Pending", "d": "", "week": 11, "dayOff": 120, "notes": "48 hours of hypercare with Fin tuned on live conversations.", "link": ""}], "client": [{"t": "Team comms sent re: Intercom go-live", "o": "SkyCity", "s": "Dependency", "d": "", "week": 11, "dayOff": -1440, "tip": "Let your wider team know Intercom is live and when, so agents are ready before the first player conversation.", "notes": "", "link": ""}]}, "post": {"sabel": [{"t": "Week 1 health check: deflection, resolution, CSAT", "o": "Chris", "s": "Pending", "d": "", "week": 12, "notes": "", "link": ""}, {"t": "Fin tuning pass on live conversations", "o": "Chris", "s": "Pending", "d": "", "week": 12, "notes": "", "link": ""}, {"t": "Open items and snag list resolved", "o": "Chris", "s": "Pending", "d": "", "week": 12, "notes": "", "link": ""}, {"t": "Final handover document issued and Slack channel wind-down", "o": "Chris", "s": "Pending", "d": "", "week": 12, "notes": "", "link": ""}, {"t": "Outbound marketing campaigns", "o": "Chris", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Out of scope in the kick-off guide, section 09.", "link": ""}], "client": [{"t": "Feedback on Week 1 agent experience", "o": "SkyCity", "s": "Dependency", "d": "", "week": 12, "tip": "After the first week live, share agent feedback so we can target the Fin tuning pass.", "notes": "", "link": ""}, {"t": "Phase 2 and Phase 3 scope decision", "o": "SkyCity", "s": "Dependency", "d": "", "week": 0, "tip": "Decide whether to proceed with EveryMatrix personalisation (Phase 2) and the NZ multi-brand rollout with Maori support (Phase 3).", "notes": "", "link": ""}]}};  // [CLIENT] injected from the Python T_DATA block above
+const T={"setup": {"sabel": [{"t": "Create Slack Connect channel and share with SkyCity team", "o": "Chris", "s": "Complete", "d": "", "week": 1, "notes": "", "link": "", "doneAt": "2026-09-23"}, {"t": "Share pre-call context and SOW with client champion", "o": "Richard", "s": "Complete", "d": "", "week": 1, "notes": "Kick-off guide issued 27 Aug 2026.", "link": ""}, {"t": "Kick-off call: scope, contacts and ways of working", "o": "Chris", "s": "Complete", "d": "", "week": 1, "notes": "Kick-off 8 Sep 2026. Weekly check-in slot Tuesday 9-10am.", "link": "", "doneAt": "2026-09-23"}, {"t": "Send kick-off intake form and file returned responses", "o": "Richard", "s": "Complete", "d": "", "week": 1, "notes": "", "link": "", "doneAt": "2026-09-29"}], "client": [{"t": "Return the completed kick-off intake form", "o": "SkyCity", "s": "In Progress", "d": "", "week": 5, "tip": "Complete and return the intake form so we can confirm scope, brands, channels and requirements before build starts.", "notes": "", "link": ""}, {"t": "Grant Sabel admin seats on the Intercom workspace", "o": "SkyCity", "s": "Complete", "d": "", "week": 1, "tip": "Add the Sabel team as admins on your Intercom workspace so we can configure it on your behalf.", "notes": "", "link": "https://app.eu.intercom.com/a/apps/_/settings/teammates", "doneAt": "2026-09-16"}, {"t": "Confirm workspace App ID, data hosting region and plan tier", "o": "SkyCity", "s": "Complete", "d": "", "week": 1, "tip": "We need the workspace App ID, the data hosting region (EU assumed) and the plan tier plus seat count, so we build in the right place from day one.", "notes": "Handover lists region, App ID and seat count as MISSING.", "link": "https://app.eu.intercom.com/a/apps/_/settings/workspace/general", "doneAt": "2026-09-29"}, {"t": "Brand assets pack (logos, sender names, reply addresses)", "o": "SkyCity", "s": "Dependency", "d": "", "week": 9, "tip": "Send logo files, sender names and reply-address preferences so we can brand the workspace, Messenger and Help Centre.", "notes": "Kamayani advised they do not have a brand book at this point 24 Sep.", "link": ""}, {"t": "Agree a secure method for sharing credentials", "o": "SkyCity", "s": "Complete", "d": "", "week": 1, "tip": "Credentials are never stored in Drive or Slack. We agree a secure channel for API keys and tokens before anything is shared.", "notes": "", "link": "", "doneAt": "2026-09-29"}, {"t": "Historical data decision: migrate, archive or partial", "o": "SkyCity", "s": "Complete", "d": "", "week": 2, "kind": "milestone", "tip": "Decide whether LiveAgent history is migrated, archived in place, or partially migrated. This changes the timeline, so it is needed before build starts.", "notes": "Section 12 of the kick-off guide. Currently out of scope.", "link": "", "doneAt": "2026-09-29"}, {"t": "Clarify audit readiness criteria with the NGA / project team", "o": "SkyCity", "s": "Complete", "d": "", "week": 2, "notes": "", "link": "", "tip": "", "doneAt": "2026-09-24"}, {"t": "Support the discussions on testing capacity for the build", "o": "SkyCity", "s": "Dependency", "d": "", "week": 9, "notes": "", "link": "", "tip": ""}, {"t": "Review the Fin guidance and content for accuracy", "o": "SkyCity", "s": "Dependency", "d": "", "week": 6, "notes": "", "link": "", "tip": ""}]}, "foundations": {"sabel": [{"t": "Inbox, teams and routing", "desc": "Where conversations land, and who sees what", "lead": "Chris", "o": "Chris", "s": "In Progress", "d": "", "week": 2, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Provide", "o": "SkyCity", "week": 2, "sub": [{"t": "Business hours, holidays and out-of-hours handling", "s": "Complete", "o": "SkyCity", "tip": "Confirm operating hours (24/7 planned), any closures and how out-of-hours conversations should be handled."}, {"t": "Confirm agent list and seat types", "s": "Complete", "o": "SkyCity", "tip": "Confirm the named agents, who needs a full seat and who needs a Lite (view-only) seat, across support, payments and player safety.", "link": "https://app.eu.intercom.com/a/apps/_/settings/teammates"}, {"t": "SLA targets per channel confirmed", "s": "Complete", "o": "SkyCity", "tip": "Confirm target response times per channel and conversation type so we can set inbox SLAs and alerts."}], "tip": "Hours, agents, seats and SLA targets", "wkEnd": 3, "doneAt": "2026-10-02"}, {"k": "build", "l": "Build", "o": "Chris", "week": 2, "sub": [{"t": "Draft inbox and team structure for 11 agents", "s": "Complete", "o": "Chris", "tip": ""}, {"t": "Build team inboxes and saved views", "s": "Complete", "o": "Chris", "tip": ""}, {"t": "Routing rules by channel, topic and escalation path", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Ticket types, statuses and SLA targets", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Team inboxes, views, routing rules, ticket types and SLAs", "wkEnd": 3}, {"k": "approve", "l": "Approve", "o": "SkyCity", "week": 3, "sub": [{"t": "Inbox structure and routing approval", "s": "Pending", "o": "SkyCity", "tip": "Review and confirm the inbox and routing setup before we finalise assignment rules."}], "tip": "You confirm the structure before it goes further", "gate": true}, {"k": "validate", "l": "Validate", "o": "Chris", "week": 6, "sub": [{"t": "Run routing tests per channel, topic and escalation path", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Confirm assignment and SLA behaviour looks right to you", "s": "Pending", "o": "SkyCity", "tip": ""}], "tip": "Routing tests before go-live"}], "wkEnd": 3}, {"t": "Email domain", "desc": "Sending from your own address", "lead": "Chris", "o": "SkyCity", "s": "Dependency", "d": "", "week": 2, "notes": "", "link": "", "phases": [{"k": "build", "l": "Issue records", "o": "SkyCity", "week": 2, "sub": [{"t": "Issue the SPF, DKIM and DMARC records", "s": "Pending", "o": "SkyCity", "tip": ""}], "tip": "We send the three records your domain host needs"}, {"k": "install", "l": "Add records", "o": "SkyCity", "week": 2, "sub": [{"t": "Add email DNS records (SPF, DKIM, DMARC) at your domain host", "s": "Pending", "o": "SkyCity", "tip": "We send you the exact records. Your IT or domain admin adds them at your domain host. Intercom cannot send email as your brand until these are in place.", "link": "https://www.intercom.com/help/en/articles/9744849-connect-your-email-support-channel"}], "tip": "Added at your domain host"}, {"k": "validate", "l": "Verify", "o": "Chris", "week": 2, "sub": [{"t": "Verify the domain in Intercom once the records propagate", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Send and receive a test email from the connected address", "s": "Pending", "o": "SkyCity", "tip": ""}], "tip": "Confirmed working both ways"}], "gate": true}, {"t": "Web Messenger", "desc": "Chat on the redesigned site and in the apps", "lead": "Chris", "o": "Chris", "s": "In Progress", "d": "", "week": 3, "notes": "", "link": "", "phases": [{"k": "build", "l": "Configure", "o": "Chris", "week": 3, "sub": [{"t": "Configure Messenger for web and native apps", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Messenger set up and styled in Intercom"}, {"k": "install", "l": "Install", "o": "SkyCity", "week": 3, "sub": [{"t": "Install Messenger code snippet on the redesigned site", "s": "Pending", "o": "SkyCity", "tip": "Your developer adds the Intercom snippet to the site so the Messenger can appear. It is a small copy-paste job, and we can join a call if they hit any issues.", "link": "https://developers.intercom.com/installing-intercom/web/installation"}, {"t": "Secure the Messenger with identity verification (JWT)", "s": "Pending", "o": "SkyCity", "tip": "Your developer sets up JSON Web Tokens so Intercom can verify who each logged-in player really is. This stops anyone impersonating a player in chat.", "link": "https://developers.intercom.com/installing-intercom/web/identity-verification"}, {"t": "Pass logged-in player attributes to the Messenger", "s": "Pending", "o": "SkyCity", "tip": "Your developer sends basic player details (name, email, player ID and useful custom fields) into the Messenger, so conversations arrive with context.", "link": "https://developers.intercom.com/installing-intercom/web/attributes-objects"}], "tip": "Your developers add the snippet, identity verification and player attributes", "wkEnd": 4, "note": "Identity verification is a go-live blocker: without it, players could be impersonated in chat."}, {"k": "validate", "l": "Validate", "o": "SkyCity", "week": 4, "sub": [{"t": "Open the Messenger on the site as a logged-in player and send a test message", "s": "Pending", "o": "SkyCity", "tip": ""}, {"t": "Confirm player attributes arrive and identity verification passes", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Prove it works end to end before Fin is switched on"}], "gate": true}, {"t": "Workspace and brand config: region, hours, seats", "o": "Chris", "s": "In Progress", "d": "", "week": 6, "notes": "", "link": ""}, {"t": "Historical ticket migration from LiveAgent", "o": "Richard", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Out of scope unless the section 12 historical data decision says otherwise. Adds roughly two weeks.", "link": ""}], "client": [{"t": "Confirm inbox email and telephony setup with Cecilie", "o": "SkyCity", "s": "Dependency", "d": "", "week": 7, "notes": "", "link": "", "tip": "", "call": "2026-09-23"}]}, "automation": {"sabel": [{"t": "EveryMatrix player-data connector", "desc": "Player profile, KYC and RG status beside every conversation", "lead": "Greg", "o": "SkyCity", "s": "Dependency", "d": "", "week": 1, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Access", "o": "SkyCity", "week": 1, "sub": [{"t": "Issue EveryMatrix API credentials and sandbox access", "s": "Pending", "o": "SkyCity", "tip": "Nothing in the integration can be built until API access is in place. This is the single biggest item on the critical path."}], "tip": "API credentials and sandbox access, agreed through the secure channel", "note": "Credentials are a go-live blocker. Nothing can be built against EveryMatrix until sandbox access lands."}, {"k": "provide", "l": "Provide", "o": "SkyCity", "week": 2, "sub": [{"t": "Provide the EveryMatrix API specification", "s": "Pending", "o": "SkyCity", "tip": "Share the current API specification so we can map the fields Fin and agents will read."}, {"t": "Provide test player accounts in the sandbox", "s": "Pending", "o": "SkyCity", "tip": "We need a few test player accounts so we can validate lookups safely without touching real player data."}, {"t": "Confirm which player data fields Fin and agents may access", "s": "Pending", "o": "SkyCity", "tip": "Confirm exactly which player fields (balance, bet history, KYC and RG status) may be surfaced in Intercom, and to whom."}], "tip": "API spec, test players, and which player fields Fin and agents may see", "wkEnd": 3}, {"k": "build", "l": "Specify + build", "o": "Greg", "week": 2, "sub": [{"t": "Specify and review EveryMatrix REST API endpoints", "s": "Pending", "o": "Greg", "tip": ""}, {"t": "Confirm session token authentication approach end to end", "s": "Pending", "o": "Greg", "tip": ""}, {"t": "Build the connector against the sandbox", "s": "Pending", "o": "Greg", "tip": ""}, {"t": "Error handling and fallback when the API is unavailable", "s": "Pending", "o": "Greg", "tip": ""}, {"t": "Configure sidebar: player profile, KYC/RG status, history", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Endpoints agreed, connector built against the sandbox, sidebar configured", "wkEnd": 5}, {"k": "validate", "l": "Validate", "o": "Greg", "week": 5, "sub": [{"t": "Test connector and validate field mapping", "s": "Pending", "o": "Greg", "tip": ""}], "tip": "Field mapping checked against real player records"}, {"k": "signoff", "l": "Sign-off", "o": "SkyCity", "week": 5, "sub": [{"t": "Confirm the player data shown in the sidebar is correct and permitted", "s": "Pending", "o": "SkyCity", "tip": "Open three real players in the sandbox and compare the sidebar with EveryMatrix."}], "tip": "You confirm the data is right, and that nothing shows that should not", "gate": true}], "parked": true}, {"t": "Custom attributes and workflow automation rules", "o": "Chris", "s": "Pending", "d": "", "week": 8, "notes": "", "link": ""}, {"t": "Additional brand instances and multi-brand routing", "o": "Greg", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Up to 7 app instances for the NZ brand expansion. Phase 3.", "link": ""}, {"t": "Chat metadata export to the SkyCity data warehouse", "o": "Greg", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Start, end and pickup times plus daily volume. Not in this SOW.", "link": ""}, {"t": "Custom development inside EveryMatrix", "o": "Greg", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Explicitly out of scope in the kick-off guide, section 09.", "link": ""}], "client": []}, "fin": {"sabel": [{"t": "Fin AI Agent", "desc": "Brand voice, regulated-topic guardrails, escalation", "lead": "Chris", "o": "Chris", "s": "In Progress", "d": "", "week": 4, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Provide", "o": "SkyCity", "week": 3, "sub": [{"t": "Tone-of-voice guide and 3-5 approved response examples", "s": "Complete", "o": "SkyCity", "tip": "Share tone-of-voice guidance and a few example responses you are happy with, so Fin mirrors your brand language."}, {"t": "Confirm the Fin content approver and approval turnaround", "s": "Complete", "o": "SkyCity", "tip": "Name who approves what Fin is allowed to say, and the turnaround they can commit to. Slow approvals are the most common cause of Fin slipping."}, {"t": "Language handling preference confirmed", "s": "Complete", "o": "SkyCity", "tip": "Confirm whether Fin should detect language automatically or use the profile language, and which languages are in scope for this phase."}, {"t": "Regulated-topic boundaries for Fin agreed in writing", "s": "Complete", "o": "SkyCity", "tip": "Responsible gambling, self-exclusion, AML and KYC need explicit written boundaries before Fin goes anywhere near a live player."}], "tip": "Voice, approver, language, and the regulated-topic boundaries in writing", "wkEnd": 4, "note": "The regulated-topic boundaries are a go-live blocker: Fin cannot go live without them agreed in writing.", "doneAt": "2026-10-02"}, {"k": "build", "l": "Build", "o": "Chris", "week": 4, "sub": [{"t": "Configure Fin persona and tone to brand voice", "s": "Complete", "o": "Chris", "tip": ""}, {"t": "Build Fin guardrails for regulated topics", "s": "Complete", "o": "Chris", "tip": ""}, {"t": "Configure Fin across all connected channels", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Configure Fin escalation, handover and fallback", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Persona, guardrails, channels, escalation and fallback", "wkEnd": 5}, {"k": "validate", "l": "Validate", "o": "Chris", "week": 4, "sub": [{"t": "Test Fin sample queries and iterate during build", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "UAT testers confirmed and available", "s": "Pending", "o": "SkyCity", "tip": "Identify testers to run end-to-end testing across all channels and Fin before go-live. Johan to confirm the window."}, {"t": "Run Fin UAT scenarios and iterate configuration", "s": "Pending", "o": "Chris", "tip": ""}, {"t": "Test the regulated-topic guardrails as a player: RG, self-exclusion, AML, KYC", "s": "Pending", "o": "SkyCity", "tip": "Ask Fin the questions it must not answer, and confirm it hands over cleanly."}], "tip": "Sample queries during the build, then UAT scenarios with your testers", "wkEnd": 6}, {"k": "signoff", "l": "Sign-off", "o": "SkyCity", "week": 6, "sub": [{"t": "Fin ready for go-live, confirmed by your lead", "s": "Pending", "o": "SkyCity", "tip": "A one-line confirmation in Slack is enough."}], "tip": "The gate before Fin is switched on", "gate": true}], "gate": true, "wkEnd": 5}, {"t": "Help Centre content", "desc": "Articles Fin can read from", "lead": "Chris", "o": "Chris", "s": "In Progress", "d": "", "week": 3, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Provide", "o": "SkyCity", "week": 3, "sub": [{"t": "Supply Help Centre source content and top player topics", "s": "Complete", "o": "SkyCity", "tip": "Send whatever content exists today plus your top 10 to 20 player questions, so we know what Fin needs to answer first."}, {"t": "Help Centre owner confirmed for ongoing maintenance", "s": "Complete", "o": "SkyCity", "tip": "Nominate your internal Help Centre owner to maintain content after handover."}], "tip": "Source content, top player topics and an owner", "doneAt": "2026-10-02"}, {"k": "build", "l": "Audit, restructure, publish", "o": "Chris", "week": 3, "sub": [{"t": "Audit existing content: gaps, duplicates, outdated", "s": "Complete", "o": "Chris", "tip": ""}, {"t": "Restructure collections and categories for Fin readability", "s": "Complete", "o": "Chris", "tip": ""}, {"t": "Publish cleaned article set in the Help Centre", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Cleaned and reshaped so Fin answers from it well", "wkEnd": 4}, {"k": "install", "l": "Domain", "o": "SkyCity", "week": 4, "sub": [{"t": "Confirm Help Centre domain and add the DNS record", "s": "Pending", "o": "SkyCity", "tip": "Choose the Help Centre address and add the DNS record we send, so the Help Centre sits on your own domain.", "link": "https://www.intercom.com/help/en/articles/271-set-up-a-custom-domain-for-your-help-center"}], "tip": "The Help Centre on your own domain"}, {"k": "review", "l": "Review", "o": "SkyCity", "week": 4, "sub": [{"t": "Review the published Help Centre and flag anything missing or wrong", "s": "Pending", "o": "SkyCity", "tip": "Read it as a player would. Anything missing here is something Fin cannot answer."}], "tip": "You check nothing was lost", "gate": true}], "wkEnd": 4}, {"t": "Maori language enablement for Fin and Messenger", "o": "Chris", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Legal requirement for the NZ rollout. Phase 3, not this engagement.", "link": ""}, {"t": "QA/CSAT scoring and compliance alerting", "o": "Chris", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "SkyCity evaluating Scorebuddy alongside Intercom QA. Decision pending.", "link": ""}, {"t": "Ongoing content writing after handover", "o": "Chris", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Out of scope in the kick-off guide, section 09.", "link": ""}, {"t": "Switch the other articles on for Fin, link the content sources and walk Cecile through switching on the rest, once approved", "o": "Chris", "s": "Complete", "d": "", "week": 6, "notes": "", "link": "", "doneAt": "2026-10-09"}], "client": [{"t": "Upload and organise knowledge base SOPs and FAQs", "o": "SkyCity", "s": "In Progress", "d": "", "week": 8, "notes": "", "link": "", "tip": "", "call": "2026-09-23"}, {"t": "Approve and publish the GDPR and responsible gaming articles", "o": "SkyCity", "s": "Dependency", "d": "", "week": 6, "notes": "", "link": "", "tip": "", "desc": "For Cecile"}]}, "uat": {"sabel": [{"t": "Team enablement", "desc": "Training and handover for the 11 agents", "lead": "Chris", "o": "SkyCity", "s": "Dependency", "d": "", "week": 6, "notes": "", "link": "", "phases": [{"k": "provide", "l": "Provide", "o": "SkyCity", "week": 6, "sub": [{"t": "Confirm attendee list and session times for training", "s": "Pending", "o": "SkyCity", "tip": "One session for the full team, then a short one for admins."}], "tip": "Who attends, and when"}, {"k": "deliver", "l": "Deliver", "o": "Chris", "week": 6, "sub": [{"t": "Live team training, inbox and Fin handover", "s": "Pending", "o": "Chris", "tip": ""}], "tip": "Live training and handover"}]}, {"t": "E2E testing: channels, Fin workflows and connectors", "o": "Chris", "s": "Pending", "d": "", "week": 10, "notes": "", "link": "", "parked": true}, {"t": "Sabel go-live readiness checklist completed", "o": "Richard", "s": "Pending", "d": "", "week": 10, "gate": true, "notes": "", "link": ""}, {"t": "Hours consumed check against contracted hours", "o": "Richard", "s": "Pending", "d": "", "week": 10, "notes": "", "link": ""}], "client": [{"t": "Go-live readiness sign-off", "o": "SkyCity", "s": "Dependency", "d": "", "week": 10, "kind": "milestone", "gate": true, "tip": "Provide written sign-off that the platform is ready before we switch live traffic.", "notes": "", "link": ""}]}, "golive": {"sabel": [{"t": "Legacy chat (LiveAgent via GIG) closed to inbound", "o": "Greg", "s": "Pending", "d": "", "week": 11, "dayOff": -60, "notes": "", "link": ""}, {"t": "Go-live meeting: cutover coordination call", "o": "Chris", "s": "Pending", "d": "", "week": 11, "dayOff": 0, "notes": "The go-live moment.", "link": ""}, {"t": "Open Intercom to inbound across all channels", "o": "Chris", "s": "Pending", "d": "", "week": 11, "dayOff": 30, "notes": "", "link": ""}, {"t": "Activate Fin AI Agent on all configured channels", "o": "Chris", "s": "Pending", "d": "", "week": 11, "dayOff": 60, "notes": "", "link": ""}, {"t": "Sabel on standby for go-live support", "o": "Chris", "s": "Pending", "d": "", "week": 11, "dayOff": 120, "notes": "48 hours of hypercare with Fin tuned on live conversations.", "link": ""}], "client": [{"t": "Team comms sent re: Intercom go-live", "o": "SkyCity", "s": "Dependency", "d": "", "week": 11, "dayOff": -1440, "tip": "Let your wider team know Intercom is live and when, so agents are ready before the first player conversation.", "notes": "", "link": ""}]}, "post": {"sabel": [{"t": "Week 1 health check: deflection, resolution, CSAT", "o": "Chris", "s": "Pending", "d": "", "week": 12, "notes": "", "link": ""}, {"t": "Fin tuning pass on live conversations", "o": "Chris", "s": "Pending", "d": "", "week": 12, "notes": "", "link": ""}, {"t": "Open items and snag list resolved", "o": "Chris", "s": "Pending", "d": "", "week": 12, "notes": "", "link": ""}, {"t": "Final handover document issued and Slack channel wind-down", "o": "Chris", "s": "Pending", "d": "", "week": 12, "notes": "", "link": ""}, {"t": "Outbound marketing campaigns", "o": "Chris", "s": "Pending", "d": "", "week": 0, "parked": true, "est": "TBC", "notes": "Out of scope in the kick-off guide, section 09.", "link": ""}], "client": [{"t": "Feedback on Week 1 agent experience", "o": "SkyCity", "s": "Dependency", "d": "", "week": 12, "tip": "After the first week live, share agent feedback so we can target the Fin tuning pass.", "notes": "", "link": ""}, {"t": "Phase 2 and Phase 3 scope decision", "o": "SkyCity", "s": "Dependency", "d": "", "week": 0, "tip": "Decide whether to proceed with EveryMatrix personalisation (Phase 2) and the NZ multi-brand rollout with Maori support (Phase 3).", "notes": "", "link": ""}]}};  // [CLIENT] injected from the Python T_DATA block above
 // Client hub forms, injected from FORMS_DATA. Only forms with a matching client
 // task ('form' key) are included, so a build without a migration has no
 // migration form anywhere.
@@ -2533,7 +2893,7 @@ function resolveTask(cid){
       return `<div class="stage-det">
         <div class="dh"><span><b>${esc(p.l)}</b>${p.tip?' · '+esc(p.tip):''}</span><span style="white-space:nowrap">${m?(n===m?'all done':n+' of '+m+' done'):''}</span></div>
         <div class="sub-rail">${(p.sub||[]).map((x,i)=>{const sd=x.s==='Complete';const o=x.o||p.o||CLIENT_LABEL;const c=OW[o]||OW[CLIENT_LABEL];return `<div style="display:flex;align-items:center;gap:7px;padding:3px 0">
-          <button class="chk-btn" onclick="togglePhaseSub(event,'${cid}',${oi},${i})" title="${sd?'Mark incomplete':'Mark done'}" style="padding-top:0;align-items:center"><i class="ti ti-${sd?'circle-check-filled':'circle'}" style="font-size:15px;color:${sd?'var(--k4ADE80)':'var(--k334155)'}"></i></button>
+          <button class="chk-btn" onclick="togglePhaseSub(event,'${cid}',${oi},${i})" title="${stepTip(x.s)}" style="padding-top:0;align-items:center"><i class="ti ti-${stepIcon(x.s)}" style="font-size:15px;color:${sd?'var(--k4ADE80)':(x.s==='In Progress'?'var(--k60A5FA)':'var(--k334155)')}"></i></button>
           <span style="font-size:12px;flex:1;min-width:0;line-height:1.4;color:${sd?'var(--k475569)':'var(--kE2E8F0)'};${sd?'text-decoration:line-through':''}">${gloss(esc(x.t))}</span>
           ${x.tip?`<i class="ti ti-info-circle" onmouseenter="showPhaseTip(event,'${cid}',${oi},${i})" onmousemove="moveTip(event)" onmouseleave="hideTip()" style="font-size:12px;color:var(--k475569);cursor:help;flex-shrink:0"></i>`:''}
           <span class="bdg" style="color:${c.c};background:${c.bg};font-size:10px;padding:1px 7px">${esc(o)}</span>
@@ -2572,7 +2932,7 @@ function resolveTask(cid){
     function togglePhaseSub(e,cid,pi,si){
       e.stopPropagation();
       const t=resolveTask(cid);const x=t&&t.phases[pi]&&t.phases[pi].sub[si];if(!x)return;
-      x.s=x.s==='Complete'?'Pending':'Complete';
+      x.s=stepNext(x.s);
       syncPhased(t);
       const ai=activePhaseIdx(t);if(phaseOpen[cid]===undefined||phaseDone(t.phases[phaseOpen[cid]]))phaseOpen[cid]=ai<0?t.phases.length-1:ai;
       render();scheduleAutoSave();
@@ -2798,7 +3158,7 @@ function resolveTask(cid){
       // Everything still open: simple tasks, plus the open items of each staged deliverable's active stage.
       const out=[];const today=new Date();today.setHours(0,0,0,0);
       ovAll().forEach(o=>{const t=o.t;if(t.s==='Complete')return;
-        if(!isPhased(t)){const end=dueEnd(endWeek(t));out.push({kind:'task',cid:o.cid,title:t.t,ctx:o.pl,pc:o.pc,o:t.o,end,od:isOverdue(t),call:!!t.call,tip:t.tip||'',week:endWeek(t)});return;}
+        if(!isPhased(t)){const end=(t.due&&typeof dueEndDate==='function')?dueEndDate(t):dueEnd(endWeek(t));out.push({kind:'task',cid:o.cid,title:t.t,ctx:o.pl,pc:o.pc,o:t.o,end,od:isOverdue(t),call:!!t.call,tip:t.tip||'',week:endWeek(t)});return;}
         const ai=activePhaseIdx(t);if(ai<0)return;const p=t.phases[ai];const end=dueEnd(p.wkEnd||p.week);
         (p.sub||[]).forEach((x,si)=>{if(x.s==='Complete')return;out.push({kind:'item',cid:o.cid,pi:ai,si,title:x.t,ctx:t.t+' · '+p.l,pc:o.pc,o:x.o||p.o||CLIENT_LABEL,end,od:isOverdue(t),call:!!x.call,tip:x.tip||'',week:p.wkEnd||p.week||0});});
       });
@@ -3287,7 +3647,7 @@ function decisionsView(){
 function decCount(){try{return decItems().filter(o=>o.obj.decision&&o.obj.decision.v).length;}catch(e){return 0;}}
 
 // ── Progression pages (between pillars) ────────────────────────────────────────
-const PROG_SEED={"p1": {"id": "p1", "frm": "setup", "to": "foundations", "code": "P1", "title": "Intercom Foundations", "week": 2, "date": "", "time": "", "hint": "week 2", "length": "90 min", "where": "Video call", "status": "unscheduled", "purpose": "Agree how your inbox, email and chat window are set up before we build them.", "prep": [], "built": [{"t": "Create Slack Connect channel and share with SkyCity team", "done": false}, {"t": "Share pre-call context and SOW with client champion", "done": false}, {"t": "Kick-off call: scope, contacts and ways of working", "done": false}, {"t": "Send kick-off intake form and file returned responses", "done": false}], "walkthrough": "", "signedBy": "", "signedOn": "", "snags": [], "decide": [{"q": "Which team inboxes you need, and who sits in each", "a": ""}, {"q": "How conversations reach the right team: by topic, language, region or product", "a": ""}, {"q": "Reply-time targets per channel", "a": ""}, {"q": "Which email addresses move to Intercom, and when", "a": ""}], "brings": [{"t": "Confirm inbox email and telephony setup with Cecilie", "got": false, "owner": ""}, {"t": "Business hours, holidays and out-of-hours handling", "got": false, "owner": ""}, {"t": "Confirm agent list and seat types", "got": false, "owner": ""}, {"t": "SLA targets per channel confirmed", "got": false, "owner": ""}, {"t": "Inbox structure and routing approval", "got": false, "owner": ""}, {"t": "Confirm assignment and SLA behaviour looks right to you", "got": false, "owner": ""}, {"t": "Issue the SPF, DKIM and DMARC records to SkyCity", "got": false, "owner": ""}, {"t": "Add email DNS records (SPF, DKIM, DMARC) at your domain host", "got": false, "owner": ""}, {"t": "Send and receive a test email from the connected address", "got": false, "owner": ""}, {"t": "Install Messenger code snippet on the redesigned site", "got": false, "owner": ""}, {"t": "Secure the Messenger with identity verification (JWT)", "got": false, "owner": ""}, {"t": "Pass logged-in player attributes to the Messenger", "got": false, "owner": ""}, {"t": "Open the Messenger on the site as a logged-in player and send a test message", "got": false, "owner": ""}], "who": [{"n": "SkyCity project lead", "s": "c"}, {"n": "Chris", "s": "s"}, {"n": "Richard", "s": "s"}], "agenda": [{"m": "0\u201310", "t": "What we set out to do, and what is on this call"}, {"m": "10\u201335", "t": "Walkthrough: what we built in Setup"}, {"m": "35\u201345", "t": "Snags and sign-off for Setup"}, {"m": "45\u201380", "t": "Opening Intercom Foundations: the decisions below"}, {"m": "80\u201390", "t": "Read back decisions, owners and dates"}], "leave": [{"t": "Decisions written up and sent within 2 working days", "done": false}, {"t": "Everything Intercom Foundations needs from you has an owner and a date", "done": false}, {"t": "Setup signed off", "done": false}], "actions": [], "readyBy": "", "readyOn": "", "notes": "", "signoff": {"mode": "elsewhere", "elsewhere": "Historical data decision: migrate, archive or partial", "person": "", "role": "", "status": "none", "requestedBy": "", "requestedAt": 0, "by": "", "at": 0, "how": "", "recordedBy": "", "note": "", "log": []}}, "p2": {"id": "p2", "frm": "foundations", "to": "automation", "code": "P2", "title": "Automation & EveryMatrix", "week": 4, "date": "", "time": "", "hint": "week 4", "length": "90 min", "where": "Video call", "status": "unscheduled", "purpose": "Agree which of your systems we connect, and what Fin may do with them.", "prep": [{"t": "Have test player accounts ready for us", "done": false, "owner": ""}], "built": [{"t": "Inbox, teams and routing", "done": false}, {"t": "Email domain", "done": false}, {"t": "Web Messenger", "done": false}, {"t": "Workspace and brand config: region, hours, seats", "done": false}], "walkthrough": "", "signedBy": "", "signedOn": "", "snags": [], "decide": [{"q": "Which of your systems Fin and your team need to look things up in", "a": ""}, {"q": "What Fin may change in those systems, and what it may only read", "a": ""}, {"q": "Who on your side owns each connection and its test account", "a": ""}], "brings": [], "who": [{"n": "SkyCity project lead", "s": "c"}, {"n": "Chris", "s": "s"}, {"n": "Richard", "s": "s"}], "agenda": [{"m": "0\u201310", "t": "What we set out to do, and what is on this call"}, {"m": "10\u201335", "t": "Walkthrough: what we built in Intercom Foundations"}, {"m": "35\u201345", "t": "Snags and sign-off for Intercom Foundations"}, {"m": "45\u201380", "t": "Opening Automation & EveryMatrix: the decisions below"}, {"m": "80\u201390", "t": "Read back decisions, owners and dates"}], "leave": [{"t": "Decisions written up and sent within 2 working days", "done": false}, {"t": "Everything Automation & EveryMatrix needs from you has an owner and a date", "done": false}, {"t": "Intercom Foundations signed off", "done": false}], "actions": [], "readyBy": "", "readyOn": "", "notes": "", "signoff": {"mode": "elsewhere", "elsewhere": "Inbox, teams and routing", "person": "", "role": "", "status": "none", "requestedBy": "", "requestedAt": 0, "by": "", "at": 0, "how": "", "recordedBy": "", "note": "", "log": []}}, "p3": {"id": "p3", "frm": "automation", "to": "fin", "code": "P3", "title": "Fin & Help Centre", "week": 3, "date": "", "time": "", "hint": "week 3", "length": "90 min", "where": "Video call", "status": "unscheduled", "purpose": "Agree how Fin answers, what it must never say, and when it hands over.", "prep": [{"t": "Send your tone of voice guidance and example replies", "done": false, "owner": ""}], "built": [{"t": "Custom attributes and workflow automation rules", "done": false}], "walkthrough": "", "signedBy": "", "signedOn": "", "snags": [], "decide": [{"q": "What Fin must never answer or promise", "a": ""}, {"q": "When Fin hands a customer to a person", "a": ""}, {"q": "Which languages Fin replies in", "a": ""}, {"q": "Who checks Fin's answers before customers see them", "a": ""}], "brings": [{"t": "Upload and organise knowledge base SOPs and FAQs", "got": false, "owner": ""}, {"t": "Tone-of-voice guide and 3-5 approved response examples", "got": false, "owner": ""}, {"t": "Confirm the Fin content approver and approval turnaround", "got": false, "owner": ""}, {"t": "Language handling preference confirmed", "got": false, "owner": ""}, {"t": "Regulated-topic boundaries for Fin agreed in writing", "got": false, "owner": ""}, {"t": "UAT testers confirmed and available", "got": false, "owner": ""}, {"t": "Test the regulated-topic guardrails as a player: RG, self-exclusion, AML, KYC", "got": false, "owner": ""}, {"t": "Fin ready for go-live, confirmed by your lead", "got": false, "owner": ""}, {"t": "Supply Help Centre source content and top player topics", "got": false, "owner": ""}, {"t": "Help Centre owner confirmed for ongoing maintenance", "got": false, "owner": ""}, {"t": "Confirm Help Centre domain and add the DNS record", "got": false, "owner": ""}, {"t": "Review the published Help Centre and flag anything missing or wrong", "got": false, "owner": ""}], "who": [{"n": "SkyCity project lead", "s": "c"}, {"n": "Chris", "s": "s"}, {"n": "Richard", "s": "s"}], "agenda": [{"m": "0\u201310", "t": "What we set out to do, and what is on this call"}, {"m": "10\u201335", "t": "Walkthrough: what we built in Automation & EveryMatrix"}, {"m": "35\u201345", "t": "Snags and sign-off for Automation & EveryMatrix"}, {"m": "45\u201380", "t": "Opening Fin & Help Centre: the decisions below"}, {"m": "80\u201390", "t": "Read back decisions, owners and dates"}], "leave": [{"t": "Decisions written up and sent within 2 working days", "done": false}, {"t": "Everything Fin & Help Centre needs from you has an owner and a date", "done": false}, {"t": "Automation & EveryMatrix signed off", "done": false}], "actions": [], "readyBy": "", "readyOn": "", "notes": "", "signoff": {"mode": "module", "elsewhere": "", "person": "", "role": "", "status": "none", "requestedBy": "", "requestedAt": 0, "by": "", "at": 0, "how": "", "recordedBy": "", "note": "", "log": []}}, "p4": {"id": "p4", "frm": "fin", "to": "uat", "code": "P4", "title": "UAT & Enablement", "week": 6, "date": "", "time": "", "hint": "week 6", "length": "90 min", "where": "Video call", "status": "unscheduled", "purpose": "Walk through the finished build and agree how we test it together.", "prep": [{"t": "Name your testers and book their time", "done": false, "owner": ""}], "built": [{"t": "Fin AI Agent", "done": false}, {"t": "Help Centre content", "done": false}], "walkthrough": "", "signedBy": "", "signedOn": "", "snags": [], "decide": [{"q": "Who tests, and when", "a": ""}, {"q": "What must work before go-live", "a": ""}, {"q": "Who gives the go-ahead", "a": ""}], "brings": [{"t": "Go-live readiness sign-off", "got": false, "owner": ""}, {"t": "Confirm attendee list and session times for training", "got": false, "owner": ""}], "who": [{"n": "SkyCity project lead", "s": "c"}, {"n": "Chris", "s": "s"}, {"n": "Richard", "s": "s"}], "agenda": [{"m": "0\u201310", "t": "What we set out to do, and what is on this call"}, {"m": "10\u201335", "t": "Walkthrough: what we built in Fin & Help Centre"}, {"m": "35\u201345", "t": "Snags and sign-off for Fin & Help Centre"}, {"m": "45\u201380", "t": "Opening UAT & Enablement: the decisions below"}, {"m": "80\u201390", "t": "Read back decisions, owners and dates"}], "leave": [{"t": "Decisions written up and sent within 2 working days", "done": false}, {"t": "Everything UAT & Enablement needs from you has an owner and a date", "done": false}, {"t": "Fin & Help Centre signed off", "done": false}], "actions": [], "readyBy": "", "readyOn": "", "notes": "", "signoff": {"mode": "elsewhere", "elsewhere": "Fin AI Agent", "person": "", "role": "", "status": "none", "requestedBy": "", "requestedAt": 0, "by": "", "at": 0, "how": "", "recordedBy": "", "note": "", "log": []}}, "p5": {"id": "p5", "frm": "uat", "to": "golive", "code": "P5", "title": "Go-live & Cutover", "week": 7, "date": "", "time": "", "hint": "week 7", "length": "90 min", "where": "Video call", "status": "unscheduled", "purpose": "Confirm everything is ready and agree the plan for go-live day.", "prep": [{"t": "Tell your team the go-live date", "done": false, "owner": ""}], "built": [{"t": "Team enablement", "done": false}, {"t": "Sabel go-live readiness checklist completed", "done": false}, {"t": "Hours consumed check against contracted hours", "done": false}], "walkthrough": "", "signedBy": "", "signedOn": "", "snags": [], "decide": [{"q": "Go-live date and time", "a": ""}, {"q": "When your old helpdesk stops taking new tickets (if you are replacing one)", "a": ""}, {"q": "Who is on hand on the day, on both sides", "a": ""}], "brings": [{"t": "Team comms sent re: Intercom go-live", "got": false, "owner": ""}], "who": [{"n": "SkyCity project lead", "s": "c"}, {"n": "Chris", "s": "s"}, {"n": "Richard", "s": "s"}], "agenda": [{"m": "0\u201310", "t": "What we set out to do, and what is on this call"}, {"m": "10\u201335", "t": "Walkthrough: what we built in UAT & Enablement"}, {"m": "35\u201345", "t": "Snags and sign-off for UAT & Enablement"}, {"m": "45\u201380", "t": "Opening Go-live & Cutover: the decisions below"}, {"m": "80\u201390", "t": "Read back decisions, owners and dates"}], "leave": [{"t": "Decisions written up and sent within 2 working days", "done": false}, {"t": "Everything Go-live & Cutover needs from you has an owner and a date", "done": false}, {"t": "UAT & Enablement signed off", "done": false}], "actions": [], "readyBy": "", "readyOn": "", "notes": "", "signoff": {"mode": "elsewhere", "elsewhere": "Go-live readiness sign-off", "person": "", "role": "", "status": "none", "requestedBy": "", "requestedAt": 0, "by": "", "at": 0, "how": "", "recordedBy": "", "note": "", "log": []}}, "p6": {"id": "p6", "frm": "golive", "to": "post", "code": "P6", "title": "Post go-live", "week": 8, "date": "", "time": "", "hint": "week 8", "length": "90 min", "where": "Video call", "status": "unscheduled", "purpose": "Look back at launch and agree what we improve in the first weeks.", "prep": [], "built": [{"t": "Legacy chat (LiveAgent via GIG) closed to inbound", "done": false}, {"t": "Go-live meeting: cutover coordination call", "done": false}, {"t": "Open Intercom to inbound across all channels", "done": false}, {"t": "Activate Fin AI Agent on all configured channels", "done": false}, {"t": "Sabel on standby for go-live support", "done": false}], "walkthrough": "", "signedBy": "", "signedOn": "", "snags": [], "decide": [{"q": "What we look at in the first weeks", "a": ""}, {"q": "Who looks after the help articles and Fin after handover", "a": ""}, {"q": "Any follow-on work", "a": ""}], "brings": [{"t": "Feedback on Week 1 agent experience", "got": false, "owner": ""}, {"t": "Phase 2 and Phase 3 scope decision", "got": false, "owner": ""}], "who": [{"n": "SkyCity project lead", "s": "c"}, {"n": "Chris", "s": "s"}, {"n": "Richard", "s": "s"}], "agenda": [{"m": "0\u201310", "t": "What we set out to do, and what is on this call"}, {"m": "10\u201335", "t": "Walkthrough: what we built in Go-live & Cutover"}, {"m": "35\u201345", "t": "Snags and sign-off for Go-live & Cutover"}, {"m": "45\u201380", "t": "Opening Post go-live: the decisions below"}, {"m": "80\u201390", "t": "Read back decisions, owners and dates"}], "leave": [{"t": "Decisions written up and sent within 2 working days", "done": false}, {"t": "Everything Post go-live needs from you has an owner and a date", "done": false}, {"t": "Go-live & Cutover signed off", "done": false}], "actions": [], "readyBy": "", "readyOn": "", "notes": "", "signoff": {"mode": "module", "elsewhere": "", "person": "", "role": "", "status": "none", "requestedBy": "", "requestedAt": 0, "by": "", "at": 0, "how": "", "recordedBy": "", "note": "", "log": []}}};
+const PROG_SEED={};
 const PROG_URL="https://sabel-intercom.github.io/Intake-forms/SkyCityTracker.html";  // the live tracker address, used in messages sent from a local copy
 let PROG=JSON.parse(JSON.stringify(PROG_SEED));
 const PROG_IDS=Object.keys(PROG_SEED);
@@ -3577,7 +3937,7 @@ function progView(id){
 const HUB_RANGE="Sep-Nov 2026";
 const SLACK_URL="";
 const HUB_PTYPE="build";
-const TIP={"markDone": "Mark done", "markNotDone": "Mark not done", "editTitle": "Click to edit the title", "editPencil": "Edit the title", "owner": "Who is doing this. Click to change", "date": "When it is due. Click to change", "status": "Where it is up to. Click to change", "openDetails": "Open details: description, steps and notes", "closeDetails": "Close details", "editDesc": "Click to edit the description", "stepDone": "Mark step done", "stepNotDone": "Mark step not done", "editStep": "Click to edit this step", "removeStep": "Remove step", "recordDecision": "Write down what was agreed for this task", "editDecision": "Change or add detail to this decision", "decisionMissing": "This was ticked without saying what was decided. Click to add it", "menuCollapse": "Collapse menu", "menuExpand": "Expand menu"};
+const TIP={"markDone": "Mark done", "markNotDone": "Mark not done", "editTitle": "Click to edit the title", "editPencil": "Edit the title", "owner": "Who is doing this. Click to change", "date": "When it is due. Click to change", "status": "Where it is up to. Click to change", "openDetails": "Open details: description, steps and notes", "closeDetails": "Close details", "editDesc": "Click to edit the description", "stepStart": "Mark step in progress", "stepDone": "Mark step done", "stepNotDone": "Mark step not done", "editStep": "Click to edit this step", "removeStep": "Remove step", "recordDecision": "Write down what was agreed for this task", "editDecision": "Change or add detail to this decision", "decisionMissing": "This was ticked without saying what was decided. Click to add it", "menuCollapse": "Collapse menu", "menuExpand": "Expand menu"};
 function tip(k){return esc(TIP[k]||"");}
 
 // ── Hub navigation and Home (1 Oct 2026) ────────────────────────────────────────
@@ -3600,41 +3960,35 @@ function hnDue(wk){if(!wk||wk>=999)return '';const d=new Date(weekStartDate(wk))
 function hnGoLive(){if(!goLiveDate)return null;const d=new Date(goLiveDate+'T00:00:00');if(isNaN(d))return null;return d;}
 function renderSidebar(){
   const sb=document.getElementById('sidebar');if(!sb)return;sb.classList.add('hn');
-  const need=hnNeeds().now.length,pct=hnPct(),forms=typeof formsActive==='function'?formsActive():[];
-  const inForm=String(cur).indexOf('form:')===0;
-  const btn=(id,icon,label,right,on)=>`<button class="hn-btn${on?' on':''}" onclick="setP('${id}')"><span class="ic"><i class="ti ti-${icon}"></i></span><span class="lb">${label}</span>${right||''}</button>`;
-  let h=`<div class="hn-mark"><img src="${logoSrc()}" alt="Sabel"></div><nav class="hn-nav">`;
-  h+=btn('home','home','Home','',cur==='home');
-  h+=btn('overview','layout-dashboard','Dashboard',need?`<span class="hn-badge" title="${need} thing${need===1?'':'s'} need${need===1?'s':''} you">${need}</span>`:'',cur==='overview');
-  const tOpen=hnOpen==='tracker',fOpen=hnOpen==='forms';
-  h+=`<button class="hn-btn${hnInTracker()?' on':''}" onclick="hnTracker()" aria-expanded="${tOpen}"><span class="ic"><i class="ti ti-list-details"></i></span><span class="lb">Tracker</span>${tOpen?'':`<span class="hn-pct">${pct}%</span>`}<i class="ti ti-chevron-${tOpen?'up':'down'} hn-chev"></i></button>`;
-  if(tOpen){
-    const hint=cur==='tracker'?hnFirstOpenPillar():'';
-    h+=`<div class="hn-sub tk">`+P.map(p=>{const m=phaseMini(p.id),pc=m.total?Math.round(m.done/m.total*100):0;
-      const pg=(typeof progPages==='function'?progPages():[]).filter(x=>x.frm===p.id).map(x=>{const i=progNum(x.id);
-        return `<button class="hn-pg${cur==='prog:'+x.id?' on':''}" onclick="setP('prog:${x.id}')" title="${esc(x.title||'')}"><i></i>Progression ${i}</button>`;}).join('');
-      const on=cur===p.id;
-      return `<button class="hn-pl${on?' on':''}${hint===p.id?' hint':''}" onclick="setGroupBy('pillar');setP('${p.id}')" title="${esc(p.l)}"><span class="lb">${esc(p.l)}</span><span class="pc" style="color:${on?'#fff':hnPillarClr(p.id,pc)}">${pc}%</span></button>`+pg;
-    }).join('')+`</div>`;
-  }
-  if(forms.length){
-    h+=`<button class="hn-btn${inForm&&!fOpen?' on':''}" onclick="hnToggleForms()" aria-expanded="${fOpen}"><span class="ic"><i class="ti ti-forms"></i></span><span class="lb">Forms</span><i class="ti ti-chevron-${fOpen?'up':'down'} hn-chev"></i></button>`;
-    if(fOpen){
-      h+=`<div class="hn-sub">`+forms.map(f=>{const st=formState(f.id);const on=cur==='form:'+f.id;
-        const started=st.total&&(st.done||(st.p&&(st.p.sections||[]).some(x=>(x.filled||0)>0)));
-        const right=st.submitted?`<i class="ti ti-circle-check-filled" style="font-size:15px;color:#4ADE80" title="Sent to Sabel"></i>`
-          :(started?`<span class="st">${st.done}/${st.total}</span>`:`<span class="hn-dot" title="Not started"></span>`);
-        return `<button class="hn-subbtn${on?' on':''}" onclick="hnSetOpen('forms');setP('form:${f.id}')"><span class="lb">${esc(f.l)}</span>${right}</button>`;}).join('')+`</div>`;
-    }
-  }
+  const need=hnNeeds().now.length,pct=hnPct(),gs=globalStats(),forms=typeof formsActive==='function'?formsActive():[];
+  const btn=(id,icon,label,right,on,go)=>`<button class="hn-btn${on?' on':''}" data-tip="${esc(label)}" onclick="${go||("setP('"+id+"')")}"><span class="ic"><i class="ti ti-${icon}"></i></span><span class="lb">${label}</span>${right||''}</button>`;
+  let h=`<div class="hn-mark"><img src="${logoSrc()}" alt="Sabel"><span class="hn-tag">Hub</span></div>`;
+  const g=ovGoLive();
+  h+=`<div class="sd-proj"><div class="k">${esc(CLIENT_NAME)}</div><div class="n">Intercom build</div><div class="r"><b>${pct}%</b><span>${Math.round(gs.complete)} of ${gs.total}</span></div><div class="bar"><i style="width:${pct}%"></i></div>${g?`<div class="gl">Go-live <b>${esc(sdFmtW(g.gl))}</b>${g.d>0?' · '+g.d+' days':(g.d===0?' · today':' · live')}</div>`:''}</div>`;
+  h+=`<nav class="hn-nav"><div class="hn-sec">Tracker</div>`;
+  h+=btn('home','home','Home',need?`<span class="hn-badge" title="${need} thing${need===1?'':'s'} need${need===1?'s':''} you">${need}</span>`:'',cur==='home');
+  h+=btn('flow','route','Project tracker',(cur!=='flow'?`<span class="hn-pct">${pct}%</span>`:''),cur==='flow'||hnInTracker());
+  h+=btn('overview','layout-dashboard','Dashboard','',cur==='overview');
+  if(typeof decisionsView==='function')h+=btn('decisions','gavel','Decisions',(typeof decCount==='function'&&decCount())?`<span class="hn-right">${decCount()}</span>`:'',cur==='decisions');
+  if(goLiveDate)h+=btn('runway','rocket','Go-live checklist','',cur==='runway');
+  if(typeof notesUnread==='function'){const u=notesUnread();h+=btn('notes','messages','Notes',u?`<span class="hn-badge">${u}</span>`:'',cur==='notes');}
+  const mats=[];
+  if(typeof SOW!=='undefined'&&SOW&&((SOW.hours>0)||(SOW.inScope&&SOW.inScope.length)))mats.push(btn('scope','file-text','Scope of work','',false,"setP('overview');ovExpand('scope')"));
+  forms.forEach(f=>{const st=formState(f.id);const on=cur==='form:'+f.id;
+    const right=st.submitted?`<i class="ti ti-circle-check-filled hn-right sent" title="Sent to Sabel"></i>`:(st.total&&st.done?`<span class="hn-right">${st.done}/${st.total}</span>`:(st.link?`<span class="hn-right dot" title="Not started"></span>`:''));
+    mats.push(btn('form:'+f.id,f.icon||'clipboard-check',esc(f.l),right,on));});
+  if(typeof openStatusReport==='function')mats.push(btn('report','file-analytics','Status report','',false,'openStatusReport()'));
+  if(typeof parkedCount==='function'&&parkedCount())mats.push(btn('parked','archive','Out of scope',`<span class="hn-right">${parkedCount()}</span>`,cur==='parked'));
+  if(INTERNAL)mats.push(btn('hours','clock-dollar','Hours','',cur==='hours'));
+  if(mats.length)h+=`<div class="hn-sec">Materials</div>`+mats.join('');
   h+=`</nav><div class="hn-foot">`;
-  const gl=hnGoLive();
-  h+=`<div class="hn-proj compact" title="${esc(HUB_RANGE)}"><div class="nm">${esc(CLIENT_NAME)}</div>${gl?`<div class="gl">Go-live ${gl.getDate()} ${HN_MON[gl.getMonth()]} ${gl.getFullYear()}</div>`:''}</div>`;
+  h+=`<div class="sd-team"><div class="k">Your Sabel team</div><div class="av">${SABEL_TEAM.map(sdAv).join('')}</div>${hhTeam().replace(/^Your Sabel team: /,'').replace(/ · /g,'. ')}.</div>`;
   if(SLACK_URL)h+=`<div class="hn-help">Need help? <a href="${esc(SLACK_URL)}" target="_blank" rel="noopener">Shared Slack channel &rarr;</a></div>`;
   h+=`</div>`;
   sb.innerHTML=h;
   hnTopBar();
 }
+
 function hnTopBar(){
   const tb=document.getElementById('top-bar');if(!tb)return;tb.classList.add('hn-top');
   let left=document.getElementById('hn-left');if(!left){left=document.createElement('div');left.id='hn-left';tb.insertBefore(left,tb.firstChild);}
@@ -3681,51 +4035,152 @@ function hhAgo(ts){if(!ts)return 'not yet';const s=(Date.now()-ts)/1000;if(s<90)
 function hhTeam(){const mig=typeof formById==='function'&&formById('migration')&&formTask('migration');
   return `Your Sabel team: <b>Chris</b> builds · <b>Richard</b> ${mig?'runs the migration':'runs the project'} · <b>Greg</b> connects your systems`;}
 // Home: a welcome and doors. Navigation only, nothing to fill in.
-function homeView(){
-  const pct=hnPct(),need=hnNeeds().now.length,cw=currentWeek(),glw=typeof goLiveWeek==='function'?goLiveWeek():0,g=ovGoLive();
-  const ptype=HUB_PTYPE==='migration'?'Migration':(HUB_PTYPE==='build'?'Build':'Full project');
-  const pills=[];
-  if(cw>=1)pills.push(`<span class="hh-pill"><b>Week ${cw}</b> of ${glw>=cw?glw:cw}</span>`);
-  if(g&&g.d>=0)pills.push(`<span class="hh-pill">Go-live in <b>${g.d} day${g.d===1?'':'s'}</b> · ${esc(g.gl.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).replace('Sept','Sep'))}</span>`);
-  else if(g)pills.push(`<span class="hh-pill">Live since <b>${esc(g.long)}</b></span>`);
-  if(need)pills.push(`<span class="hh-pill need"><i></i><b>${need}</b> thing${need===1?'':'s'} need${need===1?'s':''} you</span>`);
-  const forms=(typeof formsActive==='function'?formsActive():[]).map(f=>{const st=formState(f.id);
-    const started=st.total&&(st.done||(st.p&&(st.p.sections||[]).some(x=>(x.filled||0)>0)));
-    const status=st.submitted?['var(--k4ADE80,#4ADE80)','var(--k4ADE80,#4ADE80)','Sent']:(started?['var(--kFBBF24,#FBBF24)','var(--kFBBF24,#FBBF24)',st.done+' of '+st.total+' sections']:['var(--k8B93A3,#8B93A3)','var(--k5F6878,#5F6878)','Not started']);
-    const w=st.submitted?100:(st.total?Math.round(st.done/st.total*100):0);
-    const copy=f.id==='readiness'?'Tell us how your team works today so we build the right thing.':(f.id==='migration'?'What moves from your old helpdesk into Intercom, and how.':esc(f.blurb||''));
-    return `<a class="hh-card" href="#form/${f.id}"><div class="hh-cr"><span class="hh-lab">Form · ${esc(f.l)}</span><span class="hh-st" style="color:${status[0]}"><i style="background:${status[1]};box-shadow:0 0 8px ${status[1]}"></i>${esc(status[2])}</span></div>
-      <div class="hh-ct">Take me to my ${esc(f.l)}</div><div class="hh-cc">${copy}</div>
-      <div class="hh-cf"><div class="t"><i style="width:${w}%;background:${status[1]}"></i></div><span class="hh-go">${started||st.submitted?'Continue':'Start'} &rarr;</span></div></a>`;}).join('');
-  const more=[];
-  if(typeof notesUnread==='function')more.push(`<a class="hh-mi" href="#notes"><b>Notes<span>&rarr;</span></b><em>The thread on every task</em></a>`);
-  if(typeof decisionsView==='function')more.push(`<a class="hh-mi" href="#decisions"><b>Decisions<span>&rarr;</span></b><em>What we agreed, and where</em></a>`);
-  if(goLiveDate)more.push(`<a class="hh-mi" href="#runway"><b>Go-live checklist<span>&rarr;</span></b><em>What must be true before the day</em></a>`);
-  if(typeof SOW!=='undefined'&&SOW&&((SOW.hours>0)||(SOW.inScope&&SOW.inScope.length)))more.push(`<button class="hh-mi" onclick="setP('overview');ovExpand('scope')"><b>What's in scope<span>&rarr;</span></b><em>The agreed SOW, nothing more</em></button>`);
-  if(typeof parkedCount==='function'&&parkedCount())more.push(`<a class="hh-mi" href="#parked"><b>Out of scope<span>&rarr;</span></b><em>Ideas parked for later</em></a>`);
-  return `<div class="hh"><div class="hh-glow"></div><div class="hh-fade"></div>
-    <header class="hh-top"><div class="hh-brand"><span class="hh-sq"></span><span class="hh-word">SABEL</span><span class="hh-div"></span><span class="hh-ch">Client hub</span></div>
-      <div class="hh-right"><span class="hh-live"><i></i>Live · synced ${esc(hhAgo(remoteStamp))}</span><button class="hh-menu" onclick="toggleSidebar(true)">Menu</button></div></header>
-    <main class="hh-main">
-      <section class="hh-hero"><div class="hh-eye"><i></i><span>Sabel × ${esc(CLIENT_NAME)} · ${ptype}</span></div>
-        <h1 class="hh-h1">Welcome back,<br><span>${esc(CLIENT_NAME)}</span>.</h1>
-        <p class="hh-sub">This is your hub for the Intercom build. Everything we are doing together lives here — pick where you want to go.</p>
-        <div class="hh-pills">${pills.join('')}</div></section>
-      <section class="hh-sec"><div class="hh-sech"><span class="hh-lab">Where to</span><span class="hh-note">Everything on this page is a door — nothing to fill in here</span></div>
-        <div class="hh-grid">
-          <a class="hh-dash" href="#overview"><div class="hh-scan"></div>
-            <div class="hh-dl"><div class="hh-ic"><span class="hh-tile"><span></span></span><em>Dashboard</em></div>
-              <div class="hh-dt">Take me to my <span>Dashboard</span></div>
-              <div class="hh-dc">A snapshot of how your scope is tracking — what has moved since you last looked, what we need from you, and what is coming up.</div>
-              <div class="hh-meter"><div class="r"><span>Plan progress</span><b>${pct}%</b></div><div class="t"><i style="width:${pct}%"></i></div></div></div>
-            <div class="hh-dr">${need?`<span class="hh-wait"><b>${need}</b> waiting on you</span>`:''}<span class="hh-cta">Open dashboard <span>&rarr;</span></span></div></a>
-          ${forms}
-          <a class="hh-card" href="#focus"><span class="hh-lab">Focus list</span><div class="hh-ct">Take me to my Focus list</div><div class="hh-cc">Everything still open, most urgent first. Handy on a call.</div><div class="hh-cf" style="justify-content:flex-end"><span class="hh-go">Open &rarr;</span></div></a>
-        </div></section>
-      ${more.length?`<section class="hh-sec" style="gap:12px"><span class="hh-lab">Also in your hub</span><div class="hh-more">${more.join('')}</div></section>`:''}
-      <footer class="hh-foot"><span>${hhTeam()}</span><span>Questions? Reply in your shared Slack channel.</span></footer>
-    </main></div>`;
+// ── Home · Concept D (Sabel document skin, 9 Oct 2026) ────────────────────────
+// Sidebar hub with the Runway hero: title, go-live countdown and progress ring,
+// four header cards, the week ruler, then the three-column board (your court,
+// Sabel's court, done recently), one line per workstream, decisions and
+// materials. Reads the same state as every other view; writes nothing new.
+const SDD_MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function sdFmt(d){return d.getDate()+' '+SDD_MON[d.getMonth()];}
+function sdFmtW(d){return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).replace('Sept','Sep');}
+function sdAv(name){const n=String(name||'');const k=n==='Chris'?'c':(n==='Greg'?'g':(n==='Richard'?'r':'x'));return `<span class="sd-av ${k}" title="${esc(n)}">${esc(pvInitials(n))}</span>`;}
+function sdPillar(pid){return P.find(p=>p.id===pid)||null;}
+function sdOpenPillar(pid){if(typeof flowOpenAndScroll==='function'){cur='flow';if(!flowOpen)flowOpen=new Set();flowOpen.add(pid);flowPending=pid;render();return;}setP(pid);}
+// Everything Sabel is on this week (the hnSabelWeek rule, without the cap).
+function sdSabelRows(){
+  const cw=currentWeek(),out=[];
+  ovAll().forEach(o=>{
+    if(o.side!=='sabel')return;const t=o.t;
+    if(isPhased(t)){const ai=activePhaseIdx(t);if(ai<0)return;const p=t.phases[ai],h=phaseHolder(p);
+      if(!SABEL_TEAM.includes(h))return;const end=p.wkEnd||p.week;if(!(p.week&&p.week<=cw&&end>=cw)&&!phaseStarted(p))return;
+      const x=(p.sub||[]).find(s=>s.s!=='Complete');out.push({t:x?x.t:p.l,sub:t.t+' · '+o.pl,cid:o.cid,k:end||99,o:h,st:'In progress',pc:o.pc});return;}
+    if(t.s==='Complete')return;const end=t.wkEnd||t.week;
+    if(t.s==='In Progress'||t.s==='Blocked'||(t.week&&t.week<=cw&&end>=cw)){
+      const st=t.s==='Blocked'?'Blocked':(t.s==='In Progress'?'In progress':(t.ongoing?'Ongoing':'This week'));
+      out.push({t:t.t,sub:o.pl+(end&&end<99?' · by '+hnDue(end):''),cid:o.cid,k:end||99,o:t.o,st,pc:o.pc});}
+  });
+  out.sort((a,b)=>a.k-b.k);return out;
 }
+function sdDoneRecent(n){
+  const rows=ovAll().filter(o=>o.t.s==='Complete').map(o=>({o,at:o.t.doneAt||''}));
+  rows.sort((a,b)=>b.at.localeCompare(a.at));return rows.slice(0,n);
+}
+function sdNextSession(){
+  if(typeof progPages!=='function')return null;const today=new Date();today.setHours(0,0,0,0);
+  const open=progPages().filter(p=>p.status!=='green'&&p.status!=='held'&&!(p.date&&new Date(p.date+'T00:00:00')<today));
+  open.sort((a,b)=>(a.date||'9')<(b.date||'9')?-1:(a.date||'9')>(b.date||'9')?1:((a.week||99)-(b.week||99)));
+  return open[0]||null;
+}
+function sdSessionLine(p){const bits=[];if(p.date){const d=new Date(p.date+'T00:00:00');bits.push(sdFmtW(d)+(p.time?', '+p.time:''));}else if(p.week)bits.push('Week '+p.week);if(p.length)bits.push(p.length);if(p.where)bits.push(p.where);bits.push(p.status==='booked'?'booked':(p.status==='unscheduled'?'to be scheduled':PROG_STATUS[p.status]||''));return bits.filter(Boolean).join(' · ');}
+function sdRulerHTML(cw,glw){
+  const mx=Math.max(maxWeek(),glw?glw+4:0,cw);const cells=[],labs=[];let lastM=-1;
+  for(let n=1;n<=mx;n++){const d=weekStartDate(n);const cls=n===glw?'gl':(n===cw?'now':(n<cw?'done':''));
+    const lab=n===cw?'now':(n===glw?'go-live':(d.getMonth()!==lastM?sdFmt(d):String(d.getDate())));lastM=d.getMonth();
+    cells.push(`<div class="c ${cls}" title="Week ${n} · week of ${sdFmt(d)}" onclick="setGroupBy('week');setP('Week ${n}')"></div>`);
+    labs.push(`<span class="${cls}">${lab}</span>`);}
+  const chips=[];
+  if(typeof progPages==='function'){const today=new Date();today.setHours(0,0,0,0);
+    progPages().filter(p=>p.status!=='green'&&p.status!=='held'&&!(p.date&&new Date(p.date+'T00:00:00')<today)).sort((a,b)=>(a.week||99)-(b.week||99)).slice(0,4)
+      .forEach(p=>chips.push(`<button class="sd-chip" onclick="setP('prog:${p.id}')"><b>W${p.week||'?'}</b> ${esc(p.title||'Working session')}${p.length?' · '+esc(p.length):''}${p.status==='unscheduled'?' · to book':''}</button>`));}
+  const g=ovGoLive();if(g&&glw)chips.push(`<button class="sd-chip red" onclick="setP('runway')"><b>W${glw}</b> Go-live · ${esc(sdFmtW(g.gl))}</button>`);
+  const first=weekStartDate(1),last=weekStartDate(mx);
+  return `<div class="sd-ruler sd-rise" style="animation-delay:.3s"><div class="top"><span class="sd-lab">The ${mx} weeks · ${esc(sdFmt(first))} to ${esc(sdFmt(new Date(last.getTime()+6*86400000)))}</span>
+    <span class="sd-leg"><span><i style="background:var(--sd-green)"></i>Weeks done</span><span><i style="background:var(--sd-blue)"></i>This week</span><span><i style="background:var(--sd-red)"></i>Go-live</span></span></div>
+    <div class="cells" style="grid-template-columns:repeat(${mx},minmax(0,1fr))">${cells.join('')}</div>
+    <div class="lab" style="grid-template-columns:repeat(${mx},minmax(0,1fr))">${labs.join('')}</div>
+    ${chips.length?`<div class="sd-chips">${chips.join('')}</div>`:''}</div>`;
+}
+function sdYouTile(r){
+  const t=r.o.t,title=r.phased&&r.x?r.x.t:t.t;const a=hnRowAction(r);const due=hnDue(r.key);const ph=sdPillar(r.o.pid);
+  const kind=r.phased?('Step '+(r.si+1)+' of '+((r.p&&r.p.sub||[]).length||1)+' · '+esc(r.gl||'Provide')):(t.s==='In Progress'?'In progress':(t.form?'Form':esc(r.gl||'Provide')));
+  const when=r.od?`<span class="late">Overdue${due?' · was due '+esc(due):''}</span>`:(due?`<span>Due ${esc(due)}</span>`:'');
+  const desc=r.phased?(r.x&&(r.x.clientText||r.x.tip||'')):(t.tip||t.notes||'');
+  const ctx=r.phased?esc(t.t):(ph?esc(ph.l):'');
+  return `<article class="sd-tile${r.od?' od':''}"><div class="m"><b>${kind}</b>${when}</div><div class="tt">${esc(title)}</div>${desc?`<div class="dd">${esc(String(desc).slice(0,160))}${String(desc).length>160?'…':''}</div>`:''}
+    <div class="ctx">${ph?`<span class="sd-pill" style="color:${ph.c};border-color:${ph.c}33">${ctx}</span>`:''}<span>${esc(CLIENT_LABEL)}</span></div>
+    <div class="act">${a.l==='Open'?`<button class="sd-btn red" style="flex:1" onclick="${a.go}">Open and update</button>`:`<button class="sd-btn" onclick="gotoTask('${r.o.cid}')">Open</button><button class="sd-btn red" onclick="${a.go}">${a.l}</button>`}</div></article>`;
+}
+function sdMaterials(){
+  const m=[];
+  if(typeof SOW!=='undefined'&&SOW&&((SOW.hours>0)||(SOW.inScope&&SOW.inScope.length)))m.push(`<button class="sd-mat" onclick="setP('overview');ovExpand('scope')"><span class="ic"><i class="ti ti-file-text"></i></span><span><b>Scope of work</b><span>${esc(HUB_RANGE)} · what is in and out</span></span></button>`);
+  (typeof formsActive==='function'?formsActive():[]).forEach(f=>{const st=formState(f.id);const cls=st.submitted?'g':(st.link?'y':'');
+    m.push(`<button class="sd-mat" onclick="setP('form:${f.id}')"><span class="ic ${cls}"><i class="ti ti-${f.icon||'clipboard-check'}"></i></span><span><b>${esc(f.l)}</b><span class="${cls}">${esc(st.label)}</span></span></button>`);});
+  if(goLiveDate)m.push(`<button class="sd-mat" onclick="setP('runway')"><span class="ic"><i class="ti ti-rocket"></i></span><span><b>Go-live checklist</b><span>${typeof gateItems==='function'?gateItems().filter(o=>o.t.s!=='Complete').length+' still to clear':'What must be true before the day'}</span></span></button>`);
+  if(typeof openStatusReport==='function')m.push(`<button class="sd-mat" onclick="openStatusReport()"><span class="ic"><i class="ti ti-file-analytics"></i></span><span><b>Status report</b><span>Snapshot of today, as a PDF</span></span></button>`);
+  if(typeof notesUnread==='function'){const u=notesUnread();m.push(`<button class="sd-mat" onclick="setP('notes')"><span class="ic${u?' y':''}"><i class="ti ti-messages"></i></span><span><b>Notes</b><span class="${u?'y':''}">${u?u+' new':'The thread on every task'}</span></span></button>`);}
+  if(typeof parkedCount==='function'&&parkedCount())m.push(`<button class="sd-mat" onclick="setP('parked')"><span class="ic"><i class="ti ti-archive"></i></span><span><b>Out of scope</b><span>${parkedCount()} parked for later</span></span></button>`);
+  return m.join('');
+}
+function homeView(){
+  const gs=globalStats(),pct=hnPct(),g=ovGoLive(),cw=currentWeek(),glw=typeof goLiveWeek==='function'?goLiveWeek():0;
+  const needs=hnNeeds(),now=needs.now,later=needs.later,od=now.filter(r=>r.od).length;
+  const sab=sdSabelRows(),done=sdDoneRecent(7),nx=sdNextSession();
+  // No sessions at all (a migration build, or PROGRESSION_PAGES = []): the fourth card shows the go-live checklist instead.
+  const hasSess=typeof progPages==='function'&&progPages().length>0;
+  const gateOpen=typeof gateItems==='function'?gateItems().filter(o=>!(o&&o.t&&o.t.s==='Complete')).length:0;
+  const sdFourth=hasSess?`<div class="sd-card sd-rise" style="animation-delay:.41s" onclick="${nx?`setP('prog:${nx.id}')`:`setP('flow')`}"><div class="k">Next session</div>${nx?`<div class="h">${esc((nx.code?nx.code+' · ':'')+(nx.title||'Working session'))}</div><div class="d">${esc(sdSessionLine(nx))}</div>`:`<div class="h">No session booked</div><div class="d">We will schedule the next working session with you.</div>`}</div>`
+    :`<div class="sd-card sd-rise" style="animation-delay:.41s" onclick="setP('runway')"><div class="k">Go-live checklist</div><div class="n">${gateOpen}<small>to do</small></div><div class="d">Everything to clear before go-live</div></div>`;
+  const doneN=Math.round(gs.complete);
+  const owners=[...new Set(sab.map(r=>r.o).filter(Boolean))];
+  const ringOff=Math.round(302*(1-Math.min(100,Math.max(0,pct))/100));
+  const topPillar=P.map(p=>({p,m:phaseMini(p.id)})).filter(x=>x.m.total&&x.m.done<x.m.total).sort((a,b)=>(b.m.done/b.m.total)-(a.m.done/a.m.total))[0];
+  const subline=now.length?`${now.length===1?'One thing is':now.length+' things are'} in your court${od?', '+od+' overdue':''}. Sabel is on ${sab.length} ${sab.length===1?'item':'items'} this week.${g&&g.d>0?' Go-live is '+g.d+' days out.':''}`
+    :`Nothing is waiting on you right now. Sabel is on ${sab.length} ${sab.length===1?'item':'items'} this week.${g&&g.d>0?' Go-live is '+g.d+' days out.':''}`;
+  // hero
+  let h=`<div class="sd"><section class="sd-hero"><div class="l sd-rise"><div class="sd-kick">Sabel × ${esc(CLIENT_NAME)} · Intercom build</div>
+      <h1 class="sd-h1">Your Intercom build,<br><span>at a glance.</span></h1><p class="sd-sub">${esc(subline)}</p></div>
+    <div class="rgt sd-rise" style="animation-delay:.12s">`;
+  if(g){h+=`<div class="sd-card" title="${esc(GO_LIVE_NOTE||'')}"><div class="k">Go-live</div><div class="big">${g.d>0?g.d+'<small>days</small>':(g.d===0?'Today':'Live')}</div><div class="t">${esc(g.long)}</div>${GO_LIVE_NOTE?`<div class="d">${esc(GO_LIVE_NOTE)}.</div>`:''}</div>`;}
+  else h+=`<div class="sd-card"><div class="k">Go-live</div><div class="h">Date to be set</div><div class="d">We will add it once agreed.</div></div>`;
+  h+=`<div class="sd-plain sd-ring"><div class="w"><svg viewBox="0 0 110 110" width="110" height="110" aria-hidden="true"><circle cx="55" cy="55" r="48" fill="none" stroke="var(--k1E2433)" stroke-width="8"></circle><circle class="p" cx="55" cy="55" r="48" fill="none" stroke="#E10600" stroke-width="8" stroke-linecap="round" stroke-dasharray="302" stroke-dashoffset="${ringOff}" transform="rotate(-90 55 55)" style="--to:${ringOff}"></circle></svg><div><b>${pct}%</b><small>complete</small></div></div><div class="s">${doneN} of ${gs.total} tasks done</div></div>
+    </div></section>`;
+  // four header cards
+  h+=`<section class="sd-four">
+    <div class="sd-card y sd-rise" style="animation-delay:.2s" onclick="document.getElementById('sd-board').scrollIntoView({behavior:'smooth'})"><div class="k">Waiting on you</div><div class="n">${now.length}<small>now</small></div><div class="d">${later.length?later.length+' more open later in the plan':(now.length?'Nothing else queued yet':'Nothing queued')}</div></div>
+    <div class="sd-card b sd-rise" style="animation-delay:.27s" onclick="document.getElementById('sd-board').scrollIntoView({behavior:'smooth'})"><div class="k">Sabel is building</div><div class="n">${sab.length}<small>this week</small></div><div class="d">${owners.length?esc(owners.length>1?owners.slice(0,-1).join(', ')+' and '+owners[owners.length-1]:owners[0]):'Your Sabel team'}</div></div>
+    <div class="sd-card g sd-rise" style="animation-delay:.34s" onclick="setP('flow')"><div class="k">Done so far</div><div class="n">${doneN}<small>of ${gs.total}</small></div><div class="d">${topPillar?esc(topPillar.p.l)+' '+Math.round(topPillar.m.done/topPillar.m.total*100)+'% through':'Across '+P.length+' workstreams'}</div></div>
+    ${sdFourth}
+  </section>`;
+  // ruler
+  h+=sdRulerHTML(cw,glw);
+  // board
+  const youTiles=now.slice(0,3).map(sdYouTile).join('');
+  const laterRows=later.slice(0,3).map(r=>{const t=r.o.t,title=r.phased&&r.x?r.x.t:t.t;const d=hnDue(r.key);return `<span>${d?'By '+esc(d)+' · ':''}${esc(title)}</span>`;}).join('');
+  const sabRows=sab.slice(0,6).map(r=>`<article class="sd-tile" style="flex-direction:row;gap:12px;align-items:flex-start;cursor:pointer" onclick="gotoTask('${r.cid}')">${sdAv(r.o)}<div style="min-width:0"><div class="tt">${esc(r.t)}</div><div class="dd">${esc(r.sub)}${r.st==='Blocked'?' · <span style="color:var(--kF87171)">held up</span>':(r.st==='Ongoing'?' · ongoing':'')}</div></div></article>`).join('');
+  const doneRows=done.map(x=>{const o=x.o;const by=o.side==='client'?CLIENT_LABEL:(o.t.o||'Sabel');const d=x.at?new Date(x.at+'T00:00:00'):null;return `<div class="sd-row" onclick="gotoTask('${o.cid}')"><i class="ti ti-check ck"></i><div style="min-width:0"><div class="tt">${esc(o.t.t)}</div><div class="dd">${d&&!isNaN(d)?sdFmt(d)+' · ':''}${esc(by)} · ${esc(o.pl)}</div></div></div>`;}).join('');
+  h+=`<div class="sd-sech" id="sd-board"><span class="num">01 — THIS WEEK</span><h2>Whose move it is</h2><div class="r">${cw>=1?'Week '+cw+(glw>=cw?' of '+glw:''):'Before week 1'} · ${esc(weekRangeLabel(Math.max(cw,1)))}</div></div>
+  <section class="sd-board">
+    <div class="sd-col y sd-rise" style="animation-delay:.1s"><div class="sd-colh"><span class="k">Your court</span><span>${now.length} now${later.length?' · '+later.length+' later':''}</span></div>
+      ${youTiles||`<div class="sd-empty"><i class="ti ti-circle-check-filled"></i>Nothing is waiting on ${esc(CLIENT_LABEL)} right now.</div>`}
+      ${now.length>3?`<button class="sd-more" onclick="setP('overview')">All ${now.length} waiting on you →</button>`:''}
+      ${later.length?`<div class="sd-later"><span class="k">Later</span>${laterRows}${later.length>3?`<button onclick="setP('overview')">${later.length-3} more →</button>`:''}</div>`:''}</div>
+    <div class="sd-col b sd-rise" style="animation-delay:.18s"><div class="sd-colh"><span class="k">Sabel's court</span><span>${sab.length} this week</span></div>
+      ${sabRows||`<div class="sd-empty" style="color:var(--k94A3B8)"><i class="ti ti-tool" style="color:var(--sd-blue)"></i>Nothing scheduled for Sabel this week.</div>`}
+      ${sab.length>6?`<button class="sd-more" onclick="setP('flow')">All ${sab.length} in progress →</button>`:''}</div>
+    <div class="sd-col g sd-rise" style="animation-delay:.26s"><div class="sd-colh"><span class="k">Done recently</span><span>${doneN} so far</span></div>
+      ${doneRows?`<div class="sd-plain">${doneRows}</div>`:`<div class="sd-empty" style="color:var(--k94A3B8)"><i class="ti ti-circle" style="color:var(--k475569)"></i>Nothing finished yet.</div>`}
+      ${doneN>done.length?`<button class="sd-more" onclick="setP('flow')">All ${doneN} completed →</button>`:''}</div>
+  </section>`;
+  // workstreams
+  const rows=P.map((p,i)=>{const m=phaseMini(p.id);const pc=m.total?Math.round(m.done/m.total*100):0;
+    const you=inScope(p.id,'client').filter(t=>t.s!=='Complete').length,sa=inScope(p.id,'sabel').filter(t=>t.s!=='Complete').length;
+    const started=m.done>0||you||sa;
+    return `<div class="rw" onclick="sdOpenPillar('${p.id}')"><div class="nm"><i style="background:${p.c}"></i><span>${esc(p.l)}</span></div><div class="wk">${esc((p.w||'').replace('Weeks ','').replace('Week ',''))}</div><div class="bar"><i style="width:${pc}%;background:${pc===100?'var(--sd-green)':p.c};animation-delay:${.25+i*.04}s"></i></div><div class="num">${Math.round(m.done)}/${m.total}</div><div class="num ${you?'y':'dim'}">${you}</div><div class="num ${sa?'b':'dim'}">${sa}</div></div>`;}).join('');
+  h+=`<div class="sd-sech"><span class="num">02 — PROGRESS</span><h2>${P.length} workstreams, one line each</h2><div class="r"><button onclick="setP('flow')">Open the full tracker →</button></div></div>
+  <section class="sd-wst sd-rise" style="animation-delay:.3s"><div class="h"><span>Workstream</span><span>Weeks</span><span>Progress</span><span style="text-align:right">Done</span><span class="y" style="text-align:right">You</span><span class="b" style="text-align:right">Sabel</span></div>${rows}</section>`;
+  // decisions + materials
+  let dec=[];try{dec=(typeof decItems==='function'?decItems():[]).filter(d=>d.obj&&d.obj.decision&&d.obj.decision.v).sort((a,b)=>String(b.obj.decision.at||'').localeCompare(String(a.obj.decision.at||'')));}catch(e){dec=[];}
+  const decRows=dec.slice(0,6).map(d=>{const x=d.obj.decision;return `<div class="it" onclick="setP('decisions')"><b>${esc(d.title)}</b><span>${esc(String(x.v).slice(0,110))}${String(x.v).length>110?'…':''}</span><span>${[decDate(x.at),x.by?esc(x.by):''].filter(Boolean).join(' · ')}</span></div>`;}).join('');
+  h+=`<section class="sd-two" style="margin-top:34px">
+    <div><div class="sd-sech" style="margin-top:0"><span class="num">03 — AGREED</span><h2>Decisions on record</h2><div class="r">${dec.length?`<button onclick="setP('decisions')">All ${dec.length} →</button>`:''}</div></div>
+      ${decRows?`<div class="sd-list sd-rise" style="animation-delay:.36s">${decRows}</div>`:`<div class="sd-empty" style="color:var(--k94A3B8)"><i class="ti ti-gavel" style="color:var(--k475569)"></i>No decisions recorded yet. They appear here as tasks are agreed.</div>`}</div>
+    <div><div class="sd-sech" style="margin-top:0"><span class="num">04 — FILES</span><h2>Project materials</h2></div><div class="sd-mats">${sdMaterials()}</div>
+      ${nx?`<div class="sd-card sd-next" onclick="setP('prog:${nx.id}')" style="cursor:pointer"><div class="k">Next working session</div><div class="h" style="font-size:14px">${esc((nx.code?nx.code+' · ':'')+(nx.title||'Working session'))}</div><div class="d">${esc(sdSessionLine(nx))}${nx.prep&&nx.prep.length?' · '+nx.prep.filter(x=>!x.done).length+' prep item'+(nx.prep.filter(x=>!x.done).length===1?'':'s')+' for you':''}</div></div>`:''}</div>
+  </section>`;
+  h+=`<footer class="sd-foot"><span>Perfect made possible <i class="dot">·</i> sabelcustomersuccess.com</span><span>${hhTeam().replace(/<[^>]+>/g,'')}</span><span>Live · synced ${esc(hhAgo(remoteStamp))}</span></footer></div>`;
+  return h;
+}
+
 // Tracker page: the plan by pillar or week, plus everything that used to sit in the sidebar.
 function hnBar(pct,c){return `<div class="bar"><i style="width:${pct}%;background:${c}"></i></div>`;}
 function trackerView(){
@@ -3977,8 +4432,8 @@ function qRow(t,cid,ctx){
 }
 // ── Open row: simple task ──
 function qSteps(t,cid,ed){const steps=t.sub||[];if(!steps.length&&!ed)return '';
-  return `<div class="qsteps">${steps.map((x,i)=>{const sd=x.s==='Complete';
-    return `<div class="qi"${ed?` draggable="true" ondragstart="pvSubStart(event,'${cid}',${i})" ondragover="event.preventDefault()" ondrop="pvSubDrop(event,'${cid}',${i})"`:''}><button class="qic" onclick="toggleSub(event,'${cid}',${i})" title="${sd?tip('stepNotDone'):tip('stepDone')}"><i class="ti ti-${sd?'circle-check-filled':'circle'}"></i></button>
+  return `<div class="qsteps">${steps.map((x,i)=>{const sd=x.s==='Complete',sp=x.s==='In Progress';
+    return `<div class="qi${sp?' p':''}"${ed?` draggable="true" ondragstart="pvSubStart(event,'${cid}',${i})" ondragover="event.preventDefault()" ondrop="pvSubDrop(event,'${cid}',${i})"`:''}><button class="qic" onclick="toggleSub(event,'${cid}',${i})" title="${stepTip(x.s)}"><i class="ti ti-${stepIcon(x.s)}"></i></button>
       <span class="qit${sd?' d':''}"${ed?` contenteditable="true" spellcheck="false" title="${tip('editStep')}" data-orig="${esc(x.t)}" onkeydown="pvKey(event,this)" onblur="pvSaveSub('${cid}',${i},this)"`:''}>${esc(x.t)}</span>
       ${x.tip?`<i class="ti ti-info-circle qii" title="${esc(x.tip)}"></i>`:''}
       ${ed?`<button class="qirm" onclick="removeSub(event,'${cid}',${i})" title="${tip('removeStep')}">&times;</button>`:''}</div>
@@ -4018,8 +4473,14 @@ function qNotesTog(cid){if(qNotes.has(cid))qNotes.delete(cid);else qNotes.add(ci
 function qEditTog(cid){if(qEdit.has(cid))qEdit.delete(cid);else{qEdit.add(cid);setTimeout(()=>pvEditTitle(cid),30);}renderMain();}
 // ── Open row: staged deliverable ──
 function qStageLabel(t,st){return st.c.clientAction?sdYou(st.p.l):sdPhrase(t,st,false);}
+// Stages open and close one by one (9 Oct 2026): qStOpen holds the stages shown per card.
+// Every stage starts open when the task is opened; Collapse all / Expand all act on the whole list.
+let qStOpen={};
+function qStSet(cid,oi){if(!qStOpen[cid]){const t=resolveTask(cid);qStOpen[cid]=new Set((t&&t.phases||[]).map((_,i)=>i));}return qStOpen[cid];}
 function qStage(e,cid,i){e.stopPropagation();const t=resolveTask(cid);if(!t)return;const ai=activePhaseIdx(t);
-  if(phaseOpen[cid]===i||(phaseOpen[cid]===undefined&&i===ai))delete phaseOpen[cid];else phaseOpen[cid]=i;renderMain();}
+  const s=qStSet(cid,phaseOpen[cid]!==undefined&&t.phases[phaseOpen[cid]]?phaseOpen[cid]:ai);if(s.has(i))s.delete(i);else s.add(i);renderMain();}
+function qStageAll(e,cid,on){e.stopPropagation();const t=resolveTask(cid);if(!t)return;qStOpen[cid]=new Set(on?t.phases.map((_,i)=>i):[]);renderMain();}
+(function(){const o=togglePhaseSub;togglePhaseSub=function(e,cid,pi,si){const r=o.apply(this,arguments);const t=resolveTask(cid);if(t&&qStOpen[cid]){const na=activePhaseIdx(t);if(na>=0)qStOpen[cid].add(na);}return r;};})();
 function qMarkStage(e,cid){e.stopPropagation();const t=resolveTask(cid);if(!t)return;const ai=activePhaseIdx(t);if(ai<0)return;const p=t.phases[ai];
   if(!(p.sub||[]).length){showToast('This stage has no checklist yet. Use Edit to add one.');return;}
   p.sub.forEach(x=>x.s='Complete');syncPhased(t);delete phaseOpen[cid];render();scheduleAutoSave();showToast('Stage '+(ai+1)+' done');}
@@ -4027,14 +4488,15 @@ function qStaged(t,cid){
   syncPhased(t);
   const done=t.s==='Complete',all=sdStages(t),ai=activePhaseIdx(t),n=all.length,cu=ai<0?null:all[ai];
   const oi=phaseOpen[cid]!==undefined&&t.phases[phaseOpen[cid]]?phaseOpen[cid]:ai;
+  const openSet=qStSet(cid,oi),allOpen=all.every(st=>openSet.has(st.i));
   const nextC=all.find(x=>x.i>ai&&ai>=0&&!x.done&&x.c.clientAction);
   const desc=sdDesc(t),cnt=(t.log||[]).length,sab=qSide(t)==='sabel';
-  const stages=all.map(st=>{const i=st.i,shown=i===oi,act=i===ai,last=i===n-1;
+  const stages=all.map(st=>{const i=st.i,shown=openSet.has(i),act=i===ai,last=i===n-1;
     const cls=st.done?'ok':(shown&&!act?'sel':(act?(st.c.clientAction?'nowC':'nowS'):(st.c.clientAction?'c':'')));
     const when=st.done?sdSubLabel(st,all,ai):(act?'Now'+(sdDue(st.p)?' · due '+sdDue(st.p):''):(st.p.week?'around '+sdDue(st.p):sdLow(sdSubLabel(st,all,ai))));
     let body;
     if(shown){const txt=st.c.clientAction?sdClientText(t,st):(act?sdNowText(t,st):(st.c.nowText||st.p.tip||''));
-      const items=(st.p.sub||[]).map((x,si)=>{const sd=x.s==='Complete';return `<div class="qi"><button class="qic" onclick="togglePhaseSub(event,'${cid}',${i},${si})" title="${sd?'Mark incomplete':'Mark done'}"><i class="ti ti-${sd?'circle-check-filled':'circle'}"></i></button><span class="qit${sd?' d':''}">${esc(x.t)}</span>${x.tip?`<i class="ti ti-info-circle qii" onmouseenter="showPhaseTip(event,'${cid}',${i},${si})" onmousemove="moveTip(event)" onmouseleave="hideTip()"></i>`:''}</div>${typeof decLine==='function'?`<div class="qidc">${decLine(x,cid+':p:'+i+':'+si)}</div>`:''}`;}).join('');
+      const items=(st.p.sub||[]).map((x,si)=>{const sd=x.s==='Complete',sp=x.s==='In Progress';return `<div class="qi${sp?' p':''}"><button class="qic" onclick="togglePhaseSub(event,'${cid}',${i},${si})" title="${stepTip(x.s)}"><i class="ti ti-${stepIcon(x.s)}"></i></button><span class="qit${sd?' d':''}">${esc(x.t)}</span>${x.tip?`<i class="ti ti-info-circle qii" onmouseenter="showPhaseTip(event,'${cid}',${i},${si})" onmousemove="moveTip(event)" onmouseleave="hideTip()"></i>`:''}</div>${typeof decLine==='function'?`<div class="qidc">${decLine(x,cid+':p:'+i+':'+si)}</div>`:''}`;}).join('');
       body=`<div class="qsl"><span class="l b">${esc(qStageLabel(t,st))}</span><span class="w">${esc(when)}</span></div>${txt?`<div class="qss">${esc(txt)}</div>`:''}${items?`<div class="qsteps">${items}</div>`:''}${st.p.note?`<div class="stage-note">${esc(st.p.note)}</div>`:''}`;}
     else body=`<div class="qsl"><span class="l">${esc(qStageLabel(t,st))}</span>${nextC&&nextC.i===i?'<span class="y">'+esc(CLIENT_LABEL)+'\'s turn next</span>':''}<span class="${act?'w':'m'}">${esc(when)}</span></div>`;
     return `<div class="qsn"><button class="${cls}" onclick="qStage(event,'${cid}',${i})" title="${esc(st.p.l)}">${st.done?'<i class="ti ti-check"></i>':i+1}</button>${last?'':'<span class="ln"></span>'}</div><div class="qsb${last?' last':''}">${body}</div>`;}).join('');
@@ -4043,6 +4505,7 @@ function qStaged(t,cid){
     <div class="qrh" onclick="qToggle('${cid}')"><i class="ti ti-route qrt" style="color:${qBaton(t)}"></i><span class="qt">${esc(t.t)}</span>${sab?'<span></span>':''}<button class="qx" title="${tip('closeDetails')}" onclick="event.stopPropagation();qToggle('${cid}')"><i class="ti ti-chevron-up"></i></button></div>
     <div class="qb" onclick="event.stopPropagation()">
       ${desc?`<div class="qdesc">${esc(desc)}</div>`:''}
+      <div class="qsa"><span>${n} stages</span><button onclick="qStageAll(event,'${cid}',${allOpen?'false':'true'})">${allOpen?'Collapse all':'Expand all'}</button></div>
       <div class="qst">${stages}</div>
       <div class="qpills"><span class="qp ro">${esc(who)}</span>${cu?`<button class="qp" onclick="qStageDueMenu(event,'${cid}')" title="Set an exact due date for this stage">${due?'Due '+due:'Set a due date'}<i class="ti ti-chevron-down"></i></button>`:''}<span class="qp blue ro">${cu?`Stage ${ai+1} of ${n}`:`All ${n} stages done`}</span><span class="sp"></span>${qLink(t,cid)}</div>
       <div class="qft">
@@ -4119,36 +4582,50 @@ function qWeekView(label){
 }
 
 // ── Exact due dates (6 Oct 2026): t.due 'YYYY-MM-DD' sticks; the task's week follows it ──
+// ── Date ranges (8 Oct 2026): t.dueEnd 'YYYY-MM-DD' after t.due makes it a range, e.g. a
+//    migration run "6 – 8 Nov". The task is overdue once the LAST day has passed, and its
+//    week/wkEnd follow both dates. Tasks with no date at all read as their week ("25 – 31 May").
 const Q_DAY=86400000;
+function dueEndDate(t){if(t&&t.due&&t.dueEnd&&t.dueEnd>t.due){const d=new Date(t.dueEnd+'T00:00:00');if(!isNaN(d))return d;}return dueDate(t);}
+function isDueRange(t){return !!(t&&t.due&&t.dueEnd&&t.dueEnd>t.due);}
+function weekSpanText(t){if(!t||!t.week)return '';const s=weekStartDate(t.week),e=new Date(weekStartDate(endWeek(t)));e.setDate(e.getDate()+6);return hnFmt(s)+' – '+hnFmt(e);}
 function dueWeekOf(iso){const d=new Date(iso+'T00:00:00');if(isNaN(d))return 0;const mx=maxWeek()+40;let n=0;for(let i=1;i<=mx;i++){if(weekStartDate(i)<=d)n=i;else break;}return n||1;}
 function dueDate(t){if(t&&t.due){const d=new Date(t.due+'T00:00:00');if(!isNaN(d))return d;}if(!t||!t.week)return null;const d=new Date(weekStartDate(endWeek(t)));d.setDate(d.getDate()+4);return d;}
-function dueText(t){const d=dueDate(t);return d?hnFmt(d):'';}
+function dueText(t){
+  if(t&&t.due){const a=dueDate(t),b=dueEndDate(t);return b>a?hnFmt(a)+' – '+hnFmt(b):hnFmt(a);}
+  if(t&&t.gate==='day'&&typeof goLiveDate!=='undefined'&&goLiveDate){const g=new Date(goLiveDate+'T00:00:00');if(!isNaN(g))return hnFmt(g);}
+  return weekSpanText(t);}
 function qKey(t){let d;if(isPhased(t)){const ai=activePhaseIdx(t);d=ai<0?null:sdDueDate(t.phases[ai]);}else d=dueDate(t);
   return d?Math.round((d-weekStartDate(1))/Q_DAY):99999;}
+function dueSyncWeeks(t){if(!t.due)return;t.week=dueWeekOf(t.due);const e=isDueRange(t)?dueWeekOf(t.dueEnd):0;if(e>t.week)t.wkEnd=e;else delete t.wkEnd;}
 function setTaskDue(cid,iso){pvPopClose();const t=resolveTask(cid);if(!t)return;
-  if(!iso){delete t.due;render();scheduleAutoSave();return;}
-  const w=dueWeekOf(iso);t.due=iso;
-  if(isSpan(t)&&w>=t.week){if(w>t.week)t.wkEnd=w;else delete t.wkEnd;}else{t.week=w;delete t.wkEnd;}
-  render();scheduleAutoSave();showToast('Due '+hnFmt(new Date(iso+'T00:00:00')));}
+  if(!iso){delete t.due;delete t.dueEnd;render();scheduleAutoSave();return;}
+  t.due=iso;if(t.dueEnd&&t.dueEnd<=iso)delete t.dueEnd;
+  dueSyncWeeks(t);render();scheduleAutoSave();showToast((isDueRange(t)?'':'Due ')+dueText(t));}
+function setTaskDueEnd(cid,iso){pvPopClose();const t=resolveTask(cid);if(!t||!t.due)return;
+  if(!iso||iso<=t.due)delete t.dueEnd;else t.dueEnd=iso;
+  dueSyncWeeks(t);render();scheduleAutoSave();showToast(isDueRange(t)?dueText(t):'Due '+dueText(t));}
 // Changing the weeks drops a due date that no longer falls inside them; typed weeks mean "no fixed date".
-function dueFit(t){if(t&&t.due){const w=dueWeekOf(t.due);if(!t.week||w<t.week||w>endWeek(t)){delete t.due;return true;}}return false;}
+function dueFit(t){if(t&&t.due){const w=dueWeekOf(t.due);if(!t.week||w<t.week||w>endWeek(t)){delete t.due;delete t.dueEnd;return true;}}return false;}
 ['setTaskWeek','setTaskWeekEnd','setTaskWeekByDate'].forEach(fn=>{const o=window[fn];if(typeof o!=='function')return;
   window[fn]=function(cid){const r=o.apply(this,arguments);if(dueFit(resolveTask(cid))){renderMain();scheduleAutoSave();}return r;};});
-(function(){const o=pvSetWeeks;pvSetWeeks=function(cid){const t=resolveTask(cid);if(t)delete t.due;return o.apply(this,arguments);};})();
-(function(){const o=isOverdue;isOverdue=function(t){if(t&&t.due&&t.s!=='Complete'){const d=dueDate(t),now=new Date();now.setHours(0,0,0,0);return d<now;}return o(t);};})();
-(function(){const o=taskDatesText;taskDatesText=function(t){return t&&t.due?'Due '+dueText(t):o(t);};})();
+(function(){const o=pvSetWeeks;pvSetWeeks=function(cid){const t=resolveTask(cid);if(t){delete t.due;delete t.dueEnd;}return o.apply(this,arguments);};})();
+(function(){const o=isOverdue;isOverdue=function(t){if(t&&t.due&&t.s!=='Complete'){const d=dueEndDate(t),now=new Date();now.setHours(0,0,0,0);return d<now;}return o(t);};})();
+(function(){const o=taskDatesText;taskDatesText=function(t){return t&&t.due?(isDueRange(t)?dueText(t):'Due '+dueText(t)):o(t);};})();
 // Dashboard groups by key: an exact date is encoded as week + (weekday+1)/10 so it sorts and labels by day.
-(function(){const o=ovDueKey;ovDueKey=function(t){if(t&&t.due){const d=dueDate(t),w=dueWeekOf(t.due);return w+(Math.round((d-weekStartDate(w))/Q_DAY)+1)/10;}return o(t);};})();
+(function(){const o=ovDueKey;ovDueKey=function(t){if(t&&t.due){const d=dueEndDate(t),w=dueWeekOf(isDueRange(t)?t.dueEnd:t.due);return w+(Math.round((d-weekStartDate(w))/Q_DAY)+1)/10;}return o(t);};})();
 (function(){const o=weekDueDate;weekDueDate=function(n){if(n&&n%1){const w=Math.floor(n),d=new Date(weekStartDate(w));d.setDate(d.getDate()+Math.round((n-w)*10)-1);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});}return o(n);};})();
 pvDateLabel=function(t){
   if(t.s==='Complete')return t.doneAt?'Done '+hnFmt(new Date(t.doneAt+'T00:00:00')):'Done';
-  if(t.due)return 'Due '+dueText(t);
+  if(t.due)return (isDueRange(t)?'':'Due ')+dueText(t);
+  if(t.gate==='day'&&typeof goLiveDate!=='undefined'&&goLiveDate)return 'Go-live day';
   if(!t.week)return 'No date';
-  if(isSpan(t)&&pvOngoing(t))return 'Weeks '+t.week+'–'+t.wkEnd;
-  return 'Due '+hnDue(endWeek(t));};
+  if(isSpan(t))return 'Weeks '+t.week+'–'+t.wkEnd;
+  return 'Week '+t.week;};
 pvDateMenu=function(e,cid){const t=resolveTask(cid);if(!t)return;const d=dueDate(t);
-  pvPop(e,`<div class="pp-date"><label>Due date</label><input type="date" value="${d?isoDate(d):''}" onchange="setTaskDue('${cid}',this.value)">
-    <label>Or a span of weeks (no fixed date)</label><input type="text" placeholder="Week 3, or Weeks 1–11" value="${t.week?(isSpan(t)?'Weeks '+t.week+'–'+t.wkEnd:'Week '+t.week):''}" onkeydown="if(event.key==='Enter'){pvPopClose();pvSetWeeks('${cid}',this.value)}">
+  pvPop(e,`<div class="pp-date"><label>Exact date</label><input type="date" value="${t.due||''}" onchange="setTaskDue('${cid}',this.value)">
+    <label>Last day, for a date range (optional)</label><input type="date" value="${t.dueEnd||''}" min="${t.due||''}" onchange="setTaskDueEnd('${cid}',this.value)"${t.due?'':' disabled title="Set the first date first"'}>
+    <label>Or a week (no fixed date)</label><input type="text" placeholder="Week 3, or Weeks 1–11" value="${t.week?(isSpan(t)?'Weeks '+t.week+'–'+t.wkEnd:'Week '+t.week):''}" onkeydown="if(event.key==='Enter'){pvPopClose();pvSetWeeks('${cid}',this.value)}">
     <button onclick="pvPopClose();pvSetWeeks('${cid}','')">Clear the date</button></div>`);};
 function qStageDueMenu(e,cid){const t=resolveTask(cid);if(!t)return;const ai=activePhaseIdx(t);if(ai<0)return;const p=t.phases[ai],d=sdDueDate(p);
   pvPop(e,`<div class="pp-date"><label>Stage ${ai+1} due date</label><input type="date" value="${d?isoDate(d):''}" onchange="qSetStageDue('${cid}',${ai},this.value)">
@@ -4159,7 +4636,8 @@ function qSettings(t,cid){
   const tools=pvTools(),link=cardLinks[cid]!==undefined?cardLinks[cid]:(t.link||''),{phId}=cidParts(cid),d=dueDate(t);
   const cands=(t.sub&&t.sub.length)||typeof parentCandidates!=='function'?[]:parentCandidates(cid);
   return `<div class="qset" onclick="event.stopPropagation()">
-    <label><span>Due date</span><input type="date" value="${t.due||''}" onchange="setTaskDue('${cid}',this.value)"${t.due?'':` placeholder="${d?isoDate(d):''}"`}><em>${t.due?'Fixed date':(d?'Planned for '+hnFmt(d)+' (end of its week)':'Not scheduled')}</em></label>
+    <label><span>Exact date</span><input type="date" value="${t.due||''}" onchange="setTaskDue('${cid}',this.value)"${t.due?'':` placeholder="${d?isoDate(d):''}"`}><em>${t.due?(isDueRange(t)?'Date range':'Fixed date'):(t.week?'Planned to '+(isSpan(t)?'weeks '+t.week+'–'+t.wkEnd:'week '+t.week)+' · '+weekSpanText(t):'Not scheduled')}</em></label>
+    ${t.due?`<label><span>Until</span><input type="date" value="${t.dueEnd||''}" min="${t.due}" onchange="setTaskDueEnd('${cid}',this.value)"><em>${isDueRange(t)?'Shown as '+dueText(t):'Optional: a last day makes this a date range'}</em></label>`:''}
     <label><span>Runs in</span><span class="row"><select onchange="setTaskWeek('${cid}',this.value)"><option value="0"${!t.week?' selected':''}>Unscheduled</option>${weekOptions(t.week||0)}</select>
       ${t.week?`<select onchange="setTaskWeekEnd('${cid}',this.value)" title="Ongoing work? Set the week it runs until">${weekEndOptions(t)}</select>`:''}</span></label>
     <label><span>Guide link</span><input type="url" value="${esc(link)}" placeholder="Paste a help article or document link" onchange="saveLink('${cid}',this.value)"></label>
@@ -4173,6 +4651,132 @@ function qSettings(t,cid){
 (function(){const orig=renderMain;renderMain=function(){
   const c=String(cur);document.body.classList.toggle('q-on',P.some(p=>p.id===c)||/^Week /.test(c));
   if(/^Week /.test(c)&&qOldWeek!==c){qOldWeek='';const m=document.getElementById('main');if(m)m.innerHTML='<div class="mnw">'+qWeekView(c)+'</div>';if(typeof syncFormHost==='function')syncFormHost();return;}
+  return orig.apply(this,arguments);};})();
+
+
+// ── Project tracker as a flow (8 Oct 2026) ──
+let flowOpen=null,flowPending='';
+function flowClientOwned(side,t){return side==='client'||t.o===CLIENT_LABEL;}
+function flowKind(side,t,now){const w=t.week||0;
+  if(t.s==='Complete')return 'done';
+  if(t.s==='In Progress')return 'now';
+  if(t.s==='Dependency'&&flowClientOwned(side,t)&&w>0&&w<=now)return 'wait';
+  return 'up';}
+function flowDue(t,k){
+  if(k==='done')return ['Done','var(--k475569,#475569)'];
+  const d=(typeof dueDate==='function')?dueDate(t):null;
+  if(!d)return ['Date TBC','var(--k8B93A3,#8B93A3)'];
+  const txt=(typeof isDueRange==='function'&&isDueRange(t))?dueText(t):'Due '+hnFmt(d);
+  return [txt,isOverdue(t)?'var(--kFF4D45,#FF4D45)':'var(--k8B93A3,#8B93A3)'];}
+/* Tint from a pillar colour: '#3B82F6' or a theme token 'var(--k64748B)'. */
+function flowTint(c,a){const m=/([0-9a-f]{6})\b/i.exec(String(c||''));if(!m)return '';const n=parseInt(m[1],16);return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`;}
+function flowTask(side,t,cid,now,pc){
+  const k=flowKind(side,t,now),isC=flowClientOwned(side,t),w=t.week||0;
+  const who=isC?'you':(t.o||'Sabel');
+  const meta=k==='done'?'Done':k==='now'?(isC?'In progress · with you':'In progress · '+esc(t.o||'Sabel')):k==='wait'?('Waiting on you'+(side==='sabel'?' before Sabel can continue':'')):(((w>0&&w<=now)?'Open · ':'Upcoming · ')+esc(who));
+  const due=flowDue(t,k);
+  const title=esc(t.t)+(isPhased(t)&&t.phases&&t.phases.length?' · '+t.phases.length+' stages':'');
+  const open=typeof pvOpen!=='undefined'&&pvOpen.has(cid);
+  const tint=pc?`border-color:${flowTint(pc,.45)};background:${flowTint(pc,.06)}`:'';
+  const html=open
+    ? `<div class="fl-open" style="--flc:${flowTint(pc,.6)||'var(--k2A3145,#2A3145)'}">${isPhased(t)?qStaged(t,cid):qOpen(t,cid)}</div>`
+    : `<div class="fl-task ${k}" style="${tint}" onclick="flowRow('${cid}')" title="Open this task"><span class="fl-box">${k==='done'?'✓':k==='now'?'›':''}</span><div><div class="fl-ti">${title}</div><div class="fl-tm">${meta}</div></div><span class="fl-due" style="color:${due[1]}">${due[0]}</span></div>`;
+  return {k,done:k==='done',needYou:k==='wait'||(k==='now'&&isC),week:w,html};}
+function flowRow(cid){if(typeof pvOpen==='undefined')return;if(pvOpen.has(cid))pvOpen.delete(cid);else pvOpen.add(cid);renderMain();}
+function flowPillar(p,i,now){
+  const cols={client:[],sabel:[]};let start=0,end=0;
+  ['client','sabel'].forEach(side=>(T[p.id]&&T[p.id][side]||[]).forEach((t,idx)=>{if(t.parked)return;
+    const cid=p.id+'-'+(side==='sabel'?'s':'c')+'-'+idx;cols[side].push(flowTask(side,t,cid,now,p.c));
+    if(t.week&&t.week>=1){if(!start||t.week<start)start=t.week;const e=endWeek(t);if(e>end)end=e;}}));
+  cols.client.sort((a,b)=>a.week-b.week);cols.sabel.sort((a,b)=>a.week-b.week);
+  const all=cols.client.concat(cols.sabel),total=all.length,done=all.filter(x=>x.done).length,need=all.filter(x=>x.needYou).length;
+  const state=(total&&done===total)?'done':(start&&start<=now)?'active':'up';
+  const sun=n=>{const d=new Date(weekStartDate(n));d.setDate(d.getDate()+6);return d;};
+  const weeks=start?(start===end?'Week '+start:'Weeks '+start+'–'+end):'Not scheduled';
+  const dates=start?hnFmt(weekStartDate(start))+' – '+hnFmt(sun(end||start)):'';
+  const stateLabel=state==='done'?'Complete':state==='active'?'In motion':(start?'Opens week '+start:'Not scheduled');
+  return {kind:'pillar',p,i,num:String(i+1).padStart(2,'0'),start,end,weeks,dates,state,stateLabel,total,done,need,cols,
+    pct:total?Math.round(done/total*100):0,cDone:cols.client.filter(x=>x.done).length,sDone:cols.sabel.filter(x=>x.done).length};}
+/* Progression sessions sit after the pillar they follow (x.frm). */
+function flowProgs(pid,now){
+  if(typeof progPages!=='function')return [];
+  return progPages().filter(x=>x.frm===pid).map(x=>{const st=typeof progSt==='function'?progSt(x):'unscheduled';
+    const state=(st==='held'||st==='green')?'done':(st==='booked'?'active':'up');
+    const when=typeof progWhen==='function'?progWhen(x):'';
+    return {kind:'prog',x,n:progNum(x.id),state,label:(typeof PROG_STATUS!=='undefined'&&PROG_STATUS[st])||'',when,week:x.week||0};});}
+/* The "need you" pill goes to the Dashboard and lands on "What we need from <client>". */
+function flowNeed(){setP('overview');setTimeout(()=>{
+  const el=[...document.querySelectorAll('#main *')].find(e=>e.children.length<=3&&/^What we need from/.test(e.textContent.trim()));if(!el)return;
+  // The card is the first ancestor that paints a background (the heading itself sits in a bare row).
+  let box=el;while(box.parentElement&&box.id!=='main'){const bg=getComputedStyle(box).backgroundColor;if(bg&&bg!=='rgba(0, 0, 0, 0)'&&bg!=='transparent')break;box=box.parentElement;}
+  if(box.id==='main')box=el.parentElement||el;
+  const sc=box.closest('.mn'),ov=sc?getComputedStyle(sc).overflowY:'visible',top=box.getBoundingClientRect().top;
+  if(sc&&(ov==='auto'||ov==='scroll'))sc.scrollTo({top:sc.scrollTop+top-sc.getBoundingClientRect().top-64,behavior:'smooth'});
+  else window.scrollTo({top:top+window.scrollY-64,behavior:'smooth'});
+  box.classList.remove('fl-glow');void box.offsetWidth;box.classList.add('fl-glow');setTimeout(()=>box.classList.remove('fl-glow'),2800);},80);}
+function flowToggle(pid){if(!flowOpen)flowOpen=new Set();if(flowOpen.has(pid))flowOpen.delete(pid);else flowOpen.add(pid);renderMain();}
+function flowScroll(id){const el=document.getElementById(id);if(!el)return;
+  const sc=el.closest('.mn'),ov=sc?getComputedStyle(sc).overflowY:'visible';
+  if(sc&&(ov==='auto'||ov==='scroll'))sc.scrollTo({top:sc.scrollTop+el.getBoundingClientRect().top-sc.getBoundingClientRect().top-24,behavior:'smooth'});
+  else window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-24,behavior:'smooth'});}
+function flowOpenAndScroll(pid){if(!flowOpen)flowOpen=new Set();flowOpen.add(pid);if(cur!=='flow'){flowPending=pid;setP('flow');return;}renderMain();setTimeout(()=>flowScroll('flow-'+pid),30);}
+function flowAfterRender(){if(flowPending){const pid=flowPending;flowPending='';setTimeout(()=>flowScroll('flow-'+pid),60);}}
+function flowView(){
+  const now=currentWeek(),rows=P.map((p,i)=>flowPillar(p,i,now));
+  if(!flowOpen){flowOpen=new Set();const first=rows.find(r=>r.state==='active')||rows.find(r=>r.state!=='done')||rows[0];if(first)flowOpen.add(first.p.id);}
+  const allT=rows.reduce((a,r)=>a+r.total,0),allD=rows.reduce((a,r)=>a+r.done,0),needTotal=rows.reduce((a,r)=>a+r.need,0);
+  const pct=allT?Math.round(allD/allT*100):0;
+  // The chain and the list interleave: pillar, then its progression sessions, then the next pillar.
+  const seq=[];rows.forEach(r=>{seq.push(r);flowProgs(r.p.id,now).forEach(g=>seq.push(g));});
+  let last=-1;seq.forEach((r,i)=>{if(r.state!=='up')last=i;});
+  const chainW=last<0?'0%':(seq.length>1?(last/(seq.length-1)*92):0)+'%';
+  const ptype=HUB_PTYPE==='migration'?'Migration':(HUB_PTYPE==='build'?'Build':'Full project');
+  const glw=typeof goLiveWeek==='function'?goLiveWeek():0,g=hnGoLive();
+  const pills=[];
+  if(now>=1)pills.push(`<span class="fl-pill"><b>Week ${now}</b> of ${glw>=now?glw:Math.max(now,maxWeek())}</span>`);
+  if(g)pills.push(`<span class="fl-pill">Go-live <b>${hnFmt(g)}</b></span>`);
+  if(needTotal)pills.push(`<button class="fl-pill need" onclick="flowNeed()" title="See what we need from you on the Dashboard"><i></i><b>${needTotal}</b> need you <span class="go">&rarr;</span></button>`);
+  const nodes=seq.map(r=>r.kind==='pillar'
+    ? `<button class="fl-node ${r.state}" onclick="flowOpenAndScroll('${r.p.id}')" title="${esc(r.p.l)}">
+        <span class="c" style="${r.state==='active'?`border:2px solid ${r.p.c};box-shadow:0 0 0 4px var(--k0F1117,#0F1117),0 0 0 6px ${r.p.c},0 0 18px ${r.p.c}88`:''}">${r.state==='done'?'✓':r.num}</span>
+        <span class="l">${esc(r.p.l)}</span>
+        <span class="s">${r.state==='done'?'DONE':r.state==='active'?r.done+'/'+r.total:(r.start?'WK '+r.start:'TBC')}</span></button>`
+    : `<button class="fl-node pg ${r.state}" onclick="setP('prog:${r.x.id}')" title="Progression ${r.n}: ${esc(r.x.title||'')}${r.label?' · '+esc(r.label):''}">
+        <span class="c">${r.state==='done'?'✓':'P'+r.n}</span>
+        <span class="s">${esc(r.state==='done'?'HELD':(r.when?r.when.split(' · ')[0].replace(/^\w+ /,'').toUpperCase():(r.week?'WK '+r.week:'TBC')))}</span></button>`).join('');
+  const col=(r,side)=>{const list=r.cols[side].filter(x=>!hideDone||!x.done);
+    const head=side==='client'?`<div class="fl-colh you"><b>Your side · ${esc(CLIENT_NAME)}</b><span>${r.cDone}/${r.cols.client.length}</span></div>`:`<div class="fl-colh"><b>Sabel side</b><span>${r.sDone}/${r.cols.sabel.length}</span></div>`;
+    const body=list.length?list.map(x=>x.html).join(''):(r.cols[side].length?`<div class="fl-empty">Everything here is done.</div>`:`<div class="fl-empty">${side==='client'?'Nothing on your side for this block.':'Nothing for Sabel in this block.'}</div>`);
+    return `<div>${head}<div style="display:flex;flex-direction:column;padding-top:8px">${body}</div></div>`;};
+  const blocks=seq.map(r=>{
+    if(r.kind==='prog')return `<div class="fl-prow-pg" id="flow-prog-${r.x.id}"><div class="fl-pgnum ${r.state}">P${r.n}</div>
+      <button class="fl-pg" onclick="setP('prog:${r.x.id}')"><div><div class="m"><span>Progression ${r.n}</span>${r.when?`<span>${esc(r.when)}</span>`:''}<span class="st ${r.state}">${esc(r.label||'')}</span></div><div class="t">${esc(r.x.title||'Progression session')}</div></div><span class="go">Open session &rarr;</span></button></div>`;
+    const open=flowOpen.has(r.p.id);
+    return `<div class="fl-row ${r.state}" id="flow-${r.p.id}">
+      <div class="fl-num" style="border-color:${r.p.c};${r.state==='active'?`box-shadow:0 0 16px ${r.p.c}66`:''}">${r.num}</div>
+      <div class="fl-blk${open?' open':''}" style="${open?`border-color:${r.p.c}`:''}">
+        <button class="fl-head" onclick="flowToggle('${r.p.id}')" aria-expanded="${open}">
+          <div style="min-width:0"><div class="fl-meta"><span style="color:${r.p.c}">${esc(r.weeks)}</span>${r.dates?`<span>${esc(r.dates)}</span>`:''}<span class="fl-state ${r.state}">${esc(r.stateLabel)}</span></div>
+            <div class="fl-title">${esc(r.p.l)}</div>${r.p.sub?`<div class="fl-desc">${esc(r.p.sub)}</div>`:''}
+            <div class="fl-prow"><div class="bar"><i style="width:${r.pct}%;background:${r.p.c}"></i></div><span><b>${r.done}</b> of ${r.total} done</span>${r.need?`<span class="fl-need"><i></i><b>${r.need}</b> need you</span>`:''}</div></div>
+          <div class="fl-chev">⌄</div></button>
+        ${open?`<div class="fl-body">${col(r,'client')}${col(r,'sabel')}</div>`:''}
+      </div></div>`;}).join('');
+  const nProg=seq.filter(r=>r.kind==='prog').length;
+  return `<div class="fl"><div class="fl-wrap">
+    <div class="fl-hero"><div><div class="fl-eye"><i></i>Sabel × ${esc(CLIENT_NAME)} · ${ptype}</div>
+        <h1 class="fl-h1">Your build,<br><span>start to finish.</span></h1>
+        <p class="fl-sub">Every block of the project in one flow. Open any block to see the checklist — what's on your side, what's on ours. Click a task to work on it here.</p></div>
+      <div class="fl-prog"><div class="r"><span>Overall progress</span><b>${pct}%</b></div><div class="t"><i style="width:${pct}%"></i></div><div class="fl-pills">${pills.join('')}</div></div></div>
+    <div class="fl-card"><div class="fl-cardh"><span class="fl-lab">Checkpoints · kick-off → handover</span><span class="fl-hint">Click a checkpoint to open that block</span></div>
+      <div class="fl-chain"><div class="fl-track"></div><div class="fl-fill" style="width:${chainW}"></div><div class="fl-nodes${seq.length>14?' dense':''}">${nodes}</div></div></div>
+    <div class="fl-bh"><span class="fl-lab">${rows.length} blocks${nProg?' · '+nProg+' sessions':''} · in order</span>
+      <div class="fl-legend"><button class="fl-hide${hideDone?' on':''}" onclick="toggleHideDone()"><span class="sw"></span>Hide completed</button>
+        <span><i style="background:var(--k4ADE80,#4ADE80)"></i>Done</span><span><i style="background:var(--k60A5FA,#60A5FA)"></i>In progress</span><span><i style="border:1.5px dashed var(--kFF4D45,#FF4D45)"></i>Waiting on ${esc(CLIENT_NAME)}</span><span><i style="border:1.5px solid var(--k475569,#475569)"></i>Upcoming</span></div></div>
+    <div class="fl-blocks"><div class="fl-spine"></div>${blocks}</div>
+  </div></div>`;}
+(function(){const orig=renderMain;renderMain=function(){
+  if(cur==='flow'){const m=document.getElementById('main');if(m)m.innerHTML='<div class="mnw">'+flowView()+'</div>';if(typeof syncFormHost==='function')syncFormHost();flowAfterRender();return;}
   return orig.apply(this,arguments);};})();
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -4317,16 +4921,25 @@ function subCounts(t){
   const m=(t.sub||[]).length;
   return{n:(t.sub||[]).filter(x=>x.s==='Complete').length,m};
 }
+/* A step has three states (8 Oct 2026): not started → in progress → done → not started.
+   stepNext/stepIcon are shared by every place a step is ticked, including stage items. */
+function stepNext(s){return s==='Complete'?'Pending':(s==='In Progress'?'Complete':'In Progress');}
+function stepIcon(s){return s==='Complete'?'circle-check-filled':(s==='In Progress'?'circle-dot':'circle');}
+function stepTip(s){return s==='Complete'?tip('stepNotDone'):(s==='In Progress'?tip('stepDone'):tip('stepStart'));}
 function toggleSub(e,cid,i){
   e.stopPropagation();
   const t=resolveTask(cid); if(!t||!t.sub||!t.sub[i])return;
   const st=t.sub[i];
-  if(st.s==='Complete'){
-    st.s='Pending';
+  st.s=stepNext(st.s);
+  if(st.s==='Pending'){
     // Unticking a sub-task of a Complete parent reopens the parent.
     if(t.s==='Complete'){t.s='In Progress';delete origStatus[cid];delete t.doneAt;}
+  }else if(st.s==='In Progress'){
+    // Starting a step starts the parent, unless it is already under way or waiting on someone;
+    // a parent marked done is reopened, since one of its steps is clearly not finished.
+    if(t.s==='Pending'){origStatus[cid]=t.s;t.s='In Progress';}
+    else if(t.s==='Complete'){t.s='In Progress';delete origStatus[cid];delete t.doneAt;}
   }else{
-    st.s='Complete';
     // Ticking the last open sub-task completes the parent.
     if(t.sub.every(x=>x.s==='Complete')&&t.s!=='Complete'){origStatus[cid]=t.s;t.s='Complete';t.doneAt=isoDate(new Date());}
   }
@@ -4360,6 +4973,7 @@ function syncParentFromSubs(t){
   const all=t.sub.every(x=>x.s==='Complete');
   if(all&&t.s!=='Complete'){t.s='Complete';t.doneAt=isoDate(new Date());}
   else if(!all&&t.s==='Complete'){t.s='In Progress';delete t.doneAt;}
+  else if(!all&&t.s==='Pending'&&t.sub.some(x=>x.s==='In Progress')){t.s='In Progress';}
 }
 function cidParts(cid){
   const p=cid.split('-');
@@ -6487,6 +7101,7 @@ function syncHash(){
   else if(cur==='hours')h='#hoursview';
   else if(String(cur).indexOf('form:')===0)h='#form/'+String(cur).slice(5);
   else if(cur==='home')h='#home';
+  else if(cur==='flow')h='#flow';
   else if(cur==='tracker')h='#tracker';
   else if(cur!=='overview')h=groupBy==='week'?('#week/'+String(cur).replace(/\D/g,'')):('#pillar/'+cur);
   if(location.hash!==h)history.replaceState(null,'',h);
@@ -6495,6 +7110,7 @@ window.addEventListener('hashchange',()=>{applyHash();render();});
 function applyHash(){
   const raw=location.hash||'';
   if(raw==='#home'){cur='home';return;}
+  const flm=/^#flow(?:\/([\w-]+))?$/.exec(raw);if(flm){cur='flow';if(flm[1]&&P.some(p=>p.id===flm[1])){if(!flowOpen)flowOpen=new Set();flowOpen.add(flm[1]);flowPending=flm[1];}return;}
   if(raw==='#tracker'){cur='tracker';return;}
   if(raw==='#summary'){cur='overview';return;}  // the old Project overview link
   const fm=/^#form\/([\w-]+)$/.exec(raw);
