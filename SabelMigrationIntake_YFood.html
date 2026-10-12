@@ -280,7 +280,7 @@ html.light .toast{background:#101828;border-color:#101828;color:#FFFFFF;box-shad
         the 'What we have agreed so far' section only shows when it is set.
         Optional first-load prefills go in SEED (field id -> value).
    ===================================================================== */
-const BUILD_V='202610090001';
+const BUILD_V='202610120002';
 const API='https://sabel-webhook.vercel.app/api/tracker';
 const qs=new URLSearchParams(location.search);
 const DEFAULT_SLUG='yfood';
@@ -331,7 +331,7 @@ const ALL_SECTIONS=[
    {id:'so_role',l:'Sign-off owner, role',ty:'text'},
    {id:'so_email',l:'Sign-off owner, email',ty:'text'},
    {id:'target_golive',l:'Target go-live (cutover date)',ty:'date',hint:'The day your team starts working in Intercom'},
-   {id:'golive_time',l:'Go-live start time (local)',ty:'text',ph:'e.g. 09:00',hint:'The final delta runs about 2 hours before this'},
+   {id:'golive_time',l:'What time are you planning to switch from '+SRC+' to Fin? (local time)',ty:'text',ph:'e.g. 09:00',hint:'We usually run a delta 2 hours before you switch, to make sure nothing is missed. That run picks up every ticket created or updated since the full migration.'},
    {id:'golive_tz',l:'Timezone',ty:'text',ph:'e.g. Europe/London'},
    {id:'zd_contract_end',l:S('contract end date','Current helpdesk contract end date'),ty:'date',hint:'Helps us plan the cutover and any overlap'}
  ]},
@@ -383,6 +383,8 @@ const ALL_SECTIONS=[
  {id:'tags',n:'4',t:'Tags',
   note:'A tag of <strong>"migration"</strong> is automatically added to every migrated ticket, so you can always tell migrated records apart. We recommend archiving tags not used in the last 3 to 6 months, and restricting who can create new tags in Intercom.',
   fields:[
+   {id:'tags_all',l:'Should we bring across all the tags on your existing tickets?',ty:'pills',opts:['Yes, all of them','Only some (list below)','No, leave tags behind']},
+   {id:'tags_keep',l:'Which tags should come across?',ty:'textarea',full:1,showIf:['tags_all','Only some (list below)'],ph:'List them, attach a list, or give a rule, e.g. only tags used in the last 12 months'},
    {id:'tags_wanted',l:'Would you like any additional tags added?',ty:'pills',opts:YN},
    {id:'extra_tags',l:'Additional tags (comma-separated)',ty:'text',full:1,ph:'e.g. legacy-uk, legacy-us',showIf:['tags_wanted','Yes']},
    {id:'tags_retire',l:'Tags to drop, or a rule for dropping them',ty:'textarea',full:1,opt:1,ph:'e.g. any tag not used in the last 6 months, or attach a list'}

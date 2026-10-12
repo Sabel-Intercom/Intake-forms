@@ -684,6 +684,9 @@ const PHASES = [
   ["client","Testers run UAT against the blueprint criteria"],
   ["lead","Training delivered and recorded"],
   ["lead","Cutover call booked"],
+  ["nikki","Migration: send the final cutover confirmation (switch time, delta, freeze, open tickets, tags)","m","p7-cf1"],
+  ["client","Migration: replies confirming the switch date, time and timezone, and the cutover details","m","p7-cf2"],
+  ["nikki","Migration: confirmed details posted to Richard in Slack; delta time in his calendar","m","p7-cf3"],
   ["nikki","Go-Live QA sweep against the SOW (Thursday Forge hour)"],
   ["greg","Fixes QA fails on connectors and procedures","b"],
   ["nikki","Handover pack assembled from build recaps"],
@@ -715,7 +718,9 @@ const PHASES = [
   ["nikki","Slack channel archived or handed over to the retainer"]]}
 ];
 /* stable step ids: <phase>-<index in the phase's full list>. Only append new steps to keep ids stable. */
-PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], t:s[1], tag:s[2]||""})); });
+/* A step with a fixed id in s[3] does not use up an index, so ids after it (and ticks on them) do not move. */
+function stepId(p){ let n=0; return s=>s[3]||(p.id+"-"+(n++)); }
+PHASES.forEach(p=>{ const id=stepId(p); p.steps = p.steps.map(s=>({id:id(s), o:s[0], t:s[1], tag:s[2]||""})); });
 const PIDX = Object.fromEntries(PHASES.map((p,i)=>[p.id,i]));
 
 /* Audit only: we review their workspace, then recommend and usually sell hours from there. */
@@ -770,6 +775,9 @@ const MIGRATION_PHASES = [
  {id:"m3", code:"M4", when:"Agreed dates", name:"Migration", gate:"Data in Intercom and confirmed by the client.", steps:[
   ["richard","Mapping, sample run, then full run"],
   ["client","Checks the sample and confirms in Slack"],
+  ["nikki","5 working days before cutover: send the final cutover confirmation (switch time, delta, freeze, open tickets, tags)","","m3-cf1"],
+  ["client","Replies confirming the switch date, time and timezone, and the cutover details","","m3-cf2"],
+  ["nikki","Confirmed details posted to Richard in Slack; delta time in his calendar 2 hours before the switch","","m3-cf3"],
   ["richard","Runs the delta migration at cutover"],
   ["richard","Warns at 75% of hours; new scope by written change request"],
   ["client","Confirms the migration is complete"]]},
@@ -780,7 +788,7 @@ const MIGRATION_PHASES = [
   ["nikki","Status closed in Notion; client removed from routine prompts"],
   ["nikki","Slack channel archived"]]}
 ];
-MIGRATION_PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], t:s[1], tag:""})); });
+MIGRATION_PHASES.forEach(p=>{ const id=stepId(p); p.steps = p.steps.map(s=>({id:id(s), o:s[0], t:s[1], tag:""})); });
 /* Consultation only: no build, no migration. Two gates, so the client has a place in the
    hub, a lead, hours from Notion and a close-out, without a delivery journey it never runs. */
 const CONSULT_PHASES = [
@@ -807,7 +815,7 @@ function pidxOf(c,pid){ const L=phasesFor(c); if(projectType(c)==="migration" &&
    Edits live in the portal store at templates.opsChecklists = {steps:{<id>:{t,o,tag,crit,hide}}, added:{<phase>:[{id,o,t,tag,crit}]}, order:{<phase>:[ids]}}.
    Step ids never change, so ticks on clients survive renames, moves, removals and restores. */
 const CRIT_DEFAULT = new Set(["p0-1","p0-5","p0-6","p0-7","p0-8","p0-9","p0-10","p0-11","p1-0","p1-4","p2-0","p2-1",
-  "m0-1","m0-2","m0-3","m0-5","m1-0","m1-1","m1-2","m1-3","m2-0","m2-2",
+  "m0-1","m0-2","m0-3","m0-5","m1-0","m1-1","m1-2","m1-3","m2-0","m2-2","m3-cf2","p7-cf2",
   "a0-2","a0-3","a0-4","a1-0","a1-2"]);
 /* Gates that come before the first client session: kickoff, the discovery workshop, or the migration run. */
 const PRE_KICKOFF = {p0:1,p1:1,p2:1, m0:1,m1:1,m2:1, a0:1,a1:1};
