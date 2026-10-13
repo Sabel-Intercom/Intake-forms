@@ -307,6 +307,13 @@ a{color:inherit}
 .iconbtn:hover{background:var(--sunk);color:var(--ink)}
 .iconbtn.on{color:var(--warn)}
 .step .note{grid-column:2/-1;font-size:13px;color:var(--muted)}
+.infobtn{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--line2);background:var(--surface);color:var(--muted);font:italic 700 11px/1 Georgia,serif;cursor:pointer;padding:0;vertical-align:middle;flex-shrink:0}
+.infobtn:hover,.infobtn.on{border-color:var(--accent);color:var(--accent-ink);background:var(--accent-soft)}
+.stepinfo{grid-column:2/-1;display:grid;gap:8px;margin:4px 0 2px;padding:10px 12px;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--sunk);font-size:13px;color:var(--body)}
+.stepinfo b{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.stepinfo p{margin:0;line-height:1.45}
+.titem .stepinfo{margin-top:6px}
+.hasinfo{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--line2);color:var(--muted);font:italic 700 11px/1 Georgia,serif}
 .step .note textarea{width:100%;min-height:54px;border:1px solid var(--line2);border-radius:6px;padding:6px 8px;background:var(--raise);font-size:13.5px;resize:vertical}
 .step .when{grid-column:2;font-size:11px;color:var(--faint)}
 .gate{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding:10px 16px;background:var(--sunk);border-top:1px solid var(--line)}
@@ -540,6 +547,7 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
     <li><b>Today</b>: Nikki's own steps that are due, across all clients.</li>
     <li><b>Sales follow-up</b>: clients we have pitched to and are waiting on. Not in delivery.</li>
     <li><b>Checklists</b>: the standard steps behind each gate. Editing here changes the template for every client.</li>
+    <li><b>The (i) on a step</b>: what the step is, why it exists (which client taught us) and how to do it. Written for whoever is doing the step for the first time. Steps without an (i) are self-explanatory.</li>
   </ul>
 
   <h3>Where each thing comes from</h3>
@@ -629,12 +637,15 @@ const PHASES = [
   ["nikki","List the SOW's Client Inputs Required in Details, so they show in the client's Readiness Check"],
   ["nikki","Scope register v1: every SOW line, marked in or out of scope"],
   ["nikki","Register the tracker key (and migration intake key) before any link goes out"],
+  ["nikki","Migration: send the 'how a Sabel migration runs' explainer with the form link","m","p0-mg1"],
   ["nikki","Notion Projects row: hours, signed date, SOW links"],
   ["nikki","Add the client to the Monday, Thursday and Friday routine prompts"]]},
  {id:"p1", code:"S0", when:"Days 1 to 5", name:"Readiness Check", gate:"Readiness Check submitted.", steps:[
   ["client","Completes the Readiness Check, target 5 business days"],
   ["client","Lists contact sources and confirms IDs align (Section C)"],
   ["client","Completes the migration intake form","m"],
+  ["nikki","Migration: reconcile the form against the SOW and the tracker (volume, date range, format, go-live); post the agreed version in Slack","m","p1-mg1"],
+  ["nikki","Migration: confirm Richard's admin access is on the stated production workspace (app code), posted in the channel","m","p1-mg2"],
   ["nikki","Day 3: one nudge if nothing has been submitted"],
   ["nikki","Review the submission within 1 working day"],
   ["auto","Readiness alert lands in #tracker-notifications"]]},
@@ -674,6 +685,11 @@ const PHASES = [
   ["lead","Foundations, Knowledge and Fin configuration","b"],
   ["greg","Connectors, procedures and Forge builds, with a recap at each stage close","b"],
   ["richard","S5 migration: mapping, sample, full run, delta planned","m"],
+  ["nikki","Migration: decisions log kept; every decision made in Slack or on a call is written back into the form the same day","m","p6-mg1"],
+  ["nikki","Migration: statuses, ticket types and inboxes the mapping needs exist in Intercom before the sample loads","m","p6-mg2"],
+  ["nikki","Migration: 3 days before any production load, confirm in the channel who switches off Balanced assignment, auto-close, CSAT, workflows and notifications, and when they go back on","m","p6-mg3"],
+  ["client","Migration: signs off the sample in the channel (structure, assignment, attachments, fields, statuses, visibility)","m","p6-mg4"],
+  ["nikki","Migration: sample sign-off recorded with date and person; exceptions list acknowledged","m","p6-mg5"],
   ["richard","Warns at 75% of hours; new scope by written change request"],
   ["client","Supplies inputs by the blueprint dates and signs each stage gate"],
   ["nikki","Weekly rhythm running: Monday asks, Thursday tracker truth, Friday note"],
@@ -687,6 +703,11 @@ const PHASES = [
   ["nikki","Migration: send the final cutover confirmation (switch time, delta, freeze, open tickets, tags)","m","p7-cf1"],
   ["client","Migration: replies confirming the switch date, time and timezone, and the cutover details","m","p7-cf2"],
   ["nikki","Migration: confirmed details posted to Richard in Slack; delta time in his calendar","m","p7-cf3"],
+  ["nikki","Migration: cutover run sheet posted in the client channel, one table in client time, Sydney time and Richard's time","m","p7-mg1"],
+  ["nikki","Migration: 3 days before the final delta, compare open-ticket assignees against seated, invite-accepted teammates; post the gap list","m","p7-mg2"],
+  ["client","Migration: confirms in the channel the day before that the old helpdesk is read only and its triggers and notifications are off from the freeze time","m","p7-mg3"],
+  ["nikki","Migration: article re-sync done and old links replaced before go-live (request form, help centre, email footers, chat widget)","m","p7-mg4"],
+  ["nikki","Migration: daily sweep through the cutover fortnight; any client question to Richard unanswered for 24 hours gets a bump with a proposed answer","m","p7-mg5"],
   ["nikki","Go-Live QA sweep against the SOW (Thursday Forge hour)"],
   ["greg","Fixes QA fails on connectors and procedures","b"],
   ["nikki","Handover pack assembled from build recaps"],
@@ -695,6 +716,9 @@ const PHASES = [
   ["client","Closes old inbound; decision-maker reachable"],
   ["lead","Runs the cutover call"],
   ["richard","Runs the delta migration","m"],
+  ["nikki","Migration: post-load pack acknowledged by the client: counts by inbox and status, exceptions list, old open tickets decision, sign-off deadline","m","p8-mg1"],
+  ["nikki","Migration: client told when Balanced assignment, auto-close and workflows went back on; date the old helpdesk stops receiving a copy agreed","m","p8-mg2"],
+  ["client","Migration: signs off the migrated dataset by the deadline","m","p8-mg3"],
   ["nikki","Confirm the verification report went out the same day"],
   ["nikki","Tracker go-live row complete, hypercare rows opened"]]},
  {id:"p9", code:"S8", when:"Day +1 to +14", name:"Stabilise", gate:"Snags visible and owned.", steps:[
@@ -717,6 +741,123 @@ const PHASES = [
   ["nikki","Status closed in Notion and trackers.json; client removed from routine prompts"],
   ["nikki","Slack channel archived or handed over to the retainer"]]}
 ];
+
+/* ---------- step guidance (13 Oct 2026): what / why / how, shown by the (i) button on a step.
+   Keyed by step id, so renames and owner changes on the Checklists page keep the guidance.
+   Written from the Sounding Board, CleverCards, Shiftmove, ELMO and YFood migrations, Sep to Oct 2026. */
+const STEP_INFO = {
+ "p0-mg1":{what:"Send the one-page explainer of how a Sabel migration runs together with the form link: the stages (closed history, sample, catch-up deltas, freeze, final delta about two hours before the switch), what we do and do not do between extraction and load (map and load, no data cleansing), what the sample review checks, what sign-off means, the CSV templates for agent and ID mapping files, and roughly how the hours split.",
+   why:"Shiftmove asked for a call on 9 Oct to get exactly these answers after weeks in the channel, and Richard thought the call was unnecessary. The client felt unanswered. Every one of their six questions is answered by this page before it is asked.",
+   how:"Post it in the client channel in the same message as the form link. Pin it. If the client is on a partner project, send it to the partner contact too."},
+ "m0-mg1":{what:"Send the one-page explainer of how a Sabel migration runs together with the form link: the stages, what we do and do not do, what the sample review checks, what sign-off means, the file templates, and how the hours split.",
+   why:"Shiftmove asked for a call on 9 Oct to get exactly these answers after weeks in the channel. The client felt unanswered. The explainer answers the questions before they are asked.",
+   how:"Post it in the client channel in the same message as the form link, and pin it."},
+ "m0-mg0":{what:"Nothing is requested from the client, no Zendesk or Zoho admin access, no extraction, until the migration proposal or SOW is signed.",
+   why:"YFood verbally agreed on a call, the proposal sat unsigned for a week, and the Zendesk access request went out anyway. Richard's rule: no migration work until it is signed and invoiced.",
+   how:"Check the signed date in Details and the Signed Client Watch brief. If it is blank, the only message to the client is who can sign while the decision-maker is away."},
+ "p1-mg1":{what:"Put the form, the SOW and the tracker side by side and check they say the same thing: ticket volume, date range, history format (tickets or conversations, closed history and open-at-cutover separately), go-live date and switch time. Post the agreed version in the channel.",
+   why:"Sounding Board's tracker said six months of tickets, the form's date filter said 14 Nov to 30 Sep, and the format flipped between tickets and conversations across Mary, Kelsy and the form. Richard loaded open tickets as conversations and then had to ask for a yes or no by Sunday 6pm.",
+   how:"Open the client's form on #admin, export it, and read sections Project details, 1, 3 and 5 against the SOW volume and the tracker go-live. Anything that differs goes in one message to the client owner and the sign-off owner, as a question with the two versions quoted."},
+ "m2-mg1":{what:"Put the form, the SOW and the tracker side by side and check they say the same thing: ticket volume, date range, history format (closed history and open-at-cutover separately), go-live date and switch time. Post the agreed version in the channel.",
+   why:"Sounding Board's tracker said six months, the form's filter said 14 Nov to 30 Sep, and the format flipped between tickets and conversations across three people. Richard then had to chase a yes or no on a Saturday.",
+   how:"Export the client's form from #admin and read Project details, sections 1, 3 and 5 against the SOW and the tracker. Differences go to the client owner and sign-off owner in one message, both versions quoted."},
+ "p1-mg2":{what:"Confirm that info+1@ has full admin on the exact Intercom workspace named in the form, by app code (the 8 characters after /apps/ in the URL), and say so in the channel.",
+   why:"Shiftmove gave us admin on 195042 (ur47q5en), the sample went to pusgcxwo, production turned out to be v35vxnsy, and l18pyn7k had to be ruled out. The form carried a stale pre-fill for ten days.",
+   how:"Ask Richard which app code he can see as admin, compare it with the form's Project details and the partner's configuration links, and post one line: 'Richard is admin on <app code>, the migration lands there, <other codes> are out of scope.' Update the form if it was wrong."},
+ "m2-mg2":{what:"Confirm that info+1@ has full admin on the exact Intercom workspace named in the form, by app code, and say so in the channel.",
+   why:"Shiftmove: admin was granted on one workspace, the sample went to a test one, production was a third, and a fourth had to be ruled out.",
+   how:"Ask Richard which app code he can see, compare it with the form and the partner's links, post one line naming the production code and the out-of-scope ones. Fix the form if it was wrong."},
+ "p6-mg1":{what:"Keep one decisions log for the migration: every decision made in Slack or on a call gets the date, who made it and a link, and the matching form field is updated the same day.",
+   why:"ELMO changed the history from 4 or 5 years to 3 in a Slack thread. Sounding Board's format decision lived in three people's heads. Richard, 9 Oct: 'we just need to make sure we're reading from the latest point.'",
+   how:"When you see a decision in a channel or a call write-up, add it to the tracker decisions thread and edit the client's form on #admin (or ask the client owner to). The form is the record Richard builds from, so it must match."},
+ "m2-mg3":{what:"Start one decisions log for the migration. Every decision made in Slack or on a call gets the date, who made it and a link, and the matching form field is updated the same day.",
+   why:"ELMO changed its history range in a thread, Sounding Board's format lived in three people's heads. Richard builds from the form, so the form has to say what was last agreed.",
+   how:"Decisions go in the tracker's decisions thread and into the client's form on #admin the same day."},
+ "p6-mg2":{what:"Before the sample loads, check that every Intercom status, ticket type and team inbox named in the mapping actually exists, and who creates the missing ones by when.",
+   why:"Shiftmove mapped Zoho's Escalated to a new Escalated status that did not exist; Nicolas proposed Ocean Migration and Optimum Migration inboxes that had to be created. Tickets mapped to a missing status fall back to the default and the sample review then argues about the wrong thing.",
+   how:"Read sections 6, 7 and 8 of the form. For each target that is not in the workspace, post who creates it (partner, client admin or Chris) and the date. Tick this when they all exist."},
+ "m3-mg1":{what:"Before the sample loads, check that every Intercom status, ticket type and team inbox named in the mapping exists, and who creates the missing ones by when.",
+   why:"Shiftmove needed a new Escalated status and two migration inboxes before anything could load. A missing status means tickets fall back to the default.",
+   how:"Read sections 6, 7 and 8 of the form against the workspace. Post who creates each missing item and when. Tick when they all exist."},
+ "p6-mg3":{what:"Three days before any production load (history, catch-up or final delta), confirm in the channel who switches off Balanced assignment, auto-close and follow-up workflows, CSAT on close, live routing workflows and notifications, and when they go back on.",
+   why:"CleverCards: 29,000 closed tickets would have been handed out to whoever was online and counted in reporting. Richard switched Balanced off himself; I then said it could go back on too early. Sounding Board: other BTS teams share the workspace, so only Sounding Board's workflows could be touched, which Richard solved with the migration tag.",
+   how:"Use section 2 of the form (what is live). Post one message naming each setting, who turns it off, when, and that it stays off until the final delta is in and go-live checks are done. Ask for a thumbs up from the named person."},
+ "m3-mg2":{what:"Three days before any production load, confirm in the channel who switches off Balanced assignment, auto-close and follow-up rules, CSAT on close, live workflows and notifications, and when they go back on.",
+   why:"CleverCards: 29,000 closed tickets would have been handed out to whoever was online. Sounding Board: other teams share the workspace, so only their workflows could be touched.",
+   how:"Use section 2 of the form. One message: each setting, who turns it off, when, and that it stays off until the final delta is in. Get a thumbs up from the named person."},
+ "p6-mg4":{what:"The client's sign-off owner confirms the sample in the channel after checking message structure and order, assignment to the right person and team, the original requester, attachments, fields, statuses, internal notes staying private, and customer visibility.",
+   why:"Kelsy signed off the Sounding Board sample with 'looks great to me', and the visibility and format questions only surfaced after the full load. A sign-off that names what was checked holds up later.",
+   how:"When Richard posts the sample, reply underneath with the checklist from section 14 of the form and the review deadline. Tick this only when the sign-off owner has replied."},
+ "p6-mg5":{what:"Write down who signed off the sample, on what date, with a link, and that the exceptions list from the sample (attachments, requesters with no email, unmatched agents) was seen.",
+   why:"Richard pushed Sounding Board's backlog on 3 Oct and nobody replied; the tracker showed sign-off done only on 12 Oct. CleverCards' 65 rejected attachments were a surprise because nobody had said what to expect.",
+   how:"Record it in the tracker decisions thread and in the step note here. If the sign-off is silent after the deadline, one bump naming the date and what is blocked."},
+ "m3-mg3":{what:"Record who signed off the sample, when, with a link, and that the exceptions list was seen.",
+   why:"Sounding Board's backlog sign-off went unanswered for nine days. Exceptions (attachments, no-email requesters, unmatched agents) are expected, not surprises, if they are named at sign-off.",
+   how:"Tracker decisions thread plus the note on this step. Bump once after the deadline."},
+ "p7-mg1":{what:"Post one run sheet for the cutover in the client channel: a single table with every time in the client's zone, Sydney time and Richard's current zone. Rows: last catch-up delta, freeze (old tool read only, triggers off), final delta, go-live, email forwarding switch, widget swap, link replacement, Balanced assignment and auto-close back on, sign-off deadline, exceptions report.",
+   why:"Richard asked on 7 Oct 'do I have 2 migrations this weekend?' and on the Saturday 'does this mean I do the delta?'. The 7 Oct summary in our DM (QLD, Dublin and Sydney times side by side) was what he ran from. Two clients both had 4pm deadlines that day.",
+   how:"Build it from the cutover block in the form's Project details and section 3. Post it the week before, pin it, and repost with changes if a time moves. Copy it into Richard's DM too."},
+ "m3-mg4":{what:"Post one run sheet in the client channel: every time in the client's zone, Sydney time and Richard's zone. Rows: last catch-up delta, freeze, final delta, go-live, email switch, widget swap, link replacement, settings back on, sign-off deadline, exceptions report.",
+   why:"Richard asked 'do I have 2 migrations this weekend?' and 'does this mean I do the delta?'. The one table of times in our DM was what he ran from.",
+   how:"Build it from Project details and section 3 of the form. Post it the week before, pin it, repost on any change, copy to Richard."},
+ "p7-mg2":{what:"Three days before the final delta, list the assignees of every open ticket in the old tool and compare against Intercom teammates who have a seat and have accepted their invite. Post the gap list with the number of open tickets per missing person.",
+   why:"CleverCards: five teammates holding about 60 open tickets had no seat two days out, and Heather Mountain's unaccepted invite showed up as 'Sabel' in the sample. Tickets for anyone without a seat land unassigned.",
+   how:"Ask Richard for the open-ticket assignee counts from his extract (he has them). Check Settings > Teammates in Intercom for seat and invite status. Post: name, open tickets, what happens if no seat by the delta. The client decides; either answer is fine, silence is not."},
+ "m3-mg5":{what:"Three days before the final delta, compare open-ticket assignees in the old tool against seated, invite-accepted Intercom teammates. Post the gap list with open-ticket counts.",
+   why:"CleverCards had five unseated teammates holding about 60 open tickets two days out. Tickets for anyone without a seat land unassigned.",
+   how:"Richard's extract has the assignee counts; Intercom Settings > Teammates has seat and invite status. Post name, count and consequence; the client decides."},
+ "p7-mg3":{what:"The named person on the client side confirms in the channel, the day before, that the old helpdesk will be read only from the freeze time and that its triggers, auto-replies and notifications are switched off.",
+   why:"Without it customers get replies from both systems during the switch, and tickets edited after the freeze are lost. Madalina confirmed this for CleverCards only because we asked for it by name.",
+   how:"The owner is in section 3 of the form (freeze owner). Post the ask with the exact time and zone, tag them, and tick this only on their reply."},
+ "m3-mg6":{what:"The named person on the client side confirms in the channel, the day before, that the old helpdesk will be read only from the freeze time and its triggers and notifications are off.",
+   why:"Otherwise customers get replies from both systems and tickets edited after the freeze are lost.",
+   how:"Freeze owner is in section 3 of the form. Post the ask with the exact time and zone, tag them, tick on their reply."},
+ "p7-mg4":{what:"Before go-live: a re-sync of help centre articles if the client kept editing after the content migration, and every old-tool link replaced (ticket request form in email footers, help centre links, email templates and macros, the chat widget in the product).",
+   why:"BTS edited and added articles for weeks after Matt migrated them with nobody tracking it. The Zendesk widget was still live in the Sounding Board platform the day after go-live, and the Zendesk request form link sits in every system email.",
+   how:"Section 13 of the form lists the links and the owner. Ask for the article re-sync (Richard or the client's script) two days before go-live, and confirm each link location in the channel on go-live day."},
+ "m3-mg7":{what:"Before go-live: article re-sync if the client kept editing after the content migration, and every old-tool link replaced (request form, help centre, email footers and templates, chat widget).",
+   why:"BTS kept editing articles for weeks after the content migration; the Zendesk widget was still live the day after go-live.",
+   how:"Section 13 of the form lists links and owners. Re-sync two days before go-live; confirm each link location on the day."},
+ "p7-mg5":{what:"From the week before the first production load to the week after go-live, read the client channel every day. Any question addressed to Richard that has sat 24 hours gets a bump from you with a proposed answer for him to confirm or correct.",
+   why:"Jai's questions about the CleverCards final run (5 Oct) sat four days until our DM. Jonathan's Shiftmove meeting invite never went out. Richard is travelling and reads in bursts.",
+   how:"Use the Open Loops sweep. Bump in the thread, not a new message: 'Richard, I think the answer is X, can you confirm?' If he is unreachable, say when he will reply."},
+ "m3-mg8":{what:"Through the cutover fortnight, read the client channel daily; any question to Richard unanswered for 24 hours gets a bump with a proposed answer.",
+   why:"Questions about the CleverCards final run sat four days; a Shiftmove meeting invite never went out.",
+   how:"Open Loops sweep. Bump in the thread with a proposed answer for Richard to confirm."},
+ "p8-mg1":{what:"After the final delta, make sure the client has acknowledged Richard's post-load pack: counts by inbox and status, the exceptions list (rejected attachments, requesters with no email, unmatched agents, old open tickets), the decision on old open tickets, and the sign-off deadline.",
+   why:"Richard's final-sync posts are good (CleverCards 12 Oct: 204 tickets, 0 failures, by inbox, by status). What was missing was the client saying 'seen' and deciding the 301 old open tickets.",
+   how:"Reply under Richard's post with the two decisions the client owes and the deadline. Tick when the sign-off owner has replied to each."},
+ "m3-mg9":{what:"After the final delta, the client acknowledges the post-load pack: counts by inbox and status, exceptions list, old open tickets decision, sign-off deadline.",
+   why:"Richard's posts carry the numbers; what went missing was the client saying 'seen' and deciding the old open tickets.",
+   how:"Reply under Richard's post with the decisions owed and the deadline; tick when the sign-off owner replies."},
+ "p8-mg2":{what:"Tell the client in the channel when Balanced assignment, auto-close and the paused workflows went back on, and agree the date the old helpdesk stops receiving a copy of new email (if it was kept as a safety net).",
+   why:"CleverCards' 'Zendesk keeps a copy for a few days' plan ended at 11:00 on go-live morning because the addresses were Google Groups. Nobody had agreed when the copy would stop, so it was a surprise rather than a decision.",
+   how:"Section 3 of the form holds the old-copy answer. One message: settings back on (who, when), old copy stops on <date> (who). Tick when both are posted."},
+ "m3-mg10":{what:"Tell the client when Balanced assignment, auto-close and paused workflows went back on, and agree the date the old helpdesk stops receiving a copy of new email.",
+   why:"CleverCards' safety-net copy ended on go-live morning by accident. A date agreed in advance is a decision, not a surprise.",
+   how:"Section 3 of the form holds the old-copy answer. One message naming who and when for both."},
+ "p8-mg3":{what:"The sign-off owner confirms the migrated dataset in the channel by the deadline in the post-load pack.",
+   why:"Without it the engagement cannot close and the exceptions stay open. Sounding Board's sign-off arrived through the tracker nine days after the ask.",
+   how:"One bump the day before the deadline. Record the sign-off in the tracker decisions thread."},
+ "p7-cf1":{what:"Five working days before the switch, send the final cutover confirmation: the switch date and time with timezone, when the final delta runs (about two hours before), the freeze, what happens to open tickets, and the tags migrated tickets carry.",
+   why:"Mary gave a Saturday-to-Monday 'window' for Sounding Board; Richard's practice is one delta two hours before the switch. Neither side knew what the other expected until a Saturday-evening DM.",
+   how:"Write it from the cutover block in the form's Project details and section 3. Ask the client to reply with 'confirmed' or the corrections."},
+ "m3-cf1":{what:"Five working days before the switch, send the final cutover confirmation: switch date and time with timezone, final delta about two hours before, the freeze, open tickets, tags.",
+   why:"Sounding Board's 'migration window' and Richard's 'delta two hours before the switch' were two different pictures until a Saturday-evening DM.",
+   how:"Write it from the form's cutover block and section 3; ask for 'confirmed' or corrections."},
+ "p7-cf3":{what:"Post the confirmed cutover details to Richard in Slack and put the final delta in his calendar two hours before the switch, in his current timezone.",
+   why:"Richard asked on the Saturday evening whether he was meant to run anything that night.",
+   how:"DM plus a calendar invite. Include the client's freeze time and who confirmed it."},
+ "m3-cf3":{what:"Post the confirmed cutover details to Richard in Slack and put the final delta in his calendar two hours before the switch, in his current timezone.",
+   why:"Richard asked on the Saturday evening whether he was meant to run anything that night.",
+   how:"DM plus a calendar invite, with the freeze time and who confirmed it."},
+ "p0-10":{what:"Register the tracker key and, with a migration, the migration intake key in the sabel-webhook allowlist before any link goes out.",
+   why:"An unregistered key 404s. The form shows 'Autosaved' or 'saved in this browser only', and nothing reaches us. YFood's key was unregistered for four days.",
+   how:"Add readiness-<slug>-v1, <slug>-tracker-v1 and migration-intake-<slug>-v1 to ALLOWED_KEYS in api/tracker.js on GitHub, then open the link and check the amber banner is gone."},
+ "m0-3":{what:"Register the migration intake key in the sabel-webhook allowlist before the link goes out.",
+   why:"An unregistered key 404s and the client's answers stay in their browser.",
+   how:"Add migration-intake-<slug>-v1 to ALLOWED_KEYS in api/tracker.js on GitHub, then open the link and check the amber banner is gone."}
+};
 /* stable step ids: <phase>-<index in the phase's full list>. Only append new steps to keep ids stable. */
 /* A step with a fixed id in s[3] does not use up an index, so ids after it (and ticks on them) do not move. */
 function stepId(p){ let n=0; return s=>s[3]||(p.id+"-"+(n++)); }
@@ -755,10 +896,12 @@ AUDIT_PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], 
 const MIGRATION_PHASES = [
  {id:"m0", code:"M1", when:"Day 0", name:"Signed", gate:"File open, intake link sent, Slack channel live with the client.", steps:[
   ["client","Signs the migration scope of work"],
+  ["nikki","Contract signed before anything is requested: no source admin access, no extraction, until the signature is in","","m0-mg0"],
   ["nikki","Fill in this client's details: type, lead, hours, signed date"],
   ["nikki","Drive folder created, SOW saved in 00_Project Admin"],
   ["nikki","Register the migration intake key before the link goes out"],
   ["richard","Sends the welcome email with the migration intake form link"],
+  ["nikki","Send the 'how a Sabel migration runs' explainer with the form link","","m0-mg1"],
   ["nikki","Slack channel shared with the client, plus Richard, Chris and Greg; SOW pinned"],
   ["nikki","Notion Projects row: hours, signed date, SOW link"]]},
  {id:"m1", code:"M2", when:"Days 1 to 5", name:"Access", gate:"Full admin on their Intercom workspace and on every source.", steps:[
@@ -771,14 +914,27 @@ const MIGRATION_PHASES = [
   ["client","Completes the migration intake form"],
   ["nikki","Day 3: one nudge in Slack if nothing has been submitted"],
   ["nikki","Review the submission within 1 working day; send gaps back in Slack"],
-  ["richard","Migration plan agreed with the client in Slack"]]},
+  ["nikki","Reconcile the form against the SOW and the tracker (volume, date range, format, go-live); post the agreed version in Slack","","m2-mg1"],
+  ["nikki","Confirm Richard's admin access is on the stated production workspace (app code), posted in the channel","","m2-mg2"],
+  ["richard","Migration plan agreed with the client in Slack"],
+  ["nikki","Decisions log started; every decision made in Slack or on a call is written back into the form the same day","","m2-mg3"]]},
  {id:"m3", code:"M4", when:"Agreed dates", name:"Migration", gate:"Data in Intercom and confirmed by the client.", steps:[
+  ["nikki","Statuses, ticket types and inboxes the mapping needs exist in Intercom before the sample loads","","m3-mg1"],
   ["richard","Mapping, sample run, then full run"],
+  ["nikki","3 days before any production load, confirm in the channel who switches off Balanced assignment, auto-close, CSAT, workflows and notifications, and when they go back on","","m3-mg2"],
   ["client","Checks the sample and confirms in Slack"],
+  ["nikki","Sample sign-off recorded with date and person; exceptions list acknowledged","","m3-mg3"],
   ["nikki","5 working days before cutover: send the final cutover confirmation (switch time, delta, freeze, open tickets, tags)","","m3-cf1"],
   ["client","Replies confirming the switch date, time and timezone, and the cutover details","","m3-cf2"],
   ["nikki","Confirmed details posted to Richard in Slack; delta time in his calendar 2 hours before the switch","","m3-cf3"],
+  ["nikki","Cutover run sheet posted in the client channel, one table in client time, Sydney time and Richard's time","","m3-mg4"],
+  ["nikki","3 days before the final delta, compare open-ticket assignees against seated, invite-accepted teammates; post the gap list","","m3-mg5"],
+  ["client","Confirms in the channel the day before that the old helpdesk is read only and its triggers and notifications are off from the freeze time","","m3-mg6"],
+  ["nikki","Article re-sync done and old links replaced before go-live (request form, help centre, email footers, chat widget)","","m3-mg7"],
+  ["nikki","Daily sweep through the cutover fortnight; any client question to Richard unanswered for 24 hours gets a bump with a proposed answer","","m3-mg8"],
   ["richard","Runs the delta migration at cutover"],
+  ["nikki","Post-load pack acknowledged by the client: counts by inbox and status, exceptions list, old open tickets decision, sign-off deadline","","m3-mg9"],
+  ["nikki","Client told when Balanced assignment, auto-close and workflows went back on; date the old helpdesk stops receiving a copy agreed","","m3-mg10"],
   ["richard","Warns at 75% of hours; new scope by written change request"],
   ["client","Confirms the migration is complete"]]},
  {id:"m4", code:"Close", when:"After the run", name:"Close-out", gate:"Engagement closed.", steps:[
@@ -815,14 +971,14 @@ function pidxOf(c,pid){ const L=phasesFor(c); if(projectType(c)==="migration" &&
    Edits live in the portal store at templates.opsChecklists = {steps:{<id>:{t,o,tag,crit,hide}}, added:{<phase>:[{id,o,t,tag,crit}]}, order:{<phase>:[ids]}}.
    Step ids never change, so ticks on clients survive renames, moves, removals and restores. */
 const CRIT_DEFAULT = new Set(["p0-1","p0-5","p0-6","p0-7","p0-8","p0-9","p0-10","p0-11","p1-0","p1-4","p2-0","p2-1",
-  "m0-1","m0-2","m0-3","m0-5","m1-0","m1-1","m1-2","m1-3","m2-0","m2-2","m3-cf2","p7-cf2",
+  "m0-1","m0-2","m0-3","m0-5","m0-mg0","m1-0","m1-1","m1-2","m1-3","m2-0","m2-2","m2-mg1","m2-mg2","m3-cf2","p7-cf2","p1-mg1","p1-mg2",
   "a0-2","a0-3","a0-4","a1-0","a1-2"]);
 /* Gates that come before the first client session: kickoff, the discovery workshop, or the migration run. */
 const PRE_KICKOFF = {p0:1,p1:1,p2:1, m0:1,m1:1,m2:1, a0:1,a1:1};
 const LISTS = [["main","Build and Build + Migration",PHASES],["migration","Migration",MIGRATION_PHASES],["audit","Audit",AUDIT_PHASES],["consult","Consultation only",CONSULT_PHASES]];
 const BASE = {};
 LISTS.forEach(([,,L])=>L.forEach(p=>{
-  p.steps.forEach(s=>{ s.crit=CRIT_DEFAULT.has(s.id); if(s.tag==="mo"){ s.hide=true; s.tag=""; } });   /* migration-only steps now live in the migration list */
+  p.steps.forEach(s=>{ s.crit=CRIT_DEFAULT.has(s.id); s.info=STEP_INFO[s.id]||null; if(s.tag==="mo"){ s.hide=true; s.tag=""; } });   /* migration-only steps now live in the migration list */
   BASE[p.id]=p.steps.map(s=>Object.assign({},s));
 }));
 function checklistEdits(){ const t=S.portal&&S.portal.templates; return (t&&t.opsChecklists)||{}; }
@@ -836,7 +992,7 @@ function editorSteps(pid){
 }
 function applyChecklists(){
   LISTS.forEach(([,,L])=>L.forEach(p=>{
-    p.steps = editorSteps(p.id).filter(s=>!s.hide).map(s=>({id:s.id, o:OWNERS[s.o]?s.o:"nikki", t:s.t, tag:s.tag||"", crit:!!s.crit}));
+    p.steps = editorSteps(p.id).filter(s=>!s.hide).map(s=>({id:s.id, o:OWNERS[s.o]?s.o:"nikki", t:s.t, tag:s.tag||"", crit:!!s.crit, info:STEP_INFO[s.id]||null}));
   }));
 }
 function editChecklists(fn){
@@ -874,7 +1030,7 @@ const S = {
   portal:null, notion:[], reg:[], kickoff:{}, trk:{},
   loaded:{portal:false,notion:false,reg:false,kick:false}, errors:{},
   view:"overview", clientId:null, dirty:new Map(), save:"idle",
-  open:{}, noteOpen:{}, scopeOpen:false, foldOpen:{}, edShowGone:{},
+  open:{}, noteOpen:{}, infoOpen:{}, scopeOpen:false, foldOpen:{}, edShowGone:{},
   prefs:{mine:false, closedOpen:false, grp:{}, groupBy:"stage", cardDetail:"full"}
 };
 try{ Object.assign(S.prefs, JSON.parse(localStorage.getItem(PREF_KEY)||"{}")); }catch(e){}
@@ -902,6 +1058,13 @@ const norm = s => String(s||"").toLowerCase().replace(/#\d+/g,"").replace(/\(.*?
   .replace(/\b(delivery|ltd|limited|oy|pty|inc|global|labs|the|software|nz)\b/g,"").replace(/[^a-z0-9]/g,"");
 const chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
 const tickSvg = '<svg viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7"/></svg>';
+/* (i) button and panel for a step that has guidance. k = client id + ":" + step id (unique per row). */
+function infoBtn(s,k){ return s.info ? '<button class="infobtn'+(S.infoOpen[k]?' on':'')+'" data-act="info" data-k="'+esc(k)+'" aria-expanded="'+(!!S.infoOpen[k])+'" aria-label="What, why and how for this step" title="What, why and how">i</button>' : ''; }
+function infoPanel(s,k){
+  if(!s.info || !S.infoOpen[k]) return '';
+  const i=s.info;
+  return '<div class="stepinfo"><div><b>What</b><p>'+esc(i.what)+'</p></div><div><b>Why</b><p>'+esc(i.why)+'</p></div><div><b>How</b><p>'+esc(i.how)+'</p></div></div>';
+}
 
 async function getJSON(url){
   const r = await fetch(url+(url.includes("?")?"&":"?")+"_t="+Date.now(), {cache:"no-store"});
@@ -1640,7 +1803,7 @@ function todayView(){
     pre.forEach(x=>x.open.forEach(o=>{
       const own=stepOwner(o.c,o.s), mineS=own==="nikki";
       h += '<li class="titem"><button class="tick'+(mineS?' mine':'')+'" data-act="tick" data-id="'+o.c.id+'" data-sid="'+o.s.id+'" aria-label="Mark done: '+esc(o.s.t)+'">'+tickSvg+'</button>'+
-        '<div><div class="tx">'+esc(o.s.t)+'<span class="crit">Critical</span></div><div class="meta"><button class="cl" data-act="open" data-id="'+o.c.id+'">'+esc(o.c.name)+'</button><span class="ph">'+esc(o.p.name)+' · '+esc(ownerName(o.c,own))+'</span></div></div>'+
+        '<div><div class="tx">'+esc(o.s.t)+'<span class="crit">Critical</span>'+infoBtn(o.s,"t:"+o.c.id+":"+o.s.id)+'</div><div class="meta"><button class="cl" data-act="open" data-id="'+o.c.id+'">'+esc(o.c.name)+'</button><span class="ph">'+esc(o.p.name)+' · '+esc(ownerName(o.c,own))+'</span></div>'+infoPanel(o.s,"t:"+o.c.id+":"+o.s.id)+'</div>'+
         '<div class="side-r">'+(x.past?'<span class="due late">kickoff passed</span>':(phaseDue(o.c,o.p)?'<span class="due '+dueClass(phaseDue(o.c,o.p))+'">'+esc(fmt(phaseDue(o.c,o.p)))+'</span>':''))+'</div></li>';
     }));
     h += '</ul></section>';
@@ -1649,7 +1812,7 @@ function todayView(){
   if(!mine.length) h += '<div class="empty">'+(live.length?(myPre?'Only the critical steps above.':'Nothing waiting on you at the current gates.'):'No clients are set up in the hub yet. Pick one under "Not set up in the hub", or use + Add client.')+'</div>';
   else h += '<ul class="tlist">'+mine.map(x=>
     '<li class="titem"><button class="tick mine" data-act="tick" data-id="'+x.c.id+'" data-sid="'+x.s.id+'" aria-label="Mark done: '+esc(x.s.t)+'">'+tickSvg+'</button>'+
-    '<div><div class="tx">'+esc(x.s.t)+'</div><div class="meta"><button class="cl" data-act="open" data-id="'+x.c.id+'">'+esc(x.c.name)+'</button><span class="ph">'+esc(x.p.name)+' · '+esc(x.p.code)+'</span></div></div>'+
+    '<div><div class="tx">'+esc(x.s.t)+infoBtn(x.s,"t:"+x.c.id+":"+x.s.id)+'</div><div class="meta"><button class="cl" data-act="open" data-id="'+x.c.id+'">'+esc(x.c.name)+'</button><span class="ph">'+esc(x.p.name)+' · '+esc(x.p.code)+'</span></div>'+infoPanel(x.s,"t:"+x.c.id+":"+x.s.id)+'</div>'+
     '<div class="side-r">'+(x.due?'<span class="due '+dueClass(x.due)+'">'+(daysTo(x.due)<0?'due ':'')+esc(fmt(x.due))+'</span><span class="due">'+esc(rel(x.due))+'</span>':'<span class="due">no date</span>')+'</div></li>').join("")+'</ul>';
   h += '</section>';
 
@@ -1791,7 +1954,7 @@ function phaseBlock(c,p,pi,i){
       const nk=c.id+":"+s.id, done=["done","na"].includes(st);
       h += '<li class="step '+(mine?'mine':'other')+(st?' '+st:'')+'">'+
         '<button class="tick'+(mine?' mine':'')+(st?' '+st:'')+'" data-act="tick" data-id="'+c.id+'" data-sid="'+s.id+'" aria-label="'+(st==="done"?"Mark not done":"Mark done")+': '+esc(s.t)+'"'+(before?' disabled':'')+'>'+tickSvg+'</button>'+
-        '<span class="tx">'+esc(s.t)+(s.crit&&!done?'<span class="crit'+(mine?' mine':'')+'">Critical</span>':'')+'</span>'+
+        '<span class="tx">'+esc(s.t)+(s.crit&&!done?'<span class="crit'+(mine?' mine':'')+'">Critical</span>':'')+infoBtn(s,nk)+'</span>'+
         '<span class="acts"><span class="more">'+
           (before?'':'<button class="iconbtn'+(st==="doing"?' on':'')+'" data-act="doing" data-id="'+c.id+'" data-sid="'+s.id+'">In progress</button><button class="iconbtn" data-act="na" data-id="'+c.id+'" data-sid="'+s.id+'">'+(st==="na"?"Needed":"Not needed")+'</button><button class="iconbtn" data-act="note" data-k="'+esc(nk)+'">Note</button>')+
         '</span><label class="ownsel'+(own!==s.o?' set':'')+'" title="Who does this step for '+esc(c.name)+'"><span class="own '+own+'"><i>'+OWNERS[own].i+'</i>'+esc(ownerName(c,own))+'</span>'+
@@ -1801,6 +1964,7 @@ function phaseBlock(c,p,pi,i){
         '</select></label></span>'+
         (rec.at && st && !before ? '<span class="when">'+esc({done:"Done",doing:"Started",na:"Marked not needed"}[st]||"")+' '+esc(fmt(rec.at))+'</span>' : '')+
         (S.noteOpen[nk] ? '<div class="note"><textarea data-act="note-text" data-id="'+c.id+'" data-sid="'+s.id+'" placeholder="Note for this step">'+esc(rec.note||"")+'</textarea></div>' : (rec.note?'<div class="note">'+esc(rec.note)+'</div>':''))+
+        infoPanel(s,nk)+
       '</li>';
     });
     h += '</ul>';
@@ -2013,6 +2177,7 @@ function listsView(){
         : '<span class="mv"><button data-act="ed-move" data-pid="'+p.id+'" data-sid="'+s.id+'" data-v="-1"'+(i===0?' disabled':'')+' aria-label="Move up">↑</button><button data-act="ed-move" data-pid="'+p.id+'" data-sid="'+s.id+'" data-v="1"'+(i===n-1?' disabled':'')+' aria-label="Move down">↓</button></span>')+
       '<input class="edtx" data-ed="t" data-sid="'+s.id+'" value="'+esc(s.t)+'" aria-label="Step"'+dis+'>'+
       (s.added?'<span class="yours">Yours</span>':'')+
+      (STEP_INFO[s.id]?'<span class="hasinfo" title="This step has what / why / how guidance on the client page">i</span>':'')+
       '<select data-ed="o" data-sid="'+s.id+'" aria-label="Owner"'+dis+'>'+Object.keys(OWNERS).map(k=>'<option value="'+k+'"'+(k===s.o?' selected':'')+'>'+esc(OWNERS[k].n)+'</option>').join("")+'</select>'+
       (tab==="main"?'<select data-ed="tag" data-sid="'+s.id+'" aria-label="Applies to"'+dis+'><option value=""'+(s.tag!=="m"?' selected':'')+'>Full and Build</option><option value="m"'+(s.tag==="m"?' selected':'')+'>Full only (has a migration)</option></select>':'')+
       '<label class="crit-cb"><input type="checkbox" data-ed="crit" data-sid="'+s.id+'"'+(s.crit?' checked':'')+dis+'>Critical</label>'+
@@ -2109,6 +2274,7 @@ document.addEventListener("click", e=>{
     }
     case "doing": { if(!c) return; const st=c.hub&&c.hub.steps[t.dataset.sid]; setStep(c,t.dataset.sid, st&&st.s==="doing"?"":"doing"); return render(true); }
     case "na": { if(!c) return; const st=c.hub&&c.hub.steps[t.dataset.sid]; setStep(c,t.dataset.sid, st&&st.s==="na"?"":"na"); return render(true); }
+    case "info": S.infoOpen[t.dataset.k]=!S.infoOpen[t.dataset.k]; return render(true);
     case "note": S.noteOpen[t.dataset.k]=!S.noteOpen[t.dataset.k]; render(true);
       { const ta=document.querySelector('textarea[data-sid="'+t.dataset.k.split(":")[1]+'"]'); if(ta) ta.focus(); } return;
     case "gate": { if(!c) return;

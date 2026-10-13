@@ -280,7 +280,7 @@ html.light .toast{background:#101828;border-color:#101828;color:#FFFFFF;box-shad
         the 'What we have agreed so far' section only shows when it is set.
         Optional first-load prefills go in SEED (field id -> value).
    ===================================================================== */
-const BUILD_V='202610120001';
+const BUILD_V='202610130002';
 const API='https://sabel-webhook.vercel.app/api/tracker';
 const qs=new URLSearchParams(location.search);
 const DEFAULT_SLUG='';
@@ -321,7 +321,7 @@ const ALL_SECTIONS=[
    {id:'zd_subdomain',l:ZD?'Zendesk subdomain(s)':S('URL(s)','Helpdesk URL(s)'),ty:'text',
      ph:ZD?'e.g. yourcompany.zendesk.com':'e.g. support.yourcompany.com',
      hint:ZD?'List every Zendesk instance or brand URL tickets should come from':'List every instance or brand URL tickets should come from'},
-   {id:'intercom_workspace',l:'Intercom production workspace (name + URL)',ty:'text',ph:'e.g. Acme, https://app.intercom.com/a/apps/abc123',hint:'The workspace the migrated history lands in'},
+   {id:'intercom_workspace',l:'Intercom production workspace (name + URL)',ty:'text',ph:'e.g. Acme, https://app.intercom.com/a/apps/abc123',hint:'The workspace the migrated history lands in. Include the app code, the 8 characters after /apps/ in the URL, so nothing is loaded into the wrong one'},
    {id:'intercom_test_workspace',l:'Intercom test workspace for the sample (name + URL)',ty:'text',opt:1,ph:'Leave blank if the sample goes into production'},
    {id:'migration_type',l:'Migration type',ty:'pills',opts:['Tickets','Conversations','Both']},
    {id:'co_name',l:'Client owner, name',ty:'text',ph:'Your day-to-day contact for the migration'},
@@ -330,11 +330,16 @@ const ALL_SECTIONS=[
    {id:'so_name',l:'Sign-off owner, name',ty:'text',ph:'The person who approves the migration'},
    {id:'so_role',l:'Sign-off owner, role',ty:'text'},
    {id:'so_email',l:'Sign-off owner, email',ty:'text'},
-   {id:'target_golive',l:'Target go-live (cutover date)',ty:'date',hint:'The day your team starts working in Intercom'},
-   {id:'golive_time',l:'What time are you planning to switch from '+SRC+' to Fin? (local time)',ty:'text',ph:'e.g. 09:00',hint:'We usually run a delta 2 hours before you switch, to make sure nothing is missed. That run picks up every ticket created or updated since the full migration.'},
+   {id:'cutover_count',l:'Does everything move to Intercom on one date?',ty:'pills',full:1,opts:['Yes, one cutover','No, more than one (by brand, region or market)'],hint:'Each cutover gets its own history load, sample review and final delta'},
+   {id:'cutovers',l:'List each cutover',ty:'textarea',full:1,showIf:['cutover_count','No, more than one (by brand, region or market)'],ph:'One per line: brand or source, go-live date, the time your team switches, timezone, and when you can review its sample',hint:'Put the first one in the fields below as well'},
+   {id:'target_golive',l:'Go-live date (first or only cutover)',ty:'date',hint:'The day your team starts working in Intercom'},
+   {id:'old_stop',l:'When does your team stop working in '+SRC+'? (local date and time)',ty:'text',ph:'e.g. Friday 17:00, or Monday 07:00 on go-live day',hint:'From then on '+SRC+' is read only. Anything changed there afterwards does not come across'},
+   {id:'golive_time',l:'What time does your team start working in Intercom? (local time)',ty:'text',ph:'e.g. 09:00',hint:'We run the final delta about 2 hours before this. It picks up every ticket created or updated since the full migration'},
    {id:'golive_tz',l:'Timezone',ty:'text',ph:'e.g. Europe/London'},
-   {id:'zd_contract_end',l:S('contract end date','Current helpdesk contract end date'),ty:'date',hint:'Helps us plan the cutover and any overlap'}
- ]},
+   {id:'zd_contract_end',l:S('contract end date','Current helpdesk contract end date'),ty:'date',hint:'Helps us plan the cutover and any overlap'},
+   {id:'details_notes',l:'Notes on dates, people or workspaces',ty:'textarea',full:1,opt:1}
+ ],
+  note:'<strong>How a cutover runs.</strong> We load the closed history first, then run catch-up loads (deltas) as the date gets close. At the freeze your team stops working in '+SRC+'. We run the final delta about two hours before your team starts in Intercom, so open tickets land there still open and assigned. Anything changed in '+SRC+' after the freeze does not come across.'},
  {id:'agreed',n:'',t:'What we have agreed so far',desc:'Pulled from your SOW and our calls so far. Please check it is right.',
   note:AGREED_NOTE,
   fields:[
@@ -354,6 +359,8 @@ const ALL_SECTIONS=[
      ['ch_email','Email'],['ch_webform','Web form'],['ch_chat','Chat / messaging'],['ch_phone','Phone call logs'],['ch_api','API-created tickets'],['ch_other','Other (describe below)']]},
    {id:'_exclusions',l:'Leave out',ty:'checks',opts:[
      ['x_spam','Spam and deleted tickets'],['x_auto','Automated or system notifications'],['x_other','Anything else (describe below)']]},
+   {id:'stale_open',l:'Tickets still open in '+SRC+' but very old (months or years without activity)',ty:'pills',full:1,opts:['Migrate them as open','Close them on arrival in Intercom','Leave them behind'],hint:'Every ticket still open in '+SRC+' comes across as open unless you give us a cutoff. Old ones then sit in your agents\' inboxes on day one'},
+   {id:'stale_cutoff',l:'Cutoff for old open tickets (a date, or an age such as 6 months)',ty:'text',opt:1,ph:'e.g. anything last updated before 1 January 2026'},
    {id:'brand_notes',l:'Notes on history, brands, channels or exclusions',ty:'textarea',full:1,opt:1}
  ]},
  {id:'access',n:'2',t:'Access and readiness',desc:'We need admin access to '+SRC+' and Intercom to run the migration.',
@@ -363,6 +370,13 @@ const ALL_SECTIONS=[
    {id:'zd_api',l:S('API token shared with Sabel','API token shared with Sabel'),ty:'pills',opts:['Yes','No','Not sure']},
    {id:'intercom_access',l:'Intercom workspace admin access granted',ty:'pills',opts:YN},
    {id:'ws_separation',l:'Nothing is migrated into any other Intercom workspace you have (test, legacy or sister-brand)',ty:'pills',opts:['Confirmed','Needs discussion'],hint:'So nothing is loaded into the wrong workspace'},
+   {id:'ws_other',l:'Other Intercom workspaces you have (name + app code) and what they are for',ty:'text',full:1,opt:1,ph:'e.g. abc12345 test, xyz67890 legacy sister brand',hint:'We check our admin access is on the production one before the sample'},
+   {id:'ws_live',l:'Is this Intercom workspace already live for anyone?',ty:'pills',full:1,opts:['No, nothing live yet','Yes, other teams already work in it','Yes, our own team already works in it']},
+   {id:'_live_settings',l:'Already switched on in Intercom (tick any that apply)',ty:'checks',opts:[
+     ['ls_balanced','Balanced or round-robin assignment'],['ls_workflows','Live workflows or routing rules'],['ls_autoclose','Auto-close or follow-up rules'],['ls_csat','Surveys or CSAT on close'],['ls_sla','SLAs'],['ls_notify','Teammate notifications'],['ls_none','None of these yet']]},
+   {id:'live_notes',l:'Notes on what is live',ty:'textarea',full:1,opt:1,hint:'We switch these off for the load, so thousands of closed tickets are not handed out to whoever is online or counted in your reports, and we tell you when they can go back on. If other teams share the workspace, migrated tickets carry a tag so only your workflows need to exclude them'},
+   {id:'team_final',l:'Is the Intercom team and inbox structure final?',ty:'pills',opts:['Yes','No, still being set up']},
+   {id:'team_owner',l:'Who is finishing it, and by when?',ty:'text',showIf:['team_final','No, still being set up'],hint:'Team inbox mapping (section 6) and agent mapping (section 10) wait on it'},
    {id:'zd_plan',l:S('plan tier','Plan tier'),ty:'text',ph:ZD?'e.g. Suite Professional, Enterprise':'e.g. Professional, Enterprise',
      hint:ZD?'Zendesk limits API calls by plan, which sets how long the extract takes':'Most helpdesks limit API calls by plan, which sets how long the extract takes'},
    {id:'_constraints',l:'Access constraints (tick any that apply)',ty:'checks',opts:[
@@ -370,13 +384,18 @@ const ALL_SECTIONS=[
    {id:'access_notes',l:'Notes / constraints details',ty:'textarea',full:1,opt:1}
  ]},
  {id:'settings',n:'3',t:'Migration and cutover settings',fields:[
-   {id:'migrate_as',l:'Migrate into Intercom as',ty:'pills',opts:['Tickets','Conversations'],hint:'A common setup: history comes through as tickets assigned to the original agent, and new work starts as conversations'},
+   {id:'migrate_as',l:'Closed history migrates into Intercom as',ty:'pills',opts:['Tickets','Conversations'],hint:'Conversations let Fin learn from past answers. Tickets keep their states and fields. A common setup: history as tickets assigned to the original agent, new work as conversations'},
+   {id:'open_format',l:'Tickets still open at cutover migrate as',ty:'pills',opts:['Open tickets, keeping their state','Open conversations'],hint:'As tickets: New = Submitted, Open = In progress, Pending = Waiting on customer, On hold = Waiting on another team. As conversations they are simply open. This is a separate decision from the history above'},
    {id:'_optset',l:'Optional settings',ty:'checks',opts:[
      ['o_unassign_closed','Unassign closed tickets'],
      ['o_unassign_team','Unassign ticket if it is assigned to a team'],
      ['o_notify_last','Include notifications for last comment (tickets only)']]},
    {id:'open_at_cutover',l:'Tickets still open in '+SRC+' at cutover should be',ty:'pills',opts:['Migrated as open tickets in Intercom','Closed before cutover','A mix (describe below)'],hint:'Migrating them lets your agents keep replying to the customer from Intercom'},
-   {id:'freeze',l:S('freeze window before go-live','Freeze window in your current helpdesk before go-live'),ty:'text',full:1,ph:'e.g. no new tickets taken after 07:00 on go-live day',hint:cap(SRC)+' stops taking new email and forms at this point, so the final delta is complete'},
+   {id:'freeze',l:S('freeze: when does it become read only?','Freeze: when does your current helpdesk become read only?'),ty:'text',full:1,ph:'e.g. from 05:00 on go-live day, or from Friday 17:00',hint:cap(SRC)+' stops taking new email and forms at this point, so the final delta is complete. Usually the same as the stop time in Project details'},
+   {id:'freeze_owner',l:'Who switches off triggers, auto-replies and notifications in '+SRC+' at the freeze, and confirms it in Slack?',ty:'text',full:1,ph:'Name, and when they will do it',hint:'Otherwise customers get replies from both systems during the switch'},
+   {id:'old_copy',l:'After the switch, should '+SRC+' keep receiving a copy of new emails?',ty:'pills',full:1,opts:['No, switch fully on the day','Yes, for a few days as a safety net','Not sure'],hint:'A safety-net copy only works if your email setup allows two recipients'},
+   {id:'old_copy_days',l:'For how long, and who switches it off?',ty:'text',showIf:['old_copy','Yes, for a few days as a safety net']},
+   {id:'email_kind',l:'Are your support email addresses mailboxes or groups?',ty:'pills',full:1,opts:['Mailboxes','Groups or distribution lists','A mix, or not sure'],hint:'Intercom cannot forward from a Google Group or distribution list. Each one has to become a mailbox first, which changes the cutover plan and can cut the old tool off on the day'},
    {id:'cutover_notes',l:'Cutover notes',ty:'textarea',full:1,opt:1}
  ]},
  {id:'tags',n:'4',t:'Tags',
@@ -386,40 +405,61 @@ const ALL_SECTIONS=[
    {id:'tags_keep',l:'Which tags should come across?',ty:'textarea',full:1,showIf:['tags_all','Only some (list below)'],ph:'List them, attach a list, or give a rule, e.g. only tags used in the last 12 months'},
    {id:'tags_wanted',l:'Would you like any additional tags added?',ty:'pills',opts:YN},
    {id:'extra_tags',l:'Additional tags (comma-separated)',ty:'text',full:1,ph:'e.g. legacy-uk, legacy-us',showIf:['tags_wanted','Yes']},
-   {id:'tags_retire',l:'Tags to drop, or a rule for dropping them',ty:'textarea',full:1,opt:1,ph:'e.g. any tag not used in the last 6 months, or attach a list'}
+   {id:'tags_retire',l:'Tags to drop, or a rule for dropping them',ty:'textarea',full:1,opt:1,ph:'e.g. any tag not used in the last 6 months, or attach a list'},
+   {id:'tags_notes',l:'Notes on tags',ty:'textarea',full:1,opt:1}
  ]},
  {id:'filter',n:'5',t:'Filter (timeframe)',desc:'The window of history to migrate, matching your answer in section 1.',fields:[
    {id:'tf_enable',l:'Enable timeframe filter',ty:'pills',opts:YN},
    {id:'tf_start',l:'Start date and time',ty:'datetime',showIf:['tf_enable','Yes'],hint:'For example, 3 years back from go-live'},
    {id:'tf_end',l:'End date and time',ty:'datetime',opt:1,showIf:['tf_enable','Yes'],hint:'Leave blank: the delta runs carry everything up to go-live'},
-   {id:'tf_tz',l:'Timezone for the filter window',ty:'text',ph:'e.g. Europe/London',showIf:['tf_enable','Yes']}
+   {id:'tf_tz',l:'Timezone for the filter window',ty:'text',ph:'e.g. Europe/London',showIf:['tf_enable','Yes']},
+   {id:'filter_notes',l:'Notes on the timeframe',ty:'textarea',full:1,opt:1}
  ]},
  {id:'inbox',n:'6',t:'Team inbox mappings',
-  note:'We can replicate your existing groups in '+SRC+', or use this as a chance to create inboxes that match how you now route work, for example by product or by region, including any customers only certain teams may handle. List each group and where its tickets should land in Intercom.',
+  note:'We can replicate your existing groups in '+SRC+', or use this as a chance to create inboxes that match how you now route work, for example by product or by region, including any customers only certain teams may handle. List each group and where its tickets should land in Intercom. Closed history and open tickets can land in different places: many clients put closed history in one migration inbox per brand and send open tickets to the live team that owns them.',
+  fields:[
+   {id:'inbox_hist',l:'Inbox for closed history, if different from the live teams',ty:'text',full:1,opt:1,ph:'e.g. one \"Migration\" inbox per brand for closed tickets'},
+   {id:'inbox_notes',l:'Notes on inboxes',ty:'textarea',full:1,opt:1}
+  ],
   table:{key:'inbox',na:['na_inbox','Not applicable, we do not use separate groups'],cols:[['src',S('group','Group or team in your current helpdesk')],['dst','Intercom team inbox'],['notes','Notes']]}},
  {id:'status',n:'7',t:'Ticket status mapping',
   note:ZD?'We have started this with the standard Zendesk statuses and a suggested Intercom status for each. Change any you disagree with, and add rows for custom statuses. New statuses can be created in Intercom if required.'
          :'List each status you use in '+SRC+' and the Intercom status it should become, including any custom statuses. New statuses can be created in Intercom if required.',
   table:{key:'status',na:['na_status','Not applicable, use the Intercom default statuses'],cols:[['src',S('status','Status in your current helpdesk')],['dst','Intercom status'],['notes','Notes']]},
-  fields:[{id:'status_default',l:'Default behaviour for empty or unmapped statuses',ty:'text',full:1,opt:1}]},
+  fields:[
+   {id:'status_default',l:'Default behaviour for empty or unmapped statuses',ty:'text',full:1,opt:1},
+   {id:'status_create',l:'Statuses in your mapping that do not exist in Intercom yet: who creates them, and by when',ty:'textarea',full:1,opt:1,ph:'e.g. Escalated, created by Nicolas before 20 October',hint:'They must exist before the sample loads, or those tickets fall back to the default'},
+   {id:'status_notes',l:'Notes on statuses',ty:'textarea',full:1,opt:1}
+  ]},
  {id:'types',n:'8',t:'Ticket type mapping',
   desc:'Historical tickets can have their own ticket types, so they stay separate from new work. Tell us what the history should become, and whether it should be customer-facing in Intercom or internal only.',
+  note:'Internal comments and private notes always land as <strong>internal notes</strong> in Intercom. Customers never see them, whichever ticket type you choose.',
   fields:[
+   {id:'visibility',l:'Should migrated history be visible to customers in the Messenger or their ticket portal?',ty:'pills',full:1,opts:['Yes, customer-facing','No, internal only','Differs by brand (describe below)'],hint:'Customer-facing uses the Customer Ticket type; internal only uses Back-office. One answer per brand, please'},
    {id:'type_open',l:'Open tickets migrate as',ty:'select',opts:['Customer Ticket','Back-office Ticket','Tracker Ticket']},
    {id:'type_closed',l:'Closed tickets migrate as',ty:'select',opts:['Customer Ticket','Back-office Ticket','Tracker Ticket']},
    {id:'type_per_stack',l:'Should history use separate ticket types per product or brand?',ty:'pills',opts:['Yes, one per product or brand','No, shared types'],opt:1},
    {id:'type_notes',l:'Which ticket forms or types do you use in '+SRC+' today, and should historical tickets be customer-facing?',ty:'textarea',full:1,opt:1}
  ]},
  {id:'attrs',n:'9',t:'Custom attributes',
-  note:'By default, ALL custom ticket, user and organisation fields in '+SRC+' are migrated. If you have old fields you no longer need, choose "Specific only" and list just the ones to migrate.',
-  fields:[{id:'attr_mode',l:'Attribute import selection',ty:'pills',opts:['ALL','Specific only']}],
+  note:'By default, ALL custom ticket, user and organisation fields in '+SRC+' are migrated. If you have old fields you no longer need, choose "Specific only" and list just the ones to migrate. Whatever you choose, every ticket also carries the standard reference fields: original ticket id and link, status, priority, group or team, created and closed times, and the requester.',
+  fields:[
+   {id:'attr_mode',l:'Attribute import selection',ty:'pills',opts:['ALL','Specific only']},
+   {id:'attr_values',l:'Values on historical tickets',ty:'pills',full:1,opts:['Keep the existing values as they are','Remap them to our new Intercom categories','Keep history as it is, remap only the open tickets'],hint:'If you are changing your categories for Intercom, say whether old tickets should be translated or left as they were'},
+   {id:'ref_fields',l:'Reference IDs that must survive (Jira keys, CRM or Salesforce IDs, order or customer numbers)',ty:'textarea',full:1,opt:1,ph:'Field name in '+SRC+' and what it links to',hint:'So tickets can be re-linked to those systems afterwards'},
+   {id:'attr_file',l:'Is a field list coming as a file instead? Name it and say when',ty:'text',full:1,opt:1,ph:'e.g. custom-fields.csv, by Friday'},
+   {id:'attr_notes',l:'Notes on fields',ty:'textarea',full:1,opt:1}
+  ],
   table:{key:'attrs',showIf:['attr_mode','Specific only'],cols:[['src',S('field name','Field name in your current helpdesk')],['obj','Object (Ticket, Contact, Company)']]}},
  {id:'agents',n:'10',t:'Agent settings (agent mapping)',
-  note:'Some previous agents may no longer exist in '+SRC+' or Intercom. Map each agent to their Intercom teammate. For the migration to succeed, all mapped agents must be set up and have accepted their invite in Intercom. Unmatched agents fall back to the handling you choose below.',
+  note:'Some previous agents may no longer exist in '+SRC+' or Intercom. Map each agent to their Intercom teammate. Every teammate who holds open tickets must have an Intercom seat and have <strong>accepted their invite before the final delta</strong>; tickets assigned to anyone without a seat land unassigned in their team inbox. We check this a few days before the switch. Unmatched agents fall back to the handling you choose below.',
   table:{key:'agents',na:['na_agents','Not applicable, no individual agent mapping needed'],cols:[['src',S('agent (name + email)','Agent in your current helpdesk (name + email)')],['dst','Intercom teammate']]},
   fields:[
+   {id:'agent_exclude',l:'Agents, groups or assignees whose tickets should NOT come across, or should be archived rather than converted',ty:'textarea',full:1,opt:1,ph:'e.g. tickets assigned to a former contractor team',hint:'Tell us now: once they are in Intercom, removing them is a clean-up job'},
+   {id:'agent_file',l:'Is the agent list coming as a file instead? Name it and say when',ty:'text',full:1,opt:1},
    {id:'unmatched',l:'Unmatched agent handling',ty:'pills',opts:['Leave unassigned','Assign to specific teammate']},
-   {id:'fallback_agent',l:'Fallback teammate (name + email)',ty:'text',full:1,showIf:['unmatched','Assign to specific teammate']}
+   {id:'fallback_agent',l:'Fallback teammate (name + email)',ty:'text',full:1,showIf:['unmatched','Assign to specific teammate']},
+   {id:'agent_notes',l:'Notes on agents',ty:'textarea',full:1,opt:1}
  ]},
  {id:'contacts',n:'11',t:'Contact settings',
   note:'The default matching method is Email. If your Intercom users will carry an external or product user ID (for example from your own platform, CRM or data warehouse), migrated users should match on that ID instead, so no duplicate users are created.',
@@ -427,21 +467,44 @@ const ALL_SECTIONS=[
    {id:'match',l:'Contact matching approach',ty:'pills',opts:['Email only','External ID']},
    {id:'external_field',l:'External ID source field name in '+SRC,ty:'text',showIf:['match','External ID'],ph:ZD?'e.g. the Zendesk user external_id or a custom user field':'e.g. an external ID or a custom user field'},
    {id:'contact_type',l:'Contact type in Intercom',ty:'text',ph:'e.g. User, Lead',opt:1},
-   {id:'contact_scope',l:'Which contacts should we migrate?',ty:'pills',opts:['All contacts','Only ticket contacts']}
+   {id:'contact_scope',l:'Which contacts should we migrate?',ty:'pills',opts:['All contacts','Only ticket contacts']},
+   {id:'other_systems',l:'Which other systems create or update contacts or companies in Intercom?',ty:'textarea',full:1,ph:'e.g. Salesforce or HubSpot sync, the Shopify app, the Messenger login (boot call), n8n or Zapier flows. Write None if nothing else does',hint:'This is the one place where the migration and your integrations overlap. If both create records with different IDs, you get duplicates'},
+   {id:'other_ids',l:'For each one, which field does it use as the person external_id and the company_id?',ty:'textarea',full:1,opt:1,ph:'e.g. Salesforce sync: contact email as external_id, Salesforce account ID as company_id'},
+   {id:'run_order',l:'Which should run first?',ty:'pills',full:1,opts:['Your sync or bootstrap first, then our migration matches onto it','Our migration first, then your sync matches on email or name','Not sure, let us talk it through'],hint:'If your sync cannot run before our load, we create records your sync must then match on rather than create'},
+   {id:'messenger_id',l:'What will the Messenger use to identify logged-in users?',ty:'text',full:1,opt:1,ph:'e.g. email, or your platform\'s own user ID',hint:'Migrated contacts should match on the same thing, so the person who chats is the person with the history'},
+   {id:'no_email',l:'Requesters with no email address (anonymous chat visitors, phone-only, username-only)',ty:'pills',full:1,opts:['Create placeholder contacts so their tickets come across','Leave their tickets behind','We will add emails first'],hint:'Most helpdesks have some. Placeholder contacts keep the transcripts; they are never matched by your CRM'},
+   {id:'contact_notes',l:'Notes on contacts',ty:'textarea',full:1,opt:1}
  ]},
  {id:'companies',n:'12',t:'Company settings',desc:ZD?'Zendesk organisations become Intercom companies.':'Organisations or companies in '+SRC+' become Intercom companies.',fields:[
    {id:'migrate_companies',l:'Migrate organisations as companies',ty:'pills',opts:YN},
-   {id:'company_rule',l:'Preferred matching rule',ty:'text',ph:'e.g. match on company domain or your customer account ID',showIf:['migrate_companies','Yes']}
+   {id:'company_rule',l:'Preferred matching rule',ty:'text',ph:'e.g. match on company domain or your customer account ID',showIf:['migrate_companies','Yes']},
+   {id:'company_id_src',l:'Which system\'s ID should become the Intercom company_id?',ty:'text',ph:'e.g. Salesforce account ID, or the '+SRC+' organisation id',showIf:['migrate_companies','Yes'],hint:'Intercom needs an id when a company is created. If your CRM sync uses a different one you get two companies per customer'},
+   {id:'company_mapfile',l:'Can you send a mapping file ('+SRC+' organisation id to your CRM account id)?',ty:'pills',opts:['Yes, before the history load','No','Not needed'],showIf:['migrate_companies','Yes']},
+   {id:'company_notes',l:'Notes on companies',ty:'textarea',full:1,opt:1}
  ]},
- {id:'signoff',n:'13',t:'Sample review and sign-off',
-  desc:'Once mapping is agreed Richard sends a sample sheet (names, contact details, message body, replies and tags) and pushes a sample into Intercom for you to review. Check each ticket is assigned to the right person and team, shows the original requester, and has its attachments, fields and status. Once you sign off we load the history, run deltas up to go-live, and send a validation report for your sign-off before '+SRC+' is stood down.',
+ {id:'content',n:'13',t:'Help centre, links and articles',
+  desc:'Things outside the ticket load that break a cutover when nobody owns them.',
+  fields:[
+   {id:'hc_list',l:'Help centres per brand: where each lives today and where it goes in Intercom',ty:'textarea',full:1,ph:'e.g. support.acme.com (Zendesk) to the Acme Help Centre; Charis help centre stays on its Intercom address',hint:'If any sit in a different '+SRC+' login or account, say so'},
+   {id:'hc_restricted',l:'Any articles behind a login or limited to certain audiences?',ty:'pills',opts:YN},
+   {id:'hc_restricted_notes',l:'Which ones, and who should see them?',ty:'textarea',full:1,showIf:['hc_restricted','Yes'],hint:'Audiences do not carry across on their own. We set them in Intercom from your list'},
+   {id:'hc_edits',l:'Will your team keep editing articles in '+SRC+' after the content is migrated?',ty:'pills',full:1,opts:['No, articles are frozen once migrated','Yes, we will need a re-sync before go-live'],hint:'Edits made after the content load are lost unless we run a re-sync'},
+   {id:'_old_links',l:'Where do '+SRC+' links still appear that must be replaced at go-live? (tick any)',ty:'checks',opts:[
+     ['ol_footer','Email footers and templates'],['ol_form','Ticket request form link'],['ol_hc','Help centre links'],['ol_widget','Chat widget in your product or website'],['ol_macros','Macros or saved replies'],['ol_other','Somewhere else (describe below)']]},
+   {id:'links_owner',l:'Who replaces them, and when?',ty:'text',full:1,opt:1,hint:'The old chat widget staying live after go-live is the most common miss'},
+   {id:'content_notes',l:'Notes on help centres, links or articles',ty:'textarea',full:1,opt:1}
+ ]},
+ {id:'signoff',n:'14',t:'Sample review and sign-off',
+  desc:'Once mapping is agreed Richard sends a sample sheet (names, contact details, message body, replies and tags) and pushes a sample into Intercom for you to review. Signing off the sample means you have checked: message structure and order, assignment to the right person and team, the original requester, attachments, fields, statuses, internal notes staying private, and customer visibility. Once you sign off we load the history, run deltas up to go-live, and send a validation report for your sign-off before '+SRC+' is stood down.',
+  note:'<strong>What to expect.</strong> Images embedded in an email body (rather than attached) are sometimes refused by Intercom on upload; the text comes across and you get a list of those tickets with links to the originals. Tickets still open in '+SRC+' come across as open unless you gave us a cutoff in section 1. After each load you get counts by inbox and status, an exceptions list (attachments, requesters with no email, unmatched agents, old open tickets) and a sign-off request with a deadline.',
   fields:[
    {id:'reviewer_name',l:'Reviewer, name',ty:'text'},
    {id:'reviewer_email',l:'Reviewer, email',ty:'text'},
    {id:'review_deadline',l:'Review deadline',ty:'date'},
    {id:'approver_name',l:'Sign-off approver, name',ty:'text',hint:'Pre-filled from your sign-off owner in Project details, edit to override'},
    {id:'approver_role',l:'Sign-off approver, role',ty:'text',hint:'Pre-filled from Project details'},
-   {id:'approver_email',l:'Sign-off approver, email',ty:'text',hint:'Pre-filled from Project details'}
+   {id:'approver_email',l:'Sign-off approver, email',ty:'text',hint:'Pre-filled from Project details'},
+   {id:'signoff_notes',l:'Notes on the review',ty:'textarea',full:1,opt:1}
  ]}
 ];
 // 'agreed' only exists when AGREED_NOTE is set; hidden sections are excluded from progress, P, submit and exports
@@ -755,7 +818,7 @@ window.addEventListener('afterprint',()=>{
 /* ---------- static copy that names the source platform ---------- */
 function renderStatic(){
   document.getElementById('top-sub').textContent=(GENERIC?'Helpdesk':SRC)+' to Intercom migration · Prepared with Sabel Customer Success Solutions';
-  document.getElementById('intro').innerHTML='This form captures how your tickets from '+esc(SRC)+' should land in Intercom: how much history comes across, where tickets go, and how statuses, ticket types, fields, contacts and agents map. Where we already know an answer from your SOW or our calls, we have pre-filled it, so please check those rather than start from scratch. Your progress <strong>saves automatically</strong> and you can return any time using the same link, so different people can fill in different sections. If anything is unclear, leave it blank and add a note, or ask Richard or Chris to go through it with you.';
+  document.getElementById('intro').innerHTML='This form captures how your tickets from '+esc(SRC)+' should land in Intercom: how much history comes across, when and how the switch happens, where tickets go, how statuses, ticket types, fields, contacts and agents map, and which other systems and links the move touches. Where we already know an answer from your SOW or our calls, we have pre-filled it, so please check those rather than start from scratch. Your progress <strong>saves automatically</strong> and you can return any time using the same link, so different people can fill in different sections. If anything is unclear, leave it blank and add a note, or ask Richard or Chris to go through it with you.';
 }
 
 /* ---------- boot ---------- */
