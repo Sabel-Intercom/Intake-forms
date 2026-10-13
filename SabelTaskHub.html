@@ -19,6 +19,7 @@
 :root{
   --bg:#0F1117;--surface:#161B26;--surface2:#12161F;--raise:#1A2030;--line:#1E2433;--line2:#2A3145;
   --text:#F2F4F8;--body:#C9CFDA;--soft:#A7AFBE;--mute:#8B93A3;--faint:#5F6878;
+  --tyBuild:#2DD4BF;--tyMig:#C4B5FD;--tyBoth:#F472B6;--tyAudit:#FB923C;--tyConsult:#A3E635;
   --red:#E10600;--red2:#FF4D45;--redsoft:#FFB3AF;--green:#4ADE80;--greenfill:#16A34A;--amber:#FBBF24;--blue:#60A5FA;--violet:#A78BFA;
   --hl2:rgba(255,255,255,.12);--hl3:rgba(255,255,255,.14);--hl4:rgba(255,255,255,.22);--hl5:rgba(255,255,255,.3);
   --pill:rgba(22,27,38,.7);--ink:#0F1117;--onamber:#101828;
@@ -26,6 +27,7 @@
 html.light{
   --bg:#F4F5F7;--surface:#FFFFFF;--surface2:#F9FAFB;--raise:#F2F4F7;--line:#E4E7EC;--line2:#D0D5DD;
   --text:#101828;--body:#344054;--soft:#475467;--mute:#667085;--faint:#7A8699;
+  --tyBuild:#0F766E;--tyMig:#6D28D9;--tyBoth:#BE185D;--tyAudit:#C2410C;--tyConsult:#4D7C0F;
   --red2:#D92D20;--redsoft:#B42318;--green:#15803D;--amber:#B45309;--blue:#2563EB;--violet:#7C3AED;
   --hl2:rgba(16,24,40,.12);--hl3:rgba(16,24,40,.16);--hl4:rgba(16,24,40,.28);--hl5:rgba(16,24,40,.4);
   --pill:rgba(255,255,255,.8);--ink:#FFFFFF;
@@ -120,7 +122,16 @@ button.stat.hot.on{border-color:var(--red2);box-shadow:0 0 0 1px var(--red2) ins
 .rt b{display:block;font-size:15px;font-weight:600;color:var(--text);line-height:1.35}
 .row.isdone .rt b{color:var(--mute);text-decoration:line-through}
 .rm{display:flex;flex-wrap:wrap;gap:5px 10px;align-items:center;margin-top:3px;font-size:12.5px;color:var(--mute)}
-.rm .cl{font-weight:600;color:var(--body)}
+.rm .cl{font-weight:700;color:var(--body);font-size:14px}
+.cl.ty-build,.tykey .ty-build{color:var(--tyBuild)!important}.cl.ty-mig,.tykey .ty-mig{color:var(--tyMig)!important}
+.cl.ty-both,.tykey .ty-both{color:var(--tyBoth)!important}.cl.ty-audit,.tykey .ty-audit{color:var(--tyAudit)!important}
+.cl.ty-consult,.tykey .ty-consult{color:var(--tyConsult)!important}
+.c1 b.cl{font-size:14px}
+.tykey{display:flex;flex-wrap:wrap;gap:6px 16px;margin:-6px 22px 14px;font-size:12.5px;font-weight:600}
+.tykey span{display:inline-flex;align-items:center;gap:6px}
+.tykey i{width:9px;height:9px;border-radius:3px;background:currentColor}
+.fztop{margin-bottom:0;padding-bottom:0}
+.c3 .fzs{padding:0 2px}
 .own{background:var(--line);color:var(--body);border-radius:6px;padding:1px 7px;font-size:12px;font-weight:600}
 .tag{border-radius:6px;padding:1px 7px;font-size:12px;font-weight:600;background:var(--line);color:var(--body)}
 .tag.blue{background:rgba(96,165,250,.16);color:var(--blue)}
@@ -396,6 +407,23 @@ textarea.need{outline:2px solid var(--red2);outline-offset:2px;border-radius:6px
 .health summary::-webkit-details-marker{display:none}
 .health summary span{color:var(--amber);font-size:13px;font-family:'Source Sans 3',sans-serif}
 .hi{padding:12px 20px;border-top:1px solid var(--hl2);font-size:13.5px;color:var(--body)}
+.hih{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.hit{flex:1;min-width:200px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.hit b{color:var(--text)}
+.hia{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.hiby{font-size:12px;color:var(--mute)}
+.hid{margin-top:4px}
+.hif{margin-top:4px;color:var(--mute)}
+.hif b{color:var(--body)}
+.hiw{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
+.hiw a{color:var(--blue);font-size:13px}
+.hintro{padding:0 20px 12px;font-size:12.5px;color:var(--mute)}
+.hcl{padding:10px 20px 6px;border-top:1px solid var(--hl2);font-family:Archivo,sans-serif;font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);display:flex;gap:8px}
+.hcl span{color:var(--amber)}
+.hcl .lk{margin-left:auto;text-transform:none;letter-spacing:0;font-family:'Source Sans 3',sans-serif;font-weight:400}
+.hnr{border-top:1px solid var(--hl2)}
+.hnr>summary{padding:12px 20px;font-size:13px;color:var(--mute);font-family:'Source Sans 3',sans-serif;font-weight:600}
+.hdel{padding:10px 20px;border-top:1px solid var(--hl2);font-size:12.5px;color:var(--mute)}
 .hi b{color:var(--text)}
 .hi ul{margin:6px 0 0 18px;color:var(--soft);font-size:13px}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:60;background:var(--raise);border:1px solid var(--line2);border-radius:99px;padding:9px 18px;font-size:13.5px;color:var(--text);box-shadow:0 20px 40px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .15s ease}
@@ -499,6 +527,7 @@ if(/^#summary$/i.test(location.hash||'')){S.who=COORD;S.tab='summary';}
 {const ch=readChase();if(ch){S.who=COORD;S.tab='home';if(ch.batch)S.batch=ch.batch;else S.rem=ch;S.fromLoops=true;try{history.replaceState(null,'','#'+COORD.toLowerCase());}catch(e){}}}
 if(WHO.indexOf(S.who)<0)S.who='Everyone';
 
+let CTYPE={key:{},name:{}};
 let TASKS=[],OTHER=[],RAW=[],CLIENTS={},HEALTH=[],LOADED_AT=0,HOURS_AT=0,FIRST=true,LIVE=['busy','Loading'];
 /* Audit queue: taskId -> {owner?, client?, title, was, tracker, notion, staged, at}.
    Kept in this browser only. Nothing here writes to a tracker or to Notion; the
@@ -551,6 +580,9 @@ function mergeOv(a,b){
   /* Reminders: tasks made here and pushed to people. By id, newest edit wins, deletes are tombstones. */
   const rm={};[a&&a.reminders,b&&b.reminders].forEach(g=>Object.keys(g||{}).forEach(id=>{if(!rm[id]||(g[id].eAt||0)>(rm[id].eAt||0))rm[id]=g[id];}));
   if(Object.keys(rm).length)out.reminders=rm;
+  /* Data checks Nikki has set aside: id -> {st:'nr'|'del'|'', by, at}. Newest wins. */
+  const ck={};[a&&a.checks,b&&b.checks].forEach(g=>Object.keys(g||{}).forEach(id=>{if(!ck[id]||(g[id].at||0)>(ck[id].at||0))ck[id]=g[id];}));
+  if(Object.keys(ck).length)out.checks=ck;
   return out;
 }
 async function readRemoteOv(){
@@ -569,7 +601,7 @@ async function pullOv(){
   const before=JSON.stringify(OV),merged=mergeOv(OV,remote);
   OV=merged;saveLocalOv();
   const same=mergeOv(remote,remote);
-  if(JSON.stringify([merged.tasks,merged.focus,merged.reminders])!==JSON.stringify([same.tasks,same.focus,same.reminders]))pushOv();   // this browser held work the store had not seen
+  if(JSON.stringify([merged.tasks,merged.focus,merged.reminders,merged.checks])!==JSON.stringify([same.tasks,same.focus,same.reminders,same.checks]))pushOv();   // this browser held work the store had not seen
   return JSON.stringify(merged)!==before;
 }
 let PUSHQ=Promise.resolve();
@@ -708,6 +740,18 @@ function datesOf(t,trk,ws,n){
 /* ── build the model ────────────────────────────────────────────────────── */
 function activeStage(t){return (t.phases||[]).findIndex(p=>!((p.sub||[]).length>0&&p.sub.every(x=>x.s==='Complete')));}
 
+/* Data checks: one item per thing to fix, with a stable id so Nikki can mark it
+   not required or delete it (OV.checks) and it stays gone across reloads. */
+const notionUrl=id=>'https://www.notion.so/'+String(id||'').replace(/-/g,'');
+const words=s=>norm(s).replace(/[^a-z0-9 ]/g,' ').split(' ').filter(w=>w.length>2);
+/* Closest title by shared words, so a near-miss rename is named instead of guessed at. */
+function nearest(title,pool){
+  const a=words(title);if(!a.length)return null;
+  let best=null,bs=0;
+  pool.forEach(p=>{const b=words(p);if(!b.length)return;const sh=a.filter(w=>b.indexOf(w)>-1).length,sc=sh/(new Set(a.concat(b))).size;if(sc>bs){bs=sc;best=p;}});
+  return bs>=0.34?best:null;
+}
+const squashName=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
 async function loadAll(){
   setLive('busy','Syncing');
   let reg;
@@ -716,22 +760,28 @@ async function loadAll(){
     reg=await r.json();
   }catch(e){setLive('warn','Could not reach the tracker registry');if(FIRST)renderFail();return;}
   const active=reg.filter(t=>t.active&&t.key&&t.file);
-  const [hoursRes,loaded]=await Promise.all([
+  const [hoursRes,loaded,portalRes]=await Promise.all([
     fetchKey(HOURS_KEY),
-    Promise.all(active.map(async tr=>{const [trk,st]=await Promise.all([loadTracker(tr),fetchKey(tr.key)]);return {tr,trk,st};}))
+    Promise.all(active.map(async tr=>{const [trk,st]=await Promise.all([loadTracker(tr),fetchKey(tr.key)]);return {tr,trk,st};})),
+    fetchKey('client-portal-v1')
   ]);
+  /* Client type (Build, Migration, ...) from the Internal Ops master record, by tracker key and by name. */
+  const ty={key:{},name:{}};
+  (((portalRes&&portalRes.data)||{}).clients||[]).forEach(c=>{if(!c||!c.type)return;if(c.trackerKey)ty.key[c.trackerKey]=c.type;if(c.name)ty.name[squashName(c.name)]=c.type;});
+  if(Object.keys(ty.name).length)CTYPE=ty;
   const health=[],tasks=[],clients={},parkedTitle={};
   const hb=hoursRes.data||{};
   HOURS_AT=hb.savedAt||0;
   /* Notion rows by tracker key + title. The blob only carries OPEN Notion tasks. */
   const nIdx={},nUsed={},drift={};
   (hb.tasks||[]).forEach(n=>{(nIdx[n.project||'']=nIdx[n.project||'']||{})[norm(n.title)]=n;});
-  if(!hoursRes.reached||!hb.tasks)health.push({t:'Durations are missing',d:'The Notion estimates could not be read, so every task shows without a duration.'});
-  else if(Date.now()-HOURS_AT>36*3600*1000)health.push({t:'Durations may be stale',d:'Notion estimates were last pushed '+ago(HOURS_AT)+'. They refresh when the Sabel hours menu bar plugin runs.'});
+  if(!hoursRes.reached||!hb.tasks)health.push({id:'sys:hours-missing',t:'Durations are missing',d:'The Notion estimates could not be read, so every task shows without a duration.',fix:'Check the Sabel hours menu bar plugin is running on Nikki\'s Mac, then press Refresh here.'});
+  else if(Date.now()-HOURS_AT>36*3600*1000)health.push({id:'sys:hours-stale',t:'Durations may be stale',d:'Notion estimates were last pushed '+ago(HOURS_AT)+'.',fix:'Open the Sabel hours menu bar plugin and let it run (it pushes Notion to the hub), then press Refresh here.'});
+  /* Anything fixed in Notion only reaches the hub on the plugin's next push. */
 
   loaded.forEach(({tr,trk,st})=>{
     const c=clients[tr.key]={key:tr.key,name:tr.name,file:tr.file,url:BASE+tr.file,goLive:null,deep:trk.deep};
-    if(!st.reached){health.push({t:tr.name+': saved progress could not be read',d:'The tracker store did not answer for this client, so its tasks are left out.'});return;}
+    if(!st.reached){health.push({id:'sys:store:'+tr.key,client:tr.name,t:'Saved progress could not be read',d:'The tracker store did not answer for this client, so its tasks are left out.',fix:'Usually a blip: press Refresh. If it stays, the tracker key may not be on the webhook allowlist.',where:[{l:'Open tracker',u:c.url}]});return;}
     const saved=st.data;
     /* Legacy shape (Raiz): the whole plan lives in saved state as phases. */
     const legacy=Array.isArray(saved)?saved:(saved&&Array.isArray(saved.phases)?saved.phases:null);
@@ -753,11 +803,11 @@ async function loadAll(){
     let data=saved;
     if(trk.seed&&(!saved||rebuilt)){
       data={taskData:trk.seed,statuses:{},weekStarts:trk.weekStarts||{},goLive:trk.goLive||''};
-      if(rebuilt)health.push({t:tr.name+': tracker page and saved progress are on different builds',d:'The live tracker page (build '+trk.buildV+') ignores the saved progress (build '+saved.buildV+') and shows the plan as built. The hub shows the same thing, so recent status changes for this client may be missing.'});
+      if(rebuilt)health.push({id:'build:'+tr.key+':'+trk.buildV+':'+saved.buildV,client:tr.name,t:'Tracker page and saved progress are on different builds',d:'The live tracker page (build '+trk.buildV+') ignores the saved progress (build '+saved.buildV+') and shows the plan as built, so status changes saved before the rebuild are not showing, here or on the tracker.',fix:'Open the tracker, set the statuses again and save once; that writes the new build. Or ask Claude to carry the saved statuses onto the new build.',where:[{l:'Open tracker',u:c.url}]});
     }
     c.seeded=!!(trk.seed&&(!saved||rebuilt));c.buildV=saved?saved.buildV:undefined;
-    if(!trk.ok)health.push({t:tr.name+': tracker page could not be read',d:'Dates and pillar names for this client are unavailable; tasks still come from saved progress.'});
-    if(!data||!data.taskData){health.push({t:tr.name+': no plan found',d:'Nothing saved and no plan could be read from the tracker page.'});return;}
+    if(!trk.ok)health.push({id:'sys:page:'+tr.key,client:tr.name,t:'Tracker page could not be read',d:'Dates and pillar names for this client are unavailable; tasks still come from saved progress.',fix:'Check the tracker link opens. If the file was renamed, update trackers.json.',where:[{l:'Open tracker',u:c.url}]});
+    if(!data||!data.taskData){health.push({id:'sys:plan:'+tr.key,client:tr.name,t:'No plan found',d:'Nothing saved and no plan could be read from the tracker page.',fix:'Open the tracker and save it once, or mark this client inactive in trackers.json.',where:[{l:'Open tracker',u:c.url}]});return;}
     c.goLive=dOf(data.goLive||trk.goLive||'');
     const ws=Object.assign({},trk.weekStarts||{},data.weekStarts||{});
     const stt=data.statuses||{},cn=data.notes||{},cl=data.links||{};
@@ -829,18 +879,40 @@ async function loadAll(){
     other.push({id:'n:'+n.id,key:n.client?'name:'+n.client:'',clientAuto:n.client||'',title:n.title,owner:o,status:n.status||'Pending',est:n.est,start:dOf(n.start||n.end),end:dOf(n.end||n.start),late:dOf(n.end||n.start),
       src:/^call:/.test(n.project||'')?'Meeting action':'Notion task',ref:(n.project||'').replace(/^call:/,''),notion:n});
   });
-  Object.keys(drift).forEach(k=>health.push({t:clients[k].name+': '+drift[k].length+' task'+(drift[k].length>1?'s':'')+' done in the tracker but still open in Notion',
-    d:'The tracker shows these complete. The Notion rows need closing.',list:drift[k].map(n=>n.title+' ('+who(n.owner)+')')}));
-  Object.keys(notOn).forEach(k=>health.push({t:clients[k].name+': '+notOn[k].length+' Notion task'+(notOn[k].length>1?'s':'')+' not on the tracker',
-    d:'Shown in the list tagged "Notion only". Either an action from a client call, or a tracker task that was renamed or removed after Notion copied it. Rows that match a step inside a tracker task are shown on that step instead.',list:notOn[k].map(n=>n.title+' ('+who(n.owner)+')')}));
-  const noEst={};
-  tasks.forEach(t=>{if(!t.src&&t.status!=='Complete'&&isTeam(t.owner)&&!t.est)(noEst[t.key]=noEst[t.key]||[]).push(t);});
-  Object.keys(noEst).forEach(k=>health.push({t:clients[k].name+': '+noEst[k].length+' open task'+(noEst[k].length>1?'s':'')+' with no duration',
-    d:'No open Notion row has the same title, so there is no estimate to show. Usually the task was renamed in one place.',list:noEst[k].map(t=>t.title+' ('+t.owner+')')}));
+  const trkTitles={};tasks.forEach(t=>{if(!t.src)(trkTitles[t.key]=trkTitles[t.key]||[]).push(t.title);});
+  Object.keys(drift).forEach(k=>drift[k].forEach(n=>health.push({id:'drift:'+n.id,client:clients[k].name,kind:'Notion behind',t:n.title,
+    d:'Complete on the '+clients[k].name+' tracker, still open in Notion ('+who(n.owner)+').',
+    fix:'Set this Notion row to Done.',where:[{l:'Open Notion row',u:notionUrl(n.id)},{l:'Open tracker',u:clients[k].url}]})));
+  Object.keys(notOn).forEach(k=>notOn[k].forEach(n=>{
+    const near=nearest(n.title,trkTitles[k]||[]);
+    health.push({id:'noton:'+n.id,client:clients[k].name,kind:'Notion only',t:n.title,
+      d:'Open in Notion for '+who(n.owner)+' with no tracker task of exactly this title. It still shows in the list, tagged "Notion only".'+(near?' Closest tracker task: “'+near+'”.':''),
+      fix:(near?'If it is the same task, make the two titles match exactly (rename the Notion row or the tracker task). ':'If it belongs on the tracker, add it with exactly this title. ')+'If it is a call action that does not need a tracker line, press Not required.',
+      where:[{l:'Open Notion row',u:notionUrl(n.id)},{l:'Open tracker',u:clients[k].url}]});
+  }));
+  const nOpen={};(hb.tasks||[]).forEach(n=>{if(clients[n.project])(nOpen[n.project]=nOpen[n.project]||[]).push(n.title);});
+  /* Same title filed under a call (call:*) for this client: often the same task twice. */
+  const callDup={};(hb.tasks||[]).forEach(n=>{if(/^call:/.test(n.project||'')&&n.client)(callDup[norm(n.client)+'|'+norm(n.title)]=callDup[norm(n.client)+'|'+norm(n.title)]||[]).push(n);});
+  tasks.forEach(t=>{if(t.src||t.status==='Complete'||!isTeam(t.owner)||t.est)return;
+    const dup=callDup[norm(clients[t.key].name)+'|'+norm(t.title)]||[];
+    const dupTxt=dup.length?' There is also a copy of this task in Notion from a client call'+(dup[0].est?' with '+dup[0].est+'h on it':'')+'; it is probably the same piece of work, so close one and keep the estimate on the other.':'';
+    if(t.notion){
+      health.push({id:'noest:'+t.id,client:clients[t.key].name,kind:'No duration',t:t.title,
+        d:'Open tracker task for '+t.owner+(t.pillar?' in '+t.pillar:'')+'. The matching Notion row exists but its estimate is '+(t.notion.est===0?'0h':'empty')+(t.notion.status?' (Notion status: '+t.notion.status+')':'')+'.'+dupTxt,
+        fix:'Put the hours on the Notion row (Estimated hours), or press Not required if it needs none.',
+        where:[{l:'Open Notion row',u:notionUrl(t.notion.id)}].concat(dup.map(n=>({l:'Open call copy',u:notionUrl(n.id)}))).concat([{l:'Open tracker',u:clients[t.key].url}])});
+      return;
+    }
+    const near=nearest(t.title,nOpen[t.key]||[]);
+    health.push({id:'noest:'+t.id,client:clients[t.key].name,kind:'No duration',t:t.title,
+      d:'Open tracker task for '+t.owner+(t.pillar?' in '+t.pillar:'')+'. No open Notion row has exactly this title, so there is no estimate.'+(near?' Closest Notion row: “'+near+'”.':' No similar Notion row either.')+dupTxt,
+      fix:(dup.length?'Re-file the call copy under this client\'s tracker in Notion, or ':'')+(near?'Make the two titles match exactly.':'Add a Notion task with exactly this title and an estimate, or press Not required if it needs no hours.'),
+      where:dup.map(n=>({l:'Open call copy',u:notionUrl(n.id)})).concat([{l:'Open tracker',u:clients[t.key].url}])});
+  });
 
   RAW=tasks.concat(other);CLIENTS=clients;HEALTH=health;LOADED_AT=Date.now();FIRST=false;
   project();
-  setLive(health.some(h=>/could not|different builds|missing/.test(h.t))?'warn':'', 'Live · synced '+ago(LOADED_AT));
+  setLive(health.some(h=>/^(sys|build):/.test(h.id)&&!(((OV.checks||{})[h.id]||{}).st))?'warn':'', 'Live · synced '+ago(LOADED_AT));
   render();
 }
 
@@ -1000,6 +1072,20 @@ function narrowed(mine){
 }
 const dueIn=t=>t.end?Math.round((t.end.getTime()-today().getTime())/864e5):null;
 const isLate=t=>!isDone(t)&&dueIn(t)!==null&&dueIn(t)<0;
+/* Client type colour: one class per type, read from the master record. */
+const TYPES=[['Build','build'],['Migration','mig'],['Build + Migration','both'],['Audit','audit'],['Consultation only','consult']];
+function typeOf(t){
+  const k=t&&t.key||'';
+  if(CTYPE.key[k])return CTYPE.key[k];
+  const nm=CLIENTS[k]?CLIENTS[k].name:isNameKey(k)?k.slice(5):'';
+  return nm?CTYPE.name[squashName(nm)]||'':'';
+}
+const tyc=t=>{const x=TYPES.find(p=>p[0]===typeOf(t));return x?' ty-'+x[1]:'';};
+function typeKeyHTML(mine){
+  const seen={};mine.forEach(t=>{const y=typeOf(t);if(y)seen[y]=1;});
+  const ks=TYPES.filter(p=>seen[p[0]]);
+  return ks.length?'<div class="tykey">'+ks.map(p=>'<span class="ty-'+p[1]+'"><i></i>'+esc(p[0])+'</span>').join('')+'</div>':'';
+}
 const clientOf=t=>CLIENTS[t.key]?CLIENTS[t.key].name:isNameKey(t.key)?t.key.slice(5):'No client';
 /* Client names already set by hand, so the same spelling is offered again. */
 function manualNames(){const s={};Object.keys(OV.tasks).forEach(id=>{const c=OV.tasks[id].client;if(c&&c.name&&!c.key)s[c.name]=1;});return Object.keys(s).sort();}
@@ -1513,7 +1599,7 @@ function rowHTML(t){
   const dc=t.status==='In Progress'?'prog':t.status==='Blocked'?'block':t.status==='Parked'?'park':isDone(t)?'done':'';
   const glyph=t.status==='Blocked'?'!':t.status==='Parked'?'?':isDone(t)?'✓':'';
   const n=noteCount(t);
-  let meta='<span class="cl">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+(showOwner?'<span class="own">'+esc(t.owner)+'</span>':'')+progHTML(t)+tagsHTML(t);
+  let meta='<span class="cl'+tyc(t)+'">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+(showOwner?'<span class="own">'+esc(t.owner)+'</span>':'')+progHTML(t)+tagsHTML(t);
   if(t.parked&&t.parked.question)meta+='<span class="q">'+quote(t.parked.question)+'</span>';
   if(n)meta+='<span>'+n+' note'+(n===1?'':'s')+'</span>';
   meta+=runHTML(t)+(logged(t)?'<span>'+fMins(logged(t))+' logged</span>':'');
@@ -1528,7 +1614,7 @@ function rowHTML(t){
          :canF?'<button type="button" class="fzs'+(fz?' on':'')+'" data-act="focus" title="'+(fz?'In your Focus Zone. Click to remove.':'Add to your Focus Zone')+'" aria-pressed="'+fz+'">'+(fz?'&#9733;':'&#9734;')+'</button>':'')+
     '<span class="chev">&#9654;</span></div>';
   if(S.audit)h+=audHTML(t);
-  if(open)h+='<div class="det"><div>'+actionsHTML(t)+aboutHTML(t)+kvHTML(t)+timeHTML(t)+linksHTML(t)+'</div>'+
+  if(open&&!(S.mode==='board'&&!onDesk()))h+='<div class="det"><div>'+actionsHTML(t)+aboutHTML(t)+kvHTML(t)+timeHTML(t)+linksHTML(t)+'</div>'+
     '<div><div class="dl" style="margin-top:0">Notes</div>'+notesHTML(t)+'<div class="comp">'+draftTA()+composerBtns(t)+'</div>'+
     '<div class="hint">Notes here are internal. The client does not see them.</div></div></div>';
   return h+'</div>';
@@ -1559,9 +1645,9 @@ function cardHTML(t){
   const tg=t.status==='Blocked'?'<span class="tag red">Blocked</span>':(t.back&&!isDone(t)&&t.status!=='Parked'?'<span class="tag amber">'+esc(t.back.by)+' replied</span>':'');
   const nx=t.status==='Pending'?'Start':t.status==='In Progress'?'Done':t.status==='Blocked'?'Resume':isDone(t)?'Reopen':'';
   return '<div class="card'+(wn?' wn':isLate(t)?' late':'')+(S.open===t.id?' sel':'')+'" data-id="'+esc(t.id)+'" data-act="open">'+
-    '<div class="c1"><b>'+esc(clientOf(t))+'</b>'+dueHTML(t,true)+'</div><div class="ct">'+esc(t.title)+'</div>'+
+    '<div class="c1"><b class="cl'+tyc(t)+'">'+esc(clientOf(t))+'</b>'+dueHTML(t,true)+'</div><div class="ct">'+esc(t.title)+'</div>'+
     (t.parked&&t.parked.question?'<div class="cq">'+quote(t.parked.question)+'</div>':'')+
-    '<div class="c3">'+av(t.owner,true)+(fEst(t.est)?'<b>'+fEst(t.est)+'</b>':'')+progHTML(t)+(n?'<span>'+n+' note'+(n===1?'':'s')+'</span>':'')+runHTML(t)+tg+'<span class="sp"></span>'+
+    '<div class="c3">'+(isTeam(S.who)?'<button type="button" class="fzs'+(inFocus(t)?' on':'')+'" data-act="focus" title="'+(inFocus(t)?'In your Focus Zone. Click to remove.':'Add to your Focus Zone')+'" aria-pressed="'+inFocus(t)+'">'+(inFocus(t)?'&#9733;':'&#9734;')+'</button>':'')+av(t.owner,true)+(fEst(t.est)?'<b>'+fEst(t.est)+'</b>':'')+progHTML(t)+(n?'<span>'+n+' note'+(n===1?'':'s')+'</span>':'')+runHTML(t)+tg+'<span class="sp"></span>'+
     (t.status==='Parked'?'<span class="wait">Waiting on '+COORD+'</span>':(nx&&!(t.stages&&nx==='Done')?'<button type="button" class="nx" data-act="next">'+nx+'</button>':''))+'</div></div>';
 }
 function boardHTML(mine){
@@ -1574,7 +1660,7 @@ function boardHTML(mine){
   }).join('')+'</div>';
 }
 function drawerHTML(t){
-  return '<div class="scrim" data-act="close"></div><aside class="drawer" data-id="'+esc(t.id)+'"><div class="dh"><div class="t"><span>'+esc(clientOf(t))+(t.pillar?' · '+esc(t.pillar):'')+'</span><b>'+esc(t.title)+'</b></div>'+
+  return '<div class="scrim" data-act="close"></div><aside class="drawer" data-id="'+esc(t.id)+'"><div class="dh"><div class="t"><span><span class="cl'+tyc(t)+'">'+esc(clientOf(t))+'</span>'+(t.pillar?' · '+esc(t.pillar):'')+'</span><b>'+esc(t.title)+'</b></div>'+
     '<button type="button" class="x" data-act="close" aria-label="Close">×</button></div>'+
     '<div class="db"><div>'+actionsHTML(t)+'</div>'+
     (t.parked?'<div class="pc"><small>Parked with '+COORD+' · '+fStamp(t.parked.askedAt)+'</small>'+quote(t.parked.question)+'</div>':'')+
@@ -1590,7 +1676,7 @@ function deskHTML(mine){
   if(!parked.length)h+='<div class="blank"><b>Nothing parked.</b>When someone parks a task with you it appears here with their question.</div>';
   h+=parked.map(t=>{
     const p=t.parked||{},n=noteCount(t),open=!!S.deskOpen[t.id];
-    return '<div class="pk" data-id="'+esc(t.id)+'"><div class="pkt"><div><div class="pkl">'+av(p.by||t.owner,true)+'<span><b>'+esc(p.by||t.owner)+'</b> parked this · '+fStamp(p.askedAt)+' ·</span><span class="cl">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+'</div>'+
+    return '<div class="pk" data-id="'+esc(t.id)+'"><div class="pkt"><div><div class="pkl">'+av(p.by||t.owner,true)+'<span><b>'+esc(p.by||t.owner)+'</b> parked this · '+fStamp(p.askedAt)+' ·</span><span class="cl'+tyc(t)+'">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+'</div>'+
       '<div class="pkh">'+esc(t.title)+'</div><div class="pc">'+quote(p.question||'')+'</div></div>'+
       '<div class="pkr">'+dueHTML(t)+estHTML(t)+'<button type="button" class="lk" data-act="desk-toggle">'+n+' note'+(n===1?'':'s')+' · task detail</button></div></div>'+
       (open?'<div class="pkd"><div>'+(aboutHTML(t)||'<div class="none">No description on this task.</div>')+'<div class="hint">Owner '+esc(t.owner)+(t.end?' · due '+DOW[t.end.getDay()]+' '+fD(t.end):'')+'</div>'+linksHTML(t)+'</div><div>'+notesHTML(t)+'</div></div>':'')+
@@ -1626,6 +1712,8 @@ function focusZoneHTML(mine){
     (rows.length?'<button type="button" class="lk" data-act="fz-clear">Clear</button>':'')+'</div>'+
     (rows.length?rows.map(rowHTML).join(''):'<div class="fzempty">Nothing here yet. Drag a task up from below, or press ☆ on it.</div>')+'</div>';
 }
+/* The Focus Zone sits on top of List and Board as well as Home, so it never drops out of sight. */
+function zoneTop(mine){return isTeam(S.who)?'<div class="list fztop">'+focusZoneHTML(byClient(mine))+'</div>':'';}
 function homeHTML(mine){
   const canF=isTeam(S.who);
   const zone=canF?focusZoneHTML(mine):'';
@@ -1710,7 +1798,7 @@ function coordHomeHTML(all){
   const from=today().getTime();
   let h='<div class="desk">';
   h+='<div class="secc" style="border-color:'+(parked.length?'rgba(251,191,36,.45)':'var(--line2)')+'"><div class="sech"><i style="background:var(--amber)"></i><b style="color:var(--amber)">Waiting on you</b><span>Parked with you, oldest first</span><small>'+parked.length+' task'+(parked.length===1?'':'s')+'</small></div>'+
-    (parked.length?parked.map(t=>{const p=t.parked||{};return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="tab" data-t="desk"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl">'+esc(clientOf(t))+'</span><span class="own">'+esc(p.by||t.owner)+'</span><span class="q">'+quote(p.question||'')+'</span></span></button>'+
+    (parked.length?parked.map(t=>{const p=t.parked||{};return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="tab" data-t="desk"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl'+tyc(t)+'">'+esc(clientOf(t))+'</span><span class="own">'+esc(p.by||t.owner)+'</span><span class="q">'+quote(p.question||'')+'</span></span></button>'+
       '<span class="srw">Parked '+fStamp(p.askedAt)+'</span>'+dueHTML(t)+'<button type="button" class="pb amber sm" data-act="tab" data-t="desk">Answer</button></div>';}).join('')
      :'<div class="sempty">Nothing is parked with you.</div>')+'</div>';
   h+=batchHTML();
@@ -1741,7 +1829,7 @@ function sumRowHTML(t,kind){
   let when='';
   if(kind==='prog')when=t.sAt?'Started '+fStamp(t.sAt)+(t.sBy?' by '+esc(t.sBy):''):'In progress on the tracker';
   else when='Done '+(dOf(t.doneAt)?fD(dOf(t.doneAt)):'')+(t.sBy?' by '+esc(t.sBy):' · on the tracker');
-  return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="goto"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+
+  return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="goto"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl'+tyc(t)+'">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+
     '<span class="own">'+esc(t.owner)+'</span>'+progHTML(t)+runHTML(t)+(t.src?'<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>':'')+(noteCount(t)?'<span>'+noteCount(t)+' note'+(noteCount(t)===1?'':'s')+'</span>':'')+'</span></button>'+
     '<span class="srw">'+when+'</span>'+(kind==='prog'?dueHTML(t):'')+
     '<span class="srtm'+(over?' over':'')+'" title="Time logged against the estimate"><b>'+(sp?fMins(sp):'–')+'</b>'+(e?' / '+fEst(e):'')+'</span></div>';
@@ -1785,14 +1873,39 @@ function footHTML(){
     '<span>Tasks from the live client trackers · durations and call actions from Notion, pushed '+ago(HOURS_AT)+'</span><span class="sp"></span>'+
     '<button type="button" class="fb'+(S.audit?' on':'')+'" data-act="audit">'+(S.audit?'Audit on':'Audit'+(Object.keys(AUD).length?' · '+Object.keys(AUD).length:''))+'</button>'+
     '<button type="button" class="fb" data-act="refresh">Refresh</button></div>'+
-    (HEALTH.length?'<details class="health"'+(S.healthOpen?' open':'')+'><summary>Data checks<span>'+HEALTH.length+' thing'+(HEALTH.length>1?'s':'')+' to look at</span></summary>'+
-      HEALTH.map(x=>'<div class="hi"><b>'+esc(x.t)+'</b><br>'+esc(x.d)+(x.list?'<ul>'+x.list.map(i=>'<li>'+esc(i)+'</li>').join('')+'</ul>':'')+'</div>').join('')+'</details>':'');
+    checksHTML();
+}
+/* ── data checks: what is wrong, where to fix it, and Nikki's "not required" / delete ── */
+const ckSt=id=>((OV.checks||{})[id]||{}).st||'';
+function ckItemHTML(x,set){
+  const c=(OV.checks||{})[x.id]||{};
+  return '<div class="hi" data-ck="'+esc(x.id)+'"><div class="hih"><div class="hit">'+(x.kind?'<span class="tag">'+esc(x.kind)+'</span>':'')+'<b>'+esc(x.t)+'</b></div>'+
+    '<span class="hia">'+(set?'<span class="hiby">Not required'+(c.by?' · '+esc(c.by):'')+(c.at?' · '+fStamp(c.at):'')+'</span><button type="button" class="lk" data-act="ck-undo">Put back</button>'
+      :'<button type="button" class="pb sm" data-act="ck-nr">Not required</button><button type="button" class="pb red sm" data-act="ck-del">Delete</button>')+'</span></div>'+
+    (set?'':'<div class="hid">'+esc(x.d)+'</div>'+(x.fix?'<div class="hif"><b>To fix:</b> '+esc(x.fix)+'</div>':'')+
+      (x.where&&x.where.length?'<div class="hiw">'+x.where.filter(w=>/^https:\/\//.test(w.u||'')).map(w=>'<a href="'+esc(w.u)+'" target="_blank" rel="noopener">'+esc(w.l)+' &rarr;</a>').join('')+'</div>':''))+'</div>';
+}
+function checksHTML(){
+  if(!HEALTH.length)return '';
+  const live=HEALTH.filter(x=>!ckSt(x.id)),nr=HEALTH.filter(x=>ckSt(x.id)==='nr'),del=HEALTH.filter(x=>ckSt(x.id)==='del').length;
+  const byC={};live.forEach(x=>{const k=x.client||'General';(byC[k]=byC[k]||[]).push(x);});
+  const ks=Object.keys(byC).sort((a,b)=>a==='General'?-1:b==='General'?1:a.localeCompare(b));
+  return '<details class="health"'+(S.healthOpen?' open':'')+'><summary>Data checks<span>'+(live.length?live.length+' thing'+(live.length>1?'s':'')+' to look at':'All clear')+(nr.length?' · '+nr.length+' not required':'')+'</span></summary>'+
+    '<div class="hintro">Not required folds a check into the list at the bottom; Delete hides it for good. Both are shared with the team. Fixed something in Notion and it is still here? Notion changes only reach the hub when the hours plugin next pushes (last push '+ago(HOURS_AT)+'); press Refresh after that. Tracker fixes show on Refresh.</div>'+
+    ks.map(k=>'<div class="hcl" data-cl="'+esc(k)+'">'+esc(k)+'<span>'+byC[k].length+'</span>'+(byC[k].length>1?'<button type="button" class="lk" data-act="ck-nr-all">Not required: all '+byC[k].length+'</button>':'')+'</div>'+byC[k].map(x=>ckItemHTML(x,false)).join('')).join('')+
+    (nr.length?'<details class="hnr"'+(S.nrOpen?' open':'')+'><summary>Not required · '+nr.length+'</summary>'+nr.map(x=>ckItemHTML(x,true)).join('')+'</details>':'')+
+    (del?'<div class="hdel">'+del+' deleted · <button type="button" class="lk" data-act="ck-restore">Bring deleted back</button></div>':'')+'</details>';
+}
+function setCheck(id,st){
+  OV.checks=OV.checks||{};OV.checks[id]={st:st,by:author(),at:Date.now()};
+  commit();
 }
 function render(){
   const app=document.getElementById('app');
   /* Keep whatever is being typed: the page re-renders on every poll. */
   const ae=document.activeElement,ta=ae&&ae.getAttribute&&ae.getAttribute('data-ta'),pos=ta?[ae.selectionStart,ae.selectionEnd]:null;
   const hd=app.querySelector('.health');if(hd)S.healthOpen=hd.open;
+  const hn=app.querySelector('.hnr');if(hn)S.nrOpen=hn.open;
   const y=window.scrollY,db=app.querySelector('.db'),dby=db?db.scrollTop:0;
   if(S.open&&!findTask(S.open))S.open=null;
   let h=headerHTML();
@@ -1800,9 +1913,9 @@ function render(){
     h+='<div class="trow"><div><div class="eye">Loading the trackers</div><h2>One moment</h2></div></div><div class="list"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>';
   }else{
     const mine=scope();
-    h+=bannerHTML()+titleHTML(mine)+(S.audit&&!onDesk()&&S.mode==='list'?auditBarHTML():'');
+    h+=bannerHTML()+titleHTML(mine)+typeKeyHTML(mine)+(S.audit&&!onDesk()&&S.mode==='list'?auditBarHTML():'');
     h+=onDesk()?(S.tab==='summary'?summaryHTML(mine):S.tab==='home'?coordHomeHTML(mine):deskHTML(mine))
-      :S.mode==='board'?boardHTML(narrowed(mine)):S.mode==='home'?homeHTML(byClient(mine)):listHTML(narrowed(mine));
+      :S.mode==='board'?zoneTop(mine)+boardHTML(narrowed(mine)):S.mode==='home'?homeHTML(byClient(mine)):zoneTop(mine)+listHTML(narrowed(mine));
     if(!onDesk()&&S.mode==='board'&&S.open)h+=drawerHTML(findTask(S.open));
   }
   app.innerHTML=h+footHTML();
@@ -1875,6 +1988,12 @@ document.addEventListener('click',e=>{
     case 'b-del':S.batch.splice(+a.closest('[data-bi]').getAttribute('data-bi'),1);if(!S.batch.length)S.batch=null;render();break;
     case 'b-clear':S.batch=null;S.batchErr='';S.fromLoops=false;render();break;
     case 'b-send':sendBatch();break;
+    case 'ck-nr':setCheck(a.closest('[data-ck]').getAttribute('data-ck'),'nr');toast('Moved to Not required');break;
+    case 'ck-del':setCheck(a.closest('[data-ck]').getAttribute('data-ck'),'del');toast('Check deleted');break;
+    case 'ck-nr-all':{const cl=a.closest('[data-cl]').getAttribute('data-cl'),now=Date.now();OV.checks=OV.checks||{};let n=0;
+      HEALTH.forEach(x=>{if((x.client||'General')===cl&&!ckSt(x.id)){OV.checks[x.id]={st:'nr',by:author(),at:now};n++;}});commit();toast(n+' check'+(n===1?'':'s')+' for '+cl+' moved to Not required');break;}
+    case 'ck-undo':setCheck(a.closest('[data-ck]').getAttribute('data-ck'),'');break;
+    case 'ck-restore':HEALTH.forEach(x=>{if(ckSt(x.id)==='del')OV.checks[x.id]={st:'',by:author(),at:Date.now()};});commit();break;
     case 'r-clear':S.rem={title:'',note:'',due:'',to:[]};S.fromLoops=false;render();break;
     case 'flag':flagBlocked(id);break;
     case 'step':e.stopPropagation();tickStep(id,a.getAttribute('data-step'));break;
