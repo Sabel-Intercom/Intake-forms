@@ -10,6 +10,8 @@
 :root{--k0F1117:#0F1117;--k12151D:#12151D;--k12151E:#12151E;--k161B26:#161B26;--k1E2433:#1E2433;--k2A3145:#2A3145;--k2A3547:#2A3547;--k242A38:#242A38;--kE2E8F0:#E2E8F0;--kCBD5E1:#CBD5E1;--k94A3B8:#A3ACBC;--k64748B:#7F8A9C;--k475569:#6B7689;--k334155:#334155;--k4ADE80:#4ADE80;--kF87171:#F87171;--kFBBF24:#FBBF24;--k60A5FA:#60A5FA;--kFB923C:#FB923C;--kC084FC:#C084FC;--kA78BFA:#A78BFA;--k2DD4BF:#2DD4BF;--k38BDF8:#38BDF8;--k34D399:#34D399;--kF2F4F8:#F2F4F8;--kC9CFDA:#C9CFDA;--kA7AFBE:#A7AFBE;--k8B93A3:#8B93A3;--k5F6878:#5F6878;--k12161F:#12161F;--k1A2030:#1A2030;--kFF4D45:#FF4D45;--kFFB3AF:#FFB3AF;}
 html.light{--k0F1117:#F4F5F7;--k12151D:#FFFFFF;--k12151E:#FFFFFF;--k161B26:#FFFFFF;--k1E2433:#E4E7EC;--k2A3145:#D0D5DD;--k2A3547:#D0D5DD;--k242A38:#EEF0F4;--kE2E8F0:#101828;--kCBD5E1:#344054;--k94A3B8:#475467;--k64748B:#5D6B7E;--k475569:#6E7A8E;--k334155:#B9C0CC;--k4ADE80:#15803D;--kF87171:#DC2626;--kFBBF24:#B45309;--k60A5FA:#2563EB;--kFB923C:#C2410C;--kC084FC:#9333EA;--kA78BFA:#7C3AED;--k2DD4BF:#0F766E;--k38BDF8:#0284C7;--k34D399:#047857;--kF2F4F8:#101828;--kC9CFDA:#344054;--kA7AFBE:#475467;--k8B93A3:#667085;--k5F6878:#7A8699;--k12161F:#F9FAFB;--k1A2030:#F2F4F7;--kFF4D45:#D92D20;--kFFB3AF:#B42318;}
 
+.gl-ed{display:inline-flex;align-items:center;gap:4px;margin-left:8px;padding:3px 9px;border:1px solid var(--k2A3145);border-radius:999px;background:transparent;color:var(--k94A3B8);font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap}.gl-ed:hover{color:var(--kE2E8F0);border-color:var(--k475569)}.gl-ed i{font-size:12px}
+
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--k0F1117);color:var(--kE2E8F0);min-height:100vh}
 .pw{display:grid;grid-template-columns:176px 1fr;min-height:100vh}
@@ -4252,8 +4254,8 @@ function homeView(){
   let h=`<div class="sd"><section class="sd-hero"><div class="l sd-rise"><div class="sd-kick">Sabel × ${esc(CLIENT_NAME)} · Intercom migration</div>
       <h1 class="sd-h1">Your Intercom migration,<br><span>at a glance.</span></h1><p class="sd-sub">${esc(subline)}</p></div>
     <div class="rgt sd-rise" style="animation-delay:.12s">`;
-  if(g){h+=`<div class="sd-card" title="${esc(GO_LIVE_NOTE||'')}"><div class="k">Go-live</div><div class="big">${g.d>0?g.d+'<small>days</small>':(g.d===0?'Today':'Live')}</div><div class="t">${esc(g.long)}</div>${GO_LIVE_NOTE?`<div class="d">${esc(GO_LIVE_NOTE)}.</div>`:''}</div>`;}
-  else h+=`<div class="sd-card"><div class="k">Go-live</div><div class="h">Date to be set</div><div class="d">We will add it once agreed.</div></div>`;
+  if(g){h+=`<div class="sd-card" title="${esc(GO_LIVE_NOTE||'')}"><div class="k">Go-live</div><div class="big">${g.d>0?g.d+'<small>days</small>':(g.d===0?'Today':'Live')}</div><div class="t">${esc(g.long)}</div>${GO_LIVE_NOTE?`<div class="d">${esc(GO_LIVE_NOTE)}.</div>`:''}${typeof glEditBtn==='function'?`<div style="margin-top:8px">${glEditBtn()}</div>`:''}</div>`;}
+  else h+=`<div class="sd-card"><div class="k">Go-live</div><div class="h">Date to be set</div><div class="d">We will add it once agreed.</div>${typeof glEditBtn==='function'?`<div style="margin-top:8px">${glEditBtn()}</div>`:''}</div>`;
   h+=`<div class="sd-plain sd-ring"><div class="w"><svg viewBox="0 0 110 110" width="110" height="110" aria-hidden="true"><circle cx="55" cy="55" r="48" fill="none" stroke="var(--k1E2433)" stroke-width="8"></circle><circle class="p" cx="55" cy="55" r="48" fill="none" stroke="#E10600" stroke-width="8" stroke-linecap="round" stroke-dasharray="302" stroke-dashoffset="${ringOff}" transform="rotate(-90 55 55)" style="--to:${ringOff}"></circle></svg><div><b>${pct}%</b><small>complete</small></div></div><div class="s">${doneN} of ${gs.total} tasks done</div></div>
     </div></section>`;
   // four header cards
@@ -5587,21 +5589,37 @@ function toggleGoLiveEdit(e){
 }
 function cancelGoLiveEdit(e){ if(e)e.stopPropagation(); editingGoLive=false; renderMain(); }
 function setGoLive(val){
-  const old=goLiveDate; goLiveDate=val; editingGoLive=false;
-  if(old&&val){
-    const o=new Date(old+'T00:00:00'), n=new Date(val+'T00:00:00');
-    if(!isNaN(o)&&!isNaN(n)){
-      const dw=Math.round((n-o)/(7*86400000));
-      if(dw!==0){
-        P.forEach(ph=>['sabel','client'].forEach(g=>T[ph.id][g].forEach(t=>{
-          if(t.s!=='Complete'&&t.week&&t.week>=1) t.week=Math.max(1,t.week+dw);
-        })));
-        showToast('Go-live moved · unfinished tasks shifted '+Math.abs(dw)+' week'+(Math.abs(dw)>1?'s':'')+(dw>0?' later':' earlier'));
-      }
-    }
-  }
+  // 15 Oct 2026: moving go-live moves every unfinished task with it: weeks AND week ranges by whole
+  // weeks, exact dates (due/dueEnd) by the same number of days, and the unfinished stages of a
+  // phased card. Completed and parked work stays where it is.
+  const old=goLiveDate;editingGoLive=false;
+  if(!val||val===old){render();return;}
+  goLiveDate=val;
+  const o=old?new Date(old+'T00:00:00'):null,n=new Date(val+'T00:00:00');
+  if(o&&!isNaN(o)&&!isNaN(n)){
+    const dd=Math.round((n-o)/86400000),dw=Math.round(dd/7);let moved=0;
+    const shDate=iso=>{const d=new Date(iso+'T00:00:00');if(isNaN(d))return iso;d.setDate(d.getDate()+dd);return isoDate(d);};
+    const sh=x=>{let hit=false;
+      if(x.due&&dd){x.due=shDate(x.due);if(x.dueEnd)x.dueEnd=shDate(x.dueEnd);hit=true;}
+      if(x.week&&x.week>=1&&dw){const len=x.wkEnd&&x.wkEnd>x.week?x.wkEnd-x.week:0;x.week=Math.max(1,x.week+dw);if(len)x.wkEnd=x.week+len;hit=true;}
+      if(x.due&&typeof dueSyncWeeks==='function')dueSyncWeeks(x);
+      return hit;};
+    P.forEach(ph=>['sabel','client'].forEach(g=>(T[ph.id][g]||[]).forEach(t=>{
+      if(t.s==='Complete'||t.parked)return;
+      if(sh(t))moved++;
+      (t.phases||[]).forEach(p=>{if(!(typeof phaseDone==='function'&&phaseDone(p)))sh(p);});
+    })));
+    if(moved)showToast('Go-live moved '+Math.abs(dd)+' day'+(Math.abs(dd)===1?'':'s')+(dd>0?' later':' earlier')+' · '+moved+' unfinished task'+(moved===1?'':'s')+' moved with it');
+    else showToast('Go-live moved');
+  } else showToast('Go-live set');
   render(); scheduleAutoSave();
 }
+// Change the go-live date (editing tools on): Home go-live card and the Go-live checklist page.
+function glMenu(e){if(typeof pvPop!=='function')return;
+  pvPop(e,`<div class="pp-date"><label>New go-live date</label><input type="date" id="gl-new" value="${goLiveDate||''}">
+    <div style="font-size:11px;color:var(--k94A3B8);line-height:1.4;margin:6px 0 8px;max-width:230px">Every unfinished task and stage moves by the same amount. Completed work stays put.</div>
+    <button onclick="const v=document.getElementById('gl-new').value;pvPopClose();if(v)setGoLive(v)">Move go-live</button></div>`);}
+function glEditBtn(){return (typeof pvTools==='function'&&pvTools())?`<button class="gl-ed" onclick="event.stopPropagation();glMenu(event)" title="Change the go-live date"><i class="ti ti-pencil"></i>Change date</button>`:'';}
 
 // ── Card ──────────────────────────────────────────────────────────────────────
 // ── Schedule feed (Notion / Reclaim) ─────────────────────────────────────────
@@ -7117,6 +7135,7 @@ function renderMain(){
     html=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
         <i class="ti ti-rocket" style="font-size:16px;color:#E10600"></i>
         <span style="font-size:18px;font-weight:600;color:var(--kE2E8F0)">Go-live checklist</span>
+        ${goLiveDate?`<span style="font-size:12px;color:var(--k94A3B8);margin-left:6px">${esc(typeof hnFmt==='function'?hnFmt(new Date(goLiveDate+'T00:00:00')):goLiveDate)}</span>`:''}${glEditBtn()}
       </div>
       <div style="font-size:11px;color:var(--k475569);margin-bottom:1.25rem">Everything that must clear before launch, and the run sheet for the day itself</div>
       ${rp||`<div style="background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:10px;padding:20px;font-size:12px;color:var(--k475569)">${goLiveDate?'Nothing is flagged as a go-live blocker or cutover action yet. Flag tasks from the Go-live control on any expanded card.':'Set a go-live date to build the runway.'}</div>`}`;
