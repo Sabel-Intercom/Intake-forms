@@ -1725,7 +1725,7 @@ const GO_LIVE='2026-11-23';  // [CLIENT] go-live date YYYY-MM-DD, or '' to hide 
 const GO_LIVE_NOTE="Optimum cutover. Ocean cuts over first, on Fri 6 Nov";  // [CLIENT] one-line note
 const ALL_STATUSES=['Complete','In Progress','Pending','Blocked','Dependency'];
 const SABEL_TEAM=['Chris','Richard','Greg'];
-const BUILD_V=202610151051;  // set automatically by the build script from the build timestamp; do not edit
+const BUILD_V=202610151117;  // set automatically by the build script from the build timestamp; do not edit
 // INTERNAL build flag. false in the client tracker (the deployed, publicly
 // reachable file); the build flips it to true only in [ClientSlug]Tracker_internal.html,
 // which is also the only file that carries hours. The client build ships no hrs
@@ -3569,7 +3569,7 @@ function decLine(x,key){if(!x)return '';const d=x.decision;
   return '';}
 // ── The box ──
 let decKey=null;
-function decOpen(key,auto){const x0=decObj(key);const it=decItem(key)||{obj:x0,title:x0&&x0.t,parent:'',owner:x0&&x0.o};const x=it.obj;if(!x)return;decKey=key;
+function decOpen(key,auto){const x0=decObj(key);const _pk=String(key).split(':'),_pt=_pk.length>1?resolveTask(_pk[0]):null;const it=decItem(key)||{obj:x0,title:x0&&x0.t,parent:_pt?_pt.t:'',owner:x0&&x0.o};const x=it.obj;if(!x)return;decKey=key;
   const d=x.decision||{};const appr=/^(approve|sign)/i.test(String(x.t||''));
   const def=d.v||(appr?(/^sign/i.test(x.t)?'Signed off':'Approved'):'');
   const by=d.by||decWho(it.owner),at=d.at||isoDate(new Date());
@@ -4476,7 +4476,7 @@ function qStaged(t,cid){
   syncPhased(t);
   const done=t.s==='Complete',all=sdStages(t),ai=activePhaseIdx(t),n=all.length,cu=ai<0?null:all[ai];
   const oi=phaseOpen[cid]!==undefined&&t.phases[phaseOpen[cid]]?phaseOpen[cid]:ai;
-  const openSet=qStSet(cid,oi),allOpen=all.every(st=>openSet.has(st.i));
+  const openSet=editCards.has(cid)?new Set(all.map(x=>x.i)):qStSet(cid,oi),allOpen=all.every(st=>openSet.has(st.i));
   const nextC=all.find(x=>x.i>ai&&ai>=0&&!x.done&&x.c.clientAction);
   const desc=sdDesc(t),cnt=(t.log||[]).length,sab=qSide(t)==='sabel';
   const stages=all.map(st=>{const i=st.i,shown=openSet.has(i),act=i===ai,last=i===n-1;
@@ -4484,7 +4484,7 @@ function qStaged(t,cid){
     const when=st.done?sdSubLabel(st,all,ai):(act?'Now'+(sdDue(st.p)?' · due '+sdDue(st.p):''):(st.p.week?'around '+sdDue(st.p):sdLow(sdSubLabel(st,all,ai))));
     let body;
     if(shown){const txt=st.c.clientAction?sdClientText(t,st):(act?sdNowText(t,st):(st.c.nowText||st.p.tip||''));
-      const items=(st.p.sub||[]).map((x,si)=>{const sd=x.s==='Complete',sp=x.s==='In Progress';return `<div class="qi${sp?' p':''}"><button class="qic" onclick="togglePhaseSub(event,'${cid}',${i},${si})" title="${stepTip(x.s)}"><i class="ti ti-${stepIcon(x.s)}"></i></button><span class="qit${sd?' d':''}">${esc(x.t)}</span>${x.tip?`<i class="ti ti-info-circle qii" onmouseenter="showPhaseTip(event,'${cid}',${i},${si})" onmousemove="moveTip(event)" onmouseleave="hideTip()"></i>`:''}</div>${typeof decLine==='function'?`<div class="qidc">${decLine(x,cid+':p:'+i+':'+si)}</div>`:''}`;}).join('');
+      const items=(st.p.sub||[]).map((x,si)=>{const sd=x.s==='Complete',sp=x.s==='In Progress';return `<div class="qi${sp?' p':''}"><button class="qic" onclick="togglePhaseSub(event,'${cid}',${i},${si})" title="${stepTip(x.s)}"><i class="ti ti-${stepIcon(x.s)}"></i></button><span class="qit${sd?' d':''}">${esc(x.t)}</span>${x.tip?`<i class="ti ti-info-circle qii" onmouseenter="showPhaseTip(event,'${cid}',${i},${si})" onmousemove="moveTip(event)" onmouseleave="hideTip()"></i>`:''}</div>${typeof decLine==='function'?`<div class="qidc">${decLine(x,cid+':p:'+i+':'+si)}${editCards.has(cid)&&typeof decOpen==='function'&&!(x.decision&&x.decision.v)?`<button class="dc-add" style="margin-top:0" onclick="event.stopPropagation();decOpen('${cid}:p:${i}:${si}')" title="${tip('recordDecision')}"><i class="ti ti-gavel"></i>Record a decision</button>`:''}</div>`:''}`;}).join('');
       body=`<div class="qsl"><span class="l b">${esc(qStageLabel(t,st))}</span><span class="w">${esc(when)}</span></div>${txt?`<div class="qss">${esc(txt)}</div>`:''}${items?`<div class="qsteps">${items}</div>`:''}${st.p.note?`<div class="stage-note">${esc(st.p.note)}</div>`:''}`;}
     else body=`<div class="qsl"><span class="l">${esc(qStageLabel(t,st))}</span>${nextC&&nextC.i===i?'<span class="y">'+esc(CLIENT_LABEL)+'\'s turn next</span>':''}<span class="${act?'w':'m'}">${esc(when)}</span></div>`;
     return `<div class="qsn"><button class="${cls}" onclick="qStage(event,'${cid}',${i})" title="${esc(st.p.l)}">${st.done?'<i class="ti ti-check"></i>':i+1}</button>${last?'':'<span class="ln"></span>'}</div><div class="qsb${last?' last':''}">${body}</div>`;}).join('');
