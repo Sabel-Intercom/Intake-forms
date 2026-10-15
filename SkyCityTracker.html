@@ -1413,7 +1413,8 @@ html.light .ptc-dk{color:#15803D}
 .ptc-dv .m{margin-top:6px;font-size:12px;color:var(--k8B93A3,#8B93A3)}
 .ptc-dv .m a{color:#5b9cf6;text-decoration:none}
 .ptc-dv .m button{background:none;border:0;padding:0;font:inherit;color:var(--k8B93A3,#8B93A3);text-decoration:underline;cursor:pointer}
-.ptc-rec{flex:0 0 auto;background:none;border:0;padding:2px 0 0;font:inherit;font-size:11px;color:#FACC15;cursor:pointer;white-space:nowrap}
+.ptc-rec{flex:0 0 auto;display:inline-flex;align-items:center;gap:4px;background:none;border:0;padding:2px 0 0;font:inherit;font-size:11px;color:#FACC15;cursor:pointer;white-space:nowrap}
+.ptc-rec i{font-size:12px}.ptc-rec:hover{text-decoration:underline}
 html.light .ptc-rec{color:#B45309}
 .ptc-f{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 16px 10px;border-top:1px solid var(--k1E2433,#1E2433)}
 .ptc-f button,.ptc-f a{display:inline-flex;align-items:center;gap:4px;background:none;border:0;padding:2px 4px;font:inherit;font-size:11px;color:var(--k64748B,#64748B);cursor:pointer;text-decoration:none}
@@ -4963,7 +4964,13 @@ function qStaged(t,cid){
   const open=items.filter(o=>o.x.s!=='Complete'),done=items.filter(o=>o.x.s==='Complete');
   const key=si=>cid+':p:'+vi+':'+si;
   const brief=pcBrief(t,vp,vown);
-  const openH=open.map(({x,si})=>`<div class="ptc-i"><button class="ptc-c${x.s==='In Progress'?' p':''}" onclick="pcTick(event,'${cid}',${vi},${si})" title="${stepTip(x.s)}"></button><span class="ptc-it"${x.tip?` title="${esc(x.tip)}"`:''}>${esc(x.t)}</span></div>`).join('');
+  // Decision items (title rule or the Edit tick box) are marked while open too, so the decision
+  // can be recorded before the item is ticked (Nikki, 15 Oct 2026).
+  const decBits=(x,k)=>{const d=x.decision,has=d&&d.v,isO=pcDec.has(k);
+    if(has)return {link:`<div><button class="ptc-dk" onclick="pcDecTog(event,'${k}')"><span class="ptc-chev${isO?' o':''}">&#9654;</span>Decision${d.by||d.at?' · '+[d.by?esc(d.by):'',decDate(d.at)].filter(Boolean).join(', '):''}</button></div>`
+      +(isO?`<div class="ptc-dv">${esc(d.v)}<div class="m">${[d.by?esc(d.by):'',decDate(d.at)].filter(Boolean).join(', ')}${d.src||d.srcLabel?' · '+decSrc(d):''} · <button onclick="event.stopPropagation();decOpen('${k}')">edit</button></div></div>`:''),rec:''};
+    return {link:'',rec:typeof decIsTask==='function'&&decIsTask(x)?`<button class="ptc-rec" onclick="event.stopPropagation();decOpen('${k}')" title="${typeof tip==='function'?tip('decisionMissing'):'Write down what was decided'}"><i class="ti ti-gavel"></i>Record decision</button>`:''};};
+  const openH=open.map(({x,si})=>{const b=decBits(x,key(si));return `<div class="ptc-i"><button class="ptc-c${x.s==='In Progress'?' p':''}" onclick="pcTick(event,'${cid}',${vi},${si})" title="${stepTip(x.s)}"></button><div style="flex:1;min-width:0"><span class="ptc-it"${x.tip?` title="${esc(x.tip)}"`:''}>${esc(x.t)}</span>${b.link}</div>${b.rec}</div>`;}).join('');
   const nextOwn=vi+1<n?stOwner(t,t.phases[vi+1]):'';
   const okMsg=vp.doneMsg||(vi+1<n?(nextOwn==='client'?'Done. Over to '+pcYou()+' for the next stage.':'All in, thank you. Over to Sabel.'):'Done. This was the last stage.');
   const rec=done.filter(o=>o.x.decision&&o.x.decision.v).length;
@@ -4971,10 +4978,7 @@ function qStaged(t,cid){
   const dOpen=pcDone.has(cid);
   const doneH=done.length?`<button class="ptc-ds" onclick="pcDoneTog(event,'${cid}')" aria-expanded="${dOpen}"><span class="ptc-chev${dOpen?' o':''}">&#9654;</span><b>${done.length} done</b>${rec?`<span>· ${rec} decision${rec===1?'':'s'} recorded</span>`:''}${toRec?`<span class="tr">· ${toRec} to record</span>`:''}</button>`
     +(dOpen?`<div class="ptc-dl">${done.map(({x,si})=>{const d=x.decision,k=key(si),has=d&&d.v,isO=pcDec.has(k);
-      return `<div class="ptc-i d"><button class="ptc-c ok" onclick="pcTick(event,'${cid}',${vi},${si})" title="${stepTip(x.s)}">&#10003;</button><div style="flex:1;min-width:0"><span class="ptc-it">${esc(x.t)}</span>
-        ${has?`<div><button class="ptc-dk" onclick="pcDecTog(event,'${k}')"><span class="ptc-chev${isO?' o':''}">&#9654;</span>Decision${d.by||d.at?' · '+[d.by?esc(d.by):'',decDate(d.at)].filter(Boolean).join(', '):''}</button></div>
-          ${isO?`<div class="ptc-dv">${esc(d.v)}<div class="m">${[d.by?esc(d.by):'',decDate(d.at)].filter(Boolean).join(', ')}${d.src||d.srcLabel?' · '+decSrc(d):''} · <button onclick="event.stopPropagation();decOpen('${k}')">edit</button></div></div>`:''}`:''}</div>
-        ${!has&&typeof decIsTask==='function'&&decIsTask(x)?`<button class="ptc-rec" onclick="event.stopPropagation();decOpen('${k}')">Record decision</button>`:''}</div>`;}).join('')}</div>`:''):'';
+      const b=decBits(x,k);return `<div class="ptc-i d"><button class="ptc-c ok" onclick="pcTick(event,'${cid}',${vi},${si})" title="${stepTip(x.s)}">&#10003;</button><div style="flex:1;min-width:0"><span class="ptc-it">${esc(x.t)}</span>${b.link}</div>${b.rec}</div>`;}).join('')}</div>`:''):'';
   const body=`<div class="ptc-b">${vi!==ai&&!allDone?`<div class="ptc-prev">Stage ${vi+1}: ${esc(vp.l)}${vi>ai?' · coming up':' · done'}</div>`:''}${brief?`<div class="ptc-brief">${esc(brief)}</div>`:''}${openH}${!open.length?`<div class="ptc-ok">${esc(okMsg)}</div>`:''}${doneH}</div>`;
   const inFlow=typeof cur!=='undefined'&&cur==='flow';
   return `<div class="ptc ${cardSide==='client'?'client':''}" id="card-${cid}" onclick="event.stopPropagation()">
