@@ -152,5 +152,13 @@
     "file": "ReLeasedRemediationTracker.html",
     "sowHours": 32,
     "active": true
+  },
+  {
+    "name": "Cookaborough",
+    "key": "cookaborough-tracker-v1",
+    "file": "CookaboroughTracker.html",
+    "sowHours": 40,
+    "active": true
   }
+  
 ]
