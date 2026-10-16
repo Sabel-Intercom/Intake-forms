@@ -312,7 +312,7 @@ html.dark .err{background:var(--bad-soft)}
    CONFIG
    ===================================================================== */
 const API = 'https://sabel-webhook.vercel.app/api/readiness';
-const FORM_V = '2026-10-05a';
+const FORM_V = '2026-10-16a';
 /* URL parameters (see client-hub/CONTRACT.md):
    ?client=<slug>   picks this client's saved copy on the server (readiness-<slug>-v1) and keeps
                     their draft separate from anyone else's on the same browser.
@@ -1478,18 +1478,25 @@ document.addEventListener('change',e=>{
 /* =====================================================================
    SECTION J: this client's own inputs from their scope of work.
    Sabel lists them in Internal Ops, which publishes them to the
-   readiness-inputs-v1 store keyed by the client name in ?client=.
-   No list, or no ?client=, means no Section J.
+   readiness-inputs-v1 store keyed by the client name. Links carry the short
+   name in ?client= (elmo) and the company in &name= (ELMO Software), so
+   either one finds the list. No list, or neither in the link, means no Section J.
    ===================================================================== */
 const INPUTS_URL = 'https://sabel-webhook.vercel.app/api/tracker?key=readiness-inputs-v1';
 function inputId(txt){ let h=0; for(const ch of String(txt)) h=(h*31+ch.charCodeAt(0))|0; return 'pj'+(h>>>0).toString(36); }
 async function loadProjectInputs(){
-  if(!CLIENT_PARAM) return;
+  if(!CLIENT_PARAM && !NAME_PARAM) return;
   try{
     const r=await fetch(INPUTS_URL+'&_t='+Date.now(),{cache:'no-store'}); if(!r.ok) return;
     const j=await r.json(); const all=(j && j.data && j.data.clients)||{};
-    const want=CLIENT_PARAM.toLowerCase().trim();
-    const hit=all[want] || Object.values(all).find(x=>x && String(x.name||'').toLowerCase().trim()===want);
+    const wants=[NAME_PARAM, CLIENT_PARAM].filter(Boolean);
+    const vals=Object.values(all).filter(Boolean);
+    let hit=null;
+    for(const w of wants){
+      const lc=w.toLowerCase().trim(), sl=slugify(w);
+      hit = all[lc] || vals.find(x=>String(x.name||'').toLowerCase().trim()===lc || slugify(x.name)===sl || (x.slug && slugify(x.slug)===sl));
+      if(hit) break;
+    }
     const items=(hit && Array.isArray(hit.items) ? hit.items : []).map(x=>String(x).trim()).filter(Boolean);
     if(!items.length || SECTIONS.some(s=>s.id==='J')) return;
     const cur=steps()[state.step];
