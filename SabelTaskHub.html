@@ -1713,7 +1713,18 @@ function focusZoneHTML(mine){
     (rows.length?rows.map(rowHTML).join(''):'<div class="fzempty">Nothing here yet. Drag a task up from below, or press ☆ on it.</div>')+'</div>';
 }
 /* The Focus Zone sits on top of List and Board as well as Home, so it never drops out of sight. */
-function zoneTop(mine){return isTeam(S.who)?'<div class="list fztop">'+focusZoneHTML(byClient(mine))+'</div>':'';}
+function zoneTop(mine){
+  const all=byClient(mine),canF=isTeam(S.who);
+  const fset={};if(canF)focusIds(S.who).forEach(id=>{fset[id]=1;});
+  /* Same two sections as Home, so people who work from List or Board still see them first. */
+  const chases=all.filter(t=>!isDone(t)&&!fset[t.id]&&isChase(t)&&t.status!=='Parked').sort((a,b)=>Date.parse(a.rem.since||a.rem.at||0)-Date.parse(b.rem.since||b.rem.at||0));
+  const back=all.filter(t=>!isDone(t)&&!fset[t.id]&&t.src!=='Reminder'&&t.back&&t.status!=='Parked').sort(byDue);
+  const whoTxt=S.who==='Everyone'?'the team':'you';
+  const h=(canF?focusZoneHTML(all):'')+
+    (chases.length?homeSec('chase','Client waiting','A client is waiting on a reply. Longest wait first.','var(--red2)','var(--red2)','rgba(225,6,0,.45)',chases):'')+
+    (back.length?homeSec('back',COORD+' replied','Answered and handed back. Over to '+whoTxt+'.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',back):'');
+  return h?'<div class="list fztop">'+h+'</div>':'';
+}
 function homeHTML(mine){
   const canF=isTeam(S.who);
   const zone=canF?focusZoneHTML(mine):'';
