@@ -77,6 +77,17 @@ table.map td:last-child{width:34px}
 #admin .meta{font-size:11px;color:var(--fnt);margin-bottom:12px;line-height:1.6}
 #admin .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 #admin input{width:auto;flex:1;min-width:160px}
+.modal{position:fixed;inset:0;z-index:1100;background:rgba(5,7,12,.72);display:none;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-card{background:var(--card);border:1px solid rgba(74,222,128,.45);border-radius:14px;max-width:460px;width:100%;padding:28px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.done-tick{width:58px;height:58px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--green);background:rgba(74,222,128,.15);border:2px solid var(--green)}
+.modal-card.warn{border-color:rgba(251,191,36,.5)}
+.modal-card.warn .done-tick{color:var(--amber);background:rgba(251,191,36,.15);border-color:var(--amber)}
+.modal-card h2{font-size:19px;font-weight:600;margin-bottom:8px}
+.modal-card p{font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+#submit-status{font-size:13px;font-weight:600;color:var(--green)}
+@media print{.modal{display:none!important}}
 .toast{position:fixed;bottom:20px;right:20px;background:var(--line);border:1px solid var(--line2);border-radius:8px;padding:9px 14px;font-size:12px;color:var(--txt);opacity:0;transition:opacity .3s;pointer-events:none;z-index:1001}
 footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;font-size:11px;color:var(--fnt)}
 .btn.print{background:transparent;color:var(--txt);border-color:var(--line2);padding:7px 14px;font-size:12px;white-space:nowrap}
@@ -156,7 +167,8 @@ footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;font-size:11px;color:v
 
   <section class="card">
     <div class="submit-bar">
-      <button class="btn primary" onclick="submitForm()">Submit to Sabel</button>
+      <button class="btn primary" id="submit-btn" onclick="submitForm()">Submit to Sabel</button>
+      <span id="submit-status"></span>
       <button class="btn ghost" onclick="printPDF()">&#128438; Print / Save PDF</button>
       <span style="font-size:12px;color:var(--fnt)">You can still edit after submitting, changes keep saving.</span>
     </div>
@@ -165,10 +177,22 @@ footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;font-size:11px;color:v
 </div>
 <footer>Sabel Customer Success Solutions · Migration Mapping Requirements · All information is used solely to configure your migration.</footer>
 <div class="toast" id="toast"></div>
+<div class="modal" id="done-modal" onclick="if(event.target===this)closeDone()">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="done-title">
+    <div class="done-tick" id="done-icon">&#10003;</div>
+    <h2 id="done-title">Thank you, your answers are with Sabel</h2>
+    <p id="done-body"></p>
+    <div class="modal-actions">
+      <button class="btn primary" onclick="closeDone();printPDF()">Save a PDF copy</button>
+      <button class="btn ghost" onclick="closeDone()">Close</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 'use strict';
-const BUILD_V='202607290418';
+const BUILD_V='202607290419';
 const API='https://sabel-webhook.vercel.app/api/tracker';
 const qs=new URLSearchParams(location.search);
 const DEFAULT_SLUG='shiftmove';
@@ -190,22 +214,24 @@ const SECTIONS=[
  {id:'details',n:'',t:'Project details',fields:[
    {id:'client',l:'Client / company name',ty:'text'},
    {id:'source_platform',l:'Source platforms (the systems you are moving away from)',ty:'text'},
-   {id:'intercom_workspace',l:'Intercom EU production workspace (name + URL)',ty:'text',ph:'e.g. Shiftmove, https://app.eu.intercom.com/a/apps/abc123'},
+   {id:'intercom_workspace',l:'Intercom EU production workspace (name + URL)',ty:'text',ph:'e.g. Shiftmove, https://app.eu.intercom.com/a/apps/abc123',hint:'From the tracker: workspace 195042, app code ur47q5en. The second workspace on your account (l18pyn7k) is not used.'},
    {id:'intercom_test_workspace',l:'Intercom test workspace for the sample (name + URL)',ty:'text',opt:1,ph:'Leave blank if the sample goes into production'},
    {id:'migration_type',l:'Migration type',ty:'pills',opts:['Tickets','Conversations','Both']},
    {id:'co_name',l:'Client owner, name',ty:'text',ph:'Your day-to-day contact for the migration'},
    {id:'co_email',l:'Client owner, email',ty:'text'},
-   {id:'ocean_contact',l:'Ocean / Zoho Desk contact (name + email)',ty:'text',opt:1,ph:'If different from the client owner'},
-   {id:'optimum_contact',l:'Optimum / Zendesk contact (name + email)',ty:'text',opt:1,ph:'If different from the client owner'},
+   {id:'optimum_contact',l:'Optimum (Zendesk) mapping owner, name + email',ty:'text',ph:'One person who can answer field and tag questions'},
+   {id:'ocean_contact',l:'Ocean (Zoho Desk) mapping owner, name + email',ty:'text',ph:'One person who can answer field and tag questions'},
    {id:'so_name',l:'Sign-off owner, name',ty:'text',ph:'The person who approves the migration'},
    {id:'so_role',l:'Sign-off owner, role',ty:'text'},
    {id:'so_email',l:'Sign-off owner, email',ty:'text'},
    {id:'target_golive',l:'Target go-live (cutover date)',ty:'date',hint:'Kick-off, 26 Aug: targeting the end of October'},
    {id:'golive_time',l:'Go-live start time (local)',ty:'text',ph:'e.g. 09:00',hint:'The final delta starts shortly before this'},
-   {id:'golive_tz',l:'Timezone',ty:'text',ph:'e.g. Europe/Paris'}
+   {id:'golive_tz',l:'Timezone',ty:'text',ph:'e.g. Europe/Paris'},
+   {id:'zd_contract_end',l:'Zendesk contract end date',ty:'date',hint:'Sets the cutover window and how long both systems can run side by side'},
+   {id:'zoho_contract_end',l:'Zoho Desk contract end date',ty:'date'}
  ]},
  {id:'agreed',n:'',t:'What we have agreed so far',desc:'Pulled from the kick-off call and the #ext-shiftmove-sabel-migration channel. Please check it is right.',
-  note:'<strong>Legal, 28 Aug:</strong> Laura cleared Sabel and ICX to start and to share data.<br><strong>Date range, 28 Aug:</strong> 2 years of history from both platforms.<br><strong>Zendesk (Optimum):</strong> access is working and Richard has extracted <strong>31,253 tickets</strong>, 2 Sep 2024 to 1 Sep 2026.<br><strong>Zoho Desk (Ocean):</strong> admin access was set up on sales@sabelcustomersuccess.com on 11 to 14 Sep, as Zoho would not accept an address already used in another data centre. Extraction is next.<br><strong>Intercom EU workspace:</strong> Sabel access is still needed.<br><strong>Sequence:</strong> phase 1 is the bulk load of closed tickets. Delta runs follow, then the final delta brings across open tickets just before go-live, targeted for the end of October. Field mapping is confirmed after the taxonomy workshop with ICX.',
+  note:'<strong>Legal, 28 Aug:</strong> Laura cleared Sabel and ICX to start and to share data.<br><strong>Date range, 28 Aug:</strong> 2 years of history from both platforms.<br><strong>Zendesk (Optimum):</strong> access is working and Richard has extracted <strong>31,253 tickets</strong>, 2 Sep 2024 to 1 Sep 2026.<br><strong>Zoho Desk (Ocean):</strong> admin access was set up on sales@sabelcustomersuccess.com on 11 to 14 Sep, as Zoho would not accept an address already used in another data centre. Extraction is next.<br><strong>Intercom EU workspace:</strong> Sabel admin access to workspace 195042 (app code ur47q5en) is still needed.<br><strong>Sequence:</strong> phase 1 is the bulk load of closed tickets. Delta runs follow, then the final delta brings across open tickets just before go-live, targeted for the end of October. Field mapping is confirmed after the taxonomy workshop with ICX.',
   fields:[
    {id:'agreed_ok',l:'Does this match your understanding?',ty:'pills',opts:['Yes, confirmed','Needs changes']},
    {id:'agreed_changes',l:'What needs to change?',ty:'textarea',showIf:['agreed_ok','Needs changes']}
@@ -223,12 +249,14 @@ const SECTIONS=[
    {id:'brand_notes',l:'Notes on sources, brands, channels or exclusions',ty:'textarea',full:1,opt:1}
  ]},
  {id:'access',n:'2',t:'Access and readiness',desc:'We need admin access to all three platforms to run the migration.',
-  note:'Current Sabel logins: <strong>Zendesk</strong> info+1@sabelcustomersuccess.com, <strong>Zoho Desk</strong> sales@sabelcustomersuccess.com, <strong>Intercom EU workspace</strong> still needed, please invite info+1@sabelcustomersuccess.com as an admin. <strong>Never paste API tokens or passwords into this form</strong>; if one is needed, Richard will ask for it separately.',
+  note:'Current Sabel logins: <strong>Zendesk</strong> info+1@sabelcustomersuccess.com, <strong>Zoho Desk</strong> sales@sabelcustomersuccess.com, <strong>Intercom EU workspace</strong> still needed, please invite info+1@sabelcustomersuccess.com as an admin on workspace 195042 (app code ur47q5en). <strong>Never paste API tokens or passwords into this form</strong>; if one is needed, Richard will ask for it separately.',
   fields:[
    {id:'source_access',l:'Zendesk (Optimum) admin access granted',ty:'pills',opts:YN},
    {id:'zoho_access',l:'Zoho Desk (Ocean) admin access granted',ty:'pills',opts:YN},
    {id:'intercom_access',l:'Intercom EU workspace admin access granted',ty:'pills',opts:YN},
-   {id:'_constraints',l:'Access constraints (tick any that apply)',ty:'checks',opts:[
+   {id:'second_ws',l:'The second workspace (app code l18pyn7k) is out of scope',ty:'pills',opts:['Confirmed','No, we need it'],hint:'So nothing is built or loaded into the wrong workspace'},
+   {id:'zoho_plan',l:'Zoho Desk plan tier',ty:'text',ph:'e.g. Professional, Enterprise',hint:'Zoho Desk limits API calls per day by plan, which sets how long the Ocean extract takes'},
+   {id:'_constraints',l:'Access constraints (tick any that apply)',ty:'checks',hint:'This is about how your team logs in to your Intercom workspace. Tick anything you have switched on, such as single sign-on (SSO), logins only allowed from approved IP addresses, or two-factor authentication (2FA), plus any rule that limits which teammates can see some customers. It tells us what our consultant needs so they can get in. If it is a plain email and password login, leave these unticked',opts:[
      ['c_sso','SSO required'],['c_ip','IP allowlist'],['c_2fa','2FA enforced'],['c_other','Other (describe below)']]},
    {id:'access_notes',l:'Notes / constraints details',ty:'textarea',full:1,opt:1}
  ]},
@@ -310,7 +338,7 @@ function fieldHTML(f){
   const hint=f.hint?`<div class="hint">${esc(f.hint)}</div>`:'';
   if(f.ty==='checks'){
     return `<div class="f full"><label>${esc(f.l)}</label><div class="chks">${f.opts.map(([id,l])=>
-      `<span class="chk${F[id]?' on':''}" data-chk="${id}"><span class="box">✓</span>${esc(l)}</span>`).join('')}</div></div>`;
+      `<span class="chk${F[id]?' on':''}" data-chk="${id}"><span class="box">✓</span>${esc(l)}</span>`).join('')}</div>${hint}</div>`;
   }
   if(f.ty==='pills'){
     return `<div class="f${f.full?' full':''}"${si}>${lab}<div class="pills">${f.opts.map(o=>
@@ -487,9 +515,24 @@ function submitForm(){
   if(inc.length&&!confirm('Some sections look incomplete:\n\n- '+inc.join('\n- ')+'\n\nSubmit anyway? You can come back and finish them later, your answers keep saving.'))return;
   F.__submitted=new Date().toISOString();
   dirty=true;showSubmitted();
-  save().then(()=>toast(REMOTE?'Submitted, thank you.':'Saved on this device only. Please use Print / Save PDF and send the copy to Richard.'));
+  save().then(()=>openDone(REMOTE));
 }
+function openDone(ok){
+  const m=document.getElementById('done-modal'),c=m.querySelector('.modal-card');
+  c.classList.toggle('warn',!ok);
+  document.getElementById('done-icon').textContent=ok?'\u2713':'!';
+  document.getElementById('done-title').textContent=ok?'Thank you, your answers are with Sabel':'Saved on this device only';
+  document.getElementById('done-body').textContent=ok
+    ?'Submitted '+new Date(F.__submitted).toLocaleString()+'. Richard will review your answers and get in touch if anything needs a closer look. You can keep editing and your changes will carry on saving. We recommend saving a PDF copy for your records.'
+    :'We could not reach Sabel\'s server, so your answers have not been sent yet. Please save a PDF copy and send it to Richard.';
+  m.classList.add('show');
+  m.querySelector('.btn.primary').focus();
+}
+function closeDone(){document.getElementById('done-modal').classList.remove('show')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDone()});
 function showSubmitted(){
+  const st=document.getElementById('submit-status');if(st)st.textContent='\u2713 Submitted '+new Date(F.__submitted).toLocaleString();
+  const sb=document.getElementById('submit-btn');if(sb)sb.textContent='Resubmit changes to Sabel';
   const b=document.getElementById('submitted-banner');
   b.style.display='block';
   b.innerHTML='<strong>Submitted to Sabel</strong> on '+new Date(F.__submitted).toLocaleString()+'. You can keep editing, any changes continue to save.';
@@ -591,7 +634,7 @@ window.addEventListener('afterprint',()=>{
     Object.assign(F,{client:'Shiftmove',source_platform:'Zendesk (Optimum) and Zoho Desk (Ocean)',golive_tz:'Europe/Paris',
       tf_enable:'Yes',tf_start:'2024-09-02T00:00',tf_tz:'Europe/Paris',
       src_optimum:'All tickets from the start date',src_ocean:'All tickets from the start date',
-      source_access:'Yes',zoho_access:'Yes'});
+      source_access:'Yes',zoho_access:'Yes',intercom_workspace:'Workspace 195042 (app code ur47q5en)'});
     T.status=[
       {src:'Zendesk: New',dst:'Submitted',notes:'Suggested'},
       {src:'Zendesk: Open',dst:'In progress',notes:'Suggested'},

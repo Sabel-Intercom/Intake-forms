@@ -280,7 +280,7 @@ html.light .toast{background:#101828;border-color:#101828;color:#FFFFFF;box-shad
         the 'What we have agreed so far' section only shows when it is set.
         Optional first-load prefills go in SEED (field id -> value).
    ===================================================================== */
-const BUILD_V='202609300001';
+const BUILD_V='202609300002';
 const API='https://sabel-webhook.vercel.app/api/tracker';
 const qs=new URLSearchParams(location.search);
 const DEFAULT_SLUG='elmo';
@@ -362,7 +362,7 @@ const ALL_SECTIONS=[
    {id:'intercom_access',l:'Intercom AU workspace admin access granted',ty:'pills',opts:YN},
    {id:'ws_separation',l:'Nothing is migrated into the Breathe HR or Rotageek workspaces, or the old EU instance',ty:'pills',opts:['Confirmed','Needs discussion'],hint:'So nothing is loaded into the wrong workspace'},
    {id:'zd_plan',l:'Zendesk plan tier',ty:'text',ph:'e.g. Suite Professional, Enterprise',hint:'Zendesk limits API calls by plan, which sets how long the extract takes'},
-   {id:'_constraints',l:'Access constraints (tick any that apply)',ty:'checks',opts:[
+   {id:'_constraints',l:'Access constraints (tick any that apply)',ty:'checks',hint:'This is about how your team logs in to your Intercom workspace. Tick anything you have switched on, such as single sign-on (SSO), logins only allowed from approved IP addresses, or two-factor authentication (2FA), plus any rule that limits which teammates can see some customers. It tells us what our consultant needs so they can get in. If it is a plain email and password login, leave these unticked',opts:[
      ['c_sso','SSO required'],['c_ip','IP allowlist'],['c_2fa','2FA enforced'],['c_sov','Data-sovereignty limits on who can view some customers'],['c_other','Other (describe below)']]},
    {id:'access_notes',l:'Notes / constraints details',ty:'textarea',full:1,opt:1}
  ]},
@@ -450,7 +450,7 @@ function fieldHTML(f){
   const hint=f.hint?`<div class="hint">${esc(f.hint)}</div>`:'';
   if(f.ty==='checks'){
     return `<div class="f full"><label>${esc(f.l)}</label><div class="chks">${f.opts.map(([id,l])=>
-      `<span class="chk${F[id]?' on':''}" data-chk="${id}"><span class="box">✓</span>${esc(l)}</span>`).join('')}</div></div>`;
+      `<span class="chk${F[id]?' on':''}" data-chk="${id}"><span class="box">✓</span>${esc(l)}</span>`).join('')}</div>${hint}</div>`;
   }
   if(f.ty==='pills'){
     return `<div class="f${f.full?' full':''}"${si}>${lab}<div class="pills">${f.opts.map(o=>
