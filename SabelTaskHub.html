@@ -558,6 +558,9 @@ function mergeOv(a,b){
     const x=a&&a.tasks&&a.tasks[id],y=b&&b.tasks&&b.tasks[id];
     if(!x||!y){out.tasks[id]=x||y;return;}
     const m=Object.assign({},(y.sAt||0)>(x.sAt||0)?y:x),byId={};
+    /* "Nikki replied" can be cleared without a status change: newest of reply (back.at) or clear (bAt) wins. */
+    const bs=o=>Math.max(o.bAt||0,o.back?(o.back.at||0):(o.sAt||0)),bw=bs(y)>bs(x)?y:x;   /* no flag = cleared when its status last changed */
+    if(bs(bw)){m.back=bw.back||null;if(bw.bAt)m.bAt=bw.bAt;}
     /* Notes merge by id. An edit or delete stamps eAt, and the newest copy wins;
        a deleted note stays as a tombstone (del) so a merge cannot bring it back. */
     (x.notes||[]).concat(y.notes||[]).forEach(n=>{if(n&&n.id&&(!byId[n.id]||(n.eAt||0)>(byId[n.id].eAt||0)))byId[n.id]=n;});
@@ -1318,6 +1321,12 @@ function notMine(id){
   addNote(o,author(),'@'+COORD+' '+q,true);
   S.draft='';S.tag=false;S.needQ=false;S.open=null;save();commit();
 }
+/* Drop the "Nikki replied" flag (e.g. the task moved to someone else) without touching its status. */
+function clearBack(id){
+  const t=findTask(id);if(!t||!t.back)return;
+  const o=ov(id);o.back=null;o.bAt=Date.now();
+  commit();toast('Moved back into the list');
+}
 function answer(id,keep){
   const t=findTask(id);if(!t)return;
   const txt=(S.deskDraft[id]||'').trim(),o=ov(id);
@@ -1448,7 +1457,8 @@ function actionsHTML(t){
     '<div class="hint">Reply to the client in the thread, then press Replied. Not mine sends it back to '+COORD+' to reassign.</div>';
   let h='<div class="acts"><button type="button" class="pb blue" data-act="start">'+(t.status==='In Progress'?'Pause':'Start')+'</button>';
   if(!t.stages||isDone(t))h+='<button type="button" class="pb green" data-act="done">'+(isDone(t)?'Reopen':'Mark done')+'</button>';
-  h+='<button type="button" class="pb red" data-act="flag">Blocked · flag '+COORD+'</button></div>';
+  h+='<button type="button" class="pb red" data-act="flag">Blocked · flag '+COORD+'</button>'+
+    (t.back&&t.status!=='Parked'&&!isDone(t)?'<button type="button" class="pb sm" data-act="clearback" title="Take it out of '+COORD+' replied and back into the list">Clear '+COORD+' replied</button>':'')+'</div>';
   if(t.stages&&!isDone(t))h+='<div class="hint">Staged deliverable: it completes when every step is ticked.</div>';
   return h;
 }
@@ -1999,6 +2009,7 @@ document.addEventListener('click',e=>{
     case 'start':if(t)act2(id,t.status==='In Progress'?'Pending':'In Progress');break;
     case 'done':if(t)act2(id,isDone(t)?'Pending':'Complete');break;
     case 'notmine':notMine(id);break;
+    case 'clearback':clearBack(id);break;
     case 'b-who':{const b=S.batch[+a.closest('[data-bi]').getAttribute('data-bi')],p=a.getAttribute('data-p');b.to=b.to[0]===p?[]:[p];S.batchErr='';render();break;}
     case 'b-del':S.batch.splice(+a.closest('[data-bi]').getAttribute('data-bi'),1);if(!S.batch.length)S.batch=null;render();break;
     case 'b-clear':S.batch=null;S.batchErr='';S.fromLoops=false;render();break;
