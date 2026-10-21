@@ -312,7 +312,7 @@ html.dark .err{background:var(--bad-soft)}
    CONFIG
    ===================================================================== */
 const API = 'https://sabel-webhook.vercel.app/api/readiness';
-const FORM_V = '2026-10-16a';
+const FORM_V = '2026-10-21a';
 /* URL parameters (see client-hub/CONTRACT.md):
    ?client=<slug>   picks this client's saved copy on the server (readiness-<slug>-v1) and keeps
                     their draft separate from anyone else's on the same browser.
@@ -630,12 +630,12 @@ const SECTIONS = [
    f:[['g1a','What Fin should be able to do','textarea','Type here, one per line',{ex:'Tell a customer where their order is\nLook up a booking by reference number\nGive someone their current account balance\nUpdate a delivery address before dispatch\nRaise a ticket in Jira when something is broken\nCheck whether an item is in stock'}]]},
 
   {t:'rag',id:'g2',opts:O.ready,q:'Can your developers give us access to those systems?',
-   why:'API keys and a test environment. This is the most common thing that holds a build up.',
-   more:'<p>An API is the way one system lets another ask it questions. To have Fin check an order, we need a key that lets us ask your order system about it, and ideally a test environment so we are not experimenting on real customers.</p><p>This is work only your developers can do, and in our experience it is the single most common reason a build sits waiting.</p>'},
+   why:'Usually just an account for info+1@ on each system, so we can create the keys ourselves, and a test environment. This is the most common thing that holds a build up.',
+   more:'<p>An API is the way one system lets another ask it questions. To have Fin check an order, we need to connect to your order system, and ideally a test environment so we are not experimenting on real customers.</p><p>The simplest way is to add info+1@sabelcustomersuccess.com as a user on each system. We then create the API keys ourselves, so nothing sensitive needs to be sent. If a system cannot give us an account, your developer creates the key and shares it with us through your company\'s password manager, such as 1Password or LastPass. Please never send keys by Slack or email.</p><p>This is work only your team can do, and in our experience it is the single most common reason a build sits waiting.</p>'},
 
   {t:'rag',id:'g5',opts:O.ready,q:'Can we have a test account, somewhere safe to test, and some test data for each of those systems?',
    why:'We need these from the day the build starts, not when it is time to test. The wait between building a connection and being able to check it is where projects most often stall.',
-   more:'<p>Building the connection is the quick part. Checking that Fin gives the right answer is where projects sit and wait, because it needs three things only you can provide.</p><p><strong>A test environment.</strong> A sandbox, staging site or test store for each system Fin will talk to, so we are not experimenting on real customers.</p><p><strong>A test account.</strong> A login we can use freely, such as a test customer with an order or booking against it.</p><p><strong>Test data, or a few live examples we can reference.</strong> A handful of real order numbers, booking references or account IDs that are safe for us to look up while we check Fin\'s answers.</p><p>If a system has no sandbox at all, that is worth knowing now because it changes how we test. Please do not paste passwords or API keys into this form. Tell us they are ready and we will agree a secure way to hand them over.</p>'},
+   more:'<p>Building the connection is the quick part. Checking that Fin gives the right answer is where projects sit and wait, because it needs three things only you can provide.</p><p><strong>A test environment.</strong> A sandbox, staging site or test store for each system Fin will talk to, so we are not experimenting on real customers.</p><p><strong>A test account.</strong> A login we can use freely, such as a test customer with an order or booking against it.</p><p><strong>Test data, or a few live examples we can reference.</strong> A handful of real order numbers, booking references or account IDs that are safe for us to look up while we check Fin\'s answers.</p><p>If a system has no sandbox at all, that is worth knowing now because it changes how we test. Please do not paste passwords or API keys into this form. Where you can, add info+1@sabelcustomersuccess.com to the system and we will create what we need ourselves; if not, share it through your company\'s password manager, such as 1Password or LastPass.</p>'},
 
   {t:'ask',id:'g6',q:'For each system, where are the test environment, test account and test data up to?',
    why:'One row per system. It is fine if the answer is none yet, that just tells us what to chase first.',
