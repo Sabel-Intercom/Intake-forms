@@ -513,7 +513,7 @@ html.light .wl-late{--lt:rgba(217,45,32,.05)}html.light .wl-this{--lt:rgba(217,4
 .wcard.l-next{--cc:var(--amber)}.wcard.l-later{--cc:var(--green)}
 .wcard.l-late{background:var(--surface)}
 .w1{display:flex;align-items:center;gap:6px;min-width:0}
-.wcl{font-family:Archivo,sans-serif;font-weight:800;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.wcl{font-family:Archivo,sans-serif;font-weight:700;font-size:12.5px;text-transform:none;letter-spacing:normal;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 .west{font-family:Archivo,sans-serif;font-weight:700;font-size:11.5px;color:var(--text);border:1px solid var(--hl2);border-radius:99px;padding:1px 7px;white-space:nowrap}
 .west.none{color:var(--faint);border-style:dashed;font-weight:500}
 .wt{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.3}
@@ -567,16 +567,18 @@ html.light .wl-late{--lt:rgba(217,45,32,.05)}html.light .wl-this{--lt:rgba(217,4
 .lbar>span{font-size:12.5px;color:var(--mute)}
 .cgrp.hot{border-color:rgba(225,6,0,.45)}
 .cgh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:13px 20px;border-bottom:1px solid var(--line);background:var(--surface2)}
-.cgn{font-family:Archivo,sans-serif;font-weight:800;font-size:19px;letter-spacing:.01em;color:var(--text);line-height:1.2}
-.cgn.ty-build{color:var(--tyBuild)}.cgn.ty-mig{color:var(--tyMig)}.cgn.ty-both{color:var(--tyBoth)}.cgn.ty-audit{color:var(--tyAudit)}.cgn.ty-consult{color:var(--tyConsult)}
-.wcl.ty-build{color:var(--tyBuild)}.wcl.ty-mig{color:var(--tyMig)}.wcl.ty-both{color:var(--tyBoth)}.wcl.ty-audit{color:var(--tyAudit)}.wcl.ty-consult{color:var(--tyConsult)}
+.cgn{font-family:Archivo,sans-serif;font-weight:700;font-size:19px;letter-spacing:normal;color:var(--text);line-height:1.2}
 .cgt{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);border:1px solid var(--line2);border-radius:99px;padding:2px 8px}
 .cchip{font-size:12px;font-weight:700;border-radius:99px;padding:3px 9px;background:var(--raise);color:var(--soft)}
 .cchip.red{background:rgba(225,6,0,.16);color:var(--red2)}
 .cchip.amber{background:rgba(251,191,36,.16);color:var(--amber)}
 .cgh small{margin-left:auto;font-size:12.5px;color:var(--mute)}
 .cgh+.row{border-top:none}
-.rm .cl{font-family:Archivo,sans-serif;font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--text)}
+.rm .cl{font-family:Archivo,sans-serif;font-weight:700;font-size:12.5px;text-transform:none;letter-spacing:normal;color:var(--text)}
+/* Project type as a small square before the client name, so the name itself stays quiet */
+.tsq{display:inline-block;width:8px;height:8px;border-radius:2px;background:currentColor;flex:none}
+.tsq.ty-build{color:var(--tyBuild)}.tsq.ty-mig{color:var(--tyMig)}.tsq.ty-both{color:var(--tyBoth)}.tsq.ty-audit{color:var(--tyAudit)}.tsq.ty-consult{color:var(--tyConsult)}
+.cl .tsq,.cgn .tsq,.wrow .wcl .tsq{margin-right:6px;vertical-align:middle;position:relative;top:-1px}
 @media(max-width:900px){
   .wdays{grid-template-columns:minmax(0,1fr)!important}
   .wcol{border-left:none;border-top:1px solid var(--line);min-height:0}.wcol:first-child{border-top:none}
@@ -1217,7 +1219,7 @@ function clientListHTML(mine){
     const wk=rows.filter(t=>{const n=dueIn(t);return n!==null&&n>0&&n<7;}).length;
     const hrs=rows.reduce((a,t)=>a+(+t.est||0),0),ty=typeOf(rows[0]);
     const cap=S.more['cl:'+k]?rows.length:CAP;
-    h+='<div class="secc cgrp'+(late?' hot':'')+'"><div class="cgh"><span class="cgn'+tyc(rows[0])+'">'+esc(cLabel(k))+'</span>'+(ty?'<span class="cgt">'+esc(ty)+'</span>':'')+
+    h+='<div class="secc cgrp'+(late?' hot':'')+'"><div class="cgh"><span class="cgn">'+tsq(rows[0])+esc(cLabel(k))+'</span>'+(ty?'<span class="cgt">'+esc(ty)+'</span>':'')+
       (late?'<span class="cchip red">'+late+' overdue</span>':'')+(tod?'<span class="cchip amber">'+tod+' due today</span>':'')+(wk?'<span class="cchip">'+wk+' this week</span>':'')+
       '<small>'+rows.length+' task'+(rows.length===1?'':'s')+(hrs?' · '+fTot(hrs):'')+'</small></div>'+
       rows.slice(0,cap).map(t=>rowHTML(Object.assign({},t,{_inClient:true}))).join('')+
@@ -1258,17 +1260,19 @@ function wcardHTML(t,lane){
   const when=lane==='late'?'<span class="wdue late">Overdue · '+fD(t.end)+'</span>':lane==='later'?'<span class="wdue">'+(t.end?DOW[t.end.getDay()]+' '+fD(t.end):'No date')+'</span>':'';
   const st=t.status==='In Progress'?'<span class="tag blue">In progress</span>':t.status==='Blocked'?'<span class="tag red">Blocked</span>':'';
   return '<div class="wcard l-'+lane+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" data-act="open" title="Drag to another day, or click to open">'+
-    '<div class="w1"><b class="wcl'+tyc(t)+'">'+esc(clientOf(t))+'</b>'+(showOwner?av(t.owner,true):'')+'<span class="west'+(est?'':' none')+'">'+(est||'–')+'</span></div>'+
+    '<div class="w1">'+tsq(t)+'<b class="wcl">'+esc(clientOf(t))+'</b>'+(showOwner?av(t.owner,true):'')+'<span class="west'+(est?'':' none')+'">'+(est||'–')+'</span></div>'+
     '<div class="wt">'+esc(t.title)+'</div>'+
     (when||st||planned?'<div class="w2">'+when+st+(planned&&t.trkEnd?'<span class="wmv">moved from '+fD(t.trkEnd)+'</span>':planned?'<span class="wmv">date set here</span>':'')+'</div>':'')+
     '<div class="w3">'+btn+'</div></div>';
 }
+/* The project type as a small coloured square (none when the type is unknown). */
+function tsq(t){const c=tyc(t);return c?'<i class="tsq'+c+'" title="'+esc(typeOf(t))+'" aria-hidden="true"></i>':'';}
 /* Overdue triage reads fastest as one line: client, due, title, hours, actions. Rows drag onto a day too. */
 function wrowHTML(t){
   const est=fEst(t.est),showOwner=S.who==='Everyone';
   const st=t.status==='In Progress'?'<span class="tag blue">In progress</span>':t.status==='Blocked'?'<span class="tag red">Blocked</span>':'';
   return '<div class="wrow'+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" title="Drag onto a day, or use the buttons">'+
-    '<b class="wcl'+tyc(t)+'">'+esc(clientOf(t))+'</b>'+
+    '<b class="wcl">'+tsq(t)+esc(clientOf(t))+'</b>'+
     '<span class="wdue late">'+fD(t.end)+'</span>'+
     '<button type="button" class="wrt" data-act="open">'+esc(t.title)+st+'</button>'+
     '<span class="avs">'+(showOwner?av(t.owner,true):'')+'</span>'+   /* always present, so every row has the same columns */
@@ -2025,7 +2029,7 @@ function rowHTML(t){
   const dc=t.status==='In Progress'?'prog':t.status==='Blocked'?'block':t.status==='Parked'?'park':isDone(t)?'done':'';
   const glyph=t.status==='Blocked'?'!':t.status==='Parked'?'?':isDone(t)?'✓':'';
   const n=noteCount(t);
-  let meta=(t._inClient?'':'<span class="cl'+tyc(t)+'">'+esc(clientOf(t))+'</span>')+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+(showOwner?'<span class="own">'+esc(t.owner)+'</span>':'')+progHTML(t)+tagsHTML(t);
+  let meta=(t._inClient?'':'<span class="cl">'+tsq(t)+esc(clientOf(t))+'</span>')+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+(showOwner?'<span class="own">'+esc(t.owner)+'</span>':'')+progHTML(t)+tagsHTML(t);
   if(t.parked&&t.parked.question)meta+='<span class="q">'+quote(t.parked.question)+'</span>';
   if(n)meta+='<span>'+n+' note'+(n===1?'':'s')+'</span>';
   meta+=runHTML(t)+(logged(t)?'<span>'+fMins(logged(t))+' logged</span>':'');
@@ -2238,7 +2242,7 @@ function coordHomeHTML(all){
   const from=today().getTime();
   let h='<div class="desk">';
   h+='<div class="secc" style="border-color:'+(parked.length?'rgba(251,191,36,.45)':'var(--line2)')+'"><div class="sech"><i style="background:var(--amber)"></i><b style="color:var(--amber)">Waiting on you</b><span>Parked with you, oldest first</span><small>'+parked.length+' task'+(parked.length===1?'':'s')+'</small></div>'+
-    (parked.length?parked.map(t=>{const p=t.parked||{};return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="tab" data-t="desk"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl'+tyc(t)+'">'+esc(clientOf(t))+'</span><span class="own">'+esc(p.by||t.owner)+'</span><span class="q">'+quote(p.question||'')+'</span></span></button>'+
+    (parked.length?parked.map(t=>{const p=t.parked||{};return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="tab" data-t="desk"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl">'+tsq(t)+esc(clientOf(t))+'</span><span class="own">'+esc(p.by||t.owner)+'</span><span class="q">'+quote(p.question||'')+'</span></span></button>'+
       '<span class="srw">Parked '+fStamp(p.askedAt)+'</span>'+dueHTML(t)+'<button type="button" class="pb amber sm" data-act="tab" data-t="desk">Answer</button></div>';}).join('')
      :'<div class="sempty">Nothing is parked with you.</div>')+'</div>';
   /* Reminders Nikki tagged for herself (the desk's task list is the team's, so read them from everything). */
@@ -2272,7 +2276,7 @@ function sumRowHTML(t,kind){
   let when='';
   if(kind==='prog')when=t.sAt?'Started '+fStamp(t.sAt)+(t.sBy?' by '+esc(t.sBy):''):'In progress on the tracker';
   else when='Done '+(dOf(t.doneAt)?fD(dOf(t.doneAt)):'')+(t.sBy?' by '+esc(t.sBy):' · on the tracker');
-  return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="goto"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl'+tyc(t)+'">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+
+  return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="goto"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl">'+tsq(t)+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+
     '<span class="own">'+esc(t.owner)+'</span>'+progHTML(t)+runHTML(t)+(t.src?'<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>':'')+(noteCount(t)?'<span>'+noteCount(t)+' note'+(noteCount(t)===1?'':'s')+'</span>':'')+'</span></button>'+
     '<span class="srw">'+when+'</span>'+(kind==='prog'?dueHTML(t):'')+
     '<span class="srtm'+(over?' over':'')+'" title="Time logged against the estimate"><b>'+(sp?fMins(sp):'–')+'</b>'+(e?' / '+fEst(e):'')+'</span></div>';
