@@ -529,6 +529,30 @@ html.light .wl-late{--lt:rgba(217,45,32,.05)}html.light .wl-this{--lt:rgba(217,4
 .wb.am{color:var(--amber);border-color:rgba(251,191,36,.5)}
 .wb.gr{color:var(--green);border-color:rgba(74,222,128,.45)}
 .wfoot{font-size:13px;color:var(--mute);padding:0 4px}
+.wrows{display:flex;flex-direction:column}
+.wrow{display:grid;grid-template-columns:170px 58px minmax(0,1fr) auto 56px 318px;gap:12px;align-items:center;padding:8px 18px;border-top:1px solid var(--line);cursor:grab;transition:background .12s ease}
+.wrow:first-child{border-top:none}
+.wrow:hover,.wrow.sel{background:var(--surface2)}
+.wrow.dragging{opacity:.4}
+.wrow .wcl{flex:none}
+.wrow .wdue{font-size:12.5px;white-space:nowrap}
+.wrt{min-width:0;text-align:left;font-size:14px;font-weight:600;color:var(--text);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wrt:hover{text-decoration:underline}
+.wrt .tag{margin-left:8px;vertical-align:1px}
+.wrow .w3{flex-wrap:nowrap;justify-content:flex-end}
+.wrow .west{justify-self:center}
+.wl-late .hmore{border-top:1px solid var(--line)}
+@media(max-width:1100px){
+  .wrow{grid-template-columns:150px 52px minmax(0,1fr) auto 56px;row-gap:6px}
+  .wrow .w3{grid-column:1/-1;flex-wrap:wrap;justify-content:flex-start;padding-left:222px}
+}
+@media(max-width:720px){
+  .wrow{grid-template-columns:minmax(0,1fr) auto auto;padding:10px 14px}
+  .wrow .wcl{grid-column:1;grid-row:1}.wrow .wdue{grid-column:2;grid-row:1}.wrow .west{grid-column:3;grid-row:1;justify-self:end}
+  .wrow .avs{display:none}
+  .wrt{grid-column:1/-1;grid-row:2;white-space:normal}
+  .wrow .w3{grid-row:3;padding-left:0}
+}
 /* overdue clean-up under a row, and the Home banner */
 .odq{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 20px 12px 56px;background:rgba(225,6,0,.06)}
 .odq span{font-size:12.5px;color:var(--red2);font-weight:600;margin-right:4px}
@@ -1106,7 +1130,7 @@ function audHTML(t){
    replaces the tracker date in this hub only: the client tracker keeps its plan.
    Only function declarations and lets here, because this file runs before views.js. */
 const DEFAULT_CAP=30;   // hours a week for task work until the person sets their own
-const LATE_CAP=10;     // overdue cards shown before "Show all", so the week stays in view
+const LATE_CAP=12;     // overdue rows shown before "Show all", so the week stays in view
 let WDRAG=null;
 
 /* Monday of the week on screen as "this week". At the weekend that is the coming one. */
@@ -1239,6 +1263,22 @@ function wcardHTML(t,lane){
     (when||st||planned?'<div class="w2">'+when+st+(planned&&t.trkEnd?'<span class="wmv">moved from '+fD(t.trkEnd)+'</span>':planned?'<span class="wmv">date set here</span>':'')+'</div>':'')+
     '<div class="w3">'+btn+'</div></div>';
 }
+/* Overdue triage reads fastest as one line: client, due, title, hours, actions. Rows drag onto a day too. */
+function wrowHTML(t){
+  const est=fEst(t.est),showOwner=S.who==='Everyone';
+  const st=t.status==='In Progress'?'<span class="tag blue">In progress</span>':t.status==='Blocked'?'<span class="tag red">Blocked</span>':'';
+  return '<div class="wrow'+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" title="Drag onto a day, or use the buttons">'+
+    '<b class="wcl'+tyc(t)+'">'+esc(clientOf(t))+'</b>'+
+    '<span class="wdue late">'+fD(t.end)+'</span>'+
+    '<button type="button" class="wrt" data-act="open">'+esc(t.title)+st+'</button>'+
+    '<span class="avs">'+(showOwner?av(t.owner,true):'')+'</span>'+   /* always present, so every row has the same columns */
+    '<span class="west'+(est?'':' none')+'">'+(est||'–')+'</span>'+
+    '<span class="w3">'+(t.stages?'':'<button type="button" class="wb ok" data-act="wk-done" title="It is done">Done</button>')+
+      '<button type="button" class="wb" data-act="od-today" title="Do it today">Today</button>'+
+      '<button type="button" class="wb" data-act="od-tmrw" title="Do it tomorrow">Tmrw</button>'+
+      '<button type="button" class="wb am" data-act="od-next" title="Move to Monday next week">Next wk</button>'+
+      '<button type="button" class="wb" data-act="od-nn" title="Send to '+COORD+' to confirm and close">Not needed</button></span></div>';
+}
 function wdayHTML(d,lane,cards,past,isToday,share){
   const h=cards.reduce((a,t)=>a+(+t.est||0),0),over=share&&h>share+0.01;
   return '<div class="wcol'+(past?' past':'')+(isToday?' now':'')+'"'+(past?'':' data-drop="'+isoOf(d)+'"')+'>'+
@@ -1246,9 +1286,9 @@ function wdayHTML(d,lane,cards,past,isToday,share){
     '<em class="'+(over?'over':'')+'" title="'+(over?'More than your day share of '+fTot(share):'Planned for this day')+'">'+(h?fTot(h):'')+'</em></div>'+
     '<div class="wcc">'+(cards.length?cards.map(t=>wcardHTML(t,lane)).join(''):'<div class="wempty">'+(past?'Past':'Drop here')+'</div>')+'</div></div>';
 }
-function wcapHTML(h,cap){
+function wcapHTML(h,cap,part){
   const pct=Math.min(100,Math.round(h/cap*100)),over=h>cap+0.01;
-  return '<span class="wcap'+(over?' over':'')+'"><b>'+fTot(h)+'</b> of '+fTot(cap)+(over?' · '+fTot(h-cap)+' over':'')+'<i><u style="width:'+pct+'%"></u></i></span>';
+  return '<span class="wcap'+(over?' over':'')+'"><b>'+fTot(h)+'</b> of '+fTot(cap)+(part?' left':'')+(over?' · '+fTot(h-cap)+' over':'')+'<i><u style="width:'+pct+'%"></u></i></span>';
 }
 function weekHTML(mine){
   const open=mine.filter(t=>!isDone(t)&&t.status!=='Parked'&&isTeam(t.owner));
@@ -1266,12 +1306,14 @@ function weekHTML(mine){
     '<button type="button" class="pb sm'+(S.hideLater?' on':'')+'" data-act="wk-later" aria-pressed="'+S.hideLater+'">'+(S.hideLater?'Show later':'Hide later')+'</button>'+
     '<span class="whint">Drag a card to another day, or use its buttons. Dates here are '+(me?'your':'the team’s')+' working plan; the client tracker keeps its own.</span></div>';
   if(L.late.length)h+='<section class="wl wl-late"><div class="wlh"><i></i><b>Overdue</b><span>Clear these first: done, a new day, or not needed.</span><small>'+L.late.length+' task'+(L.late.length===1?'':'s')+(sum(L.late)?' · '+fTot(sum(L.late)):'')+'</small></div>'+
-    '<div class="wgrid">'+L.late.slice(0,S.more.wklate?L.late.length:LATE_CAP).map(t=>wcardHTML(t,'late')).join('')+'</div>'+
+    '<div class="wrows">'+L.late.slice(0,S.more.wklate?L.late.length:LATE_CAP).map(wrowHTML).join('')+'</div>'+
     (L.late.length>LATE_CAP&&!S.more.wklate?'<button type="button" class="hmore" data-act="more" data-k="wklate">Show all '+L.late.length+' overdue</button>':'')+'</section>';
+  /* Past days are gone from view: their tasks are overdue and sit in the Overdue list. */
   const lane=(k,label,w,off)=>{
-    const days=[0,1,2,3,4].map(i=>addD(base,off+i)),tot=sum(flat(w));
-    return '<section class="wl wl-'+k+'"><div class="wlh"><i></i><b>'+label+'</b><span>'+fD(days[0])+' – '+fD(days[4])+'</span>'+wcapHTML(tot,cap)+'</div>'+
-      '<div class="wdays" style="grid-template-columns:'+days.map((d,i)=>off===0&&i<todayI?'minmax(0,.35fr)':'minmax(0,1fr)').join(' ')+'">'+days.map((d,i)=>wdayHTML(d,k,w[i],off===0&&i<todayI,off===0&&i===todayI,share)).join('')+'</div></section>';
+    const from=off===0?Math.max(0,todayI):0,idx=[0,1,2,3,4].filter(i=>i>=from);
+    const days=idx.map(i=>addD(base,off+i)),tot=sum(flat(w)),left=share*idx.length;
+    return '<section class="wl wl-'+k+'"><div class="wlh"><i></i><b>'+label+'</b><span>'+fD(days[0])+(days.length>1?' – '+fD(days[days.length-1]):'')+'</span>'+wcapHTML(tot,left,idx.length<5)+'</div>'+
+      '<div class="wdays" style="grid-template-columns:repeat('+days.length+',minmax(0,1fr))">'+idx.map((i,j)=>wdayHTML(days[j],k,w[i],false,off===0&&i===todayI,share)).join('')+'</div></section>';
   };
   h+=lane('this','This week',L.this,0)+lane('next','Next week',L.next,7);
   if(S.hideLater)h+='<button type="button" class="wl wl-later wlfold" data-act="wk-later"><i></i><b>Later</b><span>'+L.later.length+' task'+(L.later.length===1?'':'s')+' hidden'+(sum(L.later)?' · '+fTot(sum(L.later)):'')+'</span><small>Show</small></button>';
@@ -1284,11 +1326,11 @@ function weekHTML(mine){
 /* Drag a card to a day (or to Later). Whole cards drag; buttons still click. */
 function wClear(){document.querySelectorAll('[data-drop].over').forEach(z=>z.classList.remove('over'));}
 document.addEventListener('dragstart',e=>{
-  const c=e.target.closest&&e.target.closest('.wcard');if(!c)return;
+  const c=e.target.closest&&e.target.closest('.wcard,.wrow');if(!c)return;
   WDRAG=c.getAttribute('data-id');c.classList.add('dragging');
   try{e.dataTransfer.setData('text/plain',WDRAG);e.dataTransfer.effectAllowed='move';}catch(x){}
 });
-document.addEventListener('dragend',()=>{document.querySelectorAll('.wcard.dragging').forEach(c=>c.classList.remove('dragging'));wClear();WDRAG=null;if(S.reRender&&!DRAG)render();});
+document.addEventListener('dragend',()=>{document.querySelectorAll('.wcard.dragging,.wrow.dragging').forEach(c=>c.classList.remove('dragging'));wClear();WDRAG=null;if(S.reRender&&!DRAG)render();});
 document.addEventListener('dragover',e=>{
   if(!WDRAG)return;
   const z=e.target.closest&&e.target.closest('[data-drop]');
