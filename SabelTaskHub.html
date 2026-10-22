@@ -542,6 +542,15 @@ html.light .wl-late{--lt:rgba(217,45,32,.05)}html.light .wl-this{--lt:rgba(217,4
 .wrow .w3{flex-wrap:nowrap;justify-content:flex-end}
 .wrow .west{justify-self:center}
 .wl-late .hmore{border-top:1px solid var(--line)}
+/* Overdue: one box per client, tasks listed underneath */
+.odboxes{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(340px,1fr);gap:10px;padding:12px;overflow-x:auto;align-items:start;scrollbar-width:thin}
+.odbox{border:1px solid var(--line2);border-radius:12px;background:var(--surface);overflow:hidden}
+.odh{display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid var(--line);background:var(--surface2)}
+.odn{font-family:Archivo,sans-serif;font-weight:700;font-size:14.5px;color:var(--text)}
+.odn .tsq{margin-right:7px;vertical-align:middle;position:relative;top:-1px}
+.odh small{margin-left:auto;font-size:12.5px;color:var(--mute)}
+.odmore{display:block;width:100%;padding:7px;font-size:12.5px;font-weight:600;color:var(--mute);border-top:1px solid var(--line);text-align:center}
+.odmore:hover{color:var(--text);background:var(--surface2)}
 @media(max-width:1100px){
   .wrow{grid-template-columns:150px 52px minmax(0,1fr) auto 56px;row-gap:6px}
   .wrow .w3{grid-column:1/-1;flex-wrap:wrap;justify-content:flex-start;padding-left:222px}
@@ -552,6 +561,24 @@ html.light .wl-late{--lt:rgba(217,45,32,.05)}html.light .wl-this{--lt:rgba(217,4
   .wrow .avs{display:none}
   .wrt{grid-column:1/-1;grid-row:2;white-space:normal}
   .wrow .w3{grid-row:3;padding-left:0}
+  .odboxes{padding:10px 8px;grid-auto-columns:minmax(82vw,1fr)}.odh{padding:9px 14px}
+}
+/* Overdue kanban: inside a client column each task stacks: date and hours, title, buttons.
+   Three-class selectors so the one-line .wrow rules (and their breakpoints) never apply here. */
+.odboxes .wrow.nc{grid-template-columns:auto minmax(0,1fr) auto auto;row-gap:5px;column-gap:8px;padding:10px 14px}
+.odboxes .wrow.nc .wdue{grid-column:1;grid-row:1}
+.odboxes .wrow.nc .avs{grid-column:3;grid-row:1}
+.odboxes .wrow.nc .west{grid-column:4;grid-row:1}
+.odboxes .wrow.nc .wrt{grid-column:1/-1;grid-row:2;white-space:normal}
+.odboxes .wrow.nc .w3{grid-column:1/-1;grid-row:3;flex-wrap:wrap;justify-content:flex-start;padding-left:0}
+.odh{flex-wrap:wrap}
+.odboxes .wrt .tag{white-space:nowrap;display:inline-block}
+.odboxes .wrow.nc .w3{gap:4px}
+.odboxes .wb{padding:2px 7px}
+/* Buttons appear on hover (or keyboard focus) so more tasks fit on screen. Touch screens have no hover: they keep them. */
+@media(hover:hover){
+  .odboxes .wrow.nc .w3,.wcard .w3{display:none}
+  .odboxes .wrow.nc:hover .w3,.odboxes .wrow.nc:focus-within .w3,.wcard:hover .w3,.wcard:focus-within .w3{display:flex}
 }
 /* overdue clean-up under a row, and the Home banner */
 .odq{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 20px 12px 56px;background:rgba(225,6,0,.06)}
@@ -1132,7 +1159,7 @@ function audHTML(t){
    replaces the tracker date in this hub only: the client tracker keeps its plan.
    Only function declarations and lets here, because this file runs before views.js. */
 const DEFAULT_CAP=30;   // hours a week for task work until the person sets their own
-const LATE_CAP=12;     // overdue rows shown before "Show all", so the week stays in view
+const LATE_CAP=3;      // overdue rows per client box before "Show N more", so the week stays in view
 let WDRAG=null;
 
 /* Monday of the week on screen as "this week". At the weekend that is the coming one. */
@@ -1268,11 +1295,11 @@ function wcardHTML(t,lane){
 /* The project type as a small coloured square (none when the type is unknown). */
 function tsq(t){const c=tyc(t);return c?'<i class="tsq'+c+'" title="'+esc(typeOf(t))+'" aria-hidden="true"></i>':'';}
 /* Overdue triage reads fastest as one line: client, due, title, hours, actions. Rows drag onto a day too. */
-function wrowHTML(t){
+function wrowHTML(t,inBox){
   const est=fEst(t.est),showOwner=S.who==='Everyone';
   const st=t.status==='In Progress'?'<span class="tag blue">In progress</span>':t.status==='Blocked'?'<span class="tag red">Blocked</span>':'';
-  return '<div class="wrow'+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" title="Drag onto a day, or use the buttons">'+
-    '<b class="wcl">'+tsq(t)+esc(clientOf(t))+'</b>'+
+  return '<div class="wrow'+(inBox?' nc':'')+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" title="Drag onto a day, or use the buttons">'+
+    (inBox?'':'<b class="wcl">'+tsq(t)+esc(clientOf(t))+'</b>')+
     '<span class="wdue late">'+fD(t.end)+'</span>'+
     '<button type="button" class="wrt" data-act="open">'+esc(t.title)+st+'</button>'+
     '<span class="avs">'+(showOwner?av(t.owner,true):'')+'</span>'+   /* always present, so every row has the same columns */
@@ -1282,6 +1309,18 @@ function wrowHTML(t){
       '<button type="button" class="wb" data-act="od-tmrw" title="Do it tomorrow">Tmrw</button>'+
       '<button type="button" class="wb am" data-act="od-next" title="Move to Monday next week">Next wk</button>'+
       '<button type="button" class="wb" data-act="od-nn" title="Send to '+COORD+' to confirm and close">Not needed</button></span></div>';
+}
+/* Overdue grouped into one box per client, oldest overdue client first, tasks oldest first. */
+function lateBoxesHTML(late){
+  const g={};late.forEach(t=>{(g[ckey(t)]=g[ckey(t)]||[]).push(t);});
+  const keys=Object.keys(g).sort((a,b)=>(g[a][0].end-g[b][0].end)||(g[b].length-g[a].length)||cLabel(a).localeCompare(cLabel(b)));
+  return keys.map(k=>{
+    const rows=g[k],hrs=rows.reduce((a,t)=>a+(+t.est||0),0),open=S.more['od:'+k],cap=open?rows.length:LATE_CAP;
+    return '<div class="odbox"><div class="odh"><span class="odn">'+tsq(rows[0])+esc(cLabel(k))+'</span>'+
+      '<span class="cchip red">'+rows.length+' overdue</span>'+(hrs?'<small>'+fTot(hrs)+'</small>':'')+'</div>'+
+      '<div class="wrows">'+rows.slice(0,cap).map(t=>wrowHTML(t,true)).join('')+'</div>'+
+      (rows.length>cap?'<button type="button" class="odmore" data-act="more" data-k="od:'+esc(k)+'">Show '+(rows.length-cap)+' more</button>':'')+'</div>';
+  }).join('');
 }
 function wdayHTML(d,lane,cards,past,isToday,share){
   const h=cards.reduce((a,t)=>a+(+t.est||0),0),over=share&&h>share+0.01;
@@ -1308,10 +1347,9 @@ function weekHTML(mine){
   h+='<div class="wbar">'+(me?'<label class="wcapset">Hours for task work a week <input type="number" min="1" max="80" step="0.5" data-sel="cap" value="'+cap+'" aria-label="Hours for task work a week">h</label>'
       :'<span class="wcapset">Team hours for task work: <b>'+fTot(cap)+'</b> a week</span>')+
     '<button type="button" class="pb sm'+(S.hideLater?' on':'')+'" data-act="wk-later" aria-pressed="'+S.hideLater+'">'+(S.hideLater?'Show later':'Hide later')+'</button>'+
-    '<span class="whint">Drag a card to another day, or use its buttons. Dates here are '+(me?'your':'the team’s')+' working plan; the client tracker keeps its own.</span></div>';
+    '<span class="whint">Hover a task for its buttons, or drag it to another day. Dates here are '+(me?'your':'the team’s')+' working plan; the client tracker keeps its own.</span></div>';
   if(L.late.length)h+='<section class="wl wl-late"><div class="wlh"><i></i><b>Overdue</b><span>Clear these first: done, a new day, or not needed.</span><small>'+L.late.length+' task'+(L.late.length===1?'':'s')+(sum(L.late)?' · '+fTot(sum(L.late)):'')+'</small></div>'+
-    '<div class="wrows">'+L.late.slice(0,S.more.wklate?L.late.length:LATE_CAP).map(wrowHTML).join('')+'</div>'+
-    (L.late.length>LATE_CAP&&!S.more.wklate?'<button type="button" class="hmore" data-act="more" data-k="wklate">Show all '+L.late.length+' overdue</button>':'')+'</section>';
+    '<div class="odboxes">'+lateBoxesHTML(L.late)+'</div></section>';
   /* Past days are gone from view: their tasks are overdue and sit in the Overdue list. */
   const lane=(k,label,w,off)=>{
     const from=off===0?Math.max(0,todayI):0,idx=[0,1,2,3,4].filter(i=>i>=from);
