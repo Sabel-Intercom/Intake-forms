@@ -420,6 +420,10 @@ textarea.need{outline:2px solid var(--red2);outline-offset:2px;border-radius:6px
 .hintro{padding:0 20px 12px;font-size:12.5px;color:var(--mute)}
 .hcl{padding:10px 20px 6px;border-top:1px solid var(--hl2);font-family:Archivo,sans-serif;font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);display:flex;gap:8px}
 .hcl span{color:var(--amber)}
+.pingbox{margin-top:12px;padding:12px;border:1px solid var(--line2);border-radius:12px;display:flex;flex-direction:column;gap:8px}
+.pingbox textarea{width:100%;min-height:110px;resize:vertical;font:inherit;font-size:13px}
+.pingr{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.pingr a.pb{text-decoration:none}
 .hcl .lk{margin-left:auto;text-transform:none;letter-spacing:0;font-family:'Source Sans 3',sans-serif;font-weight:400}
 .hnr{border-top:1px solid var(--hl2)}
 .hnr>summary{padding:12px 20px;font-size:13px;color:var(--mute);font-family:'Source Sans 3',sans-serif;font-weight:600}
@@ -524,6 +528,8 @@ function oneChase(d){
 }
 if(hashWho())S.who=hashWho();
 if(/^#summary$/i.test(location.hash||'')){S.who=COORD;S.tab='summary';}
+/* A task link from a Slack ping: #greg?task=<id> opens that task once the trackers have loaded. */
+{const m=/[?&]task=([^&]*)/.exec(location.hash||'');if(m){try{S.pendingOpen=decodeURIComponent(m[1]);S.flt='';}catch(e){}try{history.replaceState(null,'','#'+(hashWho()||S.who).toLowerCase());}catch(e){}}}
 {const ch=readChase();if(ch){S.who=COORD;S.tab='home';if(ch.batch)S.batch=ch.batch;else S.rem=ch;S.fromLoops=true;try{history.replaceState(null,'','#'+COORD.toLowerCase());}catch(e){}}}
 if(WHO.indexOf(S.who)<0)S.who='Everyone';
 
@@ -775,9 +781,13 @@ async function loadAll(){
   const health=[],tasks=[],clients={},parkedTitle={};
   const hb=hoursRes.data||{};
   HOURS_AT=hb.savedAt||0;
-  /* Notion rows by tracker key + title. The blob only carries OPEN Notion tasks. */
-  const nIdx={},nUsed={},drift={};
-  (hb.tasks||[]).forEach(n=>{(nIdx[n.project||'']=nIdx[n.project||'']||{})[norm(n.title)]=n;});
+  /* Notion rows by tracker key + title. The blob carries open rows, plus closed rows
+     (closed:true) on active trackers so an estimate survives Notion closing a row early. */
+  const nIdx={},cIdx={},nUsed={},drift={};
+  const nRows=(hb.tasks||[]).filter(n=>!n.closed);
+  nRows.forEach(n=>{(nIdx[n.project||'']=nIdx[n.project||'']||{})[norm(n.title)]=n;});
+  (hb.tasks||[]).forEach(n=>{if(n.closed)(cIdx[n.project||'']=cIdx[n.project||'']||{})[norm(n.title)]=n;});
+  const shutOf=(key,title)=>(cIdx[key]||{})[norm(title)]||null;
   if(!hoursRes.reached||!hb.tasks)health.push({id:'sys:hours-missing',t:'Durations are missing',d:'The Notion estimates could not be read, so every task shows without a duration.',fix:'Check the Sabel hours menu bar plugin is running on Nikki\'s Mac, then press Refresh here.'});
   else if(Date.now()-HOURS_AT>36*3600*1000)health.push({id:'sys:hours-stale',t:'Durations may be stale',d:'Notion estimates were last pushed '+ago(HOURS_AT)+'.',fix:'Open the Sabel hours menu bar plugin and let it run (it pushes Notion to the hub), then press Refresh here.'});
   /* Anything fixed in Notion only reaches the hub on the plugin's next push. */
@@ -793,9 +803,10 @@ async function loadAll(){
       legacy.forEach(p=>(p.tasks||[]).forEach(k=>{
         if(k.dep)return;
         const n=(nIdx[tr.key]||{})[norm(k.task)];if(n)nUsed[n.id]=1;
+        const sh=n?null:shutOf(tr.key,k.task);
         const b=dOf(k.end||k.start),a=dOf(k.start||k.end);
         tasks.push({id:tr.key+':'+k.id,key:tr.key,cid:k.id,pid:p.id,pillar:p.name||p.label||p.title||p.id,title:k.task,owner:who(k.owner),lead:'',
-          status:k.status||'Pending',start:a,end:b,late:b,est:n?n.est:null,notion:n||null,desc:'',bg:k.notes||'',card:'',tip:'',link:k.link||'',log:[],sub:[],stages:null,doneAt:''});
+          status:k.status||'Pending',start:a,end:b,late:b,est:n?n.est:(sh?sh.est:null),notion:n||null,shut:sh,desc:'',bg:k.notes||'',card:'',tip:'',link:k.link||'',log:[],sub:[],stages:null,doneAt:''});
       }));
       return;
     }
@@ -823,7 +834,8 @@ async function loadAll(){
     const hook=s=>{
       if(!s||!s.t||top[norm(s.t)])return s;
       const m=(nIdx[tr.key]||{})[norm(s.t)];
-      if(!m||nUsed[m.id])return s;
+      if(!m){const sh=s.s!=='Complete'&&s.est==null?shutOf(tr.key,s.t):null;return sh?Object.assign({},s,{est:sh.est,nid:sh.id}):s;}
+      if(nUsed[m.id])return s;
       nUsed[m.id]=1;
       if(s.s==='Complete'&&isTeam(m.owner))(drift[tr.key]=drift[tr.key]||[]).push(m);
       return Object.assign({},s,{est:m.est,nid:m.id});
@@ -835,6 +847,7 @@ async function loadAll(){
         if(t.parked){parkedTitle[tr.key+'|'+norm(t.t)]=1;return;}   // out of scope: never a to-do
         const cid=pid+'-s-'+i;
         const n=(nIdx[tr.key]||{})[norm(t.t)];if(n)nUsed[n.id]=1;
+        const sh=n?null:shutOf(tr.key,t.t);
         const dt=datesOf(t,trk,ws,n);
         const ai=t.phases&&t.phases.length?activeStage(t):-1;
         const sub=Array.isArray(t.sub)?t.sub.map(hook):[];
@@ -844,7 +857,7 @@ async function loadAll(){
         const stepEst=openEst(stages?[].concat.apply([],stages.map(g=>g.sub)):sub);
         tasks.push({id:tr.key+':'+cid,key:tr.key,cid,pid,pillar:trk.pillars[pid]||pid,title:t.t,owner:who(t.o),lead:who(t.lead||''),
           status:stt[cid]||t.s||'Pending',start:dt.start,end:dt.end,late:dt.late,wk:dt.wk||0,wkEnd:dt.wkEnd||0,
-          est:n?n.est:(t.hrs||stepEst||null),notion:n||null,desc:t.desc||'',bg:t.notes||'',card:cn[cid]||'',tip:t.tip||'',link:t.link||cl[cid]||'',
+          est:n?n.est:(sh?sh.est:(t.hrs||stepEst||null)),notion:n||null,shut:sh,desc:t.desc||'',bg:t.notes||'',card:cn[cid]||'',tip:t.tip||'',link:t.link||cl[cid]||'',
           log:Array.isArray(t.log)?t.log:[],sub,stages,
           milestone:t.kind==='milestone',doneAt:t.doneAt||''});
       });
@@ -862,7 +875,7 @@ async function loadAll(){
   /* A Notion task may carry a client name but no tracker key (the row was never
      stamped). If a tracker client has that name, file the task under it. */
   const byName={};Object.keys(clients).forEach(k=>{byName[norm(clients[k].name)]=k;});
-  (hb.tasks||[]).forEach(n=>{
+  nRows.forEach(n=>{
     const o=who(n.owner);
     if(!clients[n.project]&&n.client&&byName[norm(n.client)])n=Object.assign({},n,{project:byName[norm(n.client)]});
     if(clients[n.project]){
@@ -893,9 +906,19 @@ async function loadAll(){
       fix:(near?'If it is the same task, make the two titles match exactly (rename the Notion row or the tracker task). ':'If it belongs on the tracker, add it with exactly this title. ')+'If it is a call action that does not need a tracker line, press Not required.',
       where:[{l:'Open Notion row',u:notionUrl(n.id)},{l:'Open tracker',u:clients[k].url}]});
   }));
-  const nOpen={};(hb.tasks||[]).forEach(n=>{if(clients[n.project])(nOpen[n.project]=nOpen[n.project]||[]).push(n.title);});
+  const nOpen={};nRows.forEach(n=>{if(clients[n.project])(nOpen[n.project]=nOpen[n.project]||[]).push(n.title);});
   /* Same title filed under a call (call:*) for this client: often the same task twice. */
-  const callDup={};(hb.tasks||[]).forEach(n=>{if(/^call:/.test(n.project||'')&&n.client)(callDup[norm(n.client)+'|'+norm(n.title)]=callDup[norm(n.client)+'|'+norm(n.title)]||[]).push(n);});
+  const callDup={};nRows.forEach(n=>{if(/^call:/.test(n.project||'')&&n.client)(callDup[norm(n.client)+'|'+norm(n.title)]=callDup[norm(n.client)+'|'+norm(n.title)]||[]).push(n);});
+  /* Closed in Notion, still open on the tracker. Usually the Reclaim sync closing a row
+     once its booked time has passed, so Reclaim stops scheduling work that is not done.
+     The duration shown comes from the closed row. */
+  tasks.forEach(t=>{if(t.src||t.status==='Complete'||!isTeam(t.owner)||!t.shut)return;
+    const r=t.shut.sync==='Completed';
+    health.push({id:'nshut:'+t.id,client:clients[t.key].name,kind:'Closed in Notion',t:t.title,
+      d:'Open tracker task for '+t.owner+(t.pillar?' in '+t.pillar:'')+', but its Notion row is '+(t.shut.status||'Complete')+(r?', closed by the Reclaim sync':'')+', so Reclaim no longer books time for it. The '+t.shut.est+'h shown here comes from that closed row.',
+      fix:'If the work is done, tick it Complete on the tracker. If not, set the Notion row back to Pending so Reclaim schedules the rest.',
+      where:[{l:'Open Notion row',u:notionUrl(t.shut.id)},{l:'Open tracker',u:clients[t.key].url}]});
+  });
   tasks.forEach(t=>{if(t.src||t.status==='Complete'||!isTeam(t.owner)||t.est)return;
     const dup=callDup[norm(clients[t.key].name)+'|'+norm(t.title)]||[];
     const dupTxt=dup.length?' There is also a copy of this task in Notion from a client call'+(dup[0].est?' with '+dup[0].est+'h on it':'')+'; it is probably the same piece of work, so close one and keep the estimate on the other.':'';
@@ -1327,6 +1350,33 @@ function clearBack(id){
   const o=ov(id);o.back=null;o.bAt=Date.now();
   commit();toast('Moved back into the list');
 }
+/* ── Ping in Slack: copy a ready message and open a DM with the owner (sent by Nikki, from her own Slack) ── */
+const SLACK_DOMAIN='https://scss-group.slack.com';
+const SLACK_ID={Chris:'U06D5GK7Z7C',Greg:'U0AJ75FDZ0B',Richard:'U01SWH4SN3U'};
+const taskLink=t=>BASE+'SabelTaskHub.html#'+String(t.owner).toLowerCase()+'?task='+encodeURIComponent(t.id);
+function pingText(t){
+  const d=t.late||t.end,n=dueIn(t);
+  const due=d?' Due '+fD(d)+(n!==null&&n<0?' (overdue)':n===0?' (today)':'')+'.':'';
+  const c=CLIENTS[t.key],trk=c&&c.url?'\nTracker: '+c.url:'';
+  return 'Hi '+t.owner+', can you pick this up?\n*'+clientOf(t)+'*: '+t.title+(t.pillar?' ('+t.pillar+')':'')+'.'+due+'\nTask: '+taskLink(t)+trk;
+}
+function pingHTML(t){
+  if(S.ping!==t.id)return '';
+  return '<div class="pingbox"><div class="dl">Message to '+esc(t.owner)+'</div><textarea class="rin" data-ta="ping" rows="5">'+esc(S.pingTxt)+'</textarea>'+
+    '<div class="pingr"><a class="pb hand sm" data-act="ping-go" href="'+esc(SLACK_DOMAIN+'/app_redirect?channel='+SLACK_ID[t.owner])+'" target="_blank" rel="noopener">Copy and open Slack DM with '+esc(t.owner)+'</a>'+
+    '<button type="button" class="lk" data-act="ping-x">Cancel</button><span class="hint">Then paste into the DM (Cmd+V) and send.</span></div></div>';
+}
+function pingGo(id){
+  const t=findTask(id);if(!t)return;
+  const txt=S.pingTxt;
+  const done=ok=>{
+    addNote(ov(id),author(),'Pinged '+t.owner+' in Slack',false);
+    if(ok){S.ping=null;commit();toast('Copied. Paste it into the Slack DM (Cmd+V).');return;}
+    commit();const ta=document.querySelector('[data-ta="ping"]');if(ta){ta.focus();ta.select();}   /* copy blocked: leave the box open, text selected */
+    toast('Could not copy automatically. The message is selected: press Cmd+C, then paste it into Slack.');
+  };
+  try{navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false));}catch(e){done(false);}
+}
 function answer(id,keep){
   const t=findTask(id);if(!t)return;
   const txt=(S.deskDraft[id]||'').trim(),o=ov(id);
@@ -1458,8 +1508,10 @@ function actionsHTML(t){
   let h='<div class="acts"><button type="button" class="pb blue" data-act="start">'+(t.status==='In Progress'?'Pause':'Start')+'</button>';
   if(!t.stages||isDone(t))h+='<button type="button" class="pb green" data-act="done">'+(isDone(t)?'Reopen':'Mark done')+'</button>';
   h+='<button type="button" class="pb red" data-act="flag">Blocked · flag '+COORD+'</button>'+
+    (SLACK_ID[t.owner]&&!isDone(t)?'<button type="button" class="pb sm" data-act="ping">Ping in Slack</button>':'')+
     (t.back&&t.status!=='Parked'&&!isDone(t)?'<button type="button" class="pb sm" data-act="clearback" title="Take it out of '+COORD+' replied and back into the list">Clear '+COORD+' replied</button>':'')+'</div>';
   if(t.stages&&!isDone(t))h+='<div class="hint">Staged deliverable: it completes when every step is ticked.</div>';
+  h+=pingHTML(t);
   return h;
 }
 /* Our own steps tick here. A step the client owns is theirs to tick, on the tracker. */
@@ -1932,6 +1984,7 @@ function render(){
   const hd=app.querySelector('.health');if(hd)S.healthOpen=hd.open;
   const hn=app.querySelector('.hnr');if(hn)S.nrOpen=hn.open;
   const y=window.scrollY,db=app.querySelector('.db'),dby=db?db.scrollTop:0;
+  if(!FIRST&&S.pendingOpen){const pt=findTask(S.pendingOpen);if(pt){S.open=pt.id;S.scrollOpen=true;}S.pendingOpen=null;}
   if(S.open&&!findTask(S.open))S.open=null;
   let h=headerHTML();
   if(FIRST){
@@ -1947,6 +2000,7 @@ function render(){
   if(ta){const el=app.querySelector('[data-ta="'+ta.replace(/"/g,'')+'"]');if(el){el.focus();try{el.setSelectionRange(pos[0],pos[1]);}catch(e){}}}
   const nd=app.querySelector('.db');if(nd)nd.scrollTop=dby;
   window.scrollTo(0,y);
+  if(S.scrollOpen){S.scrollOpen=false;const el=[].slice.call(document.querySelectorAll('.row,.card')).find(r=>r.getAttribute('data-id')===S.open);if(el)el.scrollIntoView({block:'center'});}
 }
 function renderFail(){
   document.getElementById('app').innerHTML=headerHTML()+'<div class="trow"><div><div class="eye">Could not load</div><h2>No answer</h2></div></div><div class="list"><div class="blank"><b>The tracker registry did not answer.</b>Check your connection and press Refresh.</div></div>'+footHTML();
@@ -2010,6 +2064,9 @@ document.addEventListener('click',e=>{
     case 'done':if(t)act2(id,isDone(t)?'Pending':'Complete');break;
     case 'notmine':notMine(id);break;
     case 'clearback':clearBack(id);break;
+    case 'ping':if(t){S.ping=S.ping===id?null:id;S.pingTxt=pingText(t);render();}break;
+    case 'ping-x':S.ping=null;render();break;
+    case 'ping-go':pingGo(id);break;
     case 'b-who':{const b=S.batch[+a.closest('[data-bi]').getAttribute('data-bi')],p=a.getAttribute('data-p');b.to=b.to[0]===p?[]:[p];S.batchErr='';render();break;}
     case 'b-del':S.batch.splice(+a.closest('[data-bi]').getAttribute('data-bi'),1);if(!S.batch.length)S.batch=null;render();break;
     case 'b-clear':S.batch=null;S.batchErr='';S.fromLoops=false;render();break;
@@ -2058,6 +2115,7 @@ document.addEventListener('input',e=>{
   else if(ta==='clname')S.clDraft=e.target.value;
   else if(ta==='rtitle')S.rem.title=e.target.value;
   else if(ta==='rnote')S.rem.note=e.target.value;
+  else if(ta==='ping')S.pingTxt=e.target.value;
   else if(ta==='note'){if(S.editNote)S.editNote.txt=e.target.value;}
   else S.deskDraft[ta.slice(5)]=e.target.value;
 });
