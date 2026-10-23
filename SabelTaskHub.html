@@ -460,125 +460,144 @@ html.light .cpop,html.light .drawer{box-shadow:0 24px 50px rgba(16,24,40,.18)}
 html.light .card.late{box-shadow:none}
 html.light .sq{box-shadow:none}
 @media(prefers-reduced-motion:reduce){.skel,.foot .live.busy i{animation:none}}
-/* ── My week ── this week red, next week amber, later green */
-.week{padding:16px 22px 28px;display:flex;flex-direction:column;gap:16px}
-.wbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.wcapset{font-size:13px;color:var(--soft);display:inline-flex;align-items:center;gap:6px}
-.wcapset input{width:62px;padding:5px 8px;border:1px solid var(--line2);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;font-weight:700;text-align:right}
-.wbar .pb.on{border-color:var(--green);color:var(--green)}
-.whint{font-size:12.5px;color:var(--mute);flex:1;min-width:220px}
-.wl{--lc:var(--red2);--lt:rgba(225,6,0,.07);border:1px solid var(--line2);border-left:4px solid var(--lc);border-radius:14px;background:var(--surface);overflow:hidden}
-.wl-late{--lc:var(--red2);--lt:rgba(225,6,0,.12);border-color:rgba(225,6,0,.45);border-left-color:var(--red2);background:linear-gradient(var(--lt),var(--lt)),var(--surface)}
-.wl-this{--lc:var(--red2);--lt:rgba(225,6,0,.07)}
-.wl-next{--lc:var(--amber);--lt:rgba(251,191,36,.08)}
-.wl-later{--lc:var(--green);--lt:rgba(74,222,128,.07)}
-html.light .wl-late{--lt:rgba(217,45,32,.05)}html.light .wl-this{--lt:rgba(217,45,32,.04)}html.light .wl-next{--lt:rgba(180,83,9,.06)}html.light .wl-later{--lt:rgba(21,128,61,.05)}
-.wlh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 18px;background:var(--lt);border-bottom:1px solid var(--line)}
-.wlh i{width:10px;height:10px;border-radius:50%;background:var(--lc)}
-.wlh b{font-family:Archivo,sans-serif;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--lc)}
-.wlh span{font-size:13px;color:var(--soft)}
-.wlh small{margin-left:auto;font-size:12.5px;color:var(--mute)}
-.wcap{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--mute)}
-.wcap b{color:var(--text);font-family:Archivo,sans-serif}
-.wcap i{display:inline-block;width:90px;height:6px;border-radius:99px;background:var(--line2);overflow:hidden}
-.wcap u{display:block;height:100%;background:var(--lc);text-decoration:none}
-.wcap.over,.wcap.over b{color:var(--red2);font-weight:700}
-.wcap.over u{background:var(--red2)}
-.wlfold{display:flex;align-items:center;gap:10px;width:100%;padding:11px 18px;text-align:left;background:linear-gradient(var(--lt),var(--lt)),var(--surface)}
-.wlfold i{width:10px;height:10px;border-radius:50%;background:var(--lc)}
-.wlfold b{font-family:Archivo,sans-serif;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--lc)}
-.wlfold span{font-size:13px;color:var(--soft)}
-.wlfold small{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--lc)}
-.wdays{display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
-.wcol{border-left:1px solid var(--line);min-height:120px;display:flex;flex-direction:column;transition:background .12s ease}
-.wcol:first-child{border-left:none}
-.wcol.past{opacity:.45}
-.wcol.past .wch span,.wcol.past .wempty{display:none}
-.wcol.now{background:var(--lt)}
-.wch{display:flex;align-items:baseline;gap:6px;padding:9px 10px 7px;border-bottom:1px dashed var(--line)}
-.wch b{font-family:Archivo,sans-serif;font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--text)}
-.wcol.now .wch b{color:var(--lc)}
-.wch span{font-size:12px;color:var(--mute)}
-.wch em{margin-left:auto;font-style:normal;font-family:Archivo,sans-serif;font-weight:700;font-size:12px;color:var(--soft)}
+/* ── My week: split layout (handoff "My week v3 – split", 23 Oct 2026). Overdue rail on the left,
+   This week / Next week / Later on the right. Red = overdue or over capacity; lane identity is the
+   8px header dot; client type is the .tsq square; client names are --text. */
+.whead{display:flex;align-items:center;gap:14px 24px;flex-wrap:wrap;padding:14px 22px 12px}
+.wht{display:flex;align-items:baseline;gap:10px;min-width:0}
+.wht h2{font-family:Archivo,sans-serif;font-weight:800;font-size:22px;letter-spacing:-.03em;color:var(--text);line-height:1}
+.whr{font-size:13px;color:var(--mute)}
+.whs{font-size:13px;color:var(--soft);white-space:nowrap}
+.whx{margin-left:auto;display:flex;align-items:center;gap:16px;flex-wrap:nowrap}
+.wcapline{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--mute);white-space:nowrap}
+.wcapline b{font-family:Archivo,sans-serif;font-weight:700;color:var(--text)}
+.wbar5{display:inline-block;width:70px;height:5px;border-radius:99px;background:var(--line2);overflow:hidden}
+.wbar5 u{display:block;height:100%;text-decoration:none}
+.wcapset{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mute);white-space:nowrap}
+.wcapset b{color:var(--text)}
+.wcapset input{width:54px;padding:4px 7px;border:1px solid var(--line2);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;font-weight:700;text-align:right;outline:none}
+.wsplit{display:grid;grid-template-columns:minmax(250px,300px) minmax(0,1fr);gap:14px;align-items:start;padding:0 22px 22px}
+.wsplit .tag{border-radius:6px;padding:0 7px;font-size:11.5px;font-weight:600;vertical-align:1px;white-space:nowrap;display:inline-block}
+/* left rail: overdue */
+.wrail{min-width:0;position:sticky;top:12px;max-height:calc(100vh - 130px);display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(225,6,0,.45);border-radius:14px;background:var(--surface)}
+.wrh{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(225,6,0,.08)}
+.wrh i{width:8px;height:8px;border-radius:50%;background:var(--red2)}
+.wrh b{font-family:Archivo,sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--red2)}
+.wrh small{margin-left:auto;font-size:12.5px;color:var(--soft)}
+.wrlist{overflow:auto;flex:1;min-height:0}
+.wrg{border-top:1px solid var(--line)}
+.wrg:first-child{border-top:none}
+.wrg.dragging{opacity:.45}
+.odh{display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;cursor:grab}
+.odh:hover{background:var(--surface2)}
+.odh:active{cursor:grabbing}
+.odh .tsq{flex-shrink:0}
+.odn{font-family:Archivo,sans-serif;font-weight:700;font-size:13.5px;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.odh .cchip{font-size:12px;padding:1px 8px;white-space:nowrap}
+.odl{margin-left:auto;font-size:12px;color:var(--mute);white-space:nowrap}
+.odc{font-size:10px;color:var(--faint);transition:transform .15s ease}
+.odh.open .odc{transform:rotate(90deg)}
+.wrail .wrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:3px 9px;align-items:baseline;padding:8px 14px 8px 30px;border-top:1px dashed var(--line);cursor:grab}
+.wrail .wrow:hover,.wrail .wrow.sel{background:var(--surface2)}
+.wrow.dragging{opacity:.4}
+.wrail .wdue{font-size:12px;font-weight:700;color:var(--red2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.wrt{min-width:0;text-align:left;font-size:13.5px;font-weight:600;color:var(--text);line-height:1.3}
+.wrt:hover{text-decoration:underline}
+.wrail .west{font-family:Archivo,sans-serif;font-weight:700;font-size:12px;color:var(--text);white-space:nowrap;border:none;padding:0}
+.wrail .west.none{color:var(--faint)}
+.wrail .w3{grid-column:1/-1;padding-top:2px}
+.wrnone{padding:28px 14px;text-align:center;font-size:13px;color:var(--faint)}
+.wrf{padding:8px 14px;border-top:1px solid var(--line);font-size:12px;color:var(--faint)}
+/* right: calendars */
+.wcals{min-width:0;display:flex;flex-direction:column;gap:12px}
+.wsec{border:1px solid var(--line2);border-radius:14px;background:var(--surface);overflow:hidden}
+.wsh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 16px;border-bottom:1px solid var(--line)}
+.wsh>i,.wlh>i{width:8px;height:8px;border-radius:50%}
+.wsh>b,.wlh>b{font-family:Archivo,sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--text)}
+.wsh>span,.wlh>span{font-size:13px;color:var(--mute)}
+.wsh>span.wpast{font-size:12.5px;color:var(--faint);border-left:1px solid var(--line2);padding-left:10px}
+.wsh .wcapline{margin-left:auto}
+.wdays{display:grid}
+.wdays.this{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.wdays.next{grid-template-columns:repeat(5,minmax(0,1fr))}
+.wcol{border-left:1px solid var(--line);margin-left:-1px;display:flex;flex-direction:column;min-width:0}
+.wdays.this .wcol{min-height:150px}
+.wdays.next .wcol{min-height:120px}
+.wch{display:flex;align-items:baseline;gap:7px;padding:8px 12px 6px;border-bottom:2px solid var(--line)}
+.wch b{font-family:Archivo,sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--body)}
+.wch span{font-size:12.5px;color:var(--mute)}
+.wch em{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-style:normal;font-family:Archivo,sans-serif;font-weight:700;font-size:12px;color:var(--soft)}
+.wch em.none{color:var(--faint)}
 .wch em.over{color:var(--red2)}
-.wcc{display:flex;flex-direction:column;gap:8px;padding:8px;flex:1}
-.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;padding:12px}
-[data-drop].over{outline:2px dashed var(--lc);outline-offset:-4px;background:var(--lt)}
-.wl-later[data-drop].over{outline-offset:-6px}
-.wempty{border:1px dashed var(--line2);border-radius:10px;padding:14px 8px;font-size:12px;color:var(--faint);text-align:center}
-.wcard{--cc:var(--red2);display:flex;flex-direction:column;gap:6px;background:var(--surface2);border:1px solid var(--line2);border-left:3px solid var(--cc);border-radius:10px;padding:9px 10px 8px;cursor:grab;transition:border-color .15s ease,box-shadow .15s ease}
-.wcard:hover{border-color:var(--hl4);border-left-color:var(--cc);box-shadow:0 10px 24px -18px rgba(0,0,0,.6)}
-.wcard.sel{border-color:var(--hl5);border-left-color:var(--cc)}
+.wch em i{display:inline-block;width:34px;height:4px;border-radius:99px;background:var(--line2);overflow:hidden}
+.wch em u{display:block;height:100%;background:currentColor;text-decoration:none}
+.wcol.now .wch{border-bottom-color:var(--red)}
+.wcol.now .wch b{color:var(--red2)}
+.wdays.next .wch{gap:6px;padding:8px 10px 6px;border-bottom:1px dashed var(--line)}
+.wdays.next .wch b,.wdays.next .wch span{font-size:12px}
+.wcc{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;padding:8px;flex:1;align-content:start}
+.wdays.next .wcc{display:flex;flex-direction:column;gap:6px;padding:7px}
+[data-drop].over{outline:2px dashed var(--hl5);outline-offset:-4px;background:var(--surface2)}
+.wempty{border:1px dashed var(--line2);border-radius:10px;padding:16px 8px;font-size:12px;color:var(--faint);text-align:center}
+.wdays.next .wempty{border-radius:9px;padding:12px 8px}
+/* cards */
+.wcard{display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--surface2);border:1px solid var(--line2);border-radius:10px;padding:8px 10px 7px;cursor:grab;transition:border-color .15s ease}
+.wcard:hover{border-color:var(--hl4)}
+.wcard.sel{border-color:var(--hl5)}
 .wcard.dragging{opacity:.4}
-.wcard.l-next{--cc:var(--amber)}.wcard.l-later{--cc:var(--green)}
-.wcard.l-late{background:var(--surface)}
-.w1{display:flex;align-items:center;gap:6px;min-width:0}
+.w1{display:flex;align-items:center;gap:7px;min-width:0}
 .wcl{font-family:Archivo,sans-serif;font-weight:700;font-size:12.5px;text-transform:none;letter-spacing:normal;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.west{font-family:Archivo,sans-serif;font-weight:700;font-size:11.5px;color:var(--text);border:1px solid var(--hl2);border-radius:99px;padding:1px 7px;white-space:nowrap}
-.west.none{color:var(--faint);border-style:dashed;font-weight:500}
-.wt{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.3}
+.west{font-family:Archivo,sans-serif;font-weight:700;font-size:11.5px;color:var(--text);border:1px solid var(--hl2);border-radius:99px;padding:0 7px;white-space:nowrap}
+.west.none{color:var(--faint)}
+.wt{font-size:14px;font-weight:600;color:var(--text);line-height:1.3}
 .w2{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:11.5px;color:var(--mute)}
-.wdue{font-weight:600;color:var(--soft)}.wdue.late{color:var(--red2);font-weight:700}
 .wmv{font-style:italic}
 .w3{display:flex;flex-wrap:wrap;gap:4px}
-.wb{border:1px solid var(--hl3);border-radius:99px;padding:2px 9px;font-size:11.5px;font-weight:700;color:var(--soft);background:transparent;line-height:1.5;transition:border-color .15s ease,color .15s ease}
-.wb:hover:not([disabled]){border-color:var(--hl5);color:var(--text)}
+.wcard .w3{padding-top:3px;border-top:1px dashed var(--line);margin-top:1px}
+.wcard.sm{gap:3px;border-radius:9px;padding:7px 9px}
+.wcard.sm .w1{gap:6px}
+.wcard.sm .tsq{width:7px;height:7px}
+.wcard.sm .wcl{font-size:12px;color:var(--body)}
+.wcard.sm .west{border:none;padding:0;color:var(--body)}
+.wcard.sm .wt{font-size:13px}
+.wcard.sm .w3{padding-top:4px;margin-top:0}
+/* action buttons */
+.wb{border:1px solid var(--hl3);border-radius:99px;padding:1px 9px;font-size:11.5px;font-weight:700;line-height:1.5;color:var(--soft);background:transparent;transition:border-color .15s ease,background .15s ease}
+.wb:hover:not([disabled]){border-color:var(--hl5);background:var(--raise)}
 .wb[disabled]{opacity:.35;cursor:default}
-.wb.ar{font-size:14px;padding:0 9px;line-height:1.35}
-.wb.ok{color:var(--green);border-color:rgba(74,222,128,.45)}
+.wb.ar{font-size:13px;padding:0 9px}
+.wb.ok,.wb.gr{color:var(--green);border-color:rgba(74,222,128,.45)}
 .wb.am{color:var(--amber);border-color:rgba(251,191,36,.5)}
-.wb.gr{color:var(--green);border-color:rgba(74,222,128,.45)}
-.wfoot{font-size:13px;color:var(--mute);padding:0 4px}
-.wrows{display:flex;flex-direction:column}
-.wrow{display:grid;grid-template-columns:170px 58px minmax(0,1fr) auto 56px 318px;gap:12px;align-items:center;padding:8px 18px;border-top:1px solid var(--line);cursor:grab;transition:background .12s ease}
-.wrow:first-child{border-top:none}
-.wrow:hover,.wrow.sel{background:var(--surface2)}
-.wrow.dragging{opacity:.4}
-.wrow .wcl{flex:none}
-.wrow .wdue{font-size:12.5px;white-space:nowrap}
-.wrt{min-width:0;text-align:left;font-size:14px;font-weight:600;color:var(--text);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.wrt:hover{text-decoration:underline}
-.wrt .tag{margin-left:8px;vertical-align:1px}
-.wrow .w3{flex-wrap:nowrap;justify-content:flex-end}
-.wrow .west{justify-self:center}
-.wl-late .hmore{border-top:1px solid var(--line)}
-/* Overdue: one box per client, tasks listed underneath */
-.odboxes{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(340px,1fr);gap:10px;padding:12px;overflow-x:auto;align-items:start;scrollbar-width:thin}
-.odbox{border:1px solid var(--line2);border-radius:12px;background:var(--surface);overflow:hidden}
-.odh{display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid var(--line);background:var(--surface2)}
-.odn{font-family:Archivo,sans-serif;font-weight:700;font-size:14.5px;color:var(--text)}
-.odn .tsq{margin-right:7px;vertical-align:middle;position:relative;top:-1px}
-.odh small{margin-left:auto;font-size:12.5px;color:var(--mute)}
-.odmore{display:block;width:100%;padding:7px;font-size:12.5px;font-weight:600;color:var(--mute);border-top:1px solid var(--line);text-align:center}
-.odmore:hover{color:var(--text);background:var(--surface2)}
-@media(max-width:1100px){
-  .wrow{grid-template-columns:150px 52px minmax(0,1fr) auto 56px;row-gap:6px}
-  .wrow .w3{grid-column:1/-1;flex-wrap:wrap;justify-content:flex-start;padding-left:222px}
+/* Later: folded strip, a drop target; opened it lists one line per task */
+.wlh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;padding:9px 16px;text-align:left}
+.wlh:hover{background:var(--surface2)}
+.wlh>i{background:var(--green)}
+.wlh small{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--soft)}
+.wlater .wrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;align-items:center;padding:9px 16px;border-top:1px solid var(--line);cursor:grab}
+.wlater .wrow:hover,.wlater .wrow.sel{background:var(--surface2)}
+.wll{min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.wll .wcl{flex:none;color:var(--body)}
+.wll .wcl .tsq{margin-right:6px;vertical-align:middle;position:relative;top:-1px}
+.wll .wrt{font-size:14px}
+.wll .wdue{font-size:12.5px;color:var(--mute)}
+.wlr{display:flex;align-items:center;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.wlr .west{border:none;padding:0;font-size:12px;min-width:36px;text-align:right}
+.wfoot{font-size:12.5px;color:var(--mute);padding:0 4px}
+/* Buttons show on hover, keyboard focus or when the task is open. Touch screens have no hover: they keep them. */
+@media(hover:hover){
+  .wrail .wrow .w3,.wcard .w3{display:none}
+  .wrail .wrow:hover .w3,.wrail .wrow:focus-within .w3,.wrail .wrow.sel .w3,.wcard:hover .w3,.wcard:focus-within .w3,.wcard.sel .w3{display:flex}
+}
+@media(max-width:800px){
+  .wsplit{grid-template-columns:minmax(0,1fr)}
+  .wrail{position:static;max-height:none}
+  .whx{margin-left:0;flex-wrap:wrap}
 }
 @media(max-width:720px){
-  .wrow{grid-template-columns:minmax(0,1fr) auto auto;padding:10px 14px}
-  .wrow .wcl{grid-column:1;grid-row:1}.wrow .wdue{grid-column:2;grid-row:1}.wrow .west{grid-column:3;grid-row:1;justify-self:end}
-  .wrow .avs{display:none}
-  .wrt{grid-column:1/-1;grid-row:2;white-space:normal}
-  .wrow .w3{grid-row:3;padding-left:0}
-  .odboxes{padding:10px 8px;grid-auto-columns:minmax(82vw,1fr)}.odh{padding:9px 14px}
-}
-/* Overdue kanban: inside a client column each task stacks: date and hours, title, buttons.
-   Three-class selectors so the one-line .wrow rules (and their breakpoints) never apply here. */
-.odboxes .wrow.nc{grid-template-columns:auto minmax(0,1fr) auto auto;row-gap:5px;column-gap:8px;padding:10px 14px}
-.odboxes .wrow.nc .wdue{grid-column:1;grid-row:1}
-.odboxes .wrow.nc .avs{grid-column:3;grid-row:1}
-.odboxes .wrow.nc .west{grid-column:4;grid-row:1}
-.odboxes .wrow.nc .wrt{grid-column:1/-1;grid-row:2;white-space:normal}
-.odboxes .wrow.nc .w3{grid-column:1/-1;grid-row:3;flex-wrap:wrap;justify-content:flex-start;padding-left:0}
-.odh{flex-wrap:wrap}
-.odboxes .wrt .tag{white-space:nowrap;display:inline-block}
-.odboxes .wrow.nc .w3{gap:4px}
-.odboxes .wb{padding:2px 7px}
-/* Buttons appear on hover (or keyboard focus) so more tasks fit on screen. Touch screens have no hover: they keep them. */
-@media(hover:hover){
-  .odboxes .wrow.nc .w3,.wcard .w3{display:none}
-  .odboxes .wrow.nc:hover .w3,.odboxes .wrow.nc:focus-within .w3,.wcard:hover .w3,.wcard:focus-within .w3{display:flex}
+  .whead{padding:12px 12px 10px}.wsplit{padding:0 12px 18px}
+  .wdays.next{grid-template-columns:minmax(0,1fr)}
+  .wdays .wcol{border-left:none;margin-left:0;border-top:1px solid var(--line);min-height:0}
+  .wdays .wcol:first-child{border-top:none}
 }
 /* overdue clean-up under a row, and the Home banner */
 .odq{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 20px 12px 56px;background:rgba(225,6,0,.06)}
@@ -606,14 +625,8 @@ html.light .wl-late{--lt:rgba(217,45,32,.05)}html.light .wl-this{--lt:rgba(217,4
 .tsq{display:inline-block;width:8px;height:8px;border-radius:2px;background:currentColor;flex:none}
 .tsq.ty-build{color:var(--tyBuild)}.tsq.ty-mig{color:var(--tyMig)}.tsq.ty-both{color:var(--tyBoth)}.tsq.ty-audit{color:var(--tyAudit)}.tsq.ty-consult{color:var(--tyConsult)}
 .cl .tsq,.cgn .tsq,.wrow .wcl .tsq{margin-right:6px;vertical-align:middle;position:relative;top:-1px}
-@media(max-width:900px){
-  .wdays{grid-template-columns:minmax(0,1fr)!important}
-  .wcol{border-left:none;border-top:1px solid var(--line);min-height:0}.wcol:first-child{border-top:none}
-  .wcol.past{display:none}
-  .wcap{margin-left:0}
-}
 @media(max-width:720px){
-  .week{padding:14px 12px 24px}.lbar{padding:12px 12px 0}
+  .lbar{padding:12px 12px 0}
   .odq,.row.dr .odq{padding:0 14px 12px}
   .cgh{padding:12px 14px}.cgn{font-size:17px}
 }
@@ -656,15 +669,15 @@ const PK='sabel-taskhub-v1';
 
 /* ── state ──────────────────────────────────────────────────────────────── */
 /* localStorage holds UI state only: who, mode, the open task. */
-const S={who:'Everyone',mode:'home',open:null,draft:'',tag:false,audit:false,deskOpen:{},deskDraft:{},full:{},flt:'',editNote:null,delNote:'',rem:{title:'',note:'',due:'',to:[]},clEdit:'',clDraft:'',needQ:false,timeDraft:'',tab:'home',period:'week',group:'person',csel:{},cOpen:false,more:{},lgroup:'client',hideLater:false};   // csel: person -> [client keys] they have filtered to   // flt: ''|'late'|'today'|'coord'; client: ''|trackerKey|'none'
-try{const p=JSON.parse(localStorage.getItem(PK)||'{}');['who','mode','open','audit','tab','period','group','csel','lgroup','hideLater'].forEach(k=>{if(p[k]!==undefined)S[k]=p[k];});
+const S={who:'Everyone',mode:'home',open:null,draft:'',tag:false,audit:false,deskOpen:{},deskDraft:{},full:{},flt:'',editNote:null,delNote:'',rem:{title:'',note:'',due:'',to:[]},clEdit:'',clDraft:'',needQ:false,timeDraft:'',tab:'home',period:'week',group:'person',csel:{},cOpen:false,more:{},lgroup:'client',hideLater:false,laterOpen:false};   // csel: person -> [client keys] they have filtered to   // flt: ''|'late'|'today'|'coord'; client: ''|trackerKey|'none'
+try{const p=JSON.parse(localStorage.getItem(PK)||'{}');['who','mode','open','audit','tab','period','group','csel','lgroup','hideLater','laterOpen'].forEach(k=>{if(p[k]!==undefined)S[k]=p[k];});
   if(!p.hv){S.mode='home';S.tab='home';}   /* first visit since Home existed: land on it once */
 }catch(e){}
 if(['home','week','list','board'].indexOf(S.mode)<0)S.mode='home';
 if(['client','date'].indexOf(S.lgroup)<0)S.lgroup='client';
 if(['home','desk','summary'].indexOf(S.tab)<0)S.tab='home';
 if(!S.csel||typeof S.csel!=='object')S.csel={};
-function save(){try{localStorage.setItem(PK,JSON.stringify({hv:1,who:S.who,mode:S.mode,open:S.open,audit:S.audit,tab:S.tab,period:S.period,group:S.group,csel:S.csel,lgroup:S.lgroup,hideLater:S.hideLater}));}catch(e){}}
+function save(){try{localStorage.setItem(PK,JSON.stringify({hv:1,who:S.who,mode:S.mode,open:S.open,audit:S.audit,tab:S.tab,period:S.period,group:S.group,csel:S.csel,lgroup:S.lgroup,hideLater:S.hideLater,laterOpen:S.laterOpen}));}catch(e){}}
 const WHO=TEAM.concat(['Everyone',COORD]);
 const hashWho=()=>{const h=decodeURIComponent((location.hash||'').slice(1).split('?')[0]).toLowerCase();return WHO.find(n=>n.toLowerCase()===h)||null;};
 /* A chase sent from Open Loops: #nikki?chase=<JSON {t,to,c,u,s,k,n}>. It fills the
@@ -1159,8 +1172,7 @@ function audHTML(t){
    replaces the tracker date in this hub only: the client tracker keeps its plan.
    Only function declarations and lets here, because this file runs before views.js. */
 const DEFAULT_CAP=30;   // hours a week for task work until the person sets their own
-const LATE_CAP=3;      // overdue rows per client box before "Show N more", so the week stays in view
-let WDRAG=null;
+let WDRAG=null,WIDS=null,WNAME='';   // WIDS: a whole client's overdue tasks, dragged by the box header
 
 /* Monday of the week on screen as "this week". At the weekend that is the coming one. */
 function wkBase(){const t=today(),dw=t.getDay(),mon=addD(t,-((dw+6)%7));return dw===0||dw===6?addD(mon,7):mon;}
@@ -1264,16 +1276,12 @@ function wkLane(t,base){
   const d=Math.max(0,Math.round((t.end.getTime()-base.getTime())/864e5));
   return d<7?['this',Math.min(d,4)]:d<14?['next',Math.min(d-7,4)]:['later',-1];
 }
+const stTag=t=>t.status==='In Progress'?' <span class="tag blue">In progress</span>':t.status==='Blocked'?' <span class="tag red">Blocked</span>':'';
+const estTxt=t=>fEst(t.est)||'–';
 function wcardHTML(t,lane){
-  const showOwner=S.who==='Everyone',planned=!!(t.plan&&t.plan.day);
-  const est=fEst(t.est);
+  const showOwner=S.who==='Everyone',planned=!!(t.plan&&t.plan.day),small=lane==='next';
   let btn='';
-  if(lane==='late'){
-    btn=(t.stages?'':'<button type="button" class="wb ok" data-act="wk-done" title="It is done">Done</button>')+
-      '<button type="button" class="wb" data-act="od-today" title="Do it today">Today</button>'+
-      '<button type="button" class="wb am" data-act="od-next" title="Move to Monday next week">Next wk</button>'+
-      '<button type="button" class="wb" data-act="od-nn" title="Send to '+COORD+' to confirm and close">Not needed</button>';
-  }else if(lane==='later'){
+  if(lane==='later'){
     btn='<button type="button" class="wb" data-act="wk-this" title="Do it today">This wk</button>'+
       '<button type="button" class="wb am" data-act="od-next" title="Move to Monday next week">Next wk</button>';
   }else{
@@ -1284,54 +1292,53 @@ function wcardHTML(t,lane){
       (t.stages?'':'<button type="button" class="wb ok" data-act="wk-done" title="Mark it done">&#10003;</button>');
   }
   if(planned)btn+='<button type="button" class="wb" data-act="wk-reset" title="Back to the tracker date'+(t.trkEnd?' ('+fD(t.trkEnd)+')':'')+'" aria-label="Back to the tracker date">&#8634;</button>';
-  const when=lane==='late'?'<span class="wdue late">Overdue · '+fD(t.end)+'</span>':lane==='later'?'<span class="wdue">'+(t.end?DOW[t.end.getDay()]+' '+fD(t.end):'No date')+'</span>':'';
-  const st=t.status==='In Progress'?'<span class="tag blue">In progress</span>':t.status==='Blocked'?'<span class="tag red">Blocked</span>':'';
-  return '<div class="wcard l-'+lane+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" data-act="open" title="Drag to another day, or click to open">'+
-    '<div class="w1">'+tsq(t)+'<b class="wcl">'+esc(clientOf(t))+'</b>'+(showOwner?av(t.owner,true):'')+'<span class="west'+(est?'':' none')+'">'+(est||'–')+'</span></div>'+
+  const st=stTag(t),moved=planned?(t.trkEnd?'moved from '+fD(t.trkEnd):'date set here'):'';
+  return '<div class="wcard'+(small?' sm':'')+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" data-act="open" title="Drag to another day, or click to open">'+
+    '<div class="w1">'+tsq(t)+'<b class="wcl">'+esc(clientOf(t))+'</b>'+(showOwner?av(t.owner,true):'')+'<span class="west'+(t.est?'':' none')+'">'+estTxt(t)+'</span></div>'+
     '<div class="wt">'+esc(t.title)+'</div>'+
-    (when||st||planned?'<div class="w2">'+when+st+(planned&&t.trkEnd?'<span class="wmv">moved from '+fD(t.trkEnd)+'</span>':planned?'<span class="wmv">date set here</span>':'')+'</div>':'')+
+    (st||moved?'<div class="w2">'+st+(moved?'<span class="wmv">'+moved+'</span>':'')+'</div>':'')+
     '<div class="w3">'+btn+'</div></div>';
 }
 /* The project type as a small coloured square (none when the type is unknown). */
 function tsq(t){const c=tyc(t);return c?'<i class="tsq'+c+'" title="'+esc(typeOf(t))+'" aria-hidden="true"></i>':'';}
-/* Overdue triage reads fastest as one line: client, due, title, hours, actions. Rows drag onto a day too. */
-function wrowHTML(t,inBox){
-  const est=fEst(t.est),showOwner=S.who==='Everyone';
-  const st=t.status==='In Progress'?'<span class="tag blue">In progress</span>':t.status==='Blocked'?'<span class="tag red">Blocked</span>':'';
-  return '<div class="wrow'+(inBox?' nc':'')+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" title="Drag onto a day, or use the buttons">'+
-    (inBox?'':'<b class="wcl">'+tsq(t)+esc(clientOf(t))+'</b>')+
-    '<span class="wdue late">'+fD(t.end)+'</span>'+
-    '<button type="button" class="wrt" data-act="open">'+esc(t.title)+st+'</button>'+
-    '<span class="avs">'+(showOwner?av(t.owner,true):'')+'</span>'+   /* always present, so every row has the same columns */
-    '<span class="west'+(est?'':' none')+'">'+(est||'–')+'</span>'+
+/* An overdue task in the rail: due, title (status inline), hours; buttons on hover. Rows drag onto a day. */
+function wrowHTML(t){
+  const showOwner=S.who==='Everyone';
+  return '<div class="wrow'+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" title="Drag onto a day, or hover for buttons">'+
+    '<span class="wdue">'+fD(t.end)+'</span>'+
+    '<button type="button" class="wrt" data-act="open">'+esc(t.title)+stTag(t)+(showOwner?' '+av(t.owner,true):'')+'</button>'+
+    '<span class="west'+(t.est?'':' none')+'">'+estTxt(t)+'</span>'+
     '<span class="w3">'+(t.stages?'':'<button type="button" class="wb ok" data-act="wk-done" title="It is done">Done</button>')+
       '<button type="button" class="wb" data-act="od-today" title="Do it today">Today</button>'+
       '<button type="button" class="wb" data-act="od-tmrw" title="Do it tomorrow">Tmrw</button>'+
       '<button type="button" class="wb am" data-act="od-next" title="Move to Monday next week">Next wk</button>'+
       '<button type="button" class="wb" data-act="od-nn" title="Send to '+COORD+' to confirm and close">Not needed</button></span></div>';
 }
-/* Overdue grouped into one box per client, oldest overdue client first, tasks oldest first. */
+/* Overdue rail: one group per client, oldest overdue client first, tasks oldest first. A group header
+   folds the group on click and, dragged onto a day, moves the client's whole overdue list. */
 function lateBoxesHTML(late){
+  if(!late.length)return '<div class="wrnone">Nothing overdue</div>';
   const g={};late.forEach(t=>{(g[ckey(t)]=g[ckey(t)]||[]).push(t);});
   const keys=Object.keys(g).sort((a,b)=>(g[a][0].end-g[b][0].end)||(g[b].length-g[a].length)||cLabel(a).localeCompare(cLabel(b)));
   return keys.map(k=>{
-    const rows=g[k],hrs=rows.reduce((a,t)=>a+(+t.est||0),0),open=S.more['od:'+k],cap=open?rows.length:LATE_CAP;
-    return '<div class="odbox"><div class="odh"><span class="odn">'+tsq(rows[0])+esc(cLabel(k))+'</span>'+
-      '<span class="cchip red">'+rows.length+' overdue</span>'+(hrs?'<small>'+fTot(hrs)+'</small>':'')+'</div>'+
-      '<div class="wrows">'+rows.slice(0,cap).map(t=>wrowHTML(t,true)).join('')+'</div>'+
-      (rows.length>cap?'<button type="button" class="odmore" data-act="more" data-k="od:'+esc(k)+'">Show '+(rows.length-cap)+' more</button>':'')+'</div>';
+    const rows=g[k],open=!S.more['odfold:'+k],days=-dueIn(rows[0]);
+    return '<div class="wrg odbox"><button type="button" class="odh'+(open?' open':'')+'" data-act="od-fold" data-k="'+esc(k)+'" draggable="true" data-client="'+esc(k)+'" data-ids="'+esc(JSON.stringify(rows.map(t=>t.id)))+'" aria-expanded="'+open+'" title="Click to '+(open?'fold':'open')+'. Drag onto a day to move all '+rows.length+' of '+esc(cLabel(k))+'’s overdue tasks there.">'+
+      tsq(rows[0])+'<span class="odn">'+esc(cLabel(k))+'</span><span class="cchip red">'+rows.length+'</span>'+
+      '<span class="odl">'+days+'d late</span><span class="odc" aria-hidden="true">&#9654;</span></button>'+
+      (open?rows.map(wrowHTML).join(''):'')+'</div>';
   }).join('');
 }
-function wdayHTML(d,lane,cards,past,isToday,share){
-  const h=cards.reduce((a,t)=>a+(+t.est||0),0),over=share&&h>share+0.01;
-  return '<div class="wcol'+(past?' past':'')+(isToday?' now':'')+'"'+(past?'':' data-drop="'+isoOf(d)+'"')+'>'+
-    '<div class="wch"><b>'+(isToday?'Today':DOW[d.getDay()])+'</b><span>'+d.getDate()+' '+MON[d.getMonth()]+'</span>'+
-    '<em class="'+(over?'over':'')+'" title="'+(over?'More than your day share of '+fTot(share):'Planned for this day')+'">'+(h?fTot(h):'')+'</em></div>'+
-    '<div class="wcc">'+(cards.length?cards.map(t=>wcardHTML(t,lane)).join(''):'<div class="wempty">'+(past?'Past':'Drop here')+'</div>')+'</div></div>';
+function wdayHTML(d,lane,cards,isToday,share){
+  const h=cards.reduce((a,t)=>a+(+t.est||0),0),over=share&&h>share+0.01,pct=share?Math.min(100,Math.round(h/share*100)):0;
+  return '<div class="wcol'+(isToday?' now':'')+'" data-drop="'+isoOf(d)+'">'+
+    '<div class="wch"><b>'+(isToday?'Today':DOW[d.getDay()])+'</b><span>'+fD(d)+'</span>'+
+    '<em class="'+(over?'over':h?'':'none')+'" title="'+(over?'More than your day share of '+fTot(share):'Planned for this day')+'">'+(h?fTot(h):'')+(lane==='this'?'<i><u style="width:'+pct+'%"></u></i>':'')+'</em></div>'+
+    '<div class="wcc">'+(cards.length?cards.map(t=>wcardHTML(t,lane)).join(''):'<div class="wempty">Drop here</div>')+'</div></div>';
 }
-function wcapHTML(h,cap,part){
-  const pct=Math.min(100,Math.round(h/cap*100)),over=h>cap+0.01;
-  return '<span class="wcap'+(over?' over':'')+'"><b>'+fTot(h)+'</b> of '+fTot(cap)+(part?' left':'')+(over?' · '+fTot(h-cap)+' over':'')+'<i><u style="width:'+pct+'%"></u></i></span>';
+/* "Xh of Yh left" with a 70px bar. */
+function wcapHTML(h,cap,suffix,fill){
+  const pct=Math.min(100,Math.round(h/cap*100)),over=h>cap+0.01,c=over?'var(--red2)':fill;
+  return '<span class="wcapline"><b'+(over?' style="color:var(--red2)"':'')+'>'+fTot(h)+'</b> of '+fTot(cap)+suffix+'<i class="wbar5"><u style="width:'+pct+'%;background:'+c+'"></u></i></span>';
 }
 function weekHTML(mine){
   const open=mine.filter(t=>!isDone(t)&&t.status!=='Parked'&&isTeam(t.owner));
@@ -1343,36 +1350,74 @@ function weekHTML(mine){
   [L.this,L.next].forEach(w=>w.forEach(c=>c.sort((a,b)=>((b.status==='In Progress')-(a.status==='In Progress'))||byDue(a,b))));
   const cap=capOf(S.who),share=cap/5,sum=l=>l.reduce((a,t)=>a+(+t.est||0),0),flat=w=>[].concat.apply([],w);
   const me=isTeam(S.who);
-  let h='<div class="week">';
-  h+='<div class="wbar">'+(me?'<label class="wcapset">Hours for task work a week <input type="number" min="1" max="80" step="0.5" data-sel="cap" value="'+cap+'" aria-label="Hours for task work a week">h</label>'
-      :'<span class="wcapset">Team hours for task work: <b>'+fTot(cap)+'</b> a week</span>')+
-    '<button type="button" class="pb sm'+(S.hideLater?' on':'')+'" data-act="wk-later" aria-pressed="'+S.hideLater+'">'+(S.hideLater?'Show later':'Hide later')+'</button>'+
-    '<span class="whint">Hover a task for its buttons, or drag it to another day. Dates here are '+(me?'your':'the team’s')+' working plan; the client tracker keeps its own.</span></div>';
-  if(L.late.length)h+='<section class="wl wl-late"><div class="wlh"><i></i><b>Overdue</b><span>Clear these first: done, a new day, or not needed.</span><small>'+L.late.length+' task'+(L.late.length===1?'':'s')+(sum(L.late)?' · '+fTot(sum(L.late)):'')+'</small></div>'+
-    '<div class="odboxes">'+lateBoxesHTML(L.late)+'</div></section>';
-  /* Past days are gone from view: their tasks are overdue and sit in the Overdue list. */
-  const lane=(k,label,w,off)=>{
-    const from=off===0?Math.max(0,todayI):0,idx=[0,1,2,3,4].filter(i=>i>=from);
-    const days=idx.map(i=>addD(base,off+i)),tot=sum(flat(w)),left=share*idx.length;
-    return '<section class="wl wl-'+k+'"><div class="wlh"><i></i><b>'+label+'</b><span>'+fD(days[0])+(days.length>1?' – '+fD(days[days.length-1]):'')+'</span>'+wcapHTML(tot,left,idx.length<5)+'</div>'+
-      '<div class="wdays" style="grid-template-columns:repeat('+days.length+',minmax(0,1fr))">'+idx.map((i,j)=>wdayHTML(days[j],k,w[i],false,off===0&&i===todayI,share)).join('')+'</div></section>';
-  };
-  h+=lane('this','This week',L.this,0)+lane('next','Next week',L.next,7);
-  if(S.hideLater)h+='<button type="button" class="wl wl-later wlfold" data-act="wk-later"><i></i><b>Later</b><span>'+L.later.length+' task'+(L.later.length===1?'':'s')+' hidden'+(sum(L.later)?' · '+fTot(sum(L.later)):'')+'</span><small>Show</small></button>';
-  else h+='<section class="wl wl-later" data-drop="later"><div class="wlh"><i></i><b>Later</b><span>After next week, and tasks with no date. Drop a card here to push it back.</span><small>'+L.later.length+' task'+(L.later.length===1?'':'s')+(sum(L.later)?' · '+fTot(sum(L.later)):'')+'</small></div>'+
-    '<div class="wgrid">'+(L.later.length?L.later.map(t=>wcardHTML(t,'later')).join(''):'<div class="wempty">Nothing later</div>')+'</div></section>';
+  /* Past days are gone from view: their tasks are overdue and sit in the rail. */
+  const from=Math.max(0,todayI),thisIdx=[0,1,2,3,4].filter(i=>i>=from),thisH=sum(flat(L.this)),left=share*thisIdx.length;
+  const todayH=todayI>=0&&todayI<5?sum(L.this[todayI]):0;
+  const past=todayI>0?DOW[base.getDay()]+(todayI>1?'–'+DOW[addD(base,todayI-1).getDay()]:'')+' passed':'';
+  const range=(a,b)=>fD(a)+(isoOf(a)!==isoOf(b)?' – '+fD(b):'');
+  const hint='Hover a task for its buttons · drag it onto a day';
+  let h='<div class="whead"><div class="wht"><h2>'+(me?'My week':S.who==='Everyone'?'Team week':esc(S.who)+'’s week')+'</h2><span class="whr">'+range(base,addD(base,4))+'</span></div>'+
+    '<span class="whs">'+(L.late.length?L.late.length+' overdue · ':'')+fTot(todayH)+' planned today</span>'+
+    '<div class="whx">'+cmenuHTML(mine)+wcapHTML(thisH,left,' left this week','var(--red)')+
+      (me?'<label class="wcapset">Hours/wk <input type="number" min="1" max="80" step="0.5" data-sel="cap" value="'+cap+'" aria-label="Hours for task work a week"></label>'
+        :'<span class="wcapset">Team <b>'+fTot(cap)+'</b>/wk</span>')+'</div></div>';
+  h+='<div class="wsplit"><aside class="wrail" aria-label="Overdue"><div class="wrh"><i></i><b>Overdue</b><small>'+L.late.length+' task'+(L.late.length===1?'':'s')+(sum(L.late)?' · '+fTot(sum(L.late)):'')+'</small></div>'+
+    '<div class="wrlist">'+lateBoxesHTML(L.late)+'</div><div class="wrf" title="'+hint+'">Oldest client first. Done, a new day, or not needed.</div></aside>';
+  h+='<div class="wcals">';
+  h+='<section class="wsec" title="'+hint+'"><div class="wsh"><i style="background:var(--red2)"></i><b>This week</b><span>'+range(addD(base,from),addD(base,4))+'</span>'+(past?'<span class="wpast">'+past+'</span>':'')+wcapHTML(thisH,left,' left','var(--text)')+'</div>'+
+    '<div class="wdays this">'+thisIdx.map(i=>wdayHTML(addD(base,i),'this',L.this[i],i===todayI,share)).join('')+'</div></section>';
+  h+='<section class="wsec" title="'+hint+'"><div class="wsh"><i style="background:var(--amber)"></i><b>Next week</b><span>'+range(addD(base,7),addD(base,11))+'</span>'+wcapHTML(sum(flat(L.next)),cap,'','var(--amber)')+'</div>'+
+    '<div class="wdays next">'+[0,1,2,3,4].map(i=>wdayHTML(addD(base,7+i),'next',L.next[i],false,share)).join('')+'</div></section>';
+  h+='<section class="wsec wlater" data-drop="later"><button type="button" class="wlh" data-act="wk-later" aria-expanded="'+!!S.laterOpen+'"><i></i><b>Later</b>'+
+    '<span>'+L.later.length+' task'+(L.later.length===1?'':'s')+(sum(L.later)?' · '+fTot(sum(L.later)):'')+' · drop a card here to push it back</span><small>'+(S.laterOpen?'Hide':'Show')+'</small></button>'+
+    (S.laterOpen?L.later.map(laterRowHTML).join(''):'')+'</section>';
   if(parked)h+='<div class="wfoot">'+parked+' task'+(parked===1?' is':'s are')+' parked with '+COORD+' and left off the week until '+(parked===1?'it comes':'they come')+' back.</div>';
-  return h+'</div>';
+  return h+'</div></div>';
+}
+/* Later, opened: one line per task (client · title · date), buttons and hours on the right. Rows still drag. */
+function laterRowHTML(t){
+  const planned=!!(t.plan&&t.plan.day);
+  return '<div class="wrow'+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" title="Drag onto a day">'+
+    '<div class="wll"><b class="wcl">'+tsq(t)+esc(clientOf(t))+'</b><button type="button" class="wrt" data-act="open">'+esc(t.title)+stTag(t)+'</button>'+
+      '<span class="wdue">'+(t.end?DOW[t.end.getDay()]+' '+fD(t.end):'No date')+'</span></div>'+
+    '<div class="wlr"><button type="button" class="wb" data-act="wk-this" title="Do it today">This wk</button>'+
+      '<button type="button" class="wb am" data-act="od-next" title="Move to Monday next week">Next wk</button>'+
+      (planned?'<button type="button" class="wb" data-act="wk-reset" title="Back to the tracker date'+(t.trkEnd?' ('+fD(t.trkEnd)+')':'')+'" aria-label="Back to the tracker date">&#8634;</button>':'')+
+      (S.who==='Everyone'?av(t.owner,true):'')+'<span class="west'+(t.est?'':' none')+'">'+estTxt(t)+'</span></div></div>';
 }
 
+/* Later = Monday after next, unless the tracker date is already later than that. */
+function laterDay(t){const far=addD(wkBase(),14);return t.trkEnd&&t.trkEnd>=far?t.trkEnd:far;}
+/* Move several tasks at once (a whole client from Overdue): one save, one message. */
+function planMany(ids,v,name){
+  const now=Date.now();let n=0,day=null;
+  ids.forEach(id=>{
+    const t=findTask(id);if(!t||isDone(t))return;
+    const d=v==='later'?laterDay(t):dOf(v);if(!d)return;
+    const tr=t.trkEnd?isoOf(t.trkEnd):'';let iso=isoOf(d);if(iso===tr)iso='';
+    ov(id).plan={day:iso,by:author(),at:now};n++;day=d;
+  });
+  if(!n)return;
+  commit();
+  toast('Moved '+n+' '+name+' task'+(n===1?'':'s')+(v==='later'?' to Later':' to '+DOW[day.getDay()]+' '+fD(day)));
+}
 /* Drag a card to a day (or to Later). Whole cards drag; buttons still click. */
 function wClear(){document.querySelectorAll('[data-drop].over').forEach(z=>z.classList.remove('over'));}
 document.addEventListener('dragstart',e=>{
+  const hd=e.target.closest&&e.target.closest('.odh[data-ids]');
+  if(hd){
+    try{WIDS=JSON.parse(hd.getAttribute('data-ids'));}catch(x){WIDS=null;}
+    if(!WIDS||!WIDS.length){WIDS=null;return;}
+    WNAME=cLabel(hd.getAttribute('data-client'));WDRAG='client:'+hd.getAttribute('data-client');
+    hd.closest('.odbox').classList.add('dragging');
+    try{e.dataTransfer.setData('text/plain',WNAME);e.dataTransfer.effectAllowed='move';e.dataTransfer.setDragImage(hd.closest('.odbox'),24,20);}catch(x){}
+    return;
+  }
   const c=e.target.closest&&e.target.closest('.wcard,.wrow');if(!c)return;
   WDRAG=c.getAttribute('data-id');c.classList.add('dragging');
   try{e.dataTransfer.setData('text/plain',WDRAG);e.dataTransfer.effectAllowed='move';}catch(x){}
 });
-document.addEventListener('dragend',()=>{document.querySelectorAll('.wcard.dragging,.wrow.dragging').forEach(c=>c.classList.remove('dragging'));wClear();WDRAG=null;if(S.reRender&&!DRAG)render();});
+document.addEventListener('dragend',()=>{document.querySelectorAll('.wcard.dragging,.wrow.dragging,.odbox.dragging').forEach(c=>c.classList.remove('dragging'));wClear();WDRAG=null;WIDS=null;if(S.reRender&&!DRAG)render();});
 document.addEventListener('dragover',e=>{
   if(!WDRAG)return;
   const z=e.target.closest&&e.target.closest('[data-drop]');
@@ -1381,15 +1426,13 @@ document.addEventListener('dragover',e=>{
 });
 document.addEventListener('drop',e=>{
   if(!WDRAG)return;
-  const z=e.target.closest&&e.target.closest('[data-drop]'),id=WDRAG;
-  WDRAG=null;wClear();if(!z){if(S.reRender)render();return;}
+  const z=e.target.closest&&e.target.closest('[data-drop]'),id=WDRAG,ids=WIDS;
+  WDRAG=null;WIDS=null;wClear();if(!z){if(S.reRender)render();return;}
   e.preventDefault();
+  if(ids){planMany(ids,z.getAttribute('data-drop'),WNAME);return;}
   const v=z.getAttribute('data-drop'),t=findTask(id);if(!t){if(S.reRender)render();return;}
-  if(v==='later'){
-    /* Later = Monday after next, unless the tracker date is already later than that. */
-    const far=addD(wkBase(),14);
-    planTo(id,t.trkEnd&&t.trkEnd>=far?t.trkEnd:far);
-  }else{const d=dOf(v);if(d&&(!t.end||isoOf(t.end)!==v))planTo(id,d);}
+  if(v==='later')planTo(id,laterDay(t));
+  else{const d=dOf(v);if(d&&(!t.end||isoOf(t.end)!==v))planTo(id,d);}
 });
 /* ── the list as it stands: trackers + Notion, then the audit queue, then our own store ── */
 /* Reminders live in OV.reminders; each becomes a task for every person it was pushed to,
@@ -2010,6 +2053,17 @@ function headerHTML(){
     '<div class="who">'+WHO.map(p=>'<button type="button" data-act="who" data-who="'+p+'" class="'+(S.who===p?'on':'')+(p===COORD?' co':'')+'">'+p+'<small>'+n[p]+'</small></button>').join('')+'</div>'+
     '<button type="button" class="theme" data-act="theme" title="'+(LIGHT?'Switch to dark mode':'Switch to light mode')+'" aria-label="'+(LIGHT?'Switch to dark mode':'Switch to light mode')+'">'+(LIGHT?'&#9790;':'&#9728;')+'</button></header>';
 }
+/* The "All clients" filter menu. Counts come from everything open, so a client stays listed while filtered out. */
+function cmenuHTML(mine){
+  const cc={};mine.forEach(t=>{if(!isDone(t))cc[ckey(t)]=(cc[ckey(t)]||0)+1;});
+  const ks=Object.keys(cc).sort((x,y)=>x==='none'?1:y==='none'?-1:cLabel(x).localeCompare(cLabel(y)));
+  const sel=selClients();
+  return '<div class="cwrap"><button type="button" class="cbtn2'+(sel.length?' on':'')+'" data-act="cmenu" aria-expanded="'+S.cOpen+'">'+
+        (sel.length?(sel.length===1?esc(cLabel(sel[0])):sel.length+' clients'):'All clients')+'<i>&#9662;</i></button>'+
+      (S.cOpen?'<div class="cpop" role="group" aria-label="Clients"><div class="cph"><span>Show only these clients</span>'+(sel.length?'<button type="button" data-act="cclear">Clear</button>':'')+'</div>'+
+        ks.concat(sel.filter(k=>!cc[k])).map(k=>'<button type="button" class="copt'+(sel.indexOf(k)>-1?' on':'')+'" data-act="csel" data-k="'+esc(k)+'" aria-pressed="'+(sel.indexOf(k)>-1)+'"><i></i><span>'+esc(cLabel(k))+'</span><small>'+(cc[k]||0)+'</small></button>').join('')+
+        '<button type="button" class="cdone" data-act="cmenu">Done</button></div>':'')+'</div>';
+}
 function titleHTML(mine){
   const d=new Date(),eye=DOW[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]+' · '+d.getFullYear();
   const name=S.who==='Everyone'?'Everyone':S.who;
@@ -2022,18 +2076,10 @@ function titleHTML(mine){
     }
   }else{
     title=esc(name)+'’s '+(S.mode==='board'?'board':S.mode==='home'?'home':S.mode==='week'?'week':'day');
-    /* Counts per client come from everything open, so a client stays in the menu while filtered out. */
-    const cc={};mine.forEach(t=>{if(!isDone(t))cc[ckey(t)]=(cc[ckey(t)]||0)+1;});
-    const ks=Object.keys(cc).sort((x,y)=>x==='none'?1:y==='none'?-1:cLabel(x).localeCompare(cLabel(y)));
-    const sel=selClients();
     const open=byClient(mine).filter(t=>!isDone(t)),late=open.filter(t=>isLate(t)&&t.status!=='Parked').length;   /* parked tasks count under the with-coordinator pill, not overdue */
     const hrs=open.reduce((s,t)=>s+(+t.est||0),0);
     const pill=(f,n,l,hot)=>'<button type="button" class="stat'+(hot?' hot':'')+(S.mode!=='home'&&S.mode!=='week'&&S.flt===f?' on':'')+'" data-act="flt" data-f="'+f+'" aria-pressed="'+(S.flt===f)+'"><b>'+n+'</b>'+l+'</button>';
-    stats='<div class="cwrap"><button type="button" class="cbtn2'+(sel.length?' on':'')+'" data-act="cmenu" aria-expanded="'+S.cOpen+'">'+
-        (sel.length?(sel.length===1?esc(cLabel(sel[0])):sel.length+' clients'):'All clients')+'<i>&#9662;</i></button>'+
-      (S.cOpen?'<div class="cpop" role="group" aria-label="Clients"><div class="cph"><span>Show only these clients</span>'+(sel.length?'<button type="button" data-act="cclear">Clear</button>':'')+'</div>'+
-        ks.concat(sel.filter(k=>!cc[k])).map(k=>'<button type="button" class="copt'+(sel.indexOf(k)>-1?' on':'')+'" data-act="csel" data-k="'+esc(k)+'" aria-pressed="'+(sel.indexOf(k)>-1)+'"><i></i><span>'+esc(cLabel(k))+'</span><small>'+(cc[k]||0)+'</small></button>').join('')+
-        '<button type="button" class="cdone" data-act="cmenu">Done</button></div>':'')+'</div>'+
+    stats=cmenuHTML(mine)+
       pill('late',late,'overdue',late>0)+
       pill('today',open.filter(t=>dueIn(t)===0).length,'due today')+
       pill('',fTot(hrs),'open')+
@@ -2402,7 +2448,7 @@ function render(){
     h+='<div class="trow"><div><div class="eye">Loading the trackers</div><h2>One moment</h2></div></div><div class="list"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>';
   }else{
     const mine=scope();
-    h+=bannerHTML()+titleHTML(mine)+typeKeyHTML(mine)+(S.audit&&!onDesk()&&S.mode==='list'?auditBarHTML():'');
+    h+=bannerHTML()+(!onDesk()&&S.mode==='week'?'':titleHTML(mine)+typeKeyHTML(mine))+(S.audit&&!onDesk()&&S.mode==='list'?auditBarHTML():'');
     h+=onDesk()?(S.tab==='summary'?summaryHTML(mine):S.tab==='home'?coordHomeHTML(mine):deskHTML(mine))
       :S.mode==='board'?zoneTop(mine)+boardHTML(narrowed(mine)):S.mode==='week'?weekHTML(byClient(mine)):S.mode==='home'?homeHTML(byClient(mine)):zoneTop(mine)+listHTML(narrowed(mine));
     if(!onDesk()&&(S.mode==='board'||S.mode==='week')&&S.open)h+=drawerHTML(findTask(S.open));
@@ -2485,7 +2531,8 @@ document.addEventListener('click',e=>{
     case 'wk-this':e.stopPropagation();planTo(id,workday(today()));break;
     case 'wk-reset':e.stopPropagation();planTo(id,null);break;
     case 'wk-done':e.stopPropagation();if(t)act2(id,'Complete');break;
-    case 'wk-later':S.hideLater=!S.hideLater;save();render();break;
+    case 'wk-later':S.laterOpen=!S.laterOpen;save();render();break;
+    case 'od-fold':{const k='odfold:'+a.getAttribute('data-k');S.more[k]=!S.more[k];render();break;}
     case 'decks':S.mode='week';S.open=null;save();render();window.scrollTo(0,0);break;
     case 'lgroup':S.lgroup=a.getAttribute('data-g');save();render();break;
     case 'cl-more':S.more['cl:'+a.getAttribute('data-k')]=true;render();break;
