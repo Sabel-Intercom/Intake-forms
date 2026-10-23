@@ -946,6 +946,9 @@ async function loadAll(){
     reg=await r.json();
   }catch(e){setLive('warn','Could not reach the tracker registry');if(FIRST)renderFail();return;}
   const active=reg.filter(t=>t.active&&t.key&&t.file);
+  /* A paused client (trackers.json paused:true, e.g. Shiftmove until Jan 2027) is left out
+     entirely: its tracker and any of its rows still open in Notion. */
+  const pausedKey={},pausedName={};reg.filter(t=>t.paused).forEach(t=>{if(t.key)pausedKey[t.key]=1;if(t.name)pausedName[norm(t.name)]=1;});
   const [hoursRes,loaded,portalRes]=await Promise.all([
     fetchKey(HOURS_KEY),
     Promise.all(active.map(async tr=>{const [trk,st]=await Promise.all([loadTracker(tr),fetchKey(tr.key)]);return {tr,trk,st};})),
@@ -1053,6 +1056,7 @@ async function loadAll(){
      stamped). If a tracker client has that name, file the task under it. */
   const byName={};Object.keys(clients).forEach(k=>{byName[norm(clients[k].name)]=k;});
   nRows.forEach(n=>{
+    if(pausedKey[n.project]||(n.client&&pausedName[norm(n.client)]))return;
     const o=who(n.owner);
     if(!clients[n.project]&&n.client&&byName[norm(n.client)])n=Object.assign({},n,{project:byName[norm(n.client)]});
     if(clients[n.project]){

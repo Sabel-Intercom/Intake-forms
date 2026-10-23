@@ -1809,13 +1809,20 @@ body.on-home #main .mnw{max-width:1344px!important;margin:0 auto!important}
 @media(max-width:900px){.sd-hero{grid-template-columns:1fr}.sd-hero .l,.sd-hero .rgt{grid-column:auto}.sd-h1{font-size:36px}.sd-two{grid-template-columns:1fr}.sd-wst{overflow-x:auto}.sd-wst .h,.sd-wst .rw{min-width:640px}}
 @media(max-width:600px){.sd-four{grid-template-columns:1fr}.sd-hero .rgt{grid-template-columns:1fr}.sd-ruler .lab{display:none}.sd-mats{grid-template-columns:1fr}}
 </style>
+<style id="pause-css">
+#pause-banner{margin:14px 18px 0;padding:14px 16px;border-radius:10px;border:1px solid rgba(251,191,36,.45);background:rgba(251,191,36,.10);color:var(--kE2E8F0);display:flex;gap:12px;align-items:flex-start;font-size:13.5px;line-height:1.5}
+#pause-banner i{color:var(--kFBBF24);font-size:20px;line-height:1.2;flex-shrink:0}
+#pause-banner b{display:block;font-size:14.5px;margin-bottom:2px;color:var(--kE2E8F0)}
+#pause-banner span{color:var(--kCBD5E1)}
+@media(max-width:720px){#pause-banner{margin:10px 12px 0;font-size:13px}}
+</style>
 </head>
 <body>
 <button id="sb-toggle" onclick="toggleSidebar()" title="Open the project menu"><i class="ti ti-menu-2" style="font-size:14px"></i>Menu</button>
 <div id="sb-scrim" onclick="toggleSidebar(false)"></div>
 <div class="pw">
   <div class="sb" id="sidebar"></div>
-  <div class="mn"><div id="form-dock"></div><div id="main"></div><div id="form-host"></div></div>
+  <div class="mn"><div id="pause-banner" role="status"><i class="ti ti-player-pause"></i><div><b>Project paused until mid January 2027</b><span>Shiftmove has asked to pause the migration. Nothing is needed from you while it is paused, and Sabel is not working on it in the meantime. When you are ready to restart, we will agree new dates together and update this plan. Dates shown below were set before the pause and will be re-planned.</span></div></div><div id="form-dock"></div><div id="main"></div><div id="form-host"></div></div>
 </div>
 <div id="status-picker"></div>
 <div id="owner-picker"></div>

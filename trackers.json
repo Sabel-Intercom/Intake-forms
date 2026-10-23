@@ -130,7 +130,10 @@
   "key": "shiftmove-tracker-v1",
   "file": "ShiftmoveTracker.html",
   "sowHours": 30,
-  "active": true
+  "active": false,
+  "paused": true,
+  "pausedUntil": "2027-01-15",
+  "pauseNote": "Client paused (company reorg and CSC consultation), advised 23 Oct 2026. Check back 15 Jan 2027. To restart: set active true and delete the three paused lines."
   },
 {
   "name": "Sky City Malta",
