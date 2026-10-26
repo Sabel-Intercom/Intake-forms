@@ -162,6 +162,12 @@
     "file": "CookaboroughTracker.html",
     "sowHours": 40,
     "active": true
+  },
+  {
+    "name": "RMS Cloud",
+    "key": "rms-tracker-v1",
+    "file": "RMSCloudTracker.html",
+    "sowHours": 485,
+    "active": true
   }
-  
 ]
