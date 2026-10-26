@@ -202,7 +202,24 @@ body.present .info.guide{display:none!important}
 .pillrow .pn{width:100%;background:var(--field);border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--body);font-size:12px;font-family:var(--sans)}
 .pillrow .pn:focus{outline:none;border-color:var(--red)}
 .pillrow .pn:disabled{opacity:.35}
-@media(max-width:900px){.pillrow{grid-template-columns:1fr}}
+/* ── pillar groups (26 Oct 2026): card 01 mirrors the accepted proposal, pillar → scope items ── */
+.pg{border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-top:10px;background:var(--topic)}
+.pg.off{opacity:.55}
+.pgh{display:grid;grid-template-columns:260px 1fr auto auto;gap:8px 12px;align-items:center}
+.pgh .pn{width:100%;background:var(--field);border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--body);font-size:12px;font-family:var(--sans)}
+.pgh .pn:focus{outline:none;border-color:var(--red)} .pgh .pn:disabled{opacity:.35}
+.pgh .ph{font-family:var(--code);font-size:11px;color:var(--mono);white-space:nowrap}
+.pg table.ed{margin-top:6px} .pg table.ed td.h{width:70px} .pg table.ed td.ci{width:30%}
+.pg .empty{padding:4px 0 2px}
+.pmodal .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.pmodal input[type=file]{font-size:12px;color:var(--muted)}
+.pmodal textarea{min-height:160px}
+.pmodal .prev{max-height:300px;overflow:auto;border:1px solid var(--border);border-radius:7px;padding:10px;font-size:12px;margin-top:10px;display:none}
+.pmodal .prev.on{display:block}
+.pmodal .prev h4{margin:8px 0 4px;color:var(--w);font-size:12.5px} .pmodal .prev h4:first-child{margin-top:0}
+.pmodal .prev ul{margin:0;padding-left:18px} .pmodal .prev li{margin:2px 0;color:var(--body)} .pmodal .prev li i{color:var(--mono)}
+.pmodal .prev .meta{color:var(--muted);margin-bottom:6px}
+@media(max-width:900px){.pillrow,.pgh{grid-template-columns:1fr}}
 h4.sh{margin:14px 0 6px;font-size:11px;letter-spacing:.9px;text-transform:uppercase;color:var(--mono);font-weight:600;display:flex;align-items:center;gap:10px}
 h4.sh .spacer{flex:1}
 table.ed{width:100%;border-collapse:collapse;margin-top:4px}
@@ -385,6 +402,18 @@ table.pt td:first-child .pe{color:var(--w);font-weight:600}
   </div>
 </div>
 
+<div class="modal" id="pmodal">
+  <div class="mbox pmodal">
+    <h3>Import from the accepted proposal</h3>
+    <p>Pick the signed proposal PDF (the SAB-xxx "Accepted Proposal" layout), or paste its text. Pillars, their subtitles, every scope item with its hours and client input, the total hours and the critical-path inputs are read. Prices are never kept.</p>
+    <div class="row"><input type="file" id="pFile" accept="application/pdf" onchange="proposalFile(this)"><span class="spacer"></span><button class="btn sm" onclick="parseProposalText()">Parse pasted text</button></div>
+    <textarea id="pText" placeholder="…or paste the proposal text here" spellcheck="false"></textarea>
+    <div class="err" id="pErr"></div>
+    <div class="prev" id="pPrev"></div>
+    <div class="mr"><button class="btn" onclick="closePModal()">Close</button><button class="btn" id="pAdd" onclick="applyProposal('add')" disabled>Add to in-scope list</button><button class="btn primary" id="pRep" onclick="applyProposal('replace')" disabled>Replace in-scope list</button></div>
+  </div>
+</div>
+
 <div id="summary">
   <div class="sbar">
     <b>Client-ready summary</b><span style="color:#94A3B8">· light mode, no internal notes, no rates. Print or save as PDF, then drop it into the client's 00_Project Admin folder.</span>
@@ -444,6 +473,7 @@ var PILLARS=[
   ['migration','05','Migration Accelerator','Migration of historical data from another platform, delivered through Migr8Now: field mapping, a sample batch, the full run and a delta at cutover. The pillar carries the platform fee; Sabel oversight sits in go-live. Only in scope when a migration was sold.']
 ];
 var OWNERS=['Sabel','Client','Richard','Chris','Greg','Nikki'];
+var SRC_OPTS=[['Sabel SOW','Sabel SOW',''],['Intercom SOW','Intercom SOW',''],['Both','Both','green'],['Not in either','Not in either','amber'],['Unclear','Unclear: differs between SOWs','red']];
 var ACCESS_ST=[['pending','Pending','amber'],['pass','Pass','green'],['fail','Fail','red'],['na','N/A','grey']];
 var RISK_ST=[['open','Open','red'],['watching','Watching','amber'],['closed','Closed','green']];
 var HORIZON=[['now','This week'],['w12','Weeks 1–2'],['later','Looking ahead']];
@@ -557,6 +587,8 @@ function blankRecord(name){
               signed:'', signedSource:'', type:'', notionId:'', notionUrl:'', trackerUrl:'', sabelDoc:'', intercomSow:'',
               pillars:{}, pillarNotes:{} },
     scope:  { summary:'', inScope:[], outScope:[],
+              /* 26 Oct 2026: Intercom-sold projects get a scope check posted in the Intercom deal thread */
+              intercomCheck:{ posted:'', link:'', confirmedBy:'', notes:'' },
               changeControl:'Anything outside this scope is treated as a change request: Sabel scopes it as an add-on and agrees it with you before any work starts.' },
     timeline:{ kickoff:'', buildStart:'', checkin:'', goLive:'', goLiveNote:'', blackout:'', sourcePlatform:'', sampleMigration:'', historicalMigration:'', sourceContractEnd:'', phases:[] },
     people: { sabel:{}, client:[] },
@@ -592,6 +624,7 @@ function blankRecord(name){
 function upgradeRec(r){
   if(!r||r.removed) return r;
   var d=blankRecord(r.name);
+  if(r.scope&&!r.scope.intercomCheck) r.scope.intercomCheck=d.scope.intercomCheck;
   ['outcomes','comms','wrap'].forEach(function(k){
     if(!r[k]||typeof r[k]!=='object'){ r[k]=d[k]; return; }
     Object.keys(d[k]).forEach(function(f){ if(r[k][f]===undefined) r[k][f]=d[k][f]; });
@@ -1021,39 +1054,56 @@ function renderRec(){
      '<span class="spacer"></span><span class="saved" id="savedStamp"></span>'+
      '<button class="btn danger sm hideP" onclick="removeRecord()">Remove record</button></div></div>';
 
-  /* 01 basics */
-  var pl='';
+  /* 01 basics: one group per pillar, in the proposal's order, each listing its scope items (26 Oct 2026) */
+  var pl='', used={};
   if(!b.pillarNotes) b.pillarNotes={};
-  PILLARS.forEach(function(p){ var on=!!b.pillars[p[0]];
-    pl+='<div class="pillrow"><label class="pill'+(on?' on':'')+'"><input type="checkbox" data-p="basics.pillars.'+p[0]+'"'+(on?' checked':'')+'><small>'+p[1]+'</small>'+p[2]+
+  function itemRow(x,i,withPillar){ var q='scope.inScope.'+i+'.';
+    return '<tr><td class="n">'+(i+1)+'</td><td>'+inp(q+'t',x.t,{ph:'Scope item'})+'</td>'+(withPillar?'<td>'+inp(q+'pillar',x.pillar||'',{type:'select',blank:'— pillar —',options:PILLARS.map(function(z){return [z[0],z[1]+' '+z[2]];})})+'</td>':'')+
+      '<td class="h">'+inp(q+'hours',x.hours||'',{type:'number',ph:'h'})+'</td><td class="ci">'+inp(q+'input',x.input||'',{ph:'client input required'})+'</td><td class="hideP src">'+inp(q+'src',x.src||'',{type:'select',blank:'source?',options:SRC_OPTS,colour:true})+'</td>'+rowX('delRow(\'scope.inScope\','+i+')')+'</tr>'; }
+  PILLARS.forEach(function(p){ var on=!!b.pillars[p[0]], rows='', hrs=0, n=0;
+    r.scope.inScope.forEach(function(x,i){ if(x.pillar!==p[0]) return; used[i]=true; n++; hrs+=parseFloat(x.hours)||0; rows+=itemRow(x,i,false); });
+    pl+='<div class="pg'+(on?'':' off')+'"><div class="pgh"><label class="pill'+(on?' on':'')+'"><input type="checkbox" data-p="basics.pillars.'+p[0]+'"'+(on?' checked':'')+'><small>'+p[1]+'</small>'+p[2]+
         '<span class="info" tabindex="0">i<span class="tip"><b>'+p[1]+' '+p[2]+'</b><br>'+esc(p[3])+'</span></span></label>'+
-        '<textarea class="grow line pn" rows="1" data-p="basics.pillarNotes.'+p[0]+'" placeholder="What it covers for '+esc(b.shortName||r.name||'this client')+'"'+(on?'':' disabled')+'>'+esc(b.pillarNotes[p[0]]||'')+'</textarea></div>'; });
+        '<textarea class="grow line pn" rows="1" data-p="basics.pillarNotes.'+p[0]+'" placeholder="The proposal\'s subtitle, or what it covers for '+esc(b.shortName||r.name||'this client')+'"'+(on?'':' disabled')+'>'+esc(b.pillarNotes[p[0]]||'')+'</textarea>'+
+        '<span class="ph">'+(n?n+' item'+(n>1?'s':'')+(hrs?' · '+(Math.round(hrs*10)/10)+' h':''):'no items')+'</span>'+
+        '<button class="btn sm" onclick="addRow(\'scope.inScope\',{t:\'\',note:\'\',pillar:\''+p[0]+'\',hours:\'\',input:\'\',src:\'\'})">+ Item</button></div>'+
+        (rows?'<table class="ed"><tr><th></th><th>Scope item</th><th>Hours</th><th>Client input required</th><th class="hideP">Source</th><th></th></tr>'+rows+'</table>':'')+'</div>'; });
+  var loose=''; r.scope.inScope.forEach(function(x,i){ if(!used[i]) loose+=itemRow(x,i,true); });
+  if(loose) pl+='<div class="pg"><div class="pgh"><b style="font-size:12px;color:var(--muted)">Not under a pillar yet</b><span></span><span class="ph"></span><span></span></div><table class="ed"><tr><th></th><th>Scope item</th><th>Pillar</th><th>Hours</th><th>Client input required</th><th class="hideP">Source</th><th></th></tr>'+loose+'</table></div>';
   h+=card('01','Engagement basics','what was signed',
-    '<div class="hint">Fields fill from Notion, the tracker registry and the portal the first time a client is opened, and are never overwritten after that. <b>Commercial note</b> is internal and never appears in the summary.<br><br><b>Pillars:</b> tick what the SOW covers. Hover the i on each pillar for what it means; the line beside it is what it covers for this client, and it prints in the summary.</div>'+
+    '<div class="hint">Fields fill from Notion, the tracker registry and the portal the first time a client is opened, and are never overwritten after that. <b>Commercial note</b> is internal and never appears in the summary.<br><br><b>Pillars:</b> the proposal\'s own structure. Each pillar carries its subtitle and the scope items under it with hours and any client input; the same items appear in card 03. <b>Import from proposal</b> fills all of it from the accepted-proposal PDF. Hover the i on each pillar for what it means; the subtitle line prints in the summary.</div>'+
     '<div class="grid">'+
     field('Legal name (cover)','basics.legalName',b.legalName)+field('Short name (inline)','basics.shortName',b.shortName)+
     field('Contracted hours','basics.hours',b.hours,{type:'number'})+'<div class="hideP">'+field('Commercial note <span class="auto">· internal</span>','basics.hoursNote',b.hoursNote,{type:'grow'})+'</div>'+
     field('Intercom subscription and seats','basics.subscription',b.subscription,{ph:'e.g. Advanced, 6 seats'})+field('Workspace App ID','basics.appId',b.appId)+
     field('Signed','basics.signed',b.signed)+field('Signed via','basics.signedSource',b.signedSource,{type:'grow'})+
     field('Engagement type','basics.type',b.type,{type:'select',blank:'—',options:['Project','Migration','Both','Retainer']})+
-    '</div><h4 class="sh">Scope summary: the five Sabel pillars</h4>'+pl);
+    '</div><h4 class="sh">Scope by pillar<span class="spacer"></span><button class="btn sm hideP" onclick="showPModal()">Import from proposal</button></h4>'+pl);
 
   /* 02 outcomes */
   h+=outcomesCard(r);
 
   /* 03 scope */
   function scopeTable(list,path,ph){
-    if(!list.length) return '<div class="empty">Nothing yet. Add a line, or seed from the SOW.</div>';
-    var t='<table class="ed"><tr><th></th><th>Deliverable</th><th style="width:38%">Detail / boundary</th><th></th></tr>';
-    list.forEach(function(x,i){ t+='<tr><td class="n">'+(i+1)+'</td><td>'+inp(path+'.'+i+'.t',x.t,{ph:ph})+'</td><td>'+inp(path+'.'+i+'.note',x.note,{ph:'optional'})+'</td>'+rowX('delRow(\''+path+'\','+i+')')+'</tr>'; });
+    if(!list.length) return '<div class="empty">Nothing yet. Add a line, or use Import from proposal in card 01.</div>';
+    var inn=path==='scope.inScope', order=list.map(function(x,i){return i;});
+    if(inn) order.sort(function(a,b){ var pa=PILLARS.findIndex(function(z){return z[0]===list[a].pillar;}), pb=PILLARS.findIndex(function(z){return z[0]===list[b].pillar;}); if(pa<0) pa=99; if(pb<0) pb=99; return pa-pb||a-b; });
+    var t='<table class="ed"><tr><th></th><th>Deliverable</th>'+(inn?'<th style="width:150px">Pillar</th><th style="width:60px">Hours</th>':'')+'<th style="width:'+(inn?'26':'34')+'%">Detail / boundary</th><th class="hideP" style="width:120px">Source</th><th></th></tr>';
+    order.forEach(function(i){ var x=list[i]; t+='<tr><td class="n">'+(i+1)+'</td><td>'+inp(path+'.'+i+'.t',x.t,{ph:ph})+'</td>'+
+      (inn?'<td>'+inp(path+'.'+i+'.pillar',x.pillar||'',{type:'select',blank:'—',options:PILLARS.map(function(z){return [z[0],z[2]];})})+'</td><td>'+inp(path+'.'+i+'.hours',x.hours||'',{type:'number',ph:'h'})+'</td>':'')+
+      '<td>'+inp(path+'.'+i+'.note',x.note,{type:'textarea',rows:1,ph:'optional'})+'</td><td class="hideP src">'+inp(path+'.'+i+'.src',x.src||'',{type:'select',blank:'source?',options:SRC_OPTS,colour:true})+'</td>'+rowX('delRow(\''+path+'\','+i+')')+'</tr>'; });
     return t+'</table>';
   }
   h+=card('03','Scope: in and out','the reason the call exists',
-    '<div class="hint">Read <b>both</b> lists aloud on the call and get a yes to each. Out-of-scope lines are the anti-scope-creep guardrail: take them from the SOW exclusions, and add anything the client asks about that is not covered.</div>'+
+    '<div class="hint">This card is the <b>scope of record</b>: every line in or out from both SOWs (Sabel and Intercom), with its source noted; a line marked <b>Unclear</b> or <b>Not in either</b> is flagged for the call. Read <b>both</b> lists aloud on the call and get a yes to each. Out-of-scope lines are the anti-scope-creep guardrail: take them from the SOW exclusions, and add anything the client asks about that is not covered.</div>'+
     '<div class="f wide"><label>Scope in one paragraph</label>'+inp('scope.summary',r.scope.summary,{type:'textarea',rows:3,ph:'What Sabel is delivering, in plain English'})+'</div>'+
-    '<div class="two"><div><h4 class="sh">In scope<span class="spacer"></span><button class="btn sm" onclick="addRow(\'scope.inScope\',{t:\'\',note:\'\'})">+ Add</button></h4>'+scopeTable(r.scope.inScope,'scope.inScope','Deliverable Sabel will do')+'</div>'+
-    '<div><h4 class="sh">Out of scope<span class="spacer"></span><button class="btn sm" onclick="addRow(\'scope.outScope\',{t:\'\',note:\'\'})">+ Add</button></h4>'+scopeTable(r.scope.outScope,'scope.outScope','Explicitly not included')+'</div></div>'+
-    '<div class="f wide" style="margin-top:12px"><label>Change control (read on the call)</label>'+inp('scope.changeControl',r.scope.changeControl,{type:'textarea',rows:2})+'</div>');
+    '<div class="two"><div><h4 class="sh">In scope<span class="spacer"></span><button class="btn sm" onclick="addRow(\'scope.inScope\',{t:\'\',note:\'\',pillar:\'\',hours:\'\',input:\'\',src:\'\'})">+ Add</button></h4>'+scopeTable(r.scope.inScope,'scope.inScope','Deliverable Sabel will do')+'</div>'+
+    '<div><h4 class="sh">Out of scope<span class="spacer"></span><button class="btn sm" onclick="addRow(\'scope.outScope\',{t:\'\',note:\'\',src:\'\'})">+ Add</button></h4>'+scopeTable(r.scope.outScope,'scope.outScope','Explicitly not included')+'</div></div>'+
+    '<div class="f wide" style="margin-top:12px"><label>Change control (read on the call)</label>'+inp('scope.changeControl',r.scope.changeControl,{type:'textarea',rows:2})+'</div>'+
+    '<div class="hideP" style="margin-top:14px"><h4 class="sh">Intercom scope check <span class="auto">· Intercom-sold projects · internal</span></h4>'+
+    '<div class="hint">Posted in the Intercom deal thread within 48 hours of signing: the hours, what they cover, confirmed volumes and what is not covered.</div>'+
+    '<div class="grid">'+field('Posted on','scope.intercomCheck.posted',(r.scope.intercomCheck||{}).posted,{type:'date'})+field('Link to the thread','scope.intercomCheck.link',(r.scope.intercomCheck||{}).link,{ph:'Slack or email link'})+
+    field('Confirmed by (Intercom)','scope.intercomCheck.confirmedBy',(r.scope.intercomCheck||{}).confirmedBy,{ph:'name, role'})+field('Notes','scope.intercomCheck.notes',(r.scope.intercomCheck||{}).notes,{type:'textarea',rows:2,ph:'what Intercom confirmed or queried'})+'</div></div>');
 
   /* 04 timeline */
   var tl=r.timeline, ph='';
@@ -1151,9 +1201,11 @@ function onEdit(e){
   var r=rec(CUR), v=t.type==='checkbox'?t.checked:t.value;
   if(t.classList&&(t.classList.contains('line')||t.classList.contains('one'))&&typeof v==='string'&&v.indexOf('\n')>-1){ v=v.replace(/\s*\n\s*/g,' '); t.value=v; }
   setPath(r,p,v);
+  [].slice.call(document.querySelectorAll('[data-p="'+p+'"]')).forEach(function(o){ if(o===t) return; if(o.type==='checkbox') o.checked=!!v; else if(o.value!==v) o.value=v; });
+  if(e.type==='change'&&/^scope\.inScope\.\d+\.(pillar|hours)$/.test(p)) setTimeout(renderRec,0);
   if(p==='wrap.aligned'){ r.wrap.alignedAt=v?new Date().toISOString():''; var as=document.getElementById('alignedStamp'); if(as) as.textContent=v?'confirmed '+fmt(r.wrap.alignedAt.slice(0,10)):''; }
   if(/^(decisions|actions|outcomes\.measures|timeline\.(checkin|goLive)|comms\.escalation)/.test(p)) { var rb=document.getElementById('recapBox'); if(rb) rb.innerHTML=recapHTML(r); };
-  if(t.tagName==='SELECT'&&t.hasAttribute('data-c')){ var opts=/status/.test(p)&&/access/.test(p)?ACCESS_ST:RISK_ST; t.setAttribute('data-c',colourOf(opts,v)); }
+  if(t.tagName==='SELECT'&&t.hasAttribute('data-c')){ var opts=/\.src$/.test(p)?SRC_OPTS:(/status/.test(p)&&/access/.test(p)?ACCESS_ST:RISK_ST); t.setAttribute('data-c',colourOf(opts,v)); }
   if(t.type==='checkbox'&&t.closest('.pill')){ t.closest('.pill').classList.toggle('on',t.checked); var row=t.closest('.pillrow'); if(row){ var pn=row.querySelector('.pn'); if(pn) pn.disabled=!t.checked; } }
   if(t.type==='checkbox'&&/^actions\./.test(p)){ var trow=t.closest('tr,li'); if(trow) trow.classList.toggle('done',t.checked); }
   if(p==='callDone'||p==='callDate'||p==='timeline.kickoff'||/basics\.pillars|scope\.(in|out)Scope|timeline\.goLive|basics\.(legalName|hours)|people\./.test(p)){ renderList(); refreshReady(); }
@@ -1179,6 +1231,85 @@ function setPresent(on){
 function presOn(){ return document.body.classList.contains('present'); }
 document.addEventListener('keydown',function(e){ if(e.key!=='Escape'||!presOn()) return; if(document.getElementById('summary').classList.contains('on')) return;
   var t=e.target; if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)){ t.blur(); return; } setPresent(false); });
+/* ── IMPORT FROM THE ACCEPTED PROPOSAL (26 Oct 2026) ─────────────────────────
+   The SAB-xxx accepted-proposal PDF is regular: "NN — PILLAR NAME Subtitle", then one
+   "Title N HOURS · $X" line per scope item followed by its paragraph and an optional
+   "Client input required: …", then "Subtotal: N hours". The cover carries the total hours,
+   the estimated weeks and "Client inputs on the critical path". pdf.js (cdnjs, loaded on
+   first use, same as Internal Ops) turns the PDF into lines; pasted text works the same way. */
+var PDFJS=null, PPARSED=null;
+function loadPdfjs(){ if(PDFJS) return PDFJS; var base='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+  PDFJS=new Promise(function(ok,fail){ var sc=document.createElement('script'); sc.src=base+'pdf.min.js';
+    sc.onload=function(){ window.pdfjsLib.GlobalWorkerOptions.workerSrc=base+'pdf.worker.min.js'; ok(window.pdfjsLib); };
+    sc.onerror=function(){ PDFJS=null; fail(new Error('pdf.js did not load')); }; document.head.appendChild(sc); });
+  return PDFJS; }
+function pdfLines(buf){ return loadPdfjs().then(function(lib){ return lib.getDocument({data:new Uint8Array(buf)}).promise; }).then(function(doc){
+  var out=[], chain=Promise.resolve();
+  for(var n=1;n<=doc.numPages;n++)(function(n){ chain=chain.then(function(){ return doc.getPage(n).then(function(pg){ return pg.getTextContent(); }).then(function(tc){
+    var lines=[], cur=null, y=null;
+    tc.items.forEach(function(it){ if(!it.str) return; var iy=Math.round(it.transform[5]); if(y===null||Math.abs(iy-y)>3){ if(cur) lines.push(cur); cur=it.str; y=iy; } else cur+=(/\s$/.test(cur)||/^\s/.test(it.str)?'':' ')+it.str; });
+    if(cur) lines.push(cur); out.push(lines.join('\n')); }); }); })(n);
+  return chain.then(function(){ return out.join('\n'); }); }); }
+var PILLAR_WORDS=[['BLUEPRINT','blueprint'],['FOUNDATION','foundations'],['AUTOMATION','automation'],['FIN ENABLEMENT','fin'],['ENABLEMENT','fin'],['MIGRATION','migration']];
+function pillarIdOf(name){ var u=name.toUpperCase(); for(var i=0;i<PILLAR_WORDS.length;i++) if(u.indexOf(PILLAR_WORDS[i][0])>-1) return PILLAR_WORDS[i][1]; return ''; }
+function parseProposal(text){
+  var t=String(text||'').replace(/\r/g,'').replace(/[\u2014\u2013]/g,'—').replace(/\u00a0/g,' ');
+  var lines=t.split('\n').map(function(x){return x.trim();}).filter(Boolean);
+  var out={ref:'',version:'',total:'',weeks:'',accepted:'',critical:[],pillars:[],items:[],warnings:[]};
+  var m=t.match(/\b(SAB-[A-Z0-9]+-\d+)\b/); if(m) out.ref=m[1];
+  m=t.match(/\bV(\d+)\b/); if(m) out.version='v'+m[1];
+  m=t.match(/(\d+)\s*TOTAL HOURS/i); if(m) out.total=m[1];
+  m=t.match(/(\d+\s*[—–-]\s*\d+)\s*EST\.?\s*WEEKS/i)||t.match(/EST\.?\s*WEEKS\s*(\d+\s*[—–-]\s*\d+)/i)||t.match(/(\d+[—–-]\d+)\s*\n?\s*EST/i); if(m) out.weeks=m[1].replace(/\s+/g,'');
+  m=t.match(/CONFIGURATION ACCEPTED\s+(\d{1,2}\s+[A-Z]+\s+\d{4})/i); if(m){ var d=new Date(m[1]+' UTC'); if(!isNaN(d)) out.accepted=d.toISOString().slice(0,10); }
+  m=t.match(/Client inputs on the critical path:\s*([\s\S]*?)(?:\.\s*Build weeks|\n\s*\n|PERFECT MADE)/i); if(m) out.critical=m[1].replace(/\n/g,' ').split(/\s*·\s*/).map(function(x){return x.replace(/\.$/,'').trim();}).filter(Boolean);
+  var cur=null, item=null, i, ln;
+  var hdr=/^0?([1-9])\s*—\s*([A-Z][^\n]*)$/;
+  function splitHdr(rest){ var w=rest.split(/\s+/), name=[]; while(w.length&&/^[A-Z][A-Z'&-]+$/.test(w[0])&&w[0].length>1) name.push(w.shift()); return [name.join(' '),w.join(' ')]; }
+  var itm=/^(.{3,}?)\s+(\d+(?:\.\d+)?)\s*HOURS?\s*(?:·\s*\$?[\d,]+(?:\.\d+)?)?\s*$/i;
+  function flush(){ if(item){ item.note=item.note.replace(/\s+/g,' ').replace(/\$\s?[\d,]+(\.\d+)?/g,'').trim(); out.items.push(item); item=null; } }
+  for(i=0;i<lines.length;i++){ ln=lines[i];
+    if(/^Subtotal:/i.test(ln)){ flush(); if(cur){ var sm=ln.match(/(\d+(?:\.\d+)?)\s*hours/i); if(sm) cur.subtotal=parseFloat(sm[1]); } cur=null; continue; }
+    if(/^SUMMARY\b|^Investment Summary|^Annexure|^CONTRACT AND SIGN-OFF/i.test(ln)){ flush(); cur=null; if(/^Annexure|^CONTRACT AND SIGN-OFF/i.test(ln)) break; continue; }
+    var h=ln.match(hdr);
+    if(h){ flush(); var nm=splitHdr(h[2]); if(!nm[0]) continue; h=[h[0],h[1],nm[0],nm[1]]; var id=pillarIdOf(h[2]); var sub=(h[3]||'').trim(); if(!sub&&lines[i+1]&&!itm.test(lines[i+1])&&!hdr.test(lines[i+1])&&/^[A-Z]/.test(lines[i+1])&&lines[i+1].length<90){ sub=lines[i+1]; i++; }
+      cur={num:h[1],name:h[2].trim(),id:id,sub:sub,subtotal:0}; out.pillars.push(cur); if(!id) out.warnings.push('Pillar "'+h[2].trim()+'" did not match one of the five Sabel pillars.'); continue; }
+    if(!cur) continue;
+    if(/^PERFECT MADE POSSIBLE|^Document ID:/i.test(ln)) continue;
+    var it=ln.match(itm);
+    if(it&&!/^Subtotal/i.test(ln)){ flush(); item={t:it[1].trim(),hours:parseFloat(it[2]),pillar:cur.id,note:'',input:''}; continue; }
+    if(!item) continue;
+    var ci=ln.match(/^Client input required:\s*(.+)$/i); if(ci){ item.input=ci[1].trim(); continue; }
+    item.note+=(item.note?' ':'')+ln;
+  }
+  flush();
+  out.pillars.forEach(function(pl){ var sum=0; out.items.forEach(function(x){ if(x.pillar===pl.id) sum+=x.hours; }); if(pl.subtotal&&Math.abs(sum-pl.subtotal)>0.01) out.warnings.push(pl.name+': items add to '+sum+' h, proposal subtotal '+pl.subtotal+' h.'); });
+  if(out.total){ var all=out.items.reduce(function(a,x){return a+x.hours;},0); if(Math.abs(all-parseFloat(out.total))>0.01) out.warnings.push('Items add to '+all+' h, cover says '+out.total+' h.'); }
+  return out;
+}
+function showPModal(){ if(!CUR) return; PPARSED=null; document.getElementById('pErr').textContent=''; document.getElementById('pPrev').className='prev'; document.getElementById('pText').value=''; document.getElementById('pAdd').disabled=true; document.getElementById('pRep').disabled=true; document.getElementById('pmodal').classList.add('on'); }
+function closePModal(){ document.getElementById('pmodal').classList.remove('on'); }
+function proposalFile(inp){ var f=inp.files&&inp.files[0]; if(!f) return; document.getElementById('pErr').textContent='Reading '+f.name+'…';
+  f.arrayBuffer().then(pdfLines).then(function(txt){ document.getElementById('pText').value=txt; document.getElementById('pErr').textContent=''; parseProposalText(); })
+   .catch(function(e){ document.getElementById('pErr').textContent='Could not read the PDF: '+e.message+'. Paste the text instead.'; }); }
+function parseProposalText(){ var txt=document.getElementById('pText').value, err=document.getElementById('pErr'), pv=document.getElementById('pPrev');
+  PPARSED=parseProposal(txt);
+  if(!PPARSED.pillars.length||!PPARSED.items.length){ err.textContent='No pillar sections with scope items found. This reads the SAB-xxx accepted-proposal layout; older SOWs are seeded by hand.'; pv.className='prev'; PPARSED=null; document.getElementById('pAdd').disabled=true; document.getElementById('pRep').disabled=true; return; }
+  err.textContent='';
+  var h='<div class="meta">'+esc([PPARSED.ref+(PPARSED.version?' '+PPARSED.version:''),PPARSED.total?PPARSED.total+' hours':'',PPARSED.weeks?'est. '+PPARSED.weeks+' weeks':'',PPARSED.accepted?'accepted '+fmt(PPARSED.accepted):''].filter(Boolean).join(' · '))+'</div>';
+  PPARSED.pillars.forEach(function(pl){ var xs=PPARSED.items.filter(function(x){return x.pillar===pl.id;}); h+='<h4>'+esc(pl.num+' '+pl.name)+(pl.sub?' <i style="font-weight:400;color:var(--muted)">'+esc(pl.sub)+'</i>':'')+' · '+esc(String(pl.subtotal||xs.reduce(function(a,x){return a+x.hours;},0)))+' h'+(pl.id?'':' <b style="color:var(--rose)">(no pillar match)</b>')+'</h4><ul>'+xs.map(function(x){ return '<li>'+esc(x.t)+' <i>· '+x.hours+' h'+(x.input?' · client input: '+esc(x.input):'')+'</i></li>'; }).join('')+'</ul>'; });
+  if(PPARSED.critical.length) h+='<h4>Client inputs on the critical path</h4><ul>'+PPARSED.critical.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';
+  if(PPARSED.warnings.length) h+='<h4 style="color:var(--amber)">Check</h4><ul>'+PPARSED.warnings.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';
+  pv.innerHTML=h; pv.className='prev on'; document.getElementById('pAdd').disabled=false; document.getElementById('pRep').disabled=false; }
+function applyProposal(mode){ if(!PPARSED||!CUR) return; var r=rec(CUR), b=r.basics, P=PPARSED;
+  if(mode==='replace') r.scope.inScope=[];
+  P.pillars.forEach(function(pl){ if(!pl.id) return; b.pillars[pl.id]=true; if(pl.sub&&(mode==='replace'||!b.pillarNotes[pl.id])) b.pillarNotes[pl.id]=pl.sub; });
+  P.items.forEach(function(x){ if(mode==='add'&&r.scope.inScope.some(function(y){return (y.t||'').trim().toLowerCase()===x.t.toLowerCase();})) return; r.scope.inScope.push({t:x.t,note:x.note,pillar:x.pillar,hours:x.hours,input:x.input,src:'Sabel SOW'}); });
+  if(P.total) b.hours=P.total;
+  if(P.ref) b.proposalRef=P.ref+(P.version?' '+P.version:'');
+  if(P.accepted&&!b.signed){ b.signed=P.accepted; if(!b.signedSource) b.signedSource='Accepted proposal'; }
+  if(!r.scope.summary||/PRE-CONTRACT|PRE-SALES/i.test(r.scope.summary)) r.scope.summary=(P.ref?'As accepted in '+P.ref+(P.version?' '+P.version:'')+': ':'')+P.items.length+' scope items across '+P.pillars.filter(function(p){return p.id;}).length+' pillars'+(P.total?', '+P.total+' hours':'')+(P.weeks?' over an estimated '+P.weeks+' weeks':'')+'.';
+  P.critical.forEach(function(c){ var t='Client input on the critical path: '+c; if(!r.actions.some(function(a){return a.t===t;})) r.actions.push({t:t,owner:'Client',due:'',when:'now',done:false}); });
+  saveStore(); closePModal(); renderRec(); renderList(); refreshReady(); stampSaved('proposal imported'); }
 /* demo record: SabelKickoffDesk.html?demo */
 var DEMO=/[?&]demo\b/.test(location.search);
 function demoRecord(){
@@ -1191,7 +1322,7 @@ function demoRecord(){
   r.people.sabel={'Chris Singh':true,'Greg Deng':true,'Nikki Coughlan':true};
   r.people.client=[{name:'Priya Nair',role:'Head of Customer Care',email:'',involvement:'Approver and day-to-day lead'},{name:'Tom Okafor',role:'Systems Lead',email:'',involvement:'Technical contact, Jira and SSO'},{name:'Mei Lin',role:'Content Manager',email:'',involvement:'Owns Help Centre content'}];
   r.comms.escalation[0].client='Priya Nair, Head of Customer Care'; r.comms.escalation[1].client='Daniel Reyes, COO';
-  r.access[2].status='pass'; r.access[3].status='fail'; r.access[3].owner='Tom Okafor'; r.access[3].note='Zendesk API token needed';
+  r.access[0].status='pass'; r.access.push({item:'Zendesk API token shared with Greg',status:'fail',owner:'Tom Okafor',note:'Zendesk API token needed'});
   r.decisions=[{topic:'Historical data',options:'A: migrate everything · B: start fresh · C: migrate a defined subset',decision:'',owner:'Priya Nair',due:'2026-10-20'},{topic:'Fin tone of voice',options:'Match the brand voice guide · Neutral and short · Agent-style, first person',decision:'Match the brand voice guide',owner:'Mei Lin',due:''}];
   r.actions=[{t:'Share Zendesk API token with Greg',owner:'Tom Okafor',due:'2026-10-15',when:'now',done:false},{t:'Send brand voice guide and top 40 article list',owner:'Mei Lin',due:'2026-10-17',when:'now',done:false},{t:'Confirm historical data decision',owner:'Priya Nair',due:'2026-10-20',when:'w12',done:false}];
   r.risks=[{t:'Zendesk contract ends 31 Dec; cutover must land before the holiday freeze',owner:'Chris',status:'watching'}];
@@ -1250,9 +1381,9 @@ function summaryHTML(r){
   h+='<div class="scover"><div class="seye">SABEL · KICK-OFF SUMMARY</div><h1>'+esc(legal)+'</h1><p class="st">What we agreed on the kick-off call'+(r.callDate?' on '+fmt(r.callDate):'')+': what success looks like, scope, timeline, who does what, how we escalate, and what happens next.</p><div class="rule"></div></div>';
 
   var pn=b.pillarNotes||{};
-  var pill=PILLARS.map(function(p){ return [p[1]+' '+p[2], b.pillars[p[0]]?'Yes':'No', b.pillars[p[0]]?(pn[p[0]]||''):'']; });
+  var pill=PILLARS.map(function(p){ var hrs=0,n=0; r.scope.inScope.forEach(function(x){ if(x.pillar===p[0]){ n++; hrs+=parseFloat(x.hours)||0; } }); return [p[1]+' '+p[2], b.pillars[p[0]]?'Yes':'No', b.pillars[p[0]]?(pn[p[0]]||''):'', b.pillars[p[0]]&&hrs?(Math.round(hrs*10)/10)+' h':'']; });
   h+=sec('Engagement basics', cap([['Client',legal],['Contracted hours',b.hours?b.hours+' hours':''],['Intercom subscription',b.subscription],['Workspace App ID',b.appId],['Engagement type',b.type],['Signed',b.signed?b.signed+(b.signedSource?' via '+b.signedSource:''):'']])+
-     '<h3>Scope summary</h3>'+tbl(['Sabel pillar','In scope','What it covers here'],pill.map(function(x){return [esc(x[0]),x[1],esc(x[2])];})));
+     '<h3>Scope summary</h3>'+tbl(['Sabel pillar','In scope','What it covers here','Hours'],pill.map(function(x){return [esc(x[0]),x[1],esc(x[2]),x[3]];})));
 
   var o=r.outcomes, ms=o.measures.filter(function(x){return x.kpi||x.goal;});
   if(o.vision||o.sixMonths||o.leadership||ms.length)
@@ -1261,7 +1392,12 @@ function summaryHTML(r){
        (ms.length?'<h3>Success measures</h3>'+tbl(['Goal','KPI','Today','Target','By','Tracked by'],ms.map(function(x){return [esc(x.goal),esc(x.kpi),esc(x.baseline),esc(x.target),fmt(x.by),esc(x.owner)];})):''));
 
   h+=sec('Scope', (r.scope.summary?'<p>'+esc(r.scope.summary)+'</p>':'')+
-     '<h3>In scope</h3>'+list(r.scope.inScope,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';})+
+     (function(){ var tagged=r.scope.inScope.some(function(x){return x.pillar;}); if(!tagged) return '<h3>In scope</h3>'+list(r.scope.inScope,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';});
+       var o='<h3>In scope</h3>'; PILLARS.forEach(function(p){ var xs=r.scope.inScope.filter(function(x){return x.pillar===p[0];}); if(!xs.length) return; var hrs=xs.reduce(function(a,x){return a+(parseFloat(x.hours)||0);},0);
+         o+='<p style="margin:10px 0 2px;font-weight:700">'+esc(p[1]+' '+p[2])+(pn[p[0]]?': '+esc(pn[p[0]]):'')+(hrs?' <span style="color:#64748B;font-weight:400">· '+(Math.round(hrs*10)/10)+' hours</span>':'')+'</p>'+
+           list(xs,function(x){return '<li>'+esc(x.t)+(x.hours?' <small>· '+x.hours+' h</small>':'')+(x.input?' <small>· client input: '+esc(x.input)+'</small>':'')+(x.note?'<br><small>'+esc(x.note)+'</small>':'')+'</li>';}); });
+       var loose=r.scope.inScope.filter(function(x){return !x.pillar;}); if(loose.length) o+='<p style="margin:10px 0 2px;font-weight:700">Other</p>'+list(loose,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';});
+       return o; })()+
      '<h3>Out of scope</h3>'+list(r.scope.outScope,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';})+
      (r.scope.changeControl?'<div class="callout">'+esc(r.scope.changeControl)+'</div>':''));
 
