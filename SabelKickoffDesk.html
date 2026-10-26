@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sabel Kick-off Desk — internal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap">
 <!--
   ─────────────────────────────────────────────────────────────────────────────
   SABEL KICK-OFF DESK  ·  INTERNAL ONLY  ·  NOT CLIENT FACING
@@ -43,25 +46,27 @@
 <script>try{ if(localStorage.getItem('sabel-ops-theme')==='light') document.documentElement.setAttribute('data-theme','light'); }catch(e){}</script>
 <style>
 :root{
-  --bg:#0B0B0C; --card:#0F1113; --card2:#141719; --w:#FFFFFF; --red:#E10600;
-  --body:#E2E8F0; --muted:#94A3B8; --border:#2A3547; --mono:#64748B;
-  --green:#4ADE80; --amber:#FBBF24; --blue:#60A5FA; --rose:#F87171; --grey:#64748B;
-  --field:#0A0D10; --line:#171C22; --sel:#1A0E0E; --topic:#12161B; --track:#1B2129; --calbg:#141719;
+  --bg:#0F1117; --card:#161B26; --card2:#12161F; --w:#F2F4F8; --red:#E10600;
+  --body:#C9CFDA; --muted:#A7AFBE; --border:#2A3145; --mono:#8B93A3;
+  --green:#4ADE80; --amber:#FBBF24; --blue:#60A5FA; --rose:#FF4D45; --grey:#5F6878;
+  --field:#0F1117; --line:#1E2433; --sel:#221418; --topic:#1A2030; --track:#1E2433; --calbg:#1A2030;
+  --glow:0 0 18px rgba(225,6,0,.5);
   --gB:#1E4A33; --gBg:#0E2A1C; --aB:#5A4A1E; --rB:#5A2323; --rT:#F8ABAB;
   --warnBg:#1A1206; --warnT:#F5E6B8; --infoBg:#0C1420; --infoB:#1E3A5A; --infoT:#CBE0F5; --codeBg:#000;
   --shadow:rgba(0,0,0,.5); --scheme:dark; color-scheme:dark;
   /* portal stage colours, same hues as SabelClientPortal.html */
   --sScope:#C084FC; --sOnb:#60A5FA; --sAct:#4ADE80; --sOff:#FBBF24; --sOut:#F87171; --sDone:#94A3B8;
-  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --sans:'Source Sans 3',"Helvetica Neue",Helvetica,Arial,sans-serif; --head:Archivo,'Source Sans 3',sans-serif;
   --code:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
 }
 /* Light mode: the header toggle sets data-theme="light" on <html> and remembers it under
    localStorage 'sabel-ops-theme' (shared by every Ops Hub tab, since they are one origin). */
 :root[data-theme="light"]{
-  --bg:#F4F5F7; --card:#FFFFFF; --card2:#F1F4F8; --w:#0F172A;
-  --body:#334155; --muted:#475569; --border:#D9DFE7; --mono:#64748B;
-  --green:#15803D; --amber:#B45309; --blue:#1D4ED8; --rose:#B91C1C; --grey:#64748B;
-  --field:#FFFFFF; --line:#EEF1F5; --sel:#FDEEEE; --topic:#F6F8FB; --track:#E5E9F0; --calbg:#F1F4F8;
+  --bg:#F4F5F7; --card:#FFFFFF; --card2:#F9FAFB; --w:#101828;
+  --body:#344054; --muted:#475467; --border:#D0D5DD; --mono:#667085;
+  --green:#15803D; --amber:#B45309; --blue:#2563EB; --rose:#D92D20; --grey:#7A8699;
+  --field:#FFFFFF; --line:#E4E7EC; --sel:#FDEEEE; --topic:#F2F4F7; --track:#E4E7EC; --calbg:#F2F4F7;
+  --glow:0 0 18px rgba(225,6,0,.3);
   --gB:#A7D7B8; --gBg:#E8F6EE; --aB:#E9CF9A; --rB:#EDB4B4; --rT:#B91C1C;
   --warnBg:#FFF8E6; --warnT:#6B4E0A; --infoBg:#EEF4FC; --infoB:#BFD4EE; --infoT:#1E3A5F; --codeBg:#E9EDF2;
   --shadow:rgba(15,23,42,.14); --scheme:light; color-scheme:light;
@@ -69,21 +74,24 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
-body{background:var(--bg);color:var(--body);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--body);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.rhead h2,.card .ch h3{font-family:var(--head)}
+.sq{display:inline-block;width:14px;height:14px;background:var(--red);border-radius:3px;box-shadow:0 0 18px rgba(225,6,0,.65)}
+.word{font-family:var(--head);font-weight:800;font-size:14px;letter-spacing:.14em;color:var(--w)}
+.vdiv{width:1px;height:18px;background:var(--border)}
 a{color:var(--blue)}
 .wrap{max-width:1280px;margin:0 auto;padding:22px 18px 90px}
 
 header{display:flex;align-items:flex-end;gap:16px;margin-bottom:16px}
-header h1{margin:0;font-size:22px;font-weight:800;color:var(--w);display:flex;align-items:center;gap:10px}
-header h1 .bar{display:inline-block;width:4px;height:22px;background:var(--red);border-radius:2px}
-header .sub{font-size:12px;color:var(--muted);margin-top:3px}
+header h1{margin:0;font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--w);display:flex;align-items:center;gap:12px}
+header .sub{font-size:13px;color:var(--muted);margin-top:4px}
 .spacer{flex:1}
 .stamp{font-size:11px;color:var(--mono);font-family:var(--code);display:flex;align-items:center;gap:7px}
 .dotlive{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block}
 .dotlive.warn{background:var(--amber)} .dotlive.off{background:var(--rose)}
 
-.banner{background:var(--warnBg);border:1px solid var(--aB);border-left:3px solid var(--amber);border-radius:7px;padding:10px 13px;font-size:12.5px;line-height:1.6;margin-bottom:12px;color:var(--warnT)}
-.banner.info{background:var(--infoBg);border-color:var(--infoB);border-left-color:var(--blue);color:var(--infoT)}
+.banner{background:var(--warnBg);border:1px solid var(--aB);border-radius:12px;padding:10px 13px;font-size:12.5px;line-height:1.6;margin-bottom:12px;color:var(--warnT)}
+.banner.info{background:var(--infoBg);border-color:var(--infoB);color:var(--infoT)}
 .banner code{font-family:var(--code);background:var(--codeBg);padding:1px 5px;border-radius:4px}
 
 .layout{display:grid;grid-template-columns:280px 1fr;gap:18px;align-items:start}
@@ -100,15 +108,15 @@ header .sub{font-size:12px;color:var(--muted);margin-top:3px}
 }
 
 /* ── client list ── */
-.side{position:sticky;top:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.side{position:sticky;top:16px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .side .top{padding:10px 10px 8px;border-bottom:1px solid var(--border)}
-.side input.q{width:100%;background:var(--field);border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--body);font-size:12.5px}
+.side input.q{width:100%;background:var(--field);border:1px solid var(--border);border-radius:99px;padding:8px 13px;color:var(--body);font-size:14px;font-family:var(--sans)}
 .side input.q:focus{outline:none;border-color:var(--red)}
 .side .list{max-height:calc(100vh - 250px);overflow:auto}
 .cl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer}
 .cl:hover{background:var(--card2)} .cl.on{background:var(--sel);border-left:3px solid var(--red);padding-left:9px}
-.cl .n{font-size:13px;color:var(--w);font-weight:600;grid-column:1}
-.cl .m{font-size:10.5px;color:var(--mono);grid-column:1}
+.cl .n{font-size:14.5px;color:var(--w);font-weight:600;grid-column:1}
+.cl .m{font-size:12px;color:var(--mono);grid-column:1}
 .cl .r{grid-column:2;grid-row:1/3;align-self:center;font-family:var(--code);font-size:10.5px;padding:2px 7px;border-radius:20px;border:1px solid var(--border);color:var(--muted)}
 .cl .r.g{border-color:var(--gB);color:var(--green)} .cl .r.a{border-color:var(--aB);color:var(--amber)} .cl .r.d{border-color:var(--gB);background:var(--gBg);color:var(--green)}
 .side .foot{padding:9px 10px;border-top:1px solid var(--border);display:flex;gap:6px}
@@ -142,57 +150,66 @@ header .sub{font-size:12px;color:var(--muted);margin-top:3px}
 .btn.theme svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
 
 /* ── buttons ── */
-.btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:6px 11px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.btn{background:transparent;border:1px solid var(--border);color:var(--body);border-radius:99px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);transition:border-color .15s,color .15s}
 .btn:hover{color:var(--w);border-color:var(--muted)}
-.btn.primary{background:var(--red);border-color:var(--red);color:#fff} .btn.primary:hover{background:#c40500}
-.btn.sm{padding:3px 8px;font-size:10.5px}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff;box-shadow:var(--glow)} .btn.primary:hover{background:#c40500}
+.btn.sm{padding:4px 11px;font-size:12px;white-space:nowrap}
 .btn.danger{border-color:var(--rB);color:var(--rT)} .btn.danger:hover{background:var(--sel);border-color:var(--rose)}
 .btn.x{border:none;color:var(--mono);padding:2px 6px;font-size:14px;line-height:1} .btn.x:hover{color:var(--rose)}
 
 /* ── record ── */
 .rec{min-width:0}
-.rhead{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.rhead{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px}
 .rhead .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-.rhead h2{margin:0;font-size:20px;color:var(--w);font-weight:800}
-.rhead .links{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;margin-top:6px}
+.rhead h2{margin:0;font-size:28px;letter-spacing:-.03em;color:var(--w);font-weight:800;line-height:1}
+.rhead .links{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;margin-top:8px}
 .rhead .links a{color:var(--blue);text-decoration:none} .rhead .links a:hover{text-decoration:underline}
 .rhead .links span{color:var(--mono)}
-.ready{display:flex;align-items:center;gap:9px;margin-top:10px;font-size:11.5px;color:var(--muted)}
+.ready{display:flex;align-items:center;gap:9px;margin-top:12px;font-size:13px;color:var(--muted)}
 .ready .bar{flex:1;max-width:260px;height:6px;background:var(--track);border-radius:3px;overflow:hidden}
 .ready .bar i{display:block;height:100%;background:var(--green);border-radius:3px;transition:width .2s}
 .ready .miss{color:var(--amber)}
-.callrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12.5px}
+.callrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:14px}
 .callrow label{display:flex;align-items:center;gap:7px;cursor:pointer}
 .callrow input[type=checkbox]{width:15px;height:15px;accent-color:var(--red)}
 
-.card{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:12px}
-.card .ch{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;user-select:none}
-.card .ch .num{font-family:var(--code);font-size:11px;color:var(--red);font-weight:700}
-.card .ch h3{margin:0;font-size:14px;color:var(--w);font-weight:700;flex:1;display:flex;align-items:center;gap:8px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:14px}
+.card .ch{display:flex;align-items:center;gap:12px;padding:14px 20px;cursor:pointer;user-select:none}
+.card .ch .num{font-family:var(--head);font-size:13px;color:var(--red);font-weight:800;letter-spacing:.04em}
+.card .ch h3{margin:0;font-size:16px;color:var(--w);font-weight:700;flex:1;display:flex;align-items:center;gap:8px;letter-spacing:-.01em}
 .info.guide .tip{width:380px;left:0;transform:none;bottom:auto;top:calc(100% + 8px);border-top-color:var(--blue)}
 body.present .info.guide{display:none!important}
-.card .ch .why{font-size:11px;color:var(--mono);font-style:italic}
+.card .ch .why{font-size:13px;color:var(--mono)}
+.card .ch .mins{font-family:var(--head);font-weight:600;font-size:11.5px;color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:2px 9px;white-space:nowrap}
+.clede{font-size:15px;line-height:1.55;color:var(--muted);margin:0 0 14px;padding:12px 0 12px;border-bottom:1px dashed var(--border);text-wrap:pretty}
+.clede b{color:var(--w)}
+ol.known{margin:0;padding:0;list-style:none} ol.known li{display:grid;grid-template-columns:22px 1fr 28px;gap:8px;align-items:start;margin:4px 0}
+ol.known li i{font-style:normal;font-family:var(--head);font-weight:800;font-size:12px;color:var(--red);padding-top:12px} ol.known li textarea{font-size:15px;color:var(--w);width:100%;box-sizing:border-box}
+.rdy .mig{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px;margin-top:4px} .rdy .mig b{color:var(--muted);font-weight:600;white-space:nowrap} .rdy .mig span{color:var(--body)}
 .card .ch .chev{color:var(--mono);font-size:11px;transition:transform .15s}
 .card.open .ch .chev{transform:rotate(90deg)}
-.card .cb{display:none;padding:4px 16px 16px;border-top:1px solid var(--border)}
+.card .cb{display:none;padding:2px 20px 20px;border-top:1px solid var(--line)}
 .card.open .cb{display:block}
-.hint{font-size:11.5px;color:var(--mono);margin:10px 0 8px;line-height:1.55}
+.hint{font-size:13px;color:var(--mono);margin:10px 0 8px;line-height:1.55}
 .hint b{color:var(--muted)}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 14px;margin-top:10px}
-.f label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mono);margin-bottom:3px}
-.f input,.f select,.f textarea,table.ed input,table.ed select,table.ed textarea{width:100%;background:var(--field);border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--body);font-size:12.5px;font-family:var(--sans)}
-.f input:focus,.f select:focus,.f textarea:focus,table.ed input:focus,table.ed select:focus,table.ed textarea:focus{outline:none;border-color:var(--red)}
-.f textarea,table.ed textarea{resize:vertical;min-height:54px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px 16px;margin-top:12px}
+.f label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--mono);margin-bottom:5px}
+.f input,.f select,.f textarea,table.ed input,table.ed select,table.ed textarea{width:100%;background:var(--field);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--w);font-size:15px;font-family:var(--sans);transition:border-color .15s,box-shadow .15s}
+.f input:focus,.f select:focus,.f textarea:focus,table.ed input:focus,table.ed select:focus,table.ed textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(225,6,0,.15)}
+.f textarea{resize:vertical;min-height:120px;line-height:1.5}
+.f textarea[rows="3"]{min-height:84px}
+table.ed textarea{resize:vertical;min-height:44px;line-height:1.5}
+.f textarea::placeholder,table.ed textarea::placeholder,.f input::placeholder,table.ed input::placeholder,textarea.grow::placeholder{color:var(--grey)}
 .f.wide{grid-column:1/-1}
-.f .sub{font-size:10.5px;color:var(--mono);margin-top:3px}
+.f .sub{font-size:12px;color:var(--mono);margin-top:4px}
 .f .auto{color:var(--blue)}
 
 .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.pill{display:flex;align-items:center;gap:7px;background:var(--field);border:1px solid var(--border);border-radius:20px;padding:5px 11px;font-size:12px;cursor:pointer;user-select:none}
+.pill{display:flex;align-items:center;gap:8px;background:var(--field);border:1px solid var(--border);border-radius:99px;padding:7px 14px;font-size:14px;font-weight:600;cursor:pointer;user-select:none}
 .pill input{accent-color:var(--red);width:14px;height:14px;margin:0}
 .pill.on{border-color:var(--red);color:var(--w)}
-.pill small{color:var(--mono);font-family:var(--code);font-size:10px}
+.pill small{color:var(--mono);font-family:var(--head);font-weight:700;font-size:11px}
 
 .info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--mono);color:var(--mono);font-size:10px;font-weight:700;font-family:var(--code);cursor:help;position:relative;margin-left:2px;flex:none}
 .info:hover{border-color:var(--blue);color:var(--blue)}
@@ -203,13 +220,17 @@ body.present .info.guide{display:none!important}
 .pillrow .pn:focus{outline:none;border-color:var(--red)}
 .pillrow .pn:disabled{opacity:.35}
 /* ── pillar groups (26 Oct 2026): card 01 mirrors the accepted proposal, pillar → scope items ── */
-.pg{border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-top:10px;background:var(--topic)}
+.pg{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:12px;background:var(--card2)}
 .pg.off{opacity:.55}
-.pgh{display:grid;grid-template-columns:260px 1fr auto auto;gap:8px 12px;align-items:center}
-.pgh .pn{width:100%;background:var(--field);border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--body);font-size:12px;font-family:var(--sans)}
+.pgroup{margin-top:10px;padding-top:12px;border-top:1px solid var(--line)}
+.pgroup.off{opacity:.55} .pgroup .pgh .pill{border-color:transparent;padding-left:0;font-family:var(--head);font-size:14.5px;letter-spacing:.02em} .pgroup .pgh .pill.on{color:var(--w)}
+.pgroup .cn{margin:8px 0 4px 36px}
+.pgh{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.pgh .pill{flex:none} .pgh .pn{flex:1 1 220px;min-width:200px} .pgh .ph{flex:none;margin-left:auto} .pgh .btn{flex:none}
+.pgh .pn{width:100%;background:var(--field);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--body);font-size:14.5px;font-family:var(--sans)}
 .pgh .pn:focus{outline:none;border-color:var(--red)} .pgh .pn:disabled{opacity:.35}
 .pgh .ph{font-family:var(--code);font-size:11px;color:var(--mono);white-space:nowrap}
-.pg table.ed{margin-top:6px} .pg table.ed td.h{width:70px} .pg table.ed td.ci{width:30%}
+.pg table.ed{margin-top:6px} .pg table.ed td.h{width:70px} .pg table.ed td.cn{width:34%} .pg table.ed td.cn textarea{color:var(--body);font-size:12.5px}
 .pg .empty{padding:4px 0 2px}
 .pmodal .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
 .pmodal input[type=file]{font-size:12px;color:var(--muted)}
@@ -219,12 +240,12 @@ body.present .info.guide{display:none!important}
 .pmodal .prev h4{margin:8px 0 4px;color:var(--w);font-size:12.5px} .pmodal .prev h4:first-child{margin-top:0}
 .pmodal .prev ul{margin:0;padding-left:18px} .pmodal .prev li{margin:2px 0;color:var(--body)} .pmodal .prev li i{color:var(--mono)}
 .pmodal .prev .meta{color:var(--muted);margin-bottom:6px}
-@media(max-width:900px){.pillrow,.pgh{grid-template-columns:1fr}}
-h4.sh{margin:14px 0 6px;font-size:11px;letter-spacing:.9px;text-transform:uppercase;color:var(--mono);font-weight:600;display:flex;align-items:center;gap:10px}
+@media(max-width:900px){.pillrow{grid-template-columns:1fr}.pgh .ph{margin-left:0}}
+h4.sh{margin:18px 0 8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--w);font-weight:700;font-family:var(--head);display:flex;align-items:center;gap:10px}
 h4.sh .spacer{flex:1}
 table.ed{width:100%;border-collapse:collapse;margin-top:4px}
-table.ed th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mono);font-weight:600;padding:4px 6px 4px 0}
-table.ed td{padding:3px 6px 3px 0;vertical-align:top}
+table.ed th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--mono);font-weight:600;padding:6px 8px 6px 0}
+table.ed td{padding:4px 8px 4px 0;vertical-align:top}
 table.ed td.x{width:28px;padding-right:0;padding-top:6px}
 table.ed td.n{width:26px;font-family:var(--code);font-size:11px;color:var(--mono);padding-top:9px}
 table.ed select[data-c="green"]{border-color:var(--gB);color:var(--green)}
@@ -242,16 +263,45 @@ table.ed textarea.grow{resize:none}
 table.ed tr.done input{color:var(--mono);text-decoration:line-through}
 table.ed input[type=checkbox]{width:15px;height:15px;accent-color:var(--green);margin-top:9px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.two.scope{grid-template-columns:1fr}
+.slist{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.sgrp{display:flex;align-items:center;gap:8px;margin:12px 0 2px;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mono)}
+.sgrp b{font-family:var(--head);color:var(--red)}
+.srow{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:8px;align-items:start;border:1px solid transparent;border-radius:10px;padding:4px 8px 4px 10px;transition:background .15s,border-color .15s}
+.srow:hover,.srow:focus-within{background:var(--topic)}
+.srow.noted{background:var(--card2);border-color:var(--line);padding:8px 8px 10px 10px;margin:3px 0}
+.srow .sn{font-family:var(--head);font-weight:800;font-size:13px;color:var(--red);padding-top:12px;text-align:center}
+.srow .sbody{min-width:0;display:flex;flex-direction:column;gap:6px}
+.srow .sttl{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:8px;align-items:center}
+.srow textarea.stitle{width:100%;box-sizing:border-box;font-size:15.5px;font-weight:600;color:var(--w);background:transparent;border-color:transparent;padding-left:0}
+.srow textarea.stitle:focus{background:var(--field);border-color:var(--red);padding-left:12px}
+.srow .shrs{font-family:var(--head);font-weight:700;font-size:13px;color:var(--muted);white-space:nowrap}
+.srow input.shrs{width:68px;text-align:right;background:transparent;border:1px solid transparent;border-radius:8px;padding:8px 10px;color:var(--muted);font-family:var(--head)}
+.srow input.shrs:hover{border-color:var(--line)} .srow input.shrs:focus{outline:none;border-color:var(--red);background:var(--field);color:var(--w)}
+.srow .chip{border:1px solid var(--border);border-radius:99px;padding:3px 9px}
+.srow select{background:var(--field);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--body);font:inherit;font-size:13px}
+.srow .edited{font-family:var(--head);font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.45);border-radius:99px;padding:3px 9px;cursor:pointer;white-space:nowrap}
+.srow .edited:hover{color:var(--w);border-color:var(--amber)}
+.srow .sdet{font-size:14px;color:var(--muted);line-height:1.5;margin-top:-4px}
+.srow .snote{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start}
+.srow .snote textarea{width:100%;box-sizing:border-box;font-size:14.5px;color:var(--body);background:var(--field);border:1px solid rgba(251,191,36,.4)}
+.srow .snote textarea:focus{border-color:var(--amber)}
+.srow .snl{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);padding-top:13px}
+.srow .sact{display:flex;gap:2px;align-items:center;padding-top:6px;opacity:0;transition:opacity .15s}
+.srow:hover .sact,.srow:focus-within .sact{opacity:1}
+@media(hover:none){.srow .sact{opacity:1}}
+@media(max-width:1000px){.srow .snote{grid-template-columns:1fr;gap:3px}.srow .snl{padding-top:0}}
+.pgh .pn{background:transparent;border-color:transparent} .pgh .pn:hover{border-color:var(--line)}
 @media(max-width:900px){.two{grid-template-columns:1fr}}
-.empty{color:var(--mono);font-size:12px;font-style:italic;padding:6px 0}
+.empty{color:var(--mono);font-size:14px;padding:8px 0}
 /* 02 · question bank, 10 · recap (6 Oct 2026) */
-.qbank{margin:4px 0 6px;padding-left:20px;color:var(--w);font-size:13.5px;line-height:1.7}
+.qbank{margin:4px 0 6px;padding-left:20px;color:var(--w);font-size:15px;line-height:1.7}
 .qbank li::marker{color:var(--red);font-weight:700}
-.recap{display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;background:var(--topic);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:8px;padding:6px 14px 12px;margin-top:10px}
+.recap{display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px 16px 14px;margin-top:10px}
 @media(max-width:900px){.recap{grid-template-columns:1fr}}
 .recap h5{margin:10px 0 3px;font-size:10.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--mono);font-weight:700}
-.recap ul{margin:0;padding-left:18px;color:var(--w);font-size:13px;line-height:1.6}
-.recap p{margin:0;color:var(--w);font-size:13px}
+.recap ul{margin:0;padding-left:18px;color:var(--w);font-size:14.5px;line-height:1.6}
+.recap p{margin:0;color:var(--w);font-size:14.5px}
 .recap p.none{color:var(--mono);font-style:italic;font-size:12px}
 .recap .by{color:var(--muted);font-size:11.5px}
 .recap .rwarn{grid-column:1/-1;color:var(--amber);font-size:12px;margin-top:6px}
@@ -261,7 +311,23 @@ table.ed input[type=checkbox]{width:15px;height:15px;accent-color:var(--green);m
 .wraprow .stamp2{font-size:11px;color:var(--green);font-family:var(--code)}
 .saved{font-size:10.5px;color:var(--mono);height:14px;margin-top:6px;font-family:var(--code)}
 
-.welcome{background:var(--card);border:1px dashed var(--border);border-radius:10px;padding:40px 30px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7}
+.ktiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:4px}
+.ktile{display:flex;flex-direction:column;gap:5px;text-align:left;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 14px 14px;min-height:118px;cursor:pointer;font-family:var(--sans);color:var(--body);position:relative;transition:border-color .15s,box-shadow .15s}
+.ktile:hover{border-color:var(--muted)}
+.ktile.open{border-color:var(--red);box-shadow:0 0 0 3px rgba(225,6,0,.15)}
+.ktile.done{border-color:var(--gB);background:var(--gBg)}
+.ktile .kn{font-family:var(--head);font-weight:800;font-size:11px;color:var(--red);letter-spacing:.04em;align-self:flex-start}
+.ktile .kt{font-family:var(--head);font-weight:700;font-size:14.5px;color:var(--w);padding-right:26px;line-height:1.25}
+.ktile .ks{font-size:14px;line-height:1.45;color:var(--body);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ktile.empty .ks{color:var(--grey)}
+.ktile .kchk{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:transparent}
+.ktile.done .kchk{background:var(--green);border-color:var(--green);color:#0F1117}
+.ked{margin-top:12px;background:var(--card2);border:1px solid var(--red);border-radius:12px;padding:14px 16px;box-shadow:0 0 0 3px rgba(225,6,0,.1)}
+.ked .grid{margin-top:0}
+.ked .kbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.btn.ok{border-color:var(--gB);color:var(--green)} .btn.ok:hover{border-color:var(--green)} .btn.ok.on{background:#16A34A;border-color:#16A34A;color:#fff}
+.kcount{font-size:13px;font-weight:600;color:var(--mono)} .kcount.all{color:var(--green)}
+.welcome{background:var(--card);border:1px dashed var(--border);border-radius:14px;padding:48px 30px;text-align:center;color:var(--muted);font-size:15px;line-height:1.7}
 .welcome b{color:var(--w)}
 
 /* ── import / json modal ── */
@@ -314,11 +380,11 @@ ul.sl li small{color:#64748B}
 .dw .cal:hover{background:var(--red);color:#fff}
 .dw input[type=date]:focus + .cal{border-color:var(--red)}
 /* auto-growing text fields */
-textarea.grow{min-height:34px;height:34px;overflow:hidden;resize:none;line-height:1.45;padding:7px 9px;font-family:var(--sans)}
+textarea.grow{min-height:42px;height:42px;overflow:hidden;resize:none;line-height:1.45;padding:9px 12px;font-family:var(--sans)}
 textarea.grow.line{white-space:pre;overflow:hidden}
 textarea.grow.wrap{white-space:pre-wrap;overflow:hidden}
-.pg textarea.grow.wrap{font-size:13px;color:var(--w)}
-.pg .cn{margin-top:8px} .pg .cn label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mono);font-weight:600;margin-bottom:3px} .pg .cn textarea{width:100%;min-height:34px;font-family:var(--sans);font-size:12.5px}
+.pg textarea.grow.wrap{font-size:15px;color:var(--w)}
+.pg .cn{margin-top:10px} .pg .cn label,.pgroup .cn label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mono);font-weight:600;margin-bottom:3px} .pg .cn textarea,.pgroup .cn textarea{width:100%;min-height:64px;font-family:var(--sans);font-size:15px}
 textarea.grow.line:focus{white-space:pre-wrap;overflow:auto}
 textarea.grow.line.open{white-space:pre-wrap}
 
@@ -330,9 +396,25 @@ body.present .layout{grid-template-columns:1fr}
 body.present .wrap{max-width:1100px}
 .presentbar{display:none;align-items:center;gap:10px;background:var(--sel);border:1px solid var(--rB);border-radius:7px;padding:8px 13px;margin-bottom:12px;font-size:12.5px;color:var(--rT)}
 body.present .presentbar{display:flex}
+body.present .card{display:none;margin-bottom:0}
+body.present .card.cur{display:block}
+body.present .card.cur .cb{display:block}
+body.present .card .ch{cursor:default} body.present .card .chev{display:none}
+.pnav{display:none}
+body.present .pnav{display:flex;align-items:center;gap:8px;margin:0 0 12px;flex-wrap:wrap}
+.pnav .pstep{flex:1 1 0;min-width:0;height:6px;border-radius:99px;background:var(--track);border:0;padding:0;cursor:pointer;transition:background .15s}
+.pnav .pstep:hover{background:var(--muted)}
+.pnav .pstep.cur{background:var(--red);box-shadow:var(--glow)}
+.pnav .pstep.seen{background:var(--grey)}
+.pnav .pcount{font-family:var(--head);font-weight:700;font-size:13px;color:var(--muted);white-space:nowrap;margin-left:6px}
+.pfoot{display:none}
+body.present .pfoot{display:flex;align-items:center;gap:10px;margin:16px 0 24px;padding-top:14px;border-top:1px solid var(--line)}
+.pfoot .pnext{min-width:0}
+.pfoot .pup{font-size:14px;color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pfoot .pup b{color:var(--w);font-weight:600}
 /* ── READINESS PANEL (26 Oct 2026): the client's own readiness-check answers, read live from
    readiness-<slug>-v1, so the call reviews what they told us instead of asking again. ── */
-.rdy{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin:8px 0 14px}
+.rdy{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:8px 0 14px}
 .rdy .rh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:13px;color:var(--muted)}
 .rdy .rh b{color:var(--w);font-size:14px}
 .rdy .rh .ast{min-width:0;padding:4px 10px;font-size:11.5px}
@@ -372,7 +454,7 @@ table.pt td:first-child .pe{color:var(--w);font-weight:600}
 
 <header>
   <div>
-    <h1><span class="bar"></span>Kick-off Desk</h1>
+    <h1><span class="sq"></span><span class="word">SABEL</span><span class="vdiv"></span>Kick-off Desk</h1>
     <div class="sub">Scope in and out, timeline, who does what, next steps. One record per client · internal only, never shared with a client</div>
   </div>
   <div class="spacer"></div>
@@ -382,7 +464,7 @@ table.pt td:first-child .pe{color:var(--w);font-weight:600}
 
 <div id="banners"></div>
 
-<div class="presentbar"><b>Presenting</b><span>Only this client is on screen. The client list, internal notes and commercial details are hidden; everything else can still be edited. Press Esc or Exit to get them back.</span><span class="spacer"></span><button type="button" class="btn" onclick="setPresent(false)">Exit presenting</button></div>
+<div class="presentbar"><b>Presenting</b><span>One section at a time; use Next, Back or the arrow keys. The client list, internal notes and commercial details are hidden; everything else can still be edited. Press Esc or Exit to get them back.</span><span class="spacer"></span><button type="button" class="btn" onclick="setPresent(false)">Exit presenting</button></div>
 <div class="stages hideP" id="stages" aria-label="Show clients by portal stage"></div>
 <div class="layout">
   <aside class="side">
@@ -476,6 +558,12 @@ var PILLARS=[
   ['migration','05','Migration Accelerator','Migration of historical data from another platform, delivered through Migr8Now: field mapping, a sample batch, the full run and a delta at cutover. The pillar carries the platform fee; Sabel oversight sits in go-live. Only in scope when a migration was sold.']
 ];
 var OWNERS=['Sabel','Client','Richard','Chris','Greg','Nikki'];
+/* 26 Oct 2026: card 00 is eight titled statements. Each is opened, read back, edited if needed and ticked as confirmed. */
+var KNOWN_TOPICS=['Moving from','Why now','Support volume','Channels','Team and seats','Timeline','Constraints','From Intercom'];
+var KOPEN=null;
+function openKnown(i){ KOPEN=i; renderRec(); if(i!=null){ var t=document.querySelector('[data-p="context.known.'+i+'.t"]'); if(t) t.focus(); } }
+function confirmKnown(i){ var r=rec(CUR), k=r.context.known; k[i].confirmed=!k[i].confirmed; saveStore();
+  if(k[i].confirmed){ var j=-1; k.forEach(function(x,n){ if(j<0&&n>i&&!x.confirmed) j=n; }); KOPEN=j>-1?j:null; } renderRec(); }
 var SRC_OPTS=[['Sabel SOW','Sabel SOW',''],['Intercom SOW','Intercom SOW',''],['Both','Both','green'],['Not in either','Not in either','amber'],['Unclear','Unclear: differs between SOWs','red']];
 var ACCESS_ST=[['pending','Pending','amber'],['pass','Pass','green'],['fail','Fail','red'],['na','N/A','grey']];
 var RISK_ST=[['open','Open','red'],['watching','Watching','amber'],['closed','Closed','green']];
@@ -562,9 +650,26 @@ function readinessHTML(id,slide){
   h+='<h5>'+(slide?'Still open from your answers':'Open items from their answers')+'</h5>';
   h+=open.length?'<div class="items">'+open.map(function(x){ return '<div class="'+(x.bad?'bad':'')+'"><i>'+esc(x.answer)+'</i><b>'+esc(x.label)+'</b><span>'+esc([x.owner,x.by?'by '+fmt(x.by):''].filter(Boolean).join(' · '))+'</span>'+(x.note?'<small>'+esc(x.note)+'</small>':'')+'</div>'; }).join('')+'</div>'
     :'<div class="none">Nothing open: every status question is answered green or does not apply.</div>';
+  var mig=[['Moving from',((d.reps||{}).a1r||[]).map(function(x){return x.sys;}).filter(Boolean).join(', ')],['Volume in the current system',dd.e1a],['How far back',dd.e2a],['Comes across with each conversation',String(dd.e3a||'').replace(/\|/g,', ')],['Moved after go-live',dd.e4c],['Checks the sample',[dd.e5a,dd.e5b].filter(Boolean).join(', ')],['Matching customers to logins',dd.e6a]].filter(function(x){return x[1];});
+  if(mig.length) h+='<h5>Migration: what we confirm live</h5><div class="mig">'+mig.map(function(x){return '<b>'+esc(x[0])+'</b><span>'+esc(x[1])+'</span>';}).join('')+'</div>';
   if(!slide) h+='<a href="'+readinessLink(id)+'" target="_blank" rel="noopener">Open their form</a>';
   return h;
 }
+/* "What we know" suggestions from the proposal, Notion and the readiness check; never overwrites, only adds */
+function suggestKnown(){ var r=rec(CUR), b=r.basics, c=CLIENTS.filter(function(x){return x.id===CUR;})[0]||{}, n=c.notion||{}, e=readinessState(CUR), dd=(e.data&&e.data.data)||{}, reps=(e.data&&e.data.reps)||{}, out=[];
+  function add(t){ if(t&&!r.context.known.some(function(x){return x.t.trim().toLowerCase()===t.trim().toLowerCase();})) out.push({t:t}); }
+  var src=(reps.a1r||[]).map(function(x){return x.sys;}).filter(Boolean).join(' and ')||r.timeline.sourcePlatform;
+  if(b.proposalRef||b.hours) add((b.type==='Migration'?'Migration into Intercom':'Intercom and Fin implementation')+(src?', moving from '+src:'')+(b.proposalRef?', as accepted in '+b.proposalRef:'')+(b.hours?': '+b.hours+' hours':'')+(b.estWeeks?' over an estimated '+b.estWeeks+' weeks':'')+'.');
+  if(dd.i1a) add((dd.i1a+(dd.i1b?', '+dd.i1b:''))+'.'); if(dd.i2a) add('Support volume today: '+dd.i2a+(dd.i2b?' ('+dd.i2b+' at peak)':'')+'.');
+  if(dd.e1a) add('History in '+(src||'the current system')+': '+String(dd.e1a).replace(/\n+/g,'; ')+(dd.e2a?'. Moving '+dd.e2a:'')+'.');
+  if(dd.i3b||dd.i3a) add('Customers looked after '+(dd.i3a?dd.i3a:'')+(dd.i3b?' across '+dd.i3b:'')+(dd.i3c?', in '+dd.i3c:'')+'.');
+  if(dd.d3a) add(dd.d3a+' people will work in Intercom.'); if(b.subscription) add('Intercom plan: '+b.subscription+'.');
+  if(reps.b1r&&reps.b1r.length) add('Customers write to '+reps.b1r.map(function(x){return x.addr;}).filter(Boolean).join(', ')+'.');
+  if(reps.c6r&&reps.c6r.length) add('Systems that feed customers into Intercom: '+reps.c6r.map(function(x){return x.sys;}).filter(Boolean).join(', ')+'.');
+  if(r.timeline.goLive) add('Go-live '+fmt(r.timeline.goLive)+(r.timeline.goLiveNote?' ('+r.timeline.goLiveNote+')':'')+(r.timeline.sourceContractEnd?'; '+(src||'the current platform')+' contract ends '+fmt(r.timeline.sourceContractEnd):'')+'.');
+  if(n.migrationNote&&/replac|moving|from /i.test(n.migrationNote)) add(n.migrationNote.split(/[.\n]/)[0]+'.');
+  if(!out.length){ alert('Nothing new to suggest. Add lines by hand from the Intercom handover.'); return; }
+  out.forEach(function(o){ var e=r.context.known.filter(function(x){return !(x.t||'').trim();})[0]; if(e) e.t=o.t; else r.context.known.push({title:'',t:o.t,confirmed:false}); }); if(!r.context.source) r.context.source=[b.proposalRef?'accepted proposal':'',e.data?'readiness check':'',n.id?'Notion':''].filter(Boolean).join(', '); saveStore(); renderRec(); }
 /* contacts and dates the form already holds, offered where the desk would otherwise ask again */
 function readinessContactsHTML(id){
   var e=readinessState(id), r=STORE.clients[id]; if(!e.data||!r||r.people.client.length) return '';
@@ -589,12 +694,16 @@ function blankRecord(name){
     basics: { legalName:'', shortName:name||'', hours:'', hoursNote:'', subscription:'', appId:'',
               signed:'', signedSource:'', type:'', notionId:'', notionUrl:'', trackerUrl:'', sabelDoc:'', intercomSow:'',
               pillars:{}, pillarNotes:{}, pillarCallNotes:{} },
+    /* 26 Oct 2026: the opener. Plain lines about the client's situation, read back to them first. */
+    context:{ known:KNOWN_TOPICS.map(function(t){ return {title:t,t:'',confirmed:false}; }), source:'' },
     scope:  { summary:'', inScope:[], outScope:[],
               /* 26 Oct 2026: Intercom-sold projects get a scope check posted in the Intercom deal thread */
-              intercomCheck:{ posted:'', link:'', confirmedBy:'', notes:'' },
+              source:'', intercomCheck:{ posted:'', link:'', confirmedBy:'', notes:'' },
               changeControl:'Anything outside this scope is treated as a change request: Sabel scopes it as an add-on and agrees it with you before any work starts.' },
     timeline:{ kickoff:'', buildStart:'', checkin:'', goLive:'', goLiveNote:'', blackout:'', sourcePlatform:'', sampleMigration:'', historicalMigration:'', sourceContractEnd:'', phases:[] },
-    people: { sabel:{}, client:[] },
+    people: { sabel:{}, client:[], attendees:'', recordingConsent:false,
+              exec:[ {role:'Champion', name:'', cares:''}, {role:'Decision maker', name:'', cares:''}, {role:'Financial approver', name:'', cares:''},
+                     {role:'Executive stakeholder', name:'', cares:''}, {role:'Intercom AE', name:'', cares:''}, {role:'Intercom RM', name:'', cares:''} ] },
     raci:   [ {area:'Workspace configuration and build', sabel:'Build and configure', client:'Review and approve'},
               {area:'Content: help articles, macros, message copy', sabel:'Structure and recommend', client:'Supply and own the content'},
               {area:'Routing, teams and inbox decisions', sabel:'Recommend', client:'Decide'},
@@ -628,6 +737,13 @@ function upgradeRec(r){
   if(!r||r.removed) return r;
   var d=blankRecord(r.name);
   if(r.scope&&!r.scope.intercomCheck) r.scope.intercomCheck=d.scope.intercomCheck;
+  if(r.scope&&r.scope.source===undefined) r.scope.source='';
+  if(!r.context) r.context=d.context;
+  else { r.context.known=(r.context.known||[]).map(function(x){ if(x.title===undefined) x.title=''; if(x.confirmed===undefined) x.confirmed=false; return x; });
+    var kt=r.context.known.map(function(x){return x.title;}), free=KNOWN_TOPICS.filter(function(t){return kt.indexOf(t)<0;});
+    r.context.known.forEach(function(x){ if(!x.title&&free.length) x.title=free.shift(); });
+    free.forEach(function(t){ if(r.context.known.length<8) r.context.known.push({title:t,t:'',confirmed:false}); }); }
+  if(r.people){ if(!r.people.exec) r.people.exec=d.people.exec; if(r.people.attendees===undefined) r.people.attendees=''; if(r.people.recordingConsent===undefined) r.people.recordingConsent=false; }
   ['outcomes','comms','wrap'].forEach(function(k){
     if(!r[k]||typeof r[k]!=='object'){ r[k]=d[k]; return; }
     Object.keys(d[k]).forEach(function(f){ if(r[k][f]===undefined) r[k][f]=d[k][f]; });
@@ -936,21 +1052,55 @@ function inp(path,val,opts){
 var CAL_SVG='<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
 function dateField(path,val,extra){ return '<span class="dw"><input type="date" data-p="'+path+'" value="'+esc(val)+'"'+(extra||'')+'><button type="button" class="cal" tabindex="-1" title="Open calendar" onclick="openCal(this)">'+CAL_SVG+'</button></span>'; }
 function openCal(btn){ var i=btn.previousElementSibling; if(!i) return; i.focus(); if(typeof i.showPicker==='function'){ try{ i.showPicker(); }catch(e){} } }
-function autoGrow(t){ t.style.height='auto'; t.style.height=Math.max(34,t.scrollHeight+2)+'px'; }
+function autoGrow(t){ t.style.height='auto'; t.style.height=Math.max(42,t.scrollHeight+2)+'px'; }
 function growAll(){ [].slice.call(document.querySelectorAll('textarea.grow:not(.line)')).forEach(autoGrow); }
 /* wrap fields (scope titles) also size as you type */
 document.addEventListener('input',function(e){ var t=e.target; if(t&&t.classList&&t.classList.contains('wrap')) autoGrow(t); });
 function colourOf(options,val){ for(var i=0;i<options.length;i++) if(options[i][0]===val) return options[i][2]||''; return ''; }
 function field(label,path,val,opts){ opts=opts||{}; return '<div class="f'+(opts.wide?' wide':'')+'"><label>'+label+'</label>'+inp(path,val,opts)+(opts.sub?'<div class="sub">'+opts.sub+'</div>':'')+'</div>'; }
+/* client-facing one-liner per card (visible in Present) and a suggested time box. {nm} = short name. */
+var CARD_LEDE={
+  '00':'Here is what we understand about {nm} going into this project. Correct anything that is wrong or out of date before we go any further.',
+  '01':'What was signed, section by section, with the hours against each. We read it through line by line and get a yes to each, so everyone starts from the same scope.',
+  '02':'Before the setup detail: what this needs to achieve for {nm}, in your words, and the numbers we will judge it by.',
+  '03':'What is not included, line by line, and how anything new gets handled. A yes to each line now saves a surprise later.',
+  '04':'The dates that matter between now and go-live, and the ones we need to work around.',
+  '05':'Who is on this from each side, and who decides what. Nothing here should be left without a name.',
+  '06':'How we stay in step week to week, and what happens if something gets stuck.',
+  '07':'What you have told us already in the readiness check, what is still open, and the doors Sabel opens for you.',
+  '08':'Choices that are yours to make. We lay out the trade-off; you decide, now or by a date.',
+  '09':'What happens from here. Every line has a name and a date on it.',
+  '10':'We read back what we agreed today and check it matches your understanding. A written summary follows within 24 hours.'
+};
+var CARD_MINS={'00':3,'01':10,'02':8,'03':3,'04':4,'05':3,'06':3,'07':4,'08':2,'09':3,'10':5};
 function card(num,title,why,body){
   var open=OPEN[num]!==false, guide='';
+  var nm=CUR?esc((rec(CUR).basics.shortName||rec(CUR).name||'you')):'you';
   /* Internal guidance is never printed in the body (a client on a screen share can read it);
      it lives behind an "i" on the header, hidden entirely in Present mode. */
   body=body.replace(/^\s*<div class="hint(?: hideP)?">([\s\S]*?)<\/div>/,function(m,g){ guide=g; return ''; });
+  if(CARD_LEDE[num]) body='<div class="clede">'+CARD_LEDE[num].replace(/\{nm\}/g,nm)+'</div>'+body;
   var info=guide?'<span class="info guide" tabindex="0" onclick="event.stopPropagation()">i<span class="tip">'+guide+'</span></span>':'';
-  return '<div class="card'+(open?' open':'')+'" id="card'+num+'"><div class="ch" onclick="toggleCard(\''+num+'\')"><span class="num">'+num+'</span><h3>'+title+info+'</h3><span class="why">'+why+'</span><span class="chev">▶</span></div><div class="cb">'+body+'</div></div>';
+  return '<div class="card'+(open?' open':'')+'" id="card'+num+'"><div class="ch" onclick="toggleCard(\''+num+'\')"><span class="num">'+num+'</span><h3>'+title+info+'</h3><span class="why">'+why+'</span>'+(CARD_MINS[num]?'<span class="mins">~'+CARD_MINS[num]+' min</span>':'')+'<span class="chev">▶</span></div><div class="cb">'+body+'</div></div>';
 }
 function toggleCard(n){ OPEN[n]=OPEN[n]===false; var el=document.getElementById('card'+n); if(el) el.classList.toggle('open',OPEN[n]!==false); }
+/* 26 Oct 2026: one row per scope item, shared by card 01 and card 03. Title is edited in place;
+   an item imported from the proposal shows an "edited" marker when its wording has changed
+   (click to restore). Notes stay hidden until "+ Note" is clicked, so the list reads clean. */
+var NOTE_OPEN={};
+function openNote(path){ NOTE_OPEN[path]=true; renderRec(); var t=document.querySelector('[data-p="'+path+'"]'); if(t) t.focus(); }
+function revertItem(path){ var x=getPath(rec(CUR),path); if(!x||x.orig==null) return; x.t=x.orig; saveStore(); renderRec(); }
+function isEdited(x,t){ return x&&x.orig!=null&&x.orig!==''&&String(t==null?x.t:t).trim()!==x.orig.trim(); }
+function editedBadge(x,p){ return '<button type="button" class="edited" title="Wording changed on the call. Originally: '+esc(x.orig)+'. Click to restore." onclick="revertItem(\''+p+'\')">edited</button>'; }
+function scopeRow(x,i,path,o){ o=o||{}; var p=path+'.'+i, nk=o.noteKey||'callNote', note=x[nk]||'', show=!!note||NOTE_OPEN[p+'.'+nk];
+  var hrs=o.hoursEdit?'<input type="number" class="shrs" data-p="'+p+'.hours" value="'+esc(x.hours||'')+'" placeholder="h" title="Hours">':(x.hours?'<span class="shrs chip">'+esc(x.hours)+' h</span>':'');
+  var pk=o.pillarPick?inp(p+'.pillar',x.pillar||'',{type:'select',blank:'— pillar —',options:PILLARS.map(function(z){return [z[0],z[1]+' '+z[2]];})}):'';
+  return '<div class="srow'+(show?' noted':'')+'"><span class="sn">'+(o.num!=null?o.num:i+1)+'</span><div class="sbody">'+
+    '<div class="sttl">'+inp(p+'.t',x.t,{type:'wrap',cls:'stitle',ph:o.ph||'Scope item'})+(isEdited(x)?editedBadge(x,p):'')+pk+hrs+'</div>'+
+    (o.detail&&x.note?'<div class="sdet">'+esc(x.note)+'</div>':'')+
+    (show?'<div class="snote"><span class="snl">Note</span>'+inp(p+'.'+nk,note,{type:'wrap',ph:o.notePh||'e.g. wanted by a date, depends on something, agreed on the call'})+'</div>':'')+
+    '</div><div class="sact">'+(show?'':'<button type="button" class="btn sm" onclick="openNote(\''+p+'.'+nk+'\')">+ Note</button>')+'<button type="button" class="btn x" title="Remove" onclick="delRow(\''+path+'\','+i+')">×</button></div></div>';
+}
 function moveCell(path,i,n){
   return '<td class="mv"><button class="btn x" title="Move up"'+(i===0?' disabled':'')+' onclick="moveRow(\''+path+'\','+i+',-1)">▲</button><button class="btn x" title="Move down"'+(i===n-1?' disabled':'')+' onclick="moveRow(\''+path+'\','+i+',1)">▼</button></td>';
 }
@@ -985,9 +1135,10 @@ function outcomesCard(r){
     '<div class="grid hideP">'+field('KPIs from Intercom handover <span class="auto">· internal</span>','outcomes.source',o.source,{type:'select',options:OUT_SRC})+'</div>'+
     '<h4 class="sh">Questions for this part of the call</h4><ol class="qbank">'+OUT_Q.map(function(q){return '<li>'+esc(q)+'</li>';}).join('')+'</ol>'+
     '<div class="grid">'+
-    field('What '+nm+' wants from this, in their words','outcomes.vision',o.vision,{type:'textarea',rows:3,wide:true,ph:'The vision as they describe it. Quote them where you can.'})+
-    field('Success six months after go-live','outcomes.sixMonths',o.sixMonths,{type:'textarea',rows:2,ph:'What will be different?'})+
-    field('How leadership will judge the rollout','outcomes.leadership',o.leadership,{type:'textarea',rows:2,ph:'Who reports on it, to whom, and on which numbers'})+
+    field('What '+nm+' wants from this, in their words','outcomes.vision',o.vision,{type:'textarea',rows:6,wide:true,ph:'The vision as they describe it. Quote them where you can.'})+
+    '</div><div class="two" style="margin-top:14px">'+
+    field('Success six months after go-live','outcomes.sixMonths',o.sixMonths,{type:'textarea',rows:6,ph:'What will be different for the team and for customers?'})+
+    field('How leadership will judge the rollout','outcomes.leadership',o.leadership,{type:'textarea',rows:6,ph:'Who reports on it, to whom, and on which numbers'})+
     '</div><h4 class="sh">Success measures<span class="spacer"></span><button class="btn sm" onclick="addRow(\'outcomes.measures\',{goal:\'\',kpi:\'\',baseline:\'\',target:\'\',by:\'\',owner:\'\'})">+ Add measure</button></h4>'+mt);
 }
 function commsCard(r){
@@ -1060,53 +1211,70 @@ function renderRec(){
      '<span class="spacer"></span><span class="saved" id="savedStamp"></span>'+
      '<button class="btn danger sm hideP" onclick="removeRecord()">Remove record</button></div></div>';
 
+  /* 00 what we know: eight tiles, each reviewed, edited if needed and ticked as confirmed */
+  if(!r.context) r.context={known:[],source:''};
+  var kn=r.context.known, nconf=kn.filter(function(x){return x.confirmed;}).length;
+  var tiles=kn.map(function(x,i){ var st=(x.t||'').trim(); return '<button type="button" class="ktile'+(x.confirmed?' done':'')+(st?'':' empty')+(KOPEN===i?' open':'')+'" id="ktile'+i+'" onclick="openKnown('+i+')"><span class="kn">0'+(i+1)+'</span><span class="kt">'+esc(x.title||'Untitled')+'</span><span class="ks">'+esc(st||'Nothing written yet')+'</span><span class="kchk">✓</span></button>'; }).join('');
+  var ked='';
+  if(KOPEN!=null&&kn[KOPEN]){ var kx=kn[KOPEN], kp='context.known.'+KOPEN+'.', nxt=KOPEN+1<kn.length?KOPEN+1:'null';
+    ked='<div class="ked"><div class="grid">'+field('Title',kp+'title',kx.title||'',{ph:'e.g. Moving from Zendesk'})+'</div>'+
+      '<div class="f wide" style="margin-top:10px"><label>Statement, read back to '+esc(b.shortName||r.name||'the client')+'</label>'+inp(kp+'t',kx.t||'',{type:'textarea',rows:4,ph:'One or two plain sentences about their situation'})+'</div>'+
+      '<div class="kbar"><button type="button" class="btn ok'+(kx.confirmed?' on':'')+'" onclick="confirmKnown('+KOPEN+')">'+(kx.confirmed?'✓ Confirmed':'Mark as confirmed')+'</button><button type="button" class="btn" onclick="openKnown('+nxt+')">Next</button><span class="spacer"></span><button type="button" class="btn" onclick="openKnown(null)">Close</button></div></div>'; }
+  h+=card('00','What we know','read it back to them first',
+    '<div class="hint">Eight plain statements about the client\'s situation: what they are moving from and why the date is fixed, volumes, channels, seats, constraints, anything from the Intercom handover. <b>Suggest</b> drafts them from the proposal, Notion and the readiness check into the empty tiles; edit them into plain English. On the call, open each tile, read it back, fix anything wrong, and mark it confirmed.</div>'+
+    '<div class="ktiles">'+tiles+'</div>'+ked+
+    '<div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="kcount'+(nconf===kn.length&&kn.length?' all':'')+'">'+nconf+' of '+kn.length+' confirmed</span><button class="btn sm hideP" onclick="suggestKnown()">Suggest from what we hold</button>'+
+    '<span class="spacer"></span><span class="hideP" style="font-size:12px;color:var(--mono)">Sources: </span>'+inp('context.source',r.context.source,{ph:'e.g. Intercom handover, proposal, readiness check',cls:'hideP'})+'</div>');
+
   /* 01 basics: one group per pillar, in the proposal's order, each listing its scope items (26 Oct 2026) */
   var pl='', used={};
   if(!b.pillarNotes) b.pillarNotes={}; if(!b.pillarCallNotes) b.pillarCallNotes={};
-  function itemRow(x,i,withPillar){ var q='scope.inScope.'+i+'.';
-    return '<tr><td class="n">'+(i+1)+'</td><td>'+inp(q+'t',x.t,{type:'wrap',ph:'Scope item'})+'</td>'+(withPillar?'<td>'+inp(q+'pillar',x.pillar||'',{type:'select',blank:'— pillar —',options:PILLARS.map(function(z){return [z[0],z[1]+' '+z[2]];})})+'</td>':'')+
-      '<td class="h">'+inp(q+'hours',x.hours||'',{type:'number',ph:'h'})+'</td><td class="hideP src">'+inp(q+'src',x.src||'',{type:'select',blank:'source?',options:SRC_OPTS,colour:true})+'</td>'+rowX('delRow(\'scope.inScope\','+i+')')+'</tr>'; }
-  PILLARS.forEach(function(p){ var on=!!b.pillars[p[0]], rows='', hrs=0, n=0;
-    r.scope.inScope.forEach(function(x,i){ if(x.pillar!==p[0]) return; used[i]=true; n++; hrs+=parseFloat(x.hours)||0; rows+=itemRow(x,i,false); });
-    pl+='<div class="pg'+(on?'':' off')+'"><div class="pgh"><label class="pill'+(on?' on':'')+'"><input type="checkbox" data-p="basics.pillars.'+p[0]+'"'+(on?' checked':'')+'><small>'+p[1]+'</small>'+p[2]+
+  var kk=0;
+  PILLARS.forEach(function(p){ var on=!!b.pillars[p[0]], rows='', hrs=0, n=0, snp='basics.pillarCallNotes.'+p[0], sn=b.pillarCallNotes[p[0]]||'', snShow=!!sn||NOTE_OPEN[snp];
+    r.scope.inScope.forEach(function(x,i){ if(x.pillar!==p[0]) return; used[i]=true; n++; hrs+=parseFloat(x.hours)||0; rows+=scopeRow(x,i,'scope.inScope',{hoursEdit:true,num:++kk,detail:true}); });
+    pl+='<div class="pgroup'+(on?'':' off')+'"><div class="pgh"><label class="pill'+(on?' on':'')+'"><input type="checkbox" data-p="basics.pillars.'+p[0]+'"'+(on?' checked':'')+'><small>'+p[1]+'</small>'+p[2]+
         '<span class="info" tabindex="0">i<span class="tip"><b>'+p[1]+' '+p[2]+'</b><br>'+esc(p[3])+'</span></span></label>'+
         '<textarea class="grow line pn" rows="1" data-p="basics.pillarNotes.'+p[0]+'" placeholder="The proposal\'s subtitle, or what it covers for '+esc(b.shortName||r.name||'this client')+'"'+(on?'':' disabled')+'>'+esc(b.pillarNotes[p[0]]||'')+'</textarea>'+
         '<span class="ph">'+(n?n+' item'+(n>1?'s':'')+(hrs?' · '+(Math.round(hrs*10)/10)+' h':''):'no items')+'</span>'+
-        '<button class="btn sm" onclick="addRow(\'scope.inScope\',{t:\'\',note:\'\',pillar:\''+p[0]+'\',hours:\'\',input:\'\',src:\'\'})">+ Item</button></div>'+
-        (rows?'<table class="ed"><tr><th></th><th>Scope item</th><th>Hours</th><th class="hideP">Source</th><th></th></tr>'+rows+'</table>':'')+
-        '<div class="cn"><label>Notes from the call</label>'+inp('basics.pillarCallNotes.'+p[0],b.pillarCallNotes[p[0]]||'',{type:'textarea',rows:1,ph:'Anything raised or agreed on this section'})+'</div></div>'; });
-  var loose=''; r.scope.inScope.forEach(function(x,i){ if(!used[i]) loose+=itemRow(x,i,true); });
-  if(loose) pl+='<div class="pg"><div class="pgh"><b style="font-size:12px;color:var(--muted)">Not under a pillar yet</b><span></span><span class="ph"></span><span></span></div><table class="ed"><tr><th></th><th>Scope item</th><th>Pillar</th><th>Hours</th><th class="hideP">Source</th><th></th></tr>'+loose+'</table></div>';
+        (snShow||!on?'<span></span>':'<button class="btn sm" onclick="openNote(\''+snp+'\')">+ Section note</button>')+
+        '<button class="btn sm" onclick="addRow(\'scope.inScope\',{t:\'\',orig:\'\',note:\'\',pillar:\''+p[0]+'\',hours:\'\',input:\'\',callNote:\'\'})">+ Item</button></div>'+
+        (rows?'<div class="slist">'+rows+'</div>':'')+
+        (snShow?'<div class="cn"><label>Notes on this section</label>'+inp(snp,sn,{type:'textarea',rows:2,ph:'Anything about the section as a whole'})+'</div>':'')+'</div>'; });
+  var loose=''; r.scope.inScope.forEach(function(x,i){ if(!used[i]) loose+=scopeRow(x,i,'scope.inScope',{hoursEdit:true,pillarPick:true,num:++kk,detail:true}); });
+  if(loose) pl+='<div class="pgroup"><div class="pgh"><b style="font-size:13px;color:var(--muted)">Not under a pillar yet</b></div><div class="slist">'+loose+'</div></div>';
   h+=card('01','Engagement basics','what was signed',
-    '<div class="hint">Fields fill from Notion, the tracker registry and the portal the first time a client is opened, and are never overwritten after that. <b>Commercial note</b> is internal and never appears in the summary.<br><br><b>Scope by pillar</b> is what the client sees on the call: each section of the proposal with its hours, the scope items under it, and a Notes box for anything raised or agreed on that section. Walk it top to bottom and get a yes to each section. The same items are editable in card 03 with their detail and source. <b>Import from proposal</b> fills it from the accepted-proposal PDF. Hover the i on each pillar for what it means; the subtitle line and the call notes print in the summary.</div>'+
+    '<div class="hint">Fields fill from Notion, the tracker registry and the portal the first time a client is opened, and are never overwritten after that. <b>Commercial note</b> is internal and never appears in the summary.<br><br><b>Scope by pillar</b> is what the client sees on the call: each section of the proposal with its hours, the scope items under it, and a Notes box for anything raised or agreed on that section. Walk it top to bottom and get a yes to each line. <b>Source</b> names the SOW it came from (Sabel, Intercom or both). <b>Import from proposal</b> fills it from the accepted-proposal PDF. Hover the i on each pillar for what it means; the subtitle line and the call notes print in the summary.</div>'+
     '<div class="grid">'+
     field('Legal name (cover)','basics.legalName',b.legalName)+field('Short name (inline)','basics.shortName',b.shortName)+
     field('Contracted hours','basics.hours',b.hours,{type:'number'})+'<div class="hideP">'+field('Commercial note <span class="auto">· internal</span>','basics.hoursNote',b.hoursNote,{type:'grow'})+'</div>'+
     field('Intercom subscription and seats','basics.subscription',b.subscription,{ph:'e.g. Advanced, 6 seats'})+field('Workspace App ID','basics.appId',b.appId)+
     field('Signed','basics.signed',b.signed)+field('Signed via','basics.signedSource',b.signedSource,{type:'grow'})+
     field('Engagement type','basics.type',b.type,{type:'select',blank:'—',options:['Project','Migration','Both','Retainer']})+
-    '</div><h4 class="sh">Scope by pillar<span class="spacer"></span><button class="btn sm hideP" onclick="showPModal()">Import from proposal</button></h4>'+pl);
+    '</div><h4 class="sh">Scope<span class="spacer"></span><button class="btn sm hideP" onclick="showPModal()">Import from proposal</button><button class="btn sm" onclick="addRow(\'scope.inScope\',{t:\'\',orig:\'\',note:\'\',pillar:\'\',hours:\'\',input:\'\',callNote:\'\'})">+ Add item</button></h4>'+
+    '<div class="grid hideP" style="margin-top:0">'+field('Source of this scope','scope.source',r.scope.source||'',{type:'select',blank:'—',options:SRC_OPTS.slice(0,3).map(function(o){return [o[0],o[1]];})})+'</div>'+
+    '<div class="f wide" style="margin:10px 0 4px"><label>Scope in one paragraph</label>'+inp('scope.summary',r.scope.summary,{type:'textarea',rows:3,ph:'What Sabel is delivering, in plain English'})+'</div>'+pl);
 
   /* 02 outcomes */
   h+=outcomesCard(r);
 
   /* 03 scope */
+  /* 26 Oct 2026: scope is a plain list, read aloud. In scope mirrors the proposal (pillar order,
+     the proposal's own detail line underneath), with one notes line per item for anything the
+     client says about it on the call: a date they want it by, a dependency, a caveat. */
   function scopeTable(list,path,ph){
     if(!list.length) return '<div class="empty">Nothing yet. Add a line, or use Import from proposal in card 01.</div>';
-    var inn=path==='scope.inScope', order=list.map(function(x,i){return i;});
+    var inn=path==='scope.inScope', order=list.map(function(x,i){return i;}), lastP=null, h='';
     if(inn) order.sort(function(a,b){ var pa=PILLARS.findIndex(function(z){return z[0]===list[a].pillar;}), pb=PILLARS.findIndex(function(z){return z[0]===list[b].pillar;}); if(pa<0) pa=99; if(pb<0) pb=99; return pa-pb||a-b; });
-    var t='<table class="ed"><tr><th></th><th>Deliverable</th>'+(inn?'<th style="width:150px">Pillar</th><th style="width:60px">Hours</th>':'')+'<th style="width:'+(inn?'26':'34')+'%">Detail / boundary</th><th class="hideP" style="width:120px">Source</th><th></th></tr>';
-    order.forEach(function(i){ var x=list[i]; t+='<tr><td class="n">'+(i+1)+'</td><td>'+inp(path+'.'+i+'.t',x.t,{type:'wrap',ph:ph})+'</td>'+
-      (inn?'<td>'+inp(path+'.'+i+'.pillar',x.pillar||'',{type:'select',blank:'—',options:PILLARS.map(function(z){return [z[0],z[2]];})})+'</td><td>'+inp(path+'.'+i+'.hours',x.hours||'',{type:'number',ph:'h'})+'</td>':'')+
-      '<td>'+inp(path+'.'+i+'.note',x.note,{type:'textarea',rows:1,ph:'optional'})+'</td><td class="hideP src">'+inp(path+'.'+i+'.src',x.src||'',{type:'select',blank:'source?',options:SRC_OPTS,colour:true})+'</td>'+rowX('delRow(\''+path+'\','+i+')')+'</tr>'; });
-    return t+'</table>';
+    order.forEach(function(i,k){ var x=list[i];
+      if(inn){ var p=PILLARS.filter(function(z){return z[0]===x.pillar;})[0], key=p?p[0]:'other';
+        if(key!==lastP){ h+='<div class="sgrp"><b>'+(p?p[1]:'')+'</b>'+(p?esc(p[2]):'Other')+'</div>'; lastP=key; } }
+      h+=scopeRow(x,i,path,inn?{num:k+1,detail:true,ph:ph}:{num:k+1,noteKey:'note',ph:ph,notePh:'why it is out, or when it could be looked at later'}); });
+    return '<div class="slist">'+h+'</div>';
   }
-  h+=card('03','Scope: in and out','the reason the call exists',
-    '<div class="hint">This card is the <b>scope of record</b>: every line in or out from both SOWs (Sabel and Intercom), with its source noted; a line marked <b>Unclear</b> or <b>Not in either</b> is flagged for the call. Read <b>both</b> lists aloud on the call and get a yes to each. Out-of-scope lines are the anti-scope-creep guardrail: take them from the SOW exclusions, and add anything the client asks about that is not covered.</div>'+
-    '<div class="f wide"><label>Scope in one paragraph</label>'+inp('scope.summary',r.scope.summary,{type:'textarea',rows:3,ph:'What Sabel is delivering, in plain English'})+'</div>'+
-    '<div class="two"><div><h4 class="sh">In scope<span class="spacer"></span><button class="btn sm" onclick="addRow(\'scope.inScope\',{t:\'\',note:\'\',pillar:\'\',hours:\'\',input:\'\',src:\'\'})">+ Add</button></h4>'+scopeTable(r.scope.inScope,'scope.inScope','Deliverable Sabel will do')+'</div>'+
-    '<div><h4 class="sh">Out of scope<span class="spacer"></span><button class="btn sm" onclick="addRow(\'scope.outScope\',{t:\'\',note:\'\',src:\'\'})">+ Add</button></h4>'+scopeTable(r.scope.outScope,'scope.outScope','Explicitly not included')+'</div></div>'+
-    '<div class="f wide" style="margin-top:12px"><label>Change control (read on the call)</label>'+inp('scope.changeControl',r.scope.changeControl,{type:'textarea',rows:2})+'</div>'+
+  h+=card('03','Out of scope and change control','the guardrail',
+    '<div class="hint">Out-of-scope lines are the anti-scope-creep guardrail: take them from the SOW exclusions, and add anything the client asks about that is not covered. Read the list aloud and get a yes to each. If the client wants one of them later, note when, and it goes through change control.</div>'+
+    '<h4 class="sh">Out of scope<span class="spacer"></span><button class="btn sm" onclick="addRow(\'scope.outScope\',{t:\'\',orig:\'\',note:\'\'})">+ Add</button></h4>'+scopeTable(r.scope.outScope,'scope.outScope','Explicitly not included')+
+    '<div class="f wide" style="margin-top:12px"><label>Change control (read on the call)</label>'+inp('scope.changeControl',r.scope.changeControl,{type:'textarea',rows:3})+'</div>'+
     '<div class="hideP" style="margin-top:14px"><h4 class="sh">Intercom scope check <span class="auto">· Intercom-sold projects · internal</span></h4>'+
     '<div class="hint">Posted in the Intercom deal thread within 48 hours of signing: the hours, what they cover, confirmed volumes and what is not covered.</div>'+
     '<div class="grid">'+field('Posted on','scope.intercomCheck.posted',(r.scope.intercomCheck||{}).posted,{type:'date'})+field('Link to the thread','scope.intercomCheck.link',(r.scope.intercomCheck||{}).link,{ph:'Slack or email link'})+
@@ -1141,8 +1309,12 @@ function renderRec(){
   var rt='<table class="ed raci"><tr><th class="mv"></th><th>Area</th><th>Sabel</th><th>'+esc(b.shortName||r.name||'Client')+'</th><th></th></tr>';
   r.raci.forEach(function(x,i){ rt+='<tr>'+moveCell('raci',i,r.raci.length)+'<td class="topic">'+inp('raci.'+i+'.area',x.area,{cls:'topic'})+'</td><td>'+inp('raci.'+i+'.sabel',x.sabel)+'</td><td>'+inp('raci.'+i+'.client',x.client)+'</td>'+rowX('delRow(\'raci\','+i+')')+'</tr>'; });
   rt+='</table>';
+  var ex=''; (r.people.exec||[]).forEach(function(x,i){ var q='people.exec.'+i+'.'; ex+='<tr><td class="topic">'+inp(q+'role',x.role,{cls:'topic'})+'</td><td>'+inp(q+'name',x.name,{ph:'name, title'})+'</td><td>'+inp(q+'cares',x.cares,{ph:'what they care about, in one line'})+'</td>'+rowX('delRow(\'people.exec\','+i+')')+'</tr>'; });
   h+=card('05','Who is who, and who does what','no unowned work',
     '<h4 class="sh">Sabel team on this engagement</h4><div class="pills">'+st+'</div>'+
+    '<h4 class="sh">Executive context<span class="spacer"></span><button class="btn sm" onclick="addRow(\'people.exec\',{role:\'\',name:\'\',cares:\'\'})">+ Add role</button></h4>'+
+    '<table class="ed raci"><tr><th style="width:22%">Role</th><th style="width:30%">Who</th><th>What they care about</th><th></th></tr>'+ex+'</table>'+
+    '<div class="grid" style="margin-top:10px">'+field('On this call','people.attendees',r.people.attendees,{ph:'who joined, both sides'})+'<div class="f"><label>Recording</label><label class="pill'+(r.people.recordingConsent?' on':'')+'" style="width:max-content"><input type="checkbox" data-p="people.recordingConsent"'+(r.people.recordingConsent?' checked':'')+'>Consent to record confirmed</label></div></div>'+
     '<h4 class="sh">Client contacts<span class="spacer"></span><button class="btn sm" onclick="addRow(\'people.client\',{name:\'\',role:\'\',email:\'\',involvement:\'\'})">+ Add contact</button></h4><div data-rdyc>'+readinessContactsHTML(CUR)+'</div>'+ct+
     '<h4 class="sh">Who does what<span class="spacer"></span><button class="btn sm" onclick="addRow(\'raci\',{area:\'\',sabel:\'\',client:\'\'})">+ Add row</button></h4>'+rt);
 
@@ -1193,8 +1365,10 @@ function renderRec(){
     '<div class="two"><div class="f"><label>Other notes <span class="auto">· goes in the summary</span></label>'+inp('notesClient',r.notesClient,{type:'textarea',rows:6,ph:'Anything else agreed on the call that the client should see'})+'</div>'+
     '<div class="f hideP"><label>Internal notes <span style="color:var(--amber)">· never exported</span></label>'+inp('notesInternal',r.notesInternal,{type:'textarea',rows:6,ph:'Rates, concerns, things to watch'})+'</div></div>');
 
+  h='<div class="pnav" id="pnav"></div>'+h+'<div class="pfoot" id="pfoot"></div>';
   h+='<datalist id="owners">'+OWNERS.map(function(o){return '<option value="'+o+'">';}).join('')+'</datalist>';
   el.innerHTML=h;
+  if(presOn()) applyStep();
   growAll();
 }
 
@@ -1210,6 +1384,8 @@ function onEdit(e){
   setPath(r,p,v);
   [].slice.call(document.querySelectorAll('[data-p="'+p+'"]')).forEach(function(o){ if(o===t) return; if(o.type==='checkbox') o.checked=!!v; else if(o.value!==v) o.value=v; });
   if(e.type==='change'&&/^scope\.inScope\.\d+\.(pillar|hours)$/.test(p)) setTimeout(renderRec,0);
+  if(/^scope\.(inScope|outScope)\.\d+\.t$/.test(p)){ var ip=p.replace(/\.t$/,''), ix=getPath(r,ip), rw=t.closest('.srow'); if(rw&&ix){ var ed=isEdited(ix,v), bd=rw.querySelector('.edited'); if(ed&&!bd) t.insertAdjacentHTML('afterend',editedBadge(ix,ip)); else if(!ed&&bd) bd.remove(); } }
+  var km=p.match(/^context\.known\.(\d+)\.(title|t)$/); if(km){ var ktl=document.getElementById('ktile'+km[1]); if(ktl){ var ksp=ktl.querySelector(km[2]==='t'?'.ks':'.kt'); if(ksp) ksp.textContent=String(v).trim()||(km[2]==='t'?'Nothing written yet':'Untitled'); if(km[2]==='t') ktl.classList.toggle('empty',!String(v).trim()); } }
   if(p==='wrap.aligned'){ r.wrap.alignedAt=v?new Date().toISOString():''; var as=document.getElementById('alignedStamp'); if(as) as.textContent=v?'confirmed '+fmt(r.wrap.alignedAt.slice(0,10)):''; }
   if(/^(decisions|actions|outcomes\.measures|timeline\.(checkin|goLive)|comms\.escalation)/.test(p)) { var rb=document.getElementById('recapBox'); if(rb) rb.innerHTML=recapHTML(r); };
   if(t.tagName==='SELECT'&&t.hasAttribute('data-c')){ var opts=/\.src$/.test(p)?SRC_OPTS:(/status/.test(p)&&/access/.test(p)?ACCESS_ST:RISK_ST); t.setAttribute('data-c',colourOf(opts,v)); }
@@ -1220,7 +1396,7 @@ function onEdit(e){
 }
 /* Click anywhere in a date field to open the calendar, not just the small icon. */
 document.addEventListener('focusin',function(e){ var t=e.target; if(t&&t.classList&&t.classList.contains('grow')){ t.classList.add('open'); autoGrow(t); } });
-document.addEventListener('focusout',function(e){ var t=e.target; if(t&&t.classList&&t.classList.contains('line')){ t.classList.remove('open'); t.style.height='34px'; t.scrollTop=0; } });
+document.addEventListener('focusout',function(e){ var t=e.target; if(t&&t.classList&&t.classList.contains('line')){ t.classList.remove('open'); t.style.height='42px'; t.scrollTop=0; } });
 document.addEventListener('keydown',function(e){ var t=e.target; if(e.key==='Enter'&&!e.shiftKey&&t&&t.classList&&(t.classList.contains('line')||t.classList.contains('one'))){ e.preventDefault(); t.blur(); } });
 document.addEventListener('click',function(e){
   var t=e.target; if(t&&t.tagName==='INPUT'&&t.type==='date'&&typeof t.showPicker==='function'){ try{ t.showPicker(); }catch(err){} }
@@ -1233,9 +1409,27 @@ function setPresent(on){
   document.body.classList.toggle('present',on);
   var b=document.getElementById('presentBtn'); if(b) b.textContent=on?'Exit presenting':'Present';
   try{ sessionStorage.setItem('kickoff_present',on?'1':''); }catch(e){}
+  if(on){ try{ PSTEP=parseInt(sessionStorage.getItem('kickoff_pstep')||'0',10)||0; }catch(e){} applyStep(); }
   window.scrollTo(0,0);
 }
 function presOn(){ return document.body.classList.contains('present'); }
+/* 26 Oct 2026: in Present we walk the same cards one at a time. Content is identical to desk
+   mode; only one card is visible, with a step bar above and Back / Next below. */
+var PSTEP=0, PSEEN={};
+function cardNums(){ return Array.prototype.map.call(document.querySelectorAll('#rec .card'),function(c){ return c.id.slice(4); }); }
+function applyStep(){ var nums=cardNums(); if(!nums.length) return; PSTEP=Math.max(0,Math.min(PSTEP,nums.length-1)); PSEEN[nums[PSTEP]]=true;
+  nums.forEach(function(n,i){ var c=document.getElementById('card'+n); if(c) c.classList.toggle('cur',i===PSTEP); });
+  var bar=document.getElementById('pnav'); if(bar) bar.innerHTML=nums.map(function(n,i){ var c=document.getElementById('card'+n), t=c?c.querySelector('h3').childNodes[0].textContent:n;
+    return '<button type="button" class="pstep'+(i===PSTEP?' cur':PSEEN[n]?' seen':'')+'" title="'+n+' · '+esc(t)+'" onclick="goStep('+i+')"></button>'; }).join('')+'<span class="pcount">'+(PSTEP+1)+' / '+nums.length+'</span>';
+  var ft=document.getElementById('pfoot'); if(ft){ var nx=document.getElementById('card'+(nums[PSTEP+1]||'')), nt=nx?nx.querySelector('h3').childNodes[0].textContent:'';
+    ft.innerHTML='<button type="button" class="btn" onclick="goStep('+(PSTEP-1)+')"'+(PSTEP===0?' disabled style="opacity:.4"':'')+'>← Back</button>'+
+      '<span class="pup">'+(nt?'Up next: <b>'+esc(nt)+'</b>':'Last section')+'</span>'+
+      (nx?'<button type="button" class="btn primary pnext" onclick="goStep('+(PSTEP+1)+')">Next →</button>':'<button type="button" class="btn primary pnext" onclick="showSummary()">Read back the summary</button>'); }
+  try{ sessionStorage.setItem('kickoff_pstep',String(PSTEP)); }catch(e){} }
+function goStep(i){ var nums=cardNums(); if(i<0||i>=nums.length) return; PSTEP=i; applyStep(); window.scrollTo(0,0); }
+document.addEventListener('keydown',function(e){ if(!presOn()) return; var t=e.target; if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+  if(document.getElementById('summary').classList.contains('on')) return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'){ e.preventDefault(); goStep(PSTEP+1); } if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); goStep(PSTEP-1); } });
 document.addEventListener('keydown',function(e){ if(e.key!=='Escape'||!presOn()) return; if(document.getElementById('summary').classList.contains('on')) return;
   var t=e.target; if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)){ t.blur(); return; } setPresent(false); });
 /* ── IMPORT FROM THE ACCEPTED PROPOSAL (26 Oct 2026) ─────────────────────────
@@ -1310,9 +1504,10 @@ function parseProposalText(){ var txt=document.getElementById('pText').value, er
 function applyProposal(mode){ if(!PPARSED||!CUR) return; var r=rec(CUR), b=r.basics, P=PPARSED;
   if(mode==='replace') r.scope.inScope=[];
   P.pillars.forEach(function(pl){ if(!pl.id) return; b.pillars[pl.id]=true; if(pl.sub&&(mode==='replace'||!b.pillarNotes[pl.id])) b.pillarNotes[pl.id]=pl.sub; });
-  P.items.forEach(function(x){ if(mode==='add'&&r.scope.inScope.some(function(y){return (y.t||'').trim().toLowerCase()===x.t.toLowerCase();})) return; r.scope.inScope.push({t:x.t,note:x.note,pillar:x.pillar,hours:x.hours,input:x.input,src:'Sabel SOW'}); });
+  P.items.forEach(function(x){ if(mode==='add'&&r.scope.inScope.some(function(y){return (y.t||'').trim().toLowerCase()===x.t.toLowerCase();})) return; r.scope.inScope.push({t:x.t,orig:x.t,note:x.note,pillar:x.pillar,hours:x.hours,input:x.input,callNote:''}); });
+  if(!r.scope.source) r.scope.source='Sabel SOW';
   if(P.total) b.hours=P.total;
-  if(P.ref) b.proposalRef=P.ref+(P.version?' '+P.version:'');
+  if(P.ref) b.proposalRef=P.ref+(P.version?' '+P.version:''); if(P.weeks) b.estWeeks=P.weeks;
   if(P.accepted&&!b.signed){ b.signed=P.accepted; if(!b.signedSource) b.signedSource='Accepted proposal'; }
   if(!r.scope.summary||/PRE-CONTRACT|PRE-SALES/i.test(r.scope.summary)) r.scope.summary=(P.ref?'As accepted in '+P.ref+(P.version?' '+P.version:'')+': ':'')+P.items.length+' scope items across '+P.pillars.filter(function(p){return p.id;}).length+' pillars'+(P.total?', '+P.total+' hours':'')+(P.weeks?' over an estimated '+P.weeks+' weeks':'')+'.';
   P.critical.forEach(function(c){ var t='Client input on the critical path: '+c; if(!r.actions.some(function(a){return a.t===t;})) r.actions.push({t:t,owner:'Client',due:'',when:'now',done:false}); });
@@ -1323,7 +1518,7 @@ function demoRecord(){
   var r=blankRecord('Northwind Travel'); r.basics.legalName='Northwind Travel Ltd'; r.basics.shortName='Northwind'; r.basics.hours='120'; r.basics.type='Both'; r.basics.subscription='Advanced, 8 seats';
   r.basics.pillars={foundations:true,automation:true,fin:true,migration:true}; r.basics.pillarNotes={foundations:'Two brands, one workspace; email, Messenger and WhatsApp',automation:'Booking-change routing, Jira for refunds',fin:'Help Centre rebuild, Fin on the top 40 intents',migration:'Zendesk tickets, 24 months'};
   r.scope.summary='Sabel moves Northwind from Zendesk to Intercom across two brands, rebuilds the Help Centre, launches Fin on booking and refund questions, and migrates two years of ticket history.';
-  r.scope.inScope=[{t:'Workspace, teams, inboxes and routing for both brands',note:''},{t:'Email, Messenger and WhatsApp channels',note:'Instagram DMs not included'},{t:'Help Centre structure and 40 priority articles',note:'Northwind supplies the content'},{t:'Fin AI Agent on booking changes and refunds',note:'Tuned for four weeks after go-live'},{t:'Jira integration for refund escalations',note:''},{t:'Zendesk migration via Migr8Now',note:'Sample, full run, delta at cutover'}];
+  r.scope.inScope=[{t:'Workspace, teams, inboxes and routing for both brands',note:''},{t:'Email, Messenger and WhatsApp channels',note:'Instagram DMs not included'},{t:'Help Centre structure and 40 priority articles',note:'Northwind supplies the content'},{t:'Fin AI Agent on booking changes and refunds',note:'Tuned for four weeks after go-live'},{t:'Jira integration for refund escalations',note:''},{t:'Zendesk migration via Migr8Now',note:'Sample, full run, delta at cutover'}].map(function(x,i){ x.orig=x.t; x.pillar=['foundations','foundations','fin','fin','automation','migration'][i]; x.hours=[18,10,16,20,8,12][i]; if(i===3) x.callNote='Priya wants Fin live on refunds before the December peak; booking changes can follow in January.'; return x; });
   r.scope.outScope=[{t:'Instagram and TikTok DMs',note:'Can be scoped as an add-on'},{t:'Custom reporting outside Intercom',note:''},{t:'Articles beyond the agreed 40',note:''},{t:'Salesforce integration',note:'Not in the SOW'}];
   r.timeline={kickoff:'2026-10-13',buildStart:'2026-10-20',checkin:'Thursdays 10:00 AEDT',goLive:'2026-12-01',goLiveNote:'All channels open in Intercom',blackout:'No changes 23 Dec to 4 Jan',sourcePlatform:'Zendesk',sampleMigration:'2026-11-05',historicalMigration:'2026-11-24',sourceContractEnd:'2026-12-31',phases:[]};
   r.people.sabel={'Chris Singh':true,'Greg Deng':true,'Nikki Coughlan':true};
@@ -1336,6 +1531,10 @@ function demoRecord(){
   r.outcomes.source='partial'; r.outcomes.vision='We want customers to get a straight answer about their booking at 11pm without waiting for the morning shift, and we want the team off copy-paste work.';
   r.outcomes.sixMonths='Half of booking-change conversations resolved by Fin; the care team spends its time on complex itineraries.'; r.outcomes.leadership='Monthly board pack: resolution rate, CSAT and cost per conversation.';
   r.outcomes.measures=[{goal:'Answers out of hours',kpi:'Fin resolution rate',baseline:'0%',target:'45%',by:'2027-03-01',owner:'Priya Nair'},{goal:'Faster first replies',kpi:'Median first response',baseline:'4h 10m',target:'under 30m',by:'2027-01-31',owner:'Priya Nair'},{goal:'Keep quality up',kpi:'CSAT',baseline:'4.1',target:'4.5',by:'2027-03-01',owner:'Priya Nair'}];
+  r.context.known[0].t='Northwind runs customer care in Zendesk today, across two brands, and the Zendesk contract ends on 31 December.'; r.context.known[0].confirmed=true;
+  r.context.known[1].t='The care team spends most of its time on booking changes and refunds that follow a fixed process, and leadership wants those answered out of hours.';
+  r.context.known[2].t='Around 6,000 conversations a month, peaking at 9,000 in the summer holidays.';
+  r.context.known[3].t='Customers write by email, Messenger and WhatsApp; Instagram DMs are handled by marketing and stay outside this project.';
   r.updated=new Date().toISOString(); return r;
 }
 function refreshReady(){ var el=document.querySelector('.ready'); if(!el) return; var rd=readiness(rec(CUR));
@@ -1389,6 +1588,7 @@ function summaryHTML(r){
 
   var pn=b.pillarNotes||{};
   var pill=PILLARS.map(function(p){ var hrs=0,n=0; r.scope.inScope.forEach(function(x){ if(x.pillar===p[0]){ n++; hrs+=parseFloat(x.hours)||0; } }); return [p[1]+' '+p[2], b.pillars[p[0]]?'Yes':'No', b.pillars[p[0]]?(pn[p[0]]||''):'', b.pillars[p[0]]&&hrs?(Math.round(hrs*10)/10)+' h':'']; });
+  if(r.context&&r.context.known.some(function(x){return x.t;})) h+=sec('What we understand', list(r.context.known.filter(function(x){return x.t;}),function(x){return '<li>'+(x.title?'<b>'+esc(x.title)+':</b> ':'')+esc(x.t)+'</li>';}));
   h+=sec('Engagement basics', cap([['Client',legal],['Contracted hours',b.hours?b.hours+' hours':''],['Intercom subscription',b.subscription],['Workspace App ID',b.appId],['Engagement type',b.type],['Signed',b.signed?b.signed+(b.signedSource?' via '+b.signedSource:''):'']])+
      '<h3>Scope summary</h3>'+tbl(['Sabel pillar','In scope','What it covers here','Hours'],pill.map(function(x){return [esc(x[0]),x[1],esc(x[2]),x[3]];})));
 
@@ -1402,7 +1602,7 @@ function summaryHTML(r){
      (function(){ var tagged=r.scope.inScope.some(function(x){return x.pillar;}); if(!tagged) return '<h3>In scope</h3>'+list(r.scope.inScope,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';});
        var o='<h3>In scope</h3>'; PILLARS.forEach(function(p){ var xs=r.scope.inScope.filter(function(x){return x.pillar===p[0];}); if(!xs.length) return; var hrs=xs.reduce(function(a,x){return a+(parseFloat(x.hours)||0);},0);
          o+='<p style="margin:10px 0 2px;font-weight:700">'+esc(p[1]+' '+p[2])+(pn[p[0]]?': '+esc(pn[p[0]]):'')+(hrs?' <span style="color:#64748B;font-weight:400">· '+(Math.round(hrs*10)/10)+' hours</span>':'')+'</p>'+
-           list(xs,function(x){return '<li>'+esc(x.t)+(x.hours?' <small>· '+x.hours+' h</small>':'')+(x.note?'<br><small>'+esc(x.note)+'</small>':'')+'</li>';})+
+           list(xs,function(x){return '<li>'+esc(x.t)+(x.hours?' <small>· '+x.hours+' h</small>':'')+(x.note?'<br><small>'+esc(x.note)+'</small>':'')+(x.callNote?'<br><small><b>On the call:</b> '+esc(x.callNote)+'</small>':'')+'</li>';})+
            ((b.pillarCallNotes||{})[p[0]]?'<p style="margin:6px 0 0;padding:8px 10px;background:#F8FAFC;border-left:3px solid #E10600"><b>Agreed on the call:</b> '+esc(b.pillarCallNotes[p[0]])+'</p>':''); });
        var loose=r.scope.inScope.filter(function(x){return !x.pillar;}); if(loose.length) o+='<p style="margin:10px 0 2px;font-weight:700">Other</p>'+list(loose,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';});
        return o; })()+
@@ -1414,7 +1614,8 @@ function summaryHTML(r){
 
   var sab=SABEL_TEAM.filter(function(m){return r.people.sabel[m[0]];});
   h+=sec('Who is who', '<h3>Your Sabel team</h3>'+tbl(['Name','Role'],sab.map(function(m){return [esc(m[0]),esc(m[1])];}))+
-     '<h3>At '+esc(name)+'</h3>'+tbl(['Name','Role','Email','Involvement'],r.people.client.map(function(p){return [esc(p.name),esc(p.role),esc(p.email),esc(p.involvement)];})));
+     '<h3>At '+esc(name)+'</h3>'+tbl(['Name','Role','Email','Involvement'],r.people.client.map(function(p){return [esc(p.name),esc(p.role),esc(p.email),esc(p.involvement)];}))+
+     (function(){ var ex=(r.people.exec||[]).filter(function(x){return x.name;}); return ex.length?'<h3>Who this matters to</h3>'+tbl(['Role','Who','What matters to them'],ex.map(function(x){return [esc(x.role),esc(x.name),esc(x.cares)];})):''; })());
 
   var cm=r.comms;
   h+=sec('How we work together', cap([['Day to day',cm.channel],['Regular sync',cm.cadence],['Go-live week',cm.goLiveWeek],['Written updates',cm.updates],['What counts as a blocker',cm.blocker]])+
