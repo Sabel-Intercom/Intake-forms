@@ -316,6 +316,9 @@ ul.sl li small{color:#64748B}
 /* auto-growing text fields */
 textarea.grow{min-height:34px;height:34px;overflow:hidden;resize:none;line-height:1.45;padding:7px 9px;font-family:var(--sans)}
 textarea.grow.line{white-space:pre;overflow:hidden}
+textarea.grow.wrap{white-space:pre-wrap;overflow:hidden}
+.pg textarea.grow.wrap{font-size:13px;color:var(--w)}
+.pg .cn{margin-top:8px} .pg .cn label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mono);font-weight:600;margin-bottom:3px} .pg .cn textarea{width:100%;min-height:34px;font-family:var(--sans);font-size:12.5px}
 textarea.grow.line:focus{white-space:pre-wrap;overflow:auto}
 textarea.grow.line.open{white-space:pre-wrap}
 
@@ -585,7 +588,7 @@ function blankRecord(name){
     name: name||'', created: new Date().toISOString(), seeded: '',
     basics: { legalName:'', shortName:name||'', hours:'', hoursNote:'', subscription:'', appId:'',
               signed:'', signedSource:'', type:'', notionId:'', notionUrl:'', trackerUrl:'', sabelDoc:'', intercomSow:'',
-              pillars:{}, pillarNotes:{} },
+              pillars:{}, pillarNotes:{}, pillarCallNotes:{} },
     scope:  { summary:'', inScope:[], outScope:[],
               /* 26 Oct 2026: Intercom-sold projects get a scope check posted in the Intercom deal thread */
               intercomCheck:{ posted:'', link:'', confirmedBy:'', notes:'' },
@@ -926,6 +929,7 @@ function inp(path,val,opts){
     return h+'</select>'; }
   if(t==='checkbox') return '<input type="checkbox" data-p="'+path+'"'+(val?' checked':'')+'>';
   if(t==='date') return dateField(path,val);
+  if(t==='wrap') return '<textarea class="grow wrap'+(opts.cls?' '+opts.cls:'')+'" rows="1" data-p="'+path+'" placeholder="'+esc(opts.ph||'')+'">'+esc(val)+'</textarea>';
   if((t==='text'||t==='grow'||t==='email')&&!opts.list) return '<textarea class="grow line'+(opts.cls?' '+opts.cls:'')+'" rows="1" data-p="'+path+'" placeholder="'+esc(opts.ph||'')+'">'+esc(val)+'</textarea>';
   return '<input type="'+t+'" data-p="'+path+'" value="'+esc(val)+'" placeholder="'+esc(opts.ph||'')+'"'+(opts.list?' list="'+opts.list+'"':'')+'>';
 }
@@ -934,6 +938,8 @@ function dateField(path,val,extra){ return '<span class="dw"><input type="date" 
 function openCal(btn){ var i=btn.previousElementSibling; if(!i) return; i.focus(); if(typeof i.showPicker==='function'){ try{ i.showPicker(); }catch(e){} } }
 function autoGrow(t){ t.style.height='auto'; t.style.height=Math.max(34,t.scrollHeight+2)+'px'; }
 function growAll(){ [].slice.call(document.querySelectorAll('textarea.grow:not(.line)')).forEach(autoGrow); }
+/* wrap fields (scope titles) also size as you type */
+document.addEventListener('input',function(e){ var t=e.target; if(t&&t.classList&&t.classList.contains('wrap')) autoGrow(t); });
 function colourOf(options,val){ for(var i=0;i<options.length;i++) if(options[i][0]===val) return options[i][2]||''; return ''; }
 function field(label,path,val,opts){ opts=opts||{}; return '<div class="f'+(opts.wide?' wide':'')+'"><label>'+label+'</label>'+inp(path,val,opts)+(opts.sub?'<div class="sub">'+opts.sub+'</div>':'')+'</div>'; }
 function card(num,title,why,body){
@@ -1056,10 +1062,10 @@ function renderRec(){
 
   /* 01 basics: one group per pillar, in the proposal's order, each listing its scope items (26 Oct 2026) */
   var pl='', used={};
-  if(!b.pillarNotes) b.pillarNotes={};
+  if(!b.pillarNotes) b.pillarNotes={}; if(!b.pillarCallNotes) b.pillarCallNotes={};
   function itemRow(x,i,withPillar){ var q='scope.inScope.'+i+'.';
-    return '<tr><td class="n">'+(i+1)+'</td><td>'+inp(q+'t',x.t,{ph:'Scope item'})+'</td>'+(withPillar?'<td>'+inp(q+'pillar',x.pillar||'',{type:'select',blank:'— pillar —',options:PILLARS.map(function(z){return [z[0],z[1]+' '+z[2]];})})+'</td>':'')+
-      '<td class="h">'+inp(q+'hours',x.hours||'',{type:'number',ph:'h'})+'</td><td class="ci">'+inp(q+'input',x.input||'',{ph:'client input required'})+'</td><td class="hideP src">'+inp(q+'src',x.src||'',{type:'select',blank:'source?',options:SRC_OPTS,colour:true})+'</td>'+rowX('delRow(\'scope.inScope\','+i+')')+'</tr>'; }
+    return '<tr><td class="n">'+(i+1)+'</td><td>'+inp(q+'t',x.t,{type:'wrap',ph:'Scope item'})+'</td>'+(withPillar?'<td>'+inp(q+'pillar',x.pillar||'',{type:'select',blank:'— pillar —',options:PILLARS.map(function(z){return [z[0],z[1]+' '+z[2]];})})+'</td>':'')+
+      '<td class="h">'+inp(q+'hours',x.hours||'',{type:'number',ph:'h'})+'</td><td class="hideP src">'+inp(q+'src',x.src||'',{type:'select',blank:'source?',options:SRC_OPTS,colour:true})+'</td>'+rowX('delRow(\'scope.inScope\','+i+')')+'</tr>'; }
   PILLARS.forEach(function(p){ var on=!!b.pillars[p[0]], rows='', hrs=0, n=0;
     r.scope.inScope.forEach(function(x,i){ if(x.pillar!==p[0]) return; used[i]=true; n++; hrs+=parseFloat(x.hours)||0; rows+=itemRow(x,i,false); });
     pl+='<div class="pg'+(on?'':' off')+'"><div class="pgh"><label class="pill'+(on?' on':'')+'"><input type="checkbox" data-p="basics.pillars.'+p[0]+'"'+(on?' checked':'')+'><small>'+p[1]+'</small>'+p[2]+
@@ -1067,11 +1073,12 @@ function renderRec(){
         '<textarea class="grow line pn" rows="1" data-p="basics.pillarNotes.'+p[0]+'" placeholder="The proposal\'s subtitle, or what it covers for '+esc(b.shortName||r.name||'this client')+'"'+(on?'':' disabled')+'>'+esc(b.pillarNotes[p[0]]||'')+'</textarea>'+
         '<span class="ph">'+(n?n+' item'+(n>1?'s':'')+(hrs?' · '+(Math.round(hrs*10)/10)+' h':''):'no items')+'</span>'+
         '<button class="btn sm" onclick="addRow(\'scope.inScope\',{t:\'\',note:\'\',pillar:\''+p[0]+'\',hours:\'\',input:\'\',src:\'\'})">+ Item</button></div>'+
-        (rows?'<table class="ed"><tr><th></th><th>Scope item</th><th>Hours</th><th>Client input required</th><th class="hideP">Source</th><th></th></tr>'+rows+'</table>':'')+'</div>'; });
+        (rows?'<table class="ed"><tr><th></th><th>Scope item</th><th>Hours</th><th class="hideP">Source</th><th></th></tr>'+rows+'</table>':'')+
+        '<div class="cn"><label>Notes from the call</label>'+inp('basics.pillarCallNotes.'+p[0],b.pillarCallNotes[p[0]]||'',{type:'textarea',rows:1,ph:'Anything raised or agreed on this section'})+'</div></div>'; });
   var loose=''; r.scope.inScope.forEach(function(x,i){ if(!used[i]) loose+=itemRow(x,i,true); });
-  if(loose) pl+='<div class="pg"><div class="pgh"><b style="font-size:12px;color:var(--muted)">Not under a pillar yet</b><span></span><span class="ph"></span><span></span></div><table class="ed"><tr><th></th><th>Scope item</th><th>Pillar</th><th>Hours</th><th>Client input required</th><th class="hideP">Source</th><th></th></tr>'+loose+'</table></div>';
+  if(loose) pl+='<div class="pg"><div class="pgh"><b style="font-size:12px;color:var(--muted)">Not under a pillar yet</b><span></span><span class="ph"></span><span></span></div><table class="ed"><tr><th></th><th>Scope item</th><th>Pillar</th><th>Hours</th><th class="hideP">Source</th><th></th></tr>'+loose+'</table></div>';
   h+=card('01','Engagement basics','what was signed',
-    '<div class="hint">Fields fill from Notion, the tracker registry and the portal the first time a client is opened, and are never overwritten after that. <b>Commercial note</b> is internal and never appears in the summary.<br><br><b>Pillars:</b> the proposal\'s own structure. Each pillar carries its subtitle and the scope items under it with hours and any client input; the same items appear in card 03. <b>Import from proposal</b> fills all of it from the accepted-proposal PDF. Hover the i on each pillar for what it means; the subtitle line prints in the summary.</div>'+
+    '<div class="hint">Fields fill from Notion, the tracker registry and the portal the first time a client is opened, and are never overwritten after that. <b>Commercial note</b> is internal and never appears in the summary.<br><br><b>Scope by pillar</b> is what the client sees on the call: each section of the proposal with its hours, the scope items under it, and a Notes box for anything raised or agreed on that section. Walk it top to bottom and get a yes to each section. The same items are editable in card 03 with their detail and source. <b>Import from proposal</b> fills it from the accepted-proposal PDF. Hover the i on each pillar for what it means; the subtitle line and the call notes print in the summary.</div>'+
     '<div class="grid">'+
     field('Legal name (cover)','basics.legalName',b.legalName)+field('Short name (inline)','basics.shortName',b.shortName)+
     field('Contracted hours','basics.hours',b.hours,{type:'number'})+'<div class="hideP">'+field('Commercial note <span class="auto">· internal</span>','basics.hoursNote',b.hoursNote,{type:'grow'})+'</div>'+
@@ -1089,7 +1096,7 @@ function renderRec(){
     var inn=path==='scope.inScope', order=list.map(function(x,i){return i;});
     if(inn) order.sort(function(a,b){ var pa=PILLARS.findIndex(function(z){return z[0]===list[a].pillar;}), pb=PILLARS.findIndex(function(z){return z[0]===list[b].pillar;}); if(pa<0) pa=99; if(pb<0) pb=99; return pa-pb||a-b; });
     var t='<table class="ed"><tr><th></th><th>Deliverable</th>'+(inn?'<th style="width:150px">Pillar</th><th style="width:60px">Hours</th>':'')+'<th style="width:'+(inn?'26':'34')+'%">Detail / boundary</th><th class="hideP" style="width:120px">Source</th><th></th></tr>';
-    order.forEach(function(i){ var x=list[i]; t+='<tr><td class="n">'+(i+1)+'</td><td>'+inp(path+'.'+i+'.t',x.t,{ph:ph})+'</td>'+
+    order.forEach(function(i){ var x=list[i]; t+='<tr><td class="n">'+(i+1)+'</td><td>'+inp(path+'.'+i+'.t',x.t,{type:'wrap',ph:ph})+'</td>'+
       (inn?'<td>'+inp(path+'.'+i+'.pillar',x.pillar||'',{type:'select',blank:'—',options:PILLARS.map(function(z){return [z[0],z[2]];})})+'</td><td>'+inp(path+'.'+i+'.hours',x.hours||'',{type:'number',ph:'h'})+'</td>':'')+
       '<td>'+inp(path+'.'+i+'.note',x.note,{type:'textarea',rows:1,ph:'optional'})+'</td><td class="hideP src">'+inp(path+'.'+i+'.src',x.src||'',{type:'select',blank:'source?',options:SRC_OPTS,colour:true})+'</td>'+rowX('delRow(\''+path+'\','+i+')')+'</tr>'; });
     return t+'</table>';
@@ -1395,7 +1402,8 @@ function summaryHTML(r){
      (function(){ var tagged=r.scope.inScope.some(function(x){return x.pillar;}); if(!tagged) return '<h3>In scope</h3>'+list(r.scope.inScope,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';});
        var o='<h3>In scope</h3>'; PILLARS.forEach(function(p){ var xs=r.scope.inScope.filter(function(x){return x.pillar===p[0];}); if(!xs.length) return; var hrs=xs.reduce(function(a,x){return a+(parseFloat(x.hours)||0);},0);
          o+='<p style="margin:10px 0 2px;font-weight:700">'+esc(p[1]+' '+p[2])+(pn[p[0]]?': '+esc(pn[p[0]]):'')+(hrs?' <span style="color:#64748B;font-weight:400">· '+(Math.round(hrs*10)/10)+' hours</span>':'')+'</p>'+
-           list(xs,function(x){return '<li>'+esc(x.t)+(x.hours?' <small>· '+x.hours+' h</small>':'')+(x.input?' <small>· client input: '+esc(x.input)+'</small>':'')+(x.note?'<br><small>'+esc(x.note)+'</small>':'')+'</li>';}); });
+           list(xs,function(x){return '<li>'+esc(x.t)+(x.hours?' <small>· '+x.hours+' h</small>':'')+(x.note?'<br><small>'+esc(x.note)+'</small>':'')+'</li>';})+
+           ((b.pillarCallNotes||{})[p[0]]?'<p style="margin:6px 0 0;padding:8px 10px;background:#F8FAFC;border-left:3px solid #E10600"><b>Agreed on the call:</b> '+esc(b.pillarCallNotes[p[0]])+'</p>':''); });
        var loose=r.scope.inScope.filter(function(x){return !x.pillar;}); if(loose.length) o+='<p style="margin:10px 0 2px;font-weight:700">Other</p>'+list(loose,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';});
        return o; })()+
      '<h3>Out of scope</h3>'+list(r.scope.outScope,function(x){return '<li>'+esc(x.t)+(x.note?' <small>'+esc(x.note)+'</small>':'')+'</li>';})+
