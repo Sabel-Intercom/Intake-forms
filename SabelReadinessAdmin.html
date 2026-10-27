@@ -77,6 +77,15 @@ pre{background:var(--surface);border:1px solid var(--line);border-radius:3px;pad
 .hide{display:none}
 .back{background:none;border:0;color:var(--accent);font-family:"IBM Plex Mono",monospace;
   font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;padding:0;margin-bottom:14px}
+.acc{background:var(--surface);border:1px solid var(--line);border-radius:3px;margin:0 0 18px}
+.acc .ar{display:grid;grid-template-columns:200px 1fr auto;gap:12px;align-items:center;padding:11px 16px;border-top:1px solid var(--line)}
+.acc .ar:first-child{border-top:0}
+.acc .an{color:var(--ink);font-weight:600}
+.acc .as{font-size:14px}
+.acc .as small{display:block;color:var(--muted);font-size:13px}
+.acc .ok{color:var(--g);font-weight:600;font-size:14px;white-space:nowrap}
+.acc .ar button{font-size:13px;padding:6px 12px}
+@media(max-width:700px){.acc .ar{grid-template-columns:1fr}}
 .empty{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:34px;text-align:center;color:var(--muted);margin-top:22px}
 </style>
 </head>
@@ -113,6 +122,9 @@ pre{background:var(--surface);border:1px solid var(--line);border-radius:3px;pad
     <div><h2 id="dtitle"></h2><p class="eyebrow" style="color:var(--muted)" id="dmeta"></p></div>
     <div class="row"><button class="ghost" id="copy">Copy report</button><button class="ghost" id="dl">Download</button><button class="ghost" id="rm">Remove</button></div>
   </div>
+  <h3>Access: confirmed working</h3>
+  <p style="color:var(--muted);font-size:14px;max-width:70ch">The client sets each row's status in Section A. Tick a row once the team has checked the access actually works. The client sees "Sabel has checked this works" on that row the next time they open the form.</p>
+  <div id="dacc"></div>
   <h3>Full report</h3>
   <pre id="dreport"></pre>
 </div>
@@ -190,8 +202,52 @@ async function open(id){
       : '';
     const cb=document.getElementById('copyforge');
     if(cb) cb.onclick=()=>{ (navigator.clipboard?navigator.clipboard.writeText(sub.forgeIntake):Promise.reject()).then(()=>{ cb.textContent='Copied'; }).catch(()=>{ prompt('Copy the Forge intake', sub.forgeIntake); }); };
+    renderAccess(sub);
     show('detail'); window.scrollTo(0,0);
   }catch(e){ alert(e.message); }
+}
+
+/* ---------------------------------------------------------------------
+   ACCESS CONFIRMATIONS (27 Oct 2026)
+   Saved in readiness-inputs-v1 under access[<client slug>][<row id>] = {at, by}.
+   Internal Ops writes clients{} in the same store and keeps every other key,
+   so the two never overwrite each other. Always re-read before writing.
+   --------------------------------------------------------------------- */
+const INPUTS='https://sabel-webhook.vercel.app/api/tracker?key=readiness-inputs-v1';
+const ACCESS_ROWS=[['a2','Intercom'],['ax_slack','Slack channel'],['a1','Current helpdesk'],['ax_agents','Agents in Intercom'],
+  ['ax_help','Help content'],['ax_msg','Messenger'],['ax_dns','Email domain'],['ax_shop','Online store and subscriptions'],
+  ['ax_sys','Other systems'],['ax_crm','CRM'],['ax_phone','Phone']];
+const slugOf=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+async function readInputs(){
+  const r=await fetch(INPUTS+'&_t='+Date.now(),{cache:'no-store'});
+  if(!r.ok) throw new Error('Could not read the access store (HTTP '+r.status+').');
+  const j=await r.json(); const d=(j&&j.data)||{}; d.clients=d.clients||{}; d.access=d.access||{}; return d;
+}
+async function renderAccess(sub){
+  const host=$('dacc'), slug=sub.slug||slugOf(sub.client);
+  const items=((sub.sections||{}).A||[]).filter(i=>ACCESS_ROWS.some(a=>a[0]===i.id));
+  if(!items.length){ host.innerHTML='<p style="color:var(--muted);font-size:14px">This submission was sent before the access rows existed.</p>'; return; }
+  let store; try{ store=await readInputs(); }catch(e){ host.innerHTML='<p class="msg bad">'+esc(e.message)+'</p>'; return; }
+  const mine=store.access[slug]||{};
+  host.innerHTML='<div class="acc">'+items.map(i=>{
+    const label=(ACCESS_ROWS.find(a=>a[0]===i.id)||[])[1]||i.id;
+    const st=i.type==='status' ? esc(i.answer||'Not answered')+(i.owner?'<small>Sorting it: '+esc(i.owner)+(i.dueBy?', by '+esc(i.dueBy):'')+'</small>':'')
+                               : esc(((i.answers||{}).Entries||'').split('\n').join(' / ')||'Not answered');
+    const c=mine[i.id];
+    return '<div class="ar"><span class="an">'+esc(label)+'</span><span class="as">'+st+'</span>'+
+      (c ? '<span class="ok">✓ Confirmed '+esc(new Date(c.at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}))+' <button class="ghost" data-acc="'+esc(i.id)+'" data-v="0">Undo</button></span>'
+         : '<button class="ghost" data-acc="'+esc(i.id)+'" data-v="1">Confirm working</button>')+'</div>';
+  }).join('')+'</div>';
+  host.querySelectorAll('[data-acc]').forEach(b=>b.addEventListener('click',async()=>{
+    b.disabled=true;
+    try{
+      const st=await readInputs(); const m=st.access[slug]=st.access[slug]||{};
+      if(b.dataset.v==='1') m[b.dataset.acc]={at:new Date().toISOString(),by:'Sabel'}; else delete m[b.dataset.acc];
+      const r=await fetch(INPUTS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:st})});
+      if(!r.ok) throw new Error('Could not save (HTTP '+r.status+').');
+      renderAccess(sub);
+    }catch(e){ alert(e.message); b.disabled=false; }
+  }));
 }
 
 function csv(){

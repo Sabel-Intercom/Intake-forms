@@ -82,6 +82,8 @@ strong{color:var(--ink);font-weight:600}
 .item{background:var(--surface);padding:18px 24px}
 .item .q{color:var(--ink);font-weight:600;display:block;font-size:16.5px;line-height:1.4}
 .item .why{font-size:15px;color:var(--muted);margin:4px 0 0;line-height:1.5}
+.item .confirmed{font-size:14px;font-weight:600;color:var(--good);margin:6px 0 0}
+.more .body ol,.more .body ul{margin:0 0 10px;padding-left:20px}.more .body li{margin:3px 0}
 
 /* plain-English expander */
 .more{margin-top:10px}
@@ -312,7 +314,7 @@ html.dark .err{background:var(--bad-soft)}
    CONFIG
    ===================================================================== */
 const API = 'https://sabel-webhook.vercel.app/api/readiness';
-const FORM_V = '2026-10-21a';
+const FORM_V = '2026-10-27a';
 /* URL parameters (see client-hub/CONTRACT.md):
    ?client=<slug>   picks this client's saved copy on the server (readiness-<slug>-v1) and keeps
                     their draft separate from anyone else's on the same browser.
@@ -349,7 +351,8 @@ const O = {
   mailbox: [['good','Yes, all proper mailboxes'],['bad','At least one is a group address'],['warn','Not sure, I will check']],
   sso:     [['good','No plans to change it'],['warn','Yes, planned. We will warn you'],['good','Already on, and Sabel is allowed'],['warn','Not sure, I will ask IT']],
   legal:   [['good','Signed'],['warn','With our legal team'],['bad','Not started'],['na','Not needed on our side']],
-  ready:   [['good','Yes, ready now'],['warn','Being sorted'],['bad','Not started'],['na','Does not apply to us']]
+  ready:   [['good','Yes, ready now'],['warn','Being sorted'],['bad','Not started'],['na','Does not apply to us']],
+  access:  [['good','Done, access given'],['warn','Invite sent or in progress'],['bad','Not started yet'],['na','Not needed for us']]
 };
 
 /* =====================================================================
@@ -363,6 +366,8 @@ const TYPES = [
 ];
 // scope tags: 'm' = only when there is a migration, 'b' = only when there is a build.
 // no tag = always shown.
+/* Access rows that only appear when the client ticks that system in A0 (27 Oct 2026). */
+function picked(x){ return String((state.data||{}).a0||'').split('|').indexOf(x)>-1; }
 function inScope(tag){
   const t = state.projectType;
   if(!tag || t==='unsure' || !t) return true;
@@ -378,19 +383,62 @@ function inScope(tag){
    ===================================================================== */
 const SECTIONS = [
 {
- id:'A', title:'Access and getting set up',
- blurb:'Nothing else can start until we can get into your systems. It is rarely difficult, it just tends to sit with one busy person, so it helps to get it moving early.',
+id:'A', title:'Access and getting set up',
+ blurb:'Nothing else can start until we can get into your systems. Each row below says what we need, and the ? has the steps and how we will check it works. Mark each one as you go, and come back to update it if something is still being sorted when you send the form.',
  items:[
-  {t:'ask',id:'a1',scope:'m',q:'Which system are you moving away from, and who can let us in?',
-   why:'Add a row for each one if you use more than one. Plenty of teams do.',
-   more:'<p>To move your conversation history across we need an admin login on your current helpdesk. Please invite <strong>info+1@sabelcustomersuccess.com</strong> as an admin user on each system listed.</p><p>An admin login is the one that can see settings, not just tickets. If you are not sure whether yours is an admin, whoever set the system up will know.</p><p>Common systems people move from: Zendesk, Freshdesk, Freshservice, Help Scout, Zoho Desk, HubSpot Service Hub, Gorgias, Salesforce Service Cloud, or a shared Gmail or Outlook inbox. Yours may be something else entirely, that is fine, just type the name.</p>',
+  {t:'note',id:'a0n',q:'The address to invite everywhere: info+1@sabelcustomersuccess.com',
+   why:'If a system will not accept a “+” in an email address, use info@sabelcustomersuccess.com instead. Please copy and paste it rather than typing it, because a typo means the invite never arrives. You should not need to send us any passwords or API keys: once we have an account on a system, we create the keys ourselves. If a system cannot give us an account, share the key through your company’s password manager, for example 1Password or LastPass, never by Slack or email.'},
+
+  {t:'ask',id:'a0',q:'Which of these will we need to connect to?',
+   why:'Tick any that apply and a row appears below for each one. Not sure? Leave it, and we will go through it with you.',
+   multi:{id:'a0',opts:[['An online store','Shopify or similar, so Fin can answer order questions'],['Subscriptions','Recharge or similar'],['A CRM','Salesforce, HubSpot or similar'],['Phone','Calls handled in Intercom'],['Other systems','Anything else Fin should look things up in, such as bookings, billing or shipping'],['None of these','']]}},
+
+  {t:'rag',id:'a2',opts:O.granted,q:'Intercom: add Sabel as a full admin teammate',
+   why:'This is the account we build everything from. Before you invite us, we ask Intercom to switch on the partner flag on your workspace so our seat is never charged to you, and we tell you when it is on.',
+   more:'<p><strong>Steps</strong></p><ol><li>Wait for our message saying the partner flag is on. There is nothing for you to do for this part.</li><li>In Intercom, open <strong>Settings</strong>, then <strong>Workspace</strong>, then <strong>Teammates</strong>, and choose <strong>Invite teammates</strong>.</li><li>Paste <strong>info+1@sabelcustomersuccess.com</strong>.</li><li>Give it every permission (full access). A lite or standard seat can read conversations but cannot change settings, build workflows or set up Fin, which is most of what we do. You can reduce it after the project.</li><li>Send the invite.</li></ol><p><strong>How we check:</strong> we accept the invite, log in, and post your workspace name, region and App ID in Slack so you can confirm it is the right workspace.</p>'},
+
+  {t:'rag',id:'ax_slack',opts:O.access,q:'Your shared Slack channel',
+   why:'Where we ask questions, share progress and post your weekly update, so nothing gets lost in email.',
+   more:'<p><strong>Steps</strong></p><ol><li>Accept the Slack Connect invite we sent. Check your email if you cannot see it in Slack.</li><li>If your company needs an admin to approve external channels, ask them to approve it.</li><li>Add everyone on your side who should see project updates, including whoever is sorting the other rows on this page.</li></ol><p><strong>How we check:</strong> your project team can see and post in the channel.</p>'},
+
+  {t:'ask',id:'a1',scope:'m',q:'Your current helpdesk: add Sabel as an admin',
+   why:'Add a row for each system you are moving away from, if you use more than one. Plenty of teams do.',
+   more:'<p>To move your conversation history across we need an admin login on your current helpdesk. Please invite <strong>info+1@sabelcustomersuccess.com</strong> as an admin user on each system listed (Zoho rejects “+” addresses, so use info@sabelcustomersuccess.com there). An admin login is the one that can see settings, not just tickets.</p><p><strong>Where to do it</strong></p><ul><li><strong>Zendesk:</strong> Admin Center, then People, Team members, Add user, role Admin.</li><li><strong>Freshdesk:</strong> Admin, Agents, New agent, role Account administrator.</li><li><strong>Zoho Desk:</strong> Setup, Users, Add user, profile Administrator.</li><li><strong>HubSpot Service Hub:</strong> Settings, Users and Teams, Create user, Super admin.</li></ul><p>That is all for access: we create any API token we need ourselves from that admin account. If your helpdesk will not allow it, tell us and we will agree how your admin shares a token through your company’s password manager.</p><p>Please also tell us the date your contract with them ends. We need access until the final sync is done, so please do not close the account or delete anything until we confirm.</p><p>Common systems people move from: Zendesk, Freshdesk, Freshservice, Help Scout, Zoho Desk, HubSpot Service Hub, Gorgias, Salesforce Service Cloud, or a shared Gmail or Outlook inbox. Yours may be something else entirely, that is fine, just type the name.</p><p><strong>How we check:</strong> we can open one ticket with its full history, and run a small test export.</p>',
    rep:{id:'a1r', cols:[['sys','System','text','e.g. Zendesk'],
                         ['who','Who can grant admin access','text','Name'],
                         ['st','Where it is up to','select','Admin access granted to info+1|Invite sent, not accepted yet|Not started yet']]}},
 
-  {t:'rag',id:'a2',opts:O.granted,q:'Admin access to your Intercom workspace, for info+1@sabelcustomersuccess.com',
-   why:'This is the account we build everything from, so please add it as an admin rather than a lighter seat.',
-   more:'<p>Intercom has different levels of seat. A lite or standard seat can read conversations but cannot change settings, build workflows or set up Fin, which is most of what we do.</p><p>Invite <strong>info+1@sabelcustomersuccess.com</strong> as a full admin. You will not be charged for it. See the note in the seats section.</p>'},
+  {t:'rag',id:'ax_agents',scope:'m',opts:O.access,q:'Your agents in Intercom, at least 3 working days before go-live',
+   why:'Old tickets are assigned to the person who handled them. If that person has no Intercom seat when we load, their tickets land unassigned.',
+   more:'<p><strong>Steps</strong></p><ol><li>List everyone who answers customers today, with the email address they use in your current helpdesk (Section D asks for this list).</li><li>Invite each of them to Intercom at least 3 working days before go-live, using that same email address.</li><li>Tell us about anyone who has left, and we will agree where their old tickets go.</li></ol><p><strong>How we check:</strong> every agent in your current helpdesk is matched to an Intercom teammate.</p>'},
+
+  {t:'rag',id:'ax_help',scope:'b',opts:O.access,q:'Your help content',
+   why:'Fin answers from your content, so we need to read it, and move or sync it into Intercom.',
+   more:'<p><strong>Steps (do the ones that apply)</strong></p><ol><li>If your articles are in another tool (for example Zendesk Guide, Freshdesk or HubSpot), give the Sabel address editor access, or send us an export.</li><li>If Fin should learn from public pages on your website, list the page or section addresses in Slack.</li><li>If Fin should use internal documents (Google Drive, Notion, Confluence, PDFs), share the specific folders or files with the Sabel address. View-only is fine.</li></ol><p><strong>How we check:</strong> we can open and read every source you listed.</p>'},
+
+  {t:'rag',id:'ax_msg',scope:'b',opts:O.access,q:'The Intercom Messenger on your website or app',
+   why:'The Messenger is where your customers chat with Fin and your team. It usually needs your web developer, or whoever manages your site.',
+   more:'<p><strong>Steps</strong></p><ol><li>Tell us in Slack who your developer is, or which platform your site is built on (Shopify, WordPress, Webflow and similar have an Intercom app or plugin).</li><li>We send them install steps for your platform, and test on a staging or test page first if you have one.</li><li>For logged-in customers we ask your developer to switch on Messenger security (identity verification, see Section C). They copy the secret key from Intercom themselves; it never needs to be sent to us.</li></ol><p><strong>How we check:</strong> we open the page, see the Messenger, and confirm a test logged-in customer shows up in Intercom as the right person.</p>'},
+
+  {t:'rag',id:'ax_dns',scope:'b',opts:O.access,q:'Your email domain: add the records we send',
+   why:'So emails from Intercom come from your own address and land in inboxes, not spam. Section B asks who manages your DNS.',
+   more:'<p><strong>Steps</strong></p><ol><li>Tell us who manages your DNS (Section B).</li><li>We add your domain in Intercom and send that person the exact records to add, usually a few lines of text.</li><li>They add the records with your domain provider. It can take up to 48 hours for them to be recognised.</li></ol><p><strong>How we check:</strong> Intercom shows your domain as verified and authenticated, and a test email arrives from your address.</p>'},
+
+  {t:'rag',id:'ax_shop',scope:'b',when:()=>picked('An online store')||picked('Subscriptions'),opts:O.access,q:'Your online store and subscription apps: add Sabel as a staff user',
+   why:'So Fin can look up a customer’s orders and subscriptions and answer “where is my order?” without a person.',
+   more:'<p><strong>Steps</strong></p><ol><li>Shopify: add the Sabel address as a staff account with access to orders and customers, or accept our collaborator request if we send one.</li><li>Recharge or other subscription apps: add the Sabel address as a user. We will tell you the access level for your setup.</li><li>That is all: we create the connection ourselves from the Sabel account. Only if your plan or policy will not allow a Sabel account, tell us in Slack and we will send steps to create a read-only key, which you share through your company’s password manager.</li></ol><p><strong>How we check:</strong> we can see one test order, and one subscription if relevant, through the connection.</p>'},
+
+  {t:'rag',id:'ax_sys',scope:'b',when:()=>picked('Other systems'),opts:O.access,q:'Other systems Fin looks things up in: add Sabel as a user',
+   why:'Usually just an account for the Sabel address on each system, so we can create the keys ourselves. This is the most common thing that holds a build up.',
+   more:'<p>An API is the way one system lets another ask it questions. To have Fin check an order or a booking, we need to connect to the system that holds it, ideally on a test version first so we are not experimenting on real customers. Section G asks what Fin should do and where the test accounts are up to.</p><p><strong>Steps</strong></p><ol><li>Tell us which system, and who your developer contact is.</li><li>Send us the API documentation link, or ask your developer to post it in Slack.</li><li>Add the Sabel address as a user on that system, on a test or sandbox account first if you have one. We create the API key we need ourselves.</li><li>Only if the system cannot give us an account: your developer creates a key with the least access needed (read-only unless Fin needs to change something) and shares it through your company’s password manager. Please never send keys by Slack or email.</li></ol><p><strong>How we check:</strong> a test request from Intercom returns real data for a test customer.</p>'},
+
+  {t:'rag',id:'ax_crm',when:()=>picked('A CRM'),opts:O.access,q:'Your CRM: an admin or integration user',
+   why:'So Intercom shows the right customer and company details, matched to one ID across both systems.',
+   more:'<p><strong>Steps</strong></p><ol><li>Tell us who your CRM admin is.</li><li>They install and authorise the Intercom app for your CRM, or give the Sabel address an admin or integration user.</li><li>Tell us which field holds your customer ID and your company ID (Section C covers this). A wrong ID creates duplicate contacts that are slow to fix later.</li></ol><p><strong>How we check:</strong> a test contact and company sync into Intercom with the right IDs.</p>'},
+
+  {t:'rag',id:'ax_phone',when:()=>picked('Phone'),opts:O.access,q:'Phone: a number connected to Intercom',
+   why:'Calls need a phone number connected to Intercom. Someone who can approve costs usually needs to be involved.',
+   more:'<p><strong>Steps</strong></p><ol><li>Decide with us whether you will buy a new number inside Intercom, or connect your existing phone provider.</li><li>New number: an Intercom admin with billing access buys it. We will show you where.</li><li>Existing provider: add the Sabel address as an admin on that provider, or tell us who can make changes.</li></ol><p><strong>How we check:</strong> a test call reaches Intercom and rings the right team.</p>'},
 
   {t:'rag',id:'a3',opts:O.sso,q:'Is your team planning to turn on single sign-on during the project?',
    why:'Not a problem at all, we just need a little warning so we do not get locked out overnight.',
@@ -629,10 +677,6 @@ const SECTIONS = [
    more:'<p>For example: check where an order is, look up a booking, tell someone their account balance, update a delivery address, or raise a ticket in another system.</p><p>Each one means connecting to whichever system holds that information. Adding more later is possible, but it is new work, so it is worth listing everything you can think of now.</p>',
    f:[['g1a','What Fin should be able to do','textarea','Type here, one per line',{ex:'Tell a customer where their order is\nLook up a booking by reference number\nGive someone their current account balance\nUpdate a delivery address before dispatch\nRaise a ticket in Jira when something is broken\nCheck whether an item is in stock'}]]},
 
-  {t:'rag',id:'g2',opts:O.ready,q:'Can your developers give us access to those systems?',
-   why:'Usually just an account for info+1@ on each system, so we can create the keys ourselves, and a test environment. This is the most common thing that holds a build up.',
-   more:'<p>An API is the way one system lets another ask it questions. To have Fin check an order, we need to connect to your order system, and ideally a test environment so we are not experimenting on real customers.</p><p>The simplest way is to add info+1@sabelcustomersuccess.com as a user on each system. We then create the API keys ourselves, so nothing sensitive needs to be sent. If a system cannot give us an account, your developer creates the key and shares it with us through your company\'s password manager, such as 1Password or LastPass. Please never send keys by Slack or email.</p><p>This is work only your team can do, and in our experience it is the single most common reason a build sits waiting.</p>'},
-
   {t:'rag',id:'g5',opts:O.ready,q:'Can we have a test account, somewhere safe to test, and some test data for each of those systems?',
    why:'We need these from the day the build starts, not when it is time to test. The wait between building a connection and being able to check it is where projects most often stall.',
    more:'<p>Building the connection is the quick part. Checking that Fin gives the right answer is where projects sit and wait, because it needs three things only you can provide.</p><p><strong>A test environment.</strong> A sandbox, staging site or test store for each system Fin will talk to, so we are not experimenting on real customers.</p><p><strong>A test account.</strong> A login we can use freely, such as a test customer with an order or booking against it.</p><p><strong>Test data, or a few live examples we can reference.</strong> A handful of real order numbers, booking references or account IDs that are safe for us to look up while we check Fin\'s answers.</p><p>If a system has no sandbox at all, that is worth knowing now because it changes how we test. Please do not paste passwords or API keys into this form. Where you can, add info+1@sabelcustomersuccess.com to the system and we will create what we need ourselves; if not, share it through your company\'s password manager, such as 1Password or LastPass.</p>'},
@@ -788,12 +832,14 @@ const SECTIONS = [
    STATE
    ===================================================================== */
 const state = { step:0, projectType:'', data:{}, reps:{}, submitted:false, lastPayload:null };
+/* Access rows Sabel has checked, from readiness-inputs-v1 access[<slug>] (set in the Readiness admin page). */
+let CONFIRMED = {};
 
 const $  = id => document.getElementById(id);
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function activeSections(){ return SECTIONS.filter(s=>inScope(s.scope)); }
-function activeItems(sec){ return sec.items.filter(i=>inScope(i.scope) && (!i.ind || i.ind.indexOf(state.data.i1a||'')>-1)); }
+function activeItems(sec){ return sec.items.filter(i=>inScope(i.scope) && (!i.ind || i.ind.indexOf(state.data.i1a||'')>-1) && (!i.when || i.when())); }
 function steps(){ return ['start', ...activeSections().map(s=>s.id), 'review']; }
 function stepLabel(id){
   if(id==='start') return 'Start · About you';
@@ -938,6 +984,7 @@ function itemHTML(it){
   let h='<div class="item"><span class="q">'+esc(it.q)+
     (it.more?'<button type="button" class="qi" data-more="'+it.id+'" aria-expanded="false" aria-controls="mb_'+it.id+'" aria-label="What does this mean?" title="What does this mean?">?</button>':'')+'</span>';
   if(it.why) h+='<p class="why">'+esc(it.why)+'</p>';
+  if(CONFIRMED[it.id]){ const at=CONFIRMED[it.id].at; h+='<p class="confirmed">✓ Sabel has checked this works'+(at?' · '+esc(new Date(at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})):'')+'</p>'; }
   if(it.more) h+='<div class="more"><div class="body" id="mb_'+it.id+'" hidden>'+it.more+'</div></div>';
 
   if(it.t==='rag'){
@@ -1179,6 +1226,16 @@ function queueServer(){
 function applyDraft(d){
   state.data=d.data||{}; state.reps=d.reps||{}; state.projectType=d.projectType||''; state.step=d.step||0;
   state.savedAt=d.savedAt||0; state.submittedAt=d.submittedAt||null; state.hasDraft=true;
+  /* 27 Oct 2026: G2 (developer access) moved into Section A as ax_sys. Carry an old answer across once. */
+  const D=state.data;
+  if(D.s_g2 && !D.s_ax_sys){
+    const b=String(D.s_g2).split('::')[0], L={good:'Done, access given',warn:'Invite sent or in progress',bad:'Not started yet',na:'Not needed for us'};
+    if(L[b]){
+      D.s_ax_sys=b+'::'+L[b];
+      ['_own','_by','_note'].forEach(x=>{ if(D['g2'+x] && !D['ax_sys'+x]) D['ax_sys'+x]=D['g2'+x]; });
+      if(b!=='na' && !picked('Other systems')) D.a0=(D.a0?D.a0+'|':'')+'Other systems';
+    }
+  }
 }
 async function syncServer(){
   if(!SERVER_KEY) return;
@@ -1285,7 +1342,7 @@ function forgeIntake(out){
 function collect(){
   readDOM();
   const typeLabel=(TYPES.find(t=>t[0]===state.projectType)||[])[1]||'Not chosen';
-  const out={ formVersion:FORM_V, submittedAt:new Date().toISOString(),
+  const out={ formVersion:FORM_V, submittedAt:new Date().toISOString(), slug:SLUG,
     projectType:typeLabel,
     client:state.data.f_client||'', contactName:state.data.f_name||'', contactEmail:state.data.f_email||'',
     contactRole:state.data.f_role||'',
@@ -1471,7 +1528,7 @@ document.addEventListener('input',e=>{
 
 /* Section I: picking an industry shows that industry's questions */
 document.addEventListener('change',e=>{
-  if(e.target.id!=='i1a') return;
+  if(e.target.id!=='i1a' && e.target.dataset.multi!=='a0') return;
   readDOM(); save(); const y=window.scrollY; render(); window.scrollTo(0,y);
 });
 
@@ -1489,6 +1546,7 @@ async function loadProjectInputs(){
   try{
     const r=await fetch(INPUTS_URL+'&_t='+Date.now(),{cache:'no-store'}); if(!r.ok) return;
     const j=await r.json(); const all=(j && j.data && j.data.clients)||{};
+    const acc=(j && j.data && j.data.access)||{}; CONFIRMED=(SLUG && acc[SLUG]) || {};
     const wants=[NAME_PARAM, CLIENT_PARAM].filter(Boolean);
     const vals=Object.values(all).filter(Boolean);
     let hit=null;
@@ -1498,7 +1556,7 @@ async function loadProjectInputs(){
       if(hit) break;
     }
     const items=(hit && Array.isArray(hit.items) ? hit.items : []).map(x=>String(x).trim()).filter(Boolean);
-    if(!items.length || SECTIONS.some(s=>s.id==='J')) return;
+    if(!items.length || SECTIONS.some(s=>s.id==='J')){ if(Object.keys(CONFIRMED).length) render(); return; }
     const cur=steps()[state.step];
     SECTIONS.push({id:'J', title:'Your project’s inputs',
       blurb:'Your scope of work lists a few things we need from you for this particular project. Tell us where each one is up to.',
