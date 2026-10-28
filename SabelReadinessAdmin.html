@@ -86,6 +86,9 @@ pre{background:var(--surface);border:1px solid var(--line);border-radius:3px;pad
 .acc .ok{color:var(--g);font-weight:600;font-size:14px;white-space:nowrap}
 .acc .ar button{font-size:13px;padding:6px 12px}
 @media(max-width:700px){.acc .ar{grid-template-columns:1fr}}
+details.fbs{margin:12px 0 0}
+details.fbs summary{cursor:pointer;color:var(--accent);font-size:14px;font-weight:600}
+details.fbs pre{margin-top:10px}
 .empty{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:34px;text-align:center;color:var(--muted);margin-top:22px}
 </style>
 </head>
@@ -125,6 +128,9 @@ pre{background:var(--surface);border:1px solid var(--line);border-radius:3px;pad
   <h3>Access: confirmed working</h3>
   <p style="color:var(--muted);font-size:14px;max-width:70ch">The client sets each row's status in Section A. Tick a row once the team has checked the access actually works. The client sees "Sabel has checked this works" on that row the next time they open the form.</p>
   <div id="dacc"></div>
+  <h3>Forge build sheet</h3>
+  <p style="color:var(--muted);font-size:14px;max-width:70ch">The answers sorted by what forge can build: direct, through the browser, or by hand. The project lead pastes it into a Claude session with forge, asks for a plan first, and approves before anything is created.</p>
+  <div id="dforge"></div>
   <h3>Full report</h3>
   <pre id="dreport"></pre>
 </div>
@@ -191,20 +197,92 @@ async function open(id){
     $('dtitle').textContent=d.submission.client||'Unnamed';
     $('dmeta').textContent=(d.submission.contactName||'')+' · '+(d.submission.contactEmail||'')+' · ref '+id;
     $('dreport').textContent=d.report;
-    /* Forge-ready fields from form version 2026-09-15c onwards */
+    /* Forge build sheet (28 Oct 2026). Built here from the stored answers, so
+       it works for every submission. The older Forge intake (form version
+       2026-09-15c onwards) is still offered as the full answer dump. */
     const sub=d.submission||{};
-    let fx=document.getElementById('dforge');
-    if(!fx){ fx=document.createElement('div'); fx.id='dforge'; fx.style.margin='0 0 14px'; $('dreport').parentNode.insertBefore(fx,$('dreport')); }
-    fx.innerHTML = sub.forgeIntake
-      ? '<p class="meta" style="margin:0 0 10px">Industry: '+esc(sub.industry||'not given')+' · Suggested tier: '+esc((sub.tierHint&&sub.tierHint.tier)||'none')+
+    const sheet=buildSheet(sub);
+    $('dforge').innerHTML =
+      '<p style="margin:0 0 10px;font-size:14px">Industry: '+esc(sub.industry||'not given')+' · Suggested tier: '+esc((sub.tierHint&&sub.tierHint.tier)||'none')+
         ((sub.tierHint&&sub.tierHint.reasons&&sub.tierHint.reasons.length)?' ('+esc(sub.tierHint.reasons.join('; '))+')':'')+'</p>'+
-        '<button class="ghost" type="button" id="copyforge">Copy Forge intake for Greg</button>'
-      : '';
-    const cb=document.getElementById('copyforge');
-    if(cb) cb.onclick=()=>{ (navigator.clipboard?navigator.clipboard.writeText(sub.forgeIntake):Promise.reject()).then(()=>{ cb.textContent='Copied'; }).catch(()=>{ prompt('Copy the Forge intake', sub.forgeIntake); }); };
+      '<div class="row"><button class="ghost" type="button" id="copysheet">Copy Forge build sheet for project lead</button>'+
+        (sub.forgeIntake?'<button class="ghost" type="button" id="copyforge">Copy full Forge intake</button>':'')+'</div>'+
+      '<details class="fbs"><summary>Preview the build sheet</summary><pre>'+esc(sheet)+'</pre></details>';
+    copyBtn('copysheet',sheet,'Copy the Forge build sheet');
+    copyBtn('copyforge',sub.forgeIntake,'Copy the Forge intake');
     renderAccess(sub);
     show('detail'); window.scrollTo(0,0);
   }catch(e){ alert(e.message); }
+}
+
+function copyBtn(id,text,label){
+  const b=$(id); if(!b) return;
+  b.onclick=()=>{ (navigator.clipboard?navigator.clipboard.writeText(text):Promise.reject()).then(()=>{ b.textContent='Copied'; }).catch(()=>{ prompt(label,text); }); };
+}
+
+/* ---------------------------------------------------------------------
+   FORGE BUILD SHEET (28 Oct 2026)
+   Groups the readiness answers by what forge can build, so the project
+   lead can hand it to a forge session and approve a plan before any write.
+   Item ids come from SECTIONS in SabelReadinessCheck.html; ids a client
+   never saw (other industries, skipped sections) are simply left out.
+   --------------------------------------------------------------------- */
+const SHEET_GROUPS=[
+  {title:'Context for the playbook',how:'Read, not built. Sets the industry for get_playbook and answers its opening questions.',
+   ids:['i1','i2','i4','ie1','ig1','is1','im1']},
+  {title:'Fin guidance',how:'Direct: create_guidance. The client\'s own words become Fin\'s rules.',
+   ids:['h1','h2','h3','h4','h6','if1','if2','ig2','ie2','ih1']},
+  {title:'Customer and company fields',how:'Direct: create_data_attribute (shared customer ID, company link).',
+   ids:['c1','c2','c3','c4','c6','c7','c8','c9','c10']},
+  {title:'Fin data connectors',how:'Direct: create_data_connector. They are created as drafts, nothing runs until the project lead sets them live.',
+   ids:['g1','g4','g3']},
+  {title:'Help centre and Fin knowledge',how:'Collections and content import sources are direct; the help centre itself is created through the browser (create_help_centers_via_ui).',
+   ids:['f1','f2','f3','f4','f5']},
+  {title:'Brands and teams',how:'Browser: create_brands_via_ui and create_teams_via_ui. Opens a visible Chrome window and needs a one-time Intercom login.',
+   ids:['b6','d3']},
+  {title:'Migration',how:'Forge command line migration run, not a single tool call. Settings below.',
+   ids:['a1','e1','e2','e3','e4','e5','e6','d1','d2']},
+  {title:'By hand, no forge tool',how:'Intercom has no API for these, or they sit with the client. Put them on the tracker.',
+   ids:['b1','b2','b3','b4','b5','b7','i3','i5','c5','g5','g6','a3','h5']}
+];
+function itemText(i){
+  if(i.type==='status'){
+    if(!i.answer && !i.note) return '';
+    return (i.answer||'Not answered')+(i.owner?' (owner '+i.owner+(i.dueBy?', by '+i.dueBy:'')+')':'')+(i.note?'. '+i.note:'');
+  }
+  const parts=Object.entries(i.answers||{}).filter(([q,a])=>a && a!=='(none given)' && a!=='(none)');
+  if(parts.length===1) return String(parts[0][1]).replace(/\n+/g,' / ');
+  return parts.map(([q,a])=>'\n    - '+q+': '+String(a).replace(/\n+/g,' / ')).join('');
+}
+function buildSheet(sub){
+  const byId={};
+  Object.values(sub.sections||{}).forEach(list=>(list||[]).forEach(i=>{ byId[i.id]=i; }));
+  const L=['# Forge build sheet: '+(sub.client||'Unnamed'),'',
+    'From the Sabel Readiness Check submitted '+(sub.submittedAt?new Date(sub.submittedAt).toLocaleDateString('en-GB'):'(date unknown)')+' by '+(sub.contactName||'the client')+'.',
+    '',
+    'How to use: paste this into a Claude session with forge. Ask for a provisioning plan first and approve it before anything is created.',
+    'Start with org_shared_context(<workspace>) and get_playbook(<industry>).',
+    '',
+    '## Workspace (fill in before you start)',
+    '- Forge workspace name: ',
+    '- Intercom App ID and region (US / EU / AU): ',
+    '- Token in the forge vault: yes / no',
+    '- Project type: '+(sub.projectType||'not given'),
+    '- Industry: '+(sub.industry||'not given'),
+    '- Suggested tier: '+((sub.tierHint&&sub.tierHint.tier)||'none')+' (a hint only; the SOW decides)'];
+  const open=((sub.sections||{}).A||[]).filter(i=>i.type==='status' && (i.status==='red' || i.status==='amber' || !i.status));
+  if(open.length){
+    L.push('','## Access still open','Forge cannot write until Sabel has a working admin seat and token.');
+    open.forEach(i=>L.push('- '+i.question+': '+(itemText(i)||'not answered')));
+  }
+  SHEET_GROUPS.forEach(g=>{
+    const rows=g.ids.map(id=>byId[id]).filter(Boolean).map(i=>[i,itemText(i)]).filter(r=>r[1]);
+    if(!rows.length) return;
+    L.push('','## '+g.title,g.how);
+    rows.forEach(([i,t])=>L.push('- '+i.question+': '+t));
+  });
+  if(sub.otherNotes) L.push('','## Anything else the client told us',sub.otherNotes);
+  return L.join('\n');
 }
 
 /* ---------------------------------------------------------------------
