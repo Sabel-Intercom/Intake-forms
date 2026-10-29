@@ -3179,6 +3179,7 @@ loadInitial();
 
 
 
+
 <script id="sabel-actuals" data-v="1">
 /* sabel-actuals v1
  * Actual hours logged per task, stored on the task object (t.act) so the
@@ -3288,7 +3289,9 @@ loadInitial();
     if (!who) { toast('Who did the work? Add a first name'); if (o) o.focus(); return; }
     saRemember(who);
     if (!Array.isArray(t.act)) t.act = [];
-    t.act.push({ d: (d && d.value) || iso(new Date()), h: Math.round(hv * 100) / 100, o: who, n: (n && n.value || '').trim() });
+    var dv = (d && d.value) || '';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dv)) dv = iso(new Date());
+    t.act.push({ d: dv, h: Math.round(hv * 100) / 100, o: who.slice(0, 40), n: (n && n.value || '').trim().slice(0, 200) });
     toast(fmt(hv) + ' logged for ' + who);
     persist();
   };
@@ -3391,7 +3394,9 @@ loadInitial();
     var rows = [['Client', 'Pillar', 'Task', 'Task owner', 'Side', 'Date', 'Hours', 'Logged by', 'Note']];
     var client = typeof CLIENT_NAME !== 'undefined' ? CLIENT_NAME : (typeof KEY !== 'undefined' ? KEY : '');
     entries().forEach(function (e) { rows.push([client, e.pillar, e.task, e.owner, e.grp, e.d, e.h, e.o, e.n]); });
-    var csv = '﻿' + rows.map(function (r) { return r.map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
+    // Neutralise spreadsheet formulas: a cell starting = + - @ tab or CR is text.
+    var cell = function (v) { var x = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(x)) x = "'" + x; return '"' + x.replace(/"/g, '""') + '"'; };
+    var csv = '﻿' + rows.map(function (r) { return r.map(cell).join(','); }).join('\r\n');
     var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = (typeof KEY !== 'undefined' ? KEY : 'tracker') + '-actuals-' + iso(new Date()) + '.csv';
