@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><script id="sabel-actuals-pre">window.__saInitHash=location.hash;</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sabel × CleverCards · Project Tracker</title>
@@ -2807,6 +2807,359 @@ function downloadSnapshot(){
 applyHash();
 render();
 loadInitial();
+</script>
+
+
+
+
+<script id="sabel-actuals" data-v="1">
+/* sabel-actuals v1
+ * Actual hours logged per task, stored on the task object (t.act) so the
+ * tracker's existing save (payload.taskData) carries them to the live store
+ * with no API change. Injected after the tracker's own script by
+ * patch_tracker.py; wraps the page's functions at runtime instead of editing
+ * them, so one module works across tracker generations.
+ *
+ * Sabel view: on when the file is an INTERNAL build, or when this browser has
+ * turned it on by opening the tracker at #sabel (off again at #client). The
+ * client never sees hours unless they do that on purpose.
+ *
+ * Data on a task:
+ *   t.hrs = 6            planned allotment (from the internal build or typed here)
+ *   t.act = [{d:'2026-10-14', h:2.5, o:'Chris', n:'Fin attributes pass'}]
+ * The monthly PSH close reads t.act by month with
+ * tools/psh-claimable/collect_tracker.py.
+ */
+(function () {
+  if (window.__sabelActuals) return;
+  window.__sabelActuals = { v: 1 };
+
+  // ---- helpers ------------------------------------------------------------
+  var hasFn = function (n) { return typeof window[n] === 'function'; };
+  var E = hasFn('esc') ? window.esc : function (s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+  var iso = function (d) {
+    var y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), da = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + da;
+  };
+  var fmt = function (n) { return (Math.round(n * 100) / 100) + 'h'; };
+  var toast = function (m, s) { if (hasFn('showToast')) showToast(m, s); };
+  var isInternal = function () { return typeof INTERNAL !== 'undefined' && !!INTERNAL; };
+
+  function saOn() {
+    if (isInternal()) return true;
+    try { return localStorage.getItem('tracker-sabel') === 'on'; } catch (e) { return false; }
+  }
+  function saSet(on) {
+    try { localStorage.setItem('tracker-sabel', on ? 'on' : 'off'); } catch (e) { }
+  }
+  function saWho() {
+    var n = '';
+    try { n = localStorage.getItem('tracker-note-name') || localStorage.getItem('tracker-sabel-who') || ''; } catch (e) { }
+    return n;
+  }
+  function saRemember(n) {
+    try { localStorage.setItem('tracker-sabel-who', n); } catch (e) { }
+  }
+  function acts(t) { return (t && Array.isArray(t.act)) ? t.act : []; }
+  function sum(list) { return list.reduce(function (a, x) { return a + (Number(x.h) || 0); }, 0); }
+  function alloc(t) { return (t && typeof t.hrs === 'number') ? t.hrs : null; }
+  function task(cid) { return hasFn('resolveTask') ? resolveTask(cid) : null; }
+  function persist() {
+    if (hasFn('render')) render();
+    if (hasFn('scheduleAutoSave')) scheduleAutoSave();
+  }
+  function canWrite() { return !isInternal(); }
+
+  // Every in-scope task with its cid, across pillars.
+  function allTasks() {
+    var out = [];
+    if (typeof P === 'undefined' || typeof T === 'undefined') return out;
+    P.forEach(function (ph) {
+      ['sabel', 'client'].forEach(function (grp) {
+        (((T[ph.id] || {})[grp]) || []).forEach(function (t, i) {
+          out.push({ t: t, cid: ph.id + '-' + (grp === 'sabel' ? 's' : 'c') + '-' + i, grp: grp, ph: ph });
+        });
+      });
+    });
+    return out;
+  }
+  function entries() {
+    var out = [];
+    allTasks().forEach(function (o) {
+      acts(o.t).forEach(function (a, i) {
+        out.push({ cid: o.cid, i: i, pillar: o.ph.l, task: o.t.t, owner: o.t.o || '', grp: o.grp, parked: !!o.t.parked, d: a.d, h: Number(a.h) || 0, o: a.o || '', n: a.n || '' });
+      });
+    });
+    out.sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; });
+    return out;
+  }
+  function byMonth() {
+    var m = {};
+    entries().forEach(function (e) {
+      var k = String(e.d || '').slice(0, 7) || 'undated';
+      m[k] = m[k] || { total: 0, who: {} };
+      m[k].total += e.h;
+      m[k].who[e.o || '?'] = (m[k].who[e.o || '?'] || 0) + e.h;
+    });
+    return m;
+  }
+  window.sabelActuals = { entries: entries, byMonth: byMonth, on: saOn };
+
+  // ---- writes -------------------------------------------------------------
+  window.saAdd = function (cid) {
+    if (!canWrite()) { toast('The internal copy is read-only. Log time in the client tracker'); return; }
+    var t = task(cid); if (!t) return;
+    var d = document.getElementById('sa-d-' + cid), h = document.getElementById('sa-h-' + cid),
+      o = document.getElementById('sa-o-' + cid), n = document.getElementById('sa-n-' + cid);
+    var hv = parseFloat(h && h.value);
+    if (!(hv > 0)) { toast('Enter the hours as a positive number, e.g. 1.5'); if (h) h.focus(); return; }
+    var who = (o && o.value || '').trim();
+    if (!who) { toast('Who did the work? Add a first name'); if (o) o.focus(); return; }
+    saRemember(who);
+    if (!Array.isArray(t.act)) t.act = [];
+    t.act.push({ d: (d && d.value) || iso(new Date()), h: Math.round(hv * 100) / 100, o: who, n: (n && n.value || '').trim() });
+    toast(fmt(hv) + ' logged for ' + who);
+    persist();
+  };
+  window.saDel = function (cid, i) {
+    if (!canWrite()) return;
+    var t = task(cid); if (!t || !Array.isArray(t.act) || !t.act[i]) return;
+    t.act.splice(i, 1);
+    persist();
+  };
+  window.saSetAlloc = function (cid, v) {
+    if (!canWrite()) return;
+    var t = task(cid); if (!t) return;
+    var n = parseFloat(v);
+    if (v === '' || !(n >= 0)) delete t.hrs; else t.hrs = Math.round(n * 100) / 100;
+    persist();
+  };
+  window.saToggle = function () {
+    if (isInternal()) return;
+    var on = !saOn(); saSet(on);
+    toast(on ? 'Sabel view on: hours and time logging shown on this browser' : 'Sabel view off');
+    if (hasFn('render')) render();
+  };
+
+  // ---- card block (inside the expanded task) ------------------------------
+  function block(t, cid) {
+    var list = acts(t), tot = sum(list), al = alloc(t);
+    var rows = list.map(function (a, i) {
+      return '<div class="sa-row"><span class="sa-d">' + E(a.d) + '</span><span class="sa-h">' + fmt(Number(a.h) || 0) + '</span><span class="sa-o">' + E(a.o) + '</span><span class="sa-n">' + E(a.n) + '</span>' +
+        (canWrite() ? '<button class="sa-x" title="Remove this entry" onclick="event.stopPropagation();saDel(\'' + cid + '\',' + i + ')"><i class="ti ti-x"></i></button>' : '') + '</div>';
+    }).join('');
+    var over = al !== null && tot > al;
+    var head = '<div class="sa-head"><span class="sa-title"><i class="ti ti-clock-hour-4"></i>Time logged</span>' +
+      '<span class="sa-tot' + (over ? ' over' : '') + '">' + fmt(tot) + (al !== null ? ' of ' + fmt(al) + ' allotted' : '') + (over ? ' · over' : '') + '</span></div>';
+    var form = canWrite()
+      ? '<div class="sa-form">' +
+      '<input id="sa-d-' + cid + '" type="date" value="' + iso(new Date()) + '" title="Date the work was done">' +
+      '<input id="sa-h-' + cid + '" type="number" step="0.25" min="0.25" placeholder="hrs" title="Hours, e.g. 1.5" onkeydown="if(event.key===\'Enter\')saAdd(\'' + cid + '\')">' +
+      '<input id="sa-o-' + cid + '" type="text" value="' + E(saWho()) + '" placeholder="who" title="First name" list="sa-team">' +
+      '<input id="sa-n-' + cid + '" type="text" placeholder="what was done (optional)" onkeydown="if(event.key===\'Enter\')saAdd(\'' + cid + '\')">' +
+      '<button class="sa-add" onclick="event.stopPropagation();saAdd(\'' + cid + '\')">Log</button></div>' +
+      '<div class="sa-alloc"><label>Allotted hrs</label><input type="number" step="0.25" min="0" value="' + (al === null ? '' : al) + '" placeholder="not set" onchange="saSetAlloc(\'' + cid + '\',this.value)"></div>'
+      : '<div class="sa-ro">Read-only here. Log time in the client tracker (open it at #sabel).</div>';
+    var team = '';
+    if (typeof SABEL_TEAM !== 'undefined' && Array.isArray(SABEL_TEAM)) team = '<datalist id="sa-team">' + SABEL_TEAM.map(function (n) { return '<option value="' + E(n) + '">'; }).join('') + '</datalist>';
+    return '<div class="sa-block" onclick="event.stopPropagation()">' + head + (rows || '<div class="sa-empty">Nothing logged yet.</div>') + form + team + '</div>';
+  }
+
+  // ---- hours view ---------------------------------------------------------
+  function view() {
+    var all = allTasks().filter(function (o) { return !o.t.parked; });
+    var ents = entries().filter(function (e) { return !e.parked; });
+    var logged = sum(ents), allot = 0, allotDone = 0, loggedDone = 0, noAlloc = 0;
+    all.forEach(function (o) {
+      var a = alloc(o.t); if (a !== null) { allot += a; if (o.t.s === 'Complete') allotDone += a; } else if (o.grp === 'sabel') noAlloc++;
+      if (o.t.s === 'Complete') loggedDone += sum(acts(o.t));
+    });
+    var sow = (typeof SOW !== 'undefined' && SOW && SOW.hours) ? Number(SOW.hours) : 0;
+    var thisM = iso(new Date()).slice(0, 7), bm = byMonth();
+    var tile = function (l, v, s, c) {
+      return '<div class="sa-tile"><div class="k">' + l + '</div><div class="v" style="color:' + (c || 'var(--kE2E8F0)') + '">' + v + '</div><div class="s">' + (s || '') + '</div></div>';
+    };
+    var tiles = '<div class="sa-tiles">' +
+      tile('SOW hours', sow ? fmt(sow) : 'not set', 'Agreed in the signed SOW') +
+      tile('Allotted', fmt(allot), noAlloc ? noAlloc + ' Sabel task' + (noAlloc > 1 ? 's' : '') + ' without an allotment' : 'Planned per task', 'var(--kA78BFA)') +
+      tile('Logged', fmt(logged), sow ? Math.round(logged / sow * 100) + '% of the SOW' : '', 'var(--k4ADE80)') +
+      tile('Logged ' + thisM, fmt((bm[thisM] || { total: 0 }).total), 'Goes on this month\'s Intercom claim', 'var(--kFBBF24)') +
+      tile('Left on SOW', sow ? fmt(sow - logged) : 'n/a', sow && sow - logged < 0 ? 'Over the SOW. Needs a top-up before more is claimed' : 'SOW minus logged', sow && sow - logged < 0 ? 'var(--kF87171)' : 'var(--kE2E8F0)') +
+      '</div>';
+    // months x people
+    var months = Object.keys(bm).sort().reverse(), people = {};
+    ents.forEach(function (e) { people[e.o || '?'] = 1; });
+    var pk = Object.keys(people).sort();
+    var mt = months.length ? '<table class="sa-table"><thead><tr><th>Month</th>' + pk.map(function (p) { return '<th class="r">' + E(p) + '</th>'; }).join('') + '<th class="r">Total</th></tr></thead><tbody>' +
+      months.map(function (m) {
+        return '<tr><td>' + E(m) + '</td>' + pk.map(function (p) { return '<td class="r">' + (bm[m].who[p] ? fmt(bm[m].who[p]) : '') + '</td>'; }).join('') + '<td class="r b">' + fmt(bm[m].total) + '</td></tr>';
+      }).join('') + '</tbody></table>' : '<div class="sa-empty">No time logged yet. Open any task and use Time logged.</div>';
+    // per pillar / task
+    var pillars = (typeof P !== 'undefined' ? P : []).map(function (ph) {
+      var rows = all.filter(function (o) { return o.ph.id === ph.id; });
+      if (!rows.length) return '';
+      var pa = 0, pl = 0;
+      var body = rows.map(function (o) {
+        var a = alloc(o.t), l = sum(acts(o.t)); pa += a || 0; pl += l;
+        var dn = o.t.s === 'Complete';
+        return '<tr class="' + (dn ? 'dn' : '') + '"><td>' + E(o.t.t) + '</td><td class="m">' + E(o.t.o || '') + ' · ' + (o.grp === 'client' ? 'Client' : 'Sabel') + '</td><td class="m">' + E(o.t.s || '') + '</td>' +
+          '<td class="r">' + (a === null ? '<span class="m">not set</span>' : fmt(a)) + '</td><td class="r b" style="color:' + (a !== null && l > a ? 'var(--kF87171)' : 'var(--k4ADE80)') + '">' + (l ? fmt(l) : '') + '</td>' +
+          '<td class="m">' + acts(o.t).map(function (x) { return E(x.d) + ' ' + fmt(Number(x.h) || 0) + ' ' + E(x.o); }).join('<br>') + '</td></tr>';
+      }).join('');
+      return '<div class="sa-card"><div class="sa-ch"><span><span class="dot" style="background:' + ph.c + '"></span>' + E(ph.l) + '</span><span class="sa-tot">' + fmt(pl) + ' logged · ' + fmt(pa) + ' allotted</span></div>' +
+        '<table class="sa-table"><thead><tr><th>Task</th><th>Owner</th><th>Status</th><th class="r">Allotted</th><th class="r">Logged</th><th>Entries</th></tr></thead><tbody>' + body + '</tbody></table></div>';
+    }).join('');
+    return '<div class="sa-view">' +
+      '<div class="sa-h1"><i class="ti ti-clock-dollar"></i><span>Hours logged</span>' + (isInternal() ? '' : '<button class="sa-lnk" onclick="saToggle()">Hide Sabel view</button>') + '</div>' +
+      '<div class="sa-sub">Sabel only. Actual time per task, logged from each task card. The monthly Intercom claim is built from this.</div>' +
+      tiles +
+      '<div class="sa-card"><div class="sa-ch"><span>By month</span><span><button class="sa-lnk" onclick="saExportCSV()">Export entries CSV</button><button class="sa-lnk" onclick="saCopyMonths()">Copy month summary</button></span></div>' + mt + '</div>' +
+      pillars + '</div>';
+  }
+  window.saExportCSV = function () {
+    var rows = [['Client', 'Pillar', 'Task', 'Task owner', 'Side', 'Date', 'Hours', 'Logged by', 'Note']];
+    var client = typeof CLIENT_NAME !== 'undefined' ? CLIENT_NAME : (typeof KEY !== 'undefined' ? KEY : '');
+    entries().forEach(function (e) { rows.push([client, e.pillar, e.task, e.owner, e.grp, e.d, e.h, e.o, e.n]); });
+    var csv = '﻿' + rows.map(function (r) { return r.map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = (typeof KEY !== 'undefined' ? KEY : 'tracker') + '-actuals-' + iso(new Date()) + '.csv';
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+    toast('Actuals CSV downloaded. Internal, do not send to the client');
+  };
+  window.saCopyMonths = function () {
+    var bm = byMonth(), lines = Object.keys(bm).sort().map(function (m) {
+      return m + ': ' + fmt(bm[m].total) + ' (' + Object.keys(bm[m].who).map(function (p) { return p + ' ' + fmt(bm[m].who[p]); }).join(', ') + ')';
+    });
+    var txt = (typeof CLIENT_NAME !== 'undefined' ? CLIENT_NAME : '') + ' hours logged\n' + lines.join('\n');
+    try { navigator.clipboard.writeText(txt); toast('Month summary copied'); } catch (e) { toast('Copy failed'); }
+  };
+
+  // ---- CSS ---------------------------------------------------------------
+  var css = document.createElement('style'); css.id = 'sa-css';
+  css.textContent =
+    '.sa-block{border-top:1px dashed var(--k2A3145,#2A3145);margin-top:10px;padding-top:10px}' +
+    '.sa-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}' +
+    '.sa-title{font-size:11px;font-weight:600;color:var(--kA78BFA,#A78BFA);display:inline-flex;align-items:center;gap:5px}' +
+    '.sa-tot{font-size:11px;font-weight:600;color:var(--kA78BFA,#A78BFA)}.sa-tot.over{color:var(--kF87171,#F87171)}' +
+    '.sa-row{display:grid;grid-template-columns:82px 44px 64px 1fr 18px;gap:6px;align-items:center;font-size:11px;padding:2px 0;color:var(--kE2E8F0,#E2E8F0)}' +
+    '.sa-row .sa-d,.sa-row .sa-o{color:var(--k94A3B8,#94A3B8)}.sa-row .sa-h{font-weight:600;color:var(--k4ADE80,#4ADE80)}.sa-row .sa-n{color:var(--k64748B,#64748B);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+    '.sa-x{background:none;border:none;color:var(--k475569,#475569);cursor:pointer;padding:0;display:flex}.sa-x:hover{color:var(--kF87171,#F87171)}' +
+    '.sa-empty{font-size:11px;color:var(--k475569,#475569);padding:2px 0 4px}' +
+    '.sa-form{display:grid;grid-template-columns:118px 62px 86px 1fr auto;gap:6px;margin-top:6px}' +
+    '.sa-form input{font-size:11px;color:var(--kE2E8F0,#E2E8F0);background:var(--k161B26,#161B26);border:1px solid var(--k2A3145,#2A3145);border-radius:6px;padding:5px 7px;font-family:inherit;min-width:0;box-sizing:border-box}' +
+    '.sa-add{background:rgba(167,139,250,.14);border:1px solid #A78BFA66;color:var(--kA78BFA,#A78BFA);font-size:11px;font-weight:600;font-family:inherit;border-radius:6px;padding:5px 12px;cursor:pointer}' +
+    '.sa-alloc{display:flex;align-items:center;gap:8px;margin-top:6px}.sa-alloc label{font-size:10px;color:var(--k64748B,#64748B);margin:0}.sa-alloc input{width:70px;font-size:11px;color:var(--kE2E8F0,#E2E8F0);background:var(--k161B26,#161B26);border:1px solid var(--k2A3145,#2A3145);border-radius:6px;padding:4px 7px;font-family:inherit}' +
+    '.sa-ro{font-size:11px;color:var(--k64748B,#64748B)}' +
+    '.sa-view .sa-h1{display:flex;align-items:center;gap:8px;margin-bottom:3px;font-size:18px;font-weight:600;color:var(--kE2E8F0,#E2E8F0)}.sa-view .sa-h1 i{font-size:16px;color:var(--kA78BFA,#A78BFA)}' +
+    '.sa-sub{font-size:11px;color:var(--k475569,#475569);margin-bottom:1.25rem}' +
+    '.sa-tiles{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.sa-tile{flex:1;min-width:118px;background:var(--k161B26,#161B26);border:1px solid var(--k1E2433,#1E2433);border-radius:10px;padding:12px 14px}' +
+    '.sa-tile .k{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--k64748B,#64748B);margin-bottom:6px}.sa-tile .v{font-size:19px;font-weight:600}.sa-tile .s{font-size:10px;color:var(--k475569,#475569);margin-top:2px}' +
+    '.sa-card{background:var(--k161B26,#161B26);border:1px solid var(--k1E2433,#1E2433);border-radius:10px;padding:14px 16px;margin-bottom:12px}' +
+    '.sa-ch{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:13px;font-weight:500;color:var(--kE2E8F0,#E2E8F0)}.sa-ch .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:7px}' +
+    '.sa-table{width:100%;border-collapse:collapse}.sa-table th{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--k64748B,#64748B);text-align:left;padding:4px 8px}' +
+    '.sa-table td{font-size:12px;color:var(--kE2E8F0,#E2E8F0);padding:6px 8px;border-top:1px solid var(--k1E2433,#1E2433);vertical-align:top}.sa-table .r{text-align:right}.sa-table .b{font-weight:600}.sa-table .m{font-size:11px;color:var(--k64748B,#64748B)}.sa-table tr.dn td:first-child{color:var(--k475569,#475569)}' +
+    '.sa-lnk{background:transparent;border:1px solid var(--k2A3145,#2A3145);color:var(--k94A3B8,#94A3B8);font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer;margin-left:6px}' +
+    '.sa-nav{border-top:1px solid var(--k1E2433,#1E2433);margin-top:6px;padding-top:6px}' +
+    'body.tools-off .sa-block{display:block}';
+  document.head.appendChild(css);
+
+  // ---- wrap the page -------------------------------------------------------
+  var orig = {};
+  function wrap(name, fn) {
+    if (!hasFn(name)) return false;
+    orig[name] = window[name];
+    window[name] = fn;
+    return true;
+  }
+
+  wrap('cardExpand', function (t, cid, isClient) {
+    var html = orig.cardExpand.apply(this, arguments);
+    if (!saOn()) return html;
+    try { return html + block(t, cid); } catch (e) { return html; }
+  });
+
+  // Pillar / week / flow views render open cards through qOpen (plain) and
+  // qStaged (phased); the block goes inside the card's outer element.
+  function inject(html, t, cid, closer) {
+    if (!saOn() || typeof html !== 'string') return html;
+    try {
+      var i = html.lastIndexOf(closer);
+      return i < 0 ? html + block(t, cid) : html.slice(0, i) + block(t, cid) + html.slice(i);
+    } catch (e) { return html; }
+  }
+  wrap('qOpen', function (t, cid) { return inject(orig.qOpen.apply(this, arguments), t, cid, '</div></div>'); });
+  wrap('qStaged', function (t, cid) { return inject(orig.qStaged.apply(this, arguments), t, cid, '</div>'); });
+
+  function nudge(cid) {
+    if (!saOn() || !canWrite()) return;
+    var t = task(cid); if (!t || t.s !== 'Complete' || acts(t).length) return;
+    try { if (typeof expandedCards !== 'undefined' && expandedCards.add) expandedCards.add(cid); } catch (e) { }
+    try { if (typeof pvOpen !== 'undefined' && pvOpen.add) pvOpen.add(cid); } catch (e) { }
+    if (hasFn('renderMain')) renderMain();
+    toast('Done. Log the time it took under Time logged');
+  }
+  wrap('toggleComplete', function (e, cid) { var r = orig.toggleComplete.apply(this, arguments); nudge(cid); return r; });
+  wrap('pickStatus', function (cid, val) { var r = orig.pickStatus.apply(this, arguments); nudge(cid); return r; });
+
+  wrap('renderMain', function () {
+    if (typeof cur !== 'undefined' && cur === 'actuals') {
+      if (!saOn()) { cur = 'overview'; return orig.renderMain.apply(this, arguments); }
+      var el = document.getElementById('main');
+      if (el) { el.innerHTML = view(); try { window.scrollTo(0, 0); } catch (e) { } return; }
+    }
+    return orig.renderMain.apply(this, arguments);
+  });
+
+  wrap('renderSidebar', function () {
+    var r = orig.renderSidebar.apply(this, arguments);
+    if (!saOn()) return r;
+    try {
+      var sb = document.getElementById('sidebar'); if (!sb) return r;
+      var on = typeof cur !== 'undefined' && cur === 'actuals';
+      var nav = sb.querySelector('.hn-nav');
+      var btn = '<button class="hn-btn' + (on ? ' on' : '') + '" data-tip="Hours logged" onclick="setP(\'actuals\')"><span class="ic"><i class="ti ti-clock-dollar"></i></span><span class="lb">Hours logged</span>' +
+        (function () { var m = byMonth(), k = iso(new Date()).slice(0, 7); return m[k] ? '<span class="hn-right">' + fmt(m[k].total) + '</span>' : ''; })() + '</button>';
+      if (nav) {
+        var sec = document.createElement('div'); sec.innerHTML = '<div class="hn-sec">Sabel</div>' + btn;
+        while (sec.firstChild) nav.appendChild(sec.firstChild);
+      } else {
+        var d = document.createElement('div'); d.className = 'sa-nav';
+        d.innerHTML = '<button onclick="setP(\'actuals\')" style="width:100%;text-align:left;background:' + (on ? 'rgba(167,139,250,.14)' : 'transparent') + ';border:1px solid var(--k2A3145,#2A3145);color:var(--kE2E8F0,#E2E8F0);font-size:12px;font-family:inherit;border-radius:6px;padding:6px 10px;cursor:pointer"><i class="ti ti-clock-dollar" style="color:var(--kA78BFA,#A78BFA);margin-right:6px"></i>Hours logged (Sabel)</button>';
+        sb.appendChild(d);
+      }
+    } catch (e) { }
+    return r;
+  });
+
+  wrap('applyHash', function () {
+    var raw = location.hash || '';
+    if (raw === '#sabel') { saSet(true); try { history.replaceState(null, '', '#actuals'); } catch (e) { } raw = '#actuals'; toast('Sabel view on for this browser'); }
+    if (raw === '#client') { saSet(false); try { history.replaceState(null, '', '#overview'); } catch (e) { } if (hasFn('render')) { cur = 'overview'; } return orig.applyHash.apply(this, arguments); }
+    if (raw === '#actuals' && saOn()) { cur = 'actuals'; return; }
+    return orig.applyHash.apply(this, arguments);
+  });
+  wrap('syncHash', function () {
+    if (typeof cur !== 'undefined' && cur === 'actuals') { if (location.hash !== '#actuals') try { history.replaceState(null, '', '#actuals'); } catch (e) { } return; }
+    return orig.syncHash.apply(this, arguments);
+  });
+
+  // First paint already happened before this module ran: honour #sabel / #actuals now.
+  // The page's own first render has already rewritten the hash, so the
+  // pre-script in <head> (patch_tracker.py) keeps the one the link opened with.
+  try {
+    var h = window.__saInitHash || location.hash || '';
+    delete window.__saInitHash;
+    if (h === '#sabel') { saSet(true); history.replaceState(null, '', '#actuals'); h = '#actuals'; toast('Sabel view on for this browser'); }
+    if (h === '#client') { saSet(false); history.replaceState(null, '', '#overview'); h = ''; if (hasFn('render')) render(); }
+    if (h === '#actuals' && saOn()) { cur = 'actuals'; history.replaceState(null, '', '#actuals'); if (hasFn('render')) render(); }
+    else if (saOn() && hasFn('renderSidebar')) renderSidebar();
+  } catch (e) { }
+})();
 </script>
 </body>
 </html>
