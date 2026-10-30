@@ -301,6 +301,10 @@ a{color:inherit}
 .step.mine .tx{color:var(--ink)}
 .step.done .tx,.step.na .tx{color:var(--faint);text-decoration:line-through;text-decoration-color:var(--line2)}
 .step .acts{display:flex;align-items:center;gap:8px}
+.step .xonly{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);border-radius:4px;padding:1px 5px;white-space:nowrap}
+.step .xstep-in{flex:1;min-width:0;font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--accent);border-radius:6px;padding:4px 8px}
+.xadd{padding:0 16px 8px 46px}
+.xadd .linkbtn{font-size:13px}
 .step .more{opacity:0;display:flex;gap:2px;transition:opacity .12s}
 .step:hover .more,.step:focus-within .more{opacity:1}
 .iconbtn{border:0;background:none;cursor:pointer;color:var(--muted);font-size:12px;padding:3px 6px;border-radius:5px;white-space:nowrap}
@@ -668,6 +672,7 @@ const PHASES = [
   ["nikki","Build the kickoff pack by stage, save to 00_Project Admin"],
   ["nikki","Tell the lead the gates are green, the same day"],
   ["nikki","Confirm tier and meeting hours with Richard"],
+  ["nikki","Intercom partner projects: compare the Intercom handover with the signed SOW and send Richard and the lead the differences before kickoff","","p2-ho1"],
   ["richard","Confirms tier and meeting hours (Light 4, Standard 8 or 12, Enterprise 14 to 18)"],
   ["lead","Books kickoff: purpose, decisions, inputs, 4 client roles, recording on"]]},
  {id:"p3", code:"S0", when:"Week 1", name:"Kickoff", gate:"Go-live and Day-30 dates agreed and in the calendar.", steps:[
@@ -763,6 +768,9 @@ const STEP_INFO = {
  "p0-mg1":{what:"Send the one-page explainer of how a Sabel migration runs together with the form link: the stages (closed history, sample, catch-up deltas, freeze, final delta about two hours before the switch), what we do and do not do between extraction and load (map and load, no data cleansing), what the sample review checks, what sign-off means, the CSV templates for agent and ID mapping files, and roughly how the hours split.",
    why:"Shiftmove asked for a call on 9 Oct to get exactly these answers after weeks in the channel, and Richard thought the call was unnecessary. The client felt unanswered. Every one of their six questions is answered by this page before it is asked.",
    how:"Post it in the client channel in the same message as the form link. Pin it. If the client is on a partner project, send it to the partner contact too."},
+ "p2-ho1":{what:"When Intercom sends the partner handover PDF, compare it line by line with the signed SOW or proposal: workspace ID and app code, contract start and go-live dates, PS hours and what they cover, Fin targets and volume baseline, channels and products sold, integrations, help centres and brands, migration source and contract end, and the named people and roles. Post a two-column table (our SOW | Intercom handover) to Richard and the project lead, and ask which is correct and which the client needs to confirm at kickoff.",
+   why:"RMS Cloud, 26 Oct 2026: the handover named a different workspace from the one we were setting up, expected a 30% Fin rate against our 50% target, recorded a 2-year Zendesk contract against our 8 Feb switch-off, and listed phone (40% of volume) and integrations our proposal does not cover. Each would have surfaced mid-build instead of at kickoff.",
+   how:"Handover PDF and signed SOW both in 00_Project Admin. Differences go to Richard and the lead in Slack the same day. Anything they cannot settle becomes a kickoff decision in the Kick-off Desk (card 08). Update people and roles in card 05 from the handover, marked 'to confirm'. Direct (non-Intercom) clients: skip."},
  "m0-mg1":{what:"Send the one-page explainer of how a Sabel migration runs together with the form link: the stages, what we do and do not do, what the sample review checks, what sign-off means, the file templates, and how the hours split.",
    why:"Shiftmove asked for a call on 9 Oct to get exactly these answers after weeks in the channel. The client felt unanswered. The explainer answers the questions before they are asked.",
    how:"Post it in the client channel in the same message as the form link, and pin it."},
@@ -1044,7 +1052,7 @@ const S = {
   portal:null, notion:[], reg:[], kickoff:{}, trk:{},
   loaded:{portal:false,notion:false,reg:false,kick:false}, errors:{},
   view:"overview", clientId:null, dirty:new Map(), save:"idle",
-  open:{}, noteOpen:{}, infoOpen:{}, scopeOpen:false, foldOpen:{}, edShowGone:{},
+  open:{}, noteOpen:{}, infoOpen:{}, xEdit:null, scopeOpen:false, foldOpen:{}, edShowGone:{},
   prefs:{mine:false, closedOpen:false, grp:{}, groupBy:"stage", cardDetail:"full"}
 };
 try{ Object.assign(S.prefs, JSON.parse(localStorage.getItem(PREF_KEY)||"{}")); }catch(e){}
@@ -1125,8 +1133,14 @@ function normaliseTypes(){
 }
 function stepsFor(c, p){
   const t = projectType(c);
-  return p.steps.filter(s => !s.tag || (s.tag==="b" && t!=="migration") || (s.tag==="m" && t!=="build") || (s.tag==="mo" && t==="migration"));
+  return p.steps.filter(s => !s.tag || (s.tag==="b" && t!=="migration") || (s.tag==="m" && t!=="build") || (s.tag==="mo" && t==="migration"))
+    .concat(extraSteps(c,p.id).map(x=>({id:x.id, o:OWNERS[x.o]?x.o:"nikki", t:x.t, tag:"", crit:false, info:null, extra:true})));
 }
+/* Steps added on one client's page only, kept on the record at hub.extra = {<phase>:[{id,t,o}]}.
+   Their ticks and notes sit in hub.steps like any other step. */
+function extraSteps(c,pid){ const x=c.hub && c.hub.extra && c.hub.extra[pid]; return Array.isArray(x) ? x : []; }
+function findExtra(c,sid){ const E=(c.hub&&c.hub.extra)||{}; for(const pid in E){ const x=(E[pid]||[]).find(s=>s.id===sid); if(x) return {pid, x}; } return null; }
+function dropExtra(c,sid){ const f=findExtra(c,sid); if(!f) return; c.hub.extra[f.pid]=c.hub.extra[f.pid].filter(s=>s.id!==sid); if(!c.hub.extra[f.pid].length) delete c.hub.extra[f.pid]; delete c.hub.steps[sid]; }
 function ownerName(c,o){ return o==="lead" ? (c.owner ? c.owner+" (lead)" : "Project lead") : OWNERS[o].n; }
 
 /* ---------- hub progress ---------- */
@@ -1969,11 +1983,15 @@ function phaseBlock(c,p,pi,i){
     list.forEach(s=>{
       const st = before ? "done" : stepStatus(c,s), rec=c.hub.steps[s.id]||{}, own=stepOwner(c,s), mine=own==="nikki";
       const nk=c.id+":"+s.id, done=["done","na"].includes(st);
+      const editing = s.extra && S.xEdit===s.id;
       h += '<li class="step '+(mine?'mine':'other')+(st?' '+st:'')+'">'+
         '<button class="tick'+(mine?' mine':'')+(st?' '+st:'')+'" data-act="tick" data-id="'+c.id+'" data-sid="'+s.id+'" aria-label="'+(st==="done"?"Mark not done":"Mark done")+': '+esc(s.t)+'"'+(before?' disabled':'')+'>'+tickSvg+'</button>'+
-        '<span class="tx">'+esc(s.t)+(s.crit&&!done?'<span class="crit'+(mine?' mine':'')+'">Critical</span>':'')+infoBtn(s,nk)+'</span>'+
+        (editing
+          ? '<span class="tx"><input class="xstep-in" data-act="xstep-t" data-id="'+c.id+'" data-sid="'+s.id+'" value="'+esc(s.t)+'" placeholder="What needs doing for '+esc(c.name)+'?" aria-label="Step"></span>'
+          : '<span class="tx">'+esc(s.t)+(s.extra?'<span class="xonly" title="Added on this client only. It is not on the standard checklist.">This client</span>':'')+(s.crit&&!done?'<span class="crit'+(mine?' mine':'')+'">Critical</span>':'')+infoBtn(s,nk)+'</span>')+
         '<span class="acts"><span class="more">'+
           (before?'':'<button class="iconbtn'+(st==="doing"?' on':'')+'" data-act="doing" data-id="'+c.id+'" data-sid="'+s.id+'">In progress</button><button class="iconbtn" data-act="na" data-id="'+c.id+'" data-sid="'+s.id+'">'+(st==="na"?"Needed":"Not needed")+'</button><button class="iconbtn" data-act="note" data-k="'+esc(nk)+'">Note</button>')+
+          (s.extra&&!editing?'<button class="iconbtn" data-act="xstep-edit" data-id="'+c.id+'" data-sid="'+s.id+'">Rename</button><button class="iconbtn" data-act="xstep-del" data-id="'+c.id+'" data-sid="'+s.id+'">Delete</button>':'')+
         '</span><label class="ownsel'+(own!==s.o?' set':'')+'" title="Who does this step for '+esc(c.name)+'"><span class="own '+own+'"><i>'+OWNERS[own].i+'</i>'+esc(ownerName(c,own))+'</span>'+
         '<select data-act="setowner" data-id="'+c.id+'" data-sid="'+s.id+'" aria-label="Who does this step">'+
           Object.keys(OWNERS).map(k=>'<option value="'+k+'"'+(k===own?' selected':'')+'>'+esc(ownerName(c,k))+'</option>').join("")+
@@ -1985,6 +2003,7 @@ function phaseBlock(c,p,pi,i){
       '</li>';
     });
     h += '</ul>';
+    if(!before) h += '<div class="xadd"><button class="linkbtn" data-act="xstep-add" data-id="'+c.id+'" data-pid="'+p.id+'">+ Add a step for '+esc(c.name)+'</button></div>';
     const critOpen = stepsFor(c,p).filter(s=>isCritOpen(c,s)).length;
     h += '<div class="gate'+(closed?' closed':'')+'"><span class="g"><b>Gate</b>'+(before?'Treated as closed — this client started tracking further along.':esc(p.gate))+'</span>'+
       (before ? reopenStartBtn(c,p) : closed
@@ -2286,12 +2305,19 @@ document.addEventListener("click", e=>{
       return;
     }
     case "tick": {
-      if(!c) return; const s = phasesFor(c).flatMap(p=>p.steps).find(x=>x.id===t.dataset.sid);
+      if(!c) return; const s = phasesFor(c).flatMap(p=>stepsFor(c,p)).find(x=>x.id===t.dataset.sid); if(!s) return;
       const st = stepStatus(c,s);
       setStep(c, s.id, st==="done" ? "" : "done"); return render(true);
     }
     case "doing": { if(!c) return; const st=c.hub&&c.hub.steps[t.dataset.sid]; setStep(c,t.dataset.sid, st&&st.s==="doing"?"":"doing"); return render(true); }
     case "na": { if(!c) return; const st=c.hub&&c.hub.steps[t.dataset.sid]; setStep(c,t.dataset.sid, st&&st.s==="na"?"":"na"); return render(true); }
+    case "xstep-add": { if(!c) return; const h=ensureHub(c), pid=t.dataset.pid, id=pid+"-c"+Date.now().toString(36);
+      h.extra=h.extra||{}; (h.extra[pid]=h.extra[pid]||[]).push({id, t:"", o:"nikki"});
+      S.xEdit=id; S.open[c.id+":"+pid]=true; render(true); focusXstep(id); return; }
+    case "xstep-edit": S.xEdit=t.dataset.sid; render(true); focusXstep(t.dataset.sid); return;
+    case "xstep-del": { if(!c) return; const f=findExtra(c,t.dataset.sid); if(!f) return;
+      if(!confirm('Delete "'+f.x.t+'" from '+c.name+'?\n\nIt only exists on this client, so it goes for good, with any tick or note on it.')) return;
+      dropExtra(c,t.dataset.sid); touch(c); return render(true); }
     case "info": S.infoOpen[t.dataset.k]=!S.infoOpen[t.dataset.k]; return render(true);
     case "note": S.noteOpen[t.dataset.k]=!S.noteOpen[t.dataset.k]; render(true);
       { const ta=document.querySelector('textarea[data-sid="'+t.dataset.k.split(":")[1]+'"]'); if(ta) ta.focus(); } return;
@@ -2328,6 +2354,8 @@ document.addEventListener("change", e=>{
   const t=e.target;
   if(t.dataset.act==="setowner"){
     const c=byId(t.dataset.id); if(!c) return;
+    const xf=findExtra(c,t.dataset.sid);
+    if(xf){ if(t.value!=="__reset") xf.x.o=t.value; if(c.hub.steps[t.dataset.sid]) delete c.hub.steps[t.dataset.sid].o; touch(c); return render(true); }
     const h=ensureHub(c), sid=t.dataset.sid, rec=Object.assign({}, h.steps[sid]||{});
     if(t.value==="__reset") delete rec.o; else rec.o=t.value;
     if(Object.keys(rec).length) h.steps[sid]=rec; else delete h.steps[sid];
@@ -2363,6 +2391,21 @@ document.addEventListener("change", e=>{
   render(true);
   refocusField(t.dataset.id, t.dataset.field);
 });
+/* A step added on one client: Enter or leaving the box saves it, Escape backs out, and a
+   brand-new step left empty is thrown away rather than saved as a blank line. */
+function focusXstep(sid){ const el=document.querySelector('input[data-act="xstep-t"][data-sid="'+sid+'"]'); if(el){ el.focus(); el.select(); } }
+function commitXstep(el, cancel){
+  if(S.xEdit!==el.dataset.sid) return;
+  const c=byId(el.dataset.id), f=c&&findExtra(c,el.dataset.sid); S.xEdit=null;
+  if(!f) return render(true);
+  const v=el.value.trim();
+  if(!cancel && v){ if(v!==f.x.t){ f.x.t=v; touch(c); } }
+  else if(!f.x.t){ dropExtra(c,f.x.id); if(!c.hub.extra||!Object.keys(c.hub.extra).length) delete c.hub.extra; }
+  render(true);
+}
+document.addEventListener("focusout", e=>{ const t=e.target; if(t.dataset && t.dataset.act==="xstep-t") commitXstep(t); });
+document.addEventListener("keydown", e=>{ const t=e.target; if(!t.dataset || t.dataset.act!=="xstep-t") return;
+  if(e.key==="Enter"){ e.preventDefault(); commitXstep(t); } else if(e.key==="Escape"){ e.preventDefault(); commitXstep(t,true); } });
 /* "toggle" does not bubble, so this listens in the capture phase. */
 (function(){ const el=$("who"); if(!el) return; el.value=who(); el.addEventListener("change", ()=>{ try{ localStorage.setItem(WHO_KEY, el.value); }catch(_){} }); })();
 document.addEventListener("toggle", e=>{ const d=e.target; if(d && d.dataset && d.dataset.fold) S.foldOpen[d.dataset.fold]=d.open; }, true);
