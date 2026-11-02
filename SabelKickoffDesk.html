@@ -114,6 +114,12 @@ header .sub{font-size:13px;color:var(--muted);margin-top:4px}
 .side input.q:focus{outline:none;border-color:var(--red)}
 .side .list{max-height:calc(100vh - 250px);overflow:auto}
 .cl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.cl{position:relative}
+.cl .nabtn{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--code);font-size:10.5px;padding:2px 8px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--body);cursor:pointer}
+.cl:hover .nabtn,.cl .nabtn:focus-visible{display:block} .cl .nabtn:hover{border-color:var(--muted)}
+.narow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;border:1px solid var(--border);border-radius:7px;padding:9px 12px;margin:10px 0;font-size:12.5px;color:var(--muted)}
+.narow b{color:var(--body)} .narow .f2{flex:1 1 220px;min-width:0}
+.narow .f2 textarea{display:block;width:100%;box-sizing:border-box;background:var(--field);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--body);font:inherit;min-height:34px;height:34px}
 .cl:hover{background:var(--card2)} .cl.on{background:var(--sel);border-left:3px solid var(--red);padding-left:9px}
 .cl .n{font-size:14.5px;color:var(--w);font-weight:600;grid-column:1}
 .cl .m{font-size:12px;color:var(--mono);grid-column:1}
@@ -536,7 +542,8 @@ var VIEWS=[
   {k:'kickoff',label:'Scoping + Onboarding',tip:'Default: every client the portal has not yet marked Active'},
   {k:'Discovery'},{k:'Onboarding'},{k:'Active'},{k:'Offboarding'},{k:'Outreach'},{k:'Complete'},
   {k:'none',tip:'Kick-off records with no matching client in the portal: manual adds, or a name the portal spells differently'},
-  {k:'all',label:'All'}
+  {k:'all',label:'All',tip:'Every client except those marked N/A'},
+  {k:'na',label:'N/A',tip:'Kick-off not required, for example it was done on the older manual form. Nothing is deleted, and Restore puts a client back.'}
 ];
 var VIEW_KEY='sabel_kickoff_view', VIEW='kickoff';
 try{ var sv=localStorage.getItem(VIEW_KEY); if(sv&&VIEWS.some(function(v){return v.k===sv;})) VIEW=sv; }catch(e){}
@@ -869,8 +876,14 @@ function readiness(r){
 function stageOf(c){ if(!c||!c.portal) return 'none'; return STAGE_ORDER.indexOf(c.portal.stage)>-1?c.portal.stage:'Onboarding'; }
 function stageIndex(c){ var s=stageOf(c); return s==='none'?STAGE_ORDER.length:STAGE_ORDER.indexOf(s); }
 function listable(c){ return !!c.portal||has(c.id); }   /* not in the portal and no record here: nothing to list */
+/* Kick-off not required: stays on the record as notRequired {at,note}, so the client leaves every
+   view except N/A and nothing they already have is lost. */
+function isNA(c){ return !!(c&&has(c.id)&&STORE.clients[c.id].notRequired); }
+function viewOf(c){ return isNA(c)?'na':listable(c)?stageOf(c):'all'; }
 function inView(c,k){
   if(!listable(c)) return false;
+  if(k==='na') return isNA(c);
+  if(isNA(c)) return false;
   var s=stageOf(c);
   if(k==='all') return true;
   if(k==='kickoff') return s==='Discovery'||s==='Onboarding';
@@ -905,6 +918,34 @@ function setStage(id,stage,sel){
     if(sel){ sel.value=was; sel.disabled=false; } if(wrap) wrap.classList.remove('busy');
   });
 }
+function clientById(id){ return CLIENTS.filter(function(x){return x.id===id;})[0]; }
+function markNA(id,on){
+  var c=clientById(id), fresh=!has(id), r=rec(id);
+  if(fresh) r.name=c?c.name:id;
+  if(on) r.notRequired={at:new Date().toISOString().slice(0,10),note:''};
+  else { delete r.notRequired; prefill(id,false); }
+  r.updated=new Date().toISOString();   /* saveStore only stamps the open record, and this may be another one */
+}
+function setNotRequired(id,on,ev){
+  if(ev) ev.stopPropagation();
+  markNA(id,on); saveStore(); build(); renderList(); if(id===CUR) renderRec();
+}
+/* For the stages where kick-offs are long past. Never offered on Scoping + Onboarding, where they are being set up. */
+var BULK_NA=['Active','Offboarding','Outreach','Complete','none'];
+function bulkNACands(){ return CLIENTS.filter(function(c){ return inView(c,VIEW)&&!(has(c.id)&&STORE.clients[c.id].callDone); }); }
+function bulkNA(){
+  var list=bulkNACands(); if(!list.length) return;
+  var names=list.map(function(c){return c.name;});
+  if(!confirm('Mark '+list.length+' client'+(list.length===1?'':'s')+' as kick-off not required?\n\n'+names.slice(0,25).join(', ')+(names.length>25?' and '+(names.length-25)+' more':'')+'\n\nClients with a held kick-off stay listed. Nothing is deleted, and any of these can be restored from the N/A list.')) return;
+  list.forEach(function(c){ markNA(c.id,true); });
+  saveStore(); build(); renderList(); if(CUR) renderRec();
+}
+function copyLink(btn){
+  var url=BASE+'SabelKickoffDesk.html#'+CUR;
+  function done(){ var t=btn.textContent; btn.textContent='Link copied'; setTimeout(function(){ btn.textContent=t; },1800); }
+  if(navigator.clipboard) navigator.clipboard.writeText(url).then(done).catch(function(){ prompt('Copy this link',url); });
+  else prompt('Copy this link',url);
+}
 function kickState(c){ var r=has(c.id)?STORE.clients[c.id]:null; return !r?'new':(r.callDone?'held':'prep'); }
 function setView(k){ VIEW=k; try{ localStorage.setItem(VIEW_KEY,k); }catch(e){} renderList(); var l=document.getElementById('list'); if(l) l.scrollTop=0; }
 function renderStages(){
@@ -919,7 +960,9 @@ function renderStages(){
   });
   var held=0, prep=0, fresh=0;
   CLIENTS.forEach(function(c){ if(!inView(c,VIEW)) return; var k=kickState(c); if(k==='held') held++; else if(k==='prep') prep++; else fresh++; });
-  h+='<span class="sum"><b>'+held+'</b> kick-off'+(held===1?'':'s')+' held · <b>'+prep+'</b> in prep · <b>'+fresh+'</b> not started</span>';
+  if(VIEW!=='na') h+='<span class="sum"><b>'+held+'</b> kick-off'+(held===1?'':'s')+' held · <b>'+prep+'</b> in prep · <b>'+fresh+'</b> not started</span>';
+  var bulk=BULK_NA.indexOf(VIEW)>-1?bulkNACands().length:0;
+  if(bulk) h+='<button type="button" class="stg" onclick="bulkNA()" title="Everyone in this view without a held kick-off moves to N/A">Mark '+bulk+' as N/A</button>';
   el.innerHTML=h;
 }
 function renderList(){
@@ -931,16 +974,20 @@ function renderList(){
     if(q&&c.name.toLowerCase().indexOf(q)<0) return;
     var s=stageOf(c), r=has(c.id)?STORE.clients[c.id]:null, pill, meta;
     if(multi&&s!==last){ h+='<div class="grp"><i style="background:'+stageDot(s)+'"></i>'+STAGE_LABEL[s]+'</div>'; last=s; }
-    if(!r){ pill='<span class="r">new</span>'; meta='not started'; }
+    var nabtn='';
+    if(isNA(c)){ nabtn='<button type="button" class="nabtn" onclick="setNotRequired(\''+c.id+'\',false,event)">Restore</button>'; }
+    else if(!r||!r.callDone) nabtn='<button type="button" class="nabtn" onclick="setNotRequired(\''+c.id+'\',true,event)" title="Kick-off not required: move to N/A">N/A</button>';
+    if(isNA(c)){ pill='<span class="r">n/a</span>'; meta='Not required'+(r.notRequired.note?' · '+esc(r.notRequired.note):''); }
+    else if(!r){ pill='<span class="r">new</span>'; meta='not started'; }
     else if(r.callDone){ pill='<span class="r d">✓ held</span>'; meta='Kick-off '+(fmt(r.callDate)||'held'); }
     else { var rd=readiness(r); pill='<span class="r '+(rd.n===9?'g':'a')+'">'+rd.n+'/'+rd.of+'</span>'; meta=r.timeline.kickoff?('Kick-off '+fmt(r.timeline.kickoff)):'kick-off date not set'; }
-    h+='<div class="cl'+(CUR===c.id?' on':'')+'" onclick="openClient(\''+c.id+'\')"><div class="n">'+esc(c.name)+'</div><div class="m"><span class="sd" style="background:'+stageDot(s)+'"></span>'+meta+'</div>'+pill+'</div>';
+    h+='<div class="cl'+(CUR===c.id?' on':'')+'" onclick="openClient(\''+c.id+'\')"><div class="n">'+esc(c.name)+'</div><div class="m"><span class="sd" style="background:'+stageDot(s)+'"></span>'+meta+'</div>'+pill+nabtn+'</div>';
     shown++;
   });
   if(!shown){
     var other=q?CLIENTS.filter(function(c){ return listable(c)&&!inView(c,VIEW)&&c.name.toLowerCase().indexOf(q)>-1; }):[];
     h='<div class="empty" style="padding:12px">'+(q?'Nothing in this view matches.':'No clients at this stage.')+
-      (other.length?'<br>In other stages: '+other.slice(0,5).map(function(c){ return '<a href="#" onclick="setView(\''+stageOf(c)+'\');openClient(\''+c.id+'\');return false">'+esc(c.name)+'</a> ('+STAGE_LABEL[stageOf(c)]+')'; }).join(', '):'')+'</div>';
+      (other.length?'<br>In other stages: '+other.slice(0,5).map(function(c){ return '<a href="#" onclick="setView(\''+viewOf(c)+'\');openClient(\''+c.id+'\');return false">'+esc(c.name)+'</a> ('+(isNA(c)?'N/A':STAGE_LABEL[stageOf(c)])+')'; }).join(', '):'')+'</div>';
   }
   var cn=document.getElementById('curname'); if(cn){ var cc=CLIENTS.filter(function(x){return x.id===CUR;})[0]; cn.textContent=cc?cc.name:(has(CUR)?(STORE.clients[CUR].name||CUR):''); }
   document.getElementById('list').innerHTML=h;
@@ -1192,6 +1239,7 @@ function renderRec(){
 
   /* header */
   h+='<div class="rhead"><div class="row"><h2>'+esc(r.name||b.shortName||CUR)+'</h2>'+stageBadge(c)+'<span class="spacer"></span>'+
+     '<button class="btn hideP" onclick="copyLink(this)" title="A direct link to this client\'s kick-off, to share with the team">Copy link</button>'+
      '<button class="btn hideP" onclick="prefill(CUR,true);saveStore();renderRec()">Refresh from Notion</button>'+
      '<button class="btn hideP" onclick="showJSON()">Copy JSON</button>'+
      '<button class="btn hideP" onclick="showImport()">Import JSON</button>'+
@@ -1204,11 +1252,13 @@ function renderRec(){
   if(b.intercomSow) links.push('<a href="'+esc(b.intercomSow)+'" target="_blank">Intercom SOW</a>');
   if(r.seeded) links.push('<span class="hideP">seeded: '+esc(r.seeded)+'</span>');
   if(links.length) h+='<div class="links">'+links.join('')+'</div>';
-  h+='<div class="ready"><span>Ready for the call</span><div class="bar"><i style="width:'+Math.round(rd.n/rd.of*100)+'%"></i></div><b>'+rd.n+'/'+rd.of+'</b>'+(rd.miss.length?'<span class="miss">still needs: '+esc(rd.miss.join(', '))+'</span>':'<span style="color:var(--green)">all set</span>')+'</div>';
+  if(r.notRequired) h+='<div class="narow"><b>Kick-off not required</b><span>marked '+esc(fmt(r.notRequired.at))+'</span><span class="f2">'+inp('notRequired.note',r.notRequired.note||'',{ph:'Why, for example done on the older manual form'})+'</span><button class="btn sm" onclick="setNotRequired(CUR,false)">Restore</button></div>';
+  else h+='<div class="ready"><span>Ready for the call</span><div class="bar"><i style="width:'+Math.round(rd.n/rd.of*100)+'%"></i></div><b>'+rd.n+'/'+rd.of+'</b>'+(rd.miss.length?'<span class="miss">still needs: '+esc(rd.miss.join(', '))+'</span>':'<span style="color:var(--green)">all set</span>')+'</div>';
   h+='<div class="callrow"><label><input type="checkbox" data-p="callDone"'+(r.callDone?' checked':'')+'> Kick-off call held</label>'+
      '<span style="color:var(--mono)">on</span><span style="display:inline-block;width:190px">'+dateField('callDate',r.callDate,' style="background:var(--field);border:1px solid var(--border);border-radius:6px 0 0 6px;padding:4px 8px;color:var(--body)"')+'</span>'+
      (r.summaryAt?'<span style="color:var(--mono)">· summary last exported '+esc(r.summaryAt.slice(0,10))+'</span>':'')+
      '<span class="spacer"></span><span class="saved" id="savedStamp"></span>'+
+     (r.notRequired||r.callDone?'':'<button class="btn sm hideP" onclick="setNotRequired(CUR,true)" title="Moves this client to the N/A list. Nothing is deleted.">Kick-off not required</button>')+
      '<button class="btn danger sm hideP" onclick="removeRecord()">Remove record</button></div></div>';
 
   /* 00 what we know: eight tiles, each reviewed, edited if needed and ticked as confirmed */
@@ -1683,12 +1733,14 @@ function loadAll(){
     fetchJSON(API+'?key='+PORTAL_KEY+'&_t='+Date.now()).then(function(j){ var d=j&&(j.data||j.value); PORTAL=(d&&d.clients)||[]; if(PORTAL.length) LIVE.ok++; else LIVE.err.push('client portal'); })
   ]).then(function(){ LIVE.at=new Date(); build(); banners(); renderList(); setStamp(); });
 }
+/* A shared link pasted into a tab that already has the desk open. */
+window.addEventListener('hashchange',function(){ var id=(location.hash||'').replace('#',''), c=clientById(id); if(c&&id!==CUR){ if(!inView(c,VIEW)) VIEW=viewOf(c); openClient(id); } });
 applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'light':'dark');
 loadLocal(); renderRec();
 if(DEMO){ STORE.clients.demo=demoRecord(); build(); renderList(); openClient('demo'); setView('all'); }
 probeStore().then(loadAll).then(function(){
   if(DEMO){ STORE.clients.demo=demoRecord(); build(); renderList(); openClient('demo'); return; }
-  var hash=(location.hash||'').replace('#',''); if(hash&&CLIENTS.some(function(c){return c.id===hash;})){ openClient(hash); var hc=CLIENTS.filter(function(c){return c.id===hash;})[0]; if(hc&&!inView(hc,VIEW)) setView(listable(hc)?stageOf(hc):'all'); }
+  var hash=(location.hash||'').replace('#',''); if(hash&&CLIENTS.some(function(c){return c.id===hash;})){ openClient(hash); var hc=CLIENTS.filter(function(c){return c.id===hash;})[0]; if(hc&&!inView(hc,VIEW)){ VIEW=viewOf(hc); renderList(); } }
   try{ if(sessionStorage.getItem('kickoff_present')==='1'&&CUR) setPresent(true); }catch(e){}
 });
 </script>
