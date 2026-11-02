@@ -567,6 +567,9 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
   <h3>Project types</h3>
   <p><b>Build</b> (an Intercom build, no migration), <b>Migration</b> (data in, no build), <b>Build + Migration</b> (both), <b>Audit</b>, and <b>Consultation only</b> (hours of advice, no delivery journey; its date on the Board is the next check-in, set in Details). The type picks which gate list the client follows.</p>
 
+  <h3>Flownetic projects</h3>
+  <p>Greg's own projects, run through Sabel. Set "Delivered by" to Flownetic in Details. Greg manages them, so there is no tracker and no data to fill in: the steps are the Slack thread, Rocketlane and a weekly update that opens again every Monday. If the type is Migration or Build + Migration, Richard is doing migration work and the migration gates apply too. Taking the mark off puts the client back as they were.</p>
+
   <h3>On hold</h3>
   <p>"Park" on the Board and "Put on hold" on the client are the same thing. A held client leaves the Board and the Today list, keeps everything recorded, and comes back with "Resume". Always give a reason and a check-back date.</p>
 
@@ -608,6 +611,7 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
     <div class="form">
       <label class="full">Client name<input id="add-name" required list="notion-names" autocomplete="off"></label>
       <datalist id="notion-names"></datalist>
+      <label class="full">Delivered by<select id="add-partner"><option value="">Sabel</option><option value="flownetic">Flownetic (Greg)</option></select><span class="fnote">For Flownetic, choose a migration type only if Richard is doing migration work.</span></label>
       <label>Starting point<select id="add-stage"><option value="Discovery">Scoping, proposal out</option><option value="Onboarding">Signed, start at Day 0</option></select></label>
       <label>Tier<select id="add-tier"><option value="">Not set</option><option>Light</option><option>Standard</option><option>Enterprise</option></select></label>
       <label>Project type<select id="add-type"><option value="full">Full project</option><option value="build">Build only</option><option value="migration">Migration only</option><option value="audit">Audit only</option></select></label>
@@ -982,11 +986,27 @@ const CONSULT_PHASES = [
   ["nikki","Slack channel archived"]]}
 ];
 CONSULT_PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], t:s[1], tag:""})); });
+/* Flownetic: Greg's own projects, run through Sabel. He manages them, with no tracker and none of the
+   usual record. Nikki sets up the thread and Rocketlane, then does the weekly update. If Richard is
+   doing migration work (type Migration or Build + Migration) the migration gates follow the set-up
+   gate, and the weekly update sits on whichever gate is current. */
+const FLOWNETIC_PHASES = [
+ {id:"f0", code:"F1", when:"On signing", name:"Set-up", gate:"Thread open, Rocketlane correct.", steps:[
+  ["nikki","Set up a thread in our Slack DMs for weekly updates"],
+  ["nikki","Set the correct dates in Rocketlane and assign Greg as the partner contact"]]},
+ {id:"f1", code:"F2", when:"Until the project ends", name:"Weekly updates", gate:"The project has finished. Greg manages everything else.", steps:[
+  ["nikki","Weekly update"]]}
+];
+FLOWNETIC_PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], t:s[1], tag:""})); });
+const FLOWNETIC_MIGRATION_PHASES = [FLOWNETIC_PHASES[0]].concat(MIGRATION_PHASES);
+const WEEKLY_STEP = "f1-0";
+function isFlownetic(c){ return c.partner==="flownetic"; }
+function hasMigration(c){ return ["migration","full"].includes(projectType(c)); }
 /* Migration clients set up on the 12-gate list before 22 Sep 2026 land on the matching migration gate. */
 const P_TO_M = {p0:"m0",p1:"m1",p2:"m2",p3:"m2",p4:"m2",p5:"m2",p6:"m3",p7:"m3",p8:"m3",p9:"m4",p10:"m4",p11:"m4"};
 function phasesForType(t){ return t==="audit" ? AUDIT_PHASES : t==="migration" ? MIGRATION_PHASES : t==="consult" ? CONSULT_PHASES : PHASES; }
-function phasesFor(c){ return phasesForType(projectType(c)); }
-function startFor(t,pid){ const L=phasesForType(t); if(L.some(p=>p.id===pid)) return pid; if(t==="migration" && P_TO_M[pid]) return P_TO_M[pid]; return L[0].id; }
+function phasesFor(c){ return isFlownetic(c) ? (hasMigration(c) ? FLOWNETIC_MIGRATION_PHASES : FLOWNETIC_PHASES) : phasesForType(projectType(c)); }
+function startFor(t,pid){ if(pid==="f0"||pid==="f1") return pid; const L=phasesForType(t); if(L.some(p=>p.id===pid)) return pid; if(t==="migration" && P_TO_M[pid]) return P_TO_M[pid]; return L[0].id; }
 function pidxOf(c,pid){ const L=phasesFor(c); if(projectType(c)==="migration" && P_TO_M[pid]) pid=P_TO_M[pid]; for(let i=0;i<L.length;i++){ if(L[i].id===pid) return i; } return 0; }
 
 /* ---------- standard checklists: the defaults above plus edits made on the Checklists page ----------
@@ -997,7 +1017,7 @@ const CRIT_DEFAULT = new Set(["p0-1","p0-5","p0-6","p0-7","p0-8","p0-9","p0-10",
   "a0-2","a0-3","a0-4","a1-0","a1-2"]);
 /* Gates that come before the first client session: kickoff, the discovery workshop, or the migration run. */
 const PRE_KICKOFF = {p0:1,p1:1,p2:1, m0:1,m1:1,m2:1, a0:1,a1:1};
-const LISTS = [["main","Build and Build + Migration",PHASES],["migration","Migration",MIGRATION_PHASES],["audit","Audit",AUDIT_PHASES],["consult","Consultation only",CONSULT_PHASES]];
+const LISTS = [["main","Build and Build + Migration",PHASES],["migration","Migration",MIGRATION_PHASES],["audit","Audit",AUDIT_PHASES],["consult","Consultation only",CONSULT_PHASES],["flownetic","Flownetic (Greg)",FLOWNETIC_PHASES]];
 const BASE = {};
 LISTS.forEach(([,,L])=>L.forEach(p=>{
   p.steps.forEach(s=>{ s.crit=CRIT_DEFAULT.has(s.id); s.info=STEP_INFO[s.id]||null; if(s.tag==="mo"){ s.hide=true; s.tag=""; } });   /* migration-only steps now live in the migration list */
@@ -1047,7 +1067,7 @@ const WHO_KEY = "sabel-ops-who";
 function who(){ try{ return localStorage.getItem(WHO_KEY) || "Nikki"; }catch(_){ return "Nikki"; } }
 /* Plain words for the record fields a change log line can carry. */
 const FIELD_LABEL = {stage:"stage", stageManual:"stage", type:"type", owner:"lead", tier:"tier", hold:"on hold", goLiveDate:"go-live", goLiveSource:"go-live", day30Date:"Day-30",
-  signedDate:"signed date", proposalSent:"proposal date", contactName:"contact", contactEmail:"contact", trackerKey:"tracker key", slackChannel:"Slack channel", intake:"came via", outreach:"sales follow-up", notes:"notes", "*":"added the client"};
+  signedDate:"signed date", proposalSent:"proposal date", contactName:"contact", contactEmail:"contact", trackerKey:"tracker key", slackChannel:"Slack channel", intake:"came via", outreach:"sales follow-up", notes:"notes", partner:"delivered by", "*":"added the client"};
 const S = {
   portal:null, notion:[], reg:[], kickoff:{}, trk:{},
   loaded:{portal:false,notion:false,reg:false,kick:false}, errors:{},
@@ -1133,7 +1153,9 @@ function normaliseTypes(){
 }
 function stepsFor(c, p){
   const t = projectType(c);
+  const weekly = isFlownetic(c) && hasMigration(c) && hasHub(c) && p.id!=="f0" && (phasesFor(c)[curIdx(c)]||{}).id===p.id ? FLOWNETIC_PHASES[1].steps : [];
   return p.steps.filter(s => !s.tag || (s.tag==="b" && t!=="migration") || (s.tag==="m" && t!=="build") || (s.tag==="mo" && t==="migration"))
+    .concat(weekly)
     .concat(extraSteps(c,p.id).map(x=>({id:x.id, o:OWNERS[x.o]?x.o:"nikki", t:x.t, tag:"", crit:false, info:null, extra:true})));
 }
 /* Steps added on one client's page only, kept on the record at hub.extra = {<phase>:[{id,t,o}]}.
@@ -1148,7 +1170,9 @@ function hasHub(c){ return !!(c.hub && c.hub.v); }
 function startIdx(c){ return hasHub(c) ? pidxOf(c, c.hub.startPhase) : 0; }
 function gateClosed(c,pid){ return pidxOf(c,pid) < startIdx(c) || !!(c.hub && c.hub.gates && c.hub.gates[pid]); }
 function curIdx(c){ const L=phasesFor(c); for(let i=startIdx(c); i<L.length; i++){ if(!gateClosed(c,L[i].id)) return i; } return L.length; }
-function stepStatus(c,s){ const st=c.hub && c.hub.steps && c.hub.steps[s.id]; return st ? st.s : ""; }
+/* The weekly update opens again every Monday, so a tick only counts for the week it was made in. */
+function weekStart(){ const t=today(), n=(new Date(t+"T00:00:00").getDay()+6)%7; return addDays(t,-n); }
+function stepStatus(c,s){ const st=c.hub && c.hub.steps && c.hub.steps[s.id]; if(st && s.id===WEEKLY_STEP && st.s==="done" && (st.at||"")<weekStart()) return ""; return st ? st.s : ""; }
 /* Owners come from the framework step list, not the tracker. A client can override any of them. */
 function stepOwner(c,s){ const r=c.hub && c.hub.steps && c.hub.steps[s.id]; return (r && r.o && OWNERS[r.o]) ? r.o : s.o; }
 function phaseCounts(c,p){
@@ -1180,6 +1204,7 @@ function band(c){
   if(c.stage==="Discovery") return "scoping";
   if(c.stage==="Complete") return "closed";
   if(!hasHub(c)) return c.stage==="Offboarding" ? "closing" : "setup";
+  if(isFlownetic(c)) return curIdx(c)>=phasesFor(c).length ? "closed" : "flownetic";
   if(projectType(c)==="audit") return curIdx(c)>=AUDIT_PHASES.length ? "closed" : "audit";
   if(projectType(c)==="consult") return curIdx(c)>=CONSULT_PHASES.length ? "closed" : "consult";
   if(projectType(c)==="migration"){ const m=curIdx(c); return m<=2 ? "onboarding" : m===3 ? "migration" : m===4 ? "closing" : "closed"; }
@@ -1188,7 +1213,7 @@ function band(c){
 }
 const BANDS = [
   ["scoping","Scoping"],["setup","Not set up in the hub"],["audit","Audit"],["onboarding","Onboarding · S0"],["build","Build · S1 to S5"],["migration","Migration run"],
-  ["golive","UAT and go-live"],["stabilise","Stabilise and Day-30"],["consult","Consultation"],["hold","On hold"],["closing","Closing"],["closed","Closed"]
+  ["golive","UAT and go-live"],["stabilise","Stabilise and Day-30"],["consult","Consultation"],["flownetic","Flownetic (Greg)"],["hold","On hold"],["closing","Closing"],["closed","Closed"]
 ];
 function inDelivery(c){ return hasHub(c) && !["scoping","closed","hold","sales"].includes(band(c)); }
 
@@ -1212,7 +1237,7 @@ function trackerSummary(d){
 
 /* ---------- warnings ---------- */
 function warnings(c){
-  const w=[]; if(["Discovery","Complete","Outreach"].includes(c.stage)) return w;
+  const w=[]; if(["Discovery","Complete","Outreach"].includes(c.stage) || isFlownetic(c)) return w;
   const n=notionFor(c), tk=trackerKeyFor(c), td=tk && S.trk[tk];
   if(S.loaded.notion && !n) w.push(["Not linked to a Notion project","Link it in Details so hours, scope and SOW links show."]);
   if(n && !n.sabelDoc && !n.intercomSow) w.push(["No SOW link in Notion","Add the Sabel doc or Intercom SOW link to the Notion project."]);
@@ -1343,9 +1368,11 @@ const BOARD_GROUPS=[
   {k:"later",   label:"Later",             tone:"var(--good)",   hint:""},
   {k:"past",    label:"Date has passed",   tone:"var(--muted)",  hint:"close off or move the date"},
   {k:"consult", label:"Consultation only", tone:"var(--info)",   hint:"the date is the next check-in, set in Details"},
+  {k:"flownetic", label:"Flownetic (Greg)", tone:"var(--info)", hint:"Greg manages these, so there is no tracker"},
   {k:"none",    label:"No go-live set",    tone:"var(--faint)",  hint:"set a date in the tracker, or here if there is no tracker"}
 ];
 function boardGroup(r){
+  if(isFlownetic(r.c)) return "flownetic";
   if(r.type==="consult") return "consult";
   if(r.days===null) return "none";
   if(r.days<0) return "past";
@@ -1375,7 +1402,7 @@ function boardRowHTML(r){
   const fill = r.pct<25?"var(--accent)":r.pct<70?"var(--info)":"var(--good)";
   const prog = r.has
     ? '<span class="bar"><i style="width:'+r.pct+'%;background:'+fill+'"></i></span><span class="pt"><b>'+r.pct+'%</b> <span>'+r.done+'/'+r.total+'</span></span>'
-    : '<span class="bar"></span><span class="pt"><span>'+(r.tk?"Not started":"No tracker")+'</span></span>';
+    : '<span class="bar"></span><span class="pt"><span>'+(isFlownetic(c)?"Greg manages":r.tk?"Not started":"No tracker")+'</span></span>';
   let open="";
   if(r.has){
     if(r.overdue) open+='<span class="oc od">'+r.overdue+' overdue</span>';
@@ -1565,11 +1592,27 @@ function syncStage(c){
   const i=curIdx(c);
   const L=phasesFor(c);
   const want = i>=L.length ? "Complete"
+    : isFlownetic(c) ? (hasMigration(c) ? (L[i].id==="m4" ? "Offboarding" : L[i].id==="m3" ? "Active" : "Onboarding") : (i>=1 ? "Active" : "Onboarding"))
     : projectType(c)==="audit" ? (i>=2 ? "Active" : "Onboarding")
     : projectType(c)==="migration" ? (i===4 ? "Offboarding" : i>=3 ? "Active" : "Onboarding")
     : i===11 ? "Offboarding" : i>=6 ? "Active" : "Onboarding";
   if(c.stage!==want){ c.stage=want; return true; }
   return false;
+}
+/* Marking a client as Flownetic only changes which gates show. Ticks and closed gates stay on the
+   record, and the old starting gate is kept so taking the mark off puts the client back. */
+function applyPartner(c, on){
+  if(on){
+    const noType=!typeSet(c), h=ensureHub(c,"f0");
+    if(noType){ h.type="build"; c.type=OLD_TYPE.build; }
+    if(h.startPhase!=="f0" && h.startPhase!=="f1") h.startBefore=h.startPhase;
+    h.startPhase="f0"; c.partner="flownetic"; c.owner="Greg";
+  } else {
+    c.partner="";
+    if(c.hub){ c.hub.startPhase=startFor(projectType(c), c.hub.startBefore||""); delete c.hub.startBefore; }
+  }
+  if(!["Complete","Outreach"].includes(c.stage)) syncStage(c);
+  return ["partner","owner","type","stage"];
 }
 function setStep(c, sid, s){
   const h=ensureHub(c);
@@ -1699,7 +1742,7 @@ function clientCard(c){
   const late=n!==null&&n<0, soon=n!==null&&n>=0&&n<=3, blocked=!!(sum&&sum.blocked);
   const edge = late ? "late" : (soon||blocked) ? "soon" : "";
   const hours=(notionFor(c)&&notionFor(c).hours) || c.hours || "";
-  const meta=[TYPE_LABEL[projectType(c)], c.tier, c.owner].filter(Boolean).join(" · ");
+  const meta=(isFlownetic(c) ? ["Flownetic · Greg", hasMigration(c)?"with migration":""] : [TYPE_LABEL[projectType(c)], c.tier, c.owner]).filter(Boolean).join(" · ");
   const pc = x => (100*x/sum.total).toFixed(1)+"%";
   let h='<button class="ccard '+edge+'" data-act="open" data-id="'+c.id+'">'+
     '<div class="c1"><div style="min-width:0"><div class="nm">'+esc(c.name)+'</div><div class="meta">'+esc(meta||"No type set")+'</div></div>'+
@@ -1707,7 +1750,8 @@ function clientCard(c){
     '<div style="display:grid;gap:5px"><div class="segs">'+
       L.map((q,qi)=>'<i class="'+(gateClosed(c,q.id)?"done":qi===i?"cur":"")+'" title="'+esc(q.name)+'"></i>').join("")+
     '</div><div class="c2row"><b>'+(p?esc(p.name)+" · "+esc(p.code):"All gates closed")+'</b><span>'+(p?"Gate "+(i+1)+" of "+L.length:L.length+" of "+L.length)+'</span></div></div>';
-  if(S.prefs.cardDetail!=="compact"){
+  if(S.prefs.cardDetail!=="compact" && isFlownetic(c)) h += '<div class="c3"><div class="wait '+(w?w.cls:"")+'">'+esc(w?w.t:"Nothing open")+'</div></div>';
+  else if(S.prefs.cardDetail!=="compact"){
     h += '<div class="c3"><div style="display:grid;gap:4px;min-width:0">'+
       '<div class="wait '+(w?w.cls:"")+'">'+esc(w?w.t:"Nothing open")+'</div>'+
       '<div class="trk"><span class="bar">'+(sum?'<i style="width:'+pc(sum.done)+';background:var(--good)"></i><i style="width:'+pc(sum.prog)+';background:var(--warn)"></i>':'')+'</span>'+
@@ -1720,7 +1764,8 @@ const OV_GROUPS=[["Onboarding","Signed through blueprint",["onboarding","audit",
   ["Build and migration runs","S1 to S5",["build","migration"]],
   ["UAT and go-live","S6 to S7",["golive"]],
   ["Stabilise and Day-30","S8",["stabilise"]],
-  ["Closing","After Day 30",["closing"]]];
+  ["Closing","After Day 30",["closing"]],
+  ["Flownetic","Greg manages these",["flownetic"]]];
 function overviewView(){
   const raw=$("q")?$("q").value:"", q=norm(raw);
   let h=loadBanner()+'<div class="ov">';
@@ -1906,12 +1951,18 @@ function clientView(c){
   else if(hasHub(c)) chips.push('<span class="chip good">All gates closed</span>');
   else chips.push('<span class="chip">'+esc(c.stage==="Discovery"?"Scoping":c.stage)+'</span>');
   if(onHold(c)) chips.push('<span class="chip warn">On hold</span>');
-  chips.push('<span class="chip'+(c.tier?'':' warn')+'">'+esc(c.tier||"No tier")+'</span>');
-  chips.push('<span class="chip">'+esc(TYPE_LABEL[projectType(c)])+'</span>');
-  chips.push('<span class="chip">Lead: '+esc(c.owner||"not set")+'</span>');
+  if(isFlownetic(c)){
+    chips.push('<span class="chip">Flownetic · Greg manages</span>');
+    if(hasMigration(c)) chips.push('<span class="chip">Migration with Richard</span>');
+  } else {
+    chips.push('<span class="chip'+(c.tier?'':' warn')+'">'+esc(c.tier||"No tier")+'</span>');
+    chips.push('<span class="chip">'+esc(TYPE_LABEL[projectType(c)])+'</span>');
+    chips.push('<span class="chip">Lead: '+esc(c.owner||"not set")+'</span>');
+  }
   if(due) chips.push('<span class="duet '+dueClass(due)+'">Gate due '+esc(fmt(due))+' · '+esc(relDue(due))+'</span>');
   const kd = (l,d,extra)=>'<div><div class="l">'+l+'</div><div class="v">'+(d?esc(fmt(d)):'<span style="color:var(--faint)">not set</span>')+'</div><div class="c '+(extra?dueClass(d):'')+'">'+(d&&extra?esc(rel(d)):'&nbsp;')+'</div></div>';
-  const dates = projectType(c)==="migration" ? kd("Signed",c.signedDate)+kd("Go-live",c.goLiveDate,true)
+  const dates = isFlownetic(c) ? (hasMigration(c) ? kd("Signed",c.signedDate)+kd("Go-live",c.goLiveDate,true) : "")
+    : projectType(c)==="migration" ? kd("Signed",c.signedDate)+kd("Go-live",c.goLiveDate,true)
     : projectType(c)==="audit" ? kd("Signed",c.signedDate)+kd("Workshop",addDays(c.signedDate,14),true)
     : kd("Signed",c.signedDate)+kd("Kickoff",c.hub&&c.hub.kickoffDate,true)+kd("Go-live",c.goLiveDate,true)+kd("Day-30",c.day30Date,true);
   h += '<div class="chead"><div><h1>'+esc(c.name)+'</h1><div class="chips">'+chips.join("")+'</div>'+statusRow(c)+'</div>'+
@@ -1988,7 +2039,7 @@ function phaseBlock(c,p,pi,i){
         '<button class="tick'+(mine?' mine':'')+(st?' '+st:'')+'" data-act="tick" data-id="'+c.id+'" data-sid="'+s.id+'" aria-label="'+(st==="done"?"Mark not done":"Mark done")+': '+esc(s.t)+'"'+(before?' disabled':'')+'>'+tickSvg+'</button>'+
         (editing
           ? '<span class="tx"><input class="xstep-in" data-act="xstep-t" data-id="'+c.id+'" data-sid="'+s.id+'" value="'+esc(s.t)+'" placeholder="What needs doing for '+esc(c.name)+'?" aria-label="Step"></span>'
-          : '<span class="tx">'+esc(s.t)+(s.extra?'<span class="xonly" title="Added on this client only. It is not on the standard checklist.">This client</span>':'')+(s.crit&&!done?'<span class="crit'+(mine?' mine':'')+'">Critical</span>':'')+infoBtn(s,nk)+'</span>')+
+          : '<span class="tx">'+esc(s.t)+(s.extra?'<span class="xonly" title="Added on this client only. It is not on the standard checklist.">This client</span>':'')+(s.id===WEEKLY_STEP?'<span class="xonly" title="Opens again every Monday">Every week</span>':'')+(s.crit&&!done?'<span class="crit'+(mine?' mine':'')+'">Critical</span>':'')+infoBtn(s,nk)+'</span>')+
         '<span class="acts"><span class="more">'+
           (before?'':'<button class="iconbtn'+(st==="doing"?' on':'')+'" data-act="doing" data-id="'+c.id+'" data-sid="'+s.id+'">In progress</button><button class="iconbtn" data-act="na" data-id="'+c.id+'" data-sid="'+s.id+'">'+(st==="na"?"Needed":"Not needed")+'</button><button class="iconbtn" data-act="note" data-k="'+esc(nk)+'">Note</button>')+
           (s.extra&&!editing?'<button class="iconbtn" data-act="xstep-edit" data-id="'+c.id+'" data-sid="'+s.id+'">Rename</button><button class="iconbtn" data-act="xstep-del" data-id="'+c.id+'" data-sid="'+s.id+'">Delete</button>':'')+
@@ -1998,6 +2049,7 @@ function phaseBlock(c,p,pi,i){
           (own!==s.o?'<option value="__reset">Put back to '+esc(ownerName(c,s.o))+'</option>':'')+
         '</select></label></span>'+
         (rec.at && st && !before ? '<span class="when">'+esc({done:"Done",doing:"Started",na:"Marked not needed"}[st]||"")+' '+esc(fmt(rec.at))+'</span>' : '')+
+        (s.id===WEEKLY_STEP && rec.at && !st ? '<span class="when">Last done '+esc(fmt(rec.at))+'</span>' : '')+
         (S.noteOpen[nk] ? '<div class="note"><textarea data-act="note-text" data-id="'+c.id+'" data-sid="'+s.id+'" placeholder="Note for this step">'+esc(rec.note||"")+'</textarea></div>' : (rec.note?'<div class="note">'+esc(rec.note)+'</div>':''))+
         infoPanel(s,nk)+
       '</li>';
@@ -2036,7 +2088,34 @@ function refocusField(cid,f){
   el.focus({preventScroll:true});
   if(el.setSelectionRange && /^(text|email|url|search|tel)$/i.test(el.type||"")){ const n=el.value.length; try{ el.setSelectionRange(n,n); }catch(_){} }
 }
+/* Greg's projects carry none of the usual record, so this replaces the whole side column. */
+function flowneticAside(c){
+  const hub=c.hub||{}, mig=hasMigration(c), gl=trackerGoLive(c);
+  const slack = /^C[A-Z0-9]{6,}$/.test(c.slackChannel||"") ? SLACK+c.slackChannel : "";
+  const migUrl = PAGES+"SabelMigrationIntake.html?client="+encodeURIComponent(formSlugOf(c));
+  let h='<section class="panel"><div class="panel-h"><h3>Flownetic project</h3></div><div class="form">'+
+    '<p class="full" style="margin:0;font-size:13px;color:var(--muted)">'+(mig
+      ? 'Greg manages this project. Richard is doing migration work, so the migration checklist applies as well as the weekly update.'
+      : 'Greg manages this project. You set up the thread and Rocketlane, then do the weekly update. Nothing else is needed here.')+'</p>'+
+    '<label>Delivered by<select data-field="partner" data-id="'+c.id+'">'+optHtml(PARTNERS,c.partner||"")+'</select></label>'+
+    '<label>Project type<select data-field="hub.type" data-id="'+c.id+'">'+optHtml(Object.entries(TYPE_LABEL),projectType(c))+'</select><span class="fnote">Migration or Build + Migration when Richard is on it</span></label>'+
+    (mig ? '<label>Signed<input type="date" data-field="signedDate" data-id="'+c.id+'" value="'+esc(c.signedDate||"")+'"></label>'+
+      (gl ? '<label>Go-live<input type="date" value="'+esc(gl)+'" disabled title="Set in the client tracker"></label>' : '<label>Go-live<input type="date" data-field="goLiveDate" data-id="'+c.id+'" value="'+esc(c.goLiveDate||"")+'"></label>')+
+      '<label>Slack channel ID<input type="text" data-field="slackChannel" data-id="'+c.id+'" value="'+esc(c.slackChannel||"")+'" placeholder="C0…"></label>'+
+      '<label>Drive folder URL<input type="url" data-field="hub.driveUrl" data-id="'+c.id+'" value="'+esc(hub.driveUrl||"")+'"></label>' : '')+
+    '<label class="full">Notes<textarea data-field="notes" data-id="'+c.id+'">'+esc(c.notes||"")+'</textarea></label>'+
+    '<div class="full" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)"><span style="flex:1 1 100%">Saves as you type.</span>'+
+      (!onHold(c) && !["Complete","Outreach"].includes(c.stage) ? '<button class="btn sm" data-act="hold-edit" data-id="'+c.id+'">Put on hold</button>' : '')+
+      (hasHub(c) ? '<button class="btn sm" data-act="restart">Change starting gate</button>' : '')+'</div></div></section>';
+  if(mig) h+='<section class="panel"><div class="panel-h"><h3>Links</h3></div><ul class="links">'+
+    '<li class="'+(slack?'':'off')+'"><a href="'+esc(slack||"#")+'" target="_blank" rel="noopener"><span class="dot"></span>Slack channel</a></li>'+
+    '<li class="'+(hub.driveUrl?'':'off')+'"><a href="'+esc(hub.driveUrl||"#")+'" target="_blank" rel="noopener"><span class="dot"></span>Drive folder</a></li>'+
+    '<li><button data-act="copy" data-url="'+esc(migUrl)+'" title="'+esc(migUrl)+'"><span class="dot"></span>Migration link<span class="k"></span></button></li></ul></section>';
+  return h;
+}
+const PARTNERS = [["","Sabel"],["flownetic","Flownetic (Greg)"]];
 function asidePanels(c,n,ko,tk,td,w){
+  if(isFlownetic(c)) return flowneticAside(c);
   let h="";
   const hours=(n&&n.hours) || c.hours || "";
   const sum = td && td.ok && td.data && trackerSummary(td.data);
@@ -2112,6 +2191,7 @@ function asidePanels(c,n,ko,tk,td,w){
   const opt = optHtml;
   const wf = v => v ? '' : ' style="border-color:var(--warn)"';
   h += '<section class="panel"><details class="fold" data-fold="'+c.id+'"'+(detailsOpen(c)?' open':'')+'><summary class="panel-h"><h3>Details</h3><span class="foldhint">'+(w.length?w.length+' to fix · edit':'edit')+'</span>'+chev+'</summary><div class="form">'+
+    '<label>Delivered by<select data-field="partner" data-id="'+c.id+'">'+opt(PARTNERS,c.partner||"")+'</select></label>'+
     '<label>Tier<select data-field="tier" data-id="'+c.id+'"'+wf(c.tier)+'>'+opt(TIERS,c.tier,"Not set")+'</select></label>'+
     '<label>Project type<select data-field="hub.type" data-id="'+c.id+'">'+opt(Object.entries(TYPE_LABEL),projectType(c))+'</select></label>'+
     '<label>Project lead<select data-field="owner" data-id="'+c.id+'"'+wf(c.owner)+'>'+opt(["Chris","Richard","Greg"],c.owner,"Not set")+'</select></label>'+
@@ -2376,7 +2456,8 @@ document.addEventListener("change", e=>{
   if(!t.dataset.field) return;
   const c=byId(t.dataset.id); if(!c) return;
   const f=t.dataset.field, v=t.value.trim();
-  if(f==="hub.sowInputs"){ ensureHub(c, c.hub&&c.hub.startPhase); c.hub.sowInputs=t.value.split("\n").map(x=>x.trim()).filter(Boolean); touch(c); publishInputs(c); }
+  if(f==="partner"){ touch(c, applyPartner(c, v==="flownetic")); }
+  else if(f==="hub.sowInputs"){ ensureHub(c, c.hub&&c.hub.startPhase); c.hub.sowInputs=t.value.split("\n").map(x=>x.trim()).filter(Boolean); touch(c); publishInputs(c); }
   else if(f.startsWith("outreach.")){
     const k=f.slice(9); c.outreach=Object.assign({retainerPack:false, doNotFollowUp:false, pitchSent:"", nextFollowUp:"", outcome:"", note:""}, c.outreach||{});
     c.outreach[k] = (k==="retainerPack"||k==="doNotFollowUp") ? t.value==="1" : v; touch(c,["outreach"]);
@@ -2428,6 +2509,7 @@ document.addEventListener("click", e=>{ const tools=$("tools"); if(tools.open &&
 
 /* ---------- add client ---------- */
 function createClient(o){
+  if(o.partner) o.stage="Onboarding";
   const tpl = (S.portal.templates && S.portal.templates.offboarding) || [];
   const c = {id:uid(), name:o.name, subtitle:"", stage:o.stage, owner:o.lead||"", type:"", intake:"", notes:"", goLiveDate:"",
     trackerUrl:"", trackerKey:"", trackerFile:"", goLiveManual:false, proposalSent: o.stage==="Discovery"?today():"", contactName:"", contactEmail:"",
@@ -2445,6 +2527,7 @@ function createClient(o){
   if(o.type) c.type = OLD_TYPE[o.type] || "";
   if(o.stage==="Onboarding" || o.type==="audit" || o.type==="consult"){ ensureHub(c, o.type==="audit" ? "a0" : o.type==="consult" ? "c0" : o.type==="migration" ? "m0" : "p0"); c.hub.type = o.type || "full"; }
   if(c.hub) c.hub.startPhase = startFor(projectType(c), c.hub.startPhase);
+  if(o.partner) applyPartner(c, true);
   S.portal.clients.push(c); touch(c,["*"]); openClient(c.id);
   return c;
 }
@@ -2455,8 +2538,9 @@ function openAdd(){
 $("add-dlg").addEventListener("close", ()=>{
   if($("add-dlg").returnValue!=="ok") return;
   const name=$("add-name").value.trim(); if(!name) return;
-  createClient({name, stage:$("add-stage").value, tier:$("add-tier").value, type:$("add-type").value, lead:$("add-lead").value});
+  createClient({name, stage:$("add-stage").value, tier:$("add-tier").value, type:$("add-type").value, lead:$("add-lead").value, partner:$("add-partner").value});
 });
+$("add-partner").addEventListener("change", e=>{ if(e.target.value==="flownetic"){ $("add-stage").value="Onboarding"; $("add-type").value="build"; $("add-tier").value=""; $("add-lead").value="Greg"; } });
 
 /* ---------- Import from SOW ----------
    Reads the signed SOW in the browser (pdf.js, loaded on first use), finds the client-inputs
