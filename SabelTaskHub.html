@@ -184,6 +184,7 @@ button.step:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 .pg{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .pg i{display:block;width:40px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
 .pg b{display:block;height:100%;background:var(--greenfill)}
+.stage .clsteps{font-weight:400;font-size:12px;color:var(--mute)}
 .stage{font-size:13px;font-weight:600;color:var(--text);margin:8px 0 2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .nt{display:flex;gap:10px;margin-bottom:12px}
 .av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:rgba(255,255,255,.12);color:#C9CFDA}
@@ -420,6 +421,7 @@ textarea.need{outline:2px solid var(--red2);outline-offset:2px;border-radius:6px
 .hintro{padding:0 20px 12px;font-size:12.5px;color:var(--mute)}
 .hcl{padding:10px 20px 6px;border-top:1px solid var(--hl2);font-family:Archivo,sans-serif;font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);display:flex;gap:8px}
 .hcl span{color:var(--amber)}
+.reas{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;color:var(--mute)}
 .pingbox{margin-top:12px;padding:12px;border:1px solid var(--line2);border-radius:12px;display:flex;flex-direction:column;gap:8px}
 .pingbox textarea{width:100%;min-height:110px;resize:vertical;font:inherit;font-size:13px}
 .pingr{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -1034,7 +1036,7 @@ async function loadAll(){
         const stages=t.phases&&t.phases.length?t.phases.map((p,pi)=>({l:p.l||p.k||('Stage '+(pi+1)),o:who(p.o),sub:(p.sub||[]).map(hook),note:p.note||'',tip:p.tip||'',
           start:p.week?weekStart(p.week,trk.week1,ws):null,now:pi===ai,done:ai<0||pi<ai})):null;
         /* No Notion row for the task itself: what is left on its steps is its duration. */
-        const stepEst=openEst(stages?[].concat.apply([],stages.map(g=>g.sub)):sub);
+        const stepEst=openEst(stages?[].concat.apply([],stages.map(g=>g.sub.filter(s=>isTeam(s.o||g.o)))):sub.filter(s=>isTeam(s.o||t.o)));
         tasks.push({id:tr.key+':'+cid,key:tr.key,cid,pid,pillar:trk.pillars[pid]||pid,title:t.t,owner:who(t.o),lead:who(t.lead||''),
           status:stt[cid]||t.s||'Pending',start:dt.start,end:dt.end,late:dt.late,wk:dt.wk||0,wkEnd:dt.wkEnd||0,
           est:n?n.est:(sh?sh.est:(t.hrs||stepEst||null)),notion:n||null,shut:sh,desc:t.desc||'',bg:t.notes||'',card:cn[cid]||'',tip:t.tip||'',link:t.link||cl[cid]||'',
@@ -1487,6 +1489,14 @@ function project(){
       x.stages=t.stages.map(g=>Object.assign({},g,{sub:(g.sub||[]).map(stepOf)}));
       const ai=x.stages.findIndex(g=>!(g.sub.length>0&&g.sub.every(s=>s.s==='Complete')));
       x.stages.forEach((g,i)=>{g.now=i===ai;g.done=ai<0||i<ai;});
+      /* The row belongs to whoever has an open step in the current stage. When only the
+         client does, it leaves the team's lists until it comes back to Sabel. */
+      const cur=x.stages[ai],open=cur?cur.sub.filter(s=>s.s!=='Complete'):[];
+      if(base!=='Complete'&&open.length&&!(a&&a.owner)){
+        const ours=open.map(s=>who(s.o||cur.o)).filter(isTeam);
+        if(!ours.length)x.owner=who(open[0].o||cur.o);
+        else if(ours.indexOf(x.owner)<0)x.owner=ours[0];
+      }
     }
     x.trkEnd=x.end||null;
     /* A working day set in My week replaces the tracker date here only; the client tracker keeps its plan. */
@@ -1575,9 +1585,11 @@ function setClient(id,key,name){
 }
 const doneToday=t=>isDone(t)&&String(t.doneAt||'').slice(0,10)===isoOf(today());
 const stepsOf=t=>t.stages?[].concat.apply([],t.stages.map(g=>g.sub)):(t.sub||[]);
+/* The hub is Sabel's list: client steps stay on the client tracker. */
+const teamSteps=t=>t.stages?[].concat.apply([],t.stages.map(g=>g.sub.filter(s=>isTeam(s.o||g.o)))):(t.sub||[]).filter(s=>isTeam(s.o||t.owner));
 /* "3/9" with a thin bar: how far through its steps a task is. */
 function progHTML(t){
-  const l=stepsOf(t),m=l.length;if(!m)return '';
+  const l=teamSteps(t),m=l.length;if(!m)return '';
   const n=l.filter(s=>s.s==='Complete').length;
   return '<span class="pg" title="'+n+' of '+m+' steps done"><i><b style="width:'+Math.round(n/m*100)+'%"></b></i>'+n+'/'+m+'</span>';
 }
@@ -1829,6 +1841,20 @@ function pingGo(id){
   };
   try{navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false));}catch(e){done(false);}
 }
+/* Move a reminder or chase from its current person to someone else: their copy closes with a note,
+   the new person gets their own copy (same reminder, same client wait clock). */
+function reassign(id,p){
+  const t=findTask(id);if(!t||!t.rem||t.owner===p)return;
+  const r=(OV.reminders||{})[t.rem.id];if(!r)return;
+  const from=t.owner,draft=(S.deskDraft[id]||'').trim();
+  if((r.to||[]).indexOf(p)<0)r.to=(r.to||[]).concat([p]);
+  r.eAt=Date.now();
+  const o=setStatus(id,'Complete',COORD);if(o){stopAll(o);addNote(o,COORD,'Reassigned to '+p+'.',false);}
+  const nid2='r:'+r.id+':'+p,o2=ov(nid2);
+  addNote(o2,COORD,'Reassigned from '+from+(t.parked&&t.parked.question?' ('+from+': '+t.parked.question+')':'')+'.'+(draft?' '+draft:''),false);
+  delete S.deskDraft[id];S.deskOpen[id]=false;
+  commit();toast('Reassigned to '+p);
+}
 function answer(id,keep){
   const t=findTask(id);if(!t)return;
   const txt=(S.deskDraft[id]||'').trim(),o=ov(id);
@@ -1962,26 +1988,30 @@ function actionsHTML(t){
   h+='<button type="button" class="pb red" data-act="flag">Blocked · flag '+COORD+'</button>'+
     (SLACK_ID[t.owner]&&!isDone(t)?'<button type="button" class="pb sm" data-act="ping">Ping in Slack</button>':'')+
     (t.back&&t.status!=='Parked'&&!isDone(t)?'<button type="button" class="pb sm" data-act="clearback" title="Take it out of '+COORD+' replied and back into the list">Clear '+COORD+' replied</button>':'')+'</div>';
-  if(t.stages&&!isDone(t))h+='<div class="hint">Staged deliverable: it completes when every step is ticked.</div>';
+  if(t.stages&&!isDone(t))h+='<div class="hint">Staged deliverable: it completes when every step, Sabel’s and the client’s, is ticked.</div>';
   h+=pingHTML(t);
   return h;
 }
 /* Our own steps tick here. A step the client owns is theirs to tick, on the tracker. */
 function stepsHTML(t,steps,stageOwner){
-  return steps.map(s=>{
+  return steps.filter(s=>isTeam(s.o||stageOwner||t.owner)).map(s=>{
     const d=s.s==='Complete',e=fEst(s.est),can=!t.src&&isTeam(s.o||stageOwner||t.owner);
     const body='<i></i><span>'+esc(s.t)+(s.o?'<small>'+esc(who(s.o))+'</small>':'')+(e?'<small title="Estimate from Notion">'+e+'</small>':'')+'</span>';
     return can?'<button type="button" class="step tick'+(d?' d':'')+'" data-act="step" data-step="'+esc(norm(s.t))+'" aria-pressed="'+d+'">'+body+'</button>'
       :'<div class="step'+(d?' d':'')+'" title="A client step. It is ticked on the client tracker.">'+body+'</div>';
   }).join('');
 }
-const stepHead=(t,l)=>{const a=stepsOf(t);return '<div class="dl">'+l+'<small> · '+a.filter(s=>s.s==='Complete').length+' of '+a.length+' done</small></div>';};
+const stepHead=(t,l)=>{const a=teamSteps(t);return '<div class="dl">'+l+'<small> · '+a.filter(s=>s.s==='Complete').length+' of '+a.length+' done</small></div>';};
+function clientStepsNote(g){
+  const n=g.sub.filter(s=>!isTeam(s.o||g.o)).length;
+  return n?'<small class="clsteps">'+n+(n===1?' step':' steps')+' on the client tracker</small>':'';
+}
 function aboutHTML(t){
   let h='';
   const d=[t.desc,t.bg,t.card].filter(Boolean).join('\n\n');
   if(d)h+='<div><div class="dl">What this is</div><div class="dp">'+linkify(d)+'</div></div>';
   if(t.stages)h+='<div>'+stepHead(t,'Stages')+t.stages.map(s=>'<div class="stage">'+esc(s.l)+'<span class="tag '+(isTeam(s.o)?'blue':'amber')+'">'+esc(s.o||'Client')+'</span>'+
-    (s.done?'<span class="tag">Done</span>':s.now?'<span class="tag blue">Now</span>':'')+'</div>'+stepsHTML(t,s.sub,s.o)).join('')+'</div>';
+    (s.done?'<span class="tag">Done</span>':s.now?'<span class="tag blue">Now</span>':'')+clientStepsNote(s)+'</div>'+stepsHTML(t,s.sub,s.o)).join('')+'</div>';
   else if(t.sub&&t.sub.length)h+='<div>'+stepHead(t,'Steps')+stepsHTML(t,t.sub)+'</div>';
   return h;
 }
@@ -2204,7 +2234,8 @@ function deskHTML(mine){
       '<div class="pkf"><textarea data-ta="desk:'+esc(t.id)+'" placeholder="Answer '+esc(p.by||t.owner)+'…">'+esc(S.deskDraft[t.id]||'')+'</textarea>'+
       '<button type="button" class="pb hand" data-act="answer">Answer &amp; hand back to '+esc(t.owner)+'</button>'+
       '<button type="button" class="pb" data-act="reply">Reply, keep parked</button>'+
-      (t.stages?'':'<button type="button" class="pb green" data-act="desk-done">Mark done</button>')+'</div></div>';
+      (t.stages?'':'<button type="button" class="pb green" data-act="desk-done">Mark done</button>')+
+      (t.rem?'<span class="reas">Reassign to '+TEAM.filter(x=>x!==t.owner).map(x=>'<button type="button" class="rwho" data-act="reassign" data-p="'+x+'">'+av(x,true)+x+'</button>').join('')+'</span>':'')+'</div></div>';
   }).join('');
   if(blocked.length){
     h+='<div class="flab">Not parked with you · marked blocked at source</div><div class="bl">'+blocked.map(t=>{
@@ -2541,6 +2572,7 @@ document.addEventListener('click',e=>{
     case 'lgroup':S.lgroup=a.getAttribute('data-g');save();render();break;
     case 'cl-more':S.more['cl:'+a.getAttribute('data-k')]=true;render();break;
     case 'clearback':clearBack(id);break;
+    case 'reassign':reassign(id,a.getAttribute('data-p'));break;
     case 'ping':if(t){S.ping=S.ping===id?null:id;S.pingTxt=pingText(t);render();}break;
     case 'ping-x':S.ping=null;render();break;
     case 'ping-go':pingGo(id);break;
