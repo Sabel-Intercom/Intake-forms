@@ -243,7 +243,7 @@ a{color:inherit}
 .keydates .v{font-family:var(--display);font-weight:700;color:var(--ink);font-size:15px;white-space:nowrap}
 .keydates .c{font-size:12px;color:var(--muted);white-space:nowrap}
 .keydates .c.late{color:var(--accent)} .keydates .c.soon{color:var(--warn)}
-.cgrid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+.cgrid{display:grid;grid-template-columns:minmax(0,1fr) 396px;gap:16px;align-items:start}
 .cmain{display:grid;gap:10px;min-width:0}
 .caside{display:grid;gap:12px;align-content:start;min-width:0}
 
@@ -309,16 +309,20 @@ a{color:inherit}
 .step{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:6px 8px;border-radius:7px}
 .step.mine{background:var(--mine)}
 .step.mine.done,.step.mine.na{background:transparent}
-.step .tx{font-size:14px;color:var(--body);line-height:1.4;display:flex;flex-wrap:wrap;align-items:center;gap:3px 8px}
+.step .tx{font-size:14px;color:var(--body);line-height:1.4;min-width:0}
+/* Inline, so the (i) and tags sit at the end of wrapped text instead of dropping to their own line. */
+.step .tx>.xonly,.step .tx>.crit{display:inline-block;margin-left:8px;vertical-align:1px}
+.step .tx>.infobtn{margin-left:8px;vertical-align:-3px}
 .step.mine .tx{color:var(--ink)}
 .step.done .tx,.step.na .tx{color:var(--faint);text-decoration:line-through;text-decoration-color:var(--line2)}
-.step .acts{display:flex;align-items:center;gap:8px}
+.step .acts{display:flex;align-items:center;gap:8px;position:relative}
 .step .xonly{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);border-radius:4px;padding:1px 5px;white-space:nowrap}
-.step .xstep-in{flex:1;min-width:0;font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--accent);border-radius:6px;padding:4px 8px}
+.step .xstep-in{width:100%;min-width:0;font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--accent);border-radius:6px;padding:4px 8px}
 .xadd{padding:0 16px 8px 46px}
 .xadd .linkbtn{font-size:13px}
-.step .more{opacity:0;display:flex;gap:2px;transition:opacity .12s}
-.step:hover .more,.step:focus-within .more{opacity:1}
+/* Floats over the row on hover, so the hidden buttons don't take width from the task text. */
+.step .more{position:absolute;right:calc(100% + 6px);top:50%;transform:translateY(-50%);z-index:2;background:var(--surface);border:1px solid var(--line2);border-radius:7px;box-shadow:0 2px 8px rgba(0,0,0,.08);opacity:0;pointer-events:none;display:flex;gap:2px;transition:opacity .12s}
+.step:hover .more,.step:focus-within .more{opacity:1;pointer-events:auto}
 .iconbtn{border:0;background:none;cursor:pointer;color:var(--muted);font-size:12px;padding:3px 6px;border-radius:5px;white-space:nowrap}
 .iconbtn:hover{background:var(--sunk);color:var(--ink)}
 .iconbtn.on{color:var(--warn)}
@@ -400,7 +404,7 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
 @media (max-width:860px){
   .form{grid-template-columns:1fr}
   .links{grid-template-columns:1fr}
-  .step .more{opacity:1}
+  .step .more{opacity:1;position:static;transform:none;background:none;border:0;box-shadow:none;pointer-events:auto}
   .keydates{width:100%}
   .keydates div{flex:1 1 44%;border-left:0;box-shadow:inset 1px 1px 0 var(--line)}
 }
