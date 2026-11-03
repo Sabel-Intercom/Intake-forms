@@ -176,5 +176,12 @@
     "file": "SmokeballTracker.html",
     "sowHours": 192,
     "active": true
+  },
+  {
+    "name": "Kinatico",
+    "key": "kinatico-tracker-v1",
+    "file": "KinaticoTracker.html",
+    "sowHours": 36,
+    "active": true
   }
 ]
