@@ -519,6 +519,16 @@ html.light .sq{box-shadow:none}
 .wsh>span,.wlh>span{font-size:13px;color:var(--mute)}
 .wsh>span.wpast{font-size:12.5px;color:var(--faint);border-left:1px solid var(--line2);padding-left:10px}
 .wsh .wcapline{margin-left:auto}
+.wsec{overflow:clip}
+.wlhead,.wlcells{display:grid;grid-template-columns:repeat(var(--wn),minmax(0,1fr))}
+.wlhead{position:sticky;top:0;z-index:3;background:var(--surface)}
+.wlhead .wcol:first-child,.wcell:first-child{border-left:none;margin-left:0}
+.wlcl{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--surface2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.wlane:first-of-type .wlcl{border-top:none}
+.wlcl b{font-family:Archivo,sans-serif;font-weight:700;font-size:13.5px;color:var(--text)}
+.wlcl span{font-size:12.5px;color:var(--mute)}
+.wcell{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px;padding:6px;align-content:start;min-width:0;min-height:44px;border-left:1px solid var(--line)}
+.wcell::before{content:attr(data-dn);display:none;grid-column:1/-1;font-size:12px;font-weight:700;color:var(--mute)}
 .wdays{display:grid}
 .wdays.this{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .wdays.next{grid-template-columns:repeat(5,minmax(0,1fr))}
@@ -600,6 +610,11 @@ html.light .sq{box-shadow:none}
   .wdays.next{grid-template-columns:minmax(0,1fr)}
   .wdays .wcol{border-left:none;margin-left:0;border-top:1px solid var(--line);min-height:0}
   .wdays .wcol:first-child{border-top:none}
+  .wlhead{display:none}
+  .wlcells{grid-template-columns:minmax(0,1fr)}
+  .wcell{border-left:none;min-height:0}
+  .wcell.none{display:none}
+  .wcell::before{display:block}
 }
 /* overdue clean-up under a row, and the Home banner */
 .odq{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 20px 12px 56px;background:rgba(225,6,0,.06)}
@@ -1300,7 +1315,7 @@ function wcardHTML(t,lane){
   if(planned)btn+='<button type="button" class="wb" data-act="wk-reset" title="Back to the tracker date'+(t.trkEnd?' ('+fD(t.trkEnd)+')':'')+'" aria-label="Back to the tracker date">&#8634;</button>';
   const st=stTag(t),moved=planned?(t.trkEnd?'moved from '+fD(t.trkEnd):'date set here'):'';
   return '<div class="wcard'+(small?' sm':'')+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" data-act="open" title="Drag to another day, or click to open">'+
-    '<div class="w1">'+tsq(t)+'<b class="wcl">'+esc(clientOf(t))+'</b>'+(showOwner?av(t.owner,true):'')+'<span class="west'+(t.est?'':' none')+'">'+estTxt(t)+'</span></div>'+
+    '<div class="w1">'+(t._inClient?'<span class="wcl"></span>':tsq(t)+'<b class="wcl">'+esc(clientOf(t))+'</b>')+(showOwner?av(t.owner,true):'')+'<span class="west'+(t.est?'':' none')+'">'+estTxt(t)+'</span></div>'+
     '<div class="wt">'+esc(t.title)+'</div>'+
     (st||moved?'<div class="w2">'+st+(moved?'<span class="wmv">'+moved+'</span>':'')+'</div>':'')+
     '<div class="w3">'+btn+'</div></div>';
@@ -1334,12 +1349,31 @@ function lateBoxesHTML(late){
       (open?rows.map(wrowHTML).join(''):'')+'</div>';
   }).join('');
 }
-function wdayHTML(d,lane,cards,isToday,share){
+function wdayHeadHTML(d,lane,cards,isToday,share){
   const h=cards.reduce((a,t)=>a+(+t.est||0),0),over=share&&h>share+0.01,pct=share?Math.min(100,Math.round(h/share*100)):0;
-  return '<div class="wcol'+(isToday?' now':'')+'" data-drop="'+isoOf(d)+'">'+
-    '<div class="wch"><b>'+(isToday?'Today':DOW[d.getDay()])+'</b><span>'+fD(d)+'</span>'+
-    '<em class="'+(over?'over':h?'':'none')+'" title="'+(over?'More than your day share of '+fTot(share):'Planned for this day')+'">'+(h?fTot(h):'')+(lane==='this'?'<i><u style="width:'+pct+'%"></u></i>':'')+'</em></div>'+
+  return '<div class="wch"><b>'+(isToday?'Today':DOW[d.getDay()])+'</b><span>'+fD(d)+'</span>'+
+    '<em class="'+(over?'over':h?'':'none')+'" title="'+(over?'More than your day share of '+fTot(share):'Planned for this day')+'">'+(h?fTot(h):'')+(lane==='this'?'<i><u style="width:'+pct+'%"></u></i>':'')+'</em></div>';
+}
+function wdayHTML(d,lane,cards,isToday,share){
+  return '<div class="wcol'+(isToday?' now':'')+'" data-drop="'+isoOf(d)+'">'+wdayHeadHTML(d,lane,cards,isToday,share)+
     '<div class="wcc">'+(cards.length?cards.map(t=>wcardHTML(t,lane)).join(''):'<div class="wempty">Drop here</div>')+'</div></div>';
+}
+/* This week: one band per client across the day columns, so a client's tasks sit together.
+   Every cell is still a day to drop on. A card dropped in another client's band lands in its own. */
+function wlanesHTML(base,idx,cols,todayI,share){
+  const g={};idx.forEach(i=>cols[i].forEach(t=>{const k=ckey(t);(g[k]=g[k]||[]).push(t);}));
+  const keys=Object.keys(g).sort((a,b)=>(a==='none')-(b==='none')||cLabel(a).localeCompare(cLabel(b)));
+  if(!keys.length)return '<div class="wdays this">'+idx.map(i=>wdayHTML(addD(base,i),'this',cols[i],i===todayI,share)).join('')+'</div>';
+  const grid=' style="--wn:'+idx.length+'"';
+  return '<div class="wlanes"><div class="wlhead"'+grid+'>'+idx.map(i=>'<div class="wcol'+(i===todayI?' now':'')+'" data-drop="'+isoOf(addD(base,i))+'">'+wdayHeadHTML(addD(base,i),'this',cols[i],i===todayI,share)+'</div>').join('')+'</div>'+
+    keys.map(k=>{
+      const rows=g[k],hrs=rows.reduce((a,t)=>a+(+t.est||0),0);
+      return '<div class="wlane"><div class="wlcl">'+tsq(rows[0])+'<b>'+esc(cLabel(k))+'</b><span>'+rows.length+' task'+(rows.length===1?'':'s')+(hrs?' · '+fTot(hrs):'')+'</span></div>'+
+        '<div class="wlcells"'+grid+'>'+idx.map(i=>{
+          const d=addD(base,i),cards=cols[i].filter(t=>ckey(t)===k);
+          return '<div class="wcell'+(i===todayI?' now':'')+(cards.length?'':' none')+'" data-drop="'+isoOf(d)+'" data-dn="'+(i===todayI?'Today':DOW[d.getDay()])+' '+fD(d)+'">'+cards.map(t=>wcardHTML(Object.assign({},t,{_inClient:true}),'this')).join('')+'</div>';
+        }).join('')+'</div></div>';
+    }).join('')+'</div>';
 }
 /* "Xh of Yh left" with a 70px bar. */
 function wcapHTML(h,cap,suffix,fill){
@@ -1371,7 +1405,7 @@ function weekHTML(mine){
     '<div class="wrlist">'+lateBoxesHTML(L.late)+'</div><div class="wrf" title="'+hint+'">Oldest client first. Done, a new day, or not needed.</div></aside>';
   h+='<div class="wcals">';
   h+='<section class="wsec" title="'+hint+'"><div class="wsh"><i style="background:var(--red2)"></i><b>This week</b><span>'+range(addD(base,from),addD(base,4))+'</span>'+(past?'<span class="wpast">'+past+'</span>':'')+wcapHTML(thisH,left,' left','var(--text)')+'</div>'+
-    '<div class="wdays this">'+thisIdx.map(i=>wdayHTML(addD(base,i),'this',L.this[i],i===todayI,share)).join('')+'</div></section>';
+    wlanesHTML(base,thisIdx,L.this,todayI,share)+'</section>';
   h+='<section class="wsec" title="'+hint+'"><div class="wsh"><i style="background:var(--amber)"></i><b>Next week</b><span>'+range(addD(base,7),addD(base,11))+'</span>'+wcapHTML(sum(flat(L.next)),cap,'','var(--amber)')+'</div>'+
     '<div class="wdays next">'+[0,1,2,3,4].map(i=>wdayHTML(addD(base,7+i),'next',L.next[i],false,share)).join('')+'</div></section>';
   h+='<section class="wsec wlater" data-drop="later"><button type="button" class="wlh" data-act="wk-later" aria-expanded="'+!!S.laterOpen+'"><i></i><b>Later</b>'+
