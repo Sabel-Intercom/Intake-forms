@@ -1,22 +1,95 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow">
-<title>Sabel kick-off</title>
-<script>try{localStorage.removeItem('sabel_kickoff_desk_v1')}catch(e){}</script>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Sabel kick-offs · team</title>
+<script>try{ localStorage.removeItem('sabel_kickoff_desk_v1'); if(localStorage.getItem('sabel-ops-theme')==='light') document.documentElement.setAttribute('data-theme','light'); }catch(e){}</script>
 <style>
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0F1117;color:#C9CFDA;font:15px/1.6 "Helvetica Neue",Helvetica,Arial,sans-serif;padding:24px;box-sizing:border-box}
-div{max-width:440px;background:#161B26;border:1px solid #2A3145;border-radius:14px;padding:26px}
-h1{margin:0 0 8px;font-size:19px;color:#F2F4F8}
-p{margin:0}
-</style>
-</head>
-<body>
-<div>
-<h1>This page has moved</h1>
-<p>Your kick-off details now sit inside your project hub. If you need the link, please ask your Sabel contact.</p>
-</div>
-</body>
-</html>
+:root{--bg:#0F1117;--card:#161B26;--w:#F2F4F8;--body:#C9CFDA;--muted:#A7AFBE;--border:#2A3145;--field:#0F1117;--red:#E10600;--green:#4ADE80;--amber:#FBBF24;color-scheme:dark}
+:root[data-theme="light"]{--bg:#F4F5F7;--card:#FFF;--w:#101828;--body:#344054;--muted:#475467;--border:#D0D5DD;--field:#FFF;--green:#15803D;--amber:#B45309;color-scheme:light}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--body);font:14px/1.5 "Helvetica Neue",Helvetica,Arial,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:22px 16px 80px}h1{font-size:21px;color:var(--w);margin:0 0 4px}.sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.spacer{flex:1}.name{font-weight:600;color:var(--w);cursor:pointer;background:none;border:0;padding:0;font:inherit;font-weight:600}
+.st{font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:1px 8px}
+.btn{background:transparent;color:var(--body);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font:inherit;font-size:12px;cursor:pointer;text-decoration:none;display:inline-block}.btn.p{background:var(--red);border-color:var(--red);color:#fff}
+input,textarea,select{width:100%;background:var(--field);color:var(--body);border:1px solid var(--border);border-radius:7px;padding:7px 9px;font:inherit;font-size:13px}label{display:block;font-size:12px;color:var(--muted);margin:10px 0 3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 12px}.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}.tabs .on{border-color:var(--red);color:var(--w)}
+.gate{max-width:380px;margin:80px auto}.err{color:#FF4D45;font-size:13px;margin-top:8px;min-height:18px}.warn{color:var(--amber);font-size:12px}
+.links a{color:#60A5FA;font-size:12px;margin-right:12px}
+</style></head><body><div class="wrap" id="app"></div>
+<script>
+/* Team page for kick-offs (3 Nov 2026). Each client's form now lives in their hub (SabelKickoff.html, its own key).
+   This page holds only what clients must never see, in sabel-kickoff-v1, which the server refuses without the passcode.
+   It shows nothing, and asks for nothing else, until the server has accepted the passcode. */
+var API='https://sabel-webhook.vercel.app/api/tracker', BASE='https://sabel-intercom.github.io/Intake-forms/', KEY='sabel-kickoff-v1', TOK='sabel-team-token';
+var STORE=null, PORTAL=[], REG=[], NOTION=[], VIEW='todo', OPEN=null, TIMER=null, SEARCH='';
+function token(){ try{ return localStorage.getItem(TOK)||''; }catch(e){ return window.__t||''; } }
+function setToken(t){ window.__t=t; try{ t?localStorage.setItem(TOK,t):localStorage.removeItem(TOK); }catch(e){} }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function norm(n){ return String(n||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
+function getStore(){ return fetch(API+'?key='+KEY+'&_t='+Date.now(),{cache:'no-store',headers:{'X-Team-Token':token()}}).then(function(r){ if(r.status===401){ var e=new Error('401'); e.auth=true; throw e; } if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+function gate(msg){ document.getElementById('app').innerHTML='<div class="card gate"><h1>Sabel kick-offs</h1><div class="sub">Team only. Client kick-off forms are in each client\'s hub.</div><label>Team passcode</label><input id="pw" type="password" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')signIn()"><div class="err">'+esc(msg||'')+'</div><button class="btn p" onclick="signIn()">Open</button></div>'; var p=document.getElementById('pw'); if(p) p.focus(); }
+function signIn(){ setToken(document.getElementById('pw').value.trim()); start(); }
+function signOut(){ setToken(''); STORE=null; gate(); }
+function start(){
+  if(!token()) return gate();
+  getStore().then(function(j){ STORE=(j.data&&j.data.clients)?j.data:{clients:{}}; render();
+    return Promise.all([
+      fetch(API+'?key=client-portal-v1').then(function(r){return r.json();}).then(function(j){ PORTAL=(j.data&&j.data.clients)||[]; }).catch(function(){}),
+      fetch(BASE+'trackers.json').then(function(r){return r.json();}).then(function(j){ REG=j||[]; }).catch(function(){}),
+      fetch('https://sabel-webhook.vercel.app/api/notion?kind=projects').then(function(r){return r.json();}).then(function(j){ NOTION=j.projects||[]; }).catch(function(){})
+    ]).then(render);
+  }).catch(function(e){ if(e.auth){ setToken(''); gate('That passcode was not accepted.'); } else gate('Could not reach the store. Try again in a minute.'); });
+}
+function stageOf(id,r){ var n=norm(r&&r.name)||id, m=PORTAL.filter(function(p){return norm(p.name)===n||norm(p.name)===id;}); var live=m.filter(function(p){return p.stage!=='Complete';})[0]||m[0]; return live?live.stage:''; }
+function rows(){
+  var out=[], seen={};
+  Object.keys(STORE.clients).forEach(function(id){ var r=STORE.clients[id]; if(r.removed) return; seen[id]=1; out.push({id:id,r:r,name:r.name||id,stage:stageOf(id,r)}); });
+  PORTAL.forEach(function(p){ var id=norm(p.name); if(!seen[id]&&(p.stage==='Discovery'||p.stage==='Onboarding')){ seen[id]=1; out.push({id:id,r:null,name:p.name,stage:p.stage}); } });
+  out.sort(function(a,b){ return a.name.localeCompare(b.name); });
+  return out;
+}
+function inView(x){ if(SEARCH&&norm(x.name).indexOf(norm(SEARCH))<0) return false;
+  var na=x.r&&x.r.notRequired; if(VIEW==='na') return !!na; if(na) return false; if(VIEW==='all') return true;
+  return x.stage==='Discovery'||x.stage==='Onboarding'||!!(x.r&&x.r.hubKey); }
+function formLink(x,team){ var h=x.r.hubKey, reg=trackerOf(x); return BASE+'SabelKickoff.html?client='+h.slug+'&k='+h.k+(h.rdy?'&rdy='+h.rdy:'')+'&name='+encodeURIComponent(x.name)+(team?'&team=1':''); }
+function trackerOf(x){ var n=norm(x.name).slice(0,6); return REG.filter(function(t){ return norm(t.name).slice(0,6)===n; })[0]||null; }
+function render(){
+  var all=rows(), h='<div class="row"><h1>Sabel kick-offs</h1><span class="spacer"></span><button class="btn" onclick="signOut()">Sign out</button></div><div class="sub">Each client\'s form is in their hub and shows only that client. Internal fields stay here. Never send this page to a client.</div>';
+  h+='<div class="tabs">'+[['todo','To do'],['all','All'],['na','N/A']].map(function(v){ return '<button class="btn'+(VIEW===v[0]?' on':'')+'" onclick="VIEW=\''+v[0]+'\';render()">'+v[1]+'</button>'; }).join('')+'<input style="width:200px" placeholder="Search" value="'+esc(SEARCH)+'" oninput="SEARCH=this.value;renderList()"></div><div id="list"></div>';
+  document.getElementById('app').innerHTML=h; renderList();
+}
+function renderList(){
+  var h=rows().filter(inView).map(function(x){
+    var r=x.r, key=r&&r.hubKey, tr=trackerOf(x);
+    var s='<div class="card"><div class="row"><button class="name" onclick="OPEN=OPEN===\''+x.id+'\'?null:\''+x.id+'\';renderList()">'+esc(x.name)+'</button>'+(x.stage?'<span class="st">'+esc(x.stage==='Discovery'?'Scoping':x.stage)+'</span>':'')+(r&&r.callDone?'<span class="st">call held</span>':'')+'<span class="spacer"></span>';
+    if(key) s+='<a class="btn p" target="_blank" rel="noopener" href="'+esc(formLink(x,true))+'">Open kick-off</a><button class="btn" onclick="copyClient(\''+x.id+'\',this)" title="This client only. Safe to send to '+esc(x.name)+'.">Copy client link</button>';
+    else s+='<button class="btn" onclick="createForm(\''+x.id+'\')">Create kick-off form</button>';
+    s+='</div>';
+    if(OPEN===x.id&&r){ var b=r.basics||{}, sc=r.scope||{}, ic=sc.intercomCheck||{};
+      s+='<div class="links" style="margin-top:8px">'+[['Notion',b.notionUrl],['Sabel SOW',b.sabelDoc],['Intercom SOW',b.intercomSow],['Tracker',tr?BASE+tr.file:b.trackerUrl]].filter(function(l){return l[1];}).map(function(l){return '<a target="_blank" rel="noopener" href="'+esc(l[1])+'">'+l[0]+'</a>';}).join('')+'</div>'+
+      f(x.id,'Internal notes','notesInternal',r.notesInternal,1)+'<div class="grid">'+f(x.id,'Commercial note','basics.hoursNote',b.hoursNote)+
+      sel(x.id,'Source of scope','scope.source',sc.source,['','Sabel SOW','Intercom SOW','Both'])+'</div><div class="grid">'+f(x.id,'Intercom scope check: posted','scope.intercomCheck.posted',ic.posted)+f(x.id,'Thread link','scope.intercomCheck.link',ic.link)+f(x.id,'Confirmed by','scope.intercomCheck.confirmedBy',ic.confirmedBy)+'</div>'+f(x.id,'Intercom check notes','scope.intercomCheck.notes',ic.notes,1)+
+      '<div class="row" style="margin-top:10px"><button class="btn" onclick="toggleNA(\''+x.id+'\')">'+(r.notRequired?'Restore':'Kick-off not required')+'</button>'+(key?'<span class="warn">Hub tab: set KICKOFF_TOKEN = '+esc(key.k)+' when building this tracker.</span>':'')+'</div>';
+    }
+    return s+'</div>';
+  }).join('');
+  document.getElementById('list').innerHTML=h||'<div class="sub">Nothing in this view.</div>';
+}
+function f(id,l,p,v,area){ var a=' oninput="edit(\''+id+'\',\''+p+'\',this.value)"'; return '<div><label>'+l+'</label>'+(area?'<textarea rows="3"'+a+'>'+esc(v||'')+'</textarea>':'<input value="'+esc(v||'')+'"'+a+'>')+'</div>'; }
+function sel(id,l,p,v,o){ return '<div><label>'+l+'</label><select onchange="edit(\''+id+'\',\''+p+'\',this.value)">'+o.map(function(x){return '<option'+(x===(v||'')?' selected':'')+'>'+esc(x)+'</option>';}).join('')+'</select></div>'; }
+function setP(o,p,v){ var a=p.split('.'), k=a.pop(); a.forEach(function(x){ o=o[x]=o[x]||{}; }); o[k]=v; }
+function edit(id,p,v){ var r=STORE.clients[id]; setP(r,p,v); r.updated=new Date().toISOString(); clearTimeout(TIMER); TIMER=setTimeout(function(){ push(id); },800); }
+/* Merge per client on save: fetch, keep everyone else's latest, write this one. */
+function push(id){ var mine=STORE.clients[id];
+  return getStore().then(function(j){ var live=(j.data&&j.data.clients)?j.data:{clients:{}}; live.clients[id]=mine; live.updated=new Date().toISOString(); STORE=live;
+    return fetch(API+'?key='+KEY,{method:'POST',headers:{'Content-Type':'application/json','X-Team-Token':token()},body:JSON.stringify({data:live})}); })
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); }).catch(function(e){ alert('Not saved. '+e.message); }); }
+function toggleNA(id){ var r=STORE.clients[id]; r.notRequired=r.notRequired?null:{at:new Date().toISOString().slice(0,10),note:''}; if(!r.notRequired) delete r.notRequired; r.updated=new Date().toISOString(); push(id).then(render); }
+function copyClient(id,btn){ var x=rows().filter(function(y){return y.id===id;})[0]; navigator.clipboard.writeText(formLink(x,false)).then(function(){ btn.textContent='Copied'; setTimeout(function(){ btn.textContent='Copy client link'; },1500); }); }
+function randomK(){ var a=new Uint8Array(8); crypto.getRandomValues(a); return Array.prototype.map.call(a,function(b){return ('0'+b.toString(16)).slice(-2);}).join(''); }
+function createForm(id){ var x=rows().filter(function(y){return y.id===id;})[0], tr=trackerOf(x), n=NOTION.filter(function(p){return norm(p.name)===id;})[0]||{};
+  var r=x.r||{name:x.name,created:new Date().toISOString(),basics:{}}, rdy=tr?String(tr.key).replace(/-tracker-v1$/,''):norm(x.name);
+  r.hubKey={slug:id,k:randomK(),rdy:rdy}; r.basics=r.basics||{}; r.basics.notionUrl=r.basics.notionUrl||n.url||''; r.basics.sabelDoc=r.basics.sabelDoc||n.sabelDoc||''; r.basics.intercomSow=r.basics.intercomSow||n.intercomSow||''; r.updated=new Date().toISOString(); STORE.clients[id]=r;
+  push(id).then(render); }
+start();
+</script></body></html>
