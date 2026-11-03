@@ -251,8 +251,20 @@ a{color:inherit}
 .scope .txt.clamp{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
 .scope .row{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:12.5px;color:var(--muted)}
 .scope .row b{color:var(--ink);font-weight:600}
-.inout{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.inout ul{margin:3px 0 0;padding-left:16px;font-size:13px}
+.sc-lists{display:grid;gap:6px;margin-top:10px}
+.sc-list{border:1px solid var(--line);border-radius:8px;min-width:0}
+.sc-list>summary{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13.5px;font-weight:600;color:var(--ink)}
+.sc-list>summary span{font-weight:400;font-size:12.5px;color:var(--muted)}
+.sc-list>summary .chev{margin-left:auto;flex:none}
+.sc-body{max-height:340px;overflow-y:auto;border-top:1px solid var(--line);padding:4px 0}
+.sc-group{display:flex;justify-content:space-between;gap:8px;padding:8px 10px 3px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sc-item>summary,.sc-item.plain{display:flex;align-items:baseline;gap:8px;padding:5px 10px;font-size:13px;line-height:1.4;color:var(--ink)}
+.sc-item>summary:hover{background:var(--sunk)}
+.sc-item .t{flex:1;min-width:0}
+.sc-item .h{flex:none;font-size:12px;color:var(--muted);white-space:nowrap}
+.sc-item>summary .chev{flex:none;width:14px;height:14px;align-self:center}
+.sc-item.plain{padding-right:32px}
+.sc-item .nt{margin:0;padding:1px 32px 8px 10px;font-size:12.5px;line-height:1.5;color:var(--muted)}
 .linkbtn{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;margin-top:6px}
 
 /* journey */
@@ -327,7 +339,7 @@ a{color:inherit}
 .gate.closed .g b{color:var(--good)}
 .phase-sum{padding:0 16px 12px;font-size:13px;color:var(--muted)}
 @media (max-width:1100px){ .cgrid{grid-template-columns:minmax(0,1fr)} }
-@media (max-width:860px){ .chead{grid-template-columns:1fr} .keydates div{min-width:92px} .inout{grid-template-columns:1fr} }
+@media (max-width:860px){ .chead{grid-template-columns:1fr} .keydates div{min-width:92px} }
 
 
 /* aside */
@@ -568,7 +580,7 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
   <p><b>Build</b> (an Intercom build, no migration), <b>Migration</b> (data in, no build), <b>Build + Migration</b> (both), <b>Audit</b>, and <b>Consultation only</b> (hours of advice, no delivery journey; its date on the Board is the next check-in, set in Details). The type picks which gate list the client follows.</p>
 
   <h3>Flownetic projects</h3>
-  <p>Greg's own projects, run through Sabel. Set "Delivered by" to Flownetic in Details. Greg manages them, so there is no tracker and no data to fill in: the steps are the Slack thread, Rocketlane and a weekly update that opens again every Monday. If the type is Migration or Build + Migration, Richard is doing migration work and the migration gates apply too. Taking the mark off puts the client back as they were.</p>
+  <p>Greg's own projects, run through Sabel. Set "Delivered by" to Flownetic in Details. Greg manages them, so there is no tracker and no data to fill in: the steps are the Slack thread, Rocketlane and a weekly update that opens again every Monday. If the type is Migration or Build + Migration, Richard is doing migration work and the migration gates apply too, without the signing and paperwork steps. Taking the mark off puts the client back as they were.</p>
 
   <h3>On hold</h3>
   <p>"Park" on the Board and "Put on hold" on the client are the same thing. A held client leaves the Board and the Today list, keeps everything recorded, and comes back with "Resume". Always give a reason and a check-back date.</p>
@@ -991,14 +1003,20 @@ CONSULT_PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0]
    doing migration work (type Migration or Build + Migration) the migration gates follow the set-up
    gate, and the weekly update sits on whichever gate is current. */
 const FLOWNETIC_PHASES = [
- {id:"f0", code:"F1", when:"On signing", name:"Set-up", gate:"Thread open, Rocketlane correct.", steps:[
+ {id:"f0", code:"F1", when:"At the start", name:"Set-up", gate:"Thread open, Rocketlane correct.", steps:[
   ["nikki","Set up a thread in our Slack DMs for weekly updates"],
   ["nikki","Set the correct dates in Rocketlane and assign Greg as the partner contact"]]},
  {id:"f1", code:"F2", when:"Until the project ends", name:"Weekly updates", gate:"The project has finished. Greg manages everything else.", steps:[
   ["nikki","Weekly update"]]}
 ];
 FLOWNETIC_PHASES.forEach(p=>{ p.steps = p.steps.map((s,i)=>({id:p.id+"-"+i, o:s[0], t:s[1], tag:""})); });
-const FLOWNETIC_MIGRATION_PHASES = [FLOWNETIC_PHASES[0]].concat(MIGRATION_PHASES);
+/* Greg holds the contract and the client, so the first migration gate is not about signing here.
+   It stays the same gate underneath (Object.create), so edits on the Checklists page still reach it. */
+const FLOWNETIC_MIGRATION_PHASES = [FLOWNETIC_PHASES[0],
+  Object.assign(Object.create(MIGRATION_PHASES[0]), {name:"Migration start", when:"When Richard starts", gate:"Intake key registered, explainer sent."})].concat(MIGRATION_PHASES.slice(1));
+/* Migration steps that do not apply on Greg's projects, from what Nikki marked not needed on Nookal, 2 Nov 2026:
+   the signing and paperwork steps, Drive, the welcome email, the Slack channel and the Intercom deal checks. */
+const FLOWNETIC_SKIP = new Set(["m0-0","m0-mg0","m0-1","m0-2","m0-4","m0-5","m0-6","m0-xmvgfs98t","m1-xmvgfs98w"]);
 const WEEKLY_STEP = "f1-0";
 function isFlownetic(c){ return c.partner==="flownetic"; }
 function hasMigration(c){ return ["migration","full"].includes(projectType(c)); }
@@ -1155,6 +1173,7 @@ function stepsFor(c, p){
   const t = projectType(c);
   const weekly = isFlownetic(c) && hasMigration(c) && hasHub(c) && p.id!=="f0" && (phasesFor(c)[curIdx(c)]||{}).id===p.id ? FLOWNETIC_PHASES[1].steps : [];
   return p.steps.filter(s => !s.tag || (s.tag==="b" && t!=="migration") || (s.tag==="m" && t!=="build") || (s.tag==="mo" && t==="migration"))
+    .filter(s => !isFlownetic(c) || !FLOWNETIC_SKIP.has(s.id))
     .concat(weekly)
     .concat(extraSteps(c,p.id).map(x=>({id:x.id, o:OWNERS[x.o]?x.o:"nikki", t:x.t, tag:"", crit:false, info:null, extra:true})));
 }
@@ -1181,7 +1200,7 @@ function phaseCounts(c,p){
   return {total:list.length, done, mine, mineDone};
 }
 function phaseDue(c,p){
-  const sg=c.signedDate, ko=(c.hub&&c.hub.kickoffDate)||"", gl=c.goLiveDate, d30=c.day30Date||addDays(gl,30);
+  const sg=isFlownetic(c)?"":c.signedDate, ko=(c.hub&&c.hub.kickoffDate)||"", gl=c.goLiveDate, d30=c.day30Date||addDays(gl,30);
   switch(p.id){
     case "p0": return sg; case "p1": return addDays(sg,7); case "p2": return addDays(sg,9);
     case "p3": return ko || addDays(sg,14); case "p4": return addDays(ko||addDays(sg,14),10); case "p5": return addDays(ko||addDays(sg,14),15);
@@ -1961,7 +1980,7 @@ function clientView(c){
   }
   if(due) chips.push('<span class="duet '+dueClass(due)+'">Gate due '+esc(fmt(due))+' · '+esc(relDue(due))+'</span>');
   const kd = (l,d,extra)=>'<div><div class="l">'+l+'</div><div class="v">'+(d?esc(fmt(d)):'<span style="color:var(--faint)">not set</span>')+'</div><div class="c '+(extra?dueClass(d):'')+'">'+(d&&extra?esc(rel(d)):'&nbsp;')+'</div></div>';
-  const dates = isFlownetic(c) ? (hasMigration(c) ? kd("Signed",c.signedDate)+kd("Go-live",c.goLiveDate,true) : "")
+  const dates = isFlownetic(c) ? (hasMigration(c) ? kd("Go-live",c.goLiveDate,true) : "")
     : projectType(c)==="migration" ? kd("Signed",c.signedDate)+kd("Go-live",c.goLiveDate,true)
     : projectType(c)==="audit" ? kd("Signed",c.signedDate)+kd("Workshop",addDays(c.signedDate,14),true)
     : kd("Signed",c.signedDate)+kd("Kickoff",c.hub&&c.hub.kickoffDate,true)+kd("Go-live",c.goLiveDate,true)+kd("Day-30",c.day30Date,true);
@@ -2091,7 +2110,6 @@ function refocusField(cid,f){
 /* Greg's projects carry none of the usual record, so this replaces the whole side column. */
 function flowneticAside(c){
   const hub=c.hub||{}, mig=hasMigration(c), gl=trackerGoLive(c);
-  const slack = /^C[A-Z0-9]{6,}$/.test(c.slackChannel||"") ? SLACK+c.slackChannel : "";
   const migUrl = PAGES+"SabelMigrationIntake.html?client="+encodeURIComponent(formSlugOf(c));
   let h='<section class="panel"><div class="panel-h"><h3>Flownetic project</h3></div><div class="form">'+
     '<p class="full" style="margin:0;font-size:13px;color:var(--muted)">'+(mig
@@ -2099,21 +2117,44 @@ function flowneticAside(c){
       : 'Greg manages this project. You set up the thread and Rocketlane, then do the weekly update. Nothing else is needed here.')+'</p>'+
     '<label>Delivered by<select data-field="partner" data-id="'+c.id+'">'+optHtml(PARTNERS,c.partner||"")+'</select></label>'+
     '<label>Project type<select data-field="hub.type" data-id="'+c.id+'">'+optHtml(Object.entries(TYPE_LABEL),projectType(c))+'</select><span class="fnote">Migration or Build + Migration when Richard is on it</span></label>'+
-    (mig ? '<label>Signed<input type="date" data-field="signedDate" data-id="'+c.id+'" value="'+esc(c.signedDate||"")+'"></label>'+
-      (gl ? '<label>Go-live<input type="date" value="'+esc(gl)+'" disabled title="Set in the client tracker"></label>' : '<label>Go-live<input type="date" data-field="goLiveDate" data-id="'+c.id+'" value="'+esc(c.goLiveDate||"")+'"></label>')+
-      '<label>Slack channel ID<input type="text" data-field="slackChannel" data-id="'+c.id+'" value="'+esc(c.slackChannel||"")+'" placeholder="C0…"></label>'+
+    (mig ? (gl ? '<label>Go-live<input type="date" value="'+esc(gl)+'" disabled title="Set in the client tracker"></label>' : '<label>Go-live<input type="date" data-field="goLiveDate" data-id="'+c.id+'" value="'+esc(c.goLiveDate||"")+'"></label>')+
       '<label>Drive folder URL<input type="url" data-field="hub.driveUrl" data-id="'+c.id+'" value="'+esc(hub.driveUrl||"")+'"></label>' : '')+
     '<label class="full">Notes<textarea data-field="notes" data-id="'+c.id+'">'+esc(c.notes||"")+'</textarea></label>'+
     '<div class="full" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)"><span style="flex:1 1 100%">Saves as you type.</span>'+
       (!onHold(c) && !["Complete","Outreach"].includes(c.stage) ? '<button class="btn sm" data-act="hold-edit" data-id="'+c.id+'">Put on hold</button>' : '')+
       (hasHub(c) ? '<button class="btn sm" data-act="restart">Change starting gate</button>' : '')+'</div></div></section>';
   if(mig) h+='<section class="panel"><div class="panel-h"><h3>Links</h3></div><ul class="links">'+
-    '<li class="'+(slack?'':'off')+'"><a href="'+esc(slack||"#")+'" target="_blank" rel="noopener"><span class="dot"></span>Slack channel</a></li>'+
     '<li class="'+(hub.driveUrl?'':'off')+'"><a href="'+esc(hub.driveUrl||"#")+'" target="_blank" rel="noopener"><span class="dot"></span>Drive folder</a></li>'+
     '<li><button data-act="copy" data-url="'+esc(migUrl)+'" title="'+esc(migUrl)+'"><span class="dot"></span>Migration link<span class="k"></span></button></li></ul></section>';
   return h;
 }
 const PARTNERS = [["","Sabel"],["flownetic","Flownetic (Greg)"]];
+/* Kick-off Desk scope items are {t, note, hours}. Closed by default so a long SOW stays one line,
+   and each note opens on its own. "Phase 1: ..." titles are grouped under a Phase 1 heading.
+   The open state lives in S.foldOpen, like Details, so an edit elsewhere does not shut them. */
+function scopeList(c,key,label,items){
+  const list=(items||[]).map(x=>typeof x==="string"?{t:x}:x);
+  if(!list.length) return "";
+  const hrs=a=>a.reduce((n,x)=>n+(Number(x.hours)||0),0);
+  const hrTxt=n=>n?n+"h":"";
+  const fid=c.id+":"+key, groups=[];
+  list.forEach((x,i)=>{
+    const m=/^(Phase\s+\d+)\s*[:\-–]\s*(.+)$/i.exec(x.t||x.item||x.text||x.label||"");
+    const name=m?m[1]:"", title=m?m[2]:(x.t||x.item||x.text||x.label||"");
+    let g=groups.find(y=>y.name===name);
+    if(!g) groups.push(g={name,rows:[]});
+    g.rows.push({x,i,title});
+  });
+  const row=r=>{
+    const hr=r.x.hours?'<span class="h">'+esc(r.x.hours)+'h</span>':'';
+    if(!r.x.note) return '<div class="sc-item plain"><span class="t">'+esc(r.title)+'</span>'+hr+'</div>';
+    const id=fid+":"+r.i;
+    return '<details class="fold sc-item" data-fold="'+esc(id)+'"'+(S.foldOpen[id]?' open':'')+'><summary><span class="t">'+esc(r.title)+'</span>'+hr+chev+'</summary><p class="nt">'+esc(r.x.note)+'</p></details>';
+  };
+  const n=list.length, total=hrs(list);
+  return '<details class="fold sc-list" data-fold="'+esc(fid)+'"'+(S.foldOpen[fid]?' open':'')+'><summary>'+label+'<span>'+n+(n===1?' item':' items')+(total?' · '+total+'h':'')+'</span>'+chev+'</summary><div class="sc-body">'+
+    groups.map(g=>(g.name?'<div class="sc-group"><span>'+esc(g.name)+'</span><span>'+hrTxt(hrs(g.rows.map(r=>r.x)))+'</span></div>':'')+g.rows.map(row).join("")).join("")+'</div></details>';
+}
 function asidePanels(c,n,ko,tk,td,w){
   if(isFlownetic(c)) return flowneticAside(c);
   let h="";
@@ -2165,27 +2206,6 @@ function asidePanels(c,n,ko,tk,td,w){
     link("Readiness answers", "SabelReadinessAdmin.html")+
   '</ul></section>';
 
-  /* scope */
-  const scopeText = (n&&n.scope) || (ko&&ko.r.scope&&ko.r.scope.summary) || "";
-  h += '<section class="panel"><div class="panel-h"><h3>Scope</h3><span class="sub">'+(n?'Notion':(ko?'Kick-off Desk':'not recorded'))+'</span></div><div class="scope">';
-  if(scopeText){
-    const long = scopeText.length>300;
-    h += '<div class="txt'+(long&&!S.scopeOpen?' clamp':'')+'">'+esc(scopeText)+'</div>'+(long?'<button class="linkbtn" data-act="scope">'+(S.scopeOpen?'Show less':'Show all')+'</button>':'');
-  } else h += '<div class="txt" style="color:var(--muted)">No scope summary yet. Add it to the Notion project, or record it on the Kick-off Desk.</div>';
-  if(n) h += '<div class="row">'+
-    '<span><b>Migration</b> '+esc(n.migration||"not stated")+(n.migrationHours?' · '+esc(n.migrationHours)+'h':'')+'</span>'+
-    (c.signedDate?'<span><b>Signed</b> '+esc(fmt(c.signedDate))+'</span>':'')+'</div>';
-  if(ko && ko.r.scope && ((ko.r.scope.inScope||[]).length || (ko.r.scope.outScope||[]).length)){
-    const li = a => (a||[]).map(x=>'<li>'+esc(typeof x==="string"?x:(x.item||x.text||x.label||JSON.stringify(x)))+'</li>').join("");
-    h += '<div class="inout"><div><div class="eyebrow">In scope</div><ul>'+li(ko.r.scope.inScope)+'</ul></div><div><div class="eyebrow">Out of scope</div><ul>'+li(ko.r.scope.outScope)+'</ul></div></div>';
-  }
-  h += '</div></section>';
-
-  /* recent changes */
-  const log=(Array.isArray(c.log)?c.log:[]).slice(-8).reverse();
-  if(log.length) h += '<section class="panel"><div class="panel-h"><h3>Recent changes</h3><span class="sub">last '+log.length+(c.updatedBy?' · latest by '+esc(c.updatedBy):'')+'</span></div><div class="changes">'+
-    log.map(l=>'<div><span>'+esc(fmt(String(l.at||"").slice(0,10)))+'</span><span>'+esc(l.by||"")+'</span><span>'+esc(l.what||"")+'</span></div>').join("")+'</div></section>';
-
   /* details */
   const hub=c.hub||{};
   const opt = optHtml;
@@ -2221,6 +2241,26 @@ function asidePanels(c,n,ko,tk,td,w){
       (!onHold(c) && !["Complete","Outreach"].includes(c.stage) ? '<button class="btn sm" data-act="hold-edit" data-id="'+c.id+'">Put on hold</button>' : '')+
       (hasHub(c) ? '<button class="btn sm" data-act="restart">Change starting gate</button>' : '')+'</div>'+
   '</div></details></section>';
+  /* scope */
+  const scopeText = (n&&n.scope) || (ko&&ko.r.scope&&ko.r.scope.summary) || "";
+  h += '<section class="panel"><div class="panel-h"><h3>Scope</h3><span class="sub">'+(n?'Notion':(ko?'Kick-off Desk':'not recorded'))+'</span></div><div class="scope">';
+  if(scopeText){
+    const long = scopeText.length>300;
+    h += '<div class="txt'+(long&&!S.scopeOpen?' clamp':'')+'">'+esc(scopeText)+'</div>'+(long?'<button class="linkbtn" data-act="scope">'+(S.scopeOpen?'Show less':'Show all')+'</button>':'');
+  } else h += '<div class="txt" style="color:var(--muted)">No scope summary yet. Add it to the Notion project, or record it on the Kick-off Desk.</div>';
+  if(n) h += '<div class="row">'+
+    '<span><b>Migration</b> '+esc(n.migration||"not stated")+(n.migrationHours?' · '+esc(n.migrationHours)+'h':'')+'</span>'+
+    (c.signedDate?'<span><b>Signed</b> '+esc(fmt(c.signedDate))+'</span>':'')+'</div>';
+  if(ko && ko.r.scope && ((ko.r.scope.inScope||[]).length || (ko.r.scope.outScope||[]).length)){
+    h += '<div class="sc-lists">'+scopeList(c,"in","In scope",ko.r.scope.inScope)+scopeList(c,"out","Out of scope",ko.r.scope.outScope)+'</div>';
+  }
+  h += '</div></section>';
+
+  /* recent changes */
+  const log=(Array.isArray(c.log)?c.log:[]).slice(-8).reverse();
+  if(log.length) h += '<section class="panel"><div class="panel-h"><h3>Recent changes</h3><span class="sub">last '+log.length+(c.updatedBy?' · latest by '+esc(c.updatedBy):'')+'</span></div><div class="changes">'+
+    log.map(l=>'<div><span>'+esc(fmt(String(l.at||"").slice(0,10)))+'</span><span>'+esc(l.by||"")+'</span><span>'+esc(l.what||"")+'</span></div>').join("")+'</div></section>';
+
   return h;
 }
 
@@ -2285,6 +2325,7 @@ function listsView(){
   let h='<div class="today-h"><div><div class="eyebrow">Standard checklists</div><h1>Checklists</h1></div></div>'+
     '<p class="lead-note">The steps every client of each project type works through. Renaming a step or changing its owner updates it for every client, and ticks already recorded are kept. <b>Remove</b> takes a built-in step off every checklist; removed steps collect at the foot of each gate, so you can bring one back if you change your mind. Steps you add yourself get a <b>Delete</b> button instead and go for good. Critical steps are the ones that must be done before kickoff: they are listed on Today and flagged when a gate closes with them open. A different owner set on one client still wins for that client.</p>'+
     '<div class="seg edtabs" role="group" aria-label="Which checklist">'+LISTS.map(([k,l,P])=>'<button data-act="list-tab" data-v="'+k+'" aria-pressed="'+(k===tab)+'">'+esc(l)+' · '+P.length+' gates</button>').join("")+'</div>';
+  if(tab==="flownetic") h+='<p class="lead-note">These are the only steps on a Flownetic project with no migration. When the type is Migration or Build + Migration, Richard is doing migration work, so the client also gets the gates on the Migration tab, without its signing, Drive, welcome email, Slack channel and Intercom deal steps.</p>';
   /* One editor row, used for both the live list and the removed pile below it. */
   const row = (p,s,i,n) => {
     const b=s.base, changed = b && (s.t!==b.t || s.o!==b.o || (s.tag||"")!==(b.tag||"") || !!s.crit!==!!b.crit), dis=s.hide?' disabled':'';
