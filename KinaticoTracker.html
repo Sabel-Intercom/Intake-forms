@@ -1855,7 +1855,7 @@ body.on-home #main .mnw{max-width:1344px!important;margin:0 auto!important}
 .ph-chip{margin-left:6px;padding:0 5px;border:1px solid var(--k2A3145,#26262a);border-radius:4px;font:500 10px/1.5 'DM Mono',monospace;color:var(--k94A3B8,#9a9a9f);white-space:nowrap}
 @media(max-width:700px){.ph-bar{margin:10px 8px 4px}.ph-t{flex-basis:100%}}
 </style><script id="ph-core">
-const PH_BUDGET={1:36,2:60},PH_BY_PILLAR={'setup':1,'foundations':1,'automation':1,'golive':1,'helpdesk':2,'fin':2,'post':2},PH_LAST_P1_WEEK=5;
+const PH_BUDGET={},PH_BY_PILLAR={'setup':1,'foundations':1,'automation':1,'golive':1,'helpdesk':2,'fin':2,'post':2},PH_LAST_P1_WEEK=5;
 const PH_CAP={1:'<b>Phase 1, core helpdesk.</b> Email and chat live in Intercom, and Help Scout switched off.',
   2:'<b>Phase 2, Fin, call flows and reporting.</b> Begins once Phase 1 is signed off, and dates are set then.',
   0:'<b>Both phases.</b> Each task shows which phase it sits in.'};
@@ -1897,7 +1897,7 @@ const GO_LIVE='2026-12-16';  // [CLIENT] Phase 1 target
 const GO_LIVE_NOTE='Phase 1 target, to be confirmed at kick-off';
 const ALL_STATUSES=['Complete','In Progress','Pending','Blocked','Dependency'];
 const SABEL_TEAM=['Chris','Richard','Greg'];
-const BUILD_V=202611030936;  // set automatically by the build script from the build timestamp; do not edit
+const BUILD_V=202611030951;  // set automatically by the build script from the build timestamp; do not edit
 // INTERNAL build flag. false in the client tracker (the deployed, publicly
 // reachable file); the build flips it to true only in [ClientSlug]Tracker_internal.html,
 // which is also the only file that carries hours. The client build ships no hrs
@@ -7699,13 +7699,8 @@ loadInitial().then(()=>{applyHash();render();refreshForms();});
 <script id="ph-ui">
 function phNormal(){P.forEach(p=>['sabel','client'].forEach(g=>(T[p.id][g]||[]).forEach(t=>{if(t.ph!==1&&t.ph!==2)t.ph=phF||PH_BY_PILLAR[p.id]||1;})));}
 function phSet(v){phF=v;try{localStorage.setItem('kinatico-phase-focus',String(v));}catch(e){}if(typeof flowOpen!=='undefined')flowOpen=null;render();}
-function phHours(){const o={1:{p:0,d:0},2:{p:0,d:0}};hoursRollup().pillars.forEach(x=>x.rows.forEach(r=>{if(r.eff===null)return;const k=o[r.t.ph||1];k.p+=r.eff;if(r.t.s==='Complete')k.d+=r.eff;}));return o;}
-function phTile(n,h){const b=PH_BUDGET[n],over=h.p-b,pct=b?Math.min(100,Math.round(h.p/b*100)):0;
-  const s=over>0.001?fmtH(over)+' over: move something out':over<-0.001?fmtH(-over)+' free':'Fully planned';
-  const conf=n===2?' · contract to be confirmed':' · on the quote';
-  return `<div class="ph-t${over>0.001?' over':''}"><div class="l">Phase ${n}${conf}</div><div class="n">${fmtH(h.p)} of ${fmtH(b)}</div><div class="b"><i style="width:${pct}%;background:${over>0.001?'#FF7A6B':n===1?'#E10600':'#6366F1'}"></i></div><div class="s">${s} · ${fmtH(h.d)} delivered</div></div>`;}
 function phBar(){const seg=[[1,'Phase 1'],[2,'Phase 2'],[0,'All']].map(x=>`<button class="${phF===x[0]?'on':''}" aria-pressed="${phF===x[0]}" onclick="phSet(${x[0]})">${x[1]}</button>`).join('');
-  let hrs='';if(INTERNAL){const h=phHours();hrs=`<div class="ph-h">${phTile(1,h[1])}${phTile(2,h[2])}</div>`;}
+  const hrs='';
   return `<div class="ph-bar"><div class="ph-seg" role="group" aria-label="Show phase">${seg}</div><div class="ph-cap">${PH_CAP[phF]}</div>${hrs}</div>`;}
 function phFields(t){return {ph:t.ph,week:t.week,wkEnd:t.wkEnd,due:t.due,dueEnd:t.dueEnd,gate:t.gate,dayOff:t.dayOff,phPrev:t.phPrev,
   stages:(t.phases||[]).map(s=>({week:s.week,wkEnd:s.wkEnd,due:s.due}))};}
