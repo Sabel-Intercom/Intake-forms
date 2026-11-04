@@ -520,6 +520,8 @@ html.light .sq{box-shadow:none}
 .wsh>span.wpast{font-size:12.5px;color:var(--faint);border-left:1px solid var(--line2);padding-left:10px}
 .wsh .wcapline{margin-left:auto}
 .wcg{display:flex;flex-direction:column;gap:6px;min-width:0;border:1px solid var(--line);border-radius:12px;padding:6px;align-self:start}
+.wcg.ty-build{--wcg:var(--tyBuild)}.wcg.ty-mig{--wcg:var(--tyMig)}.wcg.ty-both{--wcg:var(--tyBoth)}.wcg.ty-audit{--wcg:var(--tyAudit)}.wcg.ty-consult{--wcg:var(--tyConsult)}
+.wcg[class*="ty-"]{border:2px solid var(--wcg);background:color-mix(in srgb,var(--wcg) 10%,transparent)}
 .wcgh{display:flex;align-items:center;gap:6px;padding:2px 4px;min-width:0}
 .wcgh b{font-family:Archivo,sans-serif;font-weight:700;font-size:12.5px;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 .wcgh span{font-size:12px;color:var(--mute);white-space:nowrap}
@@ -1343,7 +1345,7 @@ function wclientsHTML(cards,lane){
   const g={};cards.forEach(t=>{const k=ckey(t);(g[k]=g[k]||[]).push(t);});
   return Object.keys(g).sort((a,b)=>(a==='none')-(b==='none')||cLabel(a).localeCompare(cLabel(b))).map(k=>{
     const rows=g[k],hrs=rows.reduce((a,t)=>a+(+t.est||0),0);
-    return '<div class="wcg"><div class="wcgh">'+tsq(rows[0])+'<b>'+esc(cLabel(k))+'</b><span>'+(rows.length>1?rows.length+' tasks':'')+(rows.length>1&&hrs?' · ':'')+(hrs?fTot(hrs):'')+'</span></div>'+
+    return '<div class="wcg'+tyc(rows[0])+'"><div class="wcgh">'+tsq(rows[0])+'<b>'+esc(cLabel(k))+'</b><span>'+(rows.length>1?rows.length+' tasks':'')+(rows.length>1&&hrs?' · ':'')+(hrs?fTot(hrs):'')+'</span></div>'+
       rows.map(t=>wcardHTML(Object.assign({},t,{_inClient:true}),lane)).join('')+'</div>';
   }).join('');
 }
