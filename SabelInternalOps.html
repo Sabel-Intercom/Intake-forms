@@ -1146,6 +1146,21 @@ function notionFor(c){
   const x = String(c.name).trim().toLowerCase();
   return S.notion.find(p=>String(p.name).trim().toLowerCase()===x) || S.notion.find(p=>norm(p.name)===n) || null;
 }
+/* 3 Nov 2026: sabel-kickoff-v1 needs the team passcode, kept per browser and shared with the kick-offs page.
+   Each client's live scope is in their own key, so it is laid over the record held here. */
+async function loadKickoffs(){
+  let tok=""; try{ tok=localStorage.getItem("sabel-team-token")||""; }catch(_){}
+  if(!tok){ tok=(prompt("Team passcode, to show kick-off scope on this page:")||"").trim(); try{ if(tok) localStorage.setItem("sabel-team-token",tok); }catch(_){} }
+  const r=await fetch(API+"?key="+KICKOFF_KEY+"&_t="+Date.now(),{cache:"no-store",headers:{"X-Team-Token":tok}});
+  if(r.status===401){ try{ localStorage.removeItem("sabel-team-token"); }catch(_){} throw new Error("team passcode needed"); }
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  const j=await r.json(), k=(j.data&&j.data.clients)||{};
+  await Promise.all(Object.keys(k).filter(id=>k[id]&&k[id].hubKey).map(id=>{
+    const h=k[id].hubKey;
+    return getJSON(API+"?key="+encodeURIComponent("kickoff-"+h.slug+"-"+h.k+"-v1")).then(o=>{ if(o.data&&o.data.record) k[id]=Object.assign({},k[id],o.data.record); }).catch(()=>{});
+  }));
+  S.kickoff=k; S.loaded.kick=true;
+}
 function kickoffFor(c){
   const k = S.kickoff||{};
   if(c.hub && c.hub.kickoffId && k[c.hub.kickoffId] && !k[c.hub.kickoffId].removed) return {id:c.hub.kickoffId, r:k[c.hub.kickoffId]};
@@ -1491,7 +1506,7 @@ async function loadAll(){
     }),
     getJSON(NOTION_URL).then(j=>{ S.notion = Array.isArray(j) ? j : (j.projects||j.data||[]); S.loaded.notion=true; }).catch(e=>S.errors.notion=e.message),
     getJSON(TRACKERS_JSON).then(j=>{ S.reg = Array.isArray(j) ? j : (j.trackers||[]); S.loaded.reg=true; }).catch(e=>S.errors.reg=e.message),
-    getJSON(API+"?key="+KICKOFF_KEY).then(j=>{ S.kickoff=(j.data&&j.data.clients)||{}; S.loaded.kick=true; }).catch(e=>S.errors.kick=e.message)
+    loadKickoffs().catch(e=>S.errors.kick=e.message)
   ]);
   applyChecklists();
   setSave(S.errors.portal ? "offline" : "idle");

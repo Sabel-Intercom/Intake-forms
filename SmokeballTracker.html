@@ -1895,7 +1895,14 @@ const T={"setup": {"sabel": [{"t": "Set up a shared Slack channel with your team
 // Client hub forms, injected from FORMS_DATA. Only forms with a matching client
 // task ('form' key) are included, so a build without a migration has no
 // migration form anywhere.
-const FORMS=[{"id": "readiness", "l": "Readiness check", "icon": "clipboard-check", "file": "SabelReadinessCheck.html", "blurb": "The access, people and technical pieces your build depends on, in one short form at the start.", "key": "readiness-{slug}-v1", "slugMode": "hyphen"}, {"id": "migration", "l": "Migration details", "icon": "arrows-exchange", "file": "SabelMigrationIntake_Smokeball.html", "blurb": "How your old tickets move across into Intercom: history, mappings, cutover and sign-off.", "key": "migration-intake-{slug}-v1", "slugMode": "strip"}];
+const FORMS=[{"id": "kickoff", "l": "Kick-off", "icon": "flag", "file": "SabelKickoff.html", "always": true, "blurb": "What we agreed on the kick-off call: scope, dates, who does what, and next steps.", "link": "https://sabel-intercom.github.io/Intake-forms/SabelKickoff.html?client=smokeball&k=48507d0154c8e3cb&rdy=smokeball&name=Smokeball", "keyFull": "kickoff-smokeball-48507d0154c8e3cb-v1"}, {"id": "readiness", "l": "Readiness check", "icon": "clipboard-check", "file": "SabelReadinessCheck.html", "blurb": "The access, people and technical pieces your build depends on, in one short form at the start.", "key": "readiness-{slug}-v1", "slugMode": "hyphen"}, {"id": "migration", "l": "Migration details", "icon": "arrows-exchange", "file": "SabelMigrationIntake_Smokeball.html", "blurb": "How your old tickets move across into Intercom: history, mappings, cutover and sign-off.", "key": "migration-intake-{slug}-v1", "slugMode": "strip"}];
+/*KICKOFF-TAB*/
+formsActive=function(){return FORMS.filter(f=>f.always||formTask(f.id));};
+(function(){const L=formLinkOf,K=formKey,V=formView;
+formLinkOf=function(id){const f=formById(id);return f&&f.always?f.link:L(id);};
+formKey=function(f,l){return f.always?f.keyFull:K(f,l);};
+formView=function(id){const f=formById(id);return f&&f.always?`<div id="form-head">${formHeadInner(id)}</div>`:V(id);};
+})();
 const FORMS_BASE='https://sabel-intercom.github.io/Intake-forms/';
 const TRACKER_SLUG='smokeball';
 
