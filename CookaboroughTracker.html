@@ -1433,6 +1433,49 @@ html.light .ptc-rec{color:#B45309}
 .ptc-f i{font-size:12px}
 .ptc-xtra{padding:0 16px 12px}
 .fl-ph{padding:14px 16px;border-radius:12px;border:1px dashed var(--k2A3145,#2A3145);font-size:13px;color:var(--k64748B,#64748B);line-height:1.45;text-wrap:pretty}
+
+/* ── Project tracker, By due date ── */
+.wk-left{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.wk-tog{display:inline-flex;padding:3px;border-radius:99px;border:1px solid var(--k2A3145,#2A3145);background:var(--k161B26,#161B26)}
+.wk-tog button{padding:6px 14px;border:0;border-radius:99px;background:transparent;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--k94A3B8,#94A3B8);cursor:pointer;white-space:nowrap}
+.wk-tog button:hover{color:var(--kE2E8F0,#E2E8F0)}
+.wk-tog button.on{background:#E10600;color:#fff}
+.wk-bar{margin-top:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wk-chip{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:99px;border:1px solid var(--k2A3145,#2A3145);background:transparent;font-family:inherit;font-size:12px;font-weight:500;color:var(--kA7AFBE,#A7AFBE);cursor:pointer}
+.wk-chip:hover{color:var(--kF2F4F8,#F2F4F8);border-color:var(--k475569,#475569)}
+.wk-chip i{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.wk-chip.on{color:var(--kF2F4F8,#F2F4F8);font-weight:600}
+.wk-mix{margin-top:12px;display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12px;color:var(--k8B93A3,#8B93A3)}
+.wk-mix span{display:inline-flex;align-items:center;gap:6px}
+.wk-mix i{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.wk-mix b{color:var(--kC9CFDA,#C9CFDA);font-weight:600}
+.wk-pil{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:2px 8px;border:1px solid;border-radius:99px;font-size:10.5px;font-weight:700;letter-spacing:.02em;line-height:1.35}
+.wk-pil i{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.wk-tags{display:flex;margin-bottom:6px}
+.wk-open .wk-tags{justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.wk-close{background:transparent;border:0;padding:0;font-family:inherit;font-size:12px;color:var(--k8B93A3,#8B93A3);cursor:pointer}
+.wk-close:hover{color:var(--kF2F4F8,#F2F4F8)}
+.wk .fl-due{text-align:right}
+.wk .fl-stack>.fl-task{padding-bottom:10px}
+.wk .fl-due{max-width:170px}
+.wk .fl-due b{display:block;font-weight:600}
+.wk .fl-task.late{border-color:rgba(255,77,69,.6)!important}
+.fl-num.wk-n{font-size:13px}
+.fl-num.wk-n.now{border-color:var(--k60A5FA,#60A5FA);box-shadow:0 0 16px rgba(96,165,250,.5)}
+.fl-num.wk-n.late{border-color:var(--kFF4D45,#FF4D45);color:var(--kFFB3AF,#FFB3AF)}
+.fl-num.wk-n.done{background:var(--k4ADE80,#4ADE80);border-color:var(--k4ADE80,#4ADE80);color:var(--k0F1117,#0F1117)}
+.fl-state.late{background:rgba(225,6,0,.14);color:#FF8A84}
+.fl-state.golive{background:#E10600;color:#fff}
+.fl-blk.wk-now{border-color:var(--k60A5FA,#60A5FA)}
+.fl-blk.wk-over{border-color:rgba(255,77,69,.6)}
+.wk-list{grid-column:1/-1;display:flex;flex-direction:column;gap:10px}
+.wk-list>.fl-task,.wk-list>.fl-open{margin:0;padding-bottom:10px}
+.wk-sess{grid-column:1/-1;display:flex;flex-direction:column;gap:8px}
+.wk-sess .fl-pg{max-width:none}
+.wk-go{grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border:1px solid rgba(225,6,0,.55);border-radius:12px;background:rgba(225,6,0,.1);font-size:13.5px;color:var(--kFFB3AF,#FFB3AF)}
+.wk-go b{font-family:Archivo,sans-serif;color:var(--kF2F4F8,#F2F4F8)}
+.wk-none{padding:16px 22px;font-size:13px;color:var(--k64748B,#64748B);font-style:italic}
+@media(max-width:760px){.wk .fl-task{grid-template-columns:18px minmax(0,1fr)}.wk .fl-due{grid-column:2;text-align:left;padding-top:0;white-space:normal;max-width:none}.wk .fl-due b{display:inline;margin-right:6px}.wk-sess .fl-pg{grid-template-columns:minmax(0,1fr)}.wk-bar{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.wk-chip{flex-shrink:0}}
 </style>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap">
 <style id="v9-compact">
@@ -4978,7 +5021,7 @@ function flowScroll(id){const el=document.getElementById(id);if(!el)return;
   const sc=el.closest('.mn'),ov=sc?getComputedStyle(sc).overflowY:'visible';
   if(sc&&(ov==='auto'||ov==='scroll'))sc.scrollTo({top:sc.scrollTop+el.getBoundingClientRect().top-sc.getBoundingClientRect().top-24,behavior:'smooth'});
   else window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-24,behavior:'smooth'});}
-function flowOpenAndScroll(pid){if(!flowOpen)flowOpen=new Set();flowOpen.add(pid);if(cur!=='flow'){flowPending=pid;setP('flow');return;}renderMain();setTimeout(()=>flowScroll('flow-'+pid),30);}
+function flowOpenAndScroll(pid){if(flowBy==='week'){flowBy='pillar';try{localStorage.setItem('flow-by-'+KEY,'pillar');}catch(e){}if(/^#flow/.test(location.hash))history.replaceState(null,'','#flow');}if(!flowOpen)flowOpen=new Set();flowOpen.add(pid);if(cur!=='flow'){flowPending=pid;setP('flow');return;}renderMain();setTimeout(()=>flowScroll('flow-'+pid),30);}
 function flowAfterRender(){if(flowPending){const pid=flowPending;flowPending='';setTimeout(()=>flowScroll('flow-'+pid),60);}}
 // Editing tools on (12 Oct 2026): a blank task added from a flow block opens in place, ready to edit.
 let flowAddWrapped=false;
@@ -4988,6 +5031,7 @@ function flowWrapAdd(){if(flowAddWrapped||typeof addTask!=='function')return;flo
     renderMain();setTimeout(()=>{if(typeof pvEditTitle==='function')pvEditTitle(cid);},40);};}
 function flowView(){
   flowWrapAdd();
+  if(flowPending&&flowBy==='week')flowBy='pillar';
   const now=currentWeek(),rows=P.map((p,i)=>flowPillar(p,i,now));
   if(!flowOpen){flowOpen=new Set();const first=rows.find(r=>r.state==='active')||rows.find(r=>r.state!=='done')||rows[0];if(first)flowOpen.add(first.p.id);}
   const allT=rows.reduce((a,r)=>a+r.total,0),allD=rows.reduce((a,r)=>a+r.done,0),needTotal=rows.reduce((a,r)=>a+r.need,0);
@@ -5038,14 +5082,14 @@ function flowView(){
   return `<div class="fl"><div class="fl-wrap">
     <div class="fl-hero"><div><div class="fl-eye"><i></i>Sabel × ${esc(CLIENT_NAME)} · ${ptype}</div>
         <h1 class="fl-h1">Your build,<br><span>start to finish.</span></h1>
-        <p class="fl-sub">Every block of the project in one flow. Open any block to see the checklist — what's on your side, what's on ours. Click a task to work on it here.</p></div>
+        <p class="fl-sub">${flowBy==='week'?"Everything due, most urgent first, whichever block it belongs to. What's on your side, what's on ours, and when. Click a task to work on it here.":"Every block of the project in one flow. Open any block to see the checklist — what's on your side, what's on ours. Click a task to work on it here."}</p></div>
       <div class="fl-prog"><div class="r"><span>Overall progress</span><b>${pct}%</b></div><div class="t"><i style="width:${pct}%"></i></div><div class="fl-pills">${pills.join('')}</div></div></div>
     <div class="fl-card"><div class="fl-cardh"><span class="fl-lab">Checkpoints · kick-off → handover</span><span class="fl-hint">Click a checkpoint to open that block</span></div>
       <div class="fl-chain"><div class="fl-track"></div><div class="fl-fill" style="width:${chainW}"></div><div class="fl-nodes${seq.length>14?' dense':''}">${nodes}</div></div></div>
-    <div class="fl-bh"><span class="fl-lab">${rows.length} blocks${nProg?' · '+nProg+' sessions':''} · in order</span>${(typeof toolsOn!=='undefined'&&toolsOn&&typeof sessNew==='function')?`<span class="fl-add"><button class="fl-hide" onclick="sessNew()" title="Add a light session: a training, check-in or ad hoc call">+ Add a session</button><button class="fl-hide" onclick="progNewForm()" title="Add a progression session between two blocks or at the end of a phase">+ Add a progression session</button></span>`:''}
+    <div class="fl-bh"><div class="wk-left">${wkToggle()}<span class="fl-lab">${flowBy==='week'?wkCount(rows,now):`${rows.length} blocks${nProg?' · '+nProg+' sessions':''} · in order`}</span></div>${(typeof toolsOn!=='undefined'&&toolsOn&&typeof sessNew==='function')?`<span class="fl-add"><button class="fl-hide" onclick="sessNew()" title="Add a light session: a training, check-in or ad hoc call">+ Add a session</button><button class="fl-hide" onclick="progNewForm()" title="Add a progression session between two blocks or at the end of a phase">+ Add a progression session</button></span>`:''}
       <div class="fl-legend"><button class="fl-hide${hideDone?' on':''}" onclick="toggleHideDone()"><span class="sw"></span>Hide completed</button>
         <span><i style="background:var(--k4ADE80,#4ADE80)"></i>Done</span><span><i style="background:var(--k60A5FA,#60A5FA)"></i>In progress</span><span><i style="border:1.5px dashed var(--kFF4D45,#FF4D45)"></i>Waiting on ${esc(CLIENT_NAME)}</span><span><i style="border:1.5px solid var(--k475569,#475569)"></i>Upcoming</span></div></div>
-    <div class="fl-blocks"><div class="fl-spine"></div>${blocks}</div>
+    ${flowBy==='week'?wkBlocks(rows,now):`<div class="fl-blocks"><div class="fl-spine"></div>${blocks}</div>`}
   </div></div>`;}
 (function(){const orig=renderMain;renderMain=function(){
   if(cur==='flow'){const m=document.getElementById('main');if(m)m.innerHTML='<div class="mnw">'+flowView()+'</div>';if(typeof syncFormHost==='function')syncFormHost();flowAfterRender();return;}
@@ -5154,6 +5198,100 @@ function qStaged(t,cid){
     ${qNotes.has(cid)?`<div class="ptc-xtra">${pvNotes(t,cid)}</div>`:''}
   </div>`;
 }
+
+
+// ── Project tracker, By due date (5 Nov 2026) ──
+let flowBy=(()=>{try{return localStorage.getItem('flow-by-'+KEY)==='week'?'week':'pillar';}catch(e){return 'pillar';}})();
+let wkOpen=null,wkPil='';
+const WK_DAY=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function flowSetBy(v){flowBy=v;try{localStorage.setItem('flow-by-'+KEY,v);}catch(e){}
+  if(/^#flow/.test(location.hash))history.replaceState(null,'',v==='week'?'#flow/week':'#flow');renderMain();}
+function wkToggle(){return `<div class="wk-tog" role="group" aria-label="Group tasks"><button class="${flowBy==='week'?'':'on'}" onclick="flowSetBy('pillar')" aria-pressed="${flowBy!=='week'}">By pillar</button><button class="${flowBy==='week'?'on':''}" onclick="flowSetBy('week')" aria-pressed="${flowBy==='week'}">By due date</button></div>`;}
+function wkFmt(d){return WK_DAY[d.getDay()]+' '+hnFmt(d);}
+function wkToday(){const n=new Date();n.setHours(0,0,0,0);return n;}
+/* The date a task is due: staged tasks follow their active stage, go-live day tasks the go-live date. */
+function wkDue(t){
+  if(isPhased(t)){syncPhased(t);const ai=activePhaseIdx(t),p=t.phases[ai<0?t.phases.length-1:ai];return sdDueDate(p);}
+  if(t.gate==='day'&&!t.due&&goLiveDate){const g=hnGoLive();if(g)return g;}
+  return t.due?dueEndDate(t):dueDate(t);}
+function wkLate(t,d){if(!d||t.s==='Complete')return false;return isPhased(t)||t.gate==='day'||t.due?d<wkToday():isOverdue(t);}
+function wkItem(x,r,now){
+  const t=x.t,d=x.d,cid=x.cid,pc=r.p.c,ph=isPhased(t),late=x.late,isC=x.side==='client';
+  const tag=`<span class="wk-pil" style="color:${pc};border-color:${flowTint(pc,.5)};background:${flowTint(pc,.12)}"><i style="background:${pc}"></i>${esc(r.p.l)}</span>`;
+  if(pvOpen.has(cid))return `<div class="fl-open wk-open" style="--flc:${flowTint(pc,.6)||'var(--k2A3145,#2A3145)'}"><div class="wk-tags">${tag}<button class="wk-close" onclick="flowRow('${cid}')">Close</button></div>${ph?qStaged(t,cid):qOpen(t,cid)}</div>`;
+  let k,meta;
+  if(ph){const ai=activePhaseIdx(t),p=ai<0?null:t.phases[ai],fut=p&&p.week>now&&!(p.sub||[]).some(s=>s.s!=='Pending');
+    k=ai<0?'done':fut?'up':'now';
+    meta=ai<0?'Done':`Stage ${ai+1} of ${t.phases.length} · ${esc(p.l)} · ${isC?'with you':'with Sabel'}`;}
+  else{k=x.k;const w=t.week||0,who=isC?'you':(t.o||'Sabel');
+    meta=k==='done'?'Done':k==='now'?(isC?'In progress · with you':'In progress · '+esc(t.o||'Sabel')):k==='wait'?('Waiting on you'+(x.side==='sabel'?' before Sabel can continue':'')):(((w>0&&w<=now)?'Open · ':'Upcoming · ')+esc(who));
+    if(k!=='done'&&t.week&&endWeek(t)>t.week)meta+=` · runs weeks ${t.week}–${endWeek(t)}`;}
+  const dt=!d?'':(t.due&&isDueRange(t)?dueText(t):wkFmt(d));
+  const due=k==='done'?`<b>Done</b>${dt?'was due '+dt:''}`:!d?'Date TBC':late?`<b>${wkAgo(d)}</b>was due ${dt}`:`<b>Due</b>${dt}`;
+  const tint=`border-color:${flowTint(pc,.45)};background:${flowTint(pc,.06)}`;
+  return `<div class="fl-task ${k}${late?' late':''}" style="${tint}" onclick="flowRow('${cid}')" title="Open this task"><span class="fl-box">${k==='done'?'✓':k==='now'?'›':''}</span><div style="min-width:0"><div class="wk-tags">${tag}</div><div class="fl-ti">${esc(t.t)}</div><div class="fl-tm">${meta}</div></div><span class="fl-due" style="color:${late?'var(--kFF4D45,#FF4D45)':'var(--k8B93A3,#8B93A3)'}">${due}</span></div>`;}
+/* The boxes: Overdue (one list, longest overdue first), This week, Next week, Later (undated last).
+   Tasks completed in an earlier week go to a Completed box, shown when Hide completed is off. */
+const WK_BOX=['overdue','this','next','later','done'];
+function wkAgo(d){const n=Math.round((wkToday()-d)/86400000);if(n<7)return n<=1?'1 day overdue':n+' days overdue';const w=Math.floor(n/7);return w===1?'1 week overdue':w+' weeks overdue';}
+/* Calendar weeks from today's Monday, so a project that has not started still reads true. */
+function wkMon(){const n=wkToday();n.setDate(n.getDate()-(n.getDay()+6)%7);return n;}
+function wkPlus(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function wkSlot(d){if(!d)return 'later';const m=wkMon();return d<m?'past':d<wkPlus(m,7)?'this':d<wkPlus(m,14)?'next':'later';}
+function wkBoxOf(x){const s=wkSlot(x.d);
+  if(x.done)return s==='past'||!x.d?'done':s;
+  if(x.late)return 'overdue';
+  return s==='past'?'this':s;}
+function wkBoxes(rows,now){
+  const box={};WK_BOX.forEach(k=>box[k]={key:k,client:[],sabel:[],all:[],progs:[],go:false});
+  rows.forEach(r=>{if(wkPil&&r.p.id!==wkPil)return;['client','sabel'].forEach(side=>r.cols[side].forEach(x=>{
+    const d=wkDue(x.t),it=Object.assign({},x,{r,side,d,late:wkLate(x.t,d)}),b=box[wkBoxOf(it)];b[side].push(it);b.all.push(it);}));
+    flowProgs(r.p.id,now).forEach(s=>{const sl=wkSlot(s.x.date?new Date(s.x.date+'T00:00:00'):(s.week?weekStartDate(s.week):null));
+      box[s.state==='done'?'done':sl==='past'?'overdue':sl].progs.push(s);});});
+  const g=hnGoLive();if(g&&!wkPil&&g>=wkToday()){box[wkSlot(g)].go=true;}
+  const by=(a,b)=>((a.d?a.d.getTime():9e15)-(b.d?b.d.getTime():9e15))||((a.side==='client'?0:1)-(b.side==='client'?0:1))||(a.r.i-b.r.i);
+  WK_BOX.forEach(k=>{const b=box[k];b.client.sort(by);b.sabel.sort(by);b.all.sort(by);if(k==='done')b.all.reverse();
+    b.total=b.all.length;b.done=b.all.filter(x=>x.done).length;b.need=b.all.filter(x=>x.needYou).length;});
+  return box;}
+function wkHead(k,now){
+  const m=wkMon(),range=d=>hnFmt(d)+' – '+hnFmt(wkPlus(d,6)),on=now>=1;
+  if(k==='overdue')return {title:'Overdue',meta:'Most urgent first',num:'!',cls:'late'};
+  if(k==='this')return {title:'This week',meta:(on?'Week '+now+' · ':'')+range(m),num:on?'W'+now:'·',cls:'now'};
+  if(k==='next')return {title:'Next week',meta:(on?'Week '+(now+1)+' · ':'')+range(wkPlus(m,7)),num:on?'W'+(now+1):'·',cls:''};
+  if(k==='later')return {title:'Later',meta:'From '+hnFmt(wkPlus(m,14)),num:'+',cls:''};
+  return {title:'Completed',meta:'Earlier weeks',num:'✓',cls:'done'};}
+function wkTog(k){if(wkOpen.has(k))wkOpen.delete(k);else wkOpen.add(k);renderMain();}
+function wkCol(b,side){
+  const all=b[side],list=all.filter(x=>!hideDone||!x.done),done=all.filter(x=>x.done).length;
+  const head=side==='client'?`<div class="fl-colh you"><b>Your side · ${esc(CLIENT_NAME)}</b><span>${done}/${all.length}</span></div>`:`<div class="fl-colh"><b>Sabel side</b><span>${done}/${all.length}</span></div>`;
+  const now=currentWeek(),body=list.length?list.map(x=>wkItem(x,x.r,now)).join(''):`<div class="fl-empty">${all.length?'Everything here is done.':(side==='client'?'Nothing due from you.':'Nothing due from Sabel.')}</div>`;
+  return `<div class="fl-col">${head}<div class="fl-stack">${body}</div></div>`;}
+function wkBlocks(rows,now){
+  const box=wkBoxes(rows,now);
+  if(!wkOpen)wkOpen=new Set(['overdue','this','next']);
+  const shown=WK_BOX.filter(k=>{const b=box[k];if(k==='this'||k==='next')return true;if(k==='done')return !hideDone&&(b.total||b.progs.length);return b.total||b.progs.length||b.go;});
+  const html=shown.map(k=>{const b=box[k],h=wkHead(k,now),open=wkOpen.has(k),now_=k==='this';
+    const mix=rows.map(r=>[r,b.all.filter(x=>x.r===r).length]).filter(a=>a[1]).map(([r,n])=>`<span><i style="background:${r.p.c}"></i>${esc(r.p.l)} <b>${n}</b></span>`).join('');
+    const pct=b.total?Math.round(b.done/b.total*100):0,g=b.go?hnGoLive():null,count=b.total===1?'1 task':b.total+' tasks';
+    const stat=k==='overdue'||k==='done'?`<span><b>${count}</b></span>`:`<div class="bar"><i style="width:${pct}%;background:${pct===100?'var(--k4ADE80,#4ADE80)':'var(--k60A5FA,#60A5FA)'}"></i></div><span><b>${b.done}</b> of ${b.total} done</span>`;
+    const sess=b.progs.map(s=>`<button class="fl-pg" onclick="setP('prog:${s.x.id}')"><div><div class="m"><span>Progression ${s.n}</span>${s.when?`<span>${esc(s.when)}</span>`:''}<span class="st ${s.state}">${esc(s.label||'')}</span></div><div class="t">${esc(s.x.title||'Progression session')}</div></div><span class="go">Open session &rarr;</span></button>`).join('');
+    const list=k==='overdue'||k==='done';
+    const inner=`${g?`<div class="wk-go"><i class="ti ti-rocket"></i><b>Go-live ${esc(wkFmt(g))}</b>${esc(GO_LIVE_NOTE||'')}</div>`:''}${sess?`<div class="wk-sess">${sess}</div>`:''}${!b.total?'':list?`<div class="wk-list">${b.all.map(x=>wkItem(x,x.r,now)).join('')}</div>`:wkCol(b,'client')+wkCol(b,'sabel')}`;
+    return `<div class="fl-row" id="wk-${k}">
+      <div class="fl-num wk-n ${h.cls}">${h.num}</div>
+      <div class="fl-blk${open?' open':''}${now_?' wk-now':''}${k==='overdue'?' wk-over':''}">
+        <button class="fl-head" onclick="wkTog('${k}')" aria-expanded="${open}">
+          <div style="min-width:0">${h.meta?`<div class="fl-meta"><span>${esc(h.meta)}</span></div>`:''}
+            <div class="fl-title">${esc(h.title)}</div>
+            ${b.total?`<div class="fl-prow">${stat}${b.need?`<span class="fl-need"><i></i><b>${b.need}</b> need you</span>`:''}</div>`:`<div class="fl-desc">Nothing due.</div>`}
+            ${mix?`<div class="wk-mix">${mix}</div>`:''}</div>
+          <div class="fl-chev">⌄</div></button>
+        ${open?(inner?`<div class="fl-body">${inner}</div>`:`<div class="wk-none">No tasks are due.</div>`):''}
+      </div></div>`;}).join('');
+  const chips=[`<button class="wk-chip${wkPil?'':' on'}" onclick="wkPil='';renderMain()">All pillars</button>`].concat(rows.filter(r=>r.total).map(r=>{const on=wkPil===r.p.id;
+    return `<button class="wk-chip${on?' on':''}" style="${on?`border-color:${r.p.c};background:${flowTint(r.p.c,.15)}`:''}" onclick="wkPil=wkPil==='${r.p.id}'?'':'${r.p.id}';renderMain()"><i style="background:${r.p.c}"></i>${esc(r.p.l)}</button>`;}));
+  return `<div class="wk"><div class="wk-bar">${chips.join('')}</div><div class="fl-blocks"><div class="fl-spine"></div>${html}</div></div>`;}
+function wkCount(rows,now){const n=wkBoxes(rows,now).overdue.total;return `${rows.reduce((a,r)=>a+r.total,0)} tasks${n?' · '+n+' overdue':''} · by due date`;}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -7503,7 +7641,7 @@ window.addEventListener('hashchange',()=>{applyHash();render();});
 function applyHash(){
   const raw=location.hash||'';
   if(raw==='#home'){cur='home';return;}
-  const flm=/^#flow(?:\/([\w-]+))?$/.exec(raw);if(flm){cur='flow';if(flm[1]&&P.some(p=>p.id===flm[1])){if(!flowOpen)flowOpen=new Set();flowOpen.add(flm[1]);flowPending=flm[1];}return;}
+  const flm=/^#flow(?:\/([\w-]+))?$/.exec(raw);if(flm){cur='flow';if(flm[1]==='week')flowBy='week';if(flm[1]&&P.some(p=>p.id===flm[1])){if(!flowOpen)flowOpen=new Set();flowOpen.add(flm[1]);flowPending=flm[1];}return;}
   if(raw==='#tracker'){cur='tracker';return;}
   if(raw==='#summary'){cur='overview';return;}  // the old Project overview link
   const fm=/^#form\/([\w-]+)$/.exec(raw);
