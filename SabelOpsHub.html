@@ -82,7 +82,6 @@
       <button class="tab on" id="t-home"      onclick="show('home')">Home</button>
       <button class="tab"    id="t-internal"  onclick="show('internal')">Internal Ops</button>
       <button class="tab"    id="t-tasks"     onclick="show('tasks')">Task Hub</button>
-      <button class="tab"    id="t-kickoff"   onclick="show('kickoff')">Kick-off Desk</button>
       <button class="tab"    id="t-readiness" onclick="show('readiness')">Readiness Check</button>
       <button class="tab"    id="t-feedback"  onclick="show('feedback')">Feedback Dashboard</button>
     </nav>
@@ -116,14 +115,6 @@
           <p>Every open tracker task per person, with Home, List and Board views, a Focus Zone, timers and parked questions. Nikki&rsquo;s desk answers what the team hands back and shows the week&rsquo;s summary.</p>
           <span class="go">Open task hub <span class="arrow">&rarr;</span></span>
         </button>
-        <button class="pillar" onclick="show('kickoff')">
-          <span class="badge internal">Internal</span>
-          <div class="ico">&#9673;</div>
-          <h2>Kick-off Desk</h2>
-          <div class="sub">Scope, timeline, who does what &mdash; per client</div>
-          <p>One record per client for the kick-off call: scope in and out, key dates, contacts, the live access check, decisions and next steps. Pre-filled from Notion, edited on the call, exported as a client-ready summary.</p>
-          <span class="go">Open kick-off desk <span class="arrow">&rarr;</span></span>
-        </button>
         <button class="pillar" onclick="show('readiness')">
           <span class="badge internal">Internal</span>
           <div class="ico">&#10003;</div>
@@ -144,7 +135,6 @@
       <div class="foot-note">
         <b>Internal Ops</b> &mdash; every client from signature to close-out, step by step and gate by gate.<br>
         <b>Readiness Submissions</b> &mdash; client Readiness Check answers and the hard gates, before the kickoff is booked.<br>
-        <b>Kick-off Desk</b> &mdash; the scope, dates and owners agreed on each kick-off call, with a printable summary.<br>
         <b>Project Tracker Dashboard</b> &mdash; the team view of where all the client trackers stand.<br>
         <b>Feedback Dashboard</b> &mdash; what clients are telling us, pulled live from the feedback webhook.
       </div>
@@ -161,11 +151,6 @@
     <iframe id="frame-tasks" data-src="SabelTaskHub.html" title="Task Hub"></iframe>
   </section>
 
-  <!-- KICK-OFF DESK -->
-  <section class="view" id="kickoff">
-    <iframe id="frame-kickoff" data-src="SabelKickoffDesk.html" title="Kick-off Desk"></iframe>
-  </section>
-
   <!-- READINESS SUBMISSIONS -->
   <section class="view" id="readiness">
     <iframe id="frame-readiness" data-src="SabelReadinessAdmin.html" title="Readiness Submissions"></iframe>
@@ -177,7 +162,7 @@
 </div>
 
 <script>
-  var VIEWS = ['home','internal','tasks','kickoff','readiness','feedback'];
+  var VIEWS = ['home','internal','tasks','readiness','feedback'];
 
   // Each tab is a separate page in an iframe, with its own cache entry — so
   // refreshing the hub does not necessarily re-fetch the tool inside it, and a
@@ -218,7 +203,8 @@
       history.replaceState(null, '', '#'+view);
     }
   }
-  // Honour a deep link (e.g. SabelOpsHub.html#kickoff)
+  // Honour a deep link (e.g. SabelOpsHub.html#tasks). The Kick-off Desk tab was removed 6 Nov 2026:
+  // kick-offs now live in each client's own hub, so an old #kickoff link lands on Home.
   var start = (window.location.hash || '#home').replace('#','');
   if (start === 'portal' || start === 'status') start = 'internal';   // the old portal and Client Status tabs now open Internal Ops
   show(VIEWS.indexOf(start) > -1 ? start : 'home');
