@@ -318,6 +318,15 @@ a{color:inherit}
 .step .acts{display:flex;align-items:center;gap:8px;position:relative}
 .step .xonly{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);border-radius:4px;padding:1px 5px;white-space:nowrap}
 .step .xstep-in{width:100%;min-width:0;font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--accent);border-radius:6px;padding:4px 8px}
+.gatedue{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding:10px 16px;border-top:1px solid var(--line);font-size:13.5px;color:var(--body)}
+.gatedue .tx{flex:1 1 260px;min-width:0}
+.gatedue small{font-size:12.5px;color:var(--muted)}
+.gatedue .btns{display:flex;gap:6px}
+.gatedue.edit{justify-content:flex-start;align-items:end}
+.gatedue label{display:grid;gap:3px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.gatedue label.why{flex:1 1 240px}
+.gatedue input{font-family:var(--text);font-size:14px;text-transform:none;letter-spacing:0;color:var(--ink);background:var(--surface);border:1px solid var(--line2);border-radius:6px;padding:5px 8px;width:100%}
+.gatedue .fnote{flex-basis:100%;color:var(--warn);font-size:12.5px}
 .xadd{padding:0 16px 8px 46px}
 .xadd .linkbtn{font-size:13px}
 /* Floats over the row on hover, so the hidden buttons don't take width from the task text. */
@@ -562,7 +571,7 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
 
   <h3>The tabs</h3>
   <ul>
-    <li><b>Overview</b>: every client in delivery as a card, grouped by where they are in the journey. "Needs attention" at the top is the chase list: overdue gates, open critical steps, blocked tracker tasks.</li>
+    <li><b>Overview</b>: every client in delivery as a card, grouped by where they are in the journey. "Needs attention" at the top is the chase list: overdue gates, open critical steps, blocked tracker tasks. Gate dates are worked out from the Signed, Kickoff, Go-live and Day-30 dates; to change one gate only, open it and use Move this date. To pause a whole client, use Put on hold.</li>
     <li><b>Board</b>: one row per client, grouped by how close their go-live is. Progress, overdue and blocked counts come from the client's tracker. Use it on the Monday call.</li>
     <li><b>Today</b>: Nikki's own steps that are due, across all clients.</li>
     <li><b>Sales follow-up</b>: clients we have pitched to and are waiting on. Not in delivery.</li>
@@ -1088,7 +1097,7 @@ const optHtml = (arr,val,blank) => (blank!=null?'<option value="">'+blank+'</opt
 const WHO_KEY = "sabel-ops-who";
 function who(){ try{ return localStorage.getItem(WHO_KEY) || "Nikki"; }catch(_){ return "Nikki"; } }
 /* Plain words for the record fields a change log line can carry. */
-const FIELD_LABEL = {stage:"stage", stageManual:"stage", type:"type", owner:"lead", tier:"tier", hold:"on hold", goLiveDate:"go-live", goLiveSource:"go-live", day30Date:"Day-30",
+const FIELD_LABEL = {stage:"stage", stageManual:"stage", type:"type", owner:"lead", tier:"tier", hold:"on hold", goLiveDate:"go-live", goLiveSource:"go-live", day30Date:"Day-30", "hub.dueMoved":"gate date",
   signedDate:"signed date", proposalSent:"proposal date", contactName:"contact", contactEmail:"contact", trackerKey:"tracker key", slackChannel:"Slack channel", intake:"came via", outreach:"sales follow-up", notes:"notes", partner:"delivered by", "*":"added the client"};
 const S = {
   portal:null, notion:[], reg:[], kickoff:{}, trk:{},
@@ -1218,7 +1227,20 @@ function phaseCounts(c,p){
   list.forEach(s=>{ const st=stepStatus(c,s); const d = st==="done"||st==="na"; if(d) done++; if(stepOwner(c,s)==="nikki"){ mine++; if(d) mineDone++; } });
   return {total:list.length, done, mine, mineDone};
 }
-function phaseDue(c,p){
+/* A gate's date is worked out from the Signed, Kickoff, Go-live and Day-30 dates. A date moved by
+   hand for one gate lives at hub.dueMoved[pid] = {d, why, by, at} and wins everywhere, so the
+   alerts, Today and the cards all follow it. Later gates keep their own dates. */
+function movedDue(c,p){ const m=c.hub && c.hub.dueMoved && c.hub.dueMoved[p.id]; return m && m.d ? m : null; }
+function phaseDue(c,p){ const m=movedDue(c,p); return m ? m.d : workedOutDue(c,p); }
+function dueBasis(c,p){
+  const ko=c.hub&&c.hub.kickoffDate, id=p.id;
+  if(["p3","p4","p5"].includes(id)) return ko?"the Kickoff date":"the Signed date, as no Kickoff is set";
+  if(["m3","m4"].includes(id)) return c.goLiveDate?"the Go-live date":"the Signed date, as no Go-live is set";
+  if(["p6","p7","p8","p9"].includes(id)) return "the Go-live date";
+  if(["p10","p11"].includes(id)) return c.day30Date?"the Day-30 date":"the Go-live date";
+  return "the Signed date";
+}
+function workedOutDue(c,p){
   const sg=isFlownetic(c)?"":c.signedDate, ko=(c.hub&&c.hub.kickoffDate)||"", gl=c.goLiveDate, d30=c.day30Date||addDays(gl,30);
   switch(p.id){
     case "p0": return sg; case "p1": return addDays(sg,7); case "p2": return addDays(sg,9);
@@ -2058,7 +2080,7 @@ function phaseBlock(c,p,pi,i){
   const openCount=pc.total-pc.done, mineOpen=pc.mine-pc.mineDone;
   const status = before ? "Before the hub"
     : closed ? "Closed"+(gateInfo?" "+fmt(gateInfo.at):"")
-    : isCur ? (mineOpen?mineOpen+" yours · ":"")+openCount+" of "+pc.total+" open"+(due?" · due "+fmt(due):"")
+    : isCur ? (mineOpen?mineOpen+" yours · ":"")+openCount+" of "+pc.total+" open"+(due?" · due "+fmt(due)+(movedDue(c,p)?" (moved)":""):"")
     : pc.total+" step"+(pc.total===1?"":"s");
   let h = '<section class="phase'+(isCur?' cur':'')+(closed?' closed':'')+(open?' open':'')+(isCur&&mineOpen?' yours':'')+'" id="ph-'+p.id+'">'+
     '<button class="phase-h" data-act="phase" data-pid="'+p.id+'" aria-expanded="'+open+'">'+
@@ -2094,6 +2116,7 @@ function phaseBlock(c,p,pi,i){
     });
     h += '</ul>';
     if(!before) h += '<div class="xadd"><button class="linkbtn" data-act="xstep-add" data-id="'+c.id+'" data-pid="'+p.id+'">+ Add a step for '+esc(c.name)+'</button></div>';
+    if(!before && !closed) h += gateDueRow(c,p);
     const critOpen = stepsFor(c,p).filter(s=>isCritOpen(c,s)).length;
     h += '<div class="gate'+(closed?' closed':'')+'"><span class="g"><b>Gate</b>'+(before?'Treated as closed — this client started tracking further along.':esc(p.gate))+'</span>'+
       (before ? reopenStartBtn(c,p) : closed
@@ -2102,6 +2125,22 @@ function phaseBlock(c,p,pi,i){
   }
   h += '</section>';
   return h;
+}
+/* The gate's date, why it is that date, and the way to move it for this client only. */
+function gateDueRow(c,p){
+  const m=movedDue(c,p), base=workedOutDue(c,p), ids='data-id="'+c.id+'" data-pid="'+p.id+'"';
+  if(S.dueEdit===c.id+":"+p.id){
+    return '<div class="gatedue edit"><label>New date<input type="date" id="due-date" value="'+esc(m?m.d:(base||""))+'"></label>'+
+      '<label class="why">Why<input type="text" id="due-why" value="'+esc(m?m.why||"":"")+'" placeholder="e.g. Client asked to start after the holidays"></label>'+
+      '<button class="btn sm primary" data-act="due-save" '+ids+'>Save</button><button class="btn sm" data-act="due-cancel">Cancel</button>'+
+      '<span class="fnote" id="due-err" hidden>Add the new date and a short reason.</span></div>';
+  }
+  const worked = base ? "Worked out from "+dueBasis(c,p)+": "+fmt(base) : "No date worked out yet";
+  return '<div class="gatedue"><span class="tx">'+(m
+      ? '<b>Due '+esc(fmt(m.d))+', moved by hand.</b> '+esc(m.why||"")+' <small>'+esc(worked)+'.'+(m.by?' Moved by '+esc(m.by)+(m.at?' on '+esc(fmt(m.at)):'')+'.':'')+'</small>'
+      : (base ? '<b>Due '+esc(fmt(base))+'.</b> <small>Worked out from '+esc(dueBasis(c,p))+'.</small>' : '<small>No date worked out yet.</small>'))+
+    '</span><span class="btns"><button class="btn sm" data-act="due-edit" '+ids+'>'+(m?"Change":base?"Move this date":"Set a date")+'</button>'+
+    (m?'<button class="btn sm" data-act="due-reset" '+ids+'>Put back</button>':'')+'</span></div>';
 }
 function scopingPanel(c){
   return '<section class="setup"><h3>Proposal out</h3><p>'+(c.proposalSent?'Sent '+esc(fmt(c.proposalSent))+' ('+esc(rel(c.proposalSent))+').':'No proposal date recorded.')+(c.contactName?' Contact: '+esc(c.contactName)+'.':'')+'</p>'+
@@ -2425,6 +2464,13 @@ document.addEventListener("click", e=>{
     case "ed-gone": { const pid=t.dataset.pid; S.edShowGone[pid]=!S.edShowGone[pid]; return render(true); }
     case "ed-move": { const pid=t.dataset.pid, ids=editorSteps(pid).map(s=>s.id), i=ids.indexOf(t.dataset.sid), j=i+Number(t.dataset.v);
       if(i<0||j<0||j>=ids.length) return; [ids[i],ids[j]]=[ids[j],ids[i]]; editChecklists(E=>{ E.order[pid]=ids; }); return render(true); }
+    case "due-edit": S.dueEdit=t.dataset.id+":"+t.dataset.pid; render(true); { const el=$("due-why"); if(el) el.focus(); } return;
+    case "due-cancel": S.dueEdit=null; return render(true);
+    case "due-save": { if(!c) return; const d=$("due-date").value, why=$("due-why").value.trim();
+      if(!d||!why){ $("due-err").hidden=false; return; }
+      const h=ensureHub(c); h.dueMoved=h.dueMoved||{}; h.dueMoved[t.dataset.pid]={d, why, by:who(), at:today()};
+      S.dueEdit=null; touch(c,["hub.dueMoved"]); return render(true); }
+    case "due-reset": { if(!c||!c.hub||!c.hub.dueMoved) return; delete c.hub.dueMoved[t.dataset.pid]; touch(c,["hub.dueMoved"]); return render(true); }
     case "hold-edit": S.holdEdit=t.dataset.id; render(true); { const el=$("hold-reason"); if(el) el.focus(); } return;
     case "hold-cancel": S.holdEdit=null; return render(true);
     case "hold-save": { if(!c) return; const was=onHold(c)&&c.hold.since;
