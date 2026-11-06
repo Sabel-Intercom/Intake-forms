@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Smokeball kick-off | Sabel</title><meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<script>try{ if(localStorage.getItem('sabel-ops-theme')==='light') document.documentElement.setAttribute('data-theme','light'); }catch(e){}</script>
+<style>
+:root{
+  --bg:#0F1117; --card:#161B26; --card2:#12161F; --w:#F2F4F8; --red:#E10600;
+  --body:#C9CFDA; --muted:#A7AFBE; --border:#2A3145; --mono:#8B93A3;
+  --green:#4ADE80; --amber:#FBBF24; --blue:#60A5FA; --rose:#FF4D45; --grey:#5F6878;
+  --field:#0F1117; --line:#1E2433; --sel:#221418; --topic:#1A2030; --track:#1E2433; --calbg:#1A2030;
+  --glow:0 0 18px rgba(225,6,0,.5);
+  --gB:#1E4A33; --gBg:#0E2A1C; --aB:#5A4A1E; --rB:#5A2323; --rT:#F8ABAB;
+  --warnBg:#1A1206; --warnT:#F5E6B8; --infoBg:#0C1420; --infoB:#1E3A5A; --infoT:#CBE0F5; --codeBg:#000;
+  --shadow:rgba(0,0,0,.5); --scheme:dark; color-scheme:dark;
+  /* portal stage colours, same hues as SabelClientPortal.html */
+  --sScope:#C084FC; --sOnb:#60A5FA; --sAct:#4ADE80; --sOff:#FBBF24; --sOut:#F87171; --sDone:#94A3B8;
+  --sans:'Source Sans 3',"Helvetica Neue",Helvetica,Arial,sans-serif; --head:Archivo,'Source Sans 3',sans-serif;
+  --code:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+/* Light mode: the header toggle sets data-theme="light" on <html> and remembers it under
+   localStorage 'sabel-ops-theme' (shared by every Ops Hub tab, since they are one origin). */
+:root[data-theme="light"]{
+  --bg:#F4F5F7; --card:#FFFFFF; --card2:#F9FAFB; --w:#101828;
+  --body:#344054; --muted:#475467; --border:#D0D5DD; --mono:#667085;
+  --green:#15803D; --amber:#B45309; --blue:#2563EB; --rose:#D92D20; --grey:#7A8699;
+  --field:#FFFFFF; --line:#E4E7EC; --sel:#FDEEEE; --topic:#F2F4F7; --track:#E4E7EC; --calbg:#F2F4F7;
+  --glow:0 0 18px rgba(225,6,0,.3);
+  --gB:#A7D7B8; --gBg:#E8F6EE; --aB:#E9CF9A; --rB:#EDB4B4; --rT:#B91C1C;
+  --warnBg:#FFF8E6; --warnT:#6B4E0A; --infoBg:#EEF4FC; --infoB:#BFD4EE; --infoT:#1E3A5F; --codeBg:#E9EDF2;
+  --shadow:rgba(15,23,42,.14); --scheme:light; color-scheme:light;
+  --sScope:#7E22CE; --sOnb:#1D4ED8; --sAct:#15803D; --sOff:#B45309; --sOut:#B91C1C; --sDone:#64748B;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--body);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2{font-family:var(--head)}
+.demo{max-width:940px;margin:0 auto;padding:22px 18px 70px}
+.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.bar h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--w)}
+.bar .sub{font-size:13px;color:var(--muted)}
+.spacer{flex:1}
+.btn{background:transparent;border:1px solid var(--border);color:var(--body);border-radius:99px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+.btn:hover{color:var(--w);border-color:var(--muted)}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+.btn.sm{padding:4px 11px;font-size:12px}
+.note{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--infoBg);border:1px solid var(--infoB);color:var(--infoT);border-radius:12px;padding:8px 12px;font-size:13px;margin-bottom:16px}
+.note .btn{color:var(--infoT);border-color:var(--infoB)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.rmh,.rmc{width:34px;padding-left:0;padding-right:0;text-align:center}
+.rm{width:26px;height:26px;border:1px solid transparent;border-radius:50%;background:none;color:var(--mono);font-size:17px;line-height:1;cursor:pointer}
+.rm:hover{color:var(--rose);border-color:var(--rB)}
+td input+small{margin-top:3px}
+.nav{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;flex-wrap:wrap;gap:6px;padding:8px 0;margin-bottom:8px}
+.nav a{display:inline-flex;gap:6px;align-items:center;text-decoration:none;font-size:12.5px;font-weight:600;color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:4px 11px;background:var(--card)}
+.nav a:hover{color:var(--w)}
+.nav a b{color:var(--red);font-family:var(--head)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:14px;scroll-margin-top:50px;padding:16px 20px 20px}
+.ch{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.ch .num{font-family:var(--head);font-size:13px;color:var(--red);font-weight:800}
+.ch h2{margin:0;font-size:17px;color:var(--w);font-weight:700;flex:1;min-width:180px;letter-spacing:-.01em}
+.mins{font-family:var(--head);font-weight:600;font-size:11.5px;color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:2px 9px;white-space:nowrap}
+.say{font-size:14px;color:var(--muted);margin:0 0 12px}
+h3{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--mono);margin:16px 0 6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.src{font-family:var(--sans);text-transform:none;letter-spacing:0;font-size:11.5px;font-weight:600;color:var(--blue);border:1px solid var(--infoB);background:var(--infoBg);border-radius:99px;padding:1px 8px}
+.src.call{color:var(--amber);border-color:var(--aB);background:var(--warnBg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 16px}
+label.f{display:block}
+label.f>span{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px}
+input[type=text],input[type=email],input[type=date],textarea{width:100%;background:var(--field);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--w);font:inherit;font-size:14px}
+textarea{resize:vertical;min-height:66px;line-height:1.45}
+input[type=date]{cursor:pointer;min-height:38px}
+input:focus,textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(225,6,0,.15)}
+::placeholder{color:var(--grey)}
+.team{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+.team div{border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:13px;color:var(--muted)}
+.team b{display:block;color:var(--w);font-size:14px}
+.pl{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.plh{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card2);flex-wrap:wrap}
+.plh b{color:var(--w);font-size:14px;flex:1;min-width:150px}
+.plh small{color:var(--muted);font-size:12.5px}
+.yes{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.yes input{accent-color:var(--red);margin:0}
+details.it{border-top:1px solid var(--line)}
+details.it>summary{display:flex;gap:10px;padding:6px 12px;font-size:14px;cursor:pointer;list-style:none;color:var(--body)}
+details.it>summary::-webkit-details-marker{display:none}
+details.it>summary span:first-child{flex:1;min-width:0}
+details.it>summary:hover{background:var(--card2)}
+details.it>summary small{color:var(--muted);white-space:nowrap}
+details.it p{margin:0;padding:0 12px 9px;font-size:13px;color:var(--muted)}
+ul.plain{margin:0;padding-left:18px;font-size:14px}
+ul.plain li{margin:3px 0}
+.fixed{border-left:3px solid var(--border);padding:4px 12px;font-size:14px;margin:8px 0}
+.flow{list-style:none;margin:8px 0 4px;padding:0;display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,1fr));gap:0}
+.flow li{position:relative;min-width:0;padding-right:10px}
+.flow li:last-child{padding-right:0}
+.flow .node{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--card);border:2px solid var(--muted);color:var(--w);font-family:var(--head);font-weight:800;font-size:13px}
+/* The line runs from each stop to the next, with an arrowhead just before it arrives. */
+.flow li:not(:last-child)::before{content:"";position:absolute;left:30px;right:0;top:14px;height:2px;background:var(--muted)}
+.flow li:not(:last-child)::after{content:"";position:absolute;right:1px;top:10px;border-left:8px solid var(--muted);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.flow .now .node{border-color:var(--red);box-shadow:0 0 0 4px rgba(225,6,0,.18)}
+.flow .now .node::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--red)}
+.flow .go .node{background:var(--red);border-color:var(--red);color:#fff;font-size:15px;box-shadow:var(--glow)}
+.flow .stop{margin-top:10px;font-size:13px;color:var(--muted)}
+.flow .stop b{display:block;color:var(--w);font-family:var(--head);font-size:15px;line-height:1.25}
+.flow .stop em{display:block;font-style:normal;font-weight:600;font-size:12.5px;color:var(--body);margin:2px 0 5px}
+.flow .stop p{margin:0;line-height:1.4}
+.flow .stop p span{font-weight:700;color:var(--body)}
+.flow .tag{display:inline-block;font-size:11px;font-weight:700;color:var(--red);margin-bottom:2px}
+.flow li:not(.now):not(.go) .stop{padding-top:18px}
+.flow .go b{color:var(--red)}
+:root[data-theme="light"] .flow .go b{color:#C40500}
+@media(max-width:760px){
+  .flow{grid-template-columns:1fr}
+  .flow li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:0 12px;padding:0 0 16px}
+  .flow li:last-child{padding-bottom:0}
+  .flow li:not(:last-child)::before{left:14px;right:auto;top:30px;bottom:0;width:2px;height:auto}
+  .flow li:not(:last-child)::after{right:auto;left:10px;top:auto;bottom:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:8px solid var(--muted);border-bottom:0}
+  .flow .stop,.flow li:not(.now):not(.go) .stop{margin-top:0;padding-top:3px}
+}
+.tl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.tl div{border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:13px;color:var(--muted)}
+.tl b{display:block;color:var(--w);font-size:14px}
+.tl .go{border-color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:12px;font-weight:600;color:var(--mono);text-align:left;padding:5px 8px}
+td{padding:5px 8px;border-top:1px solid var(--line);vertical-align:middle}
+td small{display:block;color:var(--muted);font-size:12.5px}
+.recap{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 15px;font-size:14px}
+.recap p{margin:0 0 7px}.recap p:last-child{margin:0}
+.recap b{color:var(--w)}
+.recap .gap{color:var(--amber)}
+.conf{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.conf label.yes{font-size:14px}
+.conf input[type=text]{flex:1;min-width:200px}
+@media(max-width:620px){
+  .card{padding:14px}
+  .tablewrap table,.tablewrap tbody,.tablewrap tr,.tablewrap td{display:block;width:100%}
+  .tablewrap th{display:none}
+  .tablewrap td{border-top:none;padding:3px 0}
+  .tablewrap tr{border-top:1px solid var(--line);padding:8px 0}
+  .tablewrap tr{position:relative}
+  .tablewrap .rmc{padding:3px 0;width:auto;text-align:right}
+}
+.stamp{font-size:12px;color:var(--mono)}
+body.embed .demo{padding-top:6px}
+</style>
+</head>
+<body>
+<div class="demo">
+<div class="bar"><div><h1 id="cname"></h1><div class="sub">Project kick-off with Sabel</div></div><span class="spacer"></span><span class="stamp" id="stamp" aria-live="polite"></span></div>
+<nav class="nav" aria-label="Sections">
+<a href="#s1"><b>1</b>Defining success</a><a href="#s2"><b>2</b>What's in, what's out</a><a href="#s3"><b>3</b>The road to go-live</a><a href="#s4"><b>4</b>Your team</a><a href="#s5"><b>5</b>Staying in sync</a><a href="#s6"><b>6</b>Next steps</a></nav>
+<div id="app"></div>
+</div>
+<script>window.KICKOFF_SEED={"v": 2, "name": "Smokeball", "hours": 192, "goal": "", "measure": "", "scopeNote": "", "weekly": "", "aligned": false, "alignedAt": "", "confirmedBy": "", "updated": "", "pillars": [{"n": "Transformation Blueprint", "agreed": false, "items": [{"t": "Review your cleaned Zendesk inventory and lock the final counts", "d": ""}, {"t": "Design your three brands", "d": ""}, {"t": "Map your ticket fields and regional split", "d": ""}]}, {"n": "Intercom Foundations", "agreed": false, "items": [{"t": "Email sent from your own domain", "d": ""}, {"t": "Style the Messenger to match your brand", "d": ""}, {"t": "Turn your Fin workspace into your Suite workspace", "d": ""}, {"t": "Build your 46 teams with their inboxes and views", "d": ""}, {"t": "Set rules that send conversations to the right team", "d": ""}, {"t": "Set up your six reply-time targets and satisfaction reporting", "d": ""}]}, {"n": "Automation Engine", "agreed": false, "items": [{"t": "Rebuild your triggers and automations as workflows", "d": ""}, {"t": "Rebuild your views as inbox views", "d": ""}, {"t": "Rebuild your macros as saved replies", "d": ""}]}, {"n": "Native Integrations", "agreed": false, "items": [{"t": "Connect Salesforce", "d": ""}, {"t": "Connect Jira", "d": ""}, {"t": "Connect Slack", "d": ""}]}, {"n": "Data Connectors", "agreed": false, "items": [{"t": "Your 14 Zendesk webhooks rebuilt", "d": ""}, {"t": "Test each rebuilt webhook end to end and document it", "d": ""}]}, {"n": "Knowledge Base", "agreed": false, "items": [{"t": "Design your help centre structure", "d": ""}, {"t": "Move your help articles into Intercom", "d": ""}]}, {"n": "Ticket Migration", "agreed": false, "items": [{"t": "Your old tickets moved into Intercom", "d": ""}, {"t": "Move open tickets and anything new at cutover", "d": ""}, {"t": "Send the final migration report, with counts reconciled to Zendesk", "d": ""}]}, {"n": "Proactive Workspace", "agreed": false, "items": [{"t": "Your in-product messages moved into one workspace", "d": ""}, {"t": "Un-pause the messages, check targeting on live traffic and retire c1sbgle1", "d": ""}]}, {"n": "Testing and Enablement", "agreed": false, "items": [{"t": "Test every channel and connection from start to finish", "d": ""}, {"t": "Complete our go-live readiness check", "d": ""}, {"t": "Prepare your training content", "d": ""}, {"t": "Train your managers and agents in every region", "d": ""}]}, {"n": "All at Once Go-Live", "agreed": false, "items": [{"t": "Run the go-live call", "d": ""}, {"t": "Stop new tickets arriving in your old helpdesk", "d": ""}, {"t": "Switch Intercom on for every channel", "d": ""}, {"t": "Stay on hand through launch day", "d": ""}]}, {"n": "After go-live", "agreed": false, "items": [{"t": "Review how your team did in week 1", "d": ""}, {"t": "Fix the remaining small issues", "d": ""}, {"t": "Hand over documents and close the Slack channel", "d": ""}]}], "out": ["Fin refinement, including the US and UK resolution-rate target: your team owns this", "The Zendesk clean-up, and the app ID change and product release: your team owns these. Rebuilding the uncleaned Zendesk setup needs written approval first", "Archie AI and your second new product: separate scope, kept out of this agreement at your request", "ChurnZero, LogMeIn Rescue, the Zoom Contact Centre bridge and Time Tracking: scoped separately if wanted", "Replacing the Brainfish search widget", "Phone, SMS and WhatsApp channels, and a Messenger on your website", "A separate regional pilot, or separate UK and US launches and migration runs"], "summary": "We're moving your support from Zendesk onto Intercom in your existing Fin workspace, bringing your in-product messages into the same workspace, and switching Australia, the UK and the US over together in one go, with your ticket history moved across.", "goLive": "the week of 1 Mar 2027 (target, to be confirmed at kick-off)", "stages": [{"kind": "now", "tag": "We're here", "t": "Kick-off", "when": "Date to be confirmed", "d": "We agree the plan and who does what."}, {"t": "Build starts", "when": "Straight after kick-off, to 15 Feb 2027", "you": true, "d": "send us your readiness check so we can start building, then supply content and review as we go."}, {"t": "Design review", "when": "1-2 weeks into the build, if needed", "you": true, "d": "join a short check-in so we can sense-check the direction of the build before it gets too deep. We'll book it if it's useful."}, {"t": "Test and train", "when": "From 15 Feb 2027", "you": true, "d": "test everything, sign off and get your team trained."}, {"kind": "go", "tag": "The goal", "t": "Go-live", "when": "Target: week of 1 Mar 2027", "d": "Target date, to be confirmed at kick-off. Australia, the UK and the US switch on together"}], "needs": ["Complete the readiness check", "Name who owns each decision", "Clean up your Zendesk and send us the final inventory", "Finish the audit of where Zendesk connects to your other systems", "Complete the migration details form", "Confirm your Zendesk end date"], "blackouts": [{"from": "", "to": "", "why": ""}], "team": [{"n": "Chris", "d": "Project lead and your day-to-day contact"}, {"n": "Greg", "d": "Technical lead"}, {"n": "Richard", "d": "Migration lead and escalation point"}, {"n": "Nikki", "d": "Project coordinator"}], "people": [{"role": "Sponsor", "hint": "Backs the project and clears the way", "name": "", "email": ""}, {"role": "Project lead", "hint": "Your day-to-day contact", "name": "Ryan", "email": ""}, {"role": "Developer", "hint": "DNS, Messenger install and logged-in customers", "name": "", "email": ""}, {"role": "Content owner", "hint": "Supplies and looks after help articles", "name": "", "email": ""}, {"role": "Sign-off", "hint": "Approves Fin answers and go-live", "name": "", "email": ""}], "split": [["Builds and configures your workspace", "Reviews and approves it"], ["Structures content and makes recommendations", "Supplies and owns the content"], ["Prepares the test plan and fixes issues", "Tests and signs off"], ["Runs the migration and the cutover", "Grants access and approves go-live"]], "sync": {"day": "a shared Slack channel, with replies within 1 business day.", "friday": "a written update showing whether we're On track, At risk or Off track.", "golive": "a daily check-in."}, "stuck": [{"when": "Blocked for 2 business days", "sabel": "Richard", "client": ""}, {"when": "Go-live date or scope at risk", "sabel": "Richard", "client": ""}], "actions": []};</script>
+<script>
+/* ONE CLIENT, ONE KEY (5 Nov 2026, format approved by Chris). Reads and writes only kickoff-<slug>-<k>-v1.
+   Value shape: {record, P, updated}. The first open with an empty key saves window.parent.KICKOFF_SEED,
+   which the tracker build writes from the SOW and plan; after that the saved record always wins. */
+var API='https://sabel-webhook.vercel.app/api/tracker';
+var QS=new URLSearchParams(location.search);
+var SLUG=(QS.get('client')||'').toLowerCase().replace(/[^a-z0-9-]/g,''), TK=(QS.get('k')||'').toLowerCase().replace(/[^a-f0-9]/g,'');
+var VALID=!!SLUG&&TK.length===16, KEY=VALID?'kickoff-'+SLUG+'-'+TK+'-v1':'', LOCAL='sabel_kickoff_form_'+TK;
+var R=null, SYNCED=null, ONLINE=false, DIRTY=false, T=null;
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function $(q){return document.querySelector(q);}
+function stamp(t){$('#stamp').textContent=t;}
+function same(a,b){return JSON.stringify(a)===JSON.stringify(b);}
+function copy(x){return JSON.parse(JSON.stringify(x));}
+function getP(p){return p.split('.').reduce(function(o,k){return o==null?o:o[k];},R);}
+function setP(p,v){var a=p.split('.'),k=a.pop(),o=a.reduce(function(o,k){return o[k];},R);o[k]=v;}
+function inp(p,o){o=o||{};return '<input type="'+(o.type||'text')+'" data-p="'+p+'" value="'+esc(getP(p))+'"'+(o.ph?' placeholder="'+esc(o.ph)+'"':'')+(o.label?' aria-label="'+esc(o.label)+'"':'')+(o.min?' min="'+esc(o.min)+'"':'')+'>';}
+function area(p,ph){return '<textarea data-p="'+p+'" placeholder="'+esc(ph)+'">'+esc(getP(p))+'</textarea>';}
+function rm(list,i){return '<td class="rmc"><button class="rm" type="button" data-rm="'+list+'" data-i="'+i+'" aria-label="Remove this line" title="Remove this line">&times;</button></td>';}
+function plainList(a){return '<ul class="plain">'+(a||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';}
+function pillarHours(p){return typeof p.h==='number'?p.h:p.items.reduce(function(a,i){return a+Number(i.h||0);},0);}
+function card(n,id,title,mins,say,body){return '<section class="card" id="'+id+'"><div class="ch"><span class="num">'+n+'</span><h2>'+title+'</h2><span class="mins">'+mins+' min</span></div><p class="say">'+esc(say)+'</p>'+body+'</section>';}
+function render(){
+  var c=R.name; document.getElementById('cname').textContent=c;
+  var open=[].map.call(document.querySelectorAll('details.it[open]'),function(d){return d.getAttribute('data-id');});
+  var s1='<h3>Your Sabel team</h3><div class="team">'+R.team.map(function(t){return '<div><b>'+esc(t.n)+'</b>'+esc(t.d)+'</div>';}).join('')+'</div><h3>Your goal</h3><div class="grid"><label class="f"><span>What success looks like for you</span>'+area('goal','In your own words')+'</label><label class="f"><span>How we\'ll measure it</span>'+area('measure','What we\'ll look at, and by when')+'</label></div>';
+  var s2='<p class="fixed">'+esc(R.summary)+'</p><h3>Included</h3>'+R.pillars.map(function(p,i){return '<div class="pl"><div class="plh"><b>'+esc(p.n)+'</b>'+(pillarHours(p)?'<small>'+pillarHours(p)+' hours</small>':'')+'<label class="yes"><input type="checkbox" data-c="pillars.'+i+'.agreed"'+(p.agreed?' checked':'')+'> Agreed</label></div>'+p.items.map(function(it,j){return '<details class="it" data-id="'+i+'-'+j+'"'+(open.indexOf(i+'-'+j)>=0?' open':'')+'><summary><span>'+esc(it.t)+'</span>'+(typeof it.h==='number'?'<small>'+it.h+'h</small>':'')+'</summary>'+(it.d?'<p>'+esc(it.d)+'</p>':'')+'</details>';}).join('')+'</div>';}).join('')+'<h3>Not included</h3>'+plainList(R.out)+'<div class="fixed"><b>Need something else?</b> We\'ll scope it as an add-on and agree it with you before any work starts.</div><label class="f" style="margin-top:12px"><span>Changes agreed today</span>'+area('scopeNote','Anything we\'ve adjusted together')+'</label>';
+  var num=0, s3='<h3>Key stages</h3><ol class="flow" style="--n:'+R.stages.length+'" aria-label="Project stages in order">'+R.stages.map(function(s){var cls=s.kind==='now'?'now':s.kind==='go'?'go':'', node=s.kind==='now'?'':s.kind==='go'?'&#9873;':++num;return '<li'+(cls?' class="'+cls+'"':'')+'><span class="node" aria-hidden="true">'+node+'</span><div class="stop">'+(s.tag?'<small class="tag">'+esc(s.tag)+'</small>':'')+'<b>'+esc(s.t)+'</b><em>'+esc(s.when)+'</em><p>'+(s.you?'<span>You:</span> ':'')+esc(s.d)+'</p></div></li>';}).join('')+'</ol><h3>What we need from you</h3>'+plainList(R.needs)+'<h3>Dates to work around</h3><div class="tablewrap"><table class="people"><tr><th style="width:24%">From</th><th style="width:24%">To</th><th>What\'s happening</th><th class="rmh"><span class="vh">Remove</span></th></tr><tbody>'+R.blackouts.map(function(b,i){var p='blackouts.'+i+'.';return '<tr><td>'+inp(p+'from',{type:'date',label:'From'})+'</td><td>'+inp(p+'to',{type:'date',label:'To',min:b.from})+'</td><td>'+inp(p+'why',{label:'What is happening',ph:'Holidays, code freezes, product launches'})+'</td>'+rm('blackouts',i)+'</tr>';}).join('')+'</tbody></table></div><button class="btn sm" type="button" data-add="blackouts" style="margin-top:8px">+ Add dates</button>';
+  var s4='<h3>Key contacts</h3><div class="tablewrap"><table class="people"><tr><th style="width:36%">Role</th><th>Name</th><th>Email</th><th class="rmh"><span class="vh">Remove</span></th></tr><tbody>'+R.people.map(function(x,i){var p='people.'+i+'.';return '<tr><td>'+inp(p+'role',{label:'Role',ph:'Role'})+(x.hint?'<small>'+esc(x.hint)+'</small>':'')+'</td><td>'+inp(p+'name',{label:'Name',ph:'Name'})+'</td><td>'+inp(p+'email',{type:'email',label:'Email',ph:'name@company.com'})+'</td>'+rm('people',i)+'</tr>';}).join('')+'</tbody></table></div><button class="btn sm" type="button" data-add="people" style="margin-top:8px">+ Add a person</button><h3>Who does what</h3><div class="tablewrap"><table><tr><th>Sabel</th><th>'+esc(c)+'</th></tr>'+R.split.map(function(x){return '<tr><td>'+esc(x[0])+'</td><td>'+esc(x[1])+'</td></tr>';}).join('')+'</table></div>';
+  var s5='<div class="fixed"><b>Day to day:</b> '+esc(R.sync.day)+'<br><b>Every Friday:</b> '+esc(R.sync.friday)+'<br><b>Go-live week:</b> '+esc(R.sync.golive)+'</div><label class="f" style="margin-top:12px"><span>Your weekly call</span>'+inp('weekly',{ph:'e.g. Thursdays 10:00 AEDT'})+'</label><h3>If something gets stuck</h3><div class="tablewrap"><table><tr><th style="width:44%">When</th><th>Sabel</th><th>'+esc(c)+'</th></tr>'+R.stuck.map(function(x,i){return '<tr><td>'+esc(x.when)+'</td><td>'+esc(x.sabel)+'</td><td>'+inp('stuck.'+i+'.client',{ph:'Name',label:c+' contact: '+x.when})+'</td></tr>';}).join('')+'</table></div>';
+  var s6='<h3>Actions</h3><div class="tablewrap"><table class="people"><tr><th>What</th><th style="width:26%">Who</th><th style="width:20%">By</th><th class="rmh"><span class="vh">Remove</span></th></tr><tbody>'+R.actions.map(function(a,i){var p='actions.'+i+'.';return '<tr><td>'+inp(p+'t',{label:'Action',ph:'What happens next'})+'</td><td>'+inp(p+'who',{label:'Who',ph:'Name'})+'</td><td>'+inp(p+'by',{type:'date',label:'By when'})+'</td>'+rm('actions',i)+'</tr>';}).join('')+'</tbody></table></div><button class="btn sm" type="button" data-add="actions" style="margin-top:8px">+ Add an action</button><h3>What we\'ve agreed</h3><div class="recap" id="recap" aria-live="polite"></div><div class="conf"><label class="yes"><input type="checkbox" data-c="aligned"'+(R.aligned?' checked':'')+'> We\'re all agreed</label>'+inp('confirmedBy',{label:'Confirmed by',ph:'Confirmed by (name and role)'})+'</div>';
+  $('#app').innerHTML=card(1,'s1','Defining success',5,'Who you\'ll be working with, and what we\'re aiming for together.',s1)+card(2,'s2','What\'s in, what\'s out',15,(R.hours?'What your '+R.hours+' hours cover':'What the project covers')+', and what sits outside them. Select any line to see more detail.',s2)+card(3,'s3','The road to go-live',5,'The key stages from here, and what we need from you to get there.',s3)+card(4,'s4','Your team',10,'The people on your side of the project, and how we\'ll share the work.',s4)+card(5,'s5','Staying in sync',5,'How we\'ll keep in touch, and who steps in if something gets stuck.',s5)+card(6,'s6','Next steps',5,'What happens next, and a recap of what we\'ve agreed today.',s6);
+  recap();
+}
+function fmtDay(iso){var d=new Date(iso+'T00:00:00');return isNaN(d)?iso:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
+function blackoutText(){return R.blackouts.map(function(b){if(!b.from&&!b.to)return '';return (b.from&&b.to&&b.from!==b.to?fmtDay(b.from)+' to '+fmtDay(b.to):fmtDay(b.from||b.to))+(b.why&&b.why.trim()?' ('+b.why.trim()+')':'');}).filter(Boolean).join(', ');}
+function line(l,v,gap){v=(v||'').trim();return '<p><b>'+l+':</b> '+(v?esc(v):'<span class="gap">'+esc(gap)+'</span>')+'</p>';}
+function recap(){var el=$('#recap');if(!el)return;
+  var named=R.people.filter(function(p){return (p.name||'').trim();}).length, missing=R.people.filter(function(p){return (p.role||'').trim()&&!(p.name||'').trim();}).map(function(p){return p.role.trim().toLowerCase();});
+  var agreed=R.pillars.filter(function(p){return p.agreed;}).length, st=R.actions.filter(function(a){return (a.t||'').trim();}).length, bl=blackoutText();
+  el.innerHTML=line('Your goal',R.goal,'to be confirmed')+line('How we\'ll measure it',R.measure,'to be confirmed')+'<p><b>Scope:</b> '+(R.hours?esc(R.hours)+' hours, ':'')+agreed+' of '+R.pillars.length+' sections agreed'+((R.scopeNote||'').trim()?'. Changes: '+esc(R.scopeNote.trim()):'')+'.</p><p><b>Go-live:</b> '+esc(R.goLive)+(bl?', working around '+esc(bl):'')+'.</p><p><b>Your team:</b> '+named+(named===1?' contact':' contacts')+(missing.length?', <span class="gap">still to confirm: '+esc(missing.join(', '))+'</span>':'')+'.</p>'+line('Weekly call',R.weekly,'to be confirmed')+'<p><b>Actions:</b> '+st+' agreed.</p>';}
+function progress(r){function sec(id,title,f,t){return {id:id,title:title,filled:f,total:t,done:t>0&&f>=t};}
+  var named=r.people.filter(function(p){return (p.name||'').trim();}).length, blanks=r.people.filter(function(p){return (p.role||'').trim()&&!(p.name||'').trim();}).length;
+  var s=[sec('1','Defining success',((r.goal||'').trim()?1:0)+((r.measure||'').trim()?1:0),2),
+    sec('2','What\'s in, what\'s out',r.pillars.filter(function(p){return p.agreed;}).length,r.pillars.length),
+    sec('3','The road to go-live',(r.aligned||r.blackouts.some(function(b){return b.from||b.to;}))?1:0,1),
+    sec('4','Your team',named,named+blanks),
+    sec('5','Staying in sync',((r.weekly||'').trim()?1:0)+r.stuck.filter(function(x){return (x.client||'').trim();}).length,1+r.stuck.length),
+    sec('6','Next steps',(r.actions.some(function(a){return (a.t||'').trim();})?1:0)+(r.aligned?1:0),2)];
+  return {form:'kickoff',v:2,updated:r.updated||'',submitted:r.aligned?(r.alignedAt||r.updated||null):null,sections:s};}
+function tellHub(){if(window.parent!==window){try{window.parent.postMessage({type:'sabel-form-progress',form:'kickoff',slug:SLUG,P:progress(R)},location.origin);}catch(e){}}}
+/* The client and the team can have this open together: only what this tab changed since it last synced wins. */
+function merge3(base,mine,theirs){
+  if(same(mine,base))return theirs; if(same(theirs,base)||same(mine,theirs))return mine;
+  var obj=function(x){return x&&typeof x==='object'&&!Array.isArray(x);};
+  if(Array.isArray(mine)&&Array.isArray(theirs)&&Array.isArray(base)&&mine.length===theirs.length&&mine.length===base.length)return mine.map(function(m,i){return merge3(base[i],m,theirs[i]);});
+  if(!obj(mine)||!obj(theirs)||!obj(base))return mine;
+  var out={};Object.keys(Object.assign({},mine,theirs)).forEach(function(k){var v=merge3(base[k],mine[k],theirs[k]);if(v!==undefined)out[k]=v;});return out;}
+function apiGet(){return fetch(API+'?key='+encodeURIComponent(KEY)+'&_t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();});}
+function apiPost(rec){return fetch(API+'?key='+encodeURIComponent(KEY),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:{record:rec,P:progress(rec),updated:rec.updated}})}).then(function(r){if(!r.ok)throw 0;});}
+function saved(){R.updated=new Date().toISOString();tellHub();try{localStorage.setItem(LOCAL,JSON.stringify(R));}catch(e){}stamp(ONLINE?'Saving…':'Saved in this browser only');if(!ONLINE)return;DIRTY=true;clearTimeout(T);T=setTimeout(push,800);}
+function push(){DIRTY=false;var sentAt=R.updated;
+  apiGet().then(function(j){var theirs=j&&j.data&&j.data.record, mine=copy(R), next=theirs&&SYNCED?merge3(SYNCED,mine,theirs):mine;next.updated=new Date().toISOString();
+    return apiPost(next).then(function(){SYNCED=copy(next);if(!DIRTY&&R.updated===sentAt){var changed=!same(Object.assign({},R,{updated:0}),Object.assign({},next,{updated:0}));R=copy(next);if(changed&&!typing())render();}stamp('Saved');});
+  }).catch(function(){stamp('Not saved yet, kept in this browser');});}
+function typing(){var a=document.activeElement;return !!a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!=='checkbox';}
+function poll(){if(!ONLINE||DIRTY||typing())return;apiGet().then(function(j){var t=j&&j.data&&j.data.record;if(!t||DIRTY||typing()||(SYNCED&&same(t,SYNCED)))return;R=t;SYNCED=copy(t);render();tellHub();stamp('Updated by someone else');}).catch(function(){});}
+var BLANK={blackouts:{from:'',to:'',why:''},people:{role:'',hint:'',name:'',email:''},actions:{t:'',who:'',by:''}};
+document.addEventListener('input',function(e){var p=e.target.getAttribute&&e.target.getAttribute('data-p');if(!p)return;setP(p,e.target.value);
+  var m=p.match(/^blackouts\.(\d+)\.from$/);if(m){var b=R.blackouts[+m[1]],to=e.target.closest('tr').querySelector('[data-p$=".to"]');to.min=b.from;if(b.to&&b.to<b.from){b.to=b.from;to.value=b.from;}}
+  m=p.match(/^blackouts\.(\d+)\.to$/);if(m){var bb=R.blackouts[+m[1]];if(bb.from&&bb.to&&bb.to<bb.from){bb.to=bb.from;e.target.value=bb.from;}}
+  recap();saved();});
+document.addEventListener('change',function(e){var p=e.target.getAttribute&&e.target.getAttribute('data-c');if(!p)return;setP(p,e.target.checked);if(p==='aligned')R.alignedAt=e.target.checked?new Date().toISOString():'';recap();saved();});
+document.addEventListener('click',function(e){var t=e.target;
+  if(t.matches&&t.matches('input[type=date]')&&t.showPicker){try{t.showPicker();}catch(x){}}
+  var add=t.getAttribute&&t.getAttribute('data-add');if(add){R[add].push(copy(BLANK[add]));render();saved();var rows=document.querySelectorAll('[data-p^="'+add+'.'+(R[add].length-1)+'."]');if(rows[0])rows[0].focus();return;}
+  var rmv=t.getAttribute&&t.getAttribute('data-rm');if(rmv){R[rmv].splice(+t.getAttribute('data-i'),1);render();saved();}});
+function theme(t){if(t==='light')document.documentElement.setAttribute('data-theme','light');else document.documentElement.removeAttribute('data-theme');}
+window.addEventListener('message',function(e){if(e.origin===location.origin&&e.data&&e.data.type==='sabel-theme')theme(e.data.theme);});
+if(QS.get('theme'))theme(QS.get('theme'));
+if(QS.get('embed')==='1')document.body.classList.add('embed');
+function start(){var seed=window.KICKOFF_SEED||null;if(!seed){try{seed=window.parent!==window&&window.parent.KICKOFF_SEED;}catch(e){}}
+  if(!VALID){$('#app').innerHTML='<div class="card"><b>This link is not complete.</b><br>Please open your kick-off from your project hub, or ask your Sabel contact for the link.</div>';return;}
+  apiGet().then(function(j){ONLINE=true;
+    if(j&&j.data&&j.data.record&&j.data.record.v!==2){$('#app').innerHTML='<div class="card">Your kick-off is being prepared. Please open it from your project hub.</div>';return;}
+    if(j&&j.data&&j.data.record){R=j.data.record;SYNCED=copy(R);render();tellHub();}
+    else if(seed){R=copy(seed);R.updated=new Date().toISOString();render();tellHub();
+      apiPost(R).then(function(){SYNCED=copy(R);stamp('Saved');}).catch(function(){ONLINE=false;stamp('Not saved yet, kept in this browser');});}
+    else{$('#app').innerHTML='<div class="card">Your kick-off is being prepared. Please open it from your project hub.</div>';return;}
+    setInterval(poll,20000);
+  }).catch(function(){var loc=null;try{loc=JSON.parse(localStorage.getItem(LOCAL)||'null');}catch(e){}R=loc||(seed?copy(seed):null);
+    if(!R){$('#app').innerHTML='<div class="card">We can\'t reach your kick-off right now. Please try again in a minute.</div>';return;}
+    render();tellHub();stamp('Saved in this browser only');});}
+start();
+</script>
+</body>
+</html>

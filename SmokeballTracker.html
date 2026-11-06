@@ -1938,7 +1938,11 @@ const T={"setup": {"sabel": [{"t": "Set up a shared Slack channel with your team
 // Client hub forms, injected from FORMS_DATA. Only forms with a matching client
 // task ('form' key) are included, so a build without a migration has no
 // migration form anywhere.
-const FORMS=[{"id": "kickoff", "l": "Kick-off", "icon": "flag", "file": "SabelKickoff.html", "always": true, "blurb": "What we agreed on the kick-off call: scope, dates, who does what, and next steps.", "link": "https://sabel-intercom.github.io/Intake-forms/SabelKickoff.html?client=smokeball&k=48507d0154c8e3cb&rdy=smokeball&name=Smokeball", "keyFull": "kickoff-smokeball-48507d0154c8e3cb-v1"}, {"id": "readiness", "l": "Readiness check", "icon": "clipboard-check", "file": "SabelReadinessCheck.html", "blurb": "The access, people and technical pieces your build depends on, in one short form at the start.", "key": "readiness-{slug}-v1", "slugMode": "hyphen"}, {"id": "migration", "l": "Migration details", "icon": "arrows-exchange", "file": "SabelMigrationIntake_Smokeball.html", "blurb": "How your old tickets move across into Intercom: history, mappings, cutover and sign-off.", "key": "migration-intake-{slug}-v1", "slugMode": "strip"}];
+const FORMS=[{"id": "kickoff", "l": "Kick-off", "icon": "flag", "file": "SabelKickoff_Smokeball.html", "blurb": "What we agree on the kick-off call: scope, dates, who does what, and next steps.", "key": "kickoff-smokeball-7b8a4a4a71660928-v1"}, {"id": "readiness", "l": "Readiness check", "icon": "clipboard-check", "file": "SabelReadinessCheck.html", "blurb": "The access, people and technical pieces your build depends on, in one short form at the start.", "key": "readiness-{slug}-v1", "slugMode": "hyphen"}, {"id": "migration", "l": "Migration details", "icon": "arrows-exchange", "file": "SabelMigrationIntake_Smokeball.html", "blurb": "How your old tickets move across into Intercom: history, mappings, cutover and sign-off.", "key": "migration-intake-{slug}-v1", "slugMode": "strip"}];
+/*KICKOFF-FORM-TASK 6 Nov 2026*/
+const KICKOFF_TASK={"t": "Agree your kick-off with us", "o": "Smokeball", "s": "Pending", "d": "", "week": 1, "notes": "", "link": "https://sabel-intercom.github.io/Intake-forms/SabelKickoff_Smokeball.html?client=smokeball&k=7b8a4a4a71660928&rdy=smokeball&name=Smokeball", "form": "kickoff", "tip": "We go through this with you on the kick-off call: what success looks like, what's in and out, the road to go-live, your team, how we stay in touch, and next steps. Each section ticks off here as we agree it.", "sub": [{"t": "Defining success", "s": "Pending"}, {"t": "What's in, what's out", "s": "Pending"}, {"t": "The road to go-live", "s": "Pending"}, {"t": "Your team", "s": "Pending"}, {"t": "Staying in sync", "s": "Pending"}, {"t": "Next steps", "s": "Pending"}]};
+function ensureKickoffTask(){const L=T["setup"]&&T["setup"].client;if(!L)return;const i=L.findIndex(t=>t&&t.form==='kickoff');if(i<0)L.push(JSON.parse(JSON.stringify(KICKOFF_TASK)));else if(!L[i].link)L[i].link=KICKOFF_TASK.link;}
+ensureKickoffTask();
 /*KICKOFF-TAB*/
 formsActive=function(){return FORMS.filter(f=>f.always||formTask(f.id));};
 (function(){const L=formLinkOf,K=formKey,V=formView;
@@ -2068,6 +2072,7 @@ async function loadInitial(){
           }
         });
       }
+      ensureKickoffTask();
       if(d.statuses) Object.entries(d.statuses).forEach(([k,v])=>{
         const parts=k.split('-');
         const idx=parseInt(parts[parts.length-1]);
