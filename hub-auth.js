@@ -17,6 +17,16 @@
   var client = s && s.getAttribute('data-client');
   if (!client || typeof window.fetch !== 'function') return;
 
+  // Old GitHub Pages copy: send the visitor to the live hub. Same file name,
+  // same query and hash, so bookmarks and deep links keep working. Only hubs
+  // that carry this include redirect, so clients not yet moved are untouched.
+  var HUBS = 'hubs.sabelcustomersuccess.com';
+  if (/\.github\.io$/i.test(location.hostname)) {
+    var file = location.pathname.split('/').pop() || '';
+    location.replace('https://' + HUBS + '/' + file + location.search + location.hash);
+    return;
+  }
+
   var API = /sabel-webhook\.vercel\.app\/api\/tracker(\?|$)/;
   var origFetch = window.fetch;
   var token = null;
