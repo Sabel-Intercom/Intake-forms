@@ -10,13 +10,14 @@
 //      application, so only people that app's policy admits ever reach it.
 //   2. The request's Cf-Access-Jwt-Assertion is verified here against the
 //      team's public keys (signature, issuer, expiry), so a forged header on
-//      an unprotected path is still refused. Set HUB_AUD_<CLIENT> to the
-//      Access application's AUD tag to also pin the token to that app.
+//      an unprotected path is still refused, and its audience must be this
+//      client's Access application (HUB_AUD_<CLIENT>), so a sign-in to some
+//      other Sabel hub never unlocks this one. Both env vars are required.
 //
 // Env (Pages > Settings > Variables and Secrets, Production):
-//   HUB_TOKEN_COOKABOROUGH   secret   the client token from /api/tracker-lock
-//   HUB_AUD_COOKABOROUGH     optional the Access app's Application Audience tag
-//   ACCESS_TEAM_DOMAIN       optional default "sabel" (sabel.cloudflareaccess.com)
+//   HUB_TOKEN_COOKABOROUGH   secret    the client token from /api/tracker-lock
+//   HUB_AUD_COOKABOROUGH     required  the Access app's Application Audience (AUD) tag
+//   ACCESS_TEAM_DOMAIN       optional  default "sabel" (sabel.cloudflareaccess.com)
 
 const SLUG = /^[a-z0-9-]{1,40}$/;
 let certCache = { at: 0, keys: null };
@@ -69,6 +70,7 @@ async function verifyAccessJwt(jwt, teamDomain) {
   if (!ok) return null;
   const now = Math.floor(Date.now() / 1000);
   if (typeof payload.exp !== 'number' || payload.exp < now) return null;
+  if (typeof payload.nbf === 'number' && payload.nbf > now + 60) return null;
   if (payload.iss !== `https://${teamDomain}.cloudflareaccess.com`) return null;
   return payload;
 }
@@ -86,13 +88,14 @@ export async function onRequestGet({ request, env, params }) {
   try { claims = await verifyAccessJwt(jwt, teamDomain); } catch (e) { return json(503, { ok: false, error: 'Could not verify sign-in' }); }
   if (!claims) return json(401, { ok: false, error: 'Sign in required' });
 
-  const aud = env[`HUB_AUD_${envKey}`];
-  if (aud) {
-    const auds = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-    if (!auds.includes(aud)) return json(403, { ok: false, error: 'Not signed in to this hub' });
-  }
-
+  // The JWT must have been issued for THIS client's Access application. Without
+  // this, a person signed in to any other Sabel hub could fetch this token if
+  // the path were ever left out of the app's destinations. Fail closed: no
+  // audience configured = no token.
   const token = env[`HUB_TOKEN_${envKey}`];
-  if (!token) return json(404, { ok: false, error: `No token configured for ${client}` });
+  const aud = env[`HUB_AUD_${envKey}`];
+  if (!token || !aud) return json(404, { ok: false, error: `Hub token or audience not configured for ${client}` });
+  const auds = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
+  if (!auds.includes(aud)) return json(403, { ok: false, error: 'Not signed in to this hub' });
   return json(200, { ok: true, token, email: claims.email || null });
 }
