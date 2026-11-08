@@ -17,10 +17,13 @@
 // Env (Pages > Settings > Variables and Secrets, Production):
 //   HUB_TOKEN_COOKABOROUGH   secret    the client token from /api/tracker-lock
 //   HUB_AUD_COOKABOROUGH     required  the Access app's Application Audience (AUD) tag
-//   ACCESS_TEAM_DOMAIN       optional  default "sabel" (sabel.cloudflareaccess.com)
+//   ACCESS_TEAM_DOMAINS      optional  comma list of accepted team names, default
+//                                      "sabel,delicate-sea-8e24" (<name>.cloudflareaccess.com)
 
 const SLUG = /^[a-z0-9-]{1,40}$/;
-let certCache = { at: 0, keys: null };
+const TEAM = /^[a-z0-9-]{1,63}$/;
+const DEFAULT_TEAM_DOMAINS = 'sabel,delicate-sea-8e24'; // current name, original name
+const certCache = new Map(); // teamDomain -> { at, keys }
 
 function json(status, body) {
   return new Response(JSON.stringify(body), {
@@ -44,22 +47,28 @@ function decodeJson(b64url) {
 
 async function teamKeys(teamDomain) {
   const now = Date.now();
-  if (certCache.keys && now - certCache.at < 10 * 60 * 1000) return certCache.keys;
+  const c = certCache.get(teamDomain);
+  if (c && now - c.at < 10 * 60 * 1000) return c.keys;
   const r = await fetch(`https://${teamDomain}.cloudflareaccess.com/cdn-cgi/access/certs`, { cf: { cacheTtl: 600 } });
   if (!r.ok) throw new Error(`certs fetch ${r.status}`);
   const j = await r.json();
-  certCache = { at: now, keys: j.keys || [] };
-  return certCache.keys;
+  const keys = j.keys || [];
+  certCache.set(teamDomain, { at: now, keys });
+  return keys;
 }
 
-// Verify a Cloudflare Access JWT. Returns the payload, or null.
-async function verifyAccessJwt(jwt, teamDomain) {
+// Verify a Cloudflare Access JWT. Returns the payload, or null. The issuer
+// must be one of our team domains (a renamed team keeps answering on its
+// original name), and the signature is checked against THAT issuer's certs.
+async function verifyAccessJwt(jwt, teamDomains) {
   const parts = String(jwt || '').split('.');
   if (parts.length !== 3) return null;
   let header, payload;
   try { header = decodeJson(parts[0]); payload = decodeJson(parts[1]); } catch { return null; }
   if (header.alg !== 'RS256' || !header.kid) return null;
-  const keys = await teamKeys(teamDomain);
+  const m = /^https:\/\/([a-z0-9-]{1,63})\.cloudflareaccess\.com$/.exec(String(payload.iss || ''));
+  if (!m || !teamDomains.includes(m[1])) return null;
+  const keys = await teamKeys(m[1]);
   const jwk = keys.find(k => k.kid === header.kid);
   if (!jwk) return null;
   const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
@@ -71,7 +80,6 @@ async function verifyAccessJwt(jwt, teamDomain) {
   const now = Math.floor(Date.now() / 1000);
   if (typeof payload.exp !== 'number' || payload.exp < now) return null;
   if (typeof payload.nbf === 'number' && payload.nbf > now + 60) return null;
-  if (payload.iss !== `https://${teamDomain}.cloudflareaccess.com`) return null;
   return payload;
 }
 
@@ -83,9 +91,10 @@ export async function onRequestGet({ request, env, params }) {
   const jwt = request.headers.get('cf-access-jwt-assertion');
   if (!jwt) return json(401, { ok: false, error: 'Sign in required' });
 
-  const teamDomain = env.ACCESS_TEAM_DOMAIN || 'sabel';
+  const teamDomains = String(env.ACCESS_TEAM_DOMAINS || DEFAULT_TEAM_DOMAINS)
+    .split(',').map(s => s.trim()).filter(s => TEAM.test(s));
   let claims;
-  try { claims = await verifyAccessJwt(jwt, teamDomain); } catch (e) { return json(503, { ok: false, error: 'Could not verify sign-in' }); }
+  try { claims = await verifyAccessJwt(jwt, teamDomains); } catch (e) { return json(503, { ok: false, error: 'Could not verify sign-in' }); }
   if (!claims) return json(401, { ok: false, error: 'Sign in required' });
 
   // The JWT must have been issued for THIS client's Access application. Without
@@ -103,6 +112,7 @@ export async function onRequestGet({ request, env, params }) {
       error: `Hub token or audience not configured for ${client}`,
       missing: [!token && `HUB_TOKEN_${envKey}`, !aud && `HUB_AUD_${envKey}`].filter(Boolean),
       seenAud: claims.aud,
+      seenIss: claims.iss,
     });
   }
   const auds = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
