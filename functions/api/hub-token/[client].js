@@ -94,7 +94,17 @@ export async function onRequestGet({ request, env, params }) {
   // audience configured = no token.
   const token = env[`HUB_TOKEN_${envKey}`];
   const aud = env[`HUB_AUD_${envKey}`];
-  if (!token || !aud) return json(404, { ok: false, error: `Hub token or audience not configured for ${client}` });
+  if (!token || !aud) {
+    // Setup aid: the AUD tag is hard to find in the dashboard, so until
+    // HUB_AUD_<CLIENT> is set, show the audience this (verified) sign-in
+    // carries. It is the app's public identifier, not a secret.
+    return json(404, {
+      ok: false,
+      error: `Hub token or audience not configured for ${client}`,
+      missing: [!token && `HUB_TOKEN_${envKey}`, !aud && `HUB_AUD_${envKey}`].filter(Boolean),
+      seenAud: claims.aud,
+    });
+  }
   const auds = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
   if (!auds.includes(aud)) return json(403, { ok: false, error: 'Not signed in to this hub' });
   return json(200, { ok: true, token, email: claims.email || null });
