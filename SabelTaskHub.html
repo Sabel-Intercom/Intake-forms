@@ -138,6 +138,10 @@ button.stat.hot.on{border-color:var(--red2);box-shadow:0 0 0 1px var(--red2) ins
 .tag.red{background:rgba(225,6,0,.18);color:var(--red2)}
 .tag.amber{background:rgba(251,191,36,.16);color:var(--amber)}
 .tag.green{background:rgba(34,197,94,.16);color:var(--green)}
+.tag.red{background:rgba(225,6,0,.14);color:var(--redsoft)}
+.owh{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding:12px 20px;border-top:1px solid var(--line);background:var(--surface2)}.owh b{font-family:Archivo,sans-serif;font-size:14px}.owh span{font-size:12.5px;color:var(--mute)}.owh .sp{flex:1}.owh a{font-size:12.5px;color:var(--mute);text-decoration:underline}
+.owr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px 16px;align-items:center;padding:11px 20px;border-top:1px solid var(--line)}.owr.late{box-shadow:inset 3px 0 0 var(--red2)}.owr.dep{opacity:.7}.owt b{display:block;font-size:14.5px;font-weight:600;color:var(--text);line-height:1.35}.owt .rm{margin-top:4px}.owc{font-size:12.5px;color:var(--mute);white-space:nowrap;text-align:right}.owc.hot{color:var(--redsoft)}.owa{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+@media (max-width:720px){.owr{grid-template-columns:minmax(0,1fr)}.owc{text-align:left}.owa{justify-content:flex-start}}
 .dbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.dbar .seg{margin-left:0}.dbar .rin{flex:1;min-width:200px}
 .tag.violet{background:rgba(167,139,250,.16);color:var(--violet)}
 .q{color:var(--amber)}
@@ -695,7 +699,7 @@ try{const p=JSON.parse(localStorage.getItem(PK)||'{}');['who','mode','open','aud
 }catch(e){}
 if(['home','week','list','board'].indexOf(S.mode)<0)S.mode='home';
 if(['client','date'].indexOf(S.lgroup)<0)S.lgroup='client';
-if(['home','desk','done','summary'].indexOf(S.tab)<0)S.tab='home';
+if(['home','desk','done','clients','summary'].indexOf(S.tab)<0)S.tab='home';
 if(!S.csel||typeof S.csel!=='object')S.csel={};
 function save(){try{localStorage.setItem(PK,JSON.stringify({hv:1,who:S.who,mode:S.mode,open:S.open,audit:S.audit,tab:S.tab,period:S.period,group:S.group,csel:S.csel,lgroup:S.lgroup,hideLater:S.hideLater,laterOpen:S.laterOpen}));}catch(e){}}
 const WHO=TEAM.concat(['Everyone',COORD]);
@@ -720,13 +724,14 @@ function oneChase(d){
 if(hashWho())S.who=hashWho();
 if(/^#summary$/i.test(location.hash||'')){S.who=COORD;S.tab='summary';}
 if(/^#done$/i.test(location.hash||'')){S.who=COORD;S.tab='done';}
+if(/^#clients$/i.test(location.hash||'')){S.who=COORD;S.tab='clients';}
 /* A task link from a Slack ping: #greg?task=<id> opens that task once the trackers have loaded. */
 {const m=/[?&]task=([^&]*)/.exec(location.hash||'');if(m){try{S.pendingOpen=decodeURIComponent(m[1]);S.flt='';}catch(e){}try{history.replaceState(null,'','#'+(hashWho()||S.who).toLowerCase());}catch(e){}}}
 {const ch=readChase();if(ch){S.who=COORD;S.tab='home';if(ch.batch)S.batch=ch.batch;else S.rem=ch;S.fromLoops=true;try{history.replaceState(null,'','#'+COORD.toLowerCase());}catch(e){}}}
 if(WHO.indexOf(S.who)<0)S.who='Everyone';
 
 let CTYPE={key:{},name:{}};
-let TASKS=[],OTHER=[],RAW=[],CLIENTS={},HEALTH=[],HELD=[],LOADED_AT=0,HOURS_AT=0,FIRST=true,LIVE=['busy','Loading'];
+let TASKS=[],OTHER=[],RAW=[],OWED=[],CLIENTS={},HEALTH=[],HELD=[],LOADED_AT=0,HOURS_AT=0,FIRST=true,LIVE=['busy','Loading'];
 /* Audit queue: taskId -> {owner?, client?, title, was, tracker, notion, staged, at}.
    Kept in this browser only. Nothing here writes to a tracker or to Notion; the
    queue is copied out and applied separately, with a title check per task. */
@@ -790,6 +795,9 @@ function mergeOv(a,b){
   /* Hours each person has for task work in a week (My week): person -> {h, by, at}. Newest wins. */
   const cp={};[a&&a.cap,b&&b.cap].forEach(g=>Object.keys(g||{}).forEach(p=>{if(!cp[p]||(g[p].at||0)>(cp[p].at||0))cp[p]=g[p];}));
   if(Object.keys(cp).length)out.cap=cp;
+  /* Chases logged on the Clients tab: owed item id -> {at, by, txt}. Newest wins. */
+  const ow={};[a&&a.owed,b&&b.owed].forEach(g=>Object.keys(g||{}).forEach(id=>{if(!ow[id]||(g[id].at||0)>(ow[id].at||0))ow[id]=g[id];}));
+  if(Object.keys(ow).length)out.owed=ow;
   return out;
 }
 async function readRemoteOv(){
@@ -808,7 +816,7 @@ async function pullOv(){
   const before=JSON.stringify(OV),merged=mergeOv(OV,remote);
   OV=merged;saveLocalOv();
   const same=mergeOv(remote,remote);
-  if(JSON.stringify([merged.tasks,merged.focus,merged.reminders,merged.checks,merged.cap])!==JSON.stringify([same.tasks,same.focus,same.reminders,same.checks,same.cap]))pushOv();   // this browser held work the store had not seen
+  if(JSON.stringify([merged.tasks,merged.focus,merged.reminders,merged.checks,merged.cap,merged.owed])!==JSON.stringify([same.tasks,same.focus,same.reminders,same.checks,same.cap,same.owed]))pushOv();   // this browser held work the store had not seen
   return JSON.stringify(merged)!==before;
 }
 let PUSHQ=Promise.resolve();
@@ -995,7 +1003,7 @@ async function loadAll(){
     held.push({id:'',name:t.name||'',key:t.key||'',reason:t.pauseNote||'',waiting:'',checkBack:t.pausedUntil||'',since:'',src:'registry'});
   });
   held.sort((a,b)=>(a.checkBack||'9999').localeCompare(b.checkBack||'9999')||a.name.localeCompare(b.name));
-  const health=[],tasks=[],clients={},parkedTitle={};
+  const health=[],tasks=[],clients={},parkedTitle={},owed=[];
   const hb=hoursRes.data||{};
   HOURS_AT=hb.savedAt||0;
   /* Notion rows by tracker key + title. The blob carries open rows, plus closed rows
@@ -1073,11 +1081,30 @@ async function loadAll(){
           start:p.week?weekStart(p.week,trk.week1,ws):null,now:pi===ai,done:ai<0||pi<ai})):null;
         /* No Notion row for the task itself: what is left on its steps is its duration. */
         const stepEst=openEst(stages?[].concat.apply([],stages.map(g=>g.sub.filter(s=>isTeam(s.o||g.o)))):sub.filter(s=>isTeam(s.o||t.o)));
+        /* A staged deliverable whose current stage waits on the client: their open steps are owed to us. */
+        if(stages&&ai>-1&&(stt[cid]||t.s)!=='Complete'){
+          const cur=stages[ai],oc=cur.sub.filter(s=>s.s!=='Complete'&&!isTeam(who(s.o||cur.o)));
+          if(oc.length&&!cur.sub.some(s=>s.s!=='Complete'&&isTeam(who(s.o||cur.o)))){
+            const e=cur.start?addD(cur.start,4):dt.end;
+            owed.push({id:tr.key+':'+cid+':c',key:tr.key,cid,pid,pillar:trk.pillars[pid]||pid,title:t.t,owner:who(oc[0].o||cur.o)||tr.name,status:'Pending',start:cur.start||dt.start,end:e,late:e,
+              stage:cur.l,stepTitles:oc.map(s=>s.t),steps:cur.sub.length,stepsOpen:oc.length,gate:false,form:'',milestone:false,link:t.link||cl[cid]||'',card:cn[cid]||'',log:[],staged:true});
+          }
+        }
         tasks.push({id:tr.key+':'+cid,key:tr.key,cid,pid,pillar:trk.pillars[pid]||pid,title:t.t,owner:who(t.o),lead:who(t.lead||''),
           status:stt[cid]||t.s||'Pending',start:dt.start,end:dt.end,late:dt.late,wk:dt.wk||0,wkEnd:dt.wkEnd||0,
           est:n?n.est:(sh?sh.est:(t.hrs||stepEst||null)),notion:n||null,shut:sh,desc:t.desc||'',bg:t.notes||'',card:cn[cid]||'',tip:t.tip||'',link:t.link||cl[cid]||'',
           log:Array.isArray(t.log)?t.log:[],sub,stages,
           milestone:t.kind==='milestone',doneAt:t.doneAt||''});
+      });
+      /* The client's own open tasks: not a to-do for the team, but what Nikki chases. */
+      ((data.taskData[pid]||{}).client||[]).forEach((t,i)=>{
+        if(!t||t.parked)return;
+        const cid=pid+'-c-'+i,s=stt[cid]||t.s||'Pending';
+        if(s==='Complete'||s==='Done')return;
+        const dt=datesOf(t,trk,ws,null),sub=Array.isArray(t.sub)?t.sub:[];
+        owed.push({id:tr.key+':'+cid,key:tr.key,cid,pid,pillar:trk.pillars[pid]||pid,title:t.t,owner:t.o||tr.name,status:s,start:dt.start,end:dt.end,late:dt.late,
+          gate:!!t.gate,form:t.form||'',milestone:t.kind==='milestone',link:t.link||cl[cid]||'',card:cn[cid]||'',log:Array.isArray(t.log)?t.log:[],
+          steps:sub.length,stepsOpen:sub.filter(x=>x&&x.s!=='Complete').length,waiting:s==='Dependency'});
       });
     });
   });
@@ -1155,7 +1182,7 @@ async function loadAll(){
       where:dup.map(n=>({l:'Open call copy',u:notionUrl(n.id)})).concat([{l:'Open tracker',u:clients[t.key].url}])});
   });
 
-  RAW=tasks.concat(other);CLIENTS=clients;HEALTH=health;HELD=held;LOADED_AT=Date.now();FIRST=false;
+  RAW=tasks.concat(other);OWED=owed;CLIENTS=clients;HEALTH=health;HELD=held;LOADED_AT=Date.now();FIRST=false;
   project();
   setLive(health.some(h=>/^(sys|build):/.test(h.id)&&!(((OV.checks||{})[h.id]||{}).st))?'warn':'', 'Live · synced '+ago(LOADED_AT));
   render();
@@ -2130,7 +2157,7 @@ function headerHTML(){
   n.Everyone=a.filter(t=>!isDone(t)).length;n[COORD]=a.filter(t=>t.status==='Parked').length;
   return '<header class="top"><span class="sq"></span><span class="word">SABEL</span><span class="div"></span>'+
     '<span class="ch">Task list'+(onDesk()?'<em>· '+COORD+'’s desk</em>':'')+'</span>'+
-    (onDesk()?'<div class="seg"><button type="button" data-act="tab" data-t="home" class="'+(S.tab==='home'?'on':'')+'">Home</button><button type="button" data-act="tab" data-t="desk" class="'+(S.tab==='desk'?'on':'')+'">Desk</button><button type="button" data-act="tab" data-t="done" class="'+(S.tab==='done'?'on':'')+'">Done'+(newDone(scope()).length?' · '+newDone(scope()).length:'')+'</button><button type="button" data-act="tab" data-t="summary" class="'+(S.tab==='summary'?'on':'')+'">Summary</button></div>':'<div class="seg"><button type="button" data-act="mode" data-m="home" class="'+(S.mode==='home'?'on':'')+'">Home</button><button type="button" data-act="mode" data-m="week" class="'+(S.mode==='week'?'on':'')+'">'+(S.who==='Everyone'?'Week':'My week')+'</button><button type="button" data-act="mode" data-m="list" class="'+(S.mode==='list'?'on':'')+'">List</button><button type="button" data-act="mode" data-m="board" class="'+(S.mode==='board'?'on':'')+'">Board</button></div>')+
+    (onDesk()?'<div class="seg"><button type="button" data-act="tab" data-t="home" class="'+(S.tab==='home'?'on':'')+'">Home</button><button type="button" data-act="tab" data-t="desk" class="'+(S.tab==='desk'?'on':'')+'">Desk</button><button type="button" data-act="tab" data-t="done" class="'+(S.tab==='done'?'on':'')+'">Done'+(newDone(scope()).length?' · '+newDone(scope()).length:'')+'</button><button type="button" data-act="tab" data-t="clients" class="'+(S.tab==='clients'?'on':'')+'">Clients'+(owedLate().length?' · '+owedLate().length:'')+'</button><button type="button" data-act="tab" data-t="summary" class="'+(S.tab==='summary'?'on':'')+'">Summary</button></div>':'<div class="seg"><button type="button" data-act="mode" data-m="home" class="'+(S.mode==='home'?'on':'')+'">Home</button><button type="button" data-act="mode" data-m="week" class="'+(S.mode==='week'?'on':'')+'">'+(S.who==='Everyone'?'Week':'My week')+'</button><button type="button" data-act="mode" data-m="list" class="'+(S.mode==='list'?'on':'')+'">List</button><button type="button" data-act="mode" data-m="board" class="'+(S.mode==='board'?'on':'')+'">Board</button></div>')+
     '<div class="who">'+WHO.map(p=>'<button type="button" data-act="who" data-who="'+p+'" class="'+(S.who===p?'on':'')+(p===COORD?' co':'')+'">'+p+'<small>'+n[p]+'</small></button>').join('')+'</div>'+
     '<button type="button" class="theme" data-act="theme" title="'+(LIGHT?'Switch to dark mode':'Switch to light mode')+'" aria-label="'+(LIGHT?'Switch to dark mode':'Switch to light mode')+'">'+(LIGHT?'&#9790;':'&#9728;')+'</button></header>';
 }
@@ -2150,7 +2177,12 @@ function titleHTML(mine){
   const name=S.who==='Everyone'?'Everyone':S.who;
   let stats='',title;
   if(onDesk()){
-    title=S.tab==='summary'?'Team summary':S.tab==='done'?'What got done':S.tab==='home'?esc(name)+'’s home':esc(name)+'’s desk';
+    title=S.tab==='summary'?'Team summary':S.tab==='done'?'What got done':S.tab==='clients'?'What clients owe us':S.tab==='home'?esc(name)+'’s home':esc(name)+'’s desk';
+    if(S.tab==='clients'){
+      const late=owedLate(),cs={};late.forEach(o=>{cs[o.key]=1;});
+      const wk=OWED.filter(o=>!o.waiting&&dueIn(o)!==null&&dueIn(o)>=0&&dueIn(o)<=7).length;
+      stats='<span class="stat'+(late.length?' hot':'')+'"><b>'+late.length+'</b>overdue across '+Object.keys(cs).length+' client'+(Object.keys(cs).length===1?'':'s')+'</span><span class="stat"><b>'+wk+'</b>due in the next 7 days</span><span class="stat"><b>'+OWED.length+'</b>open on the client side</span>';
+    }
     if(S.tab==='done'){
       const d=mine.filter(isDone),nw=newDone(mine);
       stats='<span class="stat"><b>'+d.length+'</b>completed, all time</span>'+(SEEN.at?'<span class="stat'+(nw.length?' hot':'')+'"><b>'+nw.length+'</b>new since '+fStamp(SEEN.at)+'</span>':'');
@@ -2453,6 +2485,84 @@ function coordHomeHTML(all){
   return h+'<div class="hfoot"><span>Everything the team has completed, with what is new since you last looked, is on the Done tab. Time by period is on Summary.</span><button type="button" class="lk" data-act="tab" data-t="done">Open Done</button></div></div>';
 }
 
+/* ── view 6: Clients (coordinator). What every client owes us across the active trackers: their open
+   tasks and the client-owned steps a staged deliverable is waiting on. Built in load.js (OWED). Nothing
+   here is written to a tracker; "Chased" logs the chase in our own store (OV.owed) so the next look
+   shows when a client was last asked. ── */
+const owedLate=()=>OWED.filter(o=>!o.waiting&&dueIn(o)!==null&&dueIn(o)<0);
+const owedChase=id=>((OV.owed||{})[id])||null;
+/* Last time anyone chased this client: a logged chase on any of its items, or a chase sent from Open Loops. */
+function lastChased(key){
+  let best=null;
+  Object.keys(OV.owed||{}).forEach(id=>{if(id.indexOf(key+':')===0){const c=OV.owed[id];if(c&&(!best||c.at>best.at))best=c;}});
+  Object.keys(OV.reminders||{}).forEach(id=>{const r=OV.reminders[id];if(r&&!r.del&&r.kind==='chase'&&chaseKey(r.client)===key&&(!best||(r.at||0)>best.at))best={at:r.at||0,by:r.by||COORD,txt:r.title};});
+  return best;
+}
+const nextWorkDay=(from,n)=>{let d=new Date(from),k=0;while(k<n){d=addD(d,1);if(d.getDay()!==0&&d.getDay()!==6)k++;}return d;};
+const fDow=d=>DOW[d.getDay()]+' '+fD(d);
+/* A chase in Nikki's voice: the fact, what it holds up, a date, the link. */
+function chaseText(o){
+  const c=CLIENTS[o.key],n=dueIn(o),ask=fDow(nextWorkDay(today(),2));
+  let s='Hi team, a quick one on the '+(c?c.name:'')+' tracker. ';
+  if(o.staged)s+='“'+o.title+'” is waiting on your side for: '+o.stepTitles.join('; ')+'. ';
+  else s+='“'+o.title+'”'+(o.stepsOpen>1?' ('+o.stepsOpen+' parts still open)':'')+(o.end?' was due '+fD(o.end)+(n<0?' ('+(-n)+' day'+(n===-1?'':'s')+' ago)':''):'')+'. ';
+  if(o.gate)s+='It is a gate on the plan: the next build step cannot start until it lands. ';
+  else if(o.form)s+='It is the '+o.form+' form, and the build is planned off its answers. ';
+  s+='Could you get it to us by '+ask+'? If something is holding it up, tell me and I will re-plan around it.';
+  if(c)s+='\n'+c.url;
+  return s;
+}
+function logChase(id){
+  const o=OWED.find(x=>x.id===id);if(!o)return;
+  OV.owed=OV.owed||{};OV.owed[id]={at:Date.now(),by:author(),txt:''};
+  commit();toast('Logged: chased '+(CLIENTS[o.key]?CLIENTS[o.key].name:'the client')+' today');
+}
+function copyChase(id){
+  const o=OWED.find(x=>x.id===id);if(!o)return;
+  const txt=chaseText(o);
+  const ok=()=>toast('Chase copied. Paste it into the client channel, then press Chased.');
+  const fail=()=>{window.prompt('Copy the chase:',txt);};
+  try{navigator.clipboard.writeText(txt).then(ok,fail);}catch(e){fail();}
+}
+function owedRowHTML(o){
+  const n=dueIn(o),late=!o.waiting&&n!==null&&n<0,ch=owedChase(o.id);
+  let tags='';
+  if(o.gate)tags+='<span class="tag red">Gate: blocks the build</span>';
+  if(o.form)tags+='<span class="tag amber">'+esc(o.form)+' form</span>';
+  if(o.milestone)tags+='<span class="tag">Milestone</span>';
+  if(o.staged)tags+='<span class="tag blue">Stage: '+esc(o.stage)+'</span>';
+  else if(o.steps)tags+='<span class="tag">'+o.stepsOpen+' of '+o.steps+' parts open</span>';
+  if(o.waiting)tags+='<span class="tag">Waiting on Sabel first</span>';
+  else if(o.status==='In Progress')tags+='<span class="tag blue">Started</span>';
+  return '<div class="owr'+(late?' late':'')+(o.waiting?' dep':'')+'" data-oid="'+esc(o.id)+'"><div class="owt"><b>'+esc(o.title)+'</b><div class="rm">'+(o.pillar?'<span>'+esc(o.pillar)+'</span>':'')+'<span class="own">'+esc(o.owner)+'</span>'+tags+
+      (o.staged?'<span>Open on their side: '+esc(o.stepTitles.join('; '))+'</span>':'')+(o.card?'<span>'+esc(o.card.length>90?o.card.slice(0,88)+'…':o.card)+'</span>':'')+'</div></div>'+
+    '<div class="owc'+(late?' hot':'')+'">'+dueHTML(o)+'<br>'+(ch?'Chased '+fStamp(ch.at)+(ch.by?' by '+esc(ch.by):''):'<span style="color:var(--faint)">Not chased yet</span>')+'</div>'+
+    '<div class="owa">'+(o.waiting?'':'<button type="button" class="pb sm" data-act="ow-copy" title="Copy a ready-to-send chase">Copy chase</button><button type="button" class="pb sm amber" data-act="ow-log" title="Log that you chased this today">Chased</button>')+'</div></div>';
+}
+function owedTabHTML(){
+  if(S.ofl===undefined)S.ofl='late';
+  const f=S.ofl;
+  const keep=o=>f==='all'?true:f==='week'?(!o.waiting&&dueIn(o)!==null&&dueIn(o)>=0&&dueIn(o)<=7):(!o.waiting&&dueIn(o)!==null&&dueIn(o)<0);
+  const rows=OWED.filter(keep);
+  const g={};rows.forEach(o=>{(g[o.key]=g[o.key]||[]).push(o);});
+  const oldest=k=>Math.min.apply(null,g[k].map(o=>dueIn(o)===null?9e9:dueIn(o)));
+  const ks=Object.keys(g).sort((a,b)=>oldest(a)-oldest(b)||clientOf({key:a}).localeCompare(clientOf({key:b})));
+  const pill=(k,l,n)=>'<button type="button" data-act="ofl" data-f="'+k+'" class="'+(f===k?'on':'')+'">'+l+' · '+n+'</button>';
+  let h='<div class="desk">';
+  h+='<div class="dbar"><div class="seg">'+pill('late','Overdue',owedLate().length)+pill('week','Due in 7 days',OWED.filter(o=>!o.waiting&&dueIn(o)!==null&&dueIn(o)>=0&&dueIn(o)<=7).length)+pill('all','Everything open',OWED.length)+'</div>'+
+    '<span class="hint" style="margin:0">Oldest first. Copy chase gives you a message in your words; Chased logs the date so you can see who was asked when.</span></div>';
+  if(!ks.length)h+='<div class="secc"><div class="sempty">'+(f==='late'?'No client item is past its tracker date.':f==='week'?'Nothing on the client side falls due in the next 7 days.':'Nothing is open on the client side.')+'</div></div>';
+  ks.forEach(k=>{
+    const c=CLIENTS[k],lc=lastChased(k),late=g[k].filter(o=>!o.waiting&&dueIn(o)!==null&&dueIn(o)<0).length,allOpen=OWED.filter(o=>o.key===k).length;
+    g[k].sort((a,b)=>(a.waiting?1:0)-(b.waiting?1:0)||((a.end?a.end.getTime():9e15)-(b.end?b.end.getTime():9e15)));
+    h+='<div class="secc"><div class="owh">'+tsq({key:k})+'<b>'+esc(c?c.name:k)+'</b>'+
+      '<span>'+(late?'<span style="color:var(--redsoft)">'+late+' overdue</span> · ':'')+allOpen+' open on their side'+(c&&c.goLive?' · go-live '+fD(c.goLive):'')+'</span>'+
+      '<span>'+(lc?'Last chased '+fStamp(lc.at)+(lc.by?' by '+esc(lc.by):''):'Not chased from here yet')+'</span><span class="sp"></span>'+
+      (c?'<a href="'+esc(c.url)+'" target="_blank" rel="noopener">Open tracker &rarr;</a>':'')+'</div>'+g[k].map(owedRowHTML).join('')+'</div>';
+  });
+  return h+'<div class="hint">Client-owned tasks and client steps from the active trackers, read live; a tick on the tracker removes the item here on the next refresh. Held and paused clients are left out. Chases are logged in this hub only, never on the client’s tracker.</div></div>';
+}
+
 /* ── view 5: Done (coordinator). Every completed Sabel task across the active trackers, newest first,
    with what is new since Nikki last pressed "Seen". The seen list is this browser's only (localStorage):
    task id -> the doneAt it was seen with, so a task reopened and finished again shows as new once more.
@@ -2482,7 +2592,7 @@ function doneTabHTML(all){
     '<div class="seg"><button type="button" data-act="group" data-g="client" class="'+(S.group==='client'?'on':'')+'">By client</button><button type="button" data-act="group" data-g="person" class="'+(S.group!=='client'?'on':'')+'">By person</button></div></div>';
   h+='<div class="secc"><div class="sech"><i style="background:var(--greenfill)"></i><b style="color:var(--green)">All completed</b><span>Newest first within each group'+(undated?'; '+undated+' with no date were ticked on an older tracker build and sit last':'')+'</span><small>'+shown.length+(q?' of '+done.length:'')+' task'+(shown.length===1?'':'s')+'</small></div>'+
     (shown.length?sumGroupsHTML(shown,'done'):'<div class="sempty">'+(q?'Nothing matches “'+esc(q)+'”.':'Nothing has been completed yet.')+'</div>')+'</div>';
-  return h+'<div class="hint">Sabel-owned tasks on active trackers only: client-side steps and tasks on held clients are not here. Click a task to open it in its owner’s list. The seen list is kept in this browser.</div></div>';
+  return h+'<div class="hint">Sabel-owned tasks on active trackers only; what clients owe us is on the Clients tab, and held clients are left out. Click a task for its notes and detail, or to reopen it. The seen list is kept in this browser.</div></div>';
 }
 
 /* ── view 4: summary (what is in progress, what got done, where the time went) ── */
@@ -2496,7 +2606,7 @@ function sumRowHTML(t,kind){
   let when='';
   if(kind==='prog')when=t.sAt?'Started '+fStamp(t.sAt)+(t.sBy?' by '+esc(t.sBy):''):'In progress on the tracker';
   else when=(dOf(t.doneAt)?'Done '+fDY(dOf(t.doneAt)):'Done, date not recorded')+(t.sBy?' by '+esc(t.sBy):' · on the tracker');
-  return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="goto"><b>'+esc(t.title)+'</b>'+(S.tab==='done'&&isNewDone(t)?'<span class="tag green">New</span>':'')+'<span class="rm"><span class="cl">'+tsq(t)+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+
+  return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="'+(S.tab==='done'?'open':'goto')+'"><b>'+esc(t.title)+'</b>'+(S.tab==='done'&&isNewDone(t)?'<span class="tag green">New</span>':'')+'<span class="rm"><span class="cl">'+tsq(t)+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+
     '<span class="own">'+esc(t.owner)+'</span>'+progHTML(t)+runHTML(t)+(t.src?'<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>':'')+(noteCount(t)?'<span>'+noteCount(t)+' note'+(noteCount(t)===1?'':'s')+'</span>':'')+'</span></button>'+
     '<span class="srw">'+when+'</span>'+(kind==='prog'?dueHTML(t):'')+
     '<span class="srtm'+(over?' over':'')+'" title="Time logged against the estimate"><b>'+(sp?fMins(sp):'–')+'</b>'+(e?' / '+fEst(e):'')+'</span></div>';
@@ -2585,9 +2695,9 @@ function render(){
   }else{
     const mine=scope();
     h+=bannerHTML()+(!onDesk()&&S.mode==='week'?'':titleHTML(mine)+typeKeyHTML(mine))+(S.audit&&!onDesk()&&S.mode==='list'?auditBarHTML():'');
-    h+=onDesk()?(S.tab==='summary'?summaryHTML(mine):S.tab==='done'?doneTabHTML(mine):S.tab==='home'?coordHomeHTML(mine):deskHTML(mine))
+    h+=onDesk()?(S.tab==='summary'?summaryHTML(mine):S.tab==='done'?doneTabHTML(mine):S.tab==='clients'?owedTabHTML():S.tab==='home'?coordHomeHTML(mine):deskHTML(mine))
       :S.mode==='board'?zoneTop(mine)+boardHTML(narrowed(mine)):S.mode==='week'?weekHTML(byClient(mine)):S.mode==='home'?homeHTML(byClient(mine)):zoneTop(mine)+listHTML(narrowed(mine));
-    if(!onDesk()&&(S.mode==='board'||S.mode==='week')&&S.open)h+=drawerHTML(findTask(S.open));
+    if(S.open&&((!onDesk()&&(S.mode==='board'||S.mode==='week'))||(onDesk()&&S.tab==='done')))h+=drawerHTML(findTask(S.open));
   }
   app.innerHTML=h+footHTML();
   if(ta){const el=app.querySelector('[data-ta="'+ta.replace(/"/g,'')+'"]');if(el){el.focus();try{el.setSelectionRange(pos[0],pos[1]);}catch(e){}}}
@@ -2627,7 +2737,10 @@ document.addEventListener('click',e=>{
       S.open=null;save();render();break;}
     case 'cclear':delete S.csel[S.who];S.open=null;save();render();break;
     case 'more':S.more[a.getAttribute('data-k')]=true;render();break;
-    case 'tab':S.tab=a.getAttribute('data-t');S.open=null;save();history.replaceState(null,'',S.tab==='summary'?'#summary':S.tab==='done'?'#done':'#'+COORD.toLowerCase());render();window.scrollTo(0,0);break;
+    case 'tab':S.tab=a.getAttribute('data-t');S.open=null;save();history.replaceState(null,'',S.tab==='summary'?'#summary':S.tab==='done'?'#done':S.tab==='clients'?'#clients':'#'+COORD.toLowerCase());render();window.scrollTo(0,0);break;
+    case 'ofl':S.ofl=a.getAttribute('data-f');render();break;
+    case 'ow-log':logChase(a.closest('[data-oid]').getAttribute('data-oid'));break;
+    case 'ow-copy':copyChase(a.closest('[data-oid]').getAttribute('data-oid'));break;
     case 'seen-all':markSeen(scope());render();toast('Marked as seen. Anything completed from now on shows as new.');break;
     case 'period':S.period=a.getAttribute('data-p');save();render();break;
     case 'group':S.group=a.getAttribute('data-g');save();render();break;
@@ -2754,7 +2867,7 @@ document.addEventListener('change',e=>{
   const f=e.target.getAttribute&&e.target.getAttribute('data-aud');if(!f)return;
   setAudit(e.target.closest('.row').getAttribute('data-id'),f,e.target.value);
 });
-window.addEventListener('hashchange',()=>{if(/^#summary$/i.test(location.hash)){S.who=COORD;S.tab='summary';save();render();return;}if(/^#done$/i.test(location.hash)){S.who=COORD;S.tab='done';save();render();return;}const w=hashWho();if(w&&w!==S.who){S.who=w;S.open=null;save();render();}});
+window.addEventListener('hashchange',()=>{if(/^#summary$/i.test(location.hash)){S.who=COORD;S.tab='summary';save();render();return;}if(/^#done$/i.test(location.hash)){S.who=COORD;S.tab='done';save();render();return;}if(/^#clients$/i.test(location.hash)){S.who=COORD;S.tab='clients';save();render();return;}const w=hashWho();if(w&&w!==S.who){S.who=w;S.open=null;save();render();}});
 
 /* ── drag and drop into and within the Focus Zone ───────────────────────────
    Only the ⋮⋮ grip starts a drag, so text in a row still selects normally. The
