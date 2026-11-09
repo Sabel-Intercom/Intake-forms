@@ -596,7 +596,7 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
   <p>Greg's own projects, run through Sabel. Set "Delivered by" to Flownetic in Details. Greg manages them, so there is no tracker and no data to fill in: the steps are the Slack thread, Rocketlane and a weekly update that opens again every Monday. If the type is Migration or Build + Migration, Richard is doing migration work and the migration gates apply too, without the signing and paperwork steps. Taking the mark off puts the client back as they were.</p>
 
   <h3>On hold</h3>
-  <p>"Park" on the Board and "Put on hold" on the client are the same thing. A held client leaves the Board and the Today list, keeps everything recorded, and comes back with "Resume". Always give a reason and a check-back date.</p>
+  <p>"Park" on the Board and "Put on hold" on the client are the same thing. A held client leaves the Board and the Today list, keeps everything recorded, and comes back with "Resume". The Task Hub pauses the client too: none of their tracker or Notion tasks show or count as overdue for the team until you resume them here. Always give a reason and a check-back date.</p>
 
   <h3>If you need to do something while Nikki is away</h3>
   <ul>
@@ -2334,7 +2334,7 @@ function statusRow(c){
 function holdPanel(c){
   const h=c.hold||{};
   if(S.holdEdit===c.id){
-    return '<section class="hold"><div class="ht"><b>'+(onHold(c)?'Edit hold':'Put on hold')+'</b>Their steps leave Today until you resume them. The check-back date brings them back to Today.</div>'+
+    return '<section class="hold"><div class="ht"><b>'+(onHold(c)?'Edit hold':'Put on hold')+'</b>Their steps leave Today and their tasks pause in the Task Hub until you resume them. The check-back date brings them back to Today.</div>'+
       '<div class="row"><label class="full">Why it is on hold<textarea id="hold-reason" placeholder="e.g. Audit delivered, waiting on them to decide build scope">'+esc(onHold(c)?h.reason||"":"")+'</textarea></label>'+
       '<label>Waiting on<select id="hold-waiting">'+optHtml([["client","The client"],["sabel","Us"],["other","Someone else"]],onHold(c)?h.waiting:"client")+'</select></label>'+
       '<label>Check back on<input type="date" id="hold-check" value="'+esc(onHold(c)?h.checkBack||"":addDays(today(),14))+'"></label>'+

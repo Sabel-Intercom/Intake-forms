@@ -616,6 +616,13 @@ html.light .sq{box-shadow:none}
 .row.dr .odq{padding-left:62px}
 .decks{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid rgba(225,6,0,.45);border-left:4px solid var(--red2);border-radius:14px;padding:14px 18px;background:linear-gradient(rgba(225,6,0,.08),rgba(225,6,0,.08)),var(--surface)}
 .decks>div{flex:1;min-width:240px;display:flex;flex-direction:column;gap:3px}
+/* Home: clients on hold in Internal Ops. Quiet by design: their tasks are paused, not a problem to fix. */
+.held{display:flex;flex-direction:column;gap:6px;border:1px dashed var(--line2);border-radius:14px;padding:12px 18px;font-size:13px;color:var(--soft)}
+.held b{font-family:Archivo,sans-serif;font-size:14px;color:var(--text)}
+.held ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.held li span{color:var(--text)}
+.held li .late{color:var(--red2);font-weight:600}
+.held a{color:var(--mute);text-decoration:underline;text-underline-offset:2px}
 .decks b{font-family:Archivo,sans-serif;font-size:15px;color:var(--red2)}
 .decks span{font-size:13px;color:var(--soft)}
 /* List grouped by client: the client name is the headline */
@@ -716,7 +723,7 @@ if(/^#summary$/i.test(location.hash||'')){S.who=COORD;S.tab='summary';}
 if(WHO.indexOf(S.who)<0)S.who='Everyone';
 
 let CTYPE={key:{},name:{}};
-let TASKS=[],OTHER=[],RAW=[],CLIENTS={},HEALTH=[],LOADED_AT=0,HOURS_AT=0,FIRST=true,LIVE=['busy','Loading'];
+let TASKS=[],OTHER=[],RAW=[],CLIENTS={},HEALTH=[],HELD=[],LOADED_AT=0,HOURS_AT=0,FIRST=true,LIVE=['busy','Loading'];
 /* Audit queue: taskId -> {owner?, client?, title, was, tracker, notion, staged, at}.
    Kept in this browser only. Nothing here writes to a tracker or to Notion; the
    queue is copied out and applied separately, with a title check per task. */
@@ -969,6 +976,22 @@ async function loadAll(){
   const ty={key:{},name:{}};
   (((portalRes&&portalRes.data)||{}).clients||[]).forEach(c=>{if(!c||!c.type)return;if(c.trackerKey)ty.key[c.trackerKey]=c.type;if(c.name)ty.name[squashName(c.name)]=c.type;});
   if(Object.keys(ty.name).length)CTYPE=ty;
+  /* On hold in Internal Ops ("Put on hold" / Park, hold.on on the client record) pauses the client
+     here too: its tracker tasks and its open Notion rows leave every list and every count until the
+     client is resumed there, so a held client's dates stop turning overdue on the team. Same effect
+     as paused:true in trackers.json, which stays for a client with no Internal Ops record. Internal
+     Ops ignores a hold on a Complete or Outreach client, so this does as well. */
+  const held=[];
+  (((portalRes&&portalRes.data)||{}).clients||[]).forEach(c=>{
+    if(!c||!c.hold||!c.hold.on||['Complete','Outreach'].indexOf(c.stage)>-1)return;
+    held.push({id:c.id||'',name:c.name||'',key:c.trackerKey||'',reason:c.hold.reason||'',waiting:c.hold.waiting||'client',checkBack:c.hold.checkBack||'',since:c.hold.since||'',src:'ops'});
+    if(c.trackerKey)pausedKey[c.trackerKey]=1;if(c.name)pausedName[norm(c.name)]=1;
+  });
+  reg.filter(t=>t.paused).forEach(t=>{
+    if(held.some(h=>(h.key&&h.key===t.key)||norm(h.name)===norm(t.name)))return;
+    held.push({id:'',name:t.name||'',key:t.key||'',reason:t.pauseNote||'',waiting:'',checkBack:t.pausedUntil||'',since:'',src:'registry'});
+  });
+  held.sort((a,b)=>(a.checkBack||'9999').localeCompare(b.checkBack||'9999')||a.name.localeCompare(b.name));
   const health=[],tasks=[],clients={},parkedTitle={};
   const hb=hoursRes.data||{};
   HOURS_AT=hb.savedAt||0;
@@ -984,6 +1007,7 @@ async function loadAll(){
   /* Anything fixed in Notion only reaches the hub on the plugin's next push. */
 
   loaded.forEach(({tr,trk,st})=>{
+    if(pausedKey[tr.key]||pausedName[norm(tr.name)])return;   // on hold: nothing from this client
     const c=clients[tr.key]={key:tr.key,name:tr.name,file:tr.file,url:BASE+tr.file,goLive:null,deep:trk.deep};
     if(!st.reached){health.push({id:'sys:store:'+tr.key,client:tr.name,t:'Saved progress could not be read',d:'The tracker store did not answer for this client, so its tasks are left out.',fix:'Usually a blip: press Refresh. If it stays, the tracker key may not be on the webhook allowlist.',where:[{l:'Open tracker',u:c.url}]});return;}
     const saved=st.data;
@@ -1128,7 +1152,7 @@ async function loadAll(){
       where:dup.map(n=>({l:'Open call copy',u:notionUrl(n.id)})).concat([{l:'Open tracker',u:clients[t.key].url}])});
   });
 
-  RAW=tasks.concat(other);CLIENTS=clients;HEALTH=health;LOADED_AT=Date.now();FIRST=false;
+  RAW=tasks.concat(other);CLIENTS=clients;HEALTH=health;HELD=held;LOADED_AT=Date.now();FIRST=false;
   project();
   setLive(health.some(h=>/^(sys|build):/.test(h.id)&&!(((OV.checks||{})[h.id]||{}).st))?'warn':'', 'Live · synced '+ago(LOADED_AT));
   render();
@@ -2297,6 +2321,24 @@ function zoneTop(mine){
     (back.length?homeSec('back',COORD+' replied','Answered and handed back. Over to '+whoTxt+'.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',back):'');
   return h?'<div class="list fztop">'+h+'</div>':'';
 }
+/* Home: one quiet box naming the clients on hold in Internal Ops (or paused in trackers.json). Their
+   tasks are left out of every list and count above, so say where they went and when they come back. */
+function heldHTML(){
+  if(!HELD.length)return '';
+  const WAIT={client:'waiting on the client',sabel:'waiting on us',other:'waiting on someone else'};
+  const t0=today();
+  const li=HELD.map(h=>{
+    const cb=h.checkBack?dOf(h.checkBack):null,past=cb&&cb<t0;
+    const bits=[];
+    if(cb)bits.push(past?'<em class="late">check-back date passed ('+esc(fD(cb))+')</em>':'check back '+esc(fD(cb)));
+    if(h.waiting&&WAIT[h.waiting])bits.push(WAIT[h.waiting]);
+    if(h.since){const d=dOf(h.since);if(d)bits.push('since '+esc(fD(d)));}
+    const link=h.src==='ops'?'<a href="'+BASE+'SabelInternalOps.html#c='+encodeURIComponent(h.id)+'" target="_blank" rel="noopener">'+(past?'Resume or extend':'Open')+' in Internal Ops</a>':'<a href="'+BASE+'trackers.json" target="_blank" rel="noopener">paused in trackers.json</a>';
+    return '<li><span>'+esc(h.name)+'</span>'+(bits.length?' · '+bits.join(' · '):'')+(h.reason?' · '+esc(h.reason):'')+' · '+link+'</li>';
+  }).join('');
+  return '<div class="held"><b>On hold · '+HELD.length+' client'+(HELD.length===1?'':'s')+'</b><ul>'+li+'</ul>'+
+    '<span>A held client’s tasks are paused here: nothing of theirs shows or counts as overdue until the client is resumed in Internal Ops.</span></div>';
+}
 function homeHTML(mine){
   const canF=isTeam(S.who);
   const zone=canF?focusZoneHTML(mine):'';
@@ -2310,7 +2352,7 @@ function homeHTML(mine){
   const urgent=open.filter(t=>t.status!=='In Progress'&&t.status!=='Parked'&&!t.back&&dueIn(t)!==null&&dueIn(t)<=0).sort(byDue);
   const parked=open.filter(t=>t.status==='Parked').sort(byDue);
   const whoTxt=S.who==='Everyone'?'the team':'you';
-  let h='<div class="list">'+decksHTML(mine)+zone;
+  let h='<div class="list">'+decksHTML(mine)+heldHTML()+zone;
   if(chases.length)h+=homeSec('chase','Client waiting','A client is waiting on a reply. Longest wait first.','var(--red2)','var(--red2)','rgba(225,6,0,.45)',chases);
   if(rems.length)h+=homeSec('rem','Don’t forget…','Pushed to '+whoTxt+' by '+COORD+'. Tick it off when done.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',rems);
   if(back.length)h+=homeSec('back',COORD+' replied','Answered and handed back. Over to '+whoTxt+'.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',back);
