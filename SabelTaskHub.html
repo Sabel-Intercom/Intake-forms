@@ -137,6 +137,8 @@ button.stat.hot.on{border-color:var(--red2);box-shadow:0 0 0 1px var(--red2) ins
 .tag.blue{background:rgba(96,165,250,.16);color:var(--blue)}
 .tag.red{background:rgba(225,6,0,.18);color:var(--red2)}
 .tag.amber{background:rgba(251,191,36,.16);color:var(--amber)}
+.tag.green{background:rgba(34,197,94,.16);color:var(--green)}
+.dbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.dbar .seg{margin-left:0}.dbar .rin{flex:1;min-width:200px}
 .tag.violet{background:rgba(167,139,250,.16);color:var(--violet)}
 .q{color:var(--amber)}
 .due{font-size:13px;font-weight:500;color:var(--soft);white-space:nowrap;text-align:right}
@@ -693,7 +695,7 @@ try{const p=JSON.parse(localStorage.getItem(PK)||'{}');['who','mode','open','aud
 }catch(e){}
 if(['home','week','list','board'].indexOf(S.mode)<0)S.mode='home';
 if(['client','date'].indexOf(S.lgroup)<0)S.lgroup='client';
-if(['home','desk','summary'].indexOf(S.tab)<0)S.tab='home';
+if(['home','desk','done','summary'].indexOf(S.tab)<0)S.tab='home';
 if(!S.csel||typeof S.csel!=='object')S.csel={};
 function save(){try{localStorage.setItem(PK,JSON.stringify({hv:1,who:S.who,mode:S.mode,open:S.open,audit:S.audit,tab:S.tab,period:S.period,group:S.group,csel:S.csel,lgroup:S.lgroup,hideLater:S.hideLater,laterOpen:S.laterOpen}));}catch(e){}}
 const WHO=TEAM.concat(['Everyone',COORD]);
@@ -717,6 +719,7 @@ function oneChase(d){
 }
 if(hashWho())S.who=hashWho();
 if(/^#summary$/i.test(location.hash||'')){S.who=COORD;S.tab='summary';}
+if(/^#done$/i.test(location.hash||'')){S.who=COORD;S.tab='done';}
 /* A task link from a Slack ping: #greg?task=<id> opens that task once the trackers have loaded. */
 {const m=/[?&]task=([^&]*)/.exec(location.hash||'');if(m){try{S.pendingOpen=decodeURIComponent(m[1]);S.flt='';}catch(e){}try{history.replaceState(null,'','#'+(hashWho()||S.who).toLowerCase());}catch(e){}}}
 {const ch=readChase();if(ch){S.who=COORD;S.tab='home';if(ch.batch)S.batch=ch.batch;else S.rem=ch;S.fromLoops=true;try{history.replaceState(null,'','#'+COORD.toLowerCase());}catch(e){}}}
@@ -2127,7 +2130,7 @@ function headerHTML(){
   n.Everyone=a.filter(t=>!isDone(t)).length;n[COORD]=a.filter(t=>t.status==='Parked').length;
   return '<header class="top"><span class="sq"></span><span class="word">SABEL</span><span class="div"></span>'+
     '<span class="ch">Task list'+(onDesk()?'<em>· '+COORD+'’s desk</em>':'')+'</span>'+
-    (onDesk()?'<div class="seg"><button type="button" data-act="tab" data-t="home" class="'+(S.tab==='home'?'on':'')+'">Home</button><button type="button" data-act="tab" data-t="desk" class="'+(S.tab==='desk'?'on':'')+'">Desk</button><button type="button" data-act="tab" data-t="summary" class="'+(S.tab==='summary'?'on':'')+'">Summary</button></div>':'<div class="seg"><button type="button" data-act="mode" data-m="home" class="'+(S.mode==='home'?'on':'')+'">Home</button><button type="button" data-act="mode" data-m="week" class="'+(S.mode==='week'?'on':'')+'">'+(S.who==='Everyone'?'Week':'My week')+'</button><button type="button" data-act="mode" data-m="list" class="'+(S.mode==='list'?'on':'')+'">List</button><button type="button" data-act="mode" data-m="board" class="'+(S.mode==='board'?'on':'')+'">Board</button></div>')+
+    (onDesk()?'<div class="seg"><button type="button" data-act="tab" data-t="home" class="'+(S.tab==='home'?'on':'')+'">Home</button><button type="button" data-act="tab" data-t="desk" class="'+(S.tab==='desk'?'on':'')+'">Desk</button><button type="button" data-act="tab" data-t="done" class="'+(S.tab==='done'?'on':'')+'">Done'+(newDone(scope()).length?' · '+newDone(scope()).length:'')+'</button><button type="button" data-act="tab" data-t="summary" class="'+(S.tab==='summary'?'on':'')+'">Summary</button></div>':'<div class="seg"><button type="button" data-act="mode" data-m="home" class="'+(S.mode==='home'?'on':'')+'">Home</button><button type="button" data-act="mode" data-m="week" class="'+(S.mode==='week'?'on':'')+'">'+(S.who==='Everyone'?'Week':'My week')+'</button><button type="button" data-act="mode" data-m="list" class="'+(S.mode==='list'?'on':'')+'">List</button><button type="button" data-act="mode" data-m="board" class="'+(S.mode==='board'?'on':'')+'">Board</button></div>')+
     '<div class="who">'+WHO.map(p=>'<button type="button" data-act="who" data-who="'+p+'" class="'+(S.who===p?'on':'')+(p===COORD?' co':'')+'">'+p+'<small>'+n[p]+'</small></button>').join('')+'</div>'+
     '<button type="button" class="theme" data-act="theme" title="'+(LIGHT?'Switch to dark mode':'Switch to light mode')+'" aria-label="'+(LIGHT?'Switch to dark mode':'Switch to light mode')+'">'+(LIGHT?'&#9790;':'&#9728;')+'</button></header>';
 }
@@ -2147,7 +2150,11 @@ function titleHTML(mine){
   const name=S.who==='Everyone'?'Everyone':S.who;
   let stats='',title;
   if(onDesk()){
-    title=S.tab==='summary'?'Team summary':S.tab==='home'?esc(name)+'’s home':esc(name)+'’s desk';
+    title=S.tab==='summary'?'Team summary':S.tab==='done'?'What got done':S.tab==='home'?esc(name)+'’s home':esc(name)+'’s desk';
+    if(S.tab==='done'){
+      const d=mine.filter(isDone),nw=newDone(mine);
+      stats='<span class="stat"><b>'+d.length+'</b>completed, all time</span>'+(SEEN.at?'<span class="stat'+(nw.length?' hot':'')+'"><b>'+nw.length+'</b>new since '+fStamp(SEEN.at)+'</span>':'');
+    }
     if(S.tab==='desk'){
       const p=mine.filter(t=>t.status==='Parked').length;
       stats='<span class="stat amb">'+p+' task'+(p===1?'':'s')+' parked with you</span>';
@@ -2443,7 +2450,39 @@ function coordHomeHTML(all){
   h+='<div class="secc"><div class="sech"><i style="background:var(--blue)"></i><b style="color:var(--blue)">Started, not finished</b><span>In progress across the team. Open a task to act on it as yourself.</span><small>'+prog.length+' task'+(prog.length===1?'':'s')+'</small></div>'+
     (prog.length?TEAM.filter(p=>prog.some(t=>t.owner===p)).map(p=>'<div class="sg"><div class="sgh">'+av(p,true)+'<b>'+p+'</b><span>'+prog.filter(t=>t.owner===p).length+' task'+(prog.filter(t=>t.owner===p).length===1?'':'s')+'</span></div>'+prog.filter(t=>t.owner===p).map(rowHTML).join('')+'</div>').join('')
       :'<div class="sempty">Nothing is in progress.</div>')+'</div>';
-  return h+'<div class="hfoot"><span>Completed work and time by period are on the Summary tab.</span><button type="button" class="lk" data-act="tab" data-t="summary">Open the summary</button></div></div>';
+  return h+'<div class="hfoot"><span>Everything the team has completed, with what is new since you last looked, is on the Done tab. Time by period is on Summary.</span><button type="button" class="lk" data-act="tab" data-t="done">Open Done</button></div></div>';
+}
+
+/* ── view 5: Done (coordinator). Every completed Sabel task across the active trackers, newest first,
+   with what is new since Nikki last pressed "Seen". The seen list is this browser's only (localStorage):
+   task id -> the doneAt it was seen with, so a task reopened and finished again shows as new once more.
+   First visit sets the baseline quietly, so hundreds of old completions do not all read as new. ── */
+const SEEN_K='sabel-taskhub-seen-done-v1';
+let SEEN={ids:{},at:0};try{const s=JSON.parse(localStorage.getItem(SEEN_K)||'null');if(s&&s.ids)SEEN=s;}catch(e){}
+const fDY=d=>fD(d)+(d.getFullYear()!==today().getFullYear()?' '+d.getFullYear():'');
+const isNewDone=t=>{if(!isDone(t)||!SEEN.at)return false;const v=SEEN.ids[t.id];return v===undefined||(!!t.doneAt&&v!=='1'&&String(t.doneAt)>String(v));};
+const newDone=all=>all.filter(isNewDone);
+function markSeen(all){
+  const ids=Object.assign({},SEEN.ids);          /* keep ids no longer on screen (held or finished clients) */
+  all.filter(isDone).forEach(t=>{ids[t.id]=t.doneAt?String(t.doneAt):'1';});
+  SEEN={ids,at:Date.now()};try{localStorage.setItem(SEEN_K,JSON.stringify(SEEN));}catch(e){}
+}
+const byDoneDesc=(a,b)=>{const x=String(a.doneAt||''),y=String(b.doneAt||'');if(x&&!y)return -1;if(y&&!x)return 1;return y.localeCompare(x)||byDue(a,b);};
+function doneTabHTML(all){
+  if(!SEEN.at)markSeen(all);
+  const q=(S.dq||'').trim().toLowerCase();
+  const hit=t=>!q||(t.title+' '+clientOf(t)+' '+t.owner+' '+(t.pillar||'')).toLowerCase().indexOf(q)>-1;
+  const done=all.filter(isDone).sort(byDoneDesc),nw=done.filter(isNewDone),shown=done.filter(hit);
+  const undated=done.filter(t=>!dOf(t.doneAt)).length;
+  let h='<div class="desk">';
+  h+='<div class="secc" style="border-color:'+(nw.length?'rgba(34,197,94,.45)':'var(--line2)')+'"><div class="sech"><i style="background:var(--green)"></i><b style="color:var(--green)">New since you last looked</b><span>Completed after '+fStamp(SEEN.at)+', here or on a client tracker</span><small>'+nw.length+' task'+(nw.length===1?'':'s')+'</small></div>'+
+    (nw.length?nw.map(t=>sumRowHTML(t,'done')).join('')+'<div class="hfoot" style="padding:10px 20px"><span>Once you have read these, mark them seen so the next lot stands out.</span><button type="button" class="pb green sm" data-act="seen-all">Seen, clear the list</button></div>'
+     :'<div class="sempty">Nothing new has been completed since '+fStamp(SEEN.at)+'.</div>')+'</div>';
+  h+='<div class="dbar"><input class="rin" data-ta="dq" placeholder="Find a task, client, person or pillar" value="'+esc(S.dq||'')+'">'+
+    '<div class="seg"><button type="button" data-act="group" data-g="client" class="'+(S.group==='client'?'on':'')+'">By client</button><button type="button" data-act="group" data-g="person" class="'+(S.group!=='client'?'on':'')+'">By person</button></div></div>';
+  h+='<div class="secc"><div class="sech"><i style="background:var(--greenfill)"></i><b style="color:var(--green)">All completed</b><span>Newest first within each group'+(undated?'; '+undated+' with no date were ticked on an older tracker build and sit last':'')+'</span><small>'+shown.length+(q?' of '+done.length:'')+' task'+(shown.length===1?'':'s')+'</small></div>'+
+    (shown.length?sumGroupsHTML(shown,'done'):'<div class="sempty">'+(q?'Nothing matches “'+esc(q)+'”.':'Nothing has been completed yet.')+'</div>')+'</div>';
+  return h+'<div class="hint">Sabel-owned tasks on active trackers only: client-side steps and tasks on held clients are not here. Click a task to open it in its owner’s list. The seen list is kept in this browser.</div></div>';
 }
 
 /* ── view 4: summary (what is in progress, what got done, where the time went) ── */
@@ -2456,14 +2495,14 @@ function sumRowHTML(t,kind){
   const sp=spent(t),e=+t.est||0,over=e&&sp>e*60;
   let when='';
   if(kind==='prog')when=t.sAt?'Started '+fStamp(t.sAt)+(t.sBy?' by '+esc(t.sBy):''):'In progress on the tracker';
-  else when='Done '+(dOf(t.doneAt)?fD(dOf(t.doneAt)):'')+(t.sBy?' by '+esc(t.sBy):' · on the tracker');
-  return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="goto"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl">'+tsq(t)+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+
+  else when=(dOf(t.doneAt)?'Done '+fDY(dOf(t.doneAt)):'Done, date not recorded')+(t.sBy?' by '+esc(t.sBy):' · on the tracker');
+  return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="goto"><b>'+esc(t.title)+'</b>'+(S.tab==='done'&&isNewDone(t)?'<span class="tag green">New</span>':'')+'<span class="rm"><span class="cl">'+tsq(t)+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+
     '<span class="own">'+esc(t.owner)+'</span>'+progHTML(t)+runHTML(t)+(t.src?'<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>':'')+(noteCount(t)?'<span>'+noteCount(t)+' note'+(noteCount(t)===1?'':'s')+'</span>':'')+'</span></button>'+
     '<span class="srw">'+when+'</span>'+(kind==='prog'?dueHTML(t):'')+
     '<span class="srtm'+(over?' over':'')+'" title="Time logged against the estimate"><b>'+(sp?fMins(sp):'–')+'</b>'+(e?' / '+fEst(e):'')+'</span></div>';
 }
 function sumGroupsHTML(rows,kind){
-  const byC=S.group==='client'&&S.tab==='summary';
+  const byC=S.group==='client'&&(S.tab==='summary'||S.tab==='done');
   const g={};rows.forEach(t=>{const k=byC?clientOf(t):t.owner;(g[k]=g[k]||[]).push(t);});
   const ks=Object.keys(g).sort((a,b)=>byC?(a==='No client'?1:b==='No client'?-1:a.localeCompare(b)):TEAM.indexOf(a)-TEAM.indexOf(b));
   return ks.map(k=>{
@@ -2546,7 +2585,7 @@ function render(){
   }else{
     const mine=scope();
     h+=bannerHTML()+(!onDesk()&&S.mode==='week'?'':titleHTML(mine)+typeKeyHTML(mine))+(S.audit&&!onDesk()&&S.mode==='list'?auditBarHTML():'');
-    h+=onDesk()?(S.tab==='summary'?summaryHTML(mine):S.tab==='home'?coordHomeHTML(mine):deskHTML(mine))
+    h+=onDesk()?(S.tab==='summary'?summaryHTML(mine):S.tab==='done'?doneTabHTML(mine):S.tab==='home'?coordHomeHTML(mine):deskHTML(mine))
       :S.mode==='board'?zoneTop(mine)+boardHTML(narrowed(mine)):S.mode==='week'?weekHTML(byClient(mine)):S.mode==='home'?homeHTML(byClient(mine)):zoneTop(mine)+listHTML(narrowed(mine));
     if(!onDesk()&&(S.mode==='board'||S.mode==='week')&&S.open)h+=drawerHTML(findTask(S.open));
   }
@@ -2588,7 +2627,8 @@ document.addEventListener('click',e=>{
       S.open=null;save();render();break;}
     case 'cclear':delete S.csel[S.who];S.open=null;save();render();break;
     case 'more':S.more[a.getAttribute('data-k')]=true;render();break;
-    case 'tab':S.tab=a.getAttribute('data-t');S.open=null;save();history.replaceState(null,'',S.tab==='summary'?'#summary':'#'+COORD.toLowerCase());render();window.scrollTo(0,0);break;
+    case 'tab':S.tab=a.getAttribute('data-t');S.open=null;save();history.replaceState(null,'',S.tab==='summary'?'#summary':S.tab==='done'?'#done':'#'+COORD.toLowerCase());render();window.scrollTo(0,0);break;
+    case 'seen-all':markSeen(scope());render();toast('Marked as seen. Anything completed from now on shows as new.');break;
     case 'period':S.period=a.getAttribute('data-p');save();render();break;
     case 'group':S.group=a.getAttribute('data-g');save();render();break;
     case 'goto':if(t){S.who=t.owner;S.mode='list';S.flt='';S.open=id;
@@ -2687,6 +2727,7 @@ document.addEventListener('input',e=>{
   else if(ta==='rtitle')S.rem.title=e.target.value;
   else if(ta==='rnote')S.rem.note=e.target.value;
   else if(ta==='ping')S.pingTxt=e.target.value;
+  else if(ta==='dq'){S.dq=e.target.value;render();}
   else if(ta==='note'){if(S.editNote)S.editNote.txt=e.target.value;}
   else S.deskDraft[ta.slice(5)]=e.target.value;
 });
@@ -2713,7 +2754,7 @@ document.addEventListener('change',e=>{
   const f=e.target.getAttribute&&e.target.getAttribute('data-aud');if(!f)return;
   setAudit(e.target.closest('.row').getAttribute('data-id'),f,e.target.value);
 });
-window.addEventListener('hashchange',()=>{if(/^#summary$/i.test(location.hash)){S.who=COORD;S.tab='summary';save();render();return;}const w=hashWho();if(w&&w!==S.who){S.who=w;S.open=null;save();render();}});
+window.addEventListener('hashchange',()=>{if(/^#summary$/i.test(location.hash)){S.who=COORD;S.tab='summary';save();render();return;}if(/^#done$/i.test(location.hash)){S.who=COORD;S.tab='done';save();render();return;}const w=hashWho();if(w&&w!==S.who){S.who=w;S.open=null;save();render();}});
 
 /* ── drag and drop into and within the Focus Zone ───────────────────────────
    Only the ⋮⋮ grip starts a drag, so text in a row still selects normally. The
