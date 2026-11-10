@@ -225,11 +225,22 @@ function patchHub(hubFile) {
   const p = resolve(ROOT, hubFile);
   if (!existsSync(p)) { log(`   ${hubFile} not found in this checkout; add the include by hand:\n   <script src="hub-auth.js" data-client="${slug}"></script>`); return false; }
   const html = readFileSync(p, 'utf8');
-  if (/<script[^>]+src="hub-auth\.js"/.test(html)) { log('   already present'); return false; }
   const tag = `<script src="hub-auth.js" data-client="${slug}"></script>`;
+  const have = /<script[^>]+src="hub-auth\.js"[^>]*>/.exec(html);
+  if (have) {
+    if (!have[0].includes(`data-client="${slug}"`)) die(`${hubFile} already carries a different hub-auth include: ${have[0]}\n  Expected ${tag}. Fix the file by hand, then re-run.`);
+    log('   already present');
+    return false;
+  }
+  // Immediately before the page's first <script>, so the include always runs
+  // before any page code can call fetch. No script at all: end of <head>.
   let out;
-  if (/<\/head>/i.test(html)) out = html.replace(/<\/head>/i, `${tag}\n</head>`);
-  else if (/<script/i.test(html)) out = html.replace(/<script/i, `${tag}\n<script`);
+  const i = html.search(/<script/i);
+  if (i >= 0) {
+    const before = html.slice(0, i);
+    if (before.lastIndexOf('<!--') > before.lastIndexOf('-->')) die(`${hubFile}: the first <script> is inside an HTML comment; add the include by hand:\n  ${tag}`);
+    out = `${before}${tag}\n${html.slice(i)}`;
+  } else if (/<\/head>/i.test(html)) out = html.replace(/<\/head>/i, `${tag}\n</head>`);
   else die(`${hubFile} has no <head> or <script>; cannot place the include`);
   if (DRY) { log('   DRY would insert the include'); return false; }
   if (!PATCH) { log('   --no-patch: not written. Add this line to <head>:\n   ' + tag); return false; }

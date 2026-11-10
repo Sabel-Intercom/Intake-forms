@@ -1,76 +1,109 @@
 ---
 name: onboard-hub
-description: Put a client hub behind Cloudflare Access and lock its tracker key so only that client's email domain (and Sabel) can open it. Use when asked to "onboard <client> hub", "lock <client>'s tracker", "put <client> behind Access", "rotate <client>'s hub token", or when a new client hub is being published. Runs scripts/onboard-hub.mjs locally or the "Onboard a client hub" GitHub Action.
+description: Publish a client hub or project tracker so only that client's email domain (and Sabel) can open it, and hand back the link to send. Use when asked to "publish the <client> tracker", "give <client> access to their tracker", "onboard <client> hub", "lock <client>'s tracker", "put <client> behind sign-in", "rotate <client>'s hub token", or straight after a new tracker file has been pushed to this repo. Runs the "Onboard a client hub" GitHub Action through gh; no secrets on the person's machine.
 ---
 
-# Onboard a client hub
+# Publish a client hub behind sign-in
 
-One command per client. Everything else (Zero Trust, Pages, the token function) is already set up and never repeats.
+One request per client. The person says something like "publish the Acme tracker for @acme.com" and you do everything below, in order, and finish with the link and the message to send.
 
-## What you need from the person
+The whole site `hubs.sabelcustomersuccess.com` is Sabel-staff-only by default. A client can open a page only after this has run for them.
 
-1. **Client slug**: lower-case, dashes, matches the tracker key `<slug>-tracker-v1` (e.g. `cookaborough`).
-2. **Hub file**: the HTML file in this repo (e.g. `CookaboroughTracker.html`).
-3. **Client email domain(s)**: what their staff addresses end in (e.g. `cookaborough.com`). Several: comma separated. Ask if unsure; never guess from the company name.
+## 1. Collect three things
+
+1. **Client slug**: lower-case, dashes. The tracker key is `<slug>-tracker-v1` (e.g. `acme`).
+2. **Hub file**: the HTML file name in this repo (e.g. `AcmeTracker_v2.html`).
+3. **Client email domain(s)**: what their staff addresses end in (e.g. `acme.com`). Several: comma separated. **Ask; never guess from the company name.** Domains only, no single addresses.
 
 Optional, when the client has more than a hub:
 
-4. **Their other pages** (`--also`): the client's own intake or kick-off form, e.g. `SabelMigrationIntake_Acme.html`. Same sign-in, same include. Not the shared forms (`SabelReadinessCheck.html`, `SabelKickoff.html`, `SabelMigrationIntake.html`): those serve several clients and are not handled yet.
-5. **Their other keys** (`--keys`): e.g. `migration-intake-acme-v1`. Locked with the same client token. Always issues a new token.
+- **Their other pages** (`also`): the client's own intake or kick-off form, e.g. `SabelMigrationIntake_Acme.html`. Not the shared forms (`SabelReadinessCheck.html`, `SabelKickoff.html`, `SabelMigrationIntake.html`): those serve several clients and are not handled yet.
+- **Their other keys** (`keys`): e.g. `migration-intake-acme-v1`. Locked with the same client token.
 
-## Staff only by default
+## 2. Check before running (stop and say what is missing)
 
-`scripts/lock-down.mjs` (Action: "Lock down the hubs domain") puts the whole hubs domain behind a Sabel-only sign-in. After it has run, a client can open only what `onboard-hub` gave them; every other page is staff only. Internal pages carry `<script src="hub-auth.js" data-team></script>` and get the team passcode from `/api/team-token` automatically. It is a one-time job for Richard, dry run unless `--apply`. A key it locked with `--lock-keys` opens only for staff until `onboard-hub` runs for that client, which then issues the client token by itself.
-
-## Before running
-
-- The key must already be in `ALLOWED_KEYS` in `sabel-webhook/api/tracker.js` and deployed. The script stops with a clear message if not.
-- The hub file must be on `main` and already published at `https://hubs.sabelcustomersuccess.com/<HubFile>`.
-
-## Run it
-
-**From GitHub, no setup (preferred for Nikki):**
-Actions > "Onboard a client hub" > Run workflow. Fill slug, hub file, email domains. Tick "dry run" first if nervous; read the log; run again without it.
-
-**Locally** (needs three env vars in the shell, from 1Password / Vercel):
 ```
-CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... KICKOFF_TEAM_TOKEN=... \
-node scripts/onboard-hub.mjs <slug> <HubFile.html> <domain> [--also "Form.html"] [--keys "key-v1"] [--dry-run] [--rotate]
+gh auth status
+gh api repos/Sabel-Intercom/Intake-forms/contents/<HubFile> --jq .name
+curl -s https://raw.githubusercontent.com/Sabel-Intercom/sabel-webhook/main/api/tracker.js | grep -c "'<slug>-tracker-v1'"
 ```
 
-Never paste the API token, the team passcode or the client token into chat.
+- `gh` not signed in, or no write access to `Sabel-Intercom/Intake-forms`: stop, tell the person.
+- Hub file not on `main`: it must be pushed first (the tracker skill does this).
+- Key count is 0: the key is not in `ALLOWED_KEYS` in `sabel-webhook/api/tracker.js`. It must be added and deployed first (the tracker skill does this).
 
-## After it runs
+## 3. Run it
 
-1. If the log says the hub-auth include was inserted (local run) or is missing (GitHub run), make sure this line is in the hub's `<head>` on `main`:
-   `<script src="hub-auth.js" data-client="<slug>"></script>`
-   Commit and push; Pages redeploys in about a minute.
-2. Open `https://hubs.sabelcustomersuccess.com/<HubFile without .html>` in a private window: Cloudflare sign-in page, email code, hub loads with live data.
-3. Open the old `https://sabel-intercom.github.io/Intake-forms/<HubFile>`: it forwards to the new link.
-4. Send the client the new link. Wording that works:
-   > Your hub has moved to https://hubs.sabelcustomersuccess.com/<HubFile without .html>. Open it, enter your work email, and type the code we email you. Your browser stays signed in after that.
+```
+gh workflow run onboard-hub.yml -R Sabel-Intercom/Intake-forms \
+  -f slug=<slug> -f hub_file=<HubFile> -f email_domains=<domain[,domain2]>
+```
 
-## Rotating a token
+Add `-f also=<Page.html>` and `-f keys=<key-v1>` when given. Add `-f dry_run=true` if the person wants to see it first.
 
-Run again with `--rotate` (or tick "rotate" in the Action). The old token stops the moment the new one lands; the hub picks up the new one on next load, nothing to send the client.
+Then wait for it and read the result:
+
+```
+sleep 5
+gh run list -R Sabel-Intercom/Intake-forms --workflow onboard-hub.yml --limit 1 --json databaseId,status,conclusion
+gh run watch <databaseId> -R Sabel-Intercom/Intake-forms --exit-status
+gh run view <databaseId> -R Sabel-Intercom/Intake-forms --log | grep -E "\[[0-9]\]|✖|policy:|inserted|already|Done"
+```
+
+The Action adds the one include line to the hub file and commits it to `main` by itself. Nothing for the person to edit.
+
+## 4. Verify (about a minute after the run, while Pages redeploys)
+
+```
+curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" https://hubs.sabelcustomersuccess.com/<HubFile without .html>
+gh api repos/Sabel-Intercom/Intake-forms/contents/<HubFile> --jq .content | base64 -d | grep -c 'hub-auth.js" data-client="<slug>"'
+```
+
+Expect `302` to a `cloudflareaccess.com` login address, and an include count of `1`. Anything else: report it, do not send the link.
+
+You cannot test the signed-in view yourself. Ask the person to open the link once and confirm live data shows.
+
+## 5. Hand back
+
+The link: `https://hubs.sabelcustomersuccess.com/<HubFile without .html>`
+
+A message for the client:
+
+> Your project hub is at https://hubs.sabelcustomersuccess.com/<HubFile without .html>. Open it, enter your work email, and type the code we email you. Your browser stays signed in for 24 hours. Only addresses at <domain> can open it.
+
+If the client had an old `github.io` link, it now forwards to the new one.
+
+## Rules
+
+- Never paste or print the Cloudflare API token, the team passcode or a client token. The Action never prints them either.
+- Never run "Lock down the hubs domain" from this skill. That one is Richard's.
+- One onboarding at a time; the Action queues a second run behind the first.
+
+## Other jobs
+
+- **Rotate a client's token**: same command plus `-f rotate=true`. Nothing to send the client.
+- **Add a second email domain**: run again with both domains, comma separated. The rule is replaced, not added to.
+- **Run locally** (Richard only; needs the three secrets in the shell): `node scripts/onboard-hub.mjs <slug> <HubFile.html> <domain> [--also "Form.html"] [--keys "key-v1"] [--dry-run] [--rotate]`, then commit and push the hub file.
 
 ## If something fails
 
 | Message | Fix |
 |---|---|
 | `not in ALLOWED_KEYS` | Add the key to `sabel-webhook/api/tracker.js`, deploy, re-run |
-| `KICKOFF_TEAM_TOKEN was refused` | Value differs from Vercel's; copy it again (watch for trailing spaces) |
-| `Access API ... 403` | The Cloudflare token lacks Access: Apps and Policies: Edit |
-| `pages/projects ... 403` | The token lacks Cloudflare Pages: Edit |
-| Hub shows "cannot reach its saved data (401)" | Pages variables not deployed yet, or the include is missing from the hub file |
-| Sign-in page says "not authorised" | Their email domain is not in the policy; re-run with the right domain(s) |
+| `KICKOFF_TEAM_TOKEN was refused` | Repository secret differs from Vercel's value. Richard fixes it |
+| `Access API ... 403` or `pages/projects ... 403` | The Cloudflare token lacks a permission. Richard fixes it |
+| `already carries a different hub-auth include` | The file is wired to another client. Fix the line by hand, re-run |
+| `Expected exactly one added line per file` | The file changed in an unexpected way. Nothing was committed; ask Richard |
+| Push to `main` refused | Someone pushed at the same moment. Re-run; every step is safe to repeat |
+| Hub shows "cannot reach its saved data (401)" | Pages has not redeployed yet (wait a minute), or the include is missing from the file on `main` |
+| Sign-in page says not authorised | Their email domain is not in the rule; re-run with the right domain(s) |
 
 ## What it does (for the curious)
 
 1. Checks sabel-webhook knows the key.
-2. Creates or updates the Access application "<Client> hub" with three destinations (hub, hub.html, api/hub-token/<slug>) and one Allow policy: emails ending in the client domain(s) plus @sabelcustomersuccess.com. Reads its AUD.
-3. Locks the key via `/api/tracker-lock` (keeps an existing lock unless `--rotate`).
-4. Sets `HUB_TOKEN_<SLUG>` (secret) and `HUB_AUD_<SLUG>` on the `sabel-hubs` Pages project and starts a deployment.
-5. Adds the hub-auth include to the hub file if missing.
+2. Creates or updates the Access application "<Client> hub": the hub, its `.html` form, `api/hub-token/<slug>`, plus any `also` pages. One Allow rule: emails ending in the client domain(s) plus `@sabelcustomersuccess.com`.
+3. Locks the key via `/api/tracker-lock`. Keeps an existing client token unless `rotate`, extra `keys`, or the key was locked by the domain lock-down with no client token yet.
+4. Sets `HUB_TOKEN_<SLUG>` (secret) and `HUB_AUD_<SLUG>` on the `sabel-hubs` Pages project and redeploys.
+5. Adds `<script src="hub-auth.js" data-client="<slug>"></script>` before the page's first script and commits it.
 
-Related: `hub-auth.js` (the include), `functions/api/hub-token/[client].js` (hands the token to signed-in visitors), `sabel-webhook/api/tracker-lock.js` (the lock).
+Related: `hub-auth.js` (the include), `functions/api/hub-token/[client].js` (hands the token to signed-in visitors), `scripts/lock-down.mjs` (staff-only default), `sabel-webhook/api/tracker-lock.js` (the lock).
