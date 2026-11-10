@@ -24,10 +24,10 @@ on:
         description: "Client email domain(s), comma separated, e.g. cookaborough.com"
         required: true
       also:
-        description: "This client's other pages, comma separated, e.g. SabelMigrationIntake_Acme.html"
+        description: "Usually blank: forms are found in the hub file. Extra own form pages, comma separated"
         required: false
       keys:
-        description: "This client's other tracker keys, comma separated, e.g. migration-intake-acme-v1"
+        description: "Usually blank: form keys are found in the hub file. Extra tracker keys, comma separated"
         required: false
       rotate:
         description: "Replace an existing client token"

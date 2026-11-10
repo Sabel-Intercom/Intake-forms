@@ -10,12 +10,18 @@
 //   --rotate                     replace an existing lock with a new client token
 //   --dry-run                    print every call, change nothing
 //   --no-patch                   do not add the hub-auth include to the hub file
-//   --also "A.html,B.html"       this client's other pages (their own intake or
-//                                kick-off form, a .js file the hub loads): same
-//                                sign-in, same include
-//   --keys "k1,k2"               this client's other tracker keys (e.g.
-//                                migration-intake-<slug>-v1): locked with the
-//                                SAME client token. Always issues a new token.
+//   --also "A.html,B.html"       more of this client's OWN form pages, on top of
+//                                the ones found in the hub file
+//   --keys "k1,k2"               more of this client's tracker keys, on top of
+//                                the ones found in the hub file
+//   --no-detect                  do not read the hub file for forms; use only
+//                                --also and --keys
+//
+// Forms. A hub shows forms in a frame: the shared readiness check, migration
+// intake and kick-off, and sometimes the client's own copy of one. The script
+// reads the hub file, finds them and their storage keys, locks every key with
+// the SAME client token, and lists the own pages in HUB_PAGES_<SLUG>. All of
+// them are then served to this client at /c/<slug>/<Form> (functions/c).
 //
 // Env (all required unless --dry-run):
 //   CLOUDFLARE_API_TOKEN     Account > Access: Apps and Policies: Edit, Cloudflare Pages: Edit
@@ -28,17 +34,20 @@
 //   TEAM_EMAIL_DOMAIN        default sabelcustomersuccess.com (always allowed)
 //
 // What it does, in order, each step idempotent:
-//   1. Checks the tracker key <slug>-tracker-v1 is known to sabel-webhook.
-//   2. Creates or updates the Access application "<label>" with three
-//      destinations (hub, hub.html, api/hub-token/<slug>) and one Allow policy
-//      for the client's email domain(s) plus the Sabel domain. Reads its AUD.
-//   3. Locks the key (or keeps the existing lock unless --rotate). A key that
-//      is locked but has no HUB_TOKEN_<SLUG> on the Pages project (locked by
-//      scripts/lock-down.mjs) gets a new client token automatically.
-//   4. Sets HUB_TOKEN_<SLUG> (secret) and HUB_AUD_<SLUG> on the Pages project
-//      and starts a production deployment.
-//   5. Adds <script src="hub-auth.js" data-client="<slug>"> to the hub file if
-//      missing (commit and push that yourself, or let the GitHub Action do it).
+//   1. Checks the tracker key <slug>-tracker-v1 is known to sabel-webhook, then
+//      reads the hub file for its forms and keeps the keys that are registered.
+//   2. Creates or updates the Access application "<label>" with four
+//      destinations (hub, hub.html, api/hub-token/<slug>, c/<slug>/*) and one
+//      Allow policy for the client's email domain(s) plus the Sabel domain.
+//   3. Locks the keys. An existing client token is kept unless --rotate, or a
+//      form key does not answer to it yet (open, or locked by
+//      scripts/lock-down.mjs), or the Pages project has no HUB_TOKEN_<SLUG>:
+//      then ONE new token is issued and set on every key.
+//   4. Sets HUB_TOKEN_<SLUG> (secret), HUB_AUD_<SLUG> and HUB_PAGES_<SLUG> on
+//      the Pages project and starts a production deployment.
+//   5. Adds the hub-auth include to the hub file (data-client) and to the
+//      client's own form pages (data-form data-client) if missing. Commit and
+//      push those yourself, or let the GitHub Action do it.
 //   6. Prints the link to send the client.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -78,15 +87,16 @@ const LABEL = opt('--label') || `${slug.charAt(0).toUpperCase()}${slug.slice(1).
 const KEY = `${slug}-tracker-v1`;
 const ENV_SUFFIX = slug.toUpperCase().replace(/-/g, '_');
 const hubBase = hubFile.replace(/\.html$/, '');
-const alsoFiles = csv(opt('--also'));
-for (const f of alsoFiles) if (!/^[A-Za-z0-9_.-]+\.(html|js)$/.test(f)) die(`--also takes .html or .js file names: ${f}`);
+const DETECT = !flags.has('--no-detect');
+// The client's own form pages (served at /c/<slug>/<Page>) and other keys.
+// Given with --also / --keys, and found in the hub file by detect().
+const ownPages = csv(opt('--also'));
+for (const f of ownPages) if (!/^[A-Za-z0-9_]+\.html$/.test(f)) die(`--also takes .html page names: ${f}`);
 const extraKeys = csv(opt('--keys'));
 for (const k of extraKeys) if (!/^[a-z0-9-]{1,80}$/.test(k)) die(`--keys takes tracker key names: ${k}`);
-const destinations = [`${HUBS}/${hubBase}`, `${HUBS}/${hubFile}`, `${HUBS}/api/hub-token/${slug}`];
-for (const f of alsoFiles) {
-  if (f.endsWith('.html')) destinations.push(`${HUBS}/${f.replace(/\.html$/, '')}`);
-  destinations.push(`${HUBS}/${f}`);
-}
+// Always the same four, however many forms the client has: the hub, the token,
+// and /c/<slug>/* for every form the hub shows.
+const destinations = [`${HUBS}/${hubBase}`, `${HUBS}/${hubFile}`, `${HUBS}/api/hub-token/${slug}`, `${HUBS}/c/${slug}/*`];
 
 if (!DRY) {
   for (const k of ['CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID', 'KICKOFF_TEAM_TOKEN']) if (!env[k]) die(`${k} is not set`);
@@ -138,6 +148,54 @@ async function checkKey() {
   return r;
 }
 
+// Same rules the forms use to turn ?client= into the slug in their key.
+const hyphenSlug = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const stripSlug = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+
+// Read the hub file for the forms it shows: the client's own form pages and
+// the keys those forms save to. Every key found is checked with sabel-webhook
+// and dropped if it is not registered, so a guess can never lock anything
+// that does not exist. A key is only ever derived from this hub's own file.
+async function detect() {
+  step('1b', `Forms ${hubFile} shows`);
+  const p = resolve(ROOT, hubFile);
+  if (!DETECT) { log('   --no-detect: using --also / --keys only'); return; }
+  if (!existsSync(p)) { log(`   ${hubFile} not in this checkout; using --also / --keys only`); return; }
+  const html = readFileSync(p, 'utf8');
+  const add = (list, v) => { if (v && !list.includes(v)) list.push(v); };
+
+  for (const m of html.matchAll(/\bSabel(?:MigrationIntake|Kickoff)_[A-Za-z0-9]+\.html/g)) {
+    if (existsSync(resolve(ROOT, m[0]))) add(ownPages, m[0]);
+  }
+  const candidates = [];
+  for (const m of html.matchAll(/\bkickoff-[a-z0-9-]{1,60}-[a-f0-9]{16}-v1\b/g)) add(candidates, m[0]);
+  for (const m of html.matchAll(/SabelReadinessCheck(?:\.html)?\?[^"'\s<>\\]*?\bclient=([^&"'\s<>\\#]+)/g)) {
+    add(candidates, `readiness-${hyphenSlug(decodeURIComponent(m[1]))}-v1`);
+  }
+  for (const m of html.matchAll(/SabelMigrationIntake(?:\.html)?\?[^"'\s<>\\]*?\bclient=([^&"'\s<>\\#]+)/g)) {
+    add(candidates, `migration-intake-${stripSlug(decodeURIComponent(m[1]))}-v1`);
+  }
+  if (/readiness-\{slug\}-v1/.test(html)) add(candidates, `readiness-${slug}-v1`);
+  if (/migration-intake-\{slug\}-v1/.test(html)) add(candidates, `migration-intake-${slug}-v1`);
+  // A client's own intake page names its slug inside the page.
+  for (const page of ownPages) {
+    const own = readFileSync(resolve(ROOT, page), 'utf8');
+    const d = /const DEFAULT_SLUG='([a-z0-9-]{1,60})'/.exec(own);
+    if (d && /^SabelMigrationIntake_/.test(page)) add(candidates, `migration-intake-${d[1]}-v1`);
+  }
+
+  for (const k of candidates) {
+    if (extraKeys.includes(k) || k === KEY || !/^[a-z0-9-]{1,80}$/.test(k)) continue;
+    const r = await tracker('GET', `/api/tracker-lock?key=${encodeURIComponent(k)}`);
+    if (r.dry) { extraKeys.push(k); continue; }
+    if (r.status === 404) { log(`   ${k}: not registered in sabel-webhook, skipped`); continue; }
+    if (!r.ok) die(`could not check ${k}: ${r.status} ${r.error || ''}`);
+    extraKeys.push(k);
+  }
+  log(`   own form pages: ${ownPages.join(', ') || 'none'}`);
+  log(`   form keys:      ${extraKeys.join(', ') || 'none'}`);
+}
+
 async function ensureAccessApp() {
   step(2, `Access application "${LABEL}" on ${destinations.length} destinations`);
   const policy = {
@@ -185,10 +243,27 @@ async function pagesHasToken() {
   return Object.prototype.hasOwnProperty.call(vars, `HUB_TOKEN_${ENV_SUFFIX}`);
 }
 
+// One client token opens all of this client's keys. A form key that is open,
+// or was locked by something other than this client's onboarding (the
+// lock-down sweep labels its locks differently), does not yet answer to it.
+async function extraKeysNeedToken() {
+  for (const k of extraKeys) {
+    const r = await tracker('GET', `/api/tracker-lock?key=${encodeURIComponent(k)}`);
+    if (r.dry) return false;
+    if (r.status === 404) die(`${k} is not in ALLOWED_KEYS in sabel-webhook api/tracker.js. Add it there and deploy, then re-run.`);
+    if (!r.ok) die(`could not check ${k}: ${r.status} ${r.error || ''}`);
+    if (!r.locked || r.label !== LABEL) return k;
+  }
+  return false;
+}
+
 async function lockKey(state) {
   step(3, `Lock on ${[KEY, ...extraKeys].join(', ')}`);
   let fresh = !state.locked || ROTATE;
-  if (!fresh && extraKeys.length) { fresh = true; log('   --keys given: issuing one new client token for all of this client\'s keys'); }
+  if (!fresh) {
+    const k = await extraKeysNeedToken();
+    if (k) { fresh = true; log(`   ${k} does not answer to this client's token yet: issuing one new token for all of their keys`); }
+  }
   if (!fresh && !(await pagesHasToken())) { fresh = true; log(`   locked, but Pages has no HUB_TOKEN_${ENV_SUFFIX}: issuing a client token`); }
   if (!fresh) {
     log('   already locked; keeping the existing client token (use --rotate to replace it)');
@@ -211,24 +286,30 @@ async function lockKey(state) {
 }
 
 async function setPagesVars({ aud, token }) {
-  step(4, `Pages project ${PROJECT}: HUB_AUD_${ENV_SUFFIX}${token ? ` + HUB_TOKEN_${ENV_SUFFIX}` : ''}`);
+  const pages = ownPages.map(f => f.replace(/\.html$/, '')).join(',');
+  step(4, `Pages project ${PROJECT}: HUB_AUD_${ENV_SUFFIX}${token ? ` + HUB_TOKEN_${ENV_SUFFIX}` : ''}${pages ? ` + HUB_PAGES_${ENV_SUFFIX}` : ''}`);
   const env_vars = { [`HUB_AUD_${ENV_SUFFIX}`]: { type: 'plain_text', value: aud } };
   if (token) env_vars[`HUB_TOKEN_${ENV_SUFFIX}`] = { type: 'secret_text', value: token };
+  // Which of the client's own form pages /c/<slug>/ may serve. See functions/c.
+  if (pages) env_vars[`HUB_PAGES_${ENV_SUFFIX}`] = { type: 'plain_text', value: pages };
   await cf('PATCH', `/pages/projects/${PROJECT}`, { deployment_configs: { production: { env_vars } } });
   log('   variables saved');
   const d = await cf('POST', `/pages/projects/${PROJECT}/deployments`);
   log(`   production deployment started${d.result && d.result.id ? ` (${d.result.id})` : ''}`);
 }
 
-function patchHub(hubFile) {
+// The hub carries data-client; the client's own form pages carry data-form too,
+// so they behave as the client's page at /c/<slug>/ and as an internal page at
+// their plain, staff-only address.
+function patchHub(hubFile, isForm = false) {
   step(5, `hub-auth include in ${hubFile}`);
   const p = resolve(ROOT, hubFile);
-  if (!existsSync(p)) { log(`   ${hubFile} not found in this checkout; add the include by hand:\n   <script src="hub-auth.js" data-client="${slug}"></script>`); return false; }
+  const tag = `<script src="hub-auth.js" ${isForm ? 'data-form ' : ''}data-client="${slug}"></script>`;
+  if (!existsSync(p)) { log(`   ${hubFile} not found in this checkout; add the include by hand:\n   ${tag}`); return false; }
   const html = readFileSync(p, 'utf8');
-  const tag = `<script src="hub-auth.js" data-client="${slug}"></script>`;
-  const have = /<script[^>]+src="hub-auth\.js"[^>]*>/.exec(html);
+  const have = /<script[^>]+src="hub-auth\.js"[^>]*><\/script>/.exec(html);
   if (have) {
-    if (!have[0].includes(`data-client="${slug}"`)) die(`${hubFile} already carries a different hub-auth include: ${have[0]}\n  Expected ${tag}. Fix the file by hand, then re-run.`);
+    if (have[0] !== tag) die(`${hubFile} already carries a different hub-auth include: ${have[0]}\n  Expected ${tag}. Fix the file by hand, then re-run.`);
     log('   already present');
     return false;
   }
@@ -253,10 +334,11 @@ function patchHub(hubFile) {
 (async () => {
   log(`onboard-hub ${DRY ? '(DRY RUN) ' : ''}: ${slug} / ${hubFile} / @${clientDomains.join(', @')}`);
   const state = await checkKey();
+  await detect();
   const { aud } = await ensureAccessApp();
   const { token } = await lockKey(state);
   await setPagesVars({ aud, token });
-  const changed = [hubFile, ...alsoFiles.filter(f => f.endsWith('.html'))].filter(f => patchHub(f));
+  const changed = [hubFile, ...ownPages].filter((f, i) => patchHub(f, i > 0));
   step(6, 'Done. Send the client this link:');
   log(`\n   https://${HUBS}/${hubBase}\n`);
   log(`   They type their @${clientDomains[0]} address, enter the emailed code, and the hub opens.`);
