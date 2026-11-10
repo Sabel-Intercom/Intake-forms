@@ -22,7 +22,7 @@ function page({ attrs, host = 'hubs.sabelcustomersuccess.com', tokenReply = { ok
   };
   const window = { fetch };
   const ctx = vm.createContext({
-    window, Headers, Request, Object, encodeURIComponent,
+    window, Headers, Request, Object, URL, encodeURIComponent,
     document: { currentScript: { getAttribute: (n) => (n in attrs ? attrs[n] : null), hasAttribute: (n) => n in attrs } },
     location: { hostname: host, pathname: '/Intake-forms/SabelTaskHub.html', search: '?a=1', hash: '#t', replace: (u) => { replaced = u; } },
   });
@@ -32,7 +32,26 @@ function page({ attrs, host = 'hubs.sabelcustomersuccess.com', tokenReply = { ok
 
 const W = 'https://sabel-webhook.vercel.app/api/';
 const TEAM_ONLY = [TRACKER, W + 'notion?kind=projects', W + 'notion', W + 'motion?since=2026-11-01', W + 'feedback?key=sabel-feedback-v1'];
-const NEVER = [W + 'testimonial', W + 'webhook', W + 'readiness?token=x', W + 'tracker-lock', W + 'notionx', 'https://example.com/api/tracker?key=x', 'https://example.com/?u=sabel-webhook.vercel.app/api/trackerx'];
+const NEVER = [
+  // other endpoints on our own service
+  W + 'testimonial', W + 'webhook', W + 'readiness?token=x', W + 'tracker-lock', W + 'notionx', W + 'tracker/extra', W + 'tracker.json',
+  // another site carrying our address in its query, path or fragment
+  'https://example.com/api/tracker?key=x',
+  'https://example.com/?u=sabel-webhook.vercel.app/api/tracker',
+  'https://example.com/?u=https://sabel-webhook.vercel.app/api/tracker?key=x',
+  'https://example.com/sabel-webhook.vercel.app/api/tracker',
+  'https://example.com/#sabel-webhook.vercel.app/api/tracker',
+  // look-alike hosts, credentials trick, other port, plain http
+  'https://evil-sabel-webhook.vercel.app/api/tracker',
+  'https://sabel-webhook.vercel.app.example.com/api/tracker',
+  'https://sabel-webhookXvercel.app/api/tracker',
+  'https://sabel-webhook.vercel.app@example.com/api/tracker',
+  'https://user:pw@sabel-webhook.vercel.app/api/tracker',
+  'https://sabel-webhook.vercel.app:8443/api/tracker',
+  'http://sabel-webhook.vercel.app/api/tracker',
+  // not an address at all
+  'api/tracker?key=x', 'not a url',
+];
 
 test('team mode: sends X-Team-Token to the team-only endpoints and nowhere else', async () => {
   const p = page({ attrs: { 'data-team': '' } });

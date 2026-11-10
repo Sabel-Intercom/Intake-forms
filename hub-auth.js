@@ -39,9 +39,20 @@
 
   // Team mode also covers the other team-only endpoints (client contracts,
   // completed tasks, feedback reads). A client token only ever goes to tracker.
-  var API = team
-    ? /sabel-webhook\.vercel\.app\/api\/(tracker|notion|motion|feedback)(\?|$)/
-    : /sabel-webhook\.vercel\.app\/api\/tracker(\?|$)/;
+  //
+  // The address is PARSED and each part compared exactly. A pattern match on
+  // the whole string would also hit another site that merely carries our
+  // address in its query string or path, and send the token there.
+  var HOST = 'sabel-webhook.vercel.app';
+  var PATHS = team ? /^\/api\/(tracker|notion|motion|feedback)$/ : /^\/api\/tracker$/;
+  var API = {
+    test: function (url) {
+      var u;
+      try { u = new URL(url, location.href); } catch (e) { return false; }
+      return u.protocol === 'https:' && u.hostname === HOST && u.port === '' &&
+        u.username === '' && u.password === '' && PATHS.test(u.pathname);
+    }
+  };
   var HEADER = team ? 'X-Team-Token' : 'X-Client-Token';
   var SOURCE = team ? 'api/team-token' : 'api/hub-token/' + encodeURIComponent(client);
   var origFetch = window.fetch;
