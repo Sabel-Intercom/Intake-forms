@@ -241,7 +241,14 @@ test('internal pages: Internal Ops and the Readiness admin page carry the same w
   const ops = read('SabelInternalOps.html'), admin = read('SabelReadinessAdmin.html');
   assert.match(ops, /await riPublish\(store, riSlug\(formSlugOf\(c\)\), \[c\.name\]\); S\.inputsStatus\[c\.id\]="published";/);
   assert.ok(ops.indexOf('fetch(API+"?key="+INPUTS_KEY, {method:"POST"') < ops.indexOf('await riPublish(store,'), 'combined save comes first');
-  assert.match(admin, /await riPublish\(st, riSlug\(slug\), \[sub\.client\]\);/);
+  // the admin page passes NO names: nothing from a submission may choose a list
+  assert.match(admin, /await riPublish\(st, riSlug\(slug\), \[\]\);/);
+  for (const html of [ops, admin]) {
+    const callsites = [...html.matchAll(/riPublish\(([^;]*)\);/g)].map(m => m[1]).filter(a => !a.startsWith('store, slug, names'));
+    assert.equal(callsites.length, 1);
+    assert.ok(!/sub\.|NAME_PARAM|CLIENT_PARAM|location|contactName/.test(callsites[0]), `client-supplied text passed to riPublish: ${callsites[0]}`);
+    assert.equal([...html.matchAll(/riSliceFor\(/g)].length, 2, 'riSliceFor is called only from riPublish');
+  }
   assert.ok(admin.indexOf("fetch(INPUTS,{method:'POST'") < admin.indexOf('await riPublish(st,'));
   // both are internal pages: hub-auth adds the team passcode the write needs
   for (const html of [ops, admin]) assert.match(html, /<script src="hub-auth\.js" data-team><\/script>/);
@@ -271,12 +278,68 @@ test('internal pages: what Internal Ops publishes is what the client\'s form the
 
 test('internal pages: an older list with no slug is found by name; a list carrying another slug is never used', () => {
   const w = writer(async () => new Response('{}'));
+  // the name here is Sabel's own record of the client (Internal Ops), never a typed one
   assert.deepEqual(plain(w.riSliceFor(COMBINED, 'elmo', ['ELMO Software'])).items, ELMO.items);
-  assert.deepEqual(plain(w.riSliceFor(COMBINED, 'elmo-software', [])).items, ELMO.items);
+  // the slug alone is never tried as a name
+  assert.equal(plain(w.riSliceFor(COMBINED, 'elmo-software', [])).items, undefined);
+  assert.equal(plain(w.riSliceFor(COMBINED, 'elmo', [])).items, undefined);
   // "Kinatico" by name, but its list says slug kinatico: not for slug kin
   const out = plain(w.riSliceFor(COMBINED, 'kin', ['Kinatico']));
   assert.equal(out.items, undefined);
   assert.deepEqual(out.access, {});
+});
+
+// The admin page works from a SUBMISSION: its company name is what the client
+// typed and its slug is what was in the address. Neither may choose whose list
+// is copied into a client's own key. The admin page calls riPublish(st, slug, []).
+test('admin page: a submission naming another client cannot pull that client\'s list into its own copy', async () => {
+  // Kinatico (onboarded, slug kinatico) submits with company name "ELMO Software",
+  // or with any other spelling of another client. Staff then confirm an access row.
+  for (const typed of ['ELMO Software', 'elmo software', 'ELMO  Software ', 'Elmo-Software']) {
+    const s = webhook({ data: { [ALL]: COMBINED, [K]: OWN_KIN }, locks: { [K]: 'kin-token', [ALL]: 'STAFF' } });
+    const w = writer(s.fetchAs({ team: true }));
+    const sub = { slug: 'kinatico', client: typed };
+    const st = structuredClone(COMBINED);
+    st.access[sub.slug] = { a2: { at: 't', by: 'Sabel' } };
+    await w.riPublish(st, w.riSlug(sub.slug), []); // exactly what the page does
+    const saved = s.store.get(K);
+    assert.deepEqual(saved.items, KIN.items, typed);
+    assert.ok(!JSON.stringify(saved).includes('ELMO'), typed);
+    const got = await reader(s.fetchAs({ client: 'kin-token' })).fetchInputs('kinatico', [typed, 'kinatico']);
+    assert.ok(!JSON.stringify(got).includes('ELMO'), typed);
+  }
+});
+
+test('admin page: a submission whose address named another client (by slug or by company name) copies no list by name', async () => {
+  // ?client=ELMO%20Software gives slug elmo-software; ?client=elmo gives elmo.
+  // ELMO's older list has no slug, so nothing carries either slug: no list is copied.
+  for (const slug of ['elmo-software', 'elmo']) {
+    const s = webhook({ data: { [ALL]: COMBINED } });
+    const w = writer(s.fetchAs({ team: true }));
+    const st = structuredClone(COMBINED);
+    st.access[slug] = { a2: { at: 't', by: 'Sabel' } };
+    await w.riPublish(st, w.riSlug(slug), []);
+    const saved = s.store.get(`readiness-inputs-${slug}-v1`);
+    assert.equal('items' in saved, false, slug);
+    assert.ok(!JSON.stringify(saved).includes('ELMO item'), slug);
+  }
+  // even if a page DID pass the typed name, a list carrying another slug is never used
+  const w = writer(async () => new Response('{}'));
+  assert.equal(plain(w.riSliceFor(COMBINED, 'attacker', ['Kinatico', 'kinatico'])).items, undefined);
+  // and the script side follows the same rule
+  assert.equal(sliceFor(COMBINED, 'elmo-software', []).items, undefined);
+  assert.equal(sliceFor(COMBINED, 'attacker', ['Kinatico']).items, undefined);
+});
+
+test('backfill: a slug that exists only under access[] (it came from a submission) never brings a list with it', () => {
+  // access['elmo-software'] was written from a submission; ELMO's list belongs to slug elmo (roster)
+  const store = { clients: { 'elmo software': ELMO }, access: { 'elmo-software': { a2: { at: 't' } } } };
+  const rows = plan(store, [{ name: 'ELMO Software', key: 'elmo-tracker-v1' }]);
+  const stray = rows.find(r => r.slug === 'elmo-software');
+  assert.deepEqual([stray.via, stray.names, stray.entries], ['access', [], 0]);
+  assert.equal(sliceFor(store, stray.slug, stray.names).items, undefined);
+  const real = rows.find(r => r.slug === 'elmo');
+  assert.deepEqual(sliceFor(store, real.slug, real.names).items, ELMO.items);
 });
 
 test('internal pages: two lists for one slug (a rename): the newest wins', () => {

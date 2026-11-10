@@ -44,7 +44,9 @@ export function sliceFor(store, slug, names, prev, now = new Date().toISOString(
   let hit = vals.filter(x => x.slug && slugify(x.slug) === slug).sort(newest)[0] || null;
   if (!hit) {
     const free = vals.filter(x => !x.slug);
-    for (const w of [...(names || []), slug].filter(Boolean)) {
+    // `names` are staff-controlled names only (see riSliceFor in the pages).
+    // The slug is never tried as a name: a slug can come from a submission.
+    for (const w of (names || []).filter(Boolean)) {
       const lc = String(w).toLowerCase().trim(), sl = slugify(w);
       hit = free.filter(x => String(x.name || '').toLowerCase().trim() === lc || slugify(x.name) === sl).sort(newest)[0] || null;
       if (hit) break;
