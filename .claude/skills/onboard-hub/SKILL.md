@@ -13,6 +13,15 @@ One command per client. Everything else (Zero Trust, Pages, the token function) 
 2. **Hub file**: the HTML file in this repo (e.g. `CookaboroughTracker.html`).
 3. **Client email domain(s)**: what their staff addresses end in (e.g. `cookaborough.com`). Several: comma separated. Ask if unsure; never guess from the company name.
 
+Optional, when the client has more than a hub:
+
+4. **Their other pages** (`--also`): the client's own intake or kick-off form, e.g. `SabelMigrationIntake_Acme.html`. Same sign-in, same include. Not the shared forms (`SabelReadinessCheck.html`, `SabelKickoff.html`, `SabelMigrationIntake.html`): those serve several clients and are not handled yet.
+5. **Their other keys** (`--keys`): e.g. `migration-intake-acme-v1`. Locked with the same client token. Always issues a new token.
+
+## Staff only by default
+
+`scripts/lock-down.mjs` (Action: "Lock down the hubs domain") puts the whole hubs domain behind a Sabel-only sign-in. After it has run, a client can open only what `onboard-hub` gave them; every other page is staff only. Internal pages carry `<script src="hub-auth.js" data-team></script>` and get the team passcode from `/api/team-token` automatically. It is a one-time job for Richard, dry run unless `--apply`. A key it locked with `--lock-keys` opens only for staff until `onboard-hub` runs for that client, which then issues the client token by itself.
+
 ## Before running
 
 - The key must already be in `ALLOWED_KEYS` in `sabel-webhook/api/tracker.js` and deployed. The script stops with a clear message if not.
@@ -26,7 +35,7 @@ Actions > "Onboard a client hub" > Run workflow. Fill slug, hub file, email doma
 **Locally** (needs three env vars in the shell, from 1Password / Vercel):
 ```
 CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... KICKOFF_TEAM_TOKEN=... \
-node scripts/onboard-hub.mjs <slug> <HubFile.html> <domain> [--dry-run] [--rotate]
+node scripts/onboard-hub.mjs <slug> <HubFile.html> <domain> [--also "Form.html"] [--keys "key-v1"] [--dry-run] [--rotate]
 ```
 
 Never paste the API token, the team passcode or the client token into chat.

@@ -10,6 +10,12 @@
 //   --rotate                     replace an existing lock with a new client token
 //   --dry-run                    print every call, change nothing
 //   --no-patch                   do not add the hub-auth include to the hub file
+//   --also "A.html,B.html"       this client's other pages (their own intake or
+//                                kick-off form, a .js file the hub loads): same
+//                                sign-in, same include
+//   --keys "k1,k2"               this client's other tracker keys (e.g.
+//                                migration-intake-<slug>-v1): locked with the
+//                                SAME client token. Always issues a new token.
 //
 // Env (all required unless --dry-run):
 //   CLOUDFLARE_API_TOKEN     Account > Access: Apps and Policies: Edit, Cloudflare Pages: Edit
@@ -26,7 +32,9 @@
 //   2. Creates or updates the Access application "<label>" with three
 //      destinations (hub, hub.html, api/hub-token/<slug>) and one Allow policy
 //      for the client's email domain(s) plus the Sabel domain. Reads its AUD.
-//   3. Locks the key (or keeps the existing lock unless --rotate).
+//   3. Locks the key (or keeps the existing lock unless --rotate). A key that
+//      is locked but has no HUB_TOKEN_<SLUG> on the Pages project (locked by
+//      scripts/lock-down.mjs) gets a new client token automatically.
 //   4. Sets HUB_TOKEN_<SLUG> (secret) and HUB_AUD_<SLUG> on the Pages project
 //      and starts a production deployment.
 //   5. Adds <script src="hub-auth.js" data-client="<slug>"> to the hub file if
@@ -44,7 +52,9 @@ const CF = 'https://api.cloudflare.com/client/v4';
 const argv = process.argv.slice(2);
 const flags = new Set(argv.filter(a => a.startsWith('--') && !a.includes('=')));
 const opt = (name) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : undefined; };
-const positional = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--label');
+const VALUE_OPTS = ['--label', '--also', '--keys'];
+const csv = (v) => String(v || '').split(',').map(s => s.trim()).filter(Boolean);
+const positional = argv.filter((a, i) => !a.startsWith('--') && !VALUE_OPTS.includes(argv[i - 1]));
 const [slug, hubFile, domainsArg] = positional;
 const DRY = flags.has('--dry-run');
 const ROTATE = flags.has('--rotate');
@@ -68,7 +78,15 @@ const LABEL = opt('--label') || `${slug.charAt(0).toUpperCase()}${slug.slice(1).
 const KEY = `${slug}-tracker-v1`;
 const ENV_SUFFIX = slug.toUpperCase().replace(/-/g, '_');
 const hubBase = hubFile.replace(/\.html$/, '');
+const alsoFiles = csv(opt('--also'));
+for (const f of alsoFiles) if (!/^[A-Za-z0-9_.-]+\.(html|js)$/.test(f)) die(`--also takes .html or .js file names: ${f}`);
+const extraKeys = csv(opt('--keys'));
+for (const k of extraKeys) if (!/^[a-z0-9-]{1,80}$/.test(k)) die(`--keys takes tracker key names: ${k}`);
 const destinations = [`${HUBS}/${hubBase}`, `${HUBS}/${hubFile}`, `${HUBS}/api/hub-token/${slug}`];
+for (const f of alsoFiles) {
+  if (f.endsWith('.html')) destinations.push(`${HUBS}/${f.replace(/\.html$/, '')}`);
+  destinations.push(`${HUBS}/${f}`);
+}
 
 if (!DRY) {
   for (const k of ['CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID', 'KICKOFF_TEAM_TOKEN']) if (!env[k]) die(`${k} is not set`);
@@ -158,16 +176,37 @@ async function ensureAccessApp() {
   return { aud: aud || 'DRY_RUN_AUD' };
 }
 
+// Does the Pages project already hold this client's token? Secret values are
+// never returned by the API, only the variable names.
+async function pagesHasToken() {
+  const r = await cf('GET', `/pages/projects/${PROJECT}`);
+  if (r.dry) return true;
+  const vars = (((r.result || {}).deployment_configs || {}).production || {}).env_vars || {};
+  return Object.prototype.hasOwnProperty.call(vars, `HUB_TOKEN_${ENV_SUFFIX}`);
+}
+
 async function lockKey(state) {
-  step(3, `Lock on ${KEY}`);
-  if (state.locked && !ROTATE) {
+  step(3, `Lock on ${[KEY, ...extraKeys].join(', ')}`);
+  let fresh = !state.locked || ROTATE;
+  if (!fresh && extraKeys.length) { fresh = true; log('   --keys given: issuing one new client token for all of this client\'s keys'); }
+  if (!fresh && !(await pagesHasToken())) { fresh = true; log(`   locked, but Pages has no HUB_TOKEN_${ENV_SUFFIX}: issuing a client token`); }
+  if (!fresh) {
     log('   already locked; keeping the existing client token (use --rotate to replace it)');
     return { token: null };
   }
   const r = await tracker('POST', '/api/tracker-lock', { key: KEY, label: LABEL });
-  if (r.dry) return { token: 'DRY_RUN_TOKEN' };
+  if (r.dry) {
+    for (const k of extraKeys) await tracker('POST', '/api/tracker-lock', { key: k, label: LABEL, token: '(same client token)' });
+    return { token: 'DRY_RUN_TOKEN' };
+  }
   if (!r.ok || !r.token) die(`lock failed: ${r.status} ${r.error || ''}`);
-  log(`   ${r.replaced ? 'replaced' : 'set'} at ${r.setAt}; new client token received (not printed)`);
+  log(`   ${KEY}: ${r.replaced ? 'replaced' : 'set'} at ${r.setAt}; new client token received (not printed)`);
+  for (const k of extraKeys) {
+    const x = await tracker('POST', '/api/tracker-lock', { key: k, label: LABEL, token: r.token });
+    if (x.status === 404) die(`${k} is not in ALLOWED_KEYS in sabel-webhook api/tracker.js. Add it there and deploy, then re-run.`);
+    if (!x.ok) die(`lock failed on ${k}: ${x.status} ${x.error || ''}`);
+    log(`   ${k}: ${x.replaced ? 'replaced' : 'set'}, same client token`);
+  }
   return { token: r.token };
 }
 
@@ -181,7 +220,7 @@ async function setPagesVars({ aud, token }) {
   log(`   production deployment started${d.result && d.result.id ? ` (${d.result.id})` : ''}`);
 }
 
-function patchHub() {
+function patchHub(hubFile) {
   step(5, `hub-auth include in ${hubFile}`);
   const p = resolve(ROOT, hubFile);
   if (!existsSync(p)) { log(`   ${hubFile} not found in this checkout; add the include by hand:\n   <script src="hub-auth.js" data-client="${slug}"></script>`); return false; }
@@ -206,11 +245,11 @@ function patchHub() {
   const { aud } = await ensureAccessApp();
   const { token } = await lockKey(state);
   await setPagesVars({ aud, token });
-  const changed = patchHub();
+  const changed = [hubFile, ...alsoFiles.filter(f => f.endsWith('.html'))].filter(f => patchHub(f));
   step(6, 'Done. Send the client this link:');
   log(`\n   https://${HUBS}/${hubBase}\n`);
   log(`   They type their @${clientDomains[0]} address, enter the emailed code, and the hub opens.`);
   log(`   The old github.io link now forwards here. Anyone not on ${[...clientDomains, TEAM_DOMAIN].map(d => '@' + d).join(' / ')} is refused.`);
-  if (changed) log(`\n   Remember: commit and push ${hubFile}.`);
+  if (changed.length) log(`\n   Remember: commit and push ${changed.join(', ')}.`);
   if (DRY) log('\n   Dry run: nothing was changed.');
 })().catch(e => die(e.message));
