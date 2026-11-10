@@ -291,8 +291,56 @@ function buildSheet(sub){
    Saved in readiness-inputs-v1 under access[<client slug>][<row id>] = {at, by}.
    Internal Ops writes clients{} in the same store and keeps every other key,
    so the two never overwrite each other. Always re-read before writing.
+   After each save the client's part is also written to their own copy,
+   readiness-inputs-<slug>-v1, which is the one their form reads.
    --------------------------------------------------------------------- */
 const INPUTS='https://sabel-webhook.vercel.app/api/tracker?key=readiness-inputs-v1';
+/* READINESS-INPUTS-WRITE:BEGIN (identical in SabelInternalOps.html and SabelReadinessAdmin.html; run as-is by tests/readiness-inputs.test.mjs) */
+const RI_STORE = 'https://sabel-webhook.vercel.app/api/tracker?key=';
+const riSlug = v => String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+function riKeyFor(slug){ return /^[a-z0-9](?:[a-z0-9-]{0,58}[a-z0-9])?$/.test(slug||'') ? 'readiness-inputs-'+slug+'-v1' : ''; }
+/* One client's part of the combined store: the only part their form may read.
+   The list is the entry carrying this slug (newest, if a rename left two). An older entry with no
+   slug is found by a name in `names`, and never one that carries a different slug. With no entry
+   at all, the list already in the client's copy (prev) is kept.
+   WHOSE LIST IS COPIED IS DECIDED BY SABEL ONLY. `names` may hold nothing but names from Sabel's own
+   records (the Internal Ops client record). Never a name a client typed into a form, never anything
+   from a submission or from the address: pass [] there, and only the entry carrying the slug is used.
+   The slug itself is never tried as a name. */
+function riSliceFor(store, slug, names, prev){
+  const all = (store && store.clients) || {}, vals = Object.values(all).filter(Boolean);
+  const newest = (a,b) => String(b.updated||'').localeCompare(String(a.updated||''));
+  let hit = vals.filter(x => x.slug && riSlug(x.slug)===slug).sort(newest)[0] || null;
+  if(!hit){
+    const free = vals.filter(x => !x.slug);
+    for(const w of (names||[]).filter(Boolean)){
+      const lc = String(w).toLowerCase().trim(), sl = riSlug(w);
+      hit = free.filter(x => String(x.name||'').toLowerCase().trim()===lc || riSlug(x.name)===sl).sort(newest)[0] || null;
+      if(hit) break;
+    }
+  }
+  const out = {v:1, slug:slug, updated:new Date().toISOString(), access:((store && store.access) || {})[slug] || {}};
+  if(hit){ out.name = hit.name; out.items = (Array.isArray(hit.items) ? hit.items : []).map(x=>String(x).trim()).filter(Boolean); }
+  else if(prev && Array.isArray(prev.items)){ out.name = prev.name; out.items = prev.items; }
+  return out;
+}
+/* Writes the client's own copy from the combined store just saved. Needs the team passcode.
+   -> 'saved', or 'no-key' when sabel-webhook does not know per-client keys yet (or the slug is not usable):
+   the form then still reads the combined store. Any other failure throws. */
+async function riPublish(store, slug, names){
+  const key = riKeyFor(slug);
+  if(!key) return 'no-key';
+  const g = await fetch(RI_STORE+key+'&_t='+Date.now(), {cache:'no-store'});
+  if(g.status===404) return 'no-key';
+  if(!g.ok) throw new Error('HTTP '+g.status);
+  const j = await g.json();
+  const prev = (j && j.data && typeof j.data==='object') ? j.data : null;
+  const r = await fetch(RI_STORE+key, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data:riSliceFor(store, slug, names, prev)})});
+  if(r.status===404) return 'no-key';
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return 'saved';
+}
+/* READINESS-INPUTS-WRITE:END */
 const ACCESS_ROWS=[['a2','Intercom'],['ax_slack','Slack channel'],['a1','Current helpdesk'],['ax_agents','Agents in Intercom'],
   ['ax_help','Help content'],['ax_msg','Messenger'],['ax_dns','Email domain'],['ax_shop','Online store and subscriptions'],
   ['ax_sys','Other systems'],['ax_crm','CRM'],['ax_phone','Phone']];
@@ -324,6 +372,11 @@ async function renderAccess(sub){
       if(b.dataset.v==='1') m[b.dataset.acc]={at:new Date().toISOString(),by:'Sabel'}; else delete m[b.dataset.acc];
       const r=await fetch(INPUTS,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:st})});
       if(!r.ok) throw new Error('Could not save (HTTP '+r.status+').');
+      /* Saved for Sabel. Now the client's own copy, the one their form reads.
+         No names are passed: sub.client is what the client typed into the form, and it must never
+         choose whose list is copied. Only a list Internal Ops saved under this very slug is used. */
+      try{ await riPublish(st, riSlug(slug), []); }
+      catch(e){ alert('Saved, but the client\'s own copy was not updated ('+e.message+'), so their form will not show this tick yet. Open this page from the hubs site while signed in, then click again.'); }
       renderAccess(sub);
     }catch(e){ alert(e.message); b.disabled=false; }
   }));

@@ -23,6 +23,12 @@
 // the SAME client token, and lists the own pages in HUB_PAGES_<SLUG>. All of
 // them are then served to this client at /c/<slug>/<Form> (functions/c).
 //
+// A readiness form also reads its client's project inputs and confirmed access
+// rows from a key of its own, readiness-inputs-<slug>-v1, with the same slug as
+// the form key readiness-<slug>-v1. It is locked with the same client token.
+// The combined readiness-inputs-v1 (every client's list) is never given a
+// client token: it is for Sabel's pages only.
+//
 // Env (all required unless --dry-run):
 //   CLOUDFLARE_API_TOKEN     Account > Access: Apps and Policies: Edit, Cloudflare Pages: Edit
 //   CLOUDFLARE_ACCOUNT_ID    the Sabel account id
@@ -94,6 +100,9 @@ const ownPages = csv(opt('--also'));
 for (const f of ownPages) if (!/^[A-Za-z0-9_]+\.html$/.test(f)) die(`--also takes .html page names: ${f}`);
 const extraKeys = csv(opt('--keys'));
 for (const k of extraKeys) if (!/^[a-z0-9-]{1,80}$/.test(k)) die(`--keys takes tracker key names: ${k}`);
+// Every client's inputs list in one key: Sabel's pages only, never one client's token.
+const INPUTS_ALL = 'readiness-inputs-v1';
+if (extraKeys.includes(INPUTS_ALL)) die(`${INPUTS_ALL} holds every client's list and is never locked with one client's token. This client's own key is readiness-inputs-<slug>-v1, found from their readiness form.`);
 // Always the same four, however many forms the client has: the hub, the token,
 // and /c/<slug>/* for every form the hub shows.
 const destinations = [`${HUBS}/${hubBase}`, `${HUBS}/${hubFile}`, `${HUBS}/api/hub-token/${slug}`, `${HUBS}/c/${slug}/*`];
@@ -185,12 +194,28 @@ async function detect() {
   }
 
   for (const k of candidates) {
-    if (extraKeys.includes(k) || k === KEY || !/^[a-z0-9-]{1,80}$/.test(k)) continue;
+    if (extraKeys.includes(k) || k === KEY || k === INPUTS_ALL || !/^[a-z0-9-]{1,80}$/.test(k)) continue;
     const r = await tracker('GET', `/api/tracker-lock?key=${encodeURIComponent(k)}`);
     if (r.dry) { extraKeys.push(k); continue; }
     if (r.status === 404) { log(`   ${k}: not registered in sabel-webhook, skipped`); continue; }
     if (!r.ok) die(`could not check ${k}: ${r.status} ${r.error || ''}`);
     extraKeys.push(k);
+  }
+  // Each readiness form reads this client's project inputs from a key of its
+  // own: readiness-inputs-<slug>-v1, same slug as the form key. Taken only from
+  // a readiness key that is already on the list (registered, or given with
+  // --keys), so a guess never locks anything. sabel-webhook matches these keys
+  // by pattern; a 404 means it has not been deployed with that pattern yet.
+  for (const k of [...extraKeys]) {
+    const m = /^readiness-([a-z0-9](?:[a-z0-9-]{0,58}[a-z0-9])?)-v1$/.exec(k);
+    if (!m || /^inputs(-|$)/.test(m[1])) continue;
+    const own = `readiness-inputs-${m[1]}-v1`;
+    if (extraKeys.includes(own)) continue;
+    const r = await tracker('GET', `/api/tracker-lock?key=${encodeURIComponent(own)}`);
+    if (r.dry) { extraKeys.push(own); continue; }
+    if (r.status === 404) { log(`   ${own}: sabel-webhook does not know per-client inputs keys yet, skipped. Run this again once it does.`); continue; }
+    if (!r.ok) die(`could not check ${own}: ${r.status} ${r.error || ''}`);
+    extraKeys.push(own);
   }
   log(`   own form pages: ${ownPages.join(', ') || 'none'}`);
   log(`   form keys:      ${extraKeys.join(', ') || 'none'}`);

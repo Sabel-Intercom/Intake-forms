@@ -75,6 +75,42 @@ test('lock-down: --lock-keys locks only open keys, honours --skip, sends the tea
   noSecrets(r.out);
 });
 
+// Per-client inputs keys are not in ALLOWED_KEYS (sabel-webhook matches them by
+// pattern), so the sweep works them out from the readiness form keys.
+const SWEEP_KEYS = ['a-tracker-v1', 'readiness-a-v1', 'readiness-b-co-v1', 'readiness-inputs-v1', 'migration-intake-a-v1'];
+const swept = (r) => r.calls.filter(c => c.method === 'POST' && c.url.includes('/api/tracker-lock')).map(c => c.body.key);
+
+test('lock-down: --lock-keys also locks each client\'s own inputs key, staff only', () => {
+  const r = run('lock-down.mjs', ['--apply', '--lock-keys'], { state: { allowedKeys: SWEEP_KEYS, lockedKeys: ['readiness-inputs-b-co-v1'] } });
+  assert.equal(r.code, 0, r.out);
+  // every listed key, the combined one included, then the per-client key still open
+  assert.deepEqual(swept(r), [...SWEEP_KEYS, 'readiness-inputs-a-v1']);
+  const locks = r.calls.filter(c => c.method === 'POST' && c.url.includes('/api/tracker-lock'));
+  assert.ok(locks.every(c => c.body.token === undefined && c.body.label === 'staff only (lock-down)'));
+  // never a key made from the combined key or from another inputs key
+  assert.ok(!r.out.includes('readiness-inputs-inputs'));
+  noSecrets(r.out);
+});
+
+test('lock-down: per-client inputs keys honour --skip and --only, and show in a dry run', () => {
+  const state = { allowedKeys: SWEEP_KEYS };
+  let r = run('lock-down.mjs', ['--apply', '--lock-keys', '--only', 'readiness-inputs-a-v1,readiness-inputs-v1'], { state });
+  assert.deepEqual(swept(r), ['readiness-inputs-v1', 'readiness-inputs-a-v1']);
+  r = run('lock-down.mjs', ['--apply', '--lock-keys', '--skip', 'readiness-inputs-a-v1,readiness-inputs-b-co-v1'], { state });
+  assert.deepEqual(swept(r), SWEEP_KEYS);
+  r = run('lock-down.mjs', ['--lock-keys'], { state });
+  assert.equal(r.writes.length, 0);
+  assert.match(r.out, /would lock readiness-inputs-a-v1/);
+  assert.match(r.out, /would lock readiness-inputs-b-co-v1/);
+});
+
+test('lock-down: a sabel-webhook from before per-client inputs keys: those are skipped, the rest still lock', () => {
+  const r = run('lock-down.mjs', ['--apply', '--lock-keys'], { state: { allowedKeys: SWEEP_KEYS, noInputsPattern: true } });
+  assert.equal(r.code, 0, r.out);
+  assert.match(r.out, /readiness-inputs-a-v1: sabel-webhook does not know per-client inputs keys yet, skipped/);
+  assert.match(r.out, /5 locked/);
+});
+
 test('lock-down: --apply without credentials stops before any call', () => {
   const r = run('lock-down.mjs', ['--apply'], { creds: {} });
   assert.notEqual(r.code, 0);
@@ -144,6 +180,9 @@ test('onboard-hub: --also lists own pages for /c/, --keys locks extra keys with 
 // A hub that shows a kick-off, the readiness check and the client's own intake page.
 const KICK = 'kickoff-a-0123456789abcdef-v1';
 const FORM_KEYS = ['a-tracker-v1', KICK, 'readiness-a-co-v1', 'migration-intake-a-v1'];
+// The readiness form's own inputs key: same slug as the form key, known to
+// sabel-webhook by pattern, so never listed in ALLOWED_KEYS.
+const INPUTS_OWN = 'readiness-inputs-a-co-v1';
 function withFormHub(fn) {
   const own = `SabelMigrationIntake_T${process.pid}${Math.random().toString(36).slice(2, 8)}.html`;
   writeFileSync(join(ROOT, own), "<html><head><script>const DEFAULT_SLUG='a';</script></head></html>");
@@ -157,11 +196,16 @@ test('onboard-hub: finds the hub\'s forms itself: own pages, form keys, one toke
     const r = run('onboard-hub.mjs', ['a', hubName, 'a.com'], { state: { allowedKeys: FORM_KEYS } });
     assert.equal(r.code, 0, r.out);
     // readiness slug comes from ?client=A%20Co (the form's own rule), not from the hub slug
-    assert.deepEqual(lockPosts(r).map(c => c.body.key), ['a-tracker-v1', KICK, 'readiness-a-co-v1', 'migration-intake-a-v1']);
+    // and the client's own inputs key follows the readiness key, same slug
+    assert.deepEqual(lockPosts(r).map(c => c.body.key), ['a-tracker-v1', KICK, 'readiness-a-co-v1', 'migration-intake-a-v1', INPUTS_OWN]);
     const token = pagesVars(r).HUB_TOKEN_A.value;
     for (const c of lockPosts(r).slice(1)) assert.equal(c.body.token, token);
     assert.equal(pagesVars(r).HUB_PAGES_A.value, own.replace('.html', ''));
     assert.match(r.out, /readiness-a-v1: not registered in sabel-webhook, skipped/);
+    // no inputs key for the unregistered guess readiness-a-v1, and never the combined key
+    const asked = r.calls.map(c => c.url + JSON.stringify(c.body || ''));
+    assert.ok(!asked.some(u => u.includes('readiness-inputs-a-v1')), 'inputs key made from an unregistered form key');
+    assert.ok(!asked.some(u => /readiness-inputs-v1/.test(u)), 'the combined key was touched');
     assert.ok(readHub().includes('<script src="hub-auth.js" data-client="a"></script>\n<script>const FORMS'));
     assert.ok(readOwn().includes('<script src="hub-auth.js" data-form data-client="a"></script>\n<script>const DEFAULT_SLUG'));
     noSecrets(r.out);
@@ -170,11 +214,63 @@ test('onboard-hub: finds the hub\'s forms itself: own pages, form keys, one toke
 
 test('onboard-hub: second run changes no token when every key already answers to this client', () => {
   withFormHub((hubName) => {
-    const lockedKeys = FORM_KEYS.map(key => ({ key, label: 'A hub' }));
+    const lockedKeys = [...FORM_KEYS, INPUTS_OWN].map(key => ({ key, label: 'A hub' }));
     const r = run('onboard-hub.mjs', ['a', hubName, 'a.com'], { state: { allowedKeys: FORM_KEYS, lockedKeys, pagesVars: ['HUB_TOKEN_A'] } });
     assert.equal(r.code, 0, r.out);
     assert.equal(lockPosts(r).length, 0);
     assert.equal(pagesVars(r).HUB_TOKEN_A, undefined);
+  });
+});
+
+test('onboard-hub: a client onboarded before per-client inputs keys gets theirs on the next run, one new token for all', () => {
+  for (const inputs of [null, { key: INPUTS_OWN, label: 'staff only (lock-down)' }]) {
+    withFormHub((hubName) => {
+      const lockedKeys = FORM_KEYS.map(key => ({ key, label: 'A hub' }));
+      if (inputs) lockedKeys.push(inputs);
+      const r = run('onboard-hub.mjs', ['a', hubName, 'a.com'], { state: { allowedKeys: FORM_KEYS, lockedKeys, pagesVars: ['HUB_TOKEN_A'] } });
+      assert.equal(r.code, 0, r.out);
+      assert.deepEqual(lockPosts(r).map(c => c.body.key), [...FORM_KEYS, INPUTS_OWN]);
+      const token = pagesVars(r).HUB_TOKEN_A.value;
+      assert.match(token, /^generated-token-/);
+      assert.equal(lockPosts(r).at(-1).body.token, token);
+      assert.equal(lockPosts(r).at(-1).body.label, 'A hub');
+      noSecrets(r.out);
+    });
+  }
+});
+
+test('onboard-hub: a sabel-webhook from before per-client inputs keys: the key is skipped, onboarding still completes', () => {
+  withFormHub((hubName) => {
+    const r = run('onboard-hub.mjs', ['a', hubName, 'a.com'], { state: { allowedKeys: FORM_KEYS, noInputsPattern: true } });
+    assert.equal(r.code, 0, r.out);
+    assert.deepEqual(lockPosts(r).map(c => c.body.key), FORM_KEYS);
+    assert.match(r.out, /readiness-inputs-a-co-v1: sabel-webhook does not know per-client inputs keys yet, skipped/);
+  });
+});
+
+test('onboard-hub: the combined inputs key never gets a client token', () => {
+  // given by hand
+  const byHand = run('onboard-hub.mjs', [...ONBOARD, '--keys', 'readiness-inputs-v1'], { state: { allowedKeys: ['a-tracker-v1', 'readiness-inputs-v1'] } });
+  assert.notEqual(byHand.code, 0);
+  assert.match(byHand.out, /never locked with one client's token/);
+  assert.equal(byHand.calls.length, 0);
+  // a hub whose readiness link says ?client=inputs would spell the combined key
+  const hub = '<html><head><script>const T="SabelReadinessCheck.html?client=inputs&name=X";</script></head></html>';
+  withHub(hub, (name) => {
+    const r = run('onboard-hub.mjs', ['a', name, 'a.com', '--no-patch'], { state: { allowedKeys: ['a-tracker-v1', 'readiness-inputs-v1'] } });
+    assert.equal(r.code, 0, r.out);
+    assert.deepEqual(lockPosts(r).map(c => c.body.key), ['a-tracker-v1']);
+  });
+  // a readiness key given with --keys brings its own inputs key, not one made from an inputs key
+  withHub('<html><head><script>x()</script></head></html>', (name) => {
+    const args = ['a', name, 'a.com', '--no-patch', '--keys', 'readiness-a-v1,readiness-inputs-zed-v1'];
+    const state = { allowedKeys: ['a-tracker-v1', 'readiness-a-v1'] };
+    const r = run('onboard-hub.mjs', args, { state });
+    assert.equal(r.code, 0, r.out);
+    assert.deepEqual(lockPosts(r).map(c => c.body.key), ['a-tracker-v1', 'readiness-a-v1', 'readiness-inputs-zed-v1', 'readiness-inputs-a-v1']);
+    // --no-detect: only what was given, nothing worked out
+    const given = run('onboard-hub.mjs', [...args, '--no-detect'], { state });
+    assert.deepEqual(lockPosts(given).map(c => c.body.key), ['a-tracker-v1', 'readiness-a-v1', 'readiness-inputs-zed-v1']);
   });
 });
 
@@ -185,7 +281,7 @@ test('onboard-hub: a form key that is open, or was locked by the lock-down sweep
       if (readiness) lockedKeys.push(readiness);
       const r = run('onboard-hub.mjs', ['a', hubName, 'a.com'], { state: { allowedKeys: FORM_KEYS, lockedKeys, pagesVars: ['HUB_TOKEN_A'] } });
       assert.equal(r.code, 0, r.out);
-      assert.equal(lockPosts(r).length, 4);
+      assert.equal(lockPosts(r).length, 5);
       assert.match(pagesVars(r).HUB_TOKEN_A.value, /^generated-token-/);
     });
   }
