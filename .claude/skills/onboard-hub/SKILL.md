@@ -15,10 +15,9 @@ The whole site `hubs.sabelcustomersuccess.com` is Sabel-staff-only by default. A
 2. **Hub file**: the HTML file name in this repo (e.g. `AcmeTracker_v2.html`).
 3. **Client email domain(s)**: what their staff addresses end in (e.g. `acme.com`). Several: comma separated. **Ask; never guess from the company name.** Domains only, no single addresses.
 
-Optional, when the client has more than a hub:
+Nothing else. The forms a hub shows (readiness check, migration intake, kick-off, and any form page made for that client) are found in the hub file automatically: their saved answers are locked with the same client token and they are served to the client at `/c/<slug>/<Form>`. The run log lists what it found under "Forms ... shows". Read it out to the person.
 
-- **Their other pages** (`also`): the client's own intake or kick-off form, e.g. `SabelMigrationIntake_Acme.html`. Not the shared forms (`SabelReadinessCheck.html`, `SabelKickoff.html`, `SabelMigrationIntake.html`): those serve several clients and are not handled yet.
-- **Their other keys** (`keys`): e.g. `migration-intake-acme-v1`. Locked with the same client token.
+`also` and `keys` exist only to add a form page or key the log did not list. Leave them blank otherwise.
 
 ## 2. Check before running (stop and say what is missing)
 
@@ -39,7 +38,7 @@ gh workflow run onboard-hub.yml -R Sabel-Intercom/Intake-forms \
   -f slug=<slug> -f hub_file=<HubFile> -f email_domains=<domain[,domain2]>
 ```
 
-Add `-f also=<Page.html>` and `-f keys=<key-v1>` when given. Add `-f dry_run=true` if the person wants to see it first.
+Add `-f dry_run=true` if the person wants to see it first. (`-f also=<Page.html>` / `-f keys=<key-v1>` only for a form the log did not find.)
 
 Then wait for it and read the result:
 
@@ -47,7 +46,7 @@ Then wait for it and read the result:
 sleep 5
 gh run list -R Sabel-Intercom/Intake-forms --workflow onboard-hub.yml --limit 1 --json databaseId,status,conclusion
 gh run watch <databaseId> -R Sabel-Intercom/Intake-forms --exit-status
-gh run view <databaseId> -R Sabel-Intercom/Intake-forms --log | grep -E "\[[0-9]\]|✖|policy:|inserted|already|Done"
+gh run view <databaseId> -R Sabel-Intercom/Intake-forms --log | grep -E "\[[0-9]b?\]|✖|policy:|own form pages|form keys|skipped|inserted|already|Done"
 ```
 
 The Action adds the one include line to the hub file and commits it to `main` by itself. Nothing for the person to edit.
@@ -61,7 +60,10 @@ gh api repos/Sabel-Intercom/Intake-forms/contents/<HubFile> --jq .content | base
 
 Expect `302` to a `cloudflareaccess.com` login address, and an include count of `1`. Anything else: report it, do not send the link.
 
-You cannot test the signed-in view yourself. Ask the person to open the link once and confirm live data shows.
+You cannot test the signed-in view yourself. Ask the person to open the link once and confirm:
+
+- live data shows in the hub, and
+- if the log listed any forms, each one opens inside the hub (Readiness check, Migration details, Kick-off in the side menu) and shows the client's saved answers, not a sign-in page or a "cannot save" message.
 
 ## 5. Hand back
 
@@ -100,10 +102,12 @@ If the client had an old `github.io` link, it now forwards to the new one.
 
 ## What it does (for the curious)
 
-1. Checks sabel-webhook knows the key.
-2. Creates or updates the Access application "<Client> hub": the hub, its `.html` form, `api/hub-token/<slug>`, plus any `also` pages. One Allow rule: emails ending in the client domain(s) plus `@sabelcustomersuccess.com`.
-3. Locks the key via `/api/tracker-lock`. Keeps an existing client token unless `rotate`, extra `keys`, or the key was locked by the domain lock-down with no client token yet.
-4. Sets `HUB_TOKEN_<SLUG>` (secret) and `HUB_AUD_<SLUG>` on the `sabel-hubs` Pages project and redeploys.
-5. Adds `<script src="hub-auth.js" data-client="<slug>"></script>` before the page's first script and commits it.
+1. Checks sabel-webhook knows the key, then reads the hub file for the forms it shows and their keys.
+2. Creates or updates the Access application "<Client> hub": the hub, its `.html` form, `api/hub-token/<slug>` and `c/<slug>/*`. One Allow rule: emails ending in the client domain(s) plus `@sabelcustomersuccess.com`.
+3. Locks the tracker key and every form key with one client token via `/api/tracker-lock`. Keeps the existing token unless `rotate`, or a form key does not answer to it yet.
+4. Sets `HUB_TOKEN_<SLUG>` (secret), `HUB_AUD_<SLUG>` and `HUB_PAGES_<SLUG>` on the `sabel-hubs` Pages project and redeploys.
+5. Adds the include before the first script of the hub (`data-client="<slug>"`) and of the client's own form pages (`data-form data-client="<slug>"`), and commits it.
 
-Related: `hub-auth.js` (the include), `functions/api/hub-token/[client].js` (hands the token to signed-in visitors), `scripts/lock-down.mjs` (staff-only default), `sabel-webhook/api/tracker-lock.js` (the lock).
+How a form reaches the client: the hub shows it in a frame; `hub-auth.js` points that frame at `/c/<slug>/<Form>`; `functions/c/[client]/[[path]].js` serves it only to someone signed in to that client's hub; the form's saved answers open only with that client's token. A form link opened on its own (old `github.io` address) forwards to the same place once the client's answers are locked.
+
+Related: `hub-auth.js` (the include), `functions/api/hub-token/[client].js` (hands the token to signed-in visitors), `functions/c/[client]/[[path]].js` (forms per client), `scripts/lock-down.mjs` (staff-only default), `sabel-webhook/api/tracker-lock.js` (the lock).

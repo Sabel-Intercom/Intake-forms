@@ -6,7 +6,9 @@ import { appendFileSync } from 'node:fs';
 
 const state = JSON.parse(process.env.MOCK_STATE || '{}');
 const apps = state.apps || [];
-const locked = new Set(state.lockedKeys || []);
+// lockedKeys: key names, or { key, label } to say who locked it.
+const labels = new Map((state.lockedKeys || []).map(k => (typeof k === 'string' ? [k, 'someone'] : [k.key, k.label])));
+const locked = { has: (k) => labels.has(k), add: (k, label) => labels.set(k, label || 'someone'), [Symbol.iterator]: () => labels.keys() };
 const pagesVars = new Set(state.pagesVars || []);
 const allowed = state.allowedKeys || ['a-tracker-v1', 'b-tracker-v1', 'sabel-hours-v1'];
 let n = 0;
@@ -42,10 +44,10 @@ globalThis.fetch = async (url, init = {}) => {
     const key = new URL(url).searchParams.get('key') || (body && body.key);
     if (method === 'GET' && !key) return reply(200, { ok: true, locks: [...locked].map(k => ({ key: k, locked: true })) });
     if (!allowed.includes(key)) return reply(404, { ok: false, error: 'Unknown tracker key' });
-    if (method === 'GET') return reply(200, { ok: true, key, locked: locked.has(key), setAt: 't0' });
+    if (method === 'GET') return reply(200, locked.has(key) ? { ok: true, key, locked: true, setAt: 't0', label: labels.get(key) } : { ok: true, key, locked: false });
     if (method === 'POST') {
       const replaced = locked.has(key);
-      locked.add(key);
+      locked.add(key, body.label);
       const out = { ok: true, key, locked: true, setAt: 't1', replaced };
       if (!body.token) out.token = `generated-token-${++n}`;
       return reply(200, out);

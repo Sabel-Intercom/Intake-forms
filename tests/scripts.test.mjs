@@ -116,18 +116,87 @@ test('onboard-hub: key locked by lock-down (no token on Pages) gets a client tok
   noSecrets(r.out);
 });
 
-test('onboard-hub: --also adds destinations, --keys locks extra keys with the same token', () => {
-  const r = run('onboard-hub.mjs', [...ONBOARD, '--also', 'Intake_A.html,A.js', '--keys', 'b-tracker-v1'], { state: { lockedKeys: ['a-tracker-v1'], pagesVars: ['HUB_TOKEN_A'] } });
+const H = 'hubs.sabelcustomersuccess.com';
+const lockPosts = (r) => r.calls.filter(c => c.method === 'POST' && c.url.includes('/api/tracker-lock'));
+const pagesVars = (r) => r.calls.find(c => c.method === 'PATCH').body.deployment_configs.production.env_vars;
+
+test('onboard-hub: always four destinations, including the client\'s own form address', () => {
+  const r = run('onboard-hub.mjs', ONBOARD);
+  const app = r.calls.find(c => c.method === 'POST' && c.url.includes('/access/apps')).body;
+  assert.deepEqual(app.self_hosted_domains, [`${H}/NoSuchHub`, `${H}/NoSuchHub.html`, `${H}/api/hub-token/a`, `${H}/c/a/*`]);
+  assert.equal(pagesVars(r).HUB_PAGES_A, undefined);
+});
+
+test('onboard-hub: --also lists own pages for /c/, --keys locks extra keys with the same token', () => {
+  const r = run('onboard-hub.mjs', [...ONBOARD, '--also', 'Intake_A.html', '--keys', 'b-tracker-v1'], { state: { lockedKeys: ['a-tracker-v1'], pagesVars: ['HUB_TOKEN_A'] } });
   assert.equal(r.code, 0, r.out);
   const app = r.calls.find(c => c.method === 'POST' && c.url.includes('/access/apps')).body;
-  const H = 'hubs.sabelcustomersuccess.com';
-  assert.deepEqual(app.self_hosted_domains, [`${H}/NoSuchHub`, `${H}/NoSuchHub.html`, `${H}/api/hub-token/a`, `${H}/Intake_A`, `${H}/Intake_A.html`, `${H}/A.js`]);
-  const locks = r.calls.filter(c => c.method === 'POST' && c.url.includes('/api/tracker-lock'));
-  assert.deepEqual(locks.map(c => c.body.key), ['a-tracker-v1', 'b-tracker-v1']);
-  assert.equal(locks[0].body.token, undefined);
-  const stored = r.calls.find(c => c.method === 'PATCH').body.deployment_configs.production.env_vars.HUB_TOKEN_A.value;
-  assert.equal(locks[1].body.token, stored);
+  assert.equal(app.self_hosted_domains.length, 4);
+  assert.deepEqual(lockPosts(r).map(c => c.body.key), ['a-tracker-v1', 'b-tracker-v1']);
+  assert.equal(lockPosts(r)[0].body.token, undefined);
+  assert.equal(lockPosts(r)[1].body.token, pagesVars(r).HUB_TOKEN_A.value);
+  assert.deepEqual(pagesVars(r).HUB_PAGES_A, { type: 'plain_text', value: 'Intake_A' });
+  assert.notEqual(run('onboard-hub.mjs', [...ONBOARD, '--also', 'A.js']).code, 0);
+  assert.notEqual(run('onboard-hub.mjs', [...ONBOARD, '--also', '../x.html']).code, 0);
   noSecrets(r.out);
+});
+
+// A hub that shows a kick-off, the readiness check and the client's own intake page.
+const KICK = 'kickoff-a-0123456789abcdef-v1';
+const FORM_KEYS = ['a-tracker-v1', KICK, 'readiness-a-co-v1', 'migration-intake-a-v1'];
+function withFormHub(fn) {
+  const own = `SabelMigrationIntake_T${process.pid}${Math.random().toString(36).slice(2, 8)}.html`;
+  writeFileSync(join(ROOT, own), "<html><head><script>const DEFAULT_SLUG='a';</script></head></html>");
+  const hub = '<html><head><script>const FORMS=[{"id":"kickoff","key":"' + KICK + '"},{"id":"readiness","file":"SabelReadinessCheck.html","key":"readiness-{slug}-v1"},{"id":"migration","file":"' + own + '","key":"migration-intake-{slug}-v1"}];' +
+    'const T={"link":"https://sabel-intercom.github.io/Intake-forms/SabelReadinessCheck.html?client=A%20Co&name=A%20Co","other":"https://sabel-intercom.github.io/Intake-forms/' + own + '","not":"SabelMigrationIntake_NoSuchFile.html"};</script></head></html>';
+  try { return withHub(hub, (name, read) => fn(name, read, own, () => readFileSync(join(ROOT, own), 'utf8'))); } finally { rmSync(join(ROOT, own), { force: true }); }
+}
+
+test('onboard-hub: finds the hub\'s forms itself: own pages, form keys, one token for all', () => {
+  withFormHub((hubName, readHub, own, readOwn) => {
+    const r = run('onboard-hub.mjs', ['a', hubName, 'a.com'], { state: { allowedKeys: FORM_KEYS } });
+    assert.equal(r.code, 0, r.out);
+    // readiness slug comes from ?client=A%20Co (the form's own rule), not from the hub slug
+    assert.deepEqual(lockPosts(r).map(c => c.body.key), ['a-tracker-v1', KICK, 'readiness-a-co-v1', 'migration-intake-a-v1']);
+    const token = pagesVars(r).HUB_TOKEN_A.value;
+    for (const c of lockPosts(r).slice(1)) assert.equal(c.body.token, token);
+    assert.equal(pagesVars(r).HUB_PAGES_A.value, own.replace('.html', ''));
+    assert.match(r.out, /readiness-a-v1: not registered in sabel-webhook, skipped/);
+    assert.ok(readHub().includes('<script src="hub-auth.js" data-client="a"></script>\n<script>const FORMS'));
+    assert.ok(readOwn().includes('<script src="hub-auth.js" data-form data-client="a"></script>\n<script>const DEFAULT_SLUG'));
+    noSecrets(r.out);
+  });
+});
+
+test('onboard-hub: second run changes no token when every key already answers to this client', () => {
+  withFormHub((hubName) => {
+    const lockedKeys = FORM_KEYS.map(key => ({ key, label: 'A hub' }));
+    const r = run('onboard-hub.mjs', ['a', hubName, 'a.com'], { state: { allowedKeys: FORM_KEYS, lockedKeys, pagesVars: ['HUB_TOKEN_A'] } });
+    assert.equal(r.code, 0, r.out);
+    assert.equal(lockPosts(r).length, 0);
+    assert.equal(pagesVars(r).HUB_TOKEN_A, undefined);
+  });
+});
+
+test('onboard-hub: a form key that is open, or was locked by the lock-down sweep, gets the client token', () => {
+  for (const readiness of [null, { key: 'readiness-a-co-v1', label: 'staff only (lock-down)' }]) {
+    withFormHub((hubName) => {
+      const lockedKeys = FORM_KEYS.filter(k => k !== 'readiness-a-co-v1').map(key => ({ key, label: 'A hub' }));
+      if (readiness) lockedKeys.push(readiness);
+      const r = run('onboard-hub.mjs', ['a', hubName, 'a.com'], { state: { allowedKeys: FORM_KEYS, lockedKeys, pagesVars: ['HUB_TOKEN_A'] } });
+      assert.equal(r.code, 0, r.out);
+      assert.equal(lockPosts(r).length, 4);
+      assert.match(pagesVars(r).HUB_TOKEN_A.value, /^generated-token-/);
+    });
+  }
+});
+
+test('onboard-hub: --no-detect uses only what was given', () => {
+  withFormHub((hubName) => {
+    const r = run('onboard-hub.mjs', ['a', hubName, 'a.com', '--no-detect'], { state: { allowedKeys: FORM_KEYS } });
+    assert.deepEqual(lockPosts(r).map(c => c.body.key), ['a-tracker-v1']);
+    assert.equal(pagesVars(r).HUB_PAGES_A, undefined);
+  });
 });
 
 // The include: written into a throwaway hub file in the repo root.
