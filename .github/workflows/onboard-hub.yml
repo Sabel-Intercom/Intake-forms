@@ -1,0 +1,59 @@
+name: Onboard a client hub
+
+# Put one client hub behind Cloudflare Access and lock its tracker key.
+# Run from GitHub: Actions > "Onboard a client hub" > Run workflow.
+# It never commits. If the hub file lacks the hub-auth include, the log
+# prints the one line to add.
+#
+# Repository secrets needed (Settings > Secrets and variables > Actions):
+#   CLOUDFLARE_API_TOKEN   Account > Access: Apps and Policies: Edit; Cloudflare Pages: Edit
+#   CLOUDFLARE_ACCOUNT_ID  the Sabel Cloudflare account id
+#   KICKOFF_TEAM_TOKEN     the team passcode (same value as in Vercel)
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Client slug, e.g. cookaborough (tracker key is <slug>-tracker-v1)"
+        required: true
+      hub_file:
+        description: "Hub file name in this repo, e.g. CookaboroughTracker.html"
+        required: true
+      email_domains:
+        description: "Client email domain(s), comma separated, e.g. cookaborough.com"
+        required: true
+      rotate:
+        description: "Replace an existing client token"
+        type: boolean
+        default: false
+      dry_run:
+        description: "Print the calls, change nothing"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  onboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Onboard
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          KICKOFF_TEAM_TOKEN: ${{ secrets.KICKOFF_TEAM_TOKEN }}
+          SLUG: ${{ inputs.slug }}
+          HUB_FILE: ${{ inputs.hub_file }}
+          DOMAINS: ${{ inputs.email_domains }}
+          ROTATE: ${{ inputs.rotate }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -- "$SLUG" "$HUB_FILE" "$DOMAINS" --no-patch
+          [ "$ROTATE" = "true" ] && set -- "$@" --rotate
+          [ "$DRY_RUN" = "true" ] && set -- "$@" --dry-run
+          node scripts/onboard-hub.mjs "$@"
