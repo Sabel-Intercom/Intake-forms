@@ -35,6 +35,11 @@
 //      client a token. Anything that reads a key without the team passcode
 //      stops working the moment it is locked: an un-onboarded client's hub or
 //      form, and any script or widget that does not send X-Team-Token.
+//      For every form key readiness-<slug>-v1 it also locks that client's own
+//      inputs key readiness-inputs-<slug>-v1, which sabel-webhook matches by
+//      pattern and so is not in ALLOWED_KEYS.
+
+import { inputsKeyForFormKey } from './readiness-inputs-lib.mjs';
 
 const CF = 'https://api.cloudflare.com/client/v4';
 const DEFAULT_PUBLIC = 'Migr8Now_Rate_Calculator.html,SabelFeedbackForm.html';
@@ -190,6 +195,10 @@ async function lockKeys() {
   step(4, 'Lock every tracker key that is still open');
   let keys = await allowedKeys();
   log(`   ${keys.length} keys in ALLOWED_KEYS`);
+  // Each client's own inputs key, next to their readiness form key.
+  const derived = new Set(keys.map(inputsKeyForFormKey).filter(k => k && !keys.includes(k)));
+  keys = [...keys, ...derived];
+  if (derived.size) log(`   ${derived.size} per-client inputs keys (readiness-inputs-<slug>-v1), one for each readiness form key`);
   if (ONLY.size) keys = keys.filter(k => ONLY.has(k));
   keys = keys.filter(k => !SKIP.has(k));
   let locked = new Set();
@@ -208,6 +217,7 @@ async function lockKeys() {
   for (const key of todo) {
     if (DRY) { log(`   would lock ${key}`); continue; }
     const r = await tracker('POST', '/api/tracker-lock', { key, label: 'staff only (lock-down)' });
+    if (r.status === 404 && derived.has(key)) { log(`   ${key}: sabel-webhook does not know per-client inputs keys yet, skipped`); continue; }
     if (!r.ok) die(`lock failed on ${key}: ${r.status} ${r.error || ''} (${done} locked before this)`);
     done++;
     log(`   locked ${key}`);

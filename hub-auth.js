@@ -51,6 +51,10 @@
       u.username === '' && u.password === '' && paths.test(u.pathname);
   }
 
+  function isSharedKey(url) {
+    try { return new URL(url, location.href).searchParams.get('key') === 'readiness-inputs-v1'; } catch (e) { return false; }
+  }
+
   // Old GitHub Pages copy: send the visitor to the live page. Same file name,
   // same query and hash, so bookmarks and deep links keep working. Only pages
   // that carry this include redirect, so pages not yet moved are untouched.
@@ -70,6 +74,9 @@
       var url = typeof input === 'string' ? input : (input && input.url) || '';
       var p = plainFetch.call(this, input, init);
       if (!isWebhook(url, /^\/api\/tracker$/)) return p;
+      // readiness-inputs-v1 is shared by every client and becomes staff only.
+      // Its 401 says nothing about THIS client having moved, so it never forwards.
+      if (isSharedKey(url)) return p;
       return p.then(function (r) {
         if (r.status === 401 && !gone) { gone = true; go(SLUG.test(want) ? '/c/' + want + '/' : '/'); }
         return r;

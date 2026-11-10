@@ -183,6 +183,16 @@ test('shared form on github.io: forwards to the client\'s own address once their
   assert.equal(none.replaced(), HUBS + '/SabelMigrationIntake.html');
 });
 
+test('shared form on github.io: the combined inputs key going staff-only never forwards a client who has not moved', async () => {
+  const p = page({ attrs: { 'data-form': '' }, href: OLD + 'SabelReadinessCheck.html?client=RMS&name=RMS%20Cloud', trackerStatus: 401 });
+  const r = await p.window.fetch(W + 'tracker?key=readiness-inputs-v1&_t=1');
+  assert.equal(r.status, 401);
+  assert.equal(p.replaced(), null);
+  // the client's OWN inputs key locked does mean they have moved
+  await p.window.fetch(W + 'tracker?key=readiness-inputs-rms-v1&_t=1');
+  assert.equal(p.replaced(), HUBS + '/c/rms/SabelReadinessCheck.html?client=RMS&name=RMS%20Cloud');
+});
+
 test('client hub: forms shown in a frame load from the client\'s own address', async () => {
   const p = page({ attrs: { 'data-client': 'rms' }, href: HUBS + '/RMSCloudTracker' });
   const C = HUBS + '/c/rms/';

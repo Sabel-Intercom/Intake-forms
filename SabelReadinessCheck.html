@@ -833,7 +833,7 @@ id:'A', title:'Access and getting set up',
    STATE
    ===================================================================== */
 const state = { step:0, projectType:'', data:{}, reps:{}, submitted:false, lastPayload:null };
-/* Access rows Sabel has checked, from readiness-inputs-v1 access[<slug>] (set in the Readiness admin page). */
+/* Access rows Sabel has checked, from `access` in this client's readiness-inputs-<slug>-v1 (set in the Readiness admin page). */
 let CONFIRMED = {};
 
 const $  = id => document.getElementById(id);
@@ -1535,28 +1535,68 @@ document.addEventListener('change',e=>{
 
 /* =====================================================================
    SECTION J: this client's own inputs from their scope of work.
-   Sabel lists them in Internal Ops, which publishes them to the
-   readiness-inputs-v1 store keyed by the client name. Links carry the short
-   name in ?client= (elmo) and the company in &name= (ELMO Software), so
-   either one finds the list. No list, or neither in the link, means no Section J.
+   Sabel lists them in Internal Ops, which publishes them twice: to this
+   client's own copy, readiness-inputs-<slug>-v1, and to the combined
+   readiness-inputs-v1 store keyed by the client name (for Sabel's pages).
+
+   The form reads the client's own copy. <slug> is the SAME slug as in the
+   form's saved answers (readiness-<slug>-v1): ?client= through slugify. A
+   client's token opens their own copy and nobody else's, so changing
+   ?client= to another client's name reads nothing.
+
+   The combined store is read only while the client's own copy does not exist
+   yet (a client not moved over, or a list published before 10 Nov 2026).
+   There the link's short name in ?client= (elmo) or the company in &name=
+   (ELMO Software) finds the list. No list anywhere means no Section J.
    ===================================================================== */
-const INPUTS_URL = 'https://sabel-webhook.vercel.app/api/tracker?key=readiness-inputs-v1';
+/* READINESS-INPUTS:BEGIN (this block is run as-is by tests/readiness-inputs.test.mjs) */
+const INPUTS_STORE = 'https://sabel-webhook.vercel.app/api/tracker?key=';
+const INPUTS_ALL = 'readiness-inputs-v1';
+function inputsKeyFor(slug){ return /^[a-z0-9](?:[a-z0-9-]{0,58}[a-z0-9])?$/.test(slug||'') ? 'readiness-inputs-'+slug+'-v1' : ''; }
+/* The entry for this link in the combined store: company name first, then the short name. */
+function pickInputs(all, wants){
+  const vals=Object.values(all||{}).filter(Boolean);
+  for(const w of wants){
+    const lc=String(w).toLowerCase().trim(), sl=slugify(w);
+    const hit = (all||{})[lc] || vals.find(x=>String(x.name||'').toLowerCase().trim()===lc || slugify(x.name)===sl || (x.slug && slugify(x.slug)===sl));
+    if(hit) return hit;
+  }
+  return null;
+}
+/* -> {items, confirmed, from}. from is 'own', 'combined' or 'none'. Never throws. */
+async function fetchInputs(slug, wants){
+  const get=async key=>{
+    try{
+      const r=await fetch(INPUTS_STORE+key+'&_t='+Date.now(),{cache:'no-store'});
+      if(!r.ok) return {status:r.status, data:null};
+      const j=await r.json(); return {status:r.status, data:(j && j.data && typeof j.data==='object') ? j.data : null};
+    }catch(e){ return {status:0, data:null}; }
+  };
+  let own=null;
+  const key=inputsKeyFor(slug);
+  if(key){
+    const a=await get(key);
+    /* Locked, and this visitor's token does not open it: it is not theirs. Stop here, never fall back. */
+    if(a.status===401) return {items:[], confirmed:{}, from:'none'};
+    own=a.data;
+  }
+  const mine=(own && own.access && typeof own.access==='object') ? own.access : null;
+  if(own && Array.isArray(own.items)) return {items:own.items, confirmed:mine||{}, from:'own'};
+  /* No copy of their own yet, or one with no list in it: the combined store. */
+  const b=await get(INPUTS_ALL);
+  if(!b.data) return {items:[], confirmed:mine||{}, from: own ? 'own' : 'none'};
+  const hit=pickInputs(b.data.clients, wants);
+  const acc=b.data.access||{};
+  return {items:(hit && Array.isArray(hit.items)) ? hit.items : [], confirmed:mine || (slug && acc[slug]) || {}, from:'combined'};
+}
+/* READINESS-INPUTS:END */
 function inputId(txt){ let h=0; for(const ch of String(txt)) h=(h*31+ch.charCodeAt(0))|0; return 'pj'+(h>>>0).toString(36); }
 async function loadProjectInputs(){
   if(!CLIENT_PARAM && !NAME_PARAM) return;
   try{
-    const r=await fetch(INPUTS_URL+'&_t='+Date.now(),{cache:'no-store'}); if(!r.ok) return;
-    const j=await r.json(); const all=(j && j.data && j.data.clients)||{};
-    const acc=(j && j.data && j.data.access)||{}; CONFIRMED=(SLUG && acc[SLUG]) || {};
-    const wants=[NAME_PARAM, CLIENT_PARAM].filter(Boolean);
-    const vals=Object.values(all).filter(Boolean);
-    let hit=null;
-    for(const w of wants){
-      const lc=w.toLowerCase().trim(), sl=slugify(w);
-      hit = all[lc] || vals.find(x=>String(x.name||'').toLowerCase().trim()===lc || slugify(x.name)===sl || (x.slug && slugify(x.slug)===sl));
-      if(hit) break;
-    }
-    const items=(hit && Array.isArray(hit.items) ? hit.items : []).map(x=>String(x).trim()).filter(Boolean);
+    const got=await fetchInputs(SLUG, [NAME_PARAM, CLIENT_PARAM].filter(Boolean));
+    CONFIRMED=got.confirmed;
+    const items=got.items.map(x=>String(x).trim()).filter(Boolean);
     if(!items.length || SECTIONS.some(s=>s.id==='J')){ if(Object.keys(CONFIRMED).length) render(); return; }
     const cur=steps()[state.step];
     SECTIONS.push({id:'J', title:'Your project’s inputs',
