@@ -22,7 +22,7 @@ function page({ attrs, host = 'hubs.sabelcustomersuccess.com', tokenReply = { ok
   };
   const window = { fetch };
   const ctx = vm.createContext({
-    window, Headers, Request, Object, encodeURIComponent,
+    window, Headers, Request, Object, URL, encodeURIComponent,
     document: { currentScript: { getAttribute: (n) => (n in attrs ? attrs[n] : null), hasAttribute: (n) => n in attrs } },
     location: { hostname: host, pathname: '/Intake-forms/SabelTaskHub.html', search: '?a=1', hash: '#t', replace: (u) => { replaced = u; } },
   });
@@ -30,15 +30,46 @@ function page({ attrs, host = 'hubs.sabelcustomersuccess.com', tokenReply = { ok
   return { window, calls, replaced: () => replaced };
 }
 
-test('team mode: fetches api/team-token and sends X-Team-Token to the tracker only', async () => {
+const W = 'https://sabel-webhook.vercel.app/api/';
+const TEAM_ONLY = [TRACKER, W + 'notion?kind=projects', W + 'notion', W + 'motion?since=2026-11-01', W + 'feedback?key=sabel-feedback-v1'];
+const NEVER = [
+  // other endpoints on our own service
+  W + 'testimonial', W + 'webhook', W + 'readiness?token=x', W + 'tracker-lock', W + 'notionx', W + 'tracker/extra', W + 'tracker.json',
+  // another site carrying our address in its query, path or fragment
+  'https://example.com/api/tracker?key=x',
+  'https://example.com/?u=sabel-webhook.vercel.app/api/tracker',
+  'https://example.com/?u=https://sabel-webhook.vercel.app/api/tracker?key=x',
+  'https://example.com/sabel-webhook.vercel.app/api/tracker',
+  'https://example.com/#sabel-webhook.vercel.app/api/tracker',
+  // look-alike hosts, credentials trick, other port, plain http
+  'https://evil-sabel-webhook.vercel.app/api/tracker',
+  'https://sabel-webhook.vercel.app.example.com/api/tracker',
+  'https://sabel-webhookXvercel.app/api/tracker',
+  'https://sabel-webhook.vercel.app@example.com/api/tracker',
+  'https://user:pw@sabel-webhook.vercel.app/api/tracker',
+  'https://sabel-webhook.vercel.app:8443/api/tracker',
+  'http://sabel-webhook.vercel.app/api/tracker',
+  // not an address at all
+  'api/tracker?key=x', 'not a url',
+];
+
+test('team mode: sends X-Team-Token to the team-only endpoints and nowhere else', async () => {
   const p = page({ attrs: { 'data-team': '' } });
-  await p.window.fetch(TRACKER);
-  await p.window.fetch('https://sabel-webhook.vercel.app/api/notion?x=1');
-  await p.window.fetch('https://example.com/api/tracker?key=x');
+  for (const u of [...TEAM_ONLY, ...NEVER]) await p.window.fetch(u);
   assert.equal(p.calls[0].url, 'api/team-token');
-  assert.equal(p.calls.find(c => c.url === TRACKER).headers['x-team-token'], 'tok');
-  assert.equal(p.calls.find(c => c.url === TRACKER).headers['x-client-token'], undefined);
-  for (const c of p.calls.filter(c => c.url !== TRACKER)) assert.equal(c.headers['x-team-token'], undefined, c.url);
+  for (const u of TEAM_ONLY) {
+    const c = p.calls.find(c => c.url === u);
+    assert.equal(c.headers['x-team-token'], 'tok', u);
+    assert.equal(c.headers['x-client-token'], undefined, u);
+  }
+  for (const u of NEVER) assert.deepEqual(p.calls.find(c => c.url === u).headers, {}, u);
+});
+
+test('client mode: the client token goes to the tracker only, never to team endpoints', async () => {
+  const p = page({ attrs: { 'data-client': 'cookaborough' } });
+  for (const u of [...TEAM_ONLY, ...NEVER]) await p.window.fetch(u);
+  assert.equal(p.calls.find(c => c.url === TRACKER).headers['x-client-token'], 'tok');
+  for (const u of [...TEAM_ONLY.slice(1), ...NEVER]) assert.deepEqual(p.calls.find(c => c.url === u).headers, {}, u);
 });
 
 test('team mode: a passcode the page already sends is kept', async () => {

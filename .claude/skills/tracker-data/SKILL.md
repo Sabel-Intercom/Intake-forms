@@ -27,6 +27,15 @@ JSON object keyed by tracker key: `{ "ok": true, "data": { ... } }` or `{ "ok": 
 
 Report a failed key to the person as a failed key. Never fill in from memory, an old file or another client.
 
+## Completed tasks and contracts (Notion)
+
+```
+node scripts/tracker.mjs tasks [--since 2026-11-03]
+node scripts/tracker.mjs contracts
+```
+
+`tasks`: tasks marked Complete or Done in Notion since the date (default: last 7 days), each with its `trackerKey`. `contracts`: contract and SOW detail per client. Both are team only; they replace fetching `sabel-webhook.vercel.app/api/notion` directly, which now answers `401 Team passcode required`.
+
 ## The passcode (once per Mac)
 
 ```
@@ -48,6 +57,7 @@ If `check` says the passcode was refused, it has been changed: the person stores
 Anything that still does one of these needs changing to the two commands above:
 
 - `GET https://sabel-webhook.vercel.app/api/tracker?key=<key>`
+- `GET https://sabel-webhook.vercel.app/api/notion` or `/api/motion`
 - `https://sabel-intercom.github.io/Intake-forms/trackers.json` or the `raw.githubusercontent.com` copy
 
 Writing tracker state is not covered here. Trackers are edited in the hub itself.

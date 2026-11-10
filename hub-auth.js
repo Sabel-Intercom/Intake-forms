@@ -10,7 +10,9 @@
  * Internal Sabel page:
  *   <script src="hub-auth.js" data-team></script>
  * Fetches the team passcode from /api/team-token (answers Sabel sign-ins
- * only) and adds it as X-Team-Token, so the page can read locked keys.
+ * only) and adds it as X-Team-Token on sabel-webhook /api/tracker, /api/notion,
+ * /api/motion and /api/feedback, so the page can read locked keys and the
+ * team-only endpoints.
  *
  * Both endpoints are on the same origin and only answer after Cloudflare
  * Access sign-in. The page's own code is untouched.
@@ -35,7 +37,22 @@
     return;
   }
 
-  var API = /sabel-webhook\.vercel\.app\/api\/tracker(\?|$)/;
+  // Team mode also covers the other team-only endpoints (client contracts,
+  // completed tasks, feedback reads). A client token only ever goes to tracker.
+  //
+  // The address is PARSED and each part compared exactly. A pattern match on
+  // the whole string would also hit another site that merely carries our
+  // address in its query string or path, and send the token there.
+  var HOST = 'sabel-webhook.vercel.app';
+  var PATHS = team ? /^\/api\/(tracker|notion|motion|feedback)$/ : /^\/api\/tracker$/;
+  var API = {
+    test: function (url) {
+      var u;
+      try { u = new URL(url, location.href); } catch (e) { return false; }
+      return u.protocol === 'https:' && u.hostname === HOST && u.port === '' &&
+        u.username === '' && u.password === '' && PATHS.test(u.pathname);
+    }
+  };
   var HEADER = team ? 'X-Team-Token' : 'X-Client-Token';
   var SOURCE = team ? 'api/team-token' : 'api/hub-token/' + encodeURIComponent(client);
   var origFetch = window.fetch;
