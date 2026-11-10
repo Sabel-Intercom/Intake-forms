@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, existsSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -128,6 +128,65 @@ test('onboard-hub: --also adds destinations, --keys locks extra keys with the sa
   const stored = r.calls.find(c => c.method === 'PATCH').body.deployment_configs.production.env_vars.HUB_TOKEN_A.value;
   assert.equal(locks[1].body.token, stored);
   noSecrets(r.out);
+});
+
+// The include: written into a throwaway hub file in the repo root.
+function withHub(html, fn) {
+  const name = `__test_hub_${process.pid}_${Math.random().toString(36).slice(2)}.html`;
+  const p = join(ROOT, name);
+  writeFileSync(p, html);
+  try { return fn(name, () => readFileSync(p, 'utf8')); } finally { rmSync(p, { force: true }); }
+}
+const TAG = '<script src="hub-auth.js" data-client="a"></script>';
+
+test('onboard-hub: include goes immediately before the first script', () => {
+  const html = '<!doctype html><html><head><meta charset="utf-8">\n<script>early()</script>\n</head><body><script>late()</script></body></html>';
+  withHub(html, (name, read) => {
+    const r = run('onboard-hub.mjs', ['a', name, 'a.com']);
+    assert.equal(r.code, 0, r.out);
+    const out = read();
+    assert.equal(out, html.replace('<script>early()', `${TAG}\n<script>early()`));
+    assert.ok(out.indexOf(TAG) < out.indexOf('early()'));
+    // second run changes nothing
+    run('onboard-hub.mjs', ['a', name, 'a.com'], { state: { lockedKeys: ['a-tracker-v1'], pagesVars: ['HUB_TOKEN_A'] } });
+    assert.equal(read(), out);
+  });
+});
+
+test('onboard-hub: page with no script gets the include at the end of head', () => {
+  withHub('<html><head><title>x</title></head><body></body></html>', (name, read) => {
+    assert.equal(run('onboard-hub.mjs', ['a', name, 'a.com']).code, 0);
+    assert.equal(read(), `<html><head><title>x</title>${TAG}\n</head><body></body></html>`);
+  });
+});
+
+test('onboard-hub: --dry-run and --no-patch leave the file alone', () => {
+  const html = '<html><head><script>x()</script></head></html>';
+  withHub(html, (name, read) => {
+    run('onboard-hub.mjs', ['a', name, 'a.com', '--dry-run']);
+    run('onboard-hub.mjs', ['a', name, 'a.com', '--no-patch']);
+    assert.equal(read(), html);
+  });
+});
+
+test('onboard-hub: a page wired to another client or to team mode is refused, untouched', () => {
+  for (const other of ['<script src="hub-auth.js" data-client="b"></script>', '<script src="hub-auth.js" data-team></script>']) {
+    const html = `<html><head>${other}</head></html>`;
+    withHub(html, (name, read) => {
+      const r = run('onboard-hub.mjs', ['a', name, 'a.com']);
+      assert.notEqual(r.code, 0);
+      assert.match(r.out, /different hub-auth include/);
+      assert.equal(read(), html);
+    });
+  }
+});
+
+test('onboard-hub: first script inside an HTML comment is refused, untouched', () => {
+  const html = '<html><head><!-- <script>old()</script> --></head><body><script>x()</script></body></html>';
+  withHub(html, (name, read) => {
+    assert.notEqual(run('onboard-hub.mjs', ['a', name, 'a.com']).code, 0);
+    assert.equal(read(), html);
+  });
 });
 
 test('onboard-hub: unknown extra key stops with a clear message', () => {

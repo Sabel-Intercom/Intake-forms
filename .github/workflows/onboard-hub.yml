@@ -1,9 +1,10 @@
 name: Onboard a client hub
 
 # Put one client hub behind Cloudflare Access and lock its tracker key.
-# Run from GitHub: Actions > "Onboard a client hub" > Run workflow.
-# It never commits. If the hub file lacks the hub-auth include, the log
-# prints the one line to add.
+# Run from GitHub: Actions > "Onboard a client hub" > Run workflow, or
+#   gh workflow run onboard-hub.yml -f slug=acme -f hub_file=AcmeTracker_v2.html -f email_domains=acme.com
+# If the hub file (or a page listed under "also") lacks the hub-auth include,
+# this adds the one line and commits it to main. Nothing else is ever committed.
 #
 # Repository secrets needed (Settings > Secrets and variables > Actions):
 #   CLOUDFLARE_API_TOKEN   Account > Access: Apps and Policies: Edit; Cloudflare Pages: Edit
@@ -38,16 +39,24 @@ on:
         default: false
 
 permissions:
-  contents: read
+  contents: write
+
+# One onboarding at a time: two runs must never race on the Pages variables
+# or on the push to main.
+concurrency:
+  group: onboard-hub
+  cancel-in-progress: false
 
 jobs:
   onboard:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
         with:
-          node-version: 20
+          ref: main
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
       - name: Onboard
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -61,9 +70,29 @@ jobs:
           ROTATE: ${{ inputs.rotate }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
-          set -- "$SLUG" "$HUB_FILE" "$DOMAINS" --no-patch
-          [ -n "$ALSO" ] && set -- "$@" --also "$ALSO"
-          [ -n "$KEYS" ] && set -- "$@" --keys "$KEYS"
-          [ "$ROTATE" = "true" ] && set -- "$@" --rotate
-          [ "$DRY_RUN" = "true" ] && set -- "$@" --dry-run
+          set -- "$SLUG" "$HUB_FILE" "$DOMAINS"
+          if [ -n "$ALSO" ]; then set -- "$@" --also "$ALSO"; fi
+          if [ -n "$KEYS" ]; then set -- "$@" --keys "$KEYS"; fi
+          if [ "$ROTATE" = "true" ]; then set -- "$@" --rotate; fi
+          if [ "$DRY_RUN" = "true" ]; then set -- "$@" --dry-run; fi
           node scripts/onboard-hub.mjs "$@"
+      - name: Commit the hub-auth include if it was added
+        if: ${{ !inputs.dry_run }}
+        env:
+          SLUG: ${{ inputs.slug }}
+        run: |
+          # Only tracked .html files the script just edited; never anything new.
+          if git diff --quiet -- '*.html'; then
+            echo "Include already on main; nothing to commit."
+            exit 0
+          fi
+          git diff --stat -- '*.html'
+          if [ "$(git diff --numstat -- '*.html' | awk '{a+=$1; d+=$2} END {print a":"d}')" != "$(git diff --name-only -- '*.html' | wc -l | tr -d ' '):0" ]; then
+            echo "::error::Expected exactly one added line per file and no deletions. Not committing."
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -u -- '*.html'
+          git commit -m "Add hub-auth include for $SLUG"
+          git push origin HEAD:main
