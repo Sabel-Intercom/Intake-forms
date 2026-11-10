@@ -81,6 +81,31 @@ test('roster: reads trackers.json from the checkout, no network', () => {
   assert.equal(all.calls.length, 0);
 });
 
+test('tasks and contracts: team only, passcode sent, never printed', () => {
+  const t = run(['tasks', '--since', '2026-11-03'], { token: PASS });
+  assert.equal(t.code, 0, t.err);
+  assert.deepEqual(JSON.parse(t.out), { ok: true, since: '2026-11-03', count: 1, tasks: [{ title: 'Done thing' }] });
+  assert.equal(JSON.parse(run(['tasks'], { token: PASS }).out).since, 'default');
+  const c = run(['contracts'], { token: PASS });
+  assert.equal(JSON.parse(c.out).projects[0].name, 'Acme');
+  assert.match(c.calls[0].url, /\/api\/notion\?kind=projects$/);
+  for (const r of [t, c]) { assert.equal(r.calls[0].team, PASS); assert.ok(!(r.out + r.err).includes(PASS)); }
+
+  const none = run(['contracts']);
+  assert.notEqual(none.code, 0);
+  assert.match(none.err, /no team passcode is stored/);
+  assert.equal(none.out, '');
+  const wrong = run(['tasks'], { token: 'old-passcode' });
+  assert.notEqual(wrong.code, 0);
+  assert.match(wrong.err, /was refused/);
+
+  for (const bad of [['tasks', '--since'], ['tasks', '--since', 'not-a-date'], ['tasks', 'x'], ['contracts', 'x']]) {
+    const r = run(bad, { token: PASS });
+    assert.notEqual(r.code, 0, bad.join(' '));
+    assert.equal(r.calls.length, 0);
+  }
+});
+
 test('unknown command or argument prints usage', () => {
   assert.notEqual(run([]).code, 0);
   assert.notEqual(run(['roster', '--activ']).code, 0);

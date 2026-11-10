@@ -31,6 +31,12 @@ globalThis.fetch = async (url, init = {}) => {
     if (locked.has(key) && !isTeam) return reply(401, { ok: false, locked: true, error: 'This hub is locked. Open it from its live link.' });
     return reply(200, { ok: true, data: { savedFor: key }, value: JSON.stringify({ savedFor: key }) });
   }
+  if (url.includes('/api/notion')) {
+    if (!isTeam) return reply(401, { ok: false, error: 'Team passcode required' });
+    const q = new URL(url).searchParams;
+    if (q.get('kind') === 'projects') return reply(200, { ok: true, count: 1, projects: [{ name: 'Acme', hours: 40 }] });
+    return reply(200, { ok: true, since: q.get('since') || 'default', count: 1, tasks: [{ title: 'Done thing' }] });
+  }
   if (url.includes('/api/tracker-lock') && !isTeam) return reply(401, { ok: false, error: 'Team passcode required' });
   if (url.includes('/api/tracker-lock')) {
     const key = new URL(url).searchParams.get('key') || (body && body.key);

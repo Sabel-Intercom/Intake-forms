@@ -4,6 +4,8 @@
 //
 //   node scripts/tracker.mjs roster [--active]      the client list (trackers.json in this checkout)
 //   node scripts/tracker.mjs get <key> [<key> ...]  saved state for each key, as JSON
+//   node scripts/tracker.mjs tasks [--since <date>] tasks completed in Notion (default: last 7 days)
+//   node scripts/tracker.mjs contracts              contract / SOW detail per client, from Notion
 //   node scripts/tracker.mjs check                  is the team passcode on this Mac, and accepted?
 //
 // The team passcode is read from, in order:
@@ -84,6 +86,20 @@ async function check() {
   console.log(`Team passcode found (${source}) and accepted. ${(r.locks || []).length} tracker key(s) are locked.`);
 }
 
+// /api/notion is team only: completed tasks, or contract detail per client.
+async function notion(query, what) {
+  const { token } = teamToken();
+  const r = await call(`/api/notion${query}`, token);
+  if (r.status === 401) {
+    die(token
+      ? `${what}: the team passcode on this Mac was refused. Store the current one:\n  ${ADD_HINT}`
+      : `${what}: team only, and no team passcode is stored on this Mac. Store it once:\n  ${ADD_HINT}`);
+  }
+  if (r.status !== 200 || !r.ok) die(`${what}: ${r.status} ${r.error || ''}`);
+  const { status, ...body } = r;
+  console.log(JSON.stringify(body, null, 2));
+}
+
 const [cmd, ...rest] = process.argv.slice(2);
 if (cmd === 'roster') {
   const unknown = rest.filter(a => a !== '--active');
@@ -94,6 +110,16 @@ if (cmd === 'roster') {
   await get(rest);
 } else if (cmd === 'check') {
   await check();
+} else if (cmd === 'tasks') {
+  let since = '';
+  if (rest.length) {
+    if (rest[0] !== '--since' || rest.length !== 2 || Number.isNaN(Date.parse(rest[1]))) die('usage: tracker.mjs tasks [--since 2026-11-03]');
+    since = `?since=${encodeURIComponent(rest[1])}`;
+  }
+  await notion(since, 'tasks');
+} else if (cmd === 'contracts') {
+  if (rest.length) die('usage: tracker.mjs contracts');
+  await notion('?kind=projects', 'contracts');
 } else {
-  die('usage: tracker.mjs roster [--active] | get <key> [<key> ...] | check');
+  die('usage: tracker.mjs roster [--active] | get <key> [<key> ...] | tasks [--since <date>] | contracts | check');
 }
