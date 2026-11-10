@@ -23,4 +23,4 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - run: node --test tests/hub-auth.test.mjs tests/access-functions.test.mjs tests/scripts.test.mjs
+      - run: node --test tests/tracker-cli.test.mjs tests/hub-auth.test.mjs tests/access-functions.test.mjs tests/scripts.test.mjs

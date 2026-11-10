@@ -23,6 +23,15 @@ globalThis.fetch = async (url, init = {}) => {
   if (url.startsWith('https://raw.githubusercontent.com/')) {
     return new Response(`export const ALLOWED_KEYS = [\n${allowed.map(k => `  '${k}', // note 'not-a-key'`).join('\n')}\n];`, { status: 200 });
   }
+  // state.teamToken set: the team passcode is enforced, as on the real service.
+  const isTeam = !state.teamToken || headers['x-team-token'] === state.teamToken;
+  if (/\/api\/tracker\?key=/.test(url)) {
+    const key = new URL(url).searchParams.get('key');
+    if (!allowed.includes(key)) return reply(404, { ok: false, error: `Unknown tracker key: ${key}` });
+    if (locked.has(key) && !isTeam) return reply(401, { ok: false, locked: true, error: 'This hub is locked. Open it from its live link.' });
+    return reply(200, { ok: true, data: { savedFor: key }, value: JSON.stringify({ savedFor: key }) });
+  }
+  if (url.includes('/api/tracker-lock') && !isTeam) return reply(401, { ok: false, error: 'Team passcode required' });
   if (url.includes('/api/tracker-lock')) {
     const key = new URL(url).searchParams.get('key') || (body && body.key);
     if (method === 'GET' && !key) return reply(200, { ok: true, locks: [...locked].map(k => ({ key: k, locked: true })) });
