@@ -486,11 +486,13 @@ html.light .sq{box-shadow:none}
 .wcapset input{width:54px;padding:4px 7px;border:1px solid var(--line2);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;font-weight:700;text-align:right;outline:none}
 .wsplit{display:grid;grid-template-columns:minmax(250px,300px) minmax(0,1fr);gap:14px;align-items:start;padding:0 22px 22px}
 .wsplit .tag{border-radius:6px;padding:0 7px;font-size:11.5px;font-weight:600;vertical-align:1px;white-space:nowrap;display:inline-block}
-/* left rail: overdue */
-.wrail{min-width:0;position:sticky;top:12px;max-height:calc(100vh - 130px);display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(225,6,0,.45);border-radius:14px;background:var(--surface)}
-.wrh{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(225,6,0,.08)}
-.wrh i{width:8px;height:8px;border-radius:50%;background:var(--red2)}
-.wrh b{font-family:Archivo,sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--red2)}
+/* left rail: clients (every open task, folded per client) */
+.wrail{min-width:0;position:sticky;top:12px;max-height:calc(100vh - 130px);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line2);border-radius:14px;background:var(--surface)}
+.wrh{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface2)}
+.wrh i{width:8px;height:8px;border-radius:50%;background:var(--mute)}
+.wrh b{font-family:Archivo,sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--soft)}
+.wrh small em{font-style:normal;color:var(--red2);font-weight:700}
+.odbox.hot .odh{box-shadow:inset 3px 0 0 var(--red2)}
 .wrh small{margin-left:auto;font-size:12.5px;color:var(--soft)}
 .wrlist{overflow:auto;flex:1;min-height:0}
 .wrg{border-top:1px solid var(--line)}
@@ -508,7 +510,8 @@ html.light .sq{box-shadow:none}
 .wrail .wrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:3px 9px;align-items:baseline;padding:8px 14px 8px 30px;border-top:1px dashed var(--line);cursor:grab}
 .wrail .wrow:hover,.wrail .wrow.sel{background:var(--surface2)}
 .wrow.dragging{opacity:.4}
-.wrail .wdue{font-size:12px;font-weight:700;color:var(--red2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.wrail .wdue{font-size:12px;font-weight:600;color:var(--mute);white-space:nowrap;font-variant-numeric:tabular-nums}
+.wrail .wdue.slip{color:var(--red2);font-weight:700}
 .wrt{min-width:0;text-align:left;font-size:13.5px;font-weight:600;color:var(--text);line-height:1.3}
 .wrt:hover{text-decoration:underline}
 .wrail .west{font-family:Archivo,sans-serif;font-weight:700;font-size:12px;color:var(--text);white-space:nowrap;border:none;padding:0}
@@ -569,6 +572,7 @@ html.light .sq{box-shadow:none}
 .wt{font-size:14px;font-weight:600;color:var(--text);line-height:1.3}
 .w2{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:11.5px;color:var(--mute)}
 .wmv{font-style:italic}
+.wmv.slip{font-style:normal;font-weight:700;color:var(--red2)}
 .w3{display:flex;flex-wrap:wrap;gap:4px}
 .wcard .w3{padding-top:3px;border-top:1px dashed var(--line);margin-top:1px}
 .wcard.sm{gap:3px;border-radius:9px;padding:7px 9px}
@@ -1241,7 +1245,7 @@ function audHTML(t){
    replaces the tracker date in this hub only: the client tracker keeps its plan.
    Only function declarations and lets here, because this file runs before views.js. */
 const DEFAULT_CAP=30;   // hours a week for task work until the person sets their own
-let WDRAG=null,WIDS=null,WNAME='';   // WIDS: a whole client's overdue tasks, dragged by the box header
+let WDRAG=null,WIDS=null,WNAME='';   // WIDS: a client's slipped tasks, dragged by the rail box header
 
 /* Monday of the week on screen as "this week". At the weekend that is the coming one. */
 function wkBase(){const t=today(),dw=t.getDay(),mon=addD(t,-((dw+6)%7));return dw===0||dw===6?addD(mon,7):mon;}
@@ -1285,25 +1289,40 @@ function notNeeded(id){
   S.open=null;save();commit();toast('Sent to '+COORD+' to confirm');
 }
 
-/* One-click clean-up under every overdue row (List and Home). */
+/* The date slipped and the work cannot happen yet: park it with the coordinator to move the
+   tracker date (or hand it back with a day). The client tracker is only ever changed by her. */
+function askShift(id){
+  const t=findTask(id);if(!t||t.status==='Parked')return;
+  const q='Move the date? '+author()+' cannot get to this one yet. Please move the tracker date'+(t.trkEnd?' (currently '+fD(t.trkEnd)+')':'')+', or hand it back with a day to do it.';
+  const prev=backTo(t.status),o=setStatus(id,'Parked');
+  stopAll(o);
+  o.prevStatus=prev;o.parked={by:author(),question:q,askedAt:Date.now(),kind:'shift'};o.flagged=true;
+  addNote(o,author(),'@'+COORD+' '+q,true);
+  S.open=null;save();commit();toast('Sent to '+COORD+' to move the tracker date');
+}
+/* The slipped-task buttons: under a row (List and Home, sm=false) or on a rail row (sm=true). */
+function slipBtns(t,sm){
+  const c=sm?'wb':'pb sm';
+  return (t.stages?'':'<button type="button" class="'+c+(sm?' ok':' green')+'" data-act="od-done" title="It is done">Done'+(sm?'':' already')+'</button>')+
+    '<button type="button" class="'+c+'" data-act="od-tmrw" title="Do it tomorrow">'+(sm?'Tmrw':'Tomorrow')+'</button>'+
+    '<button type="button" class="'+c+(sm?' am':' amber')+'" data-act="od-next" title="Move to Monday next week">Next '+(sm?'wk':'week')+'</button>'+
+    '<button type="button" class="'+c+(sm?' am':' amber')+'" data-act="od-ask" title="Sends it to '+COORD+' to move the tracker date">Move the date</button>'+
+    '<button type="button" class="'+c+'" data-act="od-nn" title="Sends it to '+COORD+' to confirm and close">Not needed</button>';
+}
+/* One-click clean-up under every slipped row (List and Home). */
 function odqHTML(t){
   if(!isLate(t)||onDesk()||t.status==='Parked'||!isTeam(t.owner))return '';
-  const was=t.plan&&t.trkEnd?' (moved here from '+fD(t.trkEnd)+')':'';
-  return '<div class="odq"><span>Clear it'+was+':</span>'+
-    (t.stages?'':'<button type="button" class="pb sm green" data-act="od-done">Done already</button>')+
-    '<button type="button" class="pb sm" data-act="od-today">Today</button>'+
-    '<button type="button" class="pb sm" data-act="od-tmrw">Tomorrow</button>'+
-    '<button type="button" class="pb sm amber" data-act="od-next">Next week</button>'+
-    '<button type="button" class="pb sm" data-act="od-nn" title="Sends it to '+COORD+' to confirm and close">Not needed</button></div>';
+  const trk=t.trkEnd&&isoOf(t.trkEnd)!==isoOf(t.slipFrom)?' · tracker date '+fD(t.trkEnd):'';
+  return '<div class="odq"><span>Slipped from '+fD(t.slipFrom)+trk+':</span>'+slipBtns(t,false)+'</div>';
 }
-/* Home: while anything is overdue, say so first and offer the way out. */
+/* Home: while anything has slipped, say so first and offer the way out. */
 function decksHTML(mine){
   const late=mine.filter(t=>isLate(t)&&t.status!=='Parked'&&isTeam(t.owner));
   if(!late.length)return '';
   const hrs=late.reduce((a,t)=>a+(+t.est||0),0),mon=today().getDay()===1;
-  return '<div class="decks"><div><b>'+(mon?'Monday clear-out: ':'')+late.length+' overdue task'+(late.length===1?'':'s')+(hrs?' · '+fTot(hrs):'')+'</b>'+
-    '<span>Give each one a new day, mark it done, or send it to '+COORD+' as not needed. Then Overdue means something again.</span></div>'+
-    '<button type="button" class="pb red" data-act="decks">Clear them in '+(S.who==='Everyone'?'Week':'My week')+'</button></div>';
+  return '<div class="decks"><div><b>'+(mon?'Monday clear-out: ':'')+late.length+' task'+(late.length===1?'':'s')+' slipped to today'+(hrs?' · '+fTot(hrs):'')+'</b>'+
+    '<span>Nothing waits in the past any more: each one has rolled forward to today. Do it, give it a day, or ask '+COORD+' to move the tracker date.</span></div>'+
+    '<button type="button" class="pb red" data-act="decks">Sort them in '+(S.who==='Everyone'?'Week':'My week')+'</button></div>';
 }
 
 /* ── List: by client (most urgent first) or by due date ─────────────────── */
@@ -1323,12 +1342,12 @@ function clientListHTML(mine){
   let h='<div class="list">';
   keys.forEach(k=>{
     const rows=g[k].slice().sort((a,b)=>((a.status==='Parked')-(b.status==='Parked'))||byDue(a,b));
-    const late=rows.filter(isLate).length,tod=rows.filter(t=>dueIn(t)===0).length;
+    const late=rows.filter(isLate).length,tod=rows.filter(dueToday).length;
     const wk=rows.filter(t=>{const n=dueIn(t);return n!==null&&n>0&&n<7;}).length;
     const hrs=rows.reduce((a,t)=>a+(+t.est||0),0),ty=typeOf(rows[0]);
     const cap=S.more['cl:'+k]?rows.length:CAP;
     h+='<div class="secc cgrp'+(late?' hot':'')+'"><div class="cgh"><span class="cgn">'+tsq(rows[0])+esc(cLabel(k))+'</span>'+(ty?'<span class="cgt">'+esc(ty)+'</span>':'')+
-      (late?'<span class="cchip red">'+late+' overdue</span>':'')+(tod?'<span class="cchip amber">'+tod+' due today</span>':'')+(wk?'<span class="cchip">'+wk+' this week</span>':'')+
+      (late?'<span class="cchip red">'+late+' slipped</span>':'')+(tod?'<span class="cchip amber">'+tod+' due today</span>':'')+(wk?'<span class="cchip">'+wk+' this week</span>':'')+
       '<small>'+rows.length+' task'+(rows.length===1?'':'s')+(hrs?' · '+fTot(hrs):'')+'</small></div>'+
       rows.slice(0,cap).map(t=>rowHTML(Object.assign({},t,{_inClient:true}))).join('')+
       (rows.length>cap?'<button type="button" class="hmore" data-act="cl-more" data-k="'+esc(k)+'">Show all '+rows.length+'</button>':'')+'</div>';
@@ -1341,7 +1360,6 @@ function clientListHTML(mine){
 function wkLane(t,base){
   const n=dueIn(t);
   if(n===null)return ['later',-1];
-  if(n<0)return ['late',-1];
   const d=Math.max(0,Math.round((t.end.getTime()-base.getTime())/864e5));
   return d<7?['this',Math.min(d,4)]:d<14?['next',Math.min(d-7,4)]:['later',-1];
 }
@@ -1361,42 +1379,52 @@ function wcardHTML(t,lane){
       (t.stages?'':'<button type="button" class="wb ok" data-act="wk-done" title="Mark it done">&#10003;</button>');
   }
   if(planned)btn+='<button type="button" class="wb" data-act="wk-reset" title="Back to the tracker date'+(t.trkEnd?' ('+fD(t.trkEnd)+')':'')+'" aria-label="Back to the tracker date">&#8634;</button>';
-  const st=stTag(t),moved=planned?(t.trkEnd?'moved from '+fD(t.trkEnd):'date set here'):'';
+  if(isLate(t))btn+='<button type="button" class="wb am" data-act="od-ask" title="Sends it to '+COORD+' to move the tracker date">Move date</button>';
+  const st=stTag(t),moved=isLate(t)?'<span class="wmv slip">slipped from '+fD(t.slipFrom)+'</span>':planned?'<span class="wmv">'+(t.trkEnd?'moved from '+fD(t.trkEnd):'date set here')+'</span>':'';
   return '<div class="wcard'+(small?' sm':'')+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" data-act="open" title="Drag to another day, or click to open">'+
     (t._inClient
       ? '<div class="w1 wtop"><div class="wt">'+esc(t.title)+'</div>'+(showOwner?av(t.owner,true):'')+'<span class="west'+(t.est?'':' none')+'">'+estTxt(t)+'</span></div>'
       : '<div class="w1">'+tsq(t)+'<b class="wcl">'+esc(clientOf(t))+'</b>'+(showOwner?av(t.owner,true):'')+'<span class="west'+(t.est?'':' none')+'">'+estTxt(t)+'</span></div>'+
         '<div class="wt">'+esc(t.title)+'</div>')+
-    (st||moved?'<div class="w2">'+st+(moved?'<span class="wmv">'+moved+'</span>':'')+'</div>':'')+
+    (st||moved?'<div class="w2">'+st+moved+'</div>':'')+
     '<div class="w3">'+btn+'</div></div>';
 }
 /* The project type as a small coloured square (none when the type is unknown). */
 function tsq(t){const c=tyc(t);return c?'<i class="tsq'+c+'" title="'+esc(typeOf(t))+'" aria-hidden="true"></i>':'';}
-/* An overdue task in the rail: due, title (status inline), hours; buttons on hover. Rows drag onto a day. */
+/* A task in the rail: its day (red when slipped), title (status inline), hours; buttons on hover.
+   Rows drag onto a day. */
 function wrowHTML(t){
-  const showOwner=S.who==='Everyone';
-  return '<div class="wrow'+(S.open===t.id?' sel':'')+'" draggable="true" data-id="'+esc(t.id)+'" title="Drag onto a day, or hover for buttons">'+
-    '<span class="wdue">'+fD(t.end)+'</span>'+
+  const showOwner=S.who==='Everyone',slip=isLate(t);
+  const when=slip?'from '+fD(t.slipFrom):t.end?(dueIn(t)===0?'Today':DOW[t.end.getDay()]+' '+fD(t.end)):'No date';
+  return '<div class="wrow'+(S.open===t.id?' sel':'')+(slip?' slip':'')+'" draggable="true" data-id="'+esc(t.id)+'" title="Drag onto a day, or hover for buttons">'+
+    '<span class="wdue'+(slip?' slip':'')+'" title="'+(slip?'Slipped: rolled forward from '+fD(t.slipFrom):'Planned day')+'">'+when+'</span>'+
     '<button type="button" class="wrt" data-act="open">'+esc(t.title)+stTag(t)+(showOwner?' '+av(t.owner,true):'')+'</button>'+
     '<span class="west'+(t.est?'':' none')+'">'+estTxt(t)+'</span>'+
-    '<span class="w3">'+(t.stages?'':'<button type="button" class="wb ok" data-act="wk-done" title="It is done">Done</button>')+
-      '<button type="button" class="wb" data-act="od-today" title="Do it today">Today</button>'+
+    '<span class="w3">'+(slip?slipBtns(t,true):
+      (t.stages?'':'<button type="button" class="wb ok" data-act="wk-done" title="It is done">Done</button>')+
+      (dueIn(t)!==0?'<button type="button" class="wb" data-act="od-today" title="Do it today">Today</button>':'')+
       '<button type="button" class="wb" data-act="od-tmrw" title="Do it tomorrow">Tmrw</button>'+
       '<button type="button" class="wb am" data-act="od-next" title="Move to Monday next week">Next wk</button>'+
-      '<button type="button" class="wb" data-act="od-nn" title="Send to '+COORD+' to confirm and close">Not needed</button></span></div>';
+      '<button type="button" class="wb" data-act="od-nn" title="Send to '+COORD+' to confirm and close">Not needed</button>')+'</span></div>';
 }
-/* Overdue rail: one group per client, oldest overdue client first, tasks oldest first. A group header
-   folds the group on click and, dragged onto a day, moves the client's whole overdue list. */
-function lateBoxesHTML(late){
-  if(!late.length)return '<div class="wrnone">Nothing overdue</div>';
-  const g={};late.forEach(t=>{(g[ckey(t)]=g[ckey(t)]||[]).push(t);});
-  const keys=Object.keys(g).sort((a,b)=>(g[a][0].end-g[b][0].end)||(g[b].length-g[a].length)||cLabel(a).localeCompare(cLabel(b)));
+/* Inside a client: slipped tasks first (the one that slipped from furthest back at the top), then by day. */
+const railOrder=(a,b)=>{const la=isLate(a),lb=isLate(b);if(la!==lb)return la?-1:1;if(la)return a.slipFrom-b.slipFrom;return byDue(a,b);};
+/* Client rail (Nikki, 10 Nov 2026): every open task, one folded box per client, the client going live
+   soonest at the top. Click a header to open it. Dragging a header onto a day moves only that client's
+   slipped tasks: a whole plan should never land on one day by accident. */
+function railBoxesHTML(open){
+  if(!open.length)return '<div class="wrnone">Nothing open</div>';
+  const g={};open.forEach(t=>{(g[ckey(t)]=g[ckey(t)]||[]).push(t);});
+  const gl=k=>{const c=CLIENTS[k];return c&&c.goLive?c.goLive.getTime():9e15;};
+  const keys=Object.keys(g).sort((a,b)=>((a==='none')-(b==='none'))||(gl(a)-gl(b))||(g[b].filter(isLate).length-g[a].filter(isLate).length)||cLabel(a).localeCompare(cLabel(b)));
   return keys.map(k=>{
-    const rows=g[k],open=!S.more['odfold:'+k],days=-dueIn(rows[0]);
-    return '<div class="wrg odbox"><button type="button" class="odh'+(open?' open':'')+'" data-act="od-fold" data-k="'+esc(k)+'" draggable="true" data-client="'+esc(k)+'" data-ids="'+esc(JSON.stringify(rows.map(t=>t.id)))+'" aria-expanded="'+open+'" title="Click to '+(open?'fold':'open')+'. Drag onto a day to move all '+rows.length+' of '+esc(cLabel(k))+'’s overdue tasks there.">'+
-      tsq(rows[0])+'<span class="odn">'+esc(cLabel(k))+'</span><span class="cchip red">'+rows.length+'</span>'+
-      '<span class="odl">'+days+'d late</span><span class="odc" aria-hidden="true">&#9654;</span></button>'+
-      (open?rows.map(wrowHTML).join(''):'')+'</div>';
+    const rows=g[k].slice().sort(railOrder),slip=rows.filter(isLate),isOpen=!!S.more['rfold:'+k],c=CLIENTS[k];
+    const ids=slip.map(t=>t.id),nm=esc(cLabel(k));
+    const drag=ids.length?' draggable="true" data-client="'+esc(k)+'" data-ids="'+esc(JSON.stringify(ids))+'"':'';
+    return '<div class="wrg odbox'+(slip.length?' hot':'')+'"><button type="button" class="odh'+(isOpen?' open':'')+'" data-act="od-fold" data-k="'+esc(k)+'"'+drag+' aria-expanded="'+isOpen+'" title="Click to '+(isOpen?'fold':'open')+'.'+(ids.length?' Drag onto a day to move '+nm+'’s '+ids.length+' slipped task'+(ids.length===1?'':'s')+' there.':'')+'">'+
+      tsq(rows[0])+'<span class="odn">'+nm+'</span>'+(slip.length?'<span class="cchip red">'+slip.length+' slipped</span>':'')+'<span class="cchip">'+rows.length+'</span>'+
+      '<span class="odl">'+(c&&c.goLive?'go-live '+fD(c.goLive):'')+'</span><span class="odc" aria-hidden="true">&#9654;</span></button>'+
+      (isOpen?rows.map(wrowHTML).join(''):'')+'</div>';
   }).join('');
 }
 /* Inside a This week day, one box per client (A to Z), so a client's tasks sit together. */
@@ -1424,25 +1452,25 @@ function weekHTML(mine){
   const open=mine.filter(t=>!isDone(t)&&t.status!=='Parked'&&isTeam(t.owner));
   const parked=mine.filter(t=>t.status==='Parked').length;
   const base=wkBase(),todayI=Math.round((today().getTime()-base.getTime())/864e5);
-  const L={late:[],later:[],this:[[],[],[],[],[]],next:[[],[],[],[],[]]};
+  const L={later:[],this:[[],[],[],[],[]],next:[[],[],[],[],[]]},slipped=open.filter(isLate);
   open.forEach(t=>{const [l,c]=wkLane(t,base);if(c<0)L[l].push(t);else L[l][c].push(t);});
-  L.late.sort(byDue);L.later.sort(byDue);
+  L.later.sort(byDue);
   [L.this,L.next].forEach(w=>w.forEach(c=>c.sort((a,b)=>((b.status==='In Progress')-(a.status==='In Progress'))||byDue(a,b))));
   const cap=capOf(S.who),share=cap/5,sum=l=>l.reduce((a,t)=>a+(+t.est||0),0),flat=w=>[].concat.apply([],w);
   const me=isTeam(S.who);
-  /* Past days are gone from view: their tasks are overdue and sit in the rail. */
+  /* Past days are gone from view: anything left on them has rolled forward to today. */
   const from=Math.max(0,todayI),thisIdx=[0,1,2,3,4].filter(i=>i>=from),thisH=sum(flat(L.this)),left=share*thisIdx.length;
   const todayH=todayI>=0&&todayI<5?sum(L.this[todayI]):0;
   const past=todayI>0?DOW[base.getDay()]+(todayI>1?'–'+DOW[addD(base,todayI-1).getDay()]:'')+' passed':'';
   const range=(a,b)=>fD(a)+(isoOf(a)!==isoOf(b)?' – '+fD(b):'');
   const hint='Hover a task for its buttons · drag it onto a day';
   let h='<div class="whead"><div class="wht"><h2>'+(me?'My week':S.who==='Everyone'?'Team week':esc(S.who)+'’s week')+'</h2><span class="whr">'+range(base,addD(base,4))+'</span></div>'+
-    '<span class="whs">'+(L.late.length?L.late.length+' overdue · ':'')+fTot(todayH)+' planned today</span>'+
+    '<span class="whs">'+(slipped.length?slipped.length+' slipped to today · ':'')+fTot(todayH)+' planned today</span>'+
     '<div class="whx">'+cmenuHTML(mine)+wcapHTML(thisH,left,' left this week','var(--red)')+
       (me?'<label class="wcapset">Hours/wk <input type="number" min="1" max="80" step="0.5" data-sel="cap" value="'+cap+'" aria-label="Hours for task work a week"></label>'
         :'<span class="wcapset">Team <b>'+fTot(cap)+'</b>/wk</span>')+'</div></div>';
-  h+='<div class="wsplit"><aside class="wrail" aria-label="Overdue"><div class="wrh"><i></i><b>Overdue</b><small>'+L.late.length+' task'+(L.late.length===1?'':'s')+(sum(L.late)?' · '+fTot(sum(L.late)):'')+'</small></div>'+
-    '<div class="wrlist">'+lateBoxesHTML(L.late)+'</div><div class="wrf" title="'+hint+'">Oldest client first. Done, a new day, or not needed.</div></aside>';
+  h+='<div class="wsplit"><aside class="wrail" aria-label="Clients"><div class="wrh"><i></i><b>Clients</b><small>'+open.length+' open'+(slipped.length?' · <em>'+slipped.length+' slipped</em>':'')+'</small></div>'+
+    '<div class="wrlist">'+railBoxesHTML(open)+'</div><div class="wrf" title="'+hint+'">Soonest go-live first; slipped tasks at the top of each client. Drag any task onto a day.</div></aside>';
   h+='<div class="wcals">';
   h+='<section class="wsec" title="'+hint+'"><div class="wsh"><i style="background:var(--red2)"></i><b>This week</b><span>'+range(addD(base,from),addD(base,4))+'</span>'+(past?'<span class="wpast">'+past+'</span>':'')+wcapHTML(thisH,left,' left','var(--text)')+'</div>'+
     '<div class="wdays this">'+thisIdx.map(i=>wdayHTML(addD(base,i),'this',L.this[i],i===todayI,share)).join('')+'</div></section>';
@@ -1595,6 +1623,12 @@ function project(){
         }
       }
     }
+    /* Roll-over (Nikki, 10 Nov 2026): an open task is never left in the past. Whatever its
+       date was (tracker, or a day set here), once that day has gone it rolls to the next
+       working day and is marked slipped, with the date it slipped from. Nothing is written:
+       the roll is worked out on every load, so the tracker date stays what the client sees.
+       The way out is to do it, give it a day, or ask the coordinator to move the tracker date. */
+    if(x.status!=='Complete'&&x.end&&x.end<today()){x.slipFrom=x.end;x.end=workday(today());x.late=x.end;}
     return x;
   });
   TASKS=all.filter(t=>CLIENTS[t.key]);
@@ -1633,7 +1667,9 @@ function narrowed(mine){
   });
 }
 const dueIn=t=>t.end?Math.round((t.end.getTime()-today().getTime())/864e5):null;
-const isLate=t=>!isDone(t)&&dueIn(t)!==null&&dueIn(t)<0;
+/* "Late" now means slipped: rolled forward from an earlier date and still open. */
+const isLate=t=>!isDone(t)&&!!t.slipFrom;
+const dueToday=t=>!isDone(t)&&dueIn(t)===0&&!isLate(t);
 /* Client type colour: one class per type, read from the master record. */
 const TYPES=[['Build','build'],['Migration','mig'],['Build + Migration','both'],['Audit','audit'],['Consultation only','consult']];
 function typeOf(t){
@@ -1697,7 +1733,7 @@ function dueLabel(t,short){
   if(isDone(t))return ['Done','done'];
   const n=dueIn(t);
   if(n===null)return [short?'':'No date',''];
-  if(n<0)return [short?'Overdue':'Overdue · '+fD(t.end),'late'];
+  if(isLate(t))return [short?'Slipped':'Slipped · from '+fD(t.slipFrom),'late'];
   if(n===0)return ['Today','today'];
   if(n===1)return [short?'Tmrw':'Tomorrow',''];
   if(n<7)return [short?DOW[t.end.getDay()]:DOW[t.end.getDay()]+' '+fD(t.end),''];
@@ -1894,7 +1930,7 @@ const SLACK_ID={Chris:'U06D5GK7Z7C',Greg:'U0AJ75FDZ0B',Richard:'U01SWH4SN3U'};
 const taskLink=t=>BASE+'SabelTaskHub.html#'+String(t.owner).toLowerCase()+'?task='+encodeURIComponent(t.id);
 function pingText(t){
   const d=t.late||t.end,n=dueIn(t);
-  const due=d?' Due '+fD(d)+(n!==null&&n<0?' (overdue)':n===0?' (today)':'')+'.':'';
+  const due=d?' Due '+fD(d)+(isLate(t)?' (slipped from '+fD(t.slipFrom)+')':n===0?' (today)':'')+'.':'';
   const c=CLIENTS[t.key],trk=c&&c.url?'\nTracker: '+c.url:'';
   return 'Hi '+t.owner+', can you pick this up?\n*'+clientOf(t)+'*: '+t.title+(t.pillar?' ('+t.pillar+')':'')+'.'+due+'\nTask: '+taskLink(t)+trk;
 }
@@ -2197,8 +2233,8 @@ function titleHTML(mine){
     const hrs=open.reduce((s,t)=>s+(+t.est||0),0);
     const pill=(f,n,l,hot)=>'<button type="button" class="stat'+(hot?' hot':'')+(S.mode!=='home'&&S.mode!=='week'&&S.flt===f?' on':'')+'" data-act="flt" data-f="'+f+'" aria-pressed="'+(S.flt===f)+'"><b>'+n+'</b>'+l+'</button>';
     stats=cmenuHTML(mine)+
-      pill('late',late,'overdue',late>0)+
-      pill('today',open.filter(t=>dueIn(t)===0).length,'due today')+
+      pill('late',late,'slipped',late>0)+
+      pill('today',open.filter(dueToday).length,'due today')+
       pill('',fTot(hrs),'open')+
       pill('coord',open.filter(t=>t.status==='Parked').length,'with '+COORD);
   }
@@ -2212,7 +2248,7 @@ function bannerHTML(){
 
 /* ── view 1: list ───────────────────────────────────────────────────────── */
 const SECS=[
-  ['late','Overdue','Past the tracker date. Clear or park these first.','var(--red2)','var(--red2)','rgba(225,6,0,.45)'],
+  ['late','Slipped','Rolled forward to today from an earlier date. Do it, give it a day, or ask '+COORD+' to move the tracker date.','var(--red2)','var(--red2)','rgba(225,6,0,.45)'],
   ['today','Today','Due today','var(--amber)','var(--amber)',''],
   ['week','This week','Due in the next 7 days','var(--blue)','var(--body)',''],
   ['later','Later','Beyond this week','var(--faint)','var(--mute)',''],
@@ -2222,8 +2258,9 @@ const SECS=[
 function secOf(t){
   if(t.status==='Parked')return 'parked';
   if(isDone(t))return doneToday(t)?'done':'';
+  if(isLate(t))return 'late';
   const n=dueIn(t);
-  return n===null?'later':n<0?'late':n===0?'today':n<7?'week':'later';
+  return n===null?'later':n===0?'today':n<7?'week':'later';
 }
 function rowHTML(t){
   const open=S.open===t.id,showOwner=S.who==='Everyone'||onDesk();
@@ -2397,8 +2434,8 @@ function homeHTML(mine){
   if(back.length)h+=homeSec('back',COORD+' replied','Answered and handed back. Over to '+whoTxt+'.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',back);
   h+=prog.length?homeSec('prog','Started, not finished','In progress now. Finish or pause these before picking up more.','var(--blue)','var(--blue)','rgba(96,165,250,.4)',prog)
     :'<div class="blank sm"><b>Nothing started.</b>Pick something from Urgent below, or open the List.</div>';
-  h+=urgent.length?homeSec('urgent','Urgent','Overdue or due today, and not started.','var(--red2)','var(--red2)','rgba(225,6,0,.45)',urgent)
-    :'<div class="blank sm"><b>Nothing urgent.</b>Nothing overdue or due today that is not already under way.</div>';
+  h+=urgent.length?homeSec('urgent','Urgent','Slipped or due today, and not started.','var(--red2)','var(--red2)','rgba(225,6,0,.45)',urgent)
+    :'<div class="blank sm"><b>Nothing urgent.</b>Nothing slipped or due today that is not already under way.</div>';
   if(parked.length)h+=homeSec('parked','Parked with '+COORD,'Waiting on an answer.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',parked);
   const rest=open.length-back.length-prog.length-urgent.length-parked.length+(canF?0:0);
   return h+'<div class="hfoot"><span>'+(rest>0?rest+' more open task'+(rest===1?'':'s')+' not due yet.':'That is everything open.')+'</span><button type="button" class="lk" data-act="mode" data-m="list">Open the full list</button></div></div>';
@@ -2475,7 +2512,7 @@ function coordHomeHTML(all){
     let tm=0;all.forEach(t=>{t.time.forEach(e=>{if(e.by===p&&e.end>=from)tm+=(+e.mins||0);});if(t.run[p]&&t.run[p].start)tm+=elapsed(t.run[p].start);});
     const on=all.find(t=>t.run[p]&&t.run[p].start);
     return '<button type="button" class="tcard" data-act="who" data-who="'+p+'"><span class="tch">'+av(p)+'<b>'+p+'</b></span>'+
-      '<span class="tcs"><span><b>'+m.filter(t=>t.status==='In Progress').length+'</b>in progress</span><span class="'+(late?'hot':'')+'"><b>'+late+'</b>overdue</span><span><b>'+m.filter(t=>dueIn(t)===0).length+'</b>due today</span><span><b>'+m.filter(t=>t.status==='Parked').length+'</b>with you</span></span>'+
+      '<span class="tcs"><span><b>'+m.filter(t=>t.status==='In Progress').length+'</b>in progress</span><span class="'+(late?'hot':'')+'"><b>'+late+'</b>slipped</span><span><b>'+m.filter(dueToday).length+'</b>due today</span><span><b>'+m.filter(t=>t.status==='Parked').length+'</b>with you</span></span>'+
       (focusIds(p).length?'<span class="tcf">Focus Zone: '+focusIds(p).filter(id=>{const t=findTask(id);return t&&!isDone(t);}).length+' task'+(focusIds(p).length===1?'':'s')+'</span>':'')+
       '<span class="tcf">'+(on?'<span class="tag blue run"><i></i>'+esc(on.title.length>44?on.title.slice(0,42)+'…':on.title)+'</span>':'No timer running')+(tm?' · '+fMins(tm)+' logged today':'')+'</span></button>';
   }).join('')+'</div></div>';
@@ -2775,6 +2812,7 @@ document.addEventListener('click',e=>{
     case 'od-tmrw':planTo(id,workday(addD(today(),1)));break;
     case 'od-next':planTo(id,addD(wkBase(),7));break;
     case 'od-nn':notNeeded(id);break;
+    case 'od-ask':askShift(id);break;
     case 'wk-prev':{e.stopPropagation();const d=t&&prevWorkday(t.end);if(d)planTo(id,d);break;}
     case 'wk-next':e.stopPropagation();if(t)planTo(id,workday(addD(t.end||today(),1)));break;
     case 'wk-plus7':e.stopPropagation();if(t)planTo(id,addD(t.end&&dueIn(t)>=0?t.end:wkBase(),7));break;
@@ -2782,7 +2820,7 @@ document.addEventListener('click',e=>{
     case 'wk-reset':e.stopPropagation();planTo(id,null);break;
     case 'wk-done':e.stopPropagation();if(t)act2(id,'Complete');break;
     case 'wk-later':S.laterOpen=!S.laterOpen;save();render();break;
-    case 'od-fold':{const k='odfold:'+a.getAttribute('data-k');S.more[k]=!S.more[k];render();break;}
+    case 'od-fold':{const k='rfold:'+a.getAttribute('data-k');S.more[k]=!S.more[k];render();break;}
     case 'decks':S.mode='week';S.open=null;save();render();window.scrollTo(0,0);break;
     case 'lgroup':S.lgroup=a.getAttribute('data-g');save();render();break;
     case 'cl-more':S.more['cl:'+a.getAttribute('data-k')]=true;render();break;
