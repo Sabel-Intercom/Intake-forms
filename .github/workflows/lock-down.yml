@@ -1,0 +1,54 @@
+name: Lock down the hubs domain
+
+# Makes hubs.sabelcustomersuccess.com staff-only by default (see
+# scripts/lock-down.mjs). Run from GitHub: Actions > "Lock down the hubs
+# domain" > Run workflow. With "apply" unticked it only prints what it would
+# change. Safe to re-run: every step updates in place.
+#
+# Uses the same three repository secrets as "Onboard a client hub".
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Make the changes (unticked = dry run)"
+        type: boolean
+        default: false
+      lock_keys:
+        description: "Also lock every tracker key that is still open (read the warning in scripts/lock-down.mjs first)"
+        type: boolean
+        default: false
+      skip:
+        description: "Keys to leave open when locking, comma separated"
+        required: false
+      public_pages:
+        description: "Pages anyone may open, comma separated (blank = the default two)"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  lock-down:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Lock down
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          KICKOFF_TEAM_TOKEN: ${{ secrets.KICKOFF_TEAM_TOKEN }}
+          APPLY: ${{ inputs.apply }}
+          LOCK_KEYS: ${{ inputs.lock_keys }}
+          SKIP: ${{ inputs.skip }}
+          PUBLIC_PAGES: ${{ inputs.public_pages }}
+        run: |
+          set --
+          [ "$APPLY" = "true" ] && set -- "$@" --apply
+          [ "$LOCK_KEYS" = "true" ] && set -- "$@" --lock-keys
+          [ -n "$SKIP" ] && set -- "$@" --skip "$SKIP"
+          [ -n "$PUBLIC_PAGES" ] && set -- "$@" --public "$PUBLIC_PAGES"
+          node scripts/lock-down.mjs "$@"

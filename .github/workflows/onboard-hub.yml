@@ -22,6 +22,12 @@ on:
       email_domains:
         description: "Client email domain(s), comma separated, e.g. cookaborough.com"
         required: true
+      also:
+        description: "This client's other pages, comma separated, e.g. SabelMigrationIntake_Acme.html"
+        required: false
+      keys:
+        description: "This client's other tracker keys, comma separated, e.g. migration-intake-acme-v1"
+        required: false
       rotate:
         description: "Replace an existing client token"
         type: boolean
@@ -50,10 +56,14 @@ jobs:
           SLUG: ${{ inputs.slug }}
           HUB_FILE: ${{ inputs.hub_file }}
           DOMAINS: ${{ inputs.email_domains }}
+          ALSO: ${{ inputs.also }}
+          KEYS: ${{ inputs.keys }}
           ROTATE: ${{ inputs.rotate }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           set -- "$SLUG" "$HUB_FILE" "$DOMAINS" --no-patch
+          [ -n "$ALSO" ] && set -- "$@" --also "$ALSO"
+          [ -n "$KEYS" ] && set -- "$@" --keys "$KEYS"
           [ "$ROTATE" = "true" ] && set -- "$@" --rotate
           [ "$DRY_RUN" = "true" ] && set -- "$@" --dry-run
           node scripts/onboard-hub.mjs "$@"

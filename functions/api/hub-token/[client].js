@@ -20,82 +20,17 @@
 //   ACCESS_TEAM_DOMAINS      optional  comma list of accepted team names, default
 //                                      "sabel,delicate-sea-8e24" (<name>.cloudflareaccess.com)
 
+import { json, signedIn, audiences } from '../../_lib/access-jwt.js';
+
 const SLUG = /^[a-z0-9-]{1,40}$/;
-const TEAM = /^[a-z0-9-]{1,63}$/;
-const DEFAULT_TEAM_DOMAINS = 'sabel,delicate-sea-8e24'; // current name, original name
-const certCache = new Map(); // teamDomain -> { at, keys }
-
-function json(status, body) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
-  });
-}
-
-function b64urlToBytes(s) {
-  s = s.replace(/-/g, '+').replace(/_/g, '/');
-  while (s.length % 4) s += '=';
-  const bin = atob(s);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
-}
-
-function decodeJson(b64url) {
-  return JSON.parse(new TextDecoder().decode(b64urlToBytes(b64url)));
-}
-
-async function teamKeys(teamDomain) {
-  const now = Date.now();
-  const c = certCache.get(teamDomain);
-  if (c && now - c.at < 10 * 60 * 1000) return c.keys;
-  const r = await fetch(`https://${teamDomain}.cloudflareaccess.com/cdn-cgi/access/certs`, { cf: { cacheTtl: 600 } });
-  if (!r.ok) throw new Error(`certs fetch ${r.status}`);
-  const j = await r.json();
-  const keys = j.keys || [];
-  certCache.set(teamDomain, { at: now, keys });
-  return keys;
-}
-
-// Verify a Cloudflare Access JWT. Returns the payload, or null. The issuer
-// must be one of our team domains (a renamed team keeps answering on its
-// original name), and the signature is checked against THAT issuer's certs.
-async function verifyAccessJwt(jwt, teamDomains) {
-  const parts = String(jwt || '').split('.');
-  if (parts.length !== 3) return null;
-  let header, payload;
-  try { header = decodeJson(parts[0]); payload = decodeJson(parts[1]); } catch { return null; }
-  if (header.alg !== 'RS256' || !header.kid) return null;
-  const m = /^https:\/\/([a-z0-9-]{1,63})\.cloudflareaccess\.com$/.exec(String(payload.iss || ''));
-  if (!m || !teamDomains.includes(m[1])) return null;
-  const keys = await teamKeys(m[1]);
-  const jwk = keys.find(k => k.kid === header.kid);
-  if (!jwk) return null;
-  const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
-  const ok = await crypto.subtle.verify(
-    'RSASSA-PKCS1-v1_5', key, b64urlToBytes(parts[2]),
-    new TextEncoder().encode(parts[0] + '.' + parts[1]),
-  );
-  if (!ok) return null;
-  const now = Math.floor(Date.now() / 1000);
-  if (typeof payload.exp !== 'number' || payload.exp < now) return null;
-  if (typeof payload.nbf === 'number' && payload.nbf > now + 60) return null;
-  return payload;
-}
 
 export async function onRequestGet({ request, env, params }) {
   const client = String(params.client || '').toLowerCase();
   if (!SLUG.test(client)) return json(404, { ok: false, error: 'Unknown client' });
   const envKey = client.toUpperCase().replace(/-/g, '_');
 
-  const jwt = request.headers.get('cf-access-jwt-assertion');
-  if (!jwt) return json(401, { ok: false, error: 'Sign in required' });
-
-  const teamDomains = String(env.ACCESS_TEAM_DOMAINS || DEFAULT_TEAM_DOMAINS)
-    .split(',').map(s => s.trim()).filter(s => TEAM.test(s));
-  let claims;
-  try { claims = await verifyAccessJwt(jwt, teamDomains); } catch (e) { return json(503, { ok: false, error: 'Could not verify sign-in' }); }
-  if (!claims) return json(401, { ok: false, error: 'Sign in required' });
+  const { claims, response } = await signedIn(request, env);
+  if (response) return response;
 
   // The JWT must have been issued for THIS client's Access application. Without
   // this, a person signed in to any other Sabel hub could fetch this token if
@@ -115,7 +50,6 @@ export async function onRequestGet({ request, env, params }) {
       seenIss: claims.iss,
     });
   }
-  const auds = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-  if (!auds.includes(aud)) return json(403, { ok: false, error: 'Not signed in to this hub' });
+  if (!audiences(claims).includes(aud)) return json(403, { ok: false, error: 'Not signed in to this hub' });
   return json(200, { ok: true, token, email: claims.email || null });
 }
