@@ -119,6 +119,7 @@
   "name": "CleverCards",
   "key": "clevercards-tracker-v1",
   "file": "CleverCardsTracker.html",
+  "hub": "clevercards",
   "sowHours": 20,
   "active": true
   },
