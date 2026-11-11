@@ -68,6 +68,7 @@
     "name": "The Giving Movement",
     "key": "thegivingmovement-tracker-v1",
     "file": "TheGivingMovementTracker_v2.html",
+    "hub": "thegivingmovement",
     "sowHours": 60,
     "active": true
   },
