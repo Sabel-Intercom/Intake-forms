@@ -192,6 +192,7 @@
     "name": "Kinatico",
     "key": "kinatico-tracker-v1",
     "file": "KinaticoTracker.html",
+    "hub": "kinatico",
     "sowHours": 36,
     "active": true
   }
