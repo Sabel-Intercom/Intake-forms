@@ -176,6 +176,7 @@
     "name": "RMS Cloud",
     "key": "rms-tracker-v1",
     "file": "RMSCloudTracker.html",
+    "hub": "rms",
     "sowHours": 485,
     "active": true
   },
