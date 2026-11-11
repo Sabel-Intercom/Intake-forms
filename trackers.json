@@ -59,6 +59,7 @@
     "name": "GPS Insight",
     "key": "gps-insight-tracker-v1",
     "file": "GPSInsightTracker_v2.html",
+    "hub": "gps-insight",
     "sowHours": 50,
     "active": true
   },
