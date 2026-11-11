@@ -31,15 +31,32 @@ function getStore(){ return fetch(API+'?key='+KEY+'&_t='+Date.now(),{cache:'no-s
 function gate(msg){ document.getElementById('app').innerHTML='<div class="card gate"><h1>Sabel kick-offs</h1><div class="sub">Team only. Client kick-off forms are in each client\'s hub.</div><label>Team passcode</label><input id="pw" type="password" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')signIn()"><div class="err">'+esc(msg||'')+'</div><button class="btn p" onclick="signIn()">Open</button></div>'; var p=document.getElementById('pw'); if(p) p.focus(); }
 function signIn(){ setToken(document.getElementById('pw').value.trim()); start(); }
 function signOut(){ setToken(''); STORE=null; gate(); }
+/* Signed in through Cloudflare Access (hub-auth.js data-team): the team
+   passcode is added to every request for us, so there is nothing to type.
+   The passcode box is only the fallback for a copy opened somewhere else. */
+function signedIn(){
+  var a=window.__hubAuth;
+  if(!a||!a.team||!a.ready) return Promise.resolve(false);
+  return a.ready.then(function(){ return !!a.hasToken(); },function(){ return false; });
+}
 function start(){
-  if(!token()) return gate();
+  if(token()) return openDesk();
+  signedIn().then(function(ok){ if(ok) openDesk(); else gate(); });
+}
+function openDesk(){
   getStore().then(function(j){ STORE=(j.data&&j.data.clients)?j.data:{clients:{}}; render();
     return Promise.all([
       fetch(API+'?key=client-portal-v1').then(function(r){return r.json();}).then(function(j){ PORTAL=(j.data&&j.data.clients)||[]; }).catch(function(){}),
       fetch(BASE+'trackers.json').then(function(r){return r.json();}).then(function(j){ REG=j||[]; }).catch(function(){}),
       fetch('https://sabel-webhook.vercel.app/api/notion?kind=projects').then(function(r){return r.json();}).then(function(j){ NOTION=j.projects||[]; }).catch(function(){})
     ]).then(render);
-  }).catch(function(e){ if(e.auth){ setToken(''); gate('That passcode was not accepted.'); } else gate('Could not reach the store. Try again in a minute.'); });
+  }).catch(function(e){
+    if(!e.auth) return gate('Could not reach the store. Try again in a minute.');
+    /* A saved passcode that no longer works: drop it and try the sign-in once. */
+    var typed=token(); setToken('');
+    if(typed) return signedIn().then(function(ok){ if(ok) openDesk(); else gate('That passcode was not accepted.'); });
+    gate('Your sign-in was not accepted here. Enter the team passcode.');
+  });
 }
 function stageOf(id,r){ var n=norm(r&&r.name)||id, m=PORTAL.filter(function(p){return norm(p.name)===n||norm(p.name)===id;}); var live=m.filter(function(p){return p.stage!=='Complete';})[0]||m[0]; return live?live.stage:''; }
 function rows(){

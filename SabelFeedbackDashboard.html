@@ -267,7 +267,9 @@ document.getElementById('xlsx').onclick=()=>{
 
 async function load(){
   try{
-    const r=await fetch(API+'&token='+encodeURIComponent(TOKEN));
+    // A typed passcode goes in the X-Team-Token header, never in the address.
+    // Signed in through Cloudflare Access, hub-auth.js adds it and TOKEN is empty.
+    const r=await fetch(API, TOKEN?{headers:{'X-Team-Token':TOKEN}}:undefined);
     if(r.status===401){sessionStorage.removeItem('sfd_tok');showGate('Not quite, try again.');return;}
     const data=await r.json();
     if(data.ok===false){sessionStorage.removeItem('sfd_tok');showGate('Not quite, try again.');return;}
@@ -281,7 +283,18 @@ async function load(){
     } else showGate('Could not reach the server. Check the backend is deployed, then try again.');
   }
 }
-if(TOKEN) load();
+// Signed in through Cloudflare Access (hub-auth.js data-team): open straight
+// away, nothing to type. The passcode box is only the fallback for a copy
+// opened somewhere else.
+(async function(){
+  let signedIn=false;
+  const a=window.__hubAuth;
+  if(a&&a.team&&a.ready){
+    document.getElementById('gate').style.display='none';
+    try{ await a.ready; signedIn=!!a.hasToken(); }catch(e){}
+  }
+  if(signedIn||TOKEN) load(); else showGate();
+})();
 </script>
 </body>
 </html>
