@@ -682,6 +682,13 @@ html.light .sq{box-shadow:none}
 <script>
 /* ── config ─────────────────────────────────────────────────────────────── */
 const BASE=/^https?:$/.test(location.protocol)?location.origin+'/':'https://hubs.sabelcustomersuccess.com/';
+/* A tracker file, read through /api/hub-file/: a published hub's own address
+   belongs to that client's sign-in, which a team sign-in does not cover.
+   Falls back to the plain address (a local copy has no such path). */
+function hubFile(file){
+  var plain=function(){ return fetch(BASE+file,{cache:'no-store'}); };
+  return fetch(BASE+'api/hub-file/'+encodeURIComponent(file),{cache:'no-store'}).then(function(r){ return r.ok?r:plain(); },plain);
+}
 const API='https://sabel-webhook.vercel.app/api/tracker';
 const HOURS_KEY='sabel-hours-v1';      // Notion estimates and call actions, pushed by the menu bar plugin
 const TEAM=['Chris','Richard','Greg'];
@@ -901,7 +908,7 @@ async function loadTracker(tr){
   if(TRK[tr.key])return TRK[tr.key];
   const out={ok:false,week1:null,buildV:null,goLive:null,seed:null,weekStarts:null,pillars:{},deep:false,label:''};
   try{
-    const r=await fetch(BASE+tr.file,{cache:'no-store'});
+    const r=await hubFile(tr.file);
     if(r.ok){
       const txt=await r.text();
       const w1=txt.match(/WEEK1_START\s*=\s*['"]([\d-]{10})['"]/);
