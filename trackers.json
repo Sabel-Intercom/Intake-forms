@@ -153,6 +153,7 @@
     "name": "ELMO Software",
     "key": "elmo-tracker-v1",
     "file": "ELMOTracker.html",
+    "hub": "elmo",
     "sowHours": 240,
     "active": true
   },
