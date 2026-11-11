@@ -34,14 +34,28 @@ function page({ attrs, href = HUBS + '/SabelTaskHub', tokenReply = { ok: true, t
     get() { return this._src; }, set(v) { this._src = v; },
   });
   const window = { fetch };
+  const copied = [], listeners = {};
+  const navigator = { clipboard: { writeText(t) { copied.push(t); return Promise.resolve(); } } };
   const ctx = vm.createContext({
-    window, Headers, Request, Object, URL, URLSearchParams, String, encodeURIComponent, HTMLIFrameElement,
-    document: { currentScript: { getAttribute: (n) => (n in attrs ? attrs[n] : null), hasAttribute: (n) => n in attrs } },
+    window, Headers, Request, Object, URL, URLSearchParams, String, encodeURIComponent, HTMLIFrameElement, navigator, Promise,
+    document: {
+      currentScript: { getAttribute: (n) => (n in attrs ? attrs[n] : null), hasAttribute: (n) => n in attrs },
+      addEventListener: (type, fn, capture) => { if (capture === true) listeners[type] = fn; },
+    },
     location: { href: loc.href, origin: loc.origin, hostname: loc.hostname, pathname: loc.pathname, search: loc.search, hash: loc.hash, replace: (u) => { replaced = u; } },
   });
   vm.runInContext(SRC, ctx);
   const frame = async (src) => { const f = new HTMLIFrameElement(); f.src = src; if (window.__hubAuth) await window.__hubAuth.formsReady; await null; return f.src; };
-  return { window, calls, replaced: () => replaced, frame, tokenCall: () => calls.find(c => c.url.startsWith('/api/')) };
+  const settled = async () => { if (window.__hubAuth) await window.__hubAuth.formsReady; await null; };
+  // What ends up on the clipboard when the page copies `text`.
+  const copy = async (text) => { await settled(); await navigator.clipboard.writeText(text); return copied[copied.length - 1]; };
+  // Where a link ends up pointing when it is clicked (or middle-clicked).
+  const click = async (href, type = 'click') => {
+    await settled();
+    const a = { href }; if (listeners[type]) listeners[type]({ target: { closest: () => a } });
+    return a.href;
+  };
+  return { window, calls, replaced: () => replaced, frame, copy, click, listeners, tokenCall: () => calls.find(c => c.url.startsWith('/api/')) };
 }
 
 const TEAM_ONLY = [TRACKER, W + 'notion?kind=projects', W + 'notion', W + 'motion?since=2026-11-01', W + 'feedback?key=sabel-feedback-v1'];
@@ -202,6 +216,37 @@ test('client hub: forms shown in a frame load from the client\'s own address', a
   assert.equal(await p.frame(OLD + 'SabelMigrationIntake.html?client=rms#admin'), C + 'SabelMigrationIntake?client=rms#admin');
   assert.equal(await p.frame(HUBS + '/SabelReadinessCheck.html?client=rms'), C + 'SabelReadinessCheck?client=rms');
   assert.equal(await p.frame('SabelKickoff.html?client=rms'), C + 'SabelKickoff?client=rms');
+});
+
+test('client hub: a copied or clicked form link is the client\'s own address, never the old site', async () => {
+  const p = page({ attrs: { 'data-client': 'rms' }, href: HUBS + '/RMSCloudTracker' });
+  const C = HUBS + '/c/rms/';
+  const old = OLD + 'SabelReadinessCheck.html?client=RMS&name=RMS%20Cloud';
+  assert.equal(await p.copy(old), C + 'SabelReadinessCheck?client=RMS&name=RMS%20Cloud');
+  assert.equal(await p.click(old), C + 'SabelReadinessCheck?client=RMS&name=RMS%20Cloud');
+  assert.equal(await p.click(old, 'auxclick'), C + 'SabelReadinessCheck?client=RMS&name=RMS%20Cloud');
+  assert.equal(await p.copy(OLD + 'SabelKickoff_RMSCloud.html?client=rms&k=ea2c08a55b3877bd'), C + 'SabelKickoff_RMSCloud?client=rms&k=ea2c08a55b3877bd');
+  // anything that is not one form address is copied and followed untouched
+  for (const t of [
+    HUBS + '/RMSCloudTracker#prog/3', 'https://example.com/x', OLD + 'ELMOTracker.html',
+    'Hi Lyndon, here is the form: ' + old, 'plain words', '', 'SabelKickoff.html?client=rms',
+    'https://evil.example/Intake-forms/SabelReadinessCheck.html',
+  ]) assert.equal(await p.copy(t), t, t);
+  for (const h of [HUBS + '/RMSCloudTracker#prog/3', 'https://example.com/x', OLD + 'ELMOTracker.html', 'mailto:a@b.co'])
+    assert.equal(await p.click(h), h, h);
+});
+
+test('copied and clicked links are only changed on a client hub whose own address answers', async () => {
+  const old = OLD + 'SabelReadinessCheck.html?client=rms';
+  for (const p of [
+    page({ attrs: { 'data-team': '' } }),
+    page({ attrs: { 'data-form': '' }, href: HUBS + '/c/rms/SabelKickoff' }),
+    page({ attrs: { 'data-client': 'rms' }, href: HUBS + '/RMSCloudTracker', formsStatus: 404 }),
+    page({ attrs: { 'data-client': 'rms' }, href: OLD + 'RMSCloudTracker.html' }),
+  ]) {
+    assert.equal(await p.copy(old), old);
+    assert.equal(await p.click(old), old);
+  }
 });
 
 test('client hub: frames that are not forms are left exactly as given', async () => {

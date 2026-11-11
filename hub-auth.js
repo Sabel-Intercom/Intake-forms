@@ -141,12 +141,12 @@
   // Only once this client's own address answers for this visitor. A hub that
   // was onboarded before /c/<client>/ existed keeps its old form links until
   // onboard-hub is run for it again, instead of showing a refusal in the frame.
-  var formsReady = Promise.resolve(false);
+  var formsReady = Promise.resolve(false), formsOk = false;
   if (client && !form && typeof HTMLIFrameElement !== 'undefined') {
     var d = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
     if (d && d.set && d.configurable) {
       formsReady = origFetch('/c/' + encodeURIComponent(client) + '/hub-auth.js', { credentials: 'same-origin', cache: 'no-store', redirect: 'error' })
-        .then(function (r) { return r.status === 200; })
+        .then(function (r) { formsOk = r.status === 200; return formsOk; })
         .catch(function () { return false; });
       Object.defineProperty(HTMLIFrameElement.prototype, 'src', {
         configurable: true, enumerable: d.enumerable, get: d.get,
@@ -156,6 +156,29 @@
           formsReady.then(function (ok) { d.set.call(frame, ok ? to : given); });
         }
       });
+    }
+    // The same saved links are also copied ("Copy form link") and opened in a
+    // new tab. Hand out the client's own address there too, so nothing the hub
+    // gives a client points at the old site.
+    var clip = typeof navigator !== 'undefined' && navigator.clipboard;
+    if (clip && typeof clip.writeText === 'function') {
+      var write = clip.writeText;
+      clip.writeText = function (text) {
+        var t = String(text);
+        return write.call(clip, formsOk && /^https?:\/\/\S+$/.test(t) ? formAddress(t) : text);
+      };
+    }
+    if (typeof document !== 'undefined' && document.addEventListener) {
+      var fixLink = function (e) {
+        if (!formsOk) return;
+        var a = e.target && e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var given = a.href, to = formAddress(given);
+        if (to !== given) a.href = to;
+      };
+      // Capture phase, so the address is right before the browser follows it.
+      document.addEventListener('click', fixLink, true);
+      document.addEventListener('auxclick', fixLink, true);
     }
   }
 

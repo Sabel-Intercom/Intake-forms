@@ -681,7 +681,7 @@ html.light .sq{box-shadow:none}
 <script src="hub-auth.js" data-team></script>
 <script>
 /* ── config ─────────────────────────────────────────────────────────────── */
-const BASE='https://sabel-intercom.github.io/Intake-forms/';
+const BASE=/^https?:$/.test(location.protocol)?location.origin+'/':'https://hubs.sabelcustomersuccess.com/';
 const API='https://sabel-webhook.vercel.app/api/tracker';
 const HOURS_KEY='sabel-hours-v1';      // Notion estimates and call actions, pushed by the menu bar plugin
 const TEAM=['Chris','Richard','Greg'];

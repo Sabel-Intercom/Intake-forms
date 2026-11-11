@@ -259,7 +259,7 @@
    the whole dashboard follows.
    ────────────────────────────────────────────────────────────── */
 
-var BASE = 'https://sabel-intercom.github.io/Intake-forms/';
+var BASE = /^https?:$/.test(location.protocol) ? location.origin+'/' : 'https://hubs.sabelcustomersuccess.com/';
 var GO_LIVE_HORIZON = 30;   // "landing soon" window in days
 
 var OW = {

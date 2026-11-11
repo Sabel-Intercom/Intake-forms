@@ -160,6 +160,7 @@
     "name": "Cookaborough",
     "key": "cookaborough-tracker-v1",
     "file": "CookaboroughTracker.html",
+    "hub": "cookaborough",
     "sowHours": 40,
     "active": true
   },
