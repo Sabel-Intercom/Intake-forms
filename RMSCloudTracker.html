@@ -1943,7 +1943,7 @@ const FORMS=[{"id": "kickoff", "l": "Kick-off", "icon": "flag", "file": "SabelKi
 const KICKOFF_TASK={"t": "Agree your kick-off with us", "o": "RMS", "s": "Pending", "d": "", "week": 1, "notes": "", "link": "https://sabel-intercom.github.io/Intake-forms/SabelKickoff_RMSCloud.html?client=rms&k=ea2c08a55b3877bd&rdy=rms&name=RMS%20Cloud", "form": "kickoff", "tip": "We go through this with you on the kick-off call: what success looks like, what's in and out, the road to go-live, your team, how we stay in touch, and next steps. Each section ticks off here as we agree it.", "sub": [{"t": "Defining success", "s": "Pending"}, {"t": "What's in, what's out", "s": "Pending"}, {"t": "The road to go-live", "s": "Pending"}, {"t": "Your team", "s": "Pending"}, {"t": "Staying in sync", "s": "Pending"}, {"t": "Next steps", "s": "Pending"}]};
 function ensureKickoffTask(){const L=T.setup&&T.setup.client;if(!L)return;const i=L.findIndex(t=>t&&t.form==='kickoff');if(i<0)L.push(JSON.parse(JSON.stringify(KICKOFF_TASK)));else if(!L[i].link)L[i].link=KICKOFF_TASK.link;}
 ensureKickoffTask();
-const FORMS_BASE='https://sabel-intercom.github.io/Intake-forms/';
+const FORMS_BASE='https://hubs.sabelcustomersuccess.com/';
 const TRACKER_SLUG='rms';
 
 // ── Standard task library ─────────────────────────────────────────────────────

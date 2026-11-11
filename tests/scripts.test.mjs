@@ -318,6 +318,72 @@ test('onboard-hub: include goes immediately before the first script', () => {
   });
 });
 
+// A throwaway client list in the repo root, named to the script by TRACKERS_FILE.
+function withList(entries, fn) {
+  const name = `__test_list_${process.pid}_${Math.random().toString(36).slice(2)}.json`;
+  const p = join(ROOT, name);
+  writeFileSync(p, JSON.stringify(entries, null, 2) + '\n');
+  try { return fn({ ...CREDS, TRACKERS_FILE: name }, () => readFileSync(p, 'utf8')); } finally { rmSync(p, { force: true }); }
+}
+
+test('onboard-hub: publishing switches the hub\'s own link and names the hub in the client list, one line each', () => {
+  withHub('', (name, read) => {
+    const html = `<html><head><script>x()</script></head><body><script>\nconst PROG_URL="https://sabel-intercom.github.io/Intake-forms/${name}";  // live address\n</script></body></html>`;
+    writeFileSync(join(ROOT, name), html);
+    const entries = [{ name: 'Other', key: 'o-tracker-v1', file: 'OtherTracker.html', active: true }, { name: 'A', key: 'a-tracker-v1', file: name, sowHours: 4, active: true }];
+    withList(entries, (creds, readList) => {
+      const before = readList();
+      // dry run and --no-patch write nothing
+      for (const flag of ['--dry-run', '--no-patch']) {
+        assert.equal(run('onboard-hub.mjs', ['a', name, 'a.com', flag], { creds }).code, 0);
+        assert.equal(read(), html); assert.equal(readList(), before);
+      }
+      const r = run('onboard-hub.mjs', ['a', name, 'a.com'], { creds });
+      assert.equal(r.code, 0, r.out);
+      const base = name.replace(/\.html$/, '');
+      assert.ok(read().includes(`const PROG_URL="https://hubs.sabelcustomersuccess.com/${base}";  // live address`));
+      assert.ok(!read().includes('github.io'));
+      assert.equal(readList(), before.replace(`"file": "${name}",`, `"file": "${name}",\n    "hub": "a",`));
+      assert.deepEqual(JSON.parse(readList()).map(t => t.hub), [undefined, 'a']);
+      assert.match(r.out, new RegExp(`Remember: commit and push ${name.replace(/\./g, '\\.')}, ${creds.TRACKERS_FILE.replace(/\./g, '\\.')}`));
+      // second run changes nothing
+      const out = read(), list = readList();
+      const again = run('onboard-hub.mjs', ['a', name, 'a.com'], { creds, state: { lockedKeys: ['a-tracker-v1'], pagesVars: ['HUB_TOKEN_A'] } });
+      assert.equal(again.code, 0, again.out);
+      assert.equal(read(), out); assert.equal(readList(), list);
+      // the list naming another hub for this file stops the run
+      writeFileSync(join(ROOT, creds.TRACKERS_FILE), list.replace('"hub": "a"', '"hub": "zed"'));
+      const clash = run('onboard-hub.mjs', ['a', name, 'a.com'], { creds, state: { lockedKeys: ['a-tracker-v1'], pagesVars: ['HUB_TOKEN_A'] } });
+      assert.notEqual(clash.code, 0);
+      assert.match(clash.out, /already has "hub": "zed"/);
+    });
+  });
+});
+
+test('onboard-hub: a hub that is not in the client list, or is there twice, leaves the list alone', () => {
+  withHub('<html><head><script>x()</script></head></html>', (name) => {
+    for (const entries of [[{ name: 'Other', file: 'OtherTracker.html' }], [{ name: 'A', file: name }, { name: 'A2', file: name }]]) {
+      withList(entries, (creds, readList) => {
+        const before = readList();
+        const r = run('onboard-hub.mjs', ['a', name, 'a.com'], { creds, state: { lockedKeys: ['a-tracker-v1'], pagesVars: ['HUB_TOKEN_A'] } });
+        assert.equal(r.code, 0, r.out);
+        assert.equal(readList(), before);
+      });
+    }
+  });
+});
+
+test('trackers.json: every "hub" is a plain slug, used once, and its page carries that include', () => {
+  const list = JSON.parse(readFileSync(join(ROOT, 'trackers.json'), 'utf8'));
+  const hubs = list.filter(t => t.hub);
+  assert.ok(hubs.some(t => t.hub === 'cookaborough'));
+  assert.equal(new Set(hubs.map(t => t.hub)).size, hubs.length);
+  for (const t of hubs) {
+    assert.match(t.hub, /^[a-z0-9-]{1,40}$/);
+    assert.ok(readFileSync(join(ROOT, t.file), 'utf8').includes(`<script src="hub-auth.js" data-client="${t.hub}"></script>`), t.file);
+  }
+});
+
 test('onboard-hub: page with no script gets the include at the end of head', () => {
   withHub('<html><head><title>x</title></head><body></body></html>', (name, read) => {
     assert.equal(run('onboard-hub.mjs', ['a', name, 'a.com']).code, 0);

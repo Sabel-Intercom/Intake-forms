@@ -21,7 +21,7 @@ input,textarea,select{width:100%;background:var(--field);color:var(--body);borde
 /* Team page for kick-offs (3 Nov 2026). Each client's form now lives in their hub (SabelKickoff.html, its own key).
    This page holds only what clients must never see, in sabel-kickoff-v1, which the server refuses without the passcode.
    It shows nothing, and asks for nothing else, until the server has accepted the passcode. */
-var API='https://sabel-webhook.vercel.app/api/tracker', BASE='https://sabel-intercom.github.io/Intake-forms/', KEY='sabel-kickoff-v1', TOK='sabel-team-token';
+var API='https://sabel-webhook.vercel.app/api/tracker', BASE=/^https?:$/.test(location.protocol)?location.origin+'/':'https://hubs.sabelcustomersuccess.com/', KEY='sabel-kickoff-v1', TOK='sabel-team-token';
 var STORE=null, PORTAL=[], REG=[], NOTION=[], VIEW='todo', OPEN=null, TIMER=null, SEARCH='';
 function token(){ try{ return localStorage.getItem(TOK)||''; }catch(e){ return window.__t||''; } }
 function setToken(t){ window.__t=t; try{ t?localStorage.setItem(TOK,t):localStorage.removeItem(TOK); }catch(e){} }
@@ -69,7 +69,14 @@ function rows(){
 function inView(x){ if(SEARCH&&norm(x.name).indexOf(norm(SEARCH))<0) return false;
   var na=x.r&&x.r.notRequired; if(VIEW==='na') return !!na; if(na) return false; if(VIEW==='all') return true;
   return x.stage==='Discovery'||x.stage==='Onboarding'||!!(x.r&&x.r.hubKey); }
-function formLink(x,team){ var h=x.r.hubKey, reg=trackerOf(x); return BASE+'SabelKickoff.html?client='+h.slug+'&k='+h.k+(h.rdy?'&rdy='+h.rdy:'')+'&name='+encodeURIComponent(x.name)+(team?'&team=1':''); }
+/* The team opens the form at its plain, staff-only address. A client's link is
+   their own address /c/<hub>/, which exists once their hub is published
+   ("hub" in trackers.json). Until then the old site still serves them. */
+var OLD_SITE='https://sabel-intercom.github.io/Intake-forms/';
+function formLink(x,team){ var h=x.r.hubKey, reg=trackerOf(x), hub=reg&&/^[a-z0-9-]{1,40}$/.test(reg.hub||'')?reg.hub:'';
+  var q='?client='+h.slug+'&k='+h.k+(h.rdy?'&rdy='+h.rdy:'')+'&name='+encodeURIComponent(x.name);
+  if(team) return BASE+'SabelKickoff.html'+q+'&team=1';
+  return hub ? BASE+'c/'+hub+'/SabelKickoff'+q : OLD_SITE+'SabelKickoff.html'+q; }
 function trackerOf(x){ var n=norm(x.name).slice(0,6); return REG.filter(function(t){ return norm(t.name).slice(0,6)===n; })[0]||null; }
 function render(){
   var all=rows(), h='<div class="row"><h1>Sabel kick-offs</h1><span class="spacer"></span><button class="btn" onclick="signOut()">Sign out</button></div><div class="sub">Each client\'s form is in their hub and shows only that client. Internal fields stay here. Never send this page to a client.</div>';
@@ -84,7 +91,7 @@ function renderList(){
     else s+='<button class="btn" onclick="createForm(\''+x.id+'\')">Create kick-off form</button>';
     s+='</div>';
     if(OPEN===x.id&&r){ var b=r.basics||{}, sc=r.scope||{}, ic=sc.intercomCheck||{};
-      s+='<div class="links" style="margin-top:8px">'+[['Notion',b.notionUrl],['Sabel SOW',b.sabelDoc],['Intercom SOW',b.intercomSow],['Tracker',tr?BASE+tr.file:b.trackerUrl]].filter(function(l){return l[1];}).map(function(l){return '<a target="_blank" rel="noopener" href="'+esc(l[1])+'">'+l[0]+'</a>';}).join('')+'</div>'+
+      s+='<div class="links" style="margin-top:8px">'+[['Notion',b.notionUrl],['Sabel SOW',b.sabelDoc],['Intercom SOW',b.intercomSow],['Tracker',tr?BASE+tr.file:String(b.trackerUrl||'').replace(OLD_SITE,BASE)]].filter(function(l){return l[1];}).map(function(l){return '<a target="_blank" rel="noopener" href="'+esc(l[1])+'">'+l[0]+'</a>';}).join('')+'</div>'+
       f(x.id,'Internal notes','notesInternal',r.notesInternal,1)+'<div class="grid">'+f(x.id,'Commercial note','basics.hoursNote',b.hoursNote)+
       sel(x.id,'Source of scope','scope.source',sc.source,['','Sabel SOW','Intercom SOW','Both'])+'</div><div class="grid">'+f(x.id,'Intercom scope check: posted','scope.intercomCheck.posted',ic.posted)+f(x.id,'Thread link','scope.intercomCheck.link',ic.link)+f(x.id,'Confirmed by','scope.intercomCheck.confirmedBy',ic.confirmedBy)+'</div>'+f(x.id,'Intercom check notes','scope.intercomCheck.notes',ic.notes,1)+
       '<div class="row" style="margin-top:10px"><button class="btn" onclick="toggleNA(\''+x.id+'\')">'+(r.notRequired?'Restore':'Kick-off not required')+'</button>'+(key?'<span class="warn">Hub tab: set KICKOFF_TOKEN = '+esc(key.k)+' when building this tracker.</span>':'')+'</div>';

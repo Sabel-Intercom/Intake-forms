@@ -658,7 +658,15 @@ const API = "https://sabel-webhook.vercel.app/api/tracker";
 const PORTAL_KEY = "client-portal-v1";
 const KICKOFF_KEY = "sabel-kickoff-v1";
 const NOTION_URL = "https://sabel-webhook.vercel.app/api/notion?kind=projects";
-const PAGES = "https://sabel-intercom.github.io/Intake-forms/";
+const PAGES = /^https?:$/.test(location.protocol) ? location.origin+"/" : "https://hubs.sabelcustomersuccess.com/";
+/* A link sent to a client: their own address /c/<hub>/ once their hub is
+   published ("hub" in trackers.json). Until then the old site still serves them. */
+const OLD_SITE = "https://sabel-intercom.github.io/Intake-forms/";
+function clientFormUrl(c, form, query){
+  const k=trackerKeyFor(c), reg=k && S.reg.find(t=>t.key===k);
+  const hub=reg && /^[a-z0-9-]{1,40}$/.test(reg.hub||"") ? reg.hub : "";
+  return hub ? PAGES+"c/"+hub+"/"+form+query : OLD_SITE+form+".html"+query;
+}
 const TRACKERS_JSON = PAGES + "trackers.json";
 const SLACK = "https://scss-group.slack.com/archives/";
 const CACHE_KEY = "sabel-opshub-v2-cache";
@@ -1184,7 +1192,8 @@ function trackerKeyFor(c){ const n=notionFor(c); return c.trackerKey || (n&&n.tr
 function trackerUrlFor(c){
   const k=trackerKeyFor(c), n=notionFor(c);
   const reg = k && S.reg.find(t=>t.key===k);
-  return (n&&n.trackerUrl) || (reg&&reg.file ? PAGES+reg.file : "") || c.trackerUrl || "";
+  // Staff open the tracker on this site, whatever address was saved for it.
+  return String((n&&n.trackerUrl) || (reg&&reg.file ? PAGES+reg.file : "") || c.trackerUrl || "").replace(OLD_SITE, PAGES);
 }
 function projectType(c){
   if(c.hub && c.hub.type) return c.hub.type;
@@ -2222,7 +2231,7 @@ function refocusField(cid,f){
 /* Greg's projects carry none of the usual record, so this replaces the whole side column. */
 function flowneticAside(c){
   const hub=c.hub||{}, mig=hasMigration(c), gl=trackerGoLive(c);
-  const migUrl = PAGES+"SabelMigrationIntake.html?client="+encodeURIComponent(formSlugOf(c));
+  const migUrl = clientFormUrl(c, "SabelMigrationIntake", "?client="+encodeURIComponent(formSlugOf(c)));
   let h='<section class="panel"><div class="panel-h"><h3>Flownetic project</h3></div><div class="form">'+
     '<p class="full" style="margin:0;font-size:13px;color:var(--muted)">'+(mig
       ? 'Greg manages this project. Richard is doing migration work, so the migration checklist applies as well as the weekly update.'
@@ -2302,8 +2311,8 @@ function asidePanels(c,n,ko,tk,td,w){
      (elmo-tracker-v1 -> elmo). It picks where the form saves, so it must match the keys
      registered in sabel-webhook: readiness-<slug>-v1 and migration-intake-<slug>-v1. */
   const formSlug = formSlugOf(c);
-  const readyUrl = PAGES+"SabelReadinessCheck.html?client="+encodeURIComponent(formSlug)+"&name="+encodeURIComponent(c.name);
-  const migUrl = PAGES+"SabelMigrationIntake.html?client="+encodeURIComponent(formSlug);
+  const readyUrl = clientFormUrl(c, "SabelReadinessCheck", "?client="+encodeURIComponent(formSlug)+"&name="+encodeURIComponent(c.name));
+  const migUrl = clientFormUrl(c, "SabelMigrationIntake", "?client="+encodeURIComponent(formSlug));
   const copyBtn = (label,url) => '<li><button data-act="copy" data-url="'+esc(url)+'" title="'+esc(url)+'"><span class="dot"></span>'+label+'<span class="k"></span></button></li>';
   const link = (label,url) => '<li class="'+(url?'':'off')+'"><a href="'+esc(url||"#")+'" target="_blank" rel="noopener" title="'+esc(label)+'"><span class="dot"></span>'+label+'</a></li>';
   const slack = /^C[A-Z0-9]{6,}$/.test(c.slackChannel||"") ? SLACK+c.slackChannel : "";

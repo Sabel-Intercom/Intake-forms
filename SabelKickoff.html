@@ -493,7 +493,11 @@ body.embed header{display:none} body.embed .wrap{padding-top:6px}
 /* ══════════════════════════════════════════════════════════════════════════
    1 · FEEDS AND STORAGE
    ══════════════════════════════════════════════════════════════════════════ */
-var BASE   = 'https://sabel-intercom.github.io/Intake-forms/';
+/* This site's root. On the old github.io copy (still serving clients whose hub
+   is not published yet) that is its /Intake-forms/ folder. */
+var BASE   = /^https?:$/.test(location.protocol) ? location.origin+(/\.github\.io$/i.test(location.hostname)?'/Intake-forms/':'/') : 'https://hubs.sabelcustomersuccess.com/';
+/* Opened at a client's own address /c/<hub>/, links to their other forms stay there. */
+var HERE   = (/^\/c\/[a-z0-9-]{1,40}\//.exec(location.pathname)||[''])[0].slice(1);
 var API    = 'https://sabel-webhook.vercel.app/api/tracker';
 var NOTION = '';
 var PORTAL_KEY = '';
@@ -618,7 +622,7 @@ function readinessOpen(d){
   return out;
 }
 function readinessLink(id){ var e=readinessState(id), r=STORE.clients[id]||{}, sl=e.slug||(e.slugs&&e.slugs[0])||slugify(id), nm=(r.basics&&(r.basics.shortName||r.basics.legalName))||r.name||id;
-  return BASE+'SabelReadinessCheck.html?client='+encodeURIComponent(sl)+'&name='+encodeURIComponent(nm); }
+  return BASE+(HERE?HERE+'SabelReadinessCheck':'SabelReadinessCheck.html')+'?client='+encodeURIComponent(sl)+'&name='+encodeURIComponent(nm); }
 function readinessHTML(id,slide){
   var e=readinessState(id);
   if(e.state==='loading'&&!e.data) return '<div class="rh"><b>Readiness check</b><span>checking…</span></div>';

@@ -355,6 +355,46 @@ function patchHub(hubFile, isForm = false) {
   return true;
 }
 
+// Once a hub is published its live address is this site, and Sabel's own pages
+// need to know which clients have one (they hand out /c/<slug>/ form links).
+//   - the hub file's PROG_URL (the address it puts in messages) is switched
+//     from the old github.io address to this site
+//   - trackers.json gets "hub": "<slug>" on this client's entry
+// One line each, formatting untouched. Returns the files it wrote.
+function markPublished() {
+  step(6, 'live address and client list');
+  const wrote = [];
+  const write = (file, text, what) => {
+    if (DRY) { log(`   DRY would ${what}`); return; }
+    if (!PATCH) { log(`   --no-patch: not written (${what})`); return; }
+    writeFileSync(resolve(ROOT, file), text); wrote.push(file); log(`   ${what}`);
+  };
+  const hp = resolve(ROOT, hubFile);
+  if (existsSync(hp)) {
+    const html = readFileSync(hp, 'utf8');
+    const oldUrl = `const PROG_URL="https://sabel-intercom.github.io/Intake-forms/${hubFile}"`;
+    if (html.split(oldUrl).length === 2) write(hubFile, html.replace(oldUrl, `const PROG_URL="https://${HUBS}/${hubBase}"`), `point ${hubFile}'s own link at https://${HUBS}/${hubBase}`);
+    else log('   hub file: no old address to switch');
+  }
+  // TRACKERS_FILE: another file name in the repo root, for the tests.
+  const listName = /^[A-Za-z0-9_.-]+\.json$/.test(env.TRACKERS_FILE || '') ? env.TRACKERS_FILE : 'trackers.json';
+  const lp = resolve(ROOT, listName);
+  if (!existsSync(lp)) { log('   trackers.json not found in this checkout; not updated'); return wrote; }
+  const text = readFileSync(lp, 'utf8');
+  let list; try { list = JSON.parse(text); } catch (e) { log('   trackers.json is not valid JSON; not updated'); return wrote; }
+  const entries = (Array.isArray(list) ? list : []).filter(t => t && t.file === hubFile);
+  if (entries.length !== 1) { log(`   trackers.json has ${entries.length} entries for ${hubFile}; not updated. Add "hub": "${slug}" by hand.`); return wrote; }
+  if (entries[0].hub === slug) { log('   trackers.json already names this hub'); return wrote; }
+  if (entries[0].hub) die(`trackers.json already has "hub": "${entries[0].hub}" for ${hubFile}, not "${slug}". Fix the file by hand, then re-run.`);
+  const line = new RegExp(`^([ \\t]*)"file": "${hubFile.replace(/[.]/g, '\\.')}",[ \\t]*$`, 'm');
+  const out = text.replace(line, (m, indent) => `${m}\n${indent}"hub": "${slug}",`);
+  let ok = false;
+  try { const after = JSON.parse(out).filter(t => t && t.file === hubFile); ok = after.length === 1 && after[0].hub === slug; } catch (e) {}
+  if (!ok) { log(`   could not place the line safely; add "hub": "${slug}" to ${hubFile}'s entry in trackers.json by hand`); return wrote; }
+  write(listName, out, `add "hub": "${slug}" to trackers.json`);
+  return wrote;
+}
+
 // ---------- run ----------
 (async () => {
   log(`onboard-hub ${DRY ? '(DRY RUN) ' : ''}: ${slug} / ${hubFile} / @${clientDomains.join(', @')}`);
@@ -364,10 +404,11 @@ function patchHub(hubFile, isForm = false) {
   const { token } = await lockKey(state);
   await setPagesVars({ aud, token });
   const changed = [hubFile, ...ownPages].filter((f, i) => patchHub(f, i > 0));
-  step(6, 'Done. Send the client this link:');
+  for (const f of markPublished()) if (!changed.includes(f)) changed.push(f);
+  step(7, 'Done. Send the client this link:');
   log(`\n   https://${HUBS}/${hubBase}\n`);
   log(`   They type their @${clientDomains[0]} address, enter the emailed code, and the hub opens.`);
-  log(`   The old github.io link now forwards here. Anyone not on ${[...clientDomains, TEAM_DOMAIN].map(d => '@' + d).join(' / ')} is refused.`);
+  log(`   Their old link forwards here for as long as the old site is up. Anyone not on ${[...clientDomains, TEAM_DOMAIN].map(d => '@' + d).join(' / ')} is refused.`);
   if (changed.length) log(`\n   Remember: commit and push ${changed.join(', ')}.`);
   if (DRY) log('\n   Dry run: nothing was changed.');
 })().catch(e => die(e.message));
