@@ -1830,6 +1830,7 @@ body.on-home #main .mnw{max-width:1344px!important;margin:0 auto!important}
   <button id="theme-btn" onclick="toggleTheme()"></button><button id="hide-done-pill" onclick="toggleHideDone()" title="Hide Complete tasks from every board view. Progress bars, counts and exports are unaffected"></button>
 </div>
 <div class="toast" id="toast"></div>
+<script src="hub-auth.js" data-client="yfood"></script>
 <script>
 const API='https://sabel-webhook.vercel.app/api/tracker';
 const KEY='yfood-tracker-v1';  // [CLIENT] api key slug
@@ -3778,7 +3779,7 @@ function decisionsView(){
 
 // ── Progression pages (between pillars) ────────────────────────────────────────
 const PROG_SEED={};
-const PROG_URL="https://sabel-intercom.github.io/Intake-forms/YFoodTracker_v2.html";  // the live tracker address, used in messages sent from a local copy
+const PROG_URL="https://hubs.sabelcustomersuccess.com/YFoodTracker_v2";  // the live tracker address, used in messages sent from a local copy
 let PROG=JSON.parse(JSON.stringify(PROG_SEED));
 const PROG_IDS=Object.keys(PROG_SEED);
 const PROG_TPL={brings:{t:'',got:false,owner:''},prep:{t:'',done:false,owner:''},built:{t:'',done:false},snags:{t:''},decide:{q:'',a:''},agenda:{m:'',t:''},leave:{t:'',done:false},actions:{t:'',owner:'',due:'',done:false}};

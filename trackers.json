@@ -31,6 +31,7 @@
     "name": "YFood",
     "key": "yfood-tracker-v1",
     "file": "YFoodTracker_v2.html",
+    "hub": "yfood",
     "sowHours": 60,
     "active": true
   },
