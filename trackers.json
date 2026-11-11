@@ -145,6 +145,7 @@
   "name": "Sky City Malta",
   "key": "skycity-tracker-v1",
   "file": "SkyCityTracker.html",
+  "hub": "skycity",
   "sowHours": 35,
   "active": true
 },
