@@ -184,6 +184,7 @@
     "name": "Smokeball",
     "key": "smokeball-tracker-v1",
     "file": "SmokeballTracker.html",
+    "hub": "smokeball",
     "sowHours": 192,
     "active": true
   },
