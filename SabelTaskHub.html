@@ -393,6 +393,11 @@ textarea.need{outline:2px solid var(--red2);outline-offset:2px;border-radius:6px
 .srt b{display:block;font-size:14.5px;font-weight:600;color:var(--text);line-height:1.35}
 .srt:hover b{text-decoration:underline}
 .srw{font-size:12.5px;color:var(--mute);white-space:nowrap}
+.sr.rv{grid-template-columns:minmax(0,1fr) auto minmax(150px,auto) minmax(150px,auto) auto}
+.srk,.sra{display:flex;gap:8px;align-items:center;white-space:nowrap}.sra{justify-content:flex-end}
+.srd{font-size:12.5px;color:var(--mute)}
+.lk{background:none;border:none;padding:0;font:inherit;font-size:12.5px;font-weight:600;color:var(--body);text-decoration:underline;cursor:pointer}.lk:hover{color:var(--text)}
+@media(max-width:900px){.sr.rv{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px}.sr.rv .srt{grid-column:1/-1}.sr.rv .srtm{display:none}}
 .srtm{font-size:12.5px;color:var(--mute);white-space:nowrap;min-width:92px;text-align:right}
 .srtm b{font-family:Archivo,sans-serif;font-weight:700;color:var(--text)}
 .srtm.over b{color:var(--amber)}
@@ -817,6 +822,9 @@ function mergeOv(a,b){
   /* Chases logged on the Clients tab: owed item id -> {at, by, txt}. Newest wins. */
   const ow={};[a&&a.owed,b&&b.owed].forEach(g=>Object.keys(g||{}).forEach(id=>{if(!ow[id]||(g[id].at||0)>(ow[id].at||0))ow[id]=g[id];}));
   if(Object.keys(ow).length)out.owed=ow;
+  /* Completed tasks Nikki has reviewed: task id -> {at, by, d (the done date she saw), off}. Newest wins. */
+  const rv={};[a&&a.reviewed,b&&b.reviewed].forEach(g=>Object.keys(g||{}).forEach(id=>{if(!rv[id]||(g[id].at||0)>(rv[id].at||0))rv[id]=g[id];}));
+  if(Object.keys(rv).length)out.reviewed=rv;
   return out;
 }
 async function readRemoteOv(){
@@ -835,7 +843,7 @@ async function pullOv(){
   const before=JSON.stringify(OV),merged=mergeOv(OV,remote);
   OV=merged;saveLocalOv();
   const same=mergeOv(remote,remote);
-  if(JSON.stringify([merged.tasks,merged.focus,merged.reminders,merged.checks,merged.cap,merged.owed])!==JSON.stringify([same.tasks,same.focus,same.reminders,same.checks,same.cap,same.owed]))pushOv();   // this browser held work the store had not seen
+  if(JSON.stringify([merged.tasks,merged.focus,merged.reminders,merged.checks,merged.cap,merged.owed,merged.reviewed])!==JSON.stringify([same.tasks,same.focus,same.reminders,same.checks,same.cap,same.owed,same.reviewed]))pushOv();   // this browser held work the store had not seen
   return JSON.stringify(merged)!==before;
 }
 let PUSHQ=Promise.resolve();
@@ -1595,7 +1603,7 @@ const mapSt=s=>s==='Dependency'?'Pending':s==='Done'?'Complete':(s||'Pending');
 function project(){
   const all=RAW.concat(reminderRaws()).map(t=>{
     const base=mapSt(t.status);
-    const x=Object.assign({},t,{status:base,waiting:t.status==='Dependency',notes:[],flagged:false,parked:null,prevStatus:'',time:[],run:{},sAt:0,sBy:''});
+    const x=Object.assign({},t,{status:base,waiting:t.status==='Dependency',notes:[],flagged:false,parked:null,prevStatus:'',time:[],run:{},sAt:0,sBy:'',srcSt:base});
     const a=AUD[t.id];
     if(a){x.edited=true;if(a.owner)x.owner=a.owner;if(a.client!==undefined)x.key=a.client;}
     const o=OV.tasks[t.id];
@@ -2211,7 +2219,7 @@ function headerHTML(){
   n.Everyone=a.filter(t=>!isDone(t)).length;n[COORD]=a.filter(t=>t.status==='Parked').length;
   return '<header class="top"><span class="sq"></span><span class="word">SABEL</span><span class="div"></span>'+
     '<span class="ch">Task list'+(onDesk()?'<em>· '+COORD+'’s desk</em>':'')+'</span>'+
-    (onDesk()?'<div class="seg"><button type="button" data-act="tab" data-t="home" class="'+(S.tab==='home'?'on':'')+'">Home</button><button type="button" data-act="tab" data-t="desk" class="'+(S.tab==='desk'?'on':'')+'">Desk</button><button type="button" data-act="tab" data-t="done" class="'+(S.tab==='done'?'on':'')+'">Done'+(newDone(scope()).length?' · '+newDone(scope()).length:'')+'</button><button type="button" data-act="tab" data-t="clients" class="'+(S.tab==='clients'?'on':'')+'">Clients'+(owedLate().length?' · '+owedLate().length:'')+'</button><button type="button" data-act="tab" data-t="summary" class="'+(S.tab==='summary'?'on':'')+'">Summary</button></div>':'<div class="seg"><button type="button" data-act="mode" data-m="home" class="'+(S.mode==='home'?'on':'')+'">Home</button><button type="button" data-act="mode" data-m="week" class="'+(S.mode==='week'?'on':'')+'">'+(S.who==='Everyone'?'Week':'My week')+'</button><button type="button" data-act="mode" data-m="list" class="'+(S.mode==='list'?'on':'')+'">List</button><button type="button" data-act="mode" data-m="board" class="'+(S.mode==='board'?'on':'')+'">Board</button></div>')+
+    (onDesk()?'<div class="seg"><button type="button" data-act="tab" data-t="home" class="'+(S.tab==='home'?'on':'')+'">Home</button><button type="button" data-act="tab" data-t="desk" class="'+(S.tab==='desk'?'on':'')+'">Desk</button><button type="button" data-act="tab" data-t="done" class="'+(S.tab==='done'?'on':'')+'">Done'+(toReview(scope()).length?' · '+toReview(scope()).length:'')+'</button><button type="button" data-act="tab" data-t="clients" class="'+(S.tab==='clients'?'on':'')+'">Clients'+(owedLate().length?' · '+owedLate().length:'')+'</button><button type="button" data-act="tab" data-t="summary" class="'+(S.tab==='summary'?'on':'')+'">Summary</button></div>':'<div class="seg"><button type="button" data-act="mode" data-m="home" class="'+(S.mode==='home'?'on':'')+'">Home</button><button type="button" data-act="mode" data-m="week" class="'+(S.mode==='week'?'on':'')+'">'+(S.who==='Everyone'?'Week':'My week')+'</button><button type="button" data-act="mode" data-m="list" class="'+(S.mode==='list'?'on':'')+'">List</button><button type="button" data-act="mode" data-m="board" class="'+(S.mode==='board'?'on':'')+'">Board</button></div>')+
     '<div class="who">'+WHO.map(p=>'<button type="button" data-act="who" data-who="'+p+'" class="'+(S.who===p?'on':'')+(p===COORD?' co':'')+'">'+p+'<small>'+n[p]+'</small></button>').join('')+'</div>'+
     '<button type="button" class="theme" data-act="theme" title="'+(LIGHT?'Switch to dark mode':'Switch to light mode')+'" aria-label="'+(LIGHT?'Switch to dark mode':'Switch to light mode')+'">'+(LIGHT?'&#9790;':'&#9728;')+'</button></header>';
 }
@@ -2238,8 +2246,8 @@ function titleHTML(mine){
       stats='<span class="stat'+(late.length?' hot':'')+'"><b>'+late.length+'</b>overdue across '+Object.keys(cs).length+' client'+(Object.keys(cs).length===1?'':'s')+'</span><span class="stat"><b>'+wk+'</b>due in the next 7 days</span><span class="stat"><b>'+OWED.length+'</b>open on the client side</span>';
     }
     if(S.tab==='done'){
-      const d=mine.filter(isDone),nw=newDone(mine);
-      stats='<span class="stat"><b>'+d.length+'</b>completed, all time</span>'+(SEEN.at?'<span class="stat'+(nw.length?' hot':'')+'"><b>'+nw.length+'</b>new since '+fStamp(SEEN.at)+'</span>':'');
+      const d=mine.filter(isDone),nw=toReview(mine);
+      stats='<span class="stat'+(nw.length?' hot':'')+'"><b>'+nw.length+'</b>to review</span><span class="stat"><b>'+d.length+'</b>completed, all time</span>';
     }
     if(S.tab==='desk'){
       const p=mine.filter(t=>t.status==='Parked').length;
@@ -2629,32 +2637,69 @@ function owedTabHTML(){
    with what is new since Nikki last pressed "Seen". The seen list is this browser's only (localStorage):
    task id -> the doneAt it was seen with, so a task reopened and finished again shows as new once more.
    First visit sets the baseline quietly, so hundreds of old completions do not all read as new. ── */
-const SEEN_K='sabel-taskhub-seen-done-v1';
-let SEEN={ids:{},at:0};try{const s=JSON.parse(localStorage.getItem(SEEN_K)||'null');if(s&&s.ids)SEEN=s;}catch(e){}
-const fDY=d=>fD(d)+(d.getFullYear()!==today().getFullYear()?' '+d.getFullYear():'');
-const isNewDone=t=>{if(!isDone(t)||!SEEN.at)return false;const v=SEEN.ids[t.id];return v===undefined||(!!t.doneAt&&v!=='1'&&String(t.doneAt)>String(v));};
-const newDone=all=>all.filter(isNewDone);
-function markSeen(all){
-  const ids=Object.assign({},SEEN.ids);          /* keep ids no longer on screen (held or finished clients) */
-  all.filter(isDone).forEach(t=>{ids[t.id]=t.doneAt?String(t.doneAt):'1';});
-  SEEN={ids,at:Date.now()};try{localStorage.setItem(SEEN_K,JSON.stringify(SEEN));}catch(e){}
+/* ── Done tab: Nikki's review list (13 Nov 2026) ─────────────────────────────
+   Every task marked complete lands in "To review", by client, with when it was
+   done and whether the client tracker shows it. She checks the tracker, presses
+   Reviewed, and it leaves the list; it is still under Completed tasks below.
+   The reviewed list is in the shared store (OV.reviewed), so it follows her
+   between browsers. A task reopened and completed again comes back for review. */
+/* REVIEW:BEGIN (run as-is by tests/task-review.test.mjs) */
+const REVIEW_FROM='2026-11-09';   /* anything completed before this Monday starts out as already reviewed */
+function isReviewed(t,rv){
+  const r=rv&&rv[t.id];if(!r||r.off)return false;
+  if((t.sAt||0)>(r.at||0))return false;                                   /* status changed here after she reviewed it */
+  const d=String(t.doneAt||'').slice(0,10);
+  if(d&&r.d&&r.d!=='1'&&d>r.d)return false;                               /* completed again on the tracker, later */
+  return true;
 }
-const byDoneDesc=(a,b)=>{const x=String(a.doneAt||''),y=String(b.doneAt||'');if(x&&!y)return -1;if(y&&!x)return 1;return y.localeCompare(x)||byDue(a,b);};
+function needsReview(t,rv,from){
+  if(t.status!=='Complete'||isReviewed(t,rv))return false;
+  if(rv&&rv[t.id])return true;                                            /* undone, or completed again */
+  const d=String(t.doneAt||'').slice(0,10);
+  return !!d&&d>=from;
+}
+/* [class, label, can be fixed from here] */
+function trackerState(t,c){
+  if(t.src)return ['','Not a tracker task',false];
+  if(!c||c.seeded)return ['','No live tracker',false];
+  if(t.srcSt==='Complete')return ['green','Tracker updated',false];
+  return ['red','Tracker not updated',!t.stages];
+}
+/* REVIEW:END */
+const fDY=d=>fD(d)+(d.getFullYear()!==today().getFullYear()?' '+d.getFullYear():'');
+const toReview=all=>all.filter(t=>needsReview(t,OV.reviewed,REVIEW_FROM));
+function setReviewed(ids,on){
+  const now=Date.now();OV.reviewed=OV.reviewed||{};
+  ids.forEach(id=>{const t=findTask(id);OV.reviewed[id]=on?{at:now,by:author(),d:t&&t.doneAt?String(t.doneAt).slice(0,10):'1'}:{at:now,by:author(),off:true};});
+  commit();
+}
+function fixTracker(id){
+  const raw=rawOf(id);if(!raw)return;
+  toast('Updating the client tracker…');
+  writeThrough(raw,'Complete').then(r=>{
+    if(r.skip)return toast('This task cannot be updated from here. Tick it on the tracker itself.');
+    if(!r.ok)return toast('The client tracker was not updated: '+r.why);
+    const o=OV.tasks[id];if(o)o.wrote='Complete';raw.status='Complete';
+    saveLocalOv();project();render();pushOv();toast('Tracker updated.');
+  });
+}
+const byDoneDesc=(a,b)=>{const x=String(a.doneAt||''),y=String(b.doneAt||'');if(x&&!y)return -1;if(y&&!x)return 1;return y.localeCompare(x)||(b.sAt||0)-(a.sAt||0)||byDue(a,b);};
 function doneTabHTML(all){
-  if(!SEEN.at)markSeen(all);
   const q=(S.dq||'').trim().toLowerCase();
   const hit=t=>!q||(t.title+' '+clientOf(t)+' '+t.owner+' '+(t.pillar||'')).toLowerCase().indexOf(q)>-1;
-  const done=all.filter(isDone).sort(byDoneDesc),nw=done.filter(isNewDone),shown=done.filter(hit);
-  const undated=done.filter(t=>!dOf(t.doneAt)).length;
+  const done=all.filter(isDone).sort(byDoneDesc),nw=toReview(done),ids={};nw.forEach(t=>{ids[t.id]=1;});
+  const rest=done.filter(t=>!ids[t.id]),shown=rest.filter(hit),open=!!q||!!S.rvShow;
+  const off=nw.filter(t=>trackerState(t,CLIENTS[t.key])[0]==='red').length;
+  const undated=rest.filter(t=>!dOf(t.doneAt)).length;
   let h='<div class="desk">';
-  h+='<div class="secc" style="border-color:'+(nw.length?'rgba(34,197,94,.45)':'var(--line2)')+'"><div class="sech"><i style="background:var(--green)"></i><b style="color:var(--green)">New since you last looked</b><span>Completed after '+fStamp(SEEN.at)+', here or on a client tracker</span><small>'+nw.length+' task'+(nw.length===1?'':'s')+'</small></div>'+
-    (nw.length?nw.map(t=>sumRowHTML(t,'done')).join('')+'<div class="hfoot" style="padding:10px 20px"><span>Once you have read these, mark them seen so the next lot stands out.</span><button type="button" class="pb green sm" data-act="seen-all">Seen, clear the list</button></div>'
-     :'<div class="sempty">Nothing new has been completed since '+fStamp(SEEN.at)+'.</div>')+'</div>';
-  h+='<div class="dbar"><input class="rin" data-ta="dq" placeholder="Find a task, client, person or pillar" value="'+esc(S.dq||'')+'">'+
-    '<div class="seg"><button type="button" data-act="group" data-g="client" class="'+(S.group==='client'?'on':'')+'">By client</button><button type="button" data-act="group" data-g="person" class="'+(S.group!=='client'?'on':'')+'">By person</button></div></div>';
-  h+='<div class="secc"><div class="sech"><i style="background:var(--greenfill)"></i><b style="color:var(--green)">All completed</b><span>Newest first within each group'+(undated?'; '+undated+' with no date were ticked on an older tracker build and sit last':'')+'</span><small>'+shown.length+(q?' of '+done.length:'')+' task'+(shown.length===1?'':'s')+'</small></div>'+
-    (shown.length?sumGroupsHTML(shown,'done'):'<div class="sempty">'+(q?'Nothing matches “'+esc(q)+'”.':'Nothing has been completed yet.')+'</div>')+'</div>';
-  return h+'<div class="hint">Sabel-owned tasks on active trackers only; what clients owe us is on the Clients tab, and held clients are left out. Click a task for its notes and detail, or to reopen it. The seen list is kept in this browser.</div></div>';
+  h+='<div class="dbar"><div class="seg"><button type="button" data-act="dgroup" data-g="client" class="'+(S.dgroup!=='person'?'on':'')+'">By client</button><button type="button" data-act="dgroup" data-g="person" class="'+(S.dgroup==='person'?'on':'')+'">By person</button></div></div>';
+  h+='<div class="secc" style="border-color:'+(nw.length?'rgba(34,197,94,.45)':'var(--line2)')+'"><div class="sech"><i style="background:var(--green)"></i><b style="color:var(--green)">To review</b><span>Marked complete and not yet reviewed by you'+(off?' · <b style="color:var(--red2)">'+off+' not on the tracker</b>':'')+'</span><small>'+nw.length+' task'+(nw.length===1?'':'s')+'</small></div>'+
+    (nw.length?sumGroupsHTML(nw,'done',true):'<div class="sempty">Nothing to review. Everything marked complete has been looked at.</div>')+'</div>';
+  h+='<div class="secc"><div class="sech"><i style="background:var(--greenfill)"></i><b style="color:var(--green)">Completed tasks</b><span>Reviewed, or completed before '+fDY(dOf(REVIEW_FROM))+'</span><small>'+(q?shown.length+' of ':'')+rest.length+' task'+(rest.length===1?'':'s')+'</small></div>'+
+    '<div class="dbar" style="padding:10px 20px"><input class="rin" data-ta="dq" placeholder="Find a completed task, client, person or pillar" value="'+esc(S.dq||'')+'">'+(q?'':'<button type="button" class="pb sm" data-act="rv-show">'+(open?'Hide':'Show all '+rest.length)+'</button>')+'</div>'+
+    (open?(shown.length?sumGroupsHTML(shown,'done'):'<div class="sempty">'+(q?'Nothing matches “'+esc(q)+'”.':'Nothing here yet.')+'</div>'):'')+
+    (open&&undated?'<div class="hint" style="padding:0 20px 12px">'+undated+' with no date were ticked on an older tracker build and sit last.</div>':'')+'</div>';
+  return h+'<div class="hint">Sabel-owned tasks on active trackers, plus Notion-only tasks and reminders; what clients owe us is on the Clients tab, and held clients are left out. “Tracker updated” means the client’s tracker itself shows the task as Complete. Click a task for its notes and detail, or to reopen it. Reviewed is saved for you on the server, not just in this browser.</div></div>';
 }
 
 /* ── view 4: summary (what is in progress, what got done, where the time went) ── */
@@ -2664,22 +2709,29 @@ function periodStart(){
   return S.period==='today'?t:S.period==='week'?weekBounds()[0]:addD(t,S.period==='30'?-29:-6);
 }
 function sumRowHTML(t,kind){
-  const sp=spent(t),e=+t.est||0,over=e&&sp>e*60;
-  let when='';
+  const sp=spent(t),e=+t.est||0,over=e&&sp>e*60,rv=kind==='done'&&onDesk();
+  let when='',extra='';
   if(kind==='prog')when=t.sAt?'Started '+fStamp(t.sAt)+(t.sBy?' by '+esc(t.sBy):''):'In progress on the tracker';
-  else when=(dOf(t.doneAt)?'Done '+fDY(dOf(t.doneAt)):'Done, date not recorded')+(t.sBy?' by '+esc(t.sBy):' · on the tracker');
-  return '<div class="sr" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="'+(S.tab==='done'?'open':'goto')+'"><b>'+esc(t.title)+'</b>'+(S.tab==='done'&&isNewDone(t)?'<span class="tag green">New</span>':'')+'<span class="rm"><span class="cl">'+tsq(t)+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+
+  else when=t.sAt?'Done '+fStamp(t.sAt)+(t.sBy?' by '+esc(t.sBy):''):(dOf(t.doneAt)?'Done '+fDY(dOf(t.doneAt)):'Done, date not recorded')+' · on the tracker';
+  if(rv){
+    const ts=trackerState(t,CLIENTS[t.key]),r=(OV.reviewed||{})[t.id],need=needsReview(t,OV.reviewed,REVIEW_FROM);
+    extra='<span class="srk"><span class="tag '+ts[0]+'">'+ts[1]+'</span>'+(ts[2]?'<button type="button" class="lk" data-act="rv-fix" title="Mark this task Complete on the client tracker">Update it</button>':'')+'</span>'+
+      '<span class="sra">'+(need?'<button type="button" class="pb green sm" data-act="rv">Reviewed</button>'
+        :isReviewed(t,OV.reviewed)?'<span class="srd">Reviewed '+fStamp(r.at)+'</span><button type="button" class="lk" data-act="rv-undo">Undo</button>':'<button type="button" class="lk" data-act="rv-undo" title="Put it back in To review">Review again</button>')+'</span>';
+  }
+  return '<div class="sr'+(rv?' rv':'')+'" data-id="'+esc(t.id)+'"><button type="button" class="srt" data-act="'+(S.tab==='done'?'open':'goto')+'"><b>'+esc(t.title)+'</b><span class="rm"><span class="cl">'+tsq(t)+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+
     '<span class="own">'+esc(t.owner)+'</span>'+progHTML(t)+runHTML(t)+(t.src?'<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>':'')+(noteCount(t)?'<span>'+noteCount(t)+' note'+(noteCount(t)===1?'':'s')+'</span>':'')+'</span></button>'+
-    '<span class="srw">'+when+'</span>'+(kind==='prog'?dueHTML(t):'')+
+    '<span class="srw">'+when+'</span>'+(kind==='prog'?dueHTML(t):'')+extra+
     '<span class="srtm'+(over?' over':'')+'" title="Time logged against the estimate"><b>'+(sp?fMins(sp):'–')+'</b>'+(e?' / '+fEst(e):'')+'</span></div>';
 }
-function sumGroupsHTML(rows,kind){
-  const byC=S.group==='client'&&(S.tab==='summary'||S.tab==='done');
+function sumGroupsHTML(rows,kind,review){
+  const byC=S.tab==='done'?S.dgroup!=='person':S.group==='client'&&S.tab==='summary';
   const g={};rows.forEach(t=>{const k=byC?clientOf(t):t.owner;(g[k]=g[k]||[]).push(t);});
   const ks=Object.keys(g).sort((a,b)=>byC?(a==='No client'?1:b==='No client'?-1:a.localeCompare(b)):TEAM.indexOf(a)-TEAM.indexOf(b));
   return ks.map(k=>{
     const sp=g[k].reduce((a,t)=>a+spent(t),0),es=g[k].reduce((a,t)=>a+(+t.est||0),0);
-    return '<div class="sg"><div class="sgh">'+(byC?'':av(k,true))+'<b>'+esc(k)+'</b><span>'+g[k].length+' task'+(g[k].length===1?'':'s')+(sp?' · '+fMins(sp)+' logged':'')+(es?' · '+fTot(es)+' estimated':'')+'</span></div>'+g[k].map(t=>sumRowHTML(t,kind)).join('')+'</div>';
+    return '<div class="sg"><div class="sgh">'+(byC?'':av(k,true))+'<b>'+esc(k)+'</b><span>'+g[k].length+' task'+(g[k].length===1?'':'s')+(sp?' · '+fMins(sp)+' logged':'')+(es?' · '+fTot(es)+' estimated':'')+'</span>'+
+      (review&&g[k].length>1?'<button type="button" class="lk" style="margin-left:auto" data-act="rv-all" data-ids="'+esc(g[k].map(t=>t.id).join('|'))+'">Mark all '+g[k].length+' reviewed</button>':'')+'</div>'+g[k].map(t=>sumRowHTML(t,kind)).join('')+'</div>';
   }).join('');
 }
 function summaryHTML(all){
@@ -2803,7 +2855,12 @@ document.addEventListener('click',e=>{
     case 'ofl':S.ofl=a.getAttribute('data-f');render();break;
     case 'ow-log':logChase(a.closest('[data-oid]').getAttribute('data-oid'));break;
     case 'ow-copy':copyChase(a.closest('[data-oid]').getAttribute('data-oid'));break;
-    case 'seen-all':markSeen(scope());render();toast('Marked as seen. Anything completed from now on shows as new.');break;
+    case 'rv':setReviewed([a.closest('[data-id]').getAttribute('data-id')],true);toast('Reviewed. It is under Completed tasks if you need it again.');break;
+    case 'rv-undo':setReviewed([a.closest('[data-id]').getAttribute('data-id')],false);break;
+    case 'rv-all':{const ids=a.getAttribute('data-ids').split('|');setReviewed(ids,true);toast(ids.length+' tasks marked reviewed.');break;}
+    case 'rv-fix':fixTracker(a.closest('[data-id]').getAttribute('data-id'));break;
+    case 'dgroup':S.dgroup=a.getAttribute('data-g');render();break;
+    case 'rv-show':S.rvShow=!S.rvShow;render();break;
     case 'period':S.period=a.getAttribute('data-p');save();render();break;
     case 'group':S.group=a.getAttribute('data-g');save();render();break;
     case 'goto':if(t){S.who=t.owner;S.mode='list';S.flt='';S.open=id;
