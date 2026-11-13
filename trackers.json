@@ -195,5 +195,12 @@
     "hub": "kinatico",
     "sowHours": 36,
     "active": true
+  },
+  {
+    "name": "Smokeball Archie",
+    "key": "smokeball-archie-tracker-v1",
+    "file": "SmokeballArchieTracker.html",
+    "sowHours": 0,
+    "active": true
   }
 ]
