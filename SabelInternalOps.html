@@ -528,6 +528,35 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
 .holdbar button{text-align:left;border:0;background:transparent;font:inherit;color:var(--muted);cursor:pointer;padding:2px 0}
 .holdbar button:hover{color:var(--ink)}
 .holdbar button b{margin-right:6px}
+
+/* build brief (13 Nov 2026) */
+#brief-dlg{width:min(1000px,calc(100vw - 24px));max-height:calc(100vh - 32px)}
+#brief-dlg[open]{display:flex;flex-direction:column}
+#brief-body{padding:0 18px 6px;overflow:auto;font-size:13.5px}
+#brief-body h4{font-family:var(--display);font-size:15px;color:var(--ink);margin:22px 0 8px}
+#brief-body h5{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+.bb-msg{padding:18px 0;color:var(--body)} .bb-meta,.bb-sub{color:var(--muted);margin:0 0 8px;font-size:12.5px}
+.bb-int{margin:0 0 8px;font-size:12.5px;color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:7px;padding:6px 10px}
+.bb-seg{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.bb-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.bb-tiles>div{border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--muted);font-size:12.5px}
+.bb-tiles b{display:block;font-family:var(--display);font-size:24px;line-height:1.1;color:var(--ink)} .bb-tiles small{font-size:13px;color:var(--muted);font-weight:400}
+.bb-tiles b.g{color:var(--good)} .bb-tiles b.a{color:var(--warn)} .bb-tiles b.r{color:var(--accent)}
+.bb-three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.bb-box{border:1px solid var(--line);border-top:3px solid var(--muted);border-radius:9px;padding:10px 12px;min-width:0}
+.bb-box.g{border-top-color:var(--good)} .bb-box.r{border-top-color:var(--accent)} .bb-box.a{border-top-color:var(--warn)}
+.bb-box ul{list-style:none;margin:0;padding:0} .bb-box li{padding:7px 0;border-top:1px solid var(--line);color:var(--ink);overflow-wrap:anywhere} .bb-box li:first-child{border-top:0}
+.bb-box li small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
+.bb-area{border:1px solid var(--line);border-radius:9px;margin-bottom:10px;overflow:hidden}
+.bb-ah{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);color:var(--ink)} .bb-ah span{color:var(--info);font-size:12px;font-weight:600}
+.bb-line{display:grid;grid-template-columns:200px minmax(0,1fr) auto;gap:12px;padding:8px 12px;border-top:1px solid var(--line);align-items:start} .bb-ah + .bb-line{border-top:0}
+.bb-set{color:var(--muted)} .bb-set code{font-size:10.5px;opacity:.75} .bb-ans{color:var(--ink);overflow-wrap:anywhere} .bb-ans i{color:var(--muted)}
+.bb-ans small{display:block;color:var(--muted);font-size:12px;margin-top:2px} .bb-ans small.hint{color:var(--warn)}
+.bb-line.blank .bb-set{opacity:.8}
+.bb-pill{display:inline-block;font-size:11px;font-weight:700;border-radius:5px;padding:2px 7px;white-space:nowrap;background:var(--line);color:var(--muted)}
+.bb-pill.g{background:var(--good-soft);color:var(--good)} .bb-pill.a{background:var(--warn-soft);color:var(--warn)} .bb-pill.r{background:var(--accent);color:#fff}
+.bb-chg{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:700;color:var(--info);background:var(--info-soft);border-radius:5px;padding:2px 6px}
+@media(max-width:720px){.bb-three,.bb-tiles{grid-template-columns:1fr 1fr}.bb-three{grid-template-columns:1fr}.bb-line{grid-template-columns:1fr;gap:3px}}
 </style>
 </head>
 <body>
@@ -630,6 +659,11 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
     </div>
     <div class="dfoot"><button class="btn" value="cancel" type="submit" formnovalidate>Cancel</button><button class="btn" value="add" type="submit">Add to the list</button><button class="btn primary" value="replace" type="submit">Replace the list</button></div>
   </form>
+</dialog>
+<dialog id="brief-dlg">
+  <div class="dh">Build brief</div>
+  <div id="brief-body"></div>
+  <div class="dfoot"><button class="btn" type="button" id="brief-send" data-act="brief-send" title="Opens the Task Hub with a pinned task for the project lead, filled in. Nothing is sent until you press Send there.">Send to Task Hub</button><button class="btn" type="button" id="brief-copy" data-act="brief-copy" title="The whole brief as plain text, for Slack or to hand to Forge">Copy as text</button><button class="btn primary" type="button" data-act="brief-close">Close</button></div>
 </dialog>
 <dialog id="add-dlg">
   <form method="dialog" id="add-form">
@@ -1551,6 +1585,8 @@ async function loadAll(){
   setSave(S.errors.portal ? "offline" : "idle");
   if(S.loaded.portal) normaliseTypes();
   routeFromHash(); render();
+  /* A link from the Task Hub: #c=<id>&brief=1 opens that client's build brief. */
+  if(/[&#]brief=1\b/.test(location.hash) && S.view==="client" && byId(S.clientId)) openBrief(byId(S.clientId));
   loadTrackers();
 }
 async function loadTrackers(){
@@ -2332,6 +2368,7 @@ function asidePanels(c,n,ko,tk,td,w){
     (projectType(c)==="audit" ? "" : copyBtn("Readiness link", readyUrl))+
     (["full","migration"].includes(projectType(c)) ? copyBtn("Migration link", migUrl) : "")+
     link("Readiness answers", "SabelReadinessAdmin.html")+
+    (["audit","consult"].includes(projectType(c)) ? "" : '<li><button data-act="brief" data-id="'+c.id+'" title="Their readiness answers, sorted into build order for the project lead. Internal only."><span class="dot"></span>Build brief<span class="k"></span></button></li>')+
   '</ul></section>';
 
   /* details */
@@ -2363,6 +2400,7 @@ function asidePanels(c,n,ko,tk,td,w){
     '<label class="full">Kick-off Desk record<select data-field="hub.kickoffId" data-id="'+c.id+'"><option value="">'+(ko&&!hub.kickoffId?'Matched by name: '+esc(ko.r.name||ko.id):'No record')+'</option>'+Object.entries(S.kickoff||{}).filter(([k,r])=>r&&!r.removed).sort((a,b)=>String(a[1].name||a[0]).localeCompare(String(b[1].name||b[0]))).map(([k,r])=>'<option value="'+esc(k)+'"'+(hub.kickoffId===k?' selected':'')+'>'+esc(r.name||k)+'</option>').join("")+'</select></label>'+
     '<label class="full">SOW client inputs · one per line · shown in their Readiness Check<textarea data-field="hub.sowInputs" data-id="'+c.id+'"'+wf((hub.sowInputs||[]).length)+' placeholder="Brand assets for each brand&#10;Help centre article export">'+esc((hub.sowInputs||[]).join("\n"))+'</textarea></label>'+
     '<div class="full" style="font-size:12px;color:var(--muted);margin-top:-6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn sm" data-act="sow-import" data-id="'+c.id+'">Import from SOW</button><span style="flex:1 1 220px">'+esc({saving:"Publishing to their Readiness Check…",published:"Shown in their Readiness Check (Section J).",unregistered:"Not published: add readiness-inputs-v1 to ALLOWED_KEYS in sabel-webhook, then edit again.",failed:"Could not publish. Edit the list again to retry.",ownfailed:"Saved for Sabel, but the client's own copy was not updated, so their form may show the old list. Open this page from the hubs site while signed in, then edit the list again."}[(S.inputsStatus||{})[c.id]] || ((hub.sowInputs||[]).length ? (hub.sowInputs.length+" item"+(hub.sowInputs.length>1?"s":"")+" listed. Clients see them when they open their Readiness Check link.") : "Import them from the SOW, or type one per line."))+'</span></div>'+
+    (["audit","consult"].includes(projectType(c)) ? '' : '<div class="full" style="font-size:12px;color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn sm" data-act="brief" data-id="'+c.id+'">Build brief</button><span style="flex:1 1 220px">Their readiness answers, sorted into build order for '+esc(c.owner||"the project lead")+'. Internal only.</span></div>')+
     '<label class="full">Scoping notes<textarea data-field="scopingNotes" data-id="'+c.id+'">'+esc(c.scopingNotes||"")+'</textarea></label>'+
     '<label class="full">Notes<textarea data-field="notes" data-id="'+c.id+'">'+esc(c.notes||"")+'</textarea></label>'+
     '<div class="full" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)"><span style="flex:1 1 100%">Saves as you type.</span>'+
@@ -2510,6 +2548,11 @@ document.addEventListener("click", e=>{
     case "overview": return goOverview();
     case "help": $("help-dlg").showModal(); return;
     case "sow-import": if(c) openSowImport(c); return;
+    case "brief": if(c) openBrief(c); return;
+    case "brief-filter": BRIEF.filter=t.dataset.who||"all"; renderBrief(); return;
+    case "brief-copy": copyBrief(t); return;
+    case "brief-send": sendBrief(); return;
+    case "brief-close": $("brief-dlg").close(); return;
     case "board-park": { if(!c) return; S.holdEdit=c.id; openClient(c.id); return; }
     case "board-type": S.prefs.board=Object.assign({}, S.prefs.board||{}, {type:t.dataset.v}); savePrefs(); return render(true);
     case "board-status": S.prefs.board=Object.assign({}, S.prefs.board||{}, {status:t.dataset.v}); savePrefs(); return render(true);
@@ -2821,6 +2864,273 @@ $("sow-dlg").addEventListener("close", ()=>{
 });
 
 loadAll();
+
+/* =====================================================================
+   BUILD BRIEF (13 Nov 2026)
+   A client's saved readiness answers (readiness-<slug>-v1), re-sorted into
+   the order the workspace gets built, for the project lead. Internal only:
+   it reads the answers, the SOW client inputs and the scope held on this
+   page, and writes nothing to the record or to any store.
+   BRIEF_FORM is the form's question list. It is generated, see the script.
+   ===================================================================== */
+/* BRIEF-FORM:BEGIN (generated by scripts/build-brief-map.mjs from SabelReadinessCheck.html; do not edit by hand) */
+const BRIEF_FORM = {"v":"2026-10-27a","sections":[{"id":"A","title":"Access and getting set up","items":[{"id":"a0","t":"ask","q":"Which of these will we need to connect to?","multi":{"id":"a0","other":false}},{"id":"a2","t":"rag","q":"Intercom: add Sabel as a full admin teammate"},{"id":"ax_slack","t":"rag","q":"Your shared Slack channel"},{"id":"a1","t":"ask","q":"Your current helpdesk: add Sabel as an admin","scope":"m","rep":{"id":"a1r","cols":[["sys","System"],["who","Who can grant admin access"],["st","Where it is up to"]]}},{"id":"ax_agents","t":"rag","q":"Your agents in Intercom, at least 3 working days before go-live","scope":"m"},{"id":"ax_help","t":"rag","q":"Your help content","scope":"b"},{"id":"ax_msg","t":"rag","q":"The Intercom Messenger on your website or app","scope":"b"},{"id":"ax_dns","t":"rag","q":"Your email domain: add the records we send","scope":"b"},{"id":"ax_shop","t":"rag","q":"Your online store and subscription apps: add Sabel as a staff user","scope":"b","when":["An online store","Subscriptions"]},{"id":"ax_sys","t":"rag","q":"Other systems Fin looks things up in: add Sabel as a user","scope":"b","when":["Other systems"]},{"id":"ax_crm","t":"rag","q":"Your CRM: an admin or integration user","when":["A CRM"]},{"id":"ax_phone","t":"rag","q":"Phone: a number connected to Intercom","when":["Phone"]},{"id":"a3","t":"rag","q":"Is your team planning to turn on single sign-on during the project?"},{"id":"a4","t":"rag","q":"Non-disclosure agreement, data processing agreement or any other paperwork"},{"id":"a5","t":"ask","q":"Anything about security we should know before we start?","f":[["a5a","Anything we should know"]]}]},{"id":"B","title":"Email and web addresses","items":[{"id":"b1","t":"ask","q":"Which email addresses do your customers write to?","rep":{"id":"b1r","cols":[["addr","Email address"],["dest","Which team should get it"],["kind","What kind of address is it"]]}},{"id":"b2","t":"rag","q":"Are those all proper mailboxes?"},{"id":"b3","t":"rag","q":"Can someone log into each of those mailboxes to click a verification link?"},{"id":"b4","t":"ask","q":"Who looks after your DNS settings?","f":[["b4a","Who manages it"],["b4b","How long a change usually takes"]]},{"id":"b5","t":"ask","q":"Is anything still going to arrive in your old system after you switch?","scope":"m","f":[["b5a","Anything that will keep running"]]},{"id":"b6","t":"ask","q":"Do you split your support by region or by brand?","f":[["b6a","Regions or brands, and how you tell them apart"]]},{"id":"b7","t":"ask","q":"How should your emails look to customers?","scope":"b","f":[["b7a","Sender name"],["b7b","Reply address"],["b7c","Link to your logo files"]]}]},{"id":"C","title":"How you recognise your customers","items":[{"id":"c1","t":"ask","q":"How do you recognise a returning customer today?","f":[["c1a","Choose the closest"],["c1b","No problem. Tell us what you do know"]]},{"id":"c2","t":"rag","q":"When a logged-in customer opens the chat on your site, will your site tell Intercom who they are?","scope":"b"},{"id":"c3","t":"rag","q":"Will it also tell Intercom which company or account the person belongs to?","scope":"b"},{"id":"c4","t":"ask","q":"Do you already have the same customer in your system more than once?","f":[["c4a","Roughly how many, and how you know"]]},{"id":"c5","t":"rag","q":"Will your developers switch on secure identity checking for the chat?","scope":"b"},{"id":"c6","t":"ask","q":"Which systems add or update customers in Intercom, now or planned?","rep":{"id":"c6r","cols":[["sys","System"],["does","What it does in Intercom"],["idby","How it identifies a customer"],["when","Connected now or planned"]]}},{"id":"c7","t":"rag","q":"Does every one of those systems use the same ID for the same customer?"},{"id":"c8","t":"ask","q":"Which system should be the one that creates new customers in Intercom?","f":[["c8a","Choose the closest"],["c8b","Tell us what you know so far"]]},{"id":"c9","t":"ask","q":"Which system holds your main customer and order records?","f":[["c9a","Choose the closest"],["c9b","Name it, and tell us how your team looks a customer up today"]]},{"id":"c10","t":"ask","q":"Do you use Intercom’s Shopify app?","f":[["c10a","Choose the closest"],["c10b","Anything we should know"]]}]},{"id":"D","title":"Your team and seats","items":[{"id":"d1","t":"rag","q":"A list of everyone who has handled tickets in your current system","scope":"m"},{"id":"d2","t":"ask","q":"Who should we assign a conversation to if its original agent is not in Intercom?","scope":"m","f":[["d2a","Name"],["d2b","Email address"]]},{"id":"d3","t":"ask","q":"How many people will need to work in Intercom?","f":[["d3a","How many people"],["d3b","Do you have enough full seats on your plan for them all"]]}]},{"id":"E","title":"Moving your existing conversations","items":[{"id":"e1","t":"ask","q":"How many conversations or tickets are in your current system?","f":[["e1a","Total, and the split per inbox if you have it"]]},{"id":"e2","t":"ask","q":"How far back should we go?","f":[["e2a","How far back"],["e2b","Any inboxes to leave behind"]]},{"id":"e3","t":"ask","q":"What needs to come across with each conversation?","multi":{"id":"e3a","other":true}},{"id":"e4","t":"ask","q":"If anything needs to be moved after you are live, when could we do it?","f":[["e4c","Your hours, or a window that suits"]]},{"id":"e5","t":"ask","q":"Who will check the sample before we move everything?","f":[["e5a","Name"],["e5b","Email address"]]},{"id":"e6","t":"ask","q":"How will the customers we move across match the people who log in after go-live?","f":[["e6a","What your old system holds for each customer"],["e6b","Anything we should know"]]}],"scope":"m"},{"id":"F","title":"Your help content","items":[{"id":"f1","t":"ask","q":"Tell us about your help articles","f":[["f1a","Roughly how many articles"],["f1b","How many reviewed in the last year"],["f1c","Who owns your help content"],["f1d","Their email address"]]},{"id":"f2","t":"ask","q":"Who are your help articles written for?","multi":{"id":"f2a","other":true}},{"id":"f3","t":"ask","q":"Where would you like your help centre to live?","f":[["f3a","Preferred address"],["f3b","Who will make the change"]]},{"id":"f4","t":"rag","q":"Do you have an existing help centre that people already link to?"},{"id":"f5","t":"ask","q":"Who will look after your help articles after go-live?","f":[["f5a","Name"],["f5b","Email address"]]}],"scope":"b"},{"id":"G","title":"Other systems Fin needs to reach","items":[{"id":"g1","t":"ask","q":"What would you like Fin to be able to look up or do?","f":[["g1a","What Fin should be able to do"]]},{"id":"g5","t":"rag","q":"Can we have a test account, somewhere safe to test, and some test data for each of those systems?"},{"id":"g6","t":"ask","q":"For each system, where are the test environment, test account and test data up to?","f":[["g6a","Example references we can use"]],"rep":{"id":"g6r","cols":[["sys","System"],["env","Test environment"],["acct","Test account"],["data","Test data or examples"]]}},{"id":"g3","t":"ask","q":"Who is your developer, and how much time do they realistically have?","f":[["g3a","Name"],["g3b","Email address"],["g3c","Realistic availability"]]},{"id":"g4","t":"ask","q":"Is any of that information only available on a screen, not through a system?","f":[["g4a","Which ones"]]}],"scope":"b"},{"id":"H","title":"What Fin is allowed to say","items":[{"id":"h1","t":"ask","q":"What must Fin never promise a customer?","f":[["h1a","Things Fin must never offer or confirm"]]},{"id":"h2","t":"ask","q":"What should always go straight to a person?","f":[["h2a","Topics that always go to a person"]]},{"id":"h3","t":"ask","q":"How many times should someone have to ask for a person before they get one?","f":[["h3a","Choose"]]},{"id":"h4","t":"ask","q":"Which languages can your team actually support?","f":[["h4a","Languages you support"],["h4b","Any wording your industry requires you to include"],["h4c","When a customer writes in another language, Fin should"]]},{"id":"h5","t":"ask","q":"Who will read through Fin answers and sign them off before go-live?","f":[["h5a","Name"],["h5b","Email address"]]},{"id":"h6","t":"ask","q":"How should Fin sound?","f":[["h6a","Link to a tone of voice or brand voice guide"],["h6b","3 to 5 example replies you are happy with"]]}],"scope":"b"},{"id":"I","title":"Your business","items":[{"id":"i1","t":"ask","q":"What kind of business are you?","f":[["i1a","Industry"],["i1b","Your business in one line"]]},{"id":"i2","t":"ask","q":"How busy is your support?","f":[["i2a","Conversations per day"],["i2b","How much busier at peak"],["i2c","Busiest times of year"]]},{"id":"i3","t":"ask","q":"When and where do you look after customers?","f":[["i3a","Support hours and time zones"],["i3b","Countries or regions you serve"],["i3c","Languages customers write in"],["i3d","Currencies"],["i3e","Public holidays and closures"]]},{"id":"i4","t":"ask","q":"Where are you with Fin, our AI agent?","f":[["i4a","Fin today"],["i4b","How should we approach the build"],["i4c","A name for your AI assistant (optional)"]]},{"id":"i5","t":"ask","q":"How fast do you aim to reply to customers?","scope":"b","f":[["i5a","Chat"],["i5b","Email"],["i5c","Other channels"]]},{"id":"ie1","t":"ask","q":"About your online store","ind":["Ecommerce or retail"],"f":[["ie1a","Store platform"],["ie1b","How many storefronts"],["ie1c","Subscriptions tool, if any"],["ie1d","Returns tool, if any"],["ie1e","Shipping and tracking tools"],["ie1f","Loyalty or rewards tool, if any"]]},{"id":"ie2","t":"ask","q":"Returns and the kind of products you sell","ind":["Ecommerce or retail"],"f":[["ie2a","Your returns policy in a few lines"],["ie2b","What customers mostly buy"]]},{"id":"if1","t":"ask","q":"Your licence and obligations","ind":["Financial services"],"f":[["if1a","Who your customers are"],["if1b","Licence or regulator"],["if1c","Complaints scheme and reporting obligations"],["if1d","Identity verification provider"]]},{"id":"if2","t":"ask","q":"Advice Fin must stay away from","ind":["Financial services"],"f":[["if2a","Topics Fin must never advise on"],["if2b","Products that need their own disclaimer"]]},{"id":"ig1","t":"ask","q":"Your licences and platform","ind":["Gambling or gaming"],"f":[["ig1a","Verticals"],["ig1b","Licences and jurisdictions, with complaint deadlines"],["ig1c","Player account platform"],["ig1d","KYC provider"],["ig1e","Payment providers, including crypto"]]},{"id":"ig2","t":"ask","q":"Your players","ind":["Gambling or gaming"],"f":[["ig2a","VIP tier names"],["ig2b","Responsible gambling tools"],["ig2c","Channels beyond email and web chat"]]},{"id":"is1","t":"ask","q":"Your products and customers","ind":["Software (SaaS)","Consultancy or professional services","Marketplace"],"f":[["is1a","Products or brands"],["is1b","Engineering tracker, and how many"],["is1c","Customer tiers or plans"],["is1d","Who you support"],["is1e","Customers also contact you in Slack or Teams"]]},{"id":"im1","t":"ask","q":"Buyers and sellers","ind":["Marketplace"],"f":[["im1a","Who contacts support"],["im1b","Buyers and sellers need different help content"]]},{"id":"ih1","t":"ask","q":"Clinical and sensitive questions","ind":["Health"],"f":[["ih1a","Roughly how questions split"],["ih1b","How long you must keep records"],["ih1c","How clinical or sensitive questions must be escalated"],["ih1d","Phone lines"]]}]}]};
+/* BRIEF-FORM:END */
+/* BUILD-BRIEF:BEGIN (no page or network access in here; run as-is by tests/build-brief.test.mjs) */
+const BRIEF_AREAS = [["access","Access"],["context","Business context"],["email","Email channel"],["brands","Brands and inboxes"],
+  ["data","Customer data"],["identity","Messenger identity"],["team","Teammates and seats"],["help","Help Centre"],
+  ["connect","Fin connectors"],["fin","Fin guidance"],["hours","Hours and targets"],["mig","Migration"],["sow","SOW client inputs"]];
+/* Where a form section lands, then the questions that belong somewhere else. A question added to the
+   form later still shows up, under its section's area and with its full wording. */
+const BRIEF_SEC_AREA = {A:"access",B:"email",C:"data",D:"team",E:"mig",F:"help",G:"connect",H:"fin",I:"context",J:"sow"};
+const BRIEF_Q_AREA = {a1:"mig",ax_agents:"mig",b5:"mig",d1:"mig",d2:"mig",ax_help:"help",ax_msg:"identity",ax_dns:"email",
+  ax_shop:"connect",ax_sys:"connect",ax_crm:"connect",b6:"brands",c2:"identity",c3:"identity",c5:"identity",
+  i3:"hours",i5:"hours",i4:"fin",ie1:"connect"};
+const BRIEF_LABEL = {a0:"Systems to connect",a2:"Intercom admin access",ax_slack:"Shared Slack channel",a1:"Old helpdesk access",
+  ax_agents:"Agents invited to Intercom",ax_help:"Help content access",ax_msg:"Messenger install access",ax_dns:"DNS records added",
+  ax_shop:"Store and subscription access",ax_sys:"Other systems access",ax_crm:"CRM access",ax_phone:"Phone number connected",
+  a3:"Single sign-on",a4:"Paperwork",a5:"Security notes",
+  b1:"Support addresses",b2:"Proper mailboxes",b3:"Verification links",b4:"DNS owner",b5:"Still arriving in the old system",
+  b6:"Regions or brands",b7:"Sender name, reply address, logo",
+  c1:"How customers are recognised",c2:"Site identifies logged-in users",c3:"Company or account sent too",c4:"Duplicate customers",
+  c5:"Secure identity checking",c6:"Systems writing customers to Intercom",c7:"Same ID across systems",c8:"System that creates customers",
+  c9:"Main customer and order record",c10:"Intercom Shopify app",
+  d1:"Agent list from the old system",d2:"Fallback assignee",d3:"People and seats",
+  e1:"Volume to move",e2:"How far back",e3:"What comes across",e4:"Window for late moves",e5:"Sample checker",e6:"Matching customers to logins",
+  f1:"Help articles today",f2:"Article audiences",f3:"Help Centre address",f4:"Existing help centre links",f5:"Article owner after go-live",
+  g1:"What Fin should look up or do",g5:"Test account, sandbox and test data",g6:"Test set-up per system",g3:"Developer and their time",g4:"Screen-only information",
+  h1:"Never promise",h2:"Always to a person",h3:"Asks before handover",h4:"Languages",h5:"Signs off Fin answers",h6:"Tone of voice",
+  i1:"Industry",i2:"Support volume",i3:"Hours, regions and holidays",i4:"Fin today and approach",i5:"Reply targets",ie1:"Store tools"};
+/* Fixed pointers, shown under an answer when it is not green. */
+const BRIEF_HINT = {
+  b2:"A group address cannot be verified as it stands. Agree a real mailbox or a forward before the email channel is set up.",
+  ax_dns:"Email sending stays unverified until these are in. The DNS owner is under DNS owner in this area.",
+  c7:"Agree the shared ID before any sync is switched on, or customers will duplicate.",
+  g5:"Connectors can be built without this, but they cannot be tested."};
+const BRIEF_ST = {g:"Ready",a:"Waiting",r:"Not started",n:"Not needed",u:"Not answered"};
+function briefInputId(txt){ let h=0; for(const ch of String(txt)) h=(h*31+ch.charCodeAt(0))|0; return 'pj'+(h>>>0).toString(36); }
+/* snap: the form's saved copy {v, savedAt, projectType, data, reps, submitted, submittedAt, P}.
+   ctx: {name, type, lead, sowInputs[], scopeText}. Returns a plain object, never throws on gaps. */
+function briefModel(snap, ctx){
+  snap=snap||{}; ctx=ctx||{};
+  const D=snap.data||{}, R=snap.reps||{};
+  const val=k=>String(D[k]==null?"":D[k]).trim();
+  const type=snap.projectType || ({full:"full",build:"build",migration:"migration"}[ctx.type]||"");
+  const inScope=tag=>!tag || !type || type==="unsure" || (tag==="m" ? (type==="full"||type==="migration") : tag==="b" ? (type==="full"||type==="build") : true);
+  const picked=val("a0").split("|");
+  const lead=ctx.lead||"Project lead";
+  const ownerOf=area=>area==="mig" ? "Richard" : area==="connect" ? "Greg" : lead;
+  const unsure=s=>/^(i am )?not sure|^no idea/i.test(String(s||""));
+  const sows=(ctx.sowInputs||[]).map(x=>String(x).trim()).filter(Boolean);
+  const secs=BRIEF_FORM.sections.concat(sows.length ? [{id:"J",title:"Your project’s inputs",items:sows.map(t=>({t:"rag",id:briefInputId(t),q:t}))}] : []);
+  const lines=[];
+  secs.forEach(sec=>{
+    if(!inScope(sec.scope)) return;
+    sec.items.forEach(it=>{
+      if(!inScope(it.scope)) return;
+      if(it.ind && it.ind.indexOf(val("i1a"))<0) return;
+      if(it.when && !it.when.some(w=>picked.indexOf(w)>-1)) return;
+      const area=BRIEF_Q_AREA[it.id] || (it.scope==="m" ? "mig" : BRIEF_SEC_AREA[sec.id]) || "context";
+      const L={id:it.id, sec:sec.id, area, who:ownerOf(area), label:BRIEF_LABEL[it.id]||it.q, q:it.q, rag:it.t==="rag",
+               parts:[], st:"u", owner:"", due:"", note:"", hint:"", unsure:false};
+      if(it.t==="rag"){
+        const v=val("s_"+it.id), i=v.indexOf("::"), b=i>-1?v.slice(0,i):"", label=i>-1?v.slice(i+2):"";
+        L.st={good:"g",warn:"a",bad:"r",na:"n"}[b]||"u";
+        if(label) L.parts.push(label);
+        L.owner=val(it.id+"_own"); L.due=val(it.id+"_by"); L.note=val(it.id+"_note");
+        L.unsure=unsure(label);
+      } else {
+        if(it.rep) (R[it.rep.id]||[]).forEach(r=>{
+          const row=it.rep.cols.map(c=>String((r&&r[c[0]])||"").trim()).filter(Boolean).join(" · ");
+          if(row) L.parts.push(row);
+        });
+        if(it.multi){
+          const sel=val(it.multi.id).split("|").filter(Boolean);
+          if(sel.length) L.parts.push(sel.join(", "));
+          if(it.multi.other && val(it.multi.id+"_o")) L.parts.push("Also: "+val(it.multi.id+"_o"));
+        }
+        const fl=(it.f||[]).filter(f=>val(f[0]));
+        fl.forEach((f,n)=>L.parts.push(((it.f||[]).length>1 && !(n===0 && /^choose/i.test(f[1])) ? f[1]+": " : "")+val(f[0])));
+        L.st=L.parts.length ? "g" : "u";
+        L.unsure=fl.length>0 && unsure(val(fl[0][0]));
+      }
+      if(BRIEF_HINT[it.id] && L.rag && (L.st==="a" || L.st==="r")) L.hint=BRIEF_HINT[it.id];
+      L.text=L.parts.join("\n");
+      lines.push(L);
+    });
+  });
+  const areas=BRIEF_AREAS.map(a=>({id:a[0], title:a[1], who:ownerOf(a[0]), lines:lines.filter(l=>l.area===a[0])})).filter(a=>a.lines.length);
+  const blocked=lines.filter(l=>(l.st==="a"||l.st==="r") && !l.unsure);
+  const ask=lines.filter(l=>l.st==="u" || l.unsure);
+  const start=areas.filter(a=>a.id!=="sow" && a.lines.some(l=>l.st==="g") && !a.lines.some(l=>l.st==="a"||l.st==="r"))
+    .map(a=>({id:a.id, title:a.title, who:a.who, n:a.lines.filter(l=>l.st==="g").length, open:a.lines.filter(l=>l.st==="u").length}));
+
+  /* Scope check. Only a word match against the scope text held on this page, so it can miss and
+     it can false-alarm. It lists what to read against the SOW, it does not decide anything. */
+  const hay=String(ctx.scopeText||"").toLowerCase();
+  const seen={}, systems=[];
+  const addSys=(s,from)=>String(s||"").split(/,|\/|\band\b|\n/).forEach(x=>{
+    x=x.trim(); const k=x.toLowerCase();
+    if(x.length<3 || /^(none|n\/a|no|not sure|tbc|other)$/i.test(x) || seen[k]) return;
+    seen[k]=1; systems.push({name:x, from, mentioned: hay ? hay.indexOf(k)>-1 : null});
+  });
+  [["a1r","Old helpdesk"],["c6r","Writes customers to Intercom"],["g6r","Fin connector"]].forEach(p=>(R[p[0]]||[]).forEach(r=>addSys(r&&r.sys,p[1])));
+  [["ie1a","Store platform"],["ie1c","Subscriptions tool"],["ie1d","Returns tool"],["ie1e","Shipping and tracking"],["ie1f","Loyalty tool"]].forEach(p=>addSys(val(p[0]),p[1]));
+  const facts=[["Languages the team supports",val("h4a")],["Languages customers write in",val("i3c")],["Regions or brands",val("b6a")],
+    ["Storefronts",val("ie1b")],["Seats",val("d3a")],["Conversations to move",val("e1a")],["How far back",val("e2a")]]
+    .filter(f=>f[1] && lines.some(l=>l.text.indexOf(f[1])>-1));
+  const answered=lines.filter(l=>l.st!=="u").length;
+  return {name:ctx.name||val("f_client")||"", type, formV:snap.v||"", mapV:BRIEF_FORM.v,
+    savedAt:snap.savedAt||0, submittedAt:snap.submittedAt||null,
+    contact:[val("f_name"),val("f_role"),val("f_email")].filter(Boolean).join(" · "), otherNotes:val("f_other"),
+    empty:!lines.some(l=>l.st!=="u"), lines, areas, blocked, ask, start,
+    scope:{held:!!hay, systems, missing:systems.filter(s=>s.mentioned===false), facts},
+    counts:{total:lines.length, answered, blocked:blocked.length, ask:ask.length}};
+}
+function briefDay(s){ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||"")); return m ? (+m[3])+" "+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m[2]-1]+" "+m[1] : String(s||""); }
+function briefDue(l){ return (l.owner?"Owner: "+l.owner:"No owner named")+(l.due?" · expected "+briefDay(l.due):" · no date given"); }
+/* Plain text for Slack, or to hand to Forge as the intake document. */
+function briefText(m){
+  const T={full:"Build + Migration",build:"Build",migration:"Migration",unsure:"Type not chosen"};
+  const L=["# Build brief: "+m.name,"",
+    "- Project type: "+(T[m.type]||"not set"),
+    "- Readiness check: "+m.counts.answered+" of "+m.counts.total+" answered"+(m.submittedAt?", submitted":", not submitted yet"),
+    "- Blocked on the client: "+m.counts.blocked+" · to ask at kick-off: "+m.counts.ask];
+  if(m.blocked.length){ L.push("","## Blocked on the client"); m.blocked.forEach(l=>L.push("- "+l.label+" ("+BRIEF_ST[l.st]+(l.text?": "+l.text:"")+"). "+briefDue(l)+(l.note?". "+l.note:""))); }
+  if(m.ask.length){ L.push("","## To ask at kick-off"); m.ask.forEach(l=>L.push("- "+l.q+(l.unsure&&l.text?" (answered: "+l.text.split("\n")[0]+")":""))); }
+  m.areas.forEach(a=>{
+    const got=a.lines.filter(l=>l.st!=="u"); if(!got.length) return;
+    L.push("","## "+a.title+" ("+a.who+")");
+    got.forEach(l=>L.push("- "+l.label+": "+(l.text.replace(/\n+/g," / ")||BRIEF_ST[l.st])+(l.rag&&l.st!=="g"&&l.st!=="n"?" ["+briefDue(l)+"]":"")+(l.note?" Note: "+l.note:"")));
+  });
+  if(m.scope.missing.length){ L.push("","## Check against the SOW","Named in the form, not found in the scope text we hold:"); m.scope.missing.forEach(s=>L.push("- "+s.name+" ("+s.from+")")); }
+  return L.join("\n");
+}
+/* BUILD-BRIEF:END */
+
+const BRIEF = {id:null, model:null, filter:"all", changed:{}, last:0, state:""};
+const BRIEF_SEEN = "sabel-brief-seen-v1";
+function briefKeyFor(c){ const s=formSlugOf(c); return s ? "readiness-"+s+"-v1" : ""; }
+function briefCtx(c){
+  const n=notionFor(c), ko=kickoffFor(c), sc=(ko&&ko.r&&ko.r.scope)||{};
+  const item=x=>typeof x==="string" ? x : ((x&&x.t)||"")+" "+((x&&x.note)||"");
+  const scopeText=[n&&n.scope, sc.summary, (sc.inScope||[]).map(item).join("\n"), (sc.outScope||[]).map(item).join("\n"),
+    ((c.hub&&c.hub.sowInputs)||[]).join("\n"), c.scopingNotes].filter(Boolean).join("\n");
+  return {name:c.name, type:projectType(c), lead:c.owner||"", sowInputs:(c.hub&&c.hub.sowInputs)||[], scopeText};
+}
+async function openBrief(c){
+  BRIEF.id=c.id; BRIEF.model=null; BRIEF.filter="all"; BRIEF.changed={}; BRIEF.last=0; BRIEF.state="loading";
+  $("brief-dlg").querySelector(".dh").textContent="Build brief · "+c.name;
+  renderBrief(); $("brief-dlg").showModal();
+  const key=briefKeyFor(c);
+  if(!key){ BRIEF.state="nokey"; return renderBrief(); }
+  let snap=null;
+  try{
+    const r=await fetch(API+"?key="+encodeURIComponent(key)+"&_t="+Date.now(),{cache:"no-store"});
+    if(BRIEF.id!==c.id) return;
+    if(r.status===404){ BRIEF.state="unregistered"; return renderBrief(); }
+    if(r.status===401){ BRIEF.state="locked"; return renderBrief(); }
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const j=await r.json(), raw=j && (j.value!==undefined ? j.value : j.data);
+    snap=typeof raw==="string" ? (raw ? JSON.parse(raw) : null) : (raw||null);
+  }catch(e){ if(BRIEF.id===c.id){ BRIEF.state="failed"; renderBrief(); } return; }
+  if(BRIEF.id!==c.id) return;
+  const m=briefModel(snap, briefCtx(c));
+  BRIEF.model=m; BRIEF.state=(!snap || m.empty) ? "empty" : "ok";
+  /* What changed since this browser last opened this client's brief. A convenience only. */
+  try{
+    const all=JSON.parse(localStorage.getItem(BRIEF_SEEN)||"{}"), was=all[key];
+    const now={}; m.lines.forEach(l=>{ now[l.id]=l.st+"|"+l.text+"|"+l.owner+"|"+l.due; });
+    if(was && was.a){ BRIEF.last=was.at||0; m.lines.forEach(l=>{ if(was.a[l.id]!==undefined ? was.a[l.id]!==now[l.id] : l.st!=="u") BRIEF.changed[l.id]=1; }); }
+    all[key]={at:Date.now(), a:now}; localStorage.setItem(BRIEF_SEEN, JSON.stringify(all));
+  }catch(e){}
+  renderBrief();
+}
+function renderBrief(){
+  const body=$("brief-body"), c=byId(BRIEF.id), m=BRIEF.model, key=c?briefKeyFor(c):"";
+  $("brief-copy").disabled = $("brief-send").disabled = BRIEF.state!=="ok";
+  const msg={loading:"Loading their answers…",
+    nokey:"This client has no short name yet. Set the Tracker key in Details first, the form link is built from it.",
+    unregistered:"Their answers are not saved on the server yet: "+key+" is not registered in sabel-webhook. Until it is, answers stay in the client’s own browser and only arrive when they press Send.",
+    locked:"Could not open "+key+". Open Internal Ops from hubs.sabelcustomersuccess.com and sign in, then try again.",
+    failed:"Could not reach their saved answers. Close this and try again.",
+    empty:"Nothing answered yet. The brief fills in as soon as the client starts their Readiness Check; it does not wait for them to send it."}[BRIEF.state];
+  if(msg){ body.innerHTML='<p class="bb-msg">'+esc(msg)+'</p>'; return; }
+  const f=BRIEF.filter, show=who=>f==="all" || who===f;
+  const whos=[...new Set(m.areas.map(a=>a.who))];
+  const day=t=>{ const d=new Date(t); return isNaN(d) ? "" : d.getDate()+" "+MON[d.getMonth()]+" "+d.getFullYear(); };
+  const pill=l=>l.unsure ? '<span class="bb-pill u">Not sure</span>' : '<span class="bb-pill '+l.st+'">'+(l.st==="g" && !l.rag ? "Answered" : BRIEF_ST[l.st])+'</span>';
+  const chg=l=>BRIEF.changed[l.id] ? '<span class="bb-chg" title="Changed since you last opened this brief">changed</span>' : '';
+  const nChanged=Object.keys(BRIEF.changed).length;
+  const T={full:"Build + Migration",build:"Build",migration:"Migration",unsure:"Type not chosen in the form"};
+  let h='<p class="bb-meta">'+esc(T[m.type]||"Project type not set")+' · '+
+    (m.submittedAt ? 'sent '+esc(day(m.submittedAt)) : 'not sent yet'+(m.savedAt?', last saved '+esc(day(m.savedAt)):''))+
+    (m.contact?' · '+esc(m.contact):'')+' · lead '+esc(c.owner||"not set")+'</p>'+
+    '<p class="bb-int">Internal. Do not forward to the client: it compares their answers with the scope.</p>'+
+    (m.formV && m.mapV && m.formV!==m.mapV ? '<p class="bb-int">Their answers were saved on form version '+esc(m.formV)+' and this page knows version '+esc(m.mapV)+'. A newer question may be missing below.</p>' : '')+
+    (BRIEF.last ? '<p class="bb-meta">'+(nChanged ? nChanged+' line'+(nChanged>1?'s':'')+' changed' : 'Nothing has changed')+' since you last opened this on '+esc(day(BRIEF.last))+'.</p>' : '')+
+    '<div class="bb-seg">'+[["all","Everyone"]].concat(whos.map(w=>[w,w])).map(x=>'<button type="button" class="btn sm'+(f===x[0]?' primary':'')+'" data-act="brief-filter" data-who="'+esc(x[0])+'">'+esc(x[1])+'</button>').join("")+'</div>'+
+    '<div class="bb-tiles"><div><b class="g">'+m.counts.answered+'<small> of '+m.counts.total+'</small></b>answered</div><div><b class="r">'+m.counts.blocked+'</b>blocked on the client</div><div><b class="a">'+m.counts.ask+'</b>to ask at kick-off</div><div><b>'+m.scope.missing.length+'</b>to check against the SOW</div></div>';
+
+  const li=(t,d)=>'<li><span>'+t+'</span>'+(d?'<small>'+d+'</small>':'')+'</li>';
+  const start=m.start.filter(a=>show(a.who)), blocked=m.blocked.filter(l=>show(l.who)), ask=m.ask.filter(l=>show(l.who));
+  h+='<h4>1. Can I start?</h4><div class="bb-three">'+
+    '<div class="bb-box g"><h5>Start today</h5><ul>'+(start.map(a=>li(esc(a.title), a.n+' answer'+(a.n>1?'s':'')+', nothing waiting'+(a.open?' · '+a.open+' still blank':''))).join("")||li("Nothing is clear to start yet",""))+'</ul></div>'+
+    '<div class="bb-box r"><h5>Blocked on the client</h5><ul>'+(blocked.map(l=>li(esc(l.label)+' '+pill(l)+chg(l), esc(briefDue(l))+(l.note?' · '+esc(l.note):''))).join("")||li("Nothing blocked",""))+'</ul></div>'+
+    '<div class="bb-box u"><h5>Ask at kick-off</h5><ul>'+(ask.map(l=>li(esc(l.label)+chg(l), l.unsure ? 'Answered “'+esc(l.text.split("\n")[0])+'”' : 'Left blank')).join("")||li("Nothing left to ask",""))+'</ul></div></div>';
+
+  h+='<h4>2. Config sheet</h4><p class="bb-sub">Their answers in the order the workspace gets built. The code is the form question each line came from.</p>';
+  m.areas.filter(a=>show(a.who)).forEach((a,i)=>{
+    h+='<div class="bb-area"><div class="bb-ah"><b>'+esc(a.title)+'</b><span>'+esc(a.who)+'</span></div>'+
+      a.lines.map(l=>'<div class="bb-line'+(l.st==="u"?' blank':'')+'"><div class="bb-set">'+esc(l.label)+' <code>'+esc(l.sec==="J"?"J":l.id)+'</code></div>'+
+        '<div class="bb-ans">'+(l.text ? esc(l.text).replace(/\n/g,"<br>") : '<i>'+(l.st==="n"?"Does not apply":"No answer yet")+'</i>')+
+          ((l.rag && (l.st==="a"||l.st==="r") && !l.unsure) || l.owner || l.due ? '<small>'+esc(briefDue(l))+'</small>' : '')+
+          (l.note?'<small>Their note: '+esc(l.note)+'</small>':'')+(l.hint?'<small class="hint">'+esc(l.hint)+'</small>':'')+'</div>'+
+        '<div>'+pill(l)+chg(l)+'</div></div>').join("")+'</div>';
+  });
+  if(m.otherNotes && f==="all") h+='<div class="bb-area"><div class="bb-ah"><b>Anything else they told us</b></div><div class="bb-line"><div class="bb-set">Closing note</div><div class="bb-ans">'+esc(m.otherNotes).replace(/\n/g,"<br>")+'</div><div></div></div></div>';
+
+  if(f==="all"){
+    h+='<h4>3. Check against the SOW</h4>';
+    if(!m.scope.held) h+='<p class="bb-sub">No scope text is held for this client on this page (Notion scope, kick-off scope, SOW client inputs or scoping notes), so there is nothing to check their answers against. Read the lists below beside the SOW.</p>';
+    else h+='<p class="bb-sub">A word match against the scope held on this page (Notion scope, kick-off scope lists, SOW client inputs, scoping notes). It can miss things and it can be wrong, so read each one against the SOW before raising it.</p>';
+    if(m.scope.missing.length) h+='<div class="bb-box a"><h5>Named in the form, not found in the scope</h5><ul>'+m.scope.missing.map(s=>li(esc(s.name), esc(s.from))).join("")+'</ul></div>';
+    else if(m.scope.held && m.scope.systems.length) h+='<p class="bb-sub">Every system they named appears in the scope text.</p>';
+    if(!m.scope.held && m.scope.systems.length) h+='<div class="bb-box u"><h5>Systems they named</h5><ul>'+m.scope.systems.map(s=>li(esc(s.name), esc(s.from))).join("")+'</ul></div>';
+    if(m.scope.facts.length) h+='<div class="bb-box u" style="margin-top:10px"><h5>Sizes to compare with what was quoted</h5><ul>'+m.scope.facts.map(x=>li(esc(x[0]), esc(x[1]))).join("")+'</ul></div>';
+  }
+  body.innerHTML=h;
+}
+/* The task the lead gets: who, when, and a link straight back to this brief. Kept apart from the
+   page so the dates can be tested. kickoff is YYYY-MM-DD or "", today a Date. */
+function briefTask(m, c, today){
+  const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  const step=(d,n)=>{ d=new Date(d.getFullYear(),d.getMonth(),d.getDate()); const dir=n<0?-1:1; for(let i=Math.abs(n);i>0;){ d.setDate(d.getDate()+dir); if(d.getDay()!==0 && d.getDay()!==6) i--; } return d; };
+  const t0=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  const ko=/^\d{4}-\d{2}-\d{2}$/.test((c.hub&&c.hub.kickoffDate)||"") ? new Date(c.hub.kickoffDate+"T00:00:00") : null;
+  /* The working day before kick-off; if that has gone, or there is no kick-off date, three working days from today. */
+  const before=ko ? step(ko,-1) : null;
+  const due=before && before>=t0 ? before : step(t0,3);
+  const to=[];
+  const add=p=>{ if(["Chris","Richard","Greg"].indexOf(p)>-1 && to.indexOf(p)<0) to.push(p); };
+  add(c.owner);
+  if(m.areas.some(a=>a.id==="mig")) add("Richard");
+  if(m.areas.some(a=>a.id==="connect" && a.lines.some(l=>l.st!=="u"))) add("Greg");
+  return {kind:"brief", t:"Read the build brief for "+c.name+(ko && before>=t0 ? " before kick-off" : ""),
+    n:m.counts.answered+" of "+m.counts.total+" readiness answers in. "+m.counts.blocked+" blocked on the client, "+m.counts.ask+" to ask at kick-off"+(m.scope.missing.length?", "+m.scope.missing.length+" to check against the SOW":"")+".",
+    d:iso(due), to:to.join(","), c:c.name, k:"brief:"+c.id};
+}
+function sendBrief(){
+  const c=byId(BRIEF.id); if(!c || !BRIEF.model) return;
+  const task=briefTask(BRIEF.model, c, new Date());
+  task.u=PAGES+"SabelInternalOps.html#c="+encodeURIComponent(c.id)+"&brief=1";
+  window.open(PAGES+"SabelTaskHub.html#nikki?chase="+encodeURIComponent(JSON.stringify(task)), "_blank", "noopener");
+}
+function copyBrief(btn){
+  if(!BRIEF.model) return;
+  const txt=briefText(BRIEF.model), done=()=>{ btn.textContent="Copied"; setTimeout(()=>{ btn.textContent="Copy as text"; },1600); };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done,()=>{});
+}
 </script>
 </body>
 </html>

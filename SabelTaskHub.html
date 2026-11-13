@@ -731,6 +731,13 @@ function oneChase(d){
   const url=cut(d.u,600),okUrl=/^https:\/\/([a-z0-9-]+\.)*slack\.com\/|^https:\/\/mail\.google\.com\//i.test(url)?url:'';
   const since=cut(d.s,40),ok=since&&!isNaN(Date.parse(since))?new Date(since).toISOString():'';
   const to=TEAM.filter(p=>String(d.to||'').split(/[,\s]+/).some(x=>x.toLowerCase()===p.toLowerCase()));
+  /* 13 Nov 2026: "Send to Task Hub" on a client's build brief in Internal Ops. Same hand-off, but it
+     can go to more than one person, carries a due date, and links back to Internal Ops only. */
+  if(d.kind==='brief'){
+    const due=/^\d{4}-\d{2}-\d{2}$/.test(cut(d.d,10))?cut(d.d,10):'';
+    const ops=url.indexOf(BASE+'SabelInternalOps.html#')===0?url:'';
+    return {title:cut(d.t,160),note:cut(d.n,400),due,to,kind:'brief',client:cut(d.c,80),url:ops,since:'',sk:cut(d.k,120)};
+  }
   return {title:cut(d.t,160),note:cut(d.n,400),due:'',to:to.slice(0,1),kind:'chase',client:cut(d.c,80),url:okUrl,since:ok,sk:cut(d.k,120)};
 }
 if(hashWho())S.who=hashWho();
@@ -1559,7 +1566,7 @@ function reminderRaws(){
     const r=R[id];if(!r||r.del)return;
     (r.to||[]).forEach(p=>{
       const d=r.due?dOf(r.due):null;
-      out.push({id:'r:'+id+':'+p,key:r.kind==='chase'?chaseKey(r.client):'',cid:'',pid:'',pillar:'',title:r.title,owner:p,lead:'',status:'Pending',start:d,end:d,late:d,
+      out.push({id:'r:'+id+':'+p,key:(r.kind==='chase'||r.kind==='brief')?chaseKey(r.client):'',cid:'',pid:'',pillar:'',title:r.title,owner:p,lead:'',status:'Pending',start:d,end:d,late:d,
         est:r.est||null,notion:null,desc:r.note||'',bg:'',card:'',tip:'',link:r.url||'',log:[],sub:[],stages:null,doneAt:'',src:'Reminder',rem:r});
     });
   });
@@ -1574,6 +1581,8 @@ function chaseKey(name){
   return k||'name:'+name;
 }
 const isChase=t=>!!(t&&t.rem&&t.rem.kind==='chase');
+/* A client's build brief, pushed from Internal Ops: pinned above everything on Home until ticked. */
+const isBrief=t=>!!(t&&t.rem&&t.rem.kind==='brief');
 /* How long the client has been waiting: "5h", "1d 4h". */
 function waitAge(iso){
   const ms=Date.now()-Date.parse(iso||'');if(!iso||isNaN(ms)||ms<0)return '';
@@ -1772,15 +1781,15 @@ function addReminder(){
   if(!title){toast('Type what not to forget first');return;}
   if(!r.to.length){toast('Pick who it is for');return;}
   OV.reminders=OV.reminders||{};
-  if(r.kind==='chase'&&r.sk){
+  if((r.kind==='chase'||r.kind==='brief')&&r.sk){
     const dup=Object.keys(OV.reminders).map(k=>OV.reminders[k]).find(x=>x&&!x.del&&x.sk===r.sk&&(x.to||[]).some(p=>r.to.indexOf(p)>-1));   /* same message to someone else = a reassign, allowed */
     if(dup){toast('Already sent to '+(dup.to||[]).join(', ')+' on '+fStamp(dup.at));S.rem={title:'',note:'',due:'',to:[]};S.fromLoops=false;render();return;}
   }
   const id=nid();
   OV.reminders[id]={id,title,note:r.note.trim(),due:r.due||'',to:r.to.slice(),by:author(),at:Date.now(),eAt:Date.now()};
-  if(r.kind==='chase')Object.assign(OV.reminders[id],{kind:'chase',client:r.client||'',url:r.url||'',since:r.since||'',sk:r.sk||''});
+  if(r.kind==='chase'||r.kind==='brief')Object.assign(OV.reminders[id],{kind:r.kind,client:r.client||'',url:r.url||'',since:r.since||'',sk:r.sk||''});
   S.rem={title:'',note:'',due:'',to:[]};S.fromLoops=false;
-  commit();toast((r.kind==='chase'?'Chase':'Reminder')+' sent to '+r.to.join(', '));
+  commit();toast((r.kind==='chase'?'Chase':r.kind==='brief'?'Build brief':'Reminder')+' sent to '+r.to.join(', '));
 }
 function delReminder(rid){const r=(OV.reminders||{})[rid];if(!r)return;r.del=true;r.eAt=Date.now();commit();}
 function focusToggle(id){
@@ -2090,6 +2099,7 @@ function tagsHTML(t){
   if(t.back&&t.status!=='Parked'&&!isDone(t))h+='<span class="tag amber">'+esc(t.back.by)+' replied</span>';
   if(t.waiting)h+='<span class="tag amber">Waiting</span>';
   if(isChase(t)){const a=waitAge(t.rem.since);h+='<span class="tag '+(waitHot(t.rem.since)&&!isDone(t)?'red':'amber')+'">Client waiting'+(a&&!isDone(t)?' '+a:'')+'</span><span class="tag">From '+esc(t.rem.by||COORD)+'</span>';}
+  else if(isBrief(t))h+='<span class="tag red">Build brief</span><span class="tag">From '+esc(t.rem.by||COORD)+'</span>';
   else if(t.src==='Reminder')h+='<span class="tag amber">Reminder from '+esc(t.rem&&t.rem.by||COORD)+'</span>';
   else if(t.src)h+='<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>';
   if(t.clientManual)h+='<span class="tag violet" title="Client set by hand by '+esc(t.clientManual.by||'')+'">Client added by hand</span>';
@@ -2168,7 +2178,7 @@ function timeHTML(t){
 function linksHTML(t){
   const c=CLIENTS[t.key];let h='';
   if(c&&t.pid)h+='<a class="tl" href="'+esc(c.url+(c.deep?'#pillar/'+encodeURIComponent(t.pid):''))+'" target="_blank" rel="noopener">Open in client tracker &rarr;</a>';
-  if(t.link&&/^https?:\/\//.test(t.link))h+='<a class="tl'+(h?' sub2':'')+'" href="'+esc(t.link)+'" target="_blank" rel="noopener">'+(isChase(t)?'Open the client message':'Reference link')+'</a>';
+  if(t.link&&/^https?:\/\//.test(t.link))h+='<a class="tl'+(h?' sub2':'')+'" href="'+esc(t.link)+'" target="_blank" rel="noopener">'+(isChase(t)?'Open the client message':isBrief(t)?'Open the build brief':'Reference link')+'</a>';
   if(t.src&&t.notion&&t.notion.id)h+='<a class="tl'+(h?' sub2':'')+'" href="https://www.notion.so/'+esc(String(t.notion.id).replace(/-/g,''))+'" target="_blank" rel="noopener">Open Notion row &rarr;</a>';
   return h?'<div>'+h+'</div>':'';
 }
@@ -2399,8 +2409,10 @@ function zoneTop(mine){
   /* Same two sections as Home, so people who work from List or Board still see them first. */
   const chases=all.filter(t=>!isDone(t)&&!fset[t.id]&&isChase(t)&&t.status!=='Parked').sort((a,b)=>Date.parse(a.rem.since||a.rem.at||0)-Date.parse(b.rem.since||b.rem.at||0));
   const back=all.filter(t=>!isDone(t)&&!fset[t.id]&&t.src!=='Reminder'&&t.back&&t.status!=='Parked').sort(byDue);
+  const briefs=all.filter(t=>!isDone(t)&&!fset[t.id]&&isBrief(t)&&t.status!=='Parked').sort(byDue);
   const whoTxt=S.who==='Everyone'?'the team':'you';
   const h=(canF?focusZoneHTML(all):'')+
+    (briefs.length?homeSec('brief','Build brief','A client’s readiness answers are in. Read the brief before their kick-off.','var(--red2)','var(--red2)','rgba(225,6,0,.45)',briefs):'')+
     (chases.length?homeSec('chase','Client waiting','A client is waiting on a reply. Longest wait first.','var(--red2)','var(--red2)','rgba(225,6,0,.45)',chases):'')+
     (back.length?homeSec('back',COORD+' replied','Answered and handed back. Over to '+whoTxt+'.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',back):'');
   return h?'<div class="list fztop">'+h+'</div>':'';
@@ -2430,13 +2442,15 @@ function homeHTML(mine){
   const open=mine.filter(t=>!isDone(t)&&!fset[t.id]&&t.src!=='Reminder');
   const remsAll=mine.filter(t=>!isDone(t)&&!fset[t.id]&&t.src==='Reminder'&&t.status!=='Parked');
   const chases=remsAll.filter(isChase).sort((a,b)=>Date.parse(a.rem.since||a.rem.at||0)-Date.parse(b.rem.since||b.rem.at||0));
-  const rems=remsAll.filter(t=>!isChase(t)).sort(byDue);
+  const rems=remsAll.filter(t=>!isChase(t)&&!isBrief(t)).sort(byDue);
+  const briefs=remsAll.filter(isBrief).sort(byDue);
   const back=open.filter(t=>t.back&&t.status!=='Parked').sort(byDue);
   const prog=open.filter(t=>t.status==='In Progress'&&!t.back).sort(byDue);
   const urgent=open.filter(t=>t.status!=='In Progress'&&t.status!=='Parked'&&!t.back&&dueIn(t)!==null&&dueIn(t)<=0).sort(byDue);
   const parked=open.filter(t=>t.status==='Parked').sort(byDue);
   const whoTxt=S.who==='Everyone'?'the team':'you';
   let h='<div class="list">'+decksHTML(mine)+heldHTML()+zone;
+  if(briefs.length)h+=homeSec('brief','Build brief','A client’s readiness answers are in. Read the brief before their kick-off.','var(--red2)','var(--red2)','rgba(225,6,0,.45)',briefs);
   if(chases.length)h+=homeSec('chase','Client waiting','A client is waiting on a reply. Longest wait first.','var(--red2)','var(--red2)','rgba(225,6,0,.45)',chases);
   if(rems.length)h+=homeSec('rem','Don’t forget…','Pushed to '+whoTxt+' by '+COORD+'. Tick it off when done.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',rems);
   if(back.length)h+=homeSec('back',COORD+' replied','Answered and handed back. Over to '+whoTxt+'.','var(--amber)','var(--amber)','rgba(251,191,36,.35)',back);
@@ -2486,14 +2500,17 @@ function reminderTileHTML(all){
       (S.rem.client?'<b>'+esc(S.rem.client)+'</b>':'')+'<span>From Open Loops. Check the title and who it is for, then send.</span>'+
       (S.rem.url?'<a href="'+esc(S.rem.url)+'" target="_blank" rel="noopener">Open the client message</a>':'')+
       '<span class="sp"></span><button type="button" class="lk" data-act="r-clear">Clear</button></div>':'')+
+    (S.rem.kind==='brief'?'<div class="rchase"><span class="tag red">Build brief</span>'+(S.rem.client?'<b>'+esc(S.rem.client)+'</b>':'')+'<span>From Internal Ops. Check the title, the date and who it is for, then send. It is pinned to the top of their Home until they tick it.</span>'+
+      (S.rem.url?'<a href="'+esc(S.rem.url)+'" target="_blank" rel="noopener">Open the brief</a>':'')+
+      '<span class="sp"></span><button type="button" class="lk" data-act="r-clear">Clear</button></div>':'')+
     '<div class="rform"><input class="rin" data-ta="rtitle" placeholder="What not to forget, e.g. Complete Fin certifications" value="'+esc(S.rem.title)+'">'+
     '<input class="rin" data-ta="rnote" placeholder="A note, link or why it matters (optional)" value="'+esc(S.rem.note)+'">'+
     '<div class="rrow"><label class="rdue">Due <input type="date" data-sel="rdue" value="'+esc(S.rem.due)+'"></label>'+
     '<span class="rto">For '+TEAM.concat([COORD]).map(p=>'<button type="button" class="rwho'+(S.rem.to.indexOf(p)>-1?' on':'')+'" data-act="r-who" data-p="'+p+'" aria-pressed="'+(S.rem.to.indexOf(p)>-1)+'">'+av(p,true)+p+'</button>').join('')+
     '<button type="button" class="rwho all" data-act="r-who" data-p="*">Everyone</button></span>'+
-    '<span class="sp"></span><button type="button" class="pb hand" data-act="r-add">'+(S.rem.kind==='chase'?'Send chase':'Add reminder')+'</button></div></div>'+
+    '<span class="sp"></span><button type="button" class="pb hand" data-act="r-add">'+(S.rem.kind==='chase'?'Send chase':S.rem.kind==='brief'?'Send build brief':'Add reminder')+'</button></div></div>'+
     (live.length?live.map(r=>'<div class="ritem" data-rid="'+esc(r.id)+'"><div class="rt2"><b>'+esc(r.title)+'</b>'+(r.note?'<span class="dp">'+linkify(r.note)+'</span>':'')+
-      '<span class="rm">'+(r.kind==='chase'?'<span class="tag amber">Client waiting</span>'+(r.client?'<span>'+esc(r.client)+'</span>':'')+(r.url?'<a href="'+esc(r.url)+'" target="_blank" rel="noopener">Message</a>':''):'')+(r.due&&dOf(r.due)?'<span>Due '+fD(dOf(r.due))+'</span>':'')+'<span>Added '+fStamp(r.at)+(r.by?' by '+esc(r.by):'')+'</span>'+
+      '<span class="rm">'+(r.kind==='brief'?'<span class="tag red">Build brief</span>'+(r.client?'<span>'+esc(r.client)+'</span>':'')+(r.url?'<a href="'+esc(r.url)+'" target="_blank" rel="noopener">Brief</a>':''):'')+(r.kind==='chase'?'<span class="tag amber">Client waiting</span>'+(r.client?'<span>'+esc(r.client)+'</span>':'')+(r.url?'<a href="'+esc(r.url)+'" target="_blank" rel="noopener">Message</a>':''):'')+(r.due&&dOf(r.due)?'<span>Due '+fD(dOf(r.due))+'</span>':'')+'<span>Added '+fStamp(r.at)+(r.by?' by '+esc(r.by):'')+'</span>'+
       (r.to||[]).map(p=>'<span class="tag'+(doneBy(r,p)?' green':'')+'">'+esc(p)+(doneBy(r,p)?' ✓':'')+'</span>').join('')+'</span></div>'+
       '<button type="button" class="fzx" data-act="r-del" title="Remove this reminder for everyone" aria-label="Remove this reminder">&times;</button></div>').join('')
      :'<div class="sempty">No reminders out at the moment.</div>');
