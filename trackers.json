@@ -200,6 +200,7 @@
     "name": "Smokeball Archie",
     "key": "smokeball-archie-tracker-v1",
     "file": "SmokeballArchieTracker.html",
+    "hub": "smokeball-archie",
     "sowHours": 0,
     "active": true
   }
