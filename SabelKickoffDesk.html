@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><title>Sabel kick-offs · team</title>
+<meta name="robots" content="noindex,nofollow"><title>Sabel kick-offs · retired</title>
 <script src="hub-auth.js" data-team></script>
 <script>try{ localStorage.removeItem('sabel_kickoff_desk_v1'); if(localStorage.getItem('sabel-ops-theme')==='light') document.documentElement.setAttribute('data-theme','light'); }catch(e){}</script>
 <style>
@@ -18,9 +18,12 @@ input,textarea,select{width:100%;background:var(--field);color:var(--body);borde
 .links a{color:#60A5FA;font-size:12px;margin-right:12px}
 </style></head><body><div class="wrap" id="app"></div>
 <script>
-/* Team page for kick-offs (3 Nov 2026). Each client's form now lives in their hub (SabelKickoff.html, its own key).
-   This page holds only what clients must never see, in sabel-kickoff-v1, which the server refuses without the passcode.
-   It shows nothing, and asks for nothing else, until the server has accepted the passcode. */
+/* RETIRED 16 Nov 2026. Kick-offs are filled in and kept in each client's hub (the Kick-off form built
+   with their tracker). This page no longer creates, opens for editing or edits anything: it is a signpost
+   for old bookmarks. It points each client at the Kick-off form in their hub, and for the few kick-offs
+   recorded before the hubs carried one (Raiz, Re-Leased #2 and some part-filled ones) at that record's
+   own page. sabel-kickoff-v1 stays as the archive of those old records and is only read here.
+   It shows nothing until the server has accepted the team sign-in. */
 var API='https://sabel-webhook.vercel.app/api/tracker', BASE=/^https?:$/.test(location.protocol)?location.origin+'/':'https://hubs.sabelcustomersuccess.com/', KEY='sabel-kickoff-v1', TOK='sabel-team-token';
 var STORE=null, PORTAL=[], REG=[], NOTION=[], VIEW='todo', OPEN=null, TIMER=null, SEARCH='';
 function token(){ try{ return localStorage.getItem(TOK)||''; }catch(e){ return window.__t||''; } }
@@ -28,7 +31,7 @@ function setToken(t){ window.__t=t; try{ t?localStorage.setItem(TOK,t):localStor
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function norm(n){ return String(n||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
 function getStore(){ return fetch(API+'?key='+KEY+'&_t='+Date.now(),{cache:'no-store',headers:{'X-Team-Token':token()}}).then(function(r){ if(r.status===401){ var e=new Error('401'); e.auth=true; throw e; } if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
-function gate(msg){ document.getElementById('app').innerHTML='<div class="card gate"><h1>Sabel kick-offs</h1><div class="sub">Team only. Client kick-off forms are in each client\'s hub.</div><label>Team passcode</label><input id="pw" type="password" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')signIn()"><div class="err">'+esc(msg||'')+'</div><button class="btn p" onclick="signIn()">Open</button></div>'; var p=document.getElementById('pw'); if(p) p.focus(); }
+function gate(msg){ document.getElementById('app').innerHTML='<div class="card gate"><h1>Sabel kick-offs</h1><div class="sub">Retired. Kick-off forms are in each client\'s hub; this page only points to them.</div><label>Team passcode</label><input id="pw" type="password" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')signIn()"><div class="err">'+esc(msg||'')+'</div><button class="btn p" onclick="signIn()">Open</button></div>'; var p=document.getElementById('pw'); if(p) p.focus(); }
 function signIn(){ setToken(document.getElementById('pw').value.trim()); start(); }
 function signOut(){ setToken(''); STORE=null; gate(); }
 /* Signed in through Cloudflare Access (hub-auth.js data-team): the team
@@ -78,43 +81,42 @@ function formLink(x,team){ var h=x.r.hubKey, reg=trackerOf(x), hub=reg&&/^[a-z0-
   if(team) return BASE+'SabelKickoff.html'+q+'&team=1';
   return hub ? BASE+'c/'+hub+'/SabelKickoff'+q : OLD_SITE+'SabelKickoff.html'+q; }
 function trackerOf(x){ var n=norm(x.name).slice(0,6); return REG.filter(function(t){ return norm(t.name).slice(0,6)===n; })[0]||null; }
+/* Which hubs carry their own Kick-off form: read from the hub page, the same way the hub decides. */
+var HUBFORM={};
+function hubFile(file){ var plain=function(){ return fetch(BASE+file,{cache:'no-store'}); };
+  return fetch(BASE+'api/hub-file/'+encodeURIComponent(file),{cache:'no-store'}).then(function(r){ return r.ok?r:plain(); },plain); }
+function checkHubs(){
+  var files={}; rows().forEach(function(x){ var t=trackerOf(x); if(t&&t.file&&x.r&&(x.r.hubKey||x.r.callDone)) files[t.file]=1; });
+  return Promise.all(Object.keys(files).map(function(f){
+    return hubFile(f).then(function(r){ return r.ok?r.text():''; }).then(function(txt){
+      var m=/const FORMS\s*=\s*(\[[^\n]*\]);/.exec(txt), has=false;
+      try{ has=!!m&&JSON.parse(m[1]).some(function(x){ return x.id==='kickoff'; })&&/"form":\s*"kickoff"/.test(txt); }catch(e){}
+      HUBFORM[f]=has;
+    }).catch(function(){ HUBFORM[f]=null; });
+  }));
+}
 function render(){
-  var all=rows(), h='<div class="row"><h1>Sabel kick-offs</h1><span class="spacer"></span><button class="btn" onclick="signOut()">Sign out</button></div><div class="sub">Each client\'s form is in their hub and shows only that client. Internal fields stay here. Never send this page to a client.</div>';
-  h+='<div class="tabs">'+[['todo','To do'],['all','All'],['na','N/A']].map(function(v){ return '<button class="btn'+(VIEW===v[0]?' on':'')+'" onclick="VIEW=\''+v[0]+'\';render()">'+v[1]+'</button>'; }).join('')+'<input style="width:200px" placeholder="Search" value="'+esc(SEARCH)+'" oninput="SEARCH=this.value;renderList()"></div><div id="list"></div>';
+  var h='<div class="row"><h1>Kick-offs have moved into the client hubs</h1><span class="spacer"></span><button class="btn" onclick="signOut()">Sign out</button></div>'+
+    '<div class="sub">This page is retired. Every kick-off is filled in and kept in the client\'s own hub, under Forms. Open it from the hub, or from the Links panel on the client in <a style="color:#60A5FA" href="'+BASE+'SabelInternalOps.html">Internal Ops</a>. '+
+    'The list below is only the kick-offs recorded here before the move, so an old bookmark still lands in the right place.</div><div id="list"></div>';
   document.getElementById('app').innerHTML=h; renderList();
+  /* The first draw comes before trackers.json has loaded; the hubs are checked on the second. */
+  render.n=(render.n||0)+1;
+  if(render.n===2) checkHubs().then(function(){ render.done=true; renderList(); });
 }
 function renderList(){
-  var h=rows().filter(inView).map(function(x){
-    var r=x.r, key=r&&r.hubKey, tr=trackerOf(x);
-    var s='<div class="card"><div class="row"><button class="name" onclick="OPEN=OPEN===\''+x.id+'\'?null:\''+x.id+'\';renderList()">'+esc(x.name)+'</button>'+(x.stage?'<span class="st">'+esc(x.stage==='Discovery'?'Scoping':x.stage)+'</span>':'')+(r&&r.callDone?'<span class="st">call held</span>':'')+'<span class="spacer"></span>';
-    if(key) s+='<a class="btn p" target="_blank" rel="noopener" href="'+esc(formLink(x,true))+'">Open kick-off</a><button class="btn" onclick="copyClient(\''+x.id+'\',this)" title="This client only. Safe to send to '+esc(x.name)+'.">Copy client link</button>';
-    else s+='<button class="btn" onclick="createForm(\''+x.id+'\')">Create kick-off form</button>';
+  var list=rows().filter(function(x){ return x.r&&!x.r.notRequired&&(x.r.hubKey||x.r.callDone); });
+  var h=list.map(function(x){
+    var r=x.r, tr=trackerOf(x), inHub=tr&&HUBFORM[tr.file]===true, checking=!render.done;
+    var s='<div class="card"><div class="row"><span class="name" style="cursor:default">'+esc(x.name)+'</span>'+(x.stage?'<span class="st">'+esc(x.stage==='Discovery'?'Scoping':x.stage)+'</span>':'')+(r.callDone?'<span class="st">call held</span>':'')+'<span class="spacer"></span>';
+    if(inHub) s+='<a class="btn p" target="_blank" rel="noopener" href="'+esc(BASE+tr.file+'#form/kickoff')+'">Open the Kick-off form in their hub</a>';
+    else if(checking) s+='<span class="st">checking their hub…</span>';
+    else if(r.hubKey) s+='<a class="btn" target="_blank" rel="noopener" href="'+esc(formLink(x,true))+'" title="Recorded before kick-offs moved into the hubs. It stays on its own page.">Open the old-format record</a>';
     s+='</div>';
-    if(OPEN===x.id&&r){ var b=r.basics||{}, sc=r.scope||{}, ic=sc.intercomCheck||{};
-      s+='<div class="links" style="margin-top:8px">'+[['Notion',b.notionUrl],['Sabel SOW',b.sabelDoc],['Intercom SOW',b.intercomSow],['Tracker',tr?BASE+tr.file:String(b.trackerUrl||'').replace(OLD_SITE,BASE)]].filter(function(l){return l[1];}).map(function(l){return '<a target="_blank" rel="noopener" href="'+esc(l[1])+'">'+l[0]+'</a>';}).join('')+'</div>'+
-      f(x.id,'Internal notes','notesInternal',r.notesInternal,1)+'<div class="grid">'+f(x.id,'Commercial note','basics.hoursNote',b.hoursNote)+
-      sel(x.id,'Source of scope','scope.source',sc.source,['','Sabel SOW','Intercom SOW','Both'])+'</div><div class="grid">'+f(x.id,'Intercom scope check: posted','scope.intercomCheck.posted',ic.posted)+f(x.id,'Thread link','scope.intercomCheck.link',ic.link)+f(x.id,'Confirmed by','scope.intercomCheck.confirmedBy',ic.confirmedBy)+'</div>'+f(x.id,'Intercom check notes','scope.intercomCheck.notes',ic.notes,1)+
-      '<div class="row" style="margin-top:10px"><button class="btn" onclick="toggleNA(\''+x.id+'\')">'+(r.notRequired?'Restore':'Kick-off not required')+'</button>'+(key?'<span class="warn">Hub tab: set KICKOFF_TOKEN = '+esc(key.k)+' when building this tracker.</span>':'')+'</div>';
-    }
+    if(inHub&&r.hubKey) s+='<div class="warn" style="margin-top:6px">The old-format record for '+esc(x.name)+' is closed. Use the form in their hub.</div>';
     return s+'</div>';
   }).join('');
-  document.getElementById('list').innerHTML=h||'<div class="sub">Nothing in this view.</div>';
+  document.getElementById('list').innerHTML=h||'<div class="sub">No kick-offs were recorded here.</div>';
 }
-function f(id,l,p,v,area){ var a=' oninput="edit(\''+id+'\',\''+p+'\',this.value)"'; return '<div><label>'+l+'</label>'+(area?'<textarea rows="3"'+a+'>'+esc(v||'')+'</textarea>':'<input value="'+esc(v||'')+'"'+a+'>')+'</div>'; }
-function sel(id,l,p,v,o){ return '<div><label>'+l+'</label><select onchange="edit(\''+id+'\',\''+p+'\',this.value)">'+o.map(function(x){return '<option'+(x===(v||'')?' selected':'')+'>'+esc(x)+'</option>';}).join('')+'</select></div>'; }
-function setP(o,p,v){ var a=p.split('.'), k=a.pop(); a.forEach(function(x){ o=o[x]=o[x]||{}; }); o[k]=v; }
-function edit(id,p,v){ var r=STORE.clients[id]; setP(r,p,v); r.updated=new Date().toISOString(); clearTimeout(TIMER); TIMER=setTimeout(function(){ push(id); },800); }
-/* Merge per client on save: fetch, keep everyone else's latest, write this one. */
-function push(id){ var mine=STORE.clients[id];
-  return getStore().then(function(j){ var live=(j.data&&j.data.clients)?j.data:{clients:{}}; live.clients[id]=mine; live.updated=new Date().toISOString(); STORE=live;
-    return fetch(API+'?key='+KEY,{method:'POST',headers:{'Content-Type':'application/json','X-Team-Token':token()},body:JSON.stringify({data:live})}); })
-    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); }).catch(function(e){ alert('Not saved. '+e.message); }); }
-function toggleNA(id){ var r=STORE.clients[id]; r.notRequired=r.notRequired?null:{at:new Date().toISOString().slice(0,10),note:''}; if(!r.notRequired) delete r.notRequired; r.updated=new Date().toISOString(); push(id).then(render); }
-function copyClient(id,btn){ var x=rows().filter(function(y){return y.id===id;})[0]; navigator.clipboard.writeText(formLink(x,false)).then(function(){ btn.textContent='Copied'; setTimeout(function(){ btn.textContent='Copy client link'; },1500); }); }
-function randomK(){ var a=new Uint8Array(8); crypto.getRandomValues(a); return Array.prototype.map.call(a,function(b){return ('0'+b.toString(16)).slice(-2);}).join(''); }
-function createForm(id){ var x=rows().filter(function(y){return y.id===id;})[0], tr=trackerOf(x), n=NOTION.filter(function(p){return norm(p.name)===id;})[0]||{};
-  var r=x.r||{name:x.name,created:new Date().toISOString(),basics:{}}, rdy=tr?String(tr.key).replace(/-tracker-v1$/,''):norm(x.name);
-  r.hubKey={slug:id,k:randomK(),rdy:rdy}; r.basics=r.basics||{}; r.basics.notionUrl=r.basics.notionUrl||n.url||''; r.basics.sabelDoc=r.basics.sabelDoc||n.sabelDoc||''; r.basics.intercomSow=r.basics.intercomSow||n.intercomSow||''; r.updated=new Date().toISOString(); STORE.clients[id]=r;
-  push(id).then(render); }
 start();
 </script></body></html>
