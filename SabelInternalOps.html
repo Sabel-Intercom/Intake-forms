@@ -447,6 +447,10 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
 .edrow .mv button:disabled{opacity:.35;cursor:default}
 .crit-cb{display:flex;align-items:center;gap:5px;font-size:13px;white-space:nowrap;color:var(--body)}
 .edacts{display:flex;gap:4px;margin-left:auto}
+.edrow select.edgate{max-width:210px}
+.edadd{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;padding:8px 0 4px}
+.edadd input{flex:1 1 320px;min-width:0;font-family:var(--text);font-size:14px;color:var(--ink);background:var(--raise);border:1px dashed var(--line2);border-radius:6px;padding:5px 8px}
+.edadd select{font-family:var(--text);font-size:14px;color:var(--ink);background:var(--raise);border:1px solid var(--line2);border-radius:6px;padding:5px 8px}
 .edrow .yours{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);border-radius:4px;padding:1px 5px;white-space:nowrap}
 .edgone{margin:2px 12px 12px;border-top:1px dashed var(--line2);padding-top:8px}
 .edgone-h{display:flex;align-items:center;gap:8px;width:100%;padding:2px 0;border:0;background:none;cursor:pointer;font-size:12.5px;color:var(--muted);text-align:left}
@@ -1112,10 +1116,22 @@ LISTS.forEach(([,,L])=>L.forEach(p=>{
   BASE[p.id]=p.steps.map(s=>Object.assign({},s));
 }));
 function checklistEdits(){ const t=S.portal&&S.portal.templates; return (t&&t.opsChecklists)||{}; }
+/* The gates of the checklist a gate belongs to. A step can only move between gates of one checklist. */
+function listGates(pid){ const L=LISTS.find(([,,P])=>P.some(p=>p.id===pid)); return L ? L[2] : []; }
+/* Every step that starts at gate q (built in plus added), before any move. home = the gate it came from. */
+function homeSteps(q){
+  const E=checklistEdits(), ed=E.steps||{}, added=(E.added&&E.added[q])||[];
+  return (BASE[q]||[]).map(b=>Object.assign({}, b, ed[b.id]||{}, {base:b, home:q}))
+    .concat(added.map(a=>Object.assign({tag:"",crit:false}, a, ed[a.id]||{}, {added:true, home:q})));
+}
+/* A step moved on the Checklists page keeps its id (so ticks on clients survive) and carries
+   gate:<pid> in templates.opsChecklists.steps. A gate that is not on its checklist is ignored. */
 function editorSteps(pid){
-  const E=checklistEdits(), ed=E.steps||{}, added=(E.added&&E.added[pid])||[];
-  const all = (BASE[pid]||[]).map(b=>Object.assign({}, b, ed[b.id]||{}, {base:b}))
-    .concat(added.map(a=>Object.assign({tag:"",crit:false}, a, ed[a.id]||{}, {added:true})));
+  const E=checklistEdits(), gates=listGates(pid), ok=g=>g && gates.some(p=>p.id===g);
+  const gateOf=s=>ok(s.gate) ? s.gate : s.home;
+  const all = homeSteps(pid).filter(s=>gateOf(s)===pid)
+    .concat(gates.filter(q=>q.id!==pid).flatMap(q=>homeSteps(q.id)).filter(s=>gateOf(s)===pid));
+  all.forEach(s=>{ s.gate=pid; s.moved=pid!==s.home; });
   all.forEach(x=>{ const r=TRIM_REWORD[x.id]; if(r && r[0].test(x.t)) x.t=r[1]; });
   const order=(E.order&&E.order[pid])||[];
   const pos=id=>{ const i=order.indexOf(id); return i<0 ? 1e4+all.findIndex(x=>x.id===id) : i; };
@@ -2552,12 +2568,13 @@ function salesView(){
 function listsView(){
   const tab = S.listTab || "main", L = LISTS.find(x=>x[0]===tab);
   let h='<div class="today-h"><div><div class="eyebrow">Standard checklists</div><h1>Checklists</h1></div></div>'+
-    '<p class="lead-note">The steps every client of each project type works through. Renaming a step or changing its owner updates it for every client, and ticks already recorded are kept. <b>Remove</b> takes a built-in step off every checklist; removed steps collect at the foot of each gate, so you can bring one back if you change your mind. Steps you add yourself get a <b>Delete</b> button instead and go for good. Critical steps are the ones that must be done before kickoff: they are listed on Today and flagged when a gate closes with them open. A different owner set on one client still wins for that client.</p>'+
+    '<p class="lead-note">The steps every client of each project type works through. Renaming a step or changing its owner updates it for every client, and ticks already recorded are kept. <b>Remove</b> takes a built-in step off every checklist; removed steps collect at the foot of each gate, so you can bring one back if you change your mind. Type into <b>Add a step</b> under any gate to add one. Steps you add yourself get a <b>Delete</b> button instead and go for good. The <b>Gate</b> menu on each step moves it to a different gate for every client (for example, migration steps that do not need doing at Readiness Check); its id stays the same, so ticks already recorded move with it, and <b>Reset</b> puts it back. Critical steps are the ones that must be done before kickoff: they are listed on Today and flagged when a gate closes with them open. A different owner set on one client still wins for that client.</p>'+
     '<div class="seg edtabs" role="group" aria-label="Which checklist">'+LISTS.map(([k,l,P])=>'<button data-act="list-tab" data-v="'+k+'" aria-pressed="'+(k===tab)+'">'+esc(l)+' · '+P.length+' gates</button>').join("")+'</div>';
   if(tab==="flownetic") h+='<p class="lead-note">These are the only steps on a Flownetic project with no migration. When the type is Migration or Build + Migration, Richard is doing migration work, so the client also gets the gates on the Migration tab, without its signing, Drive, welcome email, Slack channel and Intercom deal steps.</p>';
   /* One editor row, used for both the live list and the removed pile below it. */
   const row = (p,s,i,n) => {
-    const b=s.base, changed = b && (s.t!==b.t || s.o!==b.o || (s.tag||"")!==(b.tag||"") || !!s.crit!==!!b.crit), dis=s.hide?' disabled':'';
+    const b=s.base, changed = b && (s.t!==b.t || s.o!==b.o || (s.tag||"")!==(b.tag||"") || !!s.crit!==!!b.crit || s.moved), dis=s.hide?' disabled':'';
+    const homeP=L[2].find(q=>q.id===s.home);
     return '<li class="edrow'+(s.hide?' hidden-step':'')+'">'+
       (s.hide ? '<span class="mv"></span>'
         : '<span class="mv"><button data-act="ed-move" data-pid="'+p.id+'" data-sid="'+s.id+'" data-v="-1"'+(i===0?' disabled':'')+' aria-label="Move up">↑</button><button data-act="ed-move" data-pid="'+p.id+'" data-sid="'+s.id+'" data-v="1"'+(i===n-1?' disabled':'')+' aria-label="Move down">↓</button></span>')+
@@ -2567,6 +2584,9 @@ function listsView(){
       '<select data-ed="o" data-sid="'+s.id+'" aria-label="Owner"'+dis+'>'+Object.keys(OWNERS).map(k=>'<option value="'+k+'"'+(k===s.o?' selected':'')+'>'+esc(OWNERS[k].n)+'</option>').join("")+'</select>'+
       (tab==="main"?'<select data-ed="tag" data-sid="'+s.id+'" aria-label="Applies to"'+dis+'><option value=""'+(s.tag!=="m"?' selected':'')+'>Full and Build</option><option value="m"'+(s.tag==="m"?' selected':'')+'>Full only (has a migration)</option></select>':'')+
       '<label class="crit-cb"><input type="checkbox" data-ed="crit" data-sid="'+s.id+'"'+(s.crit?' checked':'')+dis+'>Critical</label>'+
+      '<select class="edgate" data-ed="gate" data-sid="'+s.id+'" data-home="'+s.home+'" aria-label="Gate" title="Move this step to another gate"'+dis+'>'+
+        L[2].map(q=>'<option value="'+q.id+'"'+(q.id===p.id?' selected':'')+'>'+(q.id===p.id?'Gate: ':'Move to: ')+esc(q.code+' · '+q.name)+'</option>').join("")+'</select>'+
+      (s.moved&&homeP?'<span class="yours" title="This step was moved here from another gate">From '+esc(homeP.name)+'</span>':'')+
       '<span class="edacts">'+
         (s.added
           ? '<button class="btn sm ghost" data-act="ed-delete" data-pid="'+p.id+'" data-sid="'+s.id+'" data-label="'+esc(s.t)+'" title="Delete this step for good">Delete</button>'
@@ -2582,6 +2602,10 @@ function listsView(){
     live.forEach((s,i)=>{ h+=row(p,s,i,live.length); });
     if(!live.length) h+='<li class="edrow" style="color:var(--muted)">Every step at this gate has been removed.</li>';
     h+='</ul>';
+    /* Add a step, right under the gate's list. Enter in the box adds it too. */
+    h+='<div class="edadd"><input data-ed="new" data-pid="'+p.id+'" placeholder="Add a step to '+esc(p.name)+'…" aria-label="New step at '+esc(p.name)+'">'+
+      '<select data-ed="new-o" data-pid="'+p.id+'" aria-label="Owner of the new step">'+Object.keys(OWNERS).map(k=>'<option value="'+k+'"'+(k==="nikki"?' selected':'')+'>'+esc(OWNERS[k].n)+'</option>').join("")+'</select>'+
+      '<button class="btn sm" data-act="ed-add" data-pid="'+p.id+'">+ Add a step</button></div>';
     if(gone.length){
       const shown=!!S.edShowGone[p.id];
       h+='<div class="edgone"><button class="edgone-h" data-act="ed-gone" data-pid="'+p.id+'" aria-expanded="'+shown+'"><b>Removed · '+gone.length+'</b>'+
@@ -2589,7 +2613,7 @@ function listsView(){
         '<span class="tog">'+(shown?'Hide':'Show')+'</span></button>'+
         (shown?'<ul class="edlist">'+gone.map((s,i)=>row(p,s,i,gone.length)).join("")+'</ul>':'')+'</div>';
     }
-    h+='<div class="gate"><span class="g"><b>Gate</b>'+esc(p.gate)+'</span><button class="btn sm" data-act="ed-add" data-pid="'+p.id+'">+ Add a step</button></div></section>';
+    h+='<div class="gate"><span class="g"><b>Gate</b>'+esc(p.gate)+'</span></div></section>';
   });
   return h;
 }
@@ -2623,8 +2647,13 @@ document.addEventListener("click", e=>{
     case "board": case "sales": case "lists": S.view=a; S.clientId=null; history.replaceState(null,"",location.pathname+location.search+"#"+a); render(); $("scroll").scrollTop=0; return;
     case "list-tab": S.listTab=t.dataset.v; return render(true);
     case "ed-add": { const pid=t.dataset.pid, id=pid+"-x"+Date.now().toString(36);
-      editChecklists(E=>{ (E.added[pid]=E.added[pid]||[]).push({id, o:"nikki", t:"New step", tag:"", crit:false}); });
-      render(true); const el=document.querySelector('input[data-ed="t"][data-sid="'+id+'"]'); if(el){ el.focus(); el.select(); } return; }
+      const box=document.querySelector('input[data-ed="new"][data-pid="'+pid+'"]'), typed=box ? box.value.trim() : "";
+      const own=document.querySelector('select[data-ed="new-o"][data-pid="'+pid+'"]'), o=own && OWNERS[own.value] ? own.value : "nikki";
+      editChecklists(E=>{ (E.added[pid]=E.added[pid]||[]).push({id, o, t:typed||"New step", tag:"", crit:false}); });
+      render(true);
+      if(typed){ const nb=document.querySelector('input[data-ed="new"][data-pid="'+pid+'"]'); if(nb) nb.focus(); }
+      else { const el=document.querySelector('input[data-ed="t"][data-sid="'+id+'"]'); if(el){ el.focus(); el.select(); } }
+      return; }
     case "ed-hide": { const sid=t.dataset.sid; editChecklists(E=>{ E.steps[sid]=Object.assign({}, E.steps[sid]||{}, {hide:t.dataset.v==="1"}); }); return render(true); }
     case "ed-reset": { const sid=t.dataset.sid; editChecklists(E=>{ delete E.steps[sid]; }); return render(true); }
     /* Steps you added live in the store, so they can go for good. Built-in steps come from the
@@ -2632,8 +2661,9 @@ document.addEventListener("click", e=>{
     case "ed-delete": { const sid=t.dataset.sid, pid=t.dataset.pid;
       if(!confirm('Delete "'+(t.dataset.label||"this step")+'" for good?\n\nIt disappears from every client on this checklist and cannot be brought back. Anything already ticked against it is forgotten.')) return;
       editChecklists(E=>{
-        if(E.added[pid]) E.added[pid]=E.added[pid].filter(a=>a.id!==sid);
-        if(E.order[pid]) E.order[pid]=E.order[pid].filter(x=>x!==sid);
+        /* A moved step lives in the added list of the gate it started at, so look in every gate. */
+        Object.keys(E.added).forEach(q=>{ E.added[q]=E.added[q].filter(a=>a.id!==sid); });
+        Object.keys(E.order).forEach(q=>{ E.order[q]=E.order[q].filter(x=>x!==sid); });
         delete E.steps[sid];
       });
       return render(true); }
@@ -2726,6 +2756,14 @@ document.addEventListener("change", e=>{
   if(t.dataset.ed){
     const sid=t.dataset.sid, k=t.dataset.ed, v = k==="crit" ? t.checked : t.value.trim();
     if(k==="t" && !v){ render(true); return; }
+    if(k==="gate"){
+      /* Back at its own gate: drop the move rather than storing it. The step goes to the foot of the gate it lands on. */
+      editChecklists(E=>{ const r=Object.assign({}, E.steps[sid]||{}); if(v===t.dataset.home) delete r.gate; else r.gate=v;
+        if(Object.keys(r).length) E.steps[sid]=r; else delete E.steps[sid];
+        Object.keys(E.order).forEach(q=>{ if(q!==v) E.order[q]=E.order[q].filter(x=>x!==sid); }); });
+      return render(true);
+    }
+    if(k==="new"||k==="new-o") return;
     editChecklists(E=>{ E.steps[sid]=Object.assign({}, E.steps[sid]||{}, {[k]:v}); });
     return render(true);
   }
@@ -2767,6 +2805,9 @@ function commitXstep(el, cancel){
   render(true);
 }
 document.addEventListener("focusout", e=>{ const t=e.target; if(t.dataset && t.dataset.act==="xstep-t") commitXstep(t); });
+/* Enter in a Checklists "Add a step" box adds the step. */
+document.addEventListener("keydown", e=>{ const t=e.target; if(e.key!=="Enter" || !t.dataset || t.dataset.ed!=="new") return;
+  e.preventDefault(); const b=document.querySelector('button[data-act="ed-add"][data-pid="'+t.dataset.pid+'"]'); if(b) b.click(); });
 document.addEventListener("keydown", e=>{ const t=e.target; if(!t.dataset || t.dataset.act!=="xstep-t") return;
   if(e.key==="Enter"){ e.preventDefault(); commitXstep(t); } else if(e.key==="Escape"){ e.preventDefault(); commitXstep(t,true); } });
 /* "toggle" does not bubble, so this listens in the capture phase. */
