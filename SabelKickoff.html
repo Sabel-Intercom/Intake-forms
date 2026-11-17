@@ -1763,7 +1763,14 @@ window.addEventListener('message',function(e){ if(e.origin===location.origin&&e.
 document.body.classList.add('solo'); if(TEAM) document.body.classList.add('team');
 if(QS.get('embed')==='1') document.body.classList.add('embed');
 applyTheme(QS.get('theme')==='light'||(!QS.get('theme')&&document.documentElement.getAttribute('data-theme')==='light')?'light':'dark');
-if(!VALID){
+/* 16 Nov 2026: these clients' kick-offs now live in the Kick-off form inside their hub. This older page
+   is closed for them, so nothing more is typed where the hub never sees it. Listed by a hash of the
+   link's client name, so this shared page names no client. */
+var MOVED_TO_HUB=["9230639d", "81c57fee"];
+function slugHash(t){ var x=0; for(var i=0;i<t.length;i++) x=(x*31+t.charCodeAt(i))>>>0; return x.toString(16); }
+if(VALID&&MOVED_TO_HUB.indexOf(slugHash(SLUG))>-1){
+  document.getElementById('rec').innerHTML='<div class="nolink"><b>This kick-off has moved into the project hub.</b><br>Open the project hub and choose Kick-off under Forms. This older page is closed, so nothing typed here is lost or left behind.</div>';
+}else if(!VALID){
   document.getElementById('rec').innerHTML='<div class="nolink"><b>This link is not complete.</b><br>Please open your kick-off from your project hub, or ask your Sabel contact for the link.</div>';
 }else{
   CUR=SLUG; document.body.classList.add('has-cur');

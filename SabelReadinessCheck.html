@@ -315,7 +315,7 @@ html.dark .err{background:var(--bad-soft)}
    CONFIG
    ===================================================================== */
 const API = 'https://sabel-webhook.vercel.app/api/readiness';
-const FORM_V = '2026-10-27a';
+const FORM_V = '2026-11-16a';
 /* URL parameters (see client-hub/CONTRACT.md):
    ?client=<slug>   picks this client's saved copy on the server (readiness-<slug>-v1) and keeps
                     their draft separate from anyone else's on the same browser.
@@ -1123,7 +1123,7 @@ function reviewPanel(){
     '<div class="nav">'+
       '<button class="btn quiet" data-nav="back">Back</button>'+
       '<div class="spacer"></div>'+
-      '<button class="btn ghost" data-nav="download">Download my answers</button>'+
+      '<button class="btn ghost" data-nav="download" title="Saves a PDF of every section and answer">Download my answers (PDF)</button>'+
       '<button class="btn" data-nav="submit" id="sendbtn">Send to Sabel</button>'+
     '</div>'+
     '<p class="errmsg" id="e-send"></p></div>';
@@ -1135,7 +1135,7 @@ function donePanel(){
     '<p class="eyebrow">Received</p>'+
     '<h1>Thank you. That is everything we need to get going.</h1>'+
     '<p class="intro">The Sabel team has your answers. We will go through them and come back to you with the plan, and anything we would like to talk through.</p></div>'+
-    '<div class="nav"><button class="btn ghost" data-nav="download">Download a copy of my answers</button></div></div>';
+    '<div class="nav"><button class="btn ghost" data-nav="download" title="Saves a PDF of every section and answer">Download a copy of my answers (PDF)</button></div></div>';
 }
 
 /* =====================================================================
@@ -1407,12 +1407,223 @@ function reportText(d){
   return L.join('\n');
 }
 
-function download(){
-  const d=state.lastPayload||collect();
+/* =====================================================================
+   DOWNLOAD MY ANSWERS: a tidy PDF (16 Nov 2026)
+   One click saves a PDF: who filled it in, the totals, what is still to
+   sort, then every section with its questions and answers. The PDF
+   library is fetched only when the button is pressed. If it cannot load,
+   or an answer uses letters the PDF's built-in font cannot draw, the same
+   summary opens in the browser's print window (Save as PDF). The plain
+   text file is the last resort.
+   ANSWER-PDF:BEGIN (no page access between here and :END; run as-is by tests/readiness-pdf.test.mjs) */
+const PDF_ST = {green:['Ready','good'], amber:['In progress','warn'], red:['Not started','bad'], na:['Not needed','na'], '':['Not answered','none']};
+function pdfDay(v){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v||''));
+  return m ? (+m[3])+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[2]-1]+' '+m[1] : String(v||'');
+}
+/* d: what collect() returns. titles: {sectionId: title}. Returns plain data for either renderer. */
+function answerDoc(d, titles, now){
+  titles=titles||{};
+  const blank=v=>v==null || !String(v).trim() || v==='(none given)' || v==='(none)';
+  const open=[];
+  const sections=Object.keys(d.sections||{}).map(id=>{
+    const items=(d.sections[id]||[]).map(i=>{
+      if(i.type==='status'){
+        const st=PDF_ST[i.status]||PDF_ST[''];
+        const it={q:i.question, state:st[0], tone:st[1], lines:[], meta:[i.owner?'Owner: '+i.owner:'', i.dueBy?'Expected by '+pdfDay(i.dueBy):''].filter(Boolean).join('   ·   '), note:i.note||''};
+        if(i.answer && i.answer.toLowerCase()!==st[0].toLowerCase()) it.lines.push(['', i.answer]);
+        if(i.status==='amber' || i.status==='red') open.push({q:i.question, state:st[0], tone:st[1], meta:it.meta});
+        return it;
+      }
+      const lines=Object.keys(i.answers||{}).filter(k=>!blank(i.answers[k])).map(k=>[k==='Entries'||k==='Selected'?'':k, String(i.answers[k])]);
+      return {q:i.question, state:lines.length?'':'Not answered', tone:'none', lines, meta:'', note:''};
+    });
+    return {id, title:titles[id]||('Section '+id), items,
+      answered:items.filter(x=>x.state!=='Not answered').length};
+  });
+  const s=d.summary||{};
+  return {client:d.client||'', projectType:d.projectType||'',
+    by:[d.contactName, d.contactRole].filter(Boolean).join(', ')+(d.contactEmail?'  ·  '+d.contactEmail:''),
+    backup:d.backupContact||'', copyTo:d.copyTo||'', otherNotes:d.otherNotes||'',
+    stamp:pdfDay((now||new Date()).toISOString().slice(0,10)), sent:d.sentOn?pdfDay(d.sentOn):'',
+    tiles:[['Ready',s.green||0,'good'],['In progress',s.amber||0,'warn'],['Not started',s.red||0,'bad'],['Not needed',s.na||0,'na'],['Not answered',s.unanswered||0,'none']],
+    open, sections};
+}
+/* The PDF's built-in font draws Western European letters only. Curly quotes, dashes and the like
+   are swapped for plain ones; anything else it cannot draw means "use the print window instead". */
+function pdfPlain(v){
+  return String(v==null?'':v).replace(/[‘’‚′]/g,"'").replace(/[“”„″]/g,'"')
+    .replace(/[–—−]/g,'-').replace(/…/g,'...').replace(/[•●▪]/g,'·')
+    .replace(/→/g,'->').replace(/✓|✔/g,'yes').replace(/[   ]/g,' ').replace(/€/g,'EUR ').replace(/\t/g,'  ').replace(/\r/g,'');
+}
+function pdfSafe(A){
+  const bad=v=>/[^\n\x20-\x7E\xA1-\xFF]/.test(pdfPlain(v));
+  const all=[A.client,A.projectType,A.by,A.backup,A.copyTo,A.otherNotes];
+  A.sections.forEach(s=>{ all.push(s.title); s.items.forEach(i=>{ all.push(i.q,i.meta,i.note); i.lines.forEach(l=>all.push(l[0],l[1])); }); });
+  return !all.some(bad);
+}
+function buildPdf(JsPDF, A){
+  const pdf=new JsPDF({unit:'mm', format:'a4'}), W=210, H=297, M=17, CW=W-2*M, BOTTOM=H-18;
+  const C={ink:[20,23,26], body:[58,64,70], muted:[107,116,128], line:[227,229,232], alt:[245,246,247], accent:[225,6,0],
+           good:[21,128,61], warn:[180,83,9], bad:[225,6,0], na:[107,116,128], none:[107,116,128]};
+  const MM=0.3528, lh=pt=>pt*MM*1.42;
+  let y=M;
+  const font=(pt,bold,col,italic)=>{ pdf.setFont('helvetica', bold?'bold':(italic?'italic':'normal')); pdf.setFontSize(pt); const c=col||C.body; pdf.setTextColor(c[0],c[1],c[2]); };
+  const wrap=(str,w,pt,bold)=>{ font(pt,bold); return String(pdfPlain(str)).split('\n').reduce((a,p)=>a.concat(p.trim()?pdf.splitTextToSize(p,w):['']),[]); };
+  const need=h=>{ if(y+h>BOTTOM){ pdf.addPage(); y=M; return true; } return false; };
+  const draw=(lines,x,pt,bold,col,italic)=>{ lines.forEach(l=>{ need(lh(pt)); font(pt,bold,col,italic); pdf.text(l,x,y+pt*MM*0.98); y+=lh(pt); }); };
+  const para=(str,x,w,pt,bold,col,italic)=>draw(wrap(str,w,pt,bold),x,pt,bold,col,italic);
+  const rule=()=>{ pdf.setDrawColor(C.line[0],C.line[1],C.line[2]); pdf.setLineWidth(0.2); pdf.line(M,y,W-M,y); };
+
+  /* heading */
+  pdf.setFillColor(C.accent[0],C.accent[1],C.accent[2]); pdf.rect(M,y,12,1.2,'F'); y+=5;
+  para('SABEL  ·  TECHNICAL READINESS CHECK',M,CW,8,true,C.accent); y+=1.5;
+  para(A.client||'Your answers',M,CW,21,true,C.ink); y+=1.5;
+  [['Project type',A.projectType],['Completed by',A.by],['Backup contact',A.backup],['Copy sent to',A.copyTo],
+   ['Status',A.sent?'Sent to Sabel on '+A.sent:'Not sent to Sabel yet. This is a copy of the answers so far.'],['Downloaded',A.stamp]]
+    .filter(r=>r[1]).forEach(r=>{
+      need(lh(9.5)); font(9.5,true,C.muted); pdf.text(r[0],M,y+9.5*MM*0.98);
+      const L=wrap(r[1],CW-32,9.5,false); const y0=y; draw(L,M+32,9.5,false,C.body); if(y===y0) y+=lh(9.5);
+    });
+  y+=4;
+
+  /* totals */
+  const gap=3, tw=(CW-gap*4)/5, th=17;
+  A.tiles.forEach((t,i)=>{
+    const x=M+i*(tw+gap), c=C[t[2]];
+    pdf.setFillColor(C.alt[0],C.alt[1],C.alt[2]); pdf.roundedRect(x,y,tw,th,1.2,1.2,'F');
+    pdf.setFillColor(c[0],c[1],c[2]); pdf.rect(x,y,tw,0.9,'F');
+    font(17,true,t[1]?c:C.muted); pdf.text(String(t[1]),x+4,y+9.2);
+    font(8,false,C.muted); pdf.text(t[0],x+4,y+14);
+  });
+  y+=th+7;
+
+  /* what is still to sort */
+  if(A.open.length){
+    para('Still to sort',M,CW,11.5,true,C.ink); y+=1;
+    A.open.forEach(o=>{
+      const L=wrap(o.q,CW-6,9.5,false), mL=wrap(o.state+(o.meta?'   ·   '+o.meta:''),CW-6,8.5,false);
+      need((L.length*lh(9.5))+(mL.length*lh(8.5))+2);
+      const c=C[o.tone]; pdf.setFillColor(c[0],c[1],c[2]); pdf.circle(M+1.3,y+2.1,1,'F');
+      draw(L,M+6,9.5,false,C.ink); draw(mL,M+6,8.5,false,c); y+=1.6;
+    });
+    y+=3;
+  }
+
+  /* sections */
+  A.sections.forEach(sec=>{
+    need(30);
+    pdf.setFillColor(C.alt[0],C.alt[1],C.alt[2]); pdf.rect(M,y,CW,11,'F');
+    pdf.setFillColor(C.accent[0],C.accent[1],C.accent[2]); pdf.rect(M,y,1.2,11,'F');
+    font(7.5,true,C.accent); pdf.text('SECTION '+sec.id,M+5,y+4.3);
+    font(12,true,C.ink); pdf.text(pdf.splitTextToSize(pdfPlain(sec.title),CW-50)[0]||'',M+5,y+9);
+    font(8,false,C.muted); pdf.text(sec.answered+' of '+sec.items.length+' answered',W-M-4,y+6.8,{align:'right'});
+    y+=15;
+    sec.items.forEach((it,n)=>{
+      const pillW=it.state?34:0, qL=wrap(it.q,CW-pillW,10,true);
+      const body=[]; it.lines.forEach(l=>{ if(l[0]) body.push({L:wrap(l[0],CW-4,8,false),pt:8,col:C.muted}); body.push({L:wrap(l[1],CW-4,10,false),pt:10,col:C.body}); });
+      if(it.meta) body.push({L:wrap(it.meta,CW-4,8.5,false),pt:8.5,col:C.muted});
+      if(it.note) body.push({L:wrap('Note: '+it.note,CW-4,9.5,false),pt:9.5,col:C.body,it:true});
+      const h=qL.length*lh(10)+body.reduce((a,b)=>a+b.L.length*lh(b.pt),0)+6;
+      if(h<90) need(h);
+      if(it.state){
+        const c=C[it.tone]; font(8.5,true,c);
+        const w=pdf.getTextWidth(it.state); pdf.text(it.state,W-M,y+10*MM*0.98,{align:'right'});
+        if(it.tone!=='none'){ pdf.setFillColor(c[0],c[1],c[2]); pdf.circle(W-M-w-2.6,y+10*MM*0.98-1.05,1,'F'); }
+      }
+      draw(qL,M,10,true,C.ink); y+=0.8;
+      body.forEach(b=>draw(b.L,M+4,b.pt,false,b.col,b.it));
+      y+=2.6; if(n<sec.items.length-1){ need(3); rule(); } y+=2.8;
+    });
+    y+=3;
+  });
+
+  if(A.otherNotes){
+    need(24); para('Anything else you told us',M,CW,11.5,true,C.ink); y+=1; para(A.otherNotes,M,CW,10,false,C.body);
+  }
+
+  /* footer on every page */
+  const pages=pdf.getNumberOfPages();
+  for(let p=1;p<=pages;p++){
+    pdf.setPage(p); pdf.setDrawColor(C.line[0],C.line[1],C.line[2]); pdf.setLineWidth(0.2); pdf.line(M,H-12,W-M,H-12);
+    font(8,false,C.muted);
+    pdf.text(pdfPlain((A.client?A.client+'  ·  ':'')+'Sabel Technical Readiness Check  ·  '+A.stamp),M,H-7.5);
+    pdf.text('Page '+p+' of '+pages,W-M,H-7.5,{align:'right'});
+  }
+  return pdf;
+}
+/* The same summary as a page for the browser's print window. */
+function answerHTML(A){
+  const e=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const nl=v=>e(v).replace(/\n/g,'<br>');
+  const meta=[['Project type',A.projectType],['Completed by',A.by],['Backup contact',A.backup],['Copy sent to',A.copyTo],
+    ['Status',A.sent?'Sent to Sabel on '+A.sent:'Not sent to Sabel yet. This is a copy of the answers so far.'],['Downloaded',A.stamp]].filter(r=>r[1]);
+  return '<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><title>'+e((A.client||'Readiness')+' · Sabel readiness check')+'</title><style>'+
+    '@page{size:A4;margin:16mm}*{box-sizing:border-box}body{font:10.5pt/1.45 -apple-system,"Segoe UI",Helvetica,Arial,sans-serif;color:#3A4046;margin:0}'+
+    '.eb{font-size:8pt;font-weight:700;letter-spacing:.12em;color:#E10600}h1{font-size:21pt;line-height:1.1;color:#14171A;margin:4pt 0 8pt}'+
+    'table.m{border-collapse:collapse;font-size:9.5pt;margin-bottom:12pt}table.m th{text-align:left;color:#6B7480;padding:1pt 14pt 1pt 0;vertical-align:top;white-space:nowrap}table.m td{padding:1pt 0}'+
+    '.tiles{display:flex;gap:6pt;margin-bottom:14pt}.tiles div{flex:1;background:#F5F6F7;border-top:2.5pt solid;border-radius:3pt;padding:6pt 9pt;font-size:8pt;color:#6B7480}.tiles b{display:block;font-size:17pt;line-height:1.15}'+
+    '.good{color:#15803D;border-color:#15803D}.warn{color:#B45309;border-color:#B45309}.bad{color:#E10600;border-color:#E10600}.na,.none{color:#6B7480;border-color:#6B7480}'+
+    '.tiles .good{border-color:#15803D}.tiles .warn{border-color:#B45309}.tiles .bad{border-color:#E10600}.tiles .good b{color:#15803D}.tiles .warn b{color:#B45309}.tiles .bad b{color:#E10600}'+
+    'h2{font-size:11.5pt;color:#14171A;margin:0 0 4pt}.open{margin:0 0 14pt;padding:0;list-style:none}.open li{margin:0 0 4pt;break-inside:avoid}.open small{display:block;font-size:8.5pt}'+
+    '.sec{background:#F5F6F7;border-left:3pt solid #E10600;padding:5pt 10pt;margin:12pt 0 6pt;display:flex;align-items:baseline;gap:10pt;break-after:avoid}.sec small{font-size:7.5pt;font-weight:700;letter-spacing:.1em;color:#E10600}.sec b{font-size:12pt;color:#14171A;flex:1}.sec i{font-style:normal;font-size:8pt;color:#6B7480}'+
+    '.it{padding:6pt 0;border-bottom:.5pt solid #E3E5E8;break-inside:avoid}.it .q{display:flex;gap:12pt;justify-content:space-between;font-weight:700;color:#14171A}.it .q span{font-size:8.5pt;white-space:nowrap}'+
+    '.it .l{font-size:8pt;color:#6B7480;margin:2pt 0 0 10pt}.it .v{margin-left:10pt}.it .mt{font-size:8.5pt;color:#6B7480;margin-left:10pt}.it .n{font-style:italic;margin-left:10pt}'+
+    '</style></head><body><div class="eb">SABEL · TECHNICAL READINESS CHECK</div><h1>'+e(A.client||'Your answers')+'</h1>'+
+    '<table class="m">'+meta.map(r=>'<tr><th>'+e(r[0])+'</th><td>'+e(r[1])+'</td></tr>').join('')+'</table>'+
+    '<div class="tiles">'+A.tiles.map(t=>'<div class="'+t[2]+'"><b>'+t[1]+'</b>'+e(t[0])+'</div>').join('')+'</div>'+
+    (A.open.length?'<h2>Still to sort</h2><ul class="open">'+A.open.map(o=>'<li>'+e(o.q)+'<small class="'+o.tone+'">'+e(o.state+(o.meta?'   ·   '+o.meta:''))+'</small></li>').join('')+'</ul>':'')+
+    A.sections.map(s=>'<div class="sec"><small>SECTION '+e(s.id)+'</small><b>'+e(s.title)+'</b><i>'+s.answered+' of '+s.items.length+' answered</i></div>'+
+      s.items.map(i=>'<div class="it"><div class="q">'+e(i.q)+(i.state?'<span class="'+i.tone+'">'+(i.tone==='none'?'':'● ')+e(i.state)+'</span>':'')+'</div>'+
+        i.lines.map(l=>(l[0]?'<div class="l">'+e(l[0])+'</div>':'')+'<div class="v">'+nl(l[1])+'</div>').join('')+
+        (i.meta?'<div class="mt">'+e(i.meta)+'</div>':'')+(i.note?'<div class="n">Note: '+nl(i.note)+'</div>':'')+'</div>').join('')).join('')+
+    (A.otherNotes?'<h2 style="margin-top:14pt">Anything else you told us</h2><p>'+nl(A.otherNotes)+'</p>':'')+'</body></html>';
+}
+/* ANSWER-PDF:END */
+
+const PDF_LIB = {src:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  sri:'sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA=='};
+let pdfLibP=null;
+function loadPdfLib(){
+  if(window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+  if(!pdfLibP) pdfLibP=new Promise((ok,no)=>{
+    const s=document.createElement('script'); s.src=PDF_LIB.src; s.integrity=PDF_LIB.sri; s.crossOrigin='anonymous'; s.referrerPolicy='no-referrer';
+    const t=setTimeout(()=>{ pdfLibP=null; no(new Error('timed out')); },12000);
+    s.onload=()=>{ clearTimeout(t); (window.jspdf && window.jspdf.jsPDF) ? ok(window.jspdf.jsPDF) : (pdfLibP=null, no(new Error('not loaded'))); };
+    s.onerror=()=>{ clearTimeout(t); pdfLibP=null; no(new Error('blocked')); };
+    document.head.appendChild(s);
+  });
+  return pdfLibP;
+}
+function printAnswers(A){
+  const old=document.getElementById('printframe'); if(old) old.remove();
+  const f=document.createElement('iframe'); f.id='printframe'; f.setAttribute('aria-hidden','true');
+  f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+  f.onload=()=>{ try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){} };
+  f.srcdoc=answerHTML(A); document.body.appendChild(f);
+}
+function downloadText(d){
   const blob=new Blob([reportText(d)],{type:'text/plain'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download='Sabel_Readiness_'+((d.client||'submission').replace(/[^A-Za-z0-9]+/g,'_'))+'.txt';
   a.click(); URL.revokeObjectURL(a.href);
+}
+async function download(btn){
+  const d=collect();
+  if(state.submittedAt) d.sentOn=new Date(state.submittedAt).toISOString().slice(0,10);
+  const titles={}; SECTIONS.forEach(s=>{ titles[s.id]=s.title; });
+  const A=answerDoc(d, titles);
+  const label=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='Preparing your PDF…'; }
+  const done=()=>{ if(btn){ btn.disabled=false; btn.textContent=label; } };
+  try{
+    if(!pdfSafe(A)) throw new Error('letters the PDF font cannot draw');
+    const J=await loadPdfLib();
+    buildPdf(J,A).save('Sabel_Readiness_'+((d.client||'answers').replace(/[^A-Za-z0-9]+/g,'_'))+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+    done();
+  }catch(e){
+    done();
+    try{ printAnswers(A); }catch(e2){ downloadText(d); }
+  }
 }
 
 /* =====================================================================
@@ -1444,7 +1655,7 @@ async function submit(){
     pushServer(); tellParent();       // server copy only: this browser's draft stays cleared as before
   }catch(e){
     btn.disabled=false; btn.textContent='Send to Sabel';
-    err.textContent='That did not send, sorry. Please use Download my answers and email the file to admin@sabelcustomersuccess.com and we will take it from there.';
+    err.textContent='That did not send, sorry. Please use Download my answers (PDF) and email the file to admin@sabelcustomersuccess.com and we will take it from there.';
     err.classList.add('on');
   }
 }
@@ -1460,7 +1671,7 @@ document.addEventListener('click',e=>{
   const nav=e.target.closest('[data-nav]');
   if(nav){
     const a=nav.dataset.nav;
-    if(a==='download') return download();
+    if(a==='download') return download(e.target.closest('[data-nav]'));
     if(a==='restart')  return startAgain();
     if(a==='submit')  return submit();
     if(a==='back'){ save(); state.step=Math.max(0,state.step-1); return render(); }
