@@ -86,6 +86,7 @@
   .notes{margin-top:18px;font-size:11.5px;color:var(--mono);line-height:1.8}
   .notes b{color:var(--muted)}
   .low{opacity:.75}
+  tr.prelive td.n{opacity:.4}
 </style>
 </head>
 <body>
@@ -113,7 +114,7 @@
     <b>Change</b> = last 30 days minus since go-live, in percentage points. Clients live under 30 days show "&lt;30d": their 30-day columns start at go-live, so migrated or test conversations are left out.
     <b>Fin involved</b> = share of all conversations Fin took part in. <b>Automation rate</b> = conversations Fin resolved ÷ all conversations, so it shows how much of the total workload Fin takes off the team (resolution rate only counts the ones Fin joined). <b>Handover rate</b> = share of Fin conversations passed to a person. <b>First reply</b> = average hours to a first reply from a person.
     <b>First-contact resolution</b> = whole workspace, people and Fin. Under 20 Fin conversations, scores are shown faded: treat them as early signs.
-    <b>Go-live</b> comes from each client's project tracker (hover the date to see the source). Hover any column heading for its full name. Clients without a tracker need a date set by hand. New Intercom workspaces are added automatically and marked New.
+    <b>Pre-launch clients</b> (go-live still ahead) are faded and left out of the totals: their numbers are test messages and Intercom's own setup demo conversations, not customers. <b>Go-live</b> comes from each client's project tracker (hover the date to see the source). Hover any column heading for its full name. Clients without a tracker need a date set by hand. New Intercom workspaces are added automatically and marked New.
   </div>
 </div>
 <script>
@@ -134,7 +135,7 @@ function row(c){
 }
 function status(c){
   if(c.status==='error') return '<span class="tag err" title="'+(c.errors||[]).join(' | ').replace(/"/g,'&quot;')+'">Error</span>';
-  if(c.status==='not_live_yet') return ' <span class="tag">Not live</span>';
+  if(c.status==='not_live_yet') return ' <span class="tag" title="Go-live is still ahead. Figures are test and setup conversations only, and are left out of the totals.">Pre-launch: test data</span>';
   if(c.status==='no_go_live_date') return ' <span class="tag">No date</span>';
   if(c.errors&&c.errors.length) return '<span class="tag err" title="'+c.errors.join(' | ').replace(/"/g,'&quot;')+'">Partial</span>';
   return '';
@@ -153,7 +154,7 @@ function render(){
   rows.forEach(function(r){
     var t=r.c.last30_clipped_to_go_live?'<span class="tag" title="Live under 30 days, so both scores cover the same period">&lt;30d</span>':(r.trend==null?'<span class="na">–</span>':'<span class="tr '+(r.trend>0?'up':r.trend<0?'down':'flat')+'">'+(r.trend>0?'▲+':r.trend<0?'▼':'● ')+r.trend+'</span>');
     var L=function(k){ for(var i=0;i<COLS.length;i++) if(COLS[i][0]===k) return COLS[i][2]; return ''; };
-    h+='<tr class="row"><td class="c">'+r.name+(r.c.new?' <span class="tag new">New</span>':'')+
+    h+='<tr class="row'+(r.c.status==='not_live_yet'?' prelive':'')+'"><td class="c">'+r.name+(r.c.new?' <span class="tag new">New</span>':'')+
       '<span class="gl" title="'+golTitle(r.c)+'">Go-live '+fmtDate(r.c.go_live)+'</span>'+status(r.c)+'</td>'+
       '<td class="n sep" data-l="'+L('conv30')+'">'+plain(r.conv30)+'</td>'+
       '<td class="n" data-l="'+L('inv30')+'">'+plain(pct(r.inv30),'%')+'</td>'+
@@ -170,7 +171,7 @@ function render(){
 }
 function srt(k){ SORT.d=(SORT.k===k)?-SORT.d:(k==='name'||k==='golive'?1:-1); SORT.k=k; render(); }
 function tiles(){
-  var cs=DATA.clients, live=cs.filter(function(c){return c.last30&&c.last30.fin_participated}), conv=0, part=0, res=0;
+  var cs=DATA.clients.filter(function(c){return c.status!=='not_live_yet'}), live=cs.filter(function(c){return c.last30&&c.last30.fin_participated}), conv=0, part=0, res=0;
   live.forEach(function(c){ conv+=c.last30.conversations||0; part+=c.last30.fin_participated||0; res+=c.last30.fin_resolved||0; });
   var ups=cs.map(row).filter(function(r){return r.trend!=null&&r.trend>0}).length, downs=cs.map(row).filter(function(r){return r.trend!=null&&r.trend<0}).length;
   var errs=cs.filter(function(c){return c.status==='error'}).length;
