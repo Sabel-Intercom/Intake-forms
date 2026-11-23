@@ -205,7 +205,14 @@ function progress(r){function sec(id,title,f,t){return {id:id,title:title,filled
     sec('4','Your team',named,named+blanks),
     sec('5','Staying in sync',((r.weekly||'').trim()?1:0)+r.stuck.filter(function(x){return (x.client||'').trim();}).length,1+r.stuck.length),
     sec('6','Next steps',(r.actions.some(function(a){return (a.t||'').trim();})?1:0)+(r.aligned?1:0),2)];
-  return {form:'kickoff',v:2,updated:r.updated||'',submitted:r.aligned?(r.alignedAt||r.updated||null):null,sections:s};}
+  return {form:'kickoff',v:2,updated:r.progAt||r.updated||'',submitted:r.aligned?(r.alignedAt||r.progAt||r.updated||null):null,sections:s};}
+/* The tracker re-mirrors this summary onto the task's steps only when 'updated' changes, so it must be the time
+   PROGRESS last changed (progAt), not the last keystroke: typing an email or a note, a sync, or reopening the form
+   must not wipe steps the team ticked by hand. progAt only moves when a section's filled/done counts move. */
+function progSig(r){var p=progress(Object.assign({},r,{progAt:'x'}));return JSON.stringify(p.sections.map(function(x){return [x.id,x.filled,x.total];}).concat([!!r.aligned]));}
+function noteProg(r){var g=progSig(r);if(g!==r.progSig){r.progSig=g;r.progAt=new Date().toISOString();}}
+/* A record saved before progAt existed: adopt its current progress as the baseline, stamped with its own time. */
+function adopt(r){if(r&&r.progSig===undefined){r.progSig=progSig(r);r.progAt=r.updated||'';}}
 function tellHub(){if(window.parent!==window){try{window.parent.postMessage({type:'sabel-form-progress',form:'kickoff',slug:SLUG,P:progress(R)},location.origin);}catch(e){}}}
 /* The client and the team can have this open together: only what this tab changed since it last synced wins. */
 function merge3(base,mine,theirs){
@@ -216,13 +223,13 @@ function merge3(base,mine,theirs){
   var out={};Object.keys(Object.assign({},mine,theirs)).forEach(function(k){var v=merge3(base[k],mine[k],theirs[k]);if(v!==undefined)out[k]=v;});return out;}
 function apiGet(){return fetch(API+'?key='+encodeURIComponent(KEY)+'&_t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();});}
 function apiPost(rec){return fetch(API+'?key='+encodeURIComponent(KEY),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:{record:rec,P:progress(rec),updated:rec.updated}})}).then(function(r){if(!r.ok)throw 0;});}
-function saved(){R.updated=new Date().toISOString();tellHub();try{localStorage.setItem(LOCAL,JSON.stringify(R));}catch(e){}stamp(ONLINE?'Saving…':'Saved in this browser only');if(!ONLINE)return;DIRTY=true;clearTimeout(T);T=setTimeout(push,800);}
+function saved(){R.updated=new Date().toISOString();noteProg(R);tellHub();try{localStorage.setItem(LOCAL,JSON.stringify(R));}catch(e){}stamp(ONLINE?'Saving…':'Saved in this browser only');if(!ONLINE)return;DIRTY=true;clearTimeout(T);T=setTimeout(push,800);}
 function push(){DIRTY=false;var sentAt=R.updated;
-  apiGet().then(function(j){var theirs=j&&j.data&&j.data.record, mine=copy(R), next=theirs&&SYNCED?merge3(SYNCED,mine,theirs):mine;next.updated=new Date().toISOString();
+  apiGet().then(function(j){var theirs=j&&j.data&&j.data.record, mine=copy(R), next=theirs&&SYNCED?merge3(SYNCED,mine,theirs):mine;next.updated=new Date().toISOString();adopt(next);noteProg(next);
     return apiPost(next).then(function(){SYNCED=copy(next);if(!DIRTY&&R.updated===sentAt){var changed=!same(Object.assign({},R,{updated:0}),Object.assign({},next,{updated:0}));R=copy(next);if(changed&&!typing())render();}stamp('Saved');});
   }).catch(function(){stamp('Not saved yet, kept in this browser');});}
 function typing(){var a=document.activeElement;return !!a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!=='checkbox';}
-function poll(){if(!ONLINE||DIRTY||typing())return;apiGet().then(function(j){var t=j&&j.data&&j.data.record;if(!t||DIRTY||typing()||(SYNCED&&same(t,SYNCED)))return;R=t;SYNCED=copy(t);render();tellHub();stamp('Updated by someone else');}).catch(function(){});}
+function poll(){if(!ONLINE||DIRTY||typing())return;apiGet().then(function(j){var t=j&&j.data&&j.data.record;if(!t||DIRTY||typing()||(SYNCED&&same(t,SYNCED)))return;R=t;SYNCED=copy(t);adopt(R);render();tellHub();stamp('Updated by someone else');}).catch(function(){});}
 var BLANK={blackouts:{from:'',to:'',why:''},people:{role:'',hint:'',name:'',email:''},actions:{t:'',who:'',by:''}};
 document.addEventListener('input',function(e){var p=e.target.getAttribute&&e.target.getAttribute('data-p');if(!p)return;setP(p,e.target.value);
   var m=p.match(/^blackouts\.(\d+)\.from$/);if(m){var b=R.blackouts[+m[1]],to=e.target.closest('tr').querySelector('[data-p$=".to"]');to.min=b.from;if(b.to&&b.to<b.from){b.to=b.from;to.value=b.from;}}
@@ -241,14 +248,14 @@ function start(){var seed=window.KICKOFF_SEED||null;if(!seed){try{seed=window.pa
   if(!VALID){$('#app').innerHTML='<div class="card"><b>This link is not complete.</b><br>Please open your kick-off from your project hub, or ask your Sabel contact for the link.</div>';return;}
   apiGet().then(function(j){ONLINE=true;
     if(j&&j.data&&j.data.record&&j.data.record.v!==2){$('#app').innerHTML='<div class="card">Your kick-off is being prepared. Please open it from your project hub.</div>';return;}
-    if(j&&j.data&&j.data.record){R=j.data.record;SYNCED=copy(R);render();tellHub();}
-    else if(seed){R=copy(seed);R.updated=new Date().toISOString();render();tellHub();
+    if(j&&j.data&&j.data.record){R=j.data.record;SYNCED=copy(R);adopt(R);render();tellHub();}
+    else if(seed){R=copy(seed);R.updated=new Date().toISOString();noteProg(R);render();tellHub();
       apiPost(R).then(function(){SYNCED=copy(R);stamp('Saved');}).catch(function(){ONLINE=false;stamp('Not saved yet, kept in this browser');});}
     else{$('#app').innerHTML='<div class="card">Your kick-off is being prepared. Please open it from your project hub.</div>';return;}
     setInterval(poll,20000);
-  }).catch(function(){var loc=null;try{loc=JSON.parse(localStorage.getItem(LOCAL)||'null');}catch(e){}R=loc||(seed?copy(seed):null);
+  }).catch(function(){var loc=null;try{loc=JSON.parse(localStorage.getItem(LOCAL)||'null');}catch(e){}R=loc||(seed?copy(seed):null);adopt(R);
     if(!R){$('#app').innerHTML='<div class="card">We can\'t reach your kick-off right now. Please try again in a minute.</div>';return;}
-    render();tellHub();stamp('Saved in this browser only');});}
+    render();if(loc)tellHub();stamp('Saved in this browser only');});}
 start();
 </script>
 </body>

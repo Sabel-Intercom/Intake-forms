@@ -1195,8 +1195,10 @@ function progSections(){
     return { id:sec.id, title:sec.title, done: total>0 && filled>=total, filled, total };
   });
 }
+/* Only what the CLIENT has answered counts: filled counts per section. Totals and empty sections are left out,
+   so Sabel adding project inputs (section J), or those inputs failing to load, never reads as client progress. */
 function progSig(projectType,secs){
-  return JSON.stringify([projectType||'',(secs||[]).map(x=>[x.id,!!x.done,x.filled||0,x.total||0])]);
+  return JSON.stringify([projectType||'',(secs||[]).filter(x=>(x.filled||0)>0).map(x=>[x.id,x.filled]).sort()]);
 }
 /* 'updated' is when the client's progress last changed (state.changedAt), never "now".
    The tracker re-mirrors this summary onto the task's steps only when the stamp changes,
@@ -1837,7 +1839,13 @@ async function loadProjectInputs(){
 }
 
 if(EMBED) document.body.classList.add('embed');
-restore(); render(); tellParent(); loadProjectInputs(); syncServer();
+restore(); render();
+/* With a server copy, report progress to the hub only once that copy has been checked. Reporting this
+   browser's own state first (often empty, or an older draft) made the tracker overwrite the task's steps
+   with it on every open, before the real answers had loaded. */
+if(!SERVER_KEY) tellParent();
+loadProjectInputs();
+Promise.resolve(syncServer()).catch(()=>{}).then(()=>{ if(SERVER_KEY && (state.hasDraft||state.submittedAt)) tellParent(); });
 </script>
 </body>
 </html>
