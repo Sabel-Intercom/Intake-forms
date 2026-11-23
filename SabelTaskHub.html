@@ -154,6 +154,7 @@ button.stat.hot.on{border-color:var(--red2);box-shadow:0 0 0 1px var(--red2) ins
 .rq-box .rq-line{display:grid;grid-template-columns:104px minmax(0,1fr);gap:10px;align-items:start;padding:6px 0;border-top:1px solid var(--line)}
 .rq-box .rq-line .tag{justify-self:start;white-space:nowrap}
 .rq-box .rq-line b{display:block;font-size:13.5px;font-weight:600}
+.rq-box.rq-feed{margin:4px 0 0;padding:8px 12px}.rq-box.rq-feed .rq-line{grid-template-columns:92px minmax(0,1fr)}.rq-box.rq-feed .rq-line span{display:block;font-size:13px;color:var(--soft);white-space:pre-line}.rq-box.rq-feed .rq-line small{display:block;font-size:12px;color:var(--mute);margin-top:2px}.rq-box.rq-feed .rq-line em{display:block;font-style:normal;font-size:12px;color:var(--amber);margin-top:3px}.rq-box.rq-feed .rq-note{font-size:12.5px;color:var(--mute);padding-bottom:6px}.rq-box.rq-feed .rq-links{display:flex;gap:14px;padding-top:8px;font-size:12.5px}.rq-box.rq-feed .rq-links a{color:var(--blue);font-weight:600;text-decoration:none}.rm .tag small{font-weight:500;opacity:.8}
 .rq-box .rq-line span:not(.tag){display:block;font-size:13px;color:var(--soft);overflow-wrap:anywhere}
 .rq-box .rq-line em{display:block;font-size:12.5px;font-style:normal;color:var(--amber);margin-top:2px}
 .q{color:var(--amber)}
@@ -1125,6 +1126,140 @@ function briefText(m){
   if(m.scope.missing.length){ L.push("","## Check against the SOW","Named in the form, not found in the scope text we hold:"); m.scope.missing.forEach(s=>L.push("- "+s.name+" ("+s.from+")")); }
   return L.join("\n");
 }
+
+/* ---------------------------------------------------------------------
+   READINESS FEEDS (23 Nov 2026)
+   Which readiness questions a tracker task needs. Three sources, in order:
+     1. feeds:[ids] seeded on the task object by the tracker build (the
+        library's FEEDS: field). Authoritative.
+     2. BRIEF_FEEDS_TITLE: the standard library v4 titles, by normalised
+        wording, for trackers built before FEEDS existed.
+     3. BRIEF_FEEDS_WORDS: words in the title, for bespoke tasks. A guess.
+   Sources 2 and 3 are SUGGESTIONS: the Task Hub labels them as such and
+   never treats them as confirmed. A form task (form:"readiness" etc.) is
+   the form itself and feeds nothing. Mapping table and reasoning:
+   workspace/readiness-to-tasks/proposal.md.
+   --------------------------------------------------------------------- */
+function briefNormTitle(s){ return String(s||"").toLowerCase().replace(/[’']/g,"").replace(/[^a-z0-9]+/g," ").trim(); }
+const BRIEF_FEEDS_TITLE = (function(){
+  const T={
+    /* Foundations */
+    "Set up your Intercom account and branding":["a2","a3","b7","d3","i1","i3"],
+    "Agree which system holds your customer records, and how Fin looks customers up":["c1","c4","c6","c7","c8","c9","c10"],
+    "Check Intercom can send email from your domain":["b1","b2","b3","b4","ax_dns","b5"],
+    "Style the Messenger to match your brand":["b7","ax_msg","i4"],
+    "Build your team inboxes":["b1","b6","d3"],
+    "Set rules that send conversations to the right team":["b1","b6","h2"],
+    "Set up ticket types and reply-time targets (SLAs)":["i5","i3","i2"],
+    "Add three email records to your domain (DKIM, return-path, DMARC)":["ax_dns","b4"],
+    "Add the Messenger to your website":["ax_msg","g3"],
+    "Send customer details into the Messenger":["c2","c3","g3"],
+    "Secure the Messenger for logged-in customers (JWT)":["c5","g3"],
+    "Inbox routing - approve who receives which conversations":["b1","b6"],
+    /* Automation engine */
+    "Keep sales and other non-support messages away from your support team":["b1","h2"],
+    "Connect your main store so Fin can look up orders":["ie1","c10","ax_shop"],
+    "Show order and customer details next to each conversation":["ie1","c9"],
+    "Agree which of your systems Fin needs to read":["a0","g1","g4","g6","c6","ax_sys","ax_crm"],
+    "Build the connections to your systems":["g5","g6","g3","ax_sys","ax_crm","ax_phone"],
+    "Test the connections return the right details":["g5","g6"],
+    /* Fin and help centre */
+    "Review your help articles for gaps and duplicates":["f1","f2","f4","ax_help"],
+    "Reorganise your help articles so Fin can use them":["f1","f2"],
+    "Publish the updated help articles":["f3","f4","f5","ax_help"],
+    "Write Fin's guidance from your tone of voice and example replies":["h1","h4","h6","i1","i4","if2","ig2","ih1"],
+    "Set when Fin passes a customer to your team":["h2","h3","h4"],
+    "Set Fin live on each channel for your own team only":["a0","i4"],
+    "Test Fin with real customer questions and adjust":["h5","g5"],
+    "Train your team on Intercom and Fin":["d3","i3"],
+    /* Migration */
+    "Plan where your old tickets and contacts land in Intercom":["a1","d1","d2","e1","e2","e3","e6","b5"],
+    "Move a test batch and check it":["e5","e4"],
+    "Move your full ticket history":["e1","e2","e4"],
+    "Spot-check the moved tickets":["e5"],
+    "Move tickets that arrived during the build":["e4","b5"],
+    "Migration sign off - approve how your old tickets will move across":["e5"],
+    "Migration dataset - check and approve the moved tickets":["e5"],
+    /* UAT and enablement */
+    "Test every channel and connection from start to finish":["a0","h4","i3"],
+    "Run Fin through test questions and fix what fails":["h5","g5"],
+    "Complete our go-live readiness check":["ax_agents","a3","a4"],
+    "Sabel go-live readiness checklist completed":["ax_agents","a3","a4"],
+    "Name who will test before launch":["h5","e5"],
+    /* Go-live and after */
+    "Run the go-live call":["i3"],
+    "Stop new tickets arriving in your old helpdesk":["a1","b5"],
+    "Switch Intercom on for every channel":["a0","b1"],
+    "Switch Fin on for customers":["h3","i4"],
+    "Tell your team about go-live":["d3"],
+    "Review how Fin and your team did in week 1":["i5","i2"],
+    "Hand over documents and close the Slack channel":["f5","h5","ax_slack"],
+    "Set up a shared Slack channel with your team":["ax_slack"]
+  };
+  const out={}; Object.keys(T).forEach(k=>{ out[briefNormTitle(k)]=T[k]; }); return out;
+})();
+/* Words in a bespoke title, tested against the normalised title. Several can match; ids are merged. */
+const BRIEF_FEEDS_WORDS = [
+  [/\b(dns|dkim|dmarc|return path|domain|email records?)\b/, ["ax_dns","b4"]],
+  [/\b(emails?|mailbox(es)?|email addresses)\b/, ["b1","b2","b3","ax_dns","b5"]],
+  [/\b(customer notifications?|sender name|logo|branding)\b/, ["b7"]],
+  [/\b(inbox(es)?|routing|queues?)\b/, ["b1","b6","h2"]],
+  [/\b(seats?|teammates?)\b/, ["d3","ax_agents"]],
+  [/\b(messenger|chat window|live chat|widget)\b/, ["ax_msg","b7","c2","c3","c5","g3"]],
+  [/\b(jwt|identity verification|logged in|log in|login|signed in|sign in)\b/, ["c5","c2","c3","g3"]],
+  [/\b(online store|shopify|order lookups?|storefronts?|subscriptions?)\b/, ["ie1","c10","ax_shop","c9"]],
+  [/\b(customer (records?|data|database|attributes?)|source of truth|holds the truth|crm|user attributes?|data endpoint)\b/, ["c1","c4","c6","c7","c8","c9","c10"]],
+  [/\b(help (centre|center)|articles?|knowledge base|knowledge)\b/, ["f1","f2","f3","f4","f5","ax_help"]],
+  [/\b(tone of voice|guidance|example replies|fins? behaviour|fins? behavior|audiences?)\b/, ["h1","h4","h6","i4"]],
+  [/\b(hand ?overs?|passes? a customer|escalations?|to a person)\b/, ["h2","h3","h4"]],
+  [/\b(slas?|reply[- ]time targets?|reply times?|response times?|office hours|support hours|holidays|follow the sun|ticket types?|ticket states?)\b/, ["i5","i3","i2"]],
+  [/\b(migrat\w*|old tickets|ticket history|test batch|old helpdesk|zendesk|freshdesk|help ?scout|gorgias|cutover|delta)\b/, ["a1","d1","d2","e1","e2","e3","e4","e5","e6","b5"]],
+  [/\b(stop new tickets|switch(es)? off|switched off|closes? inbound)\b/, ["a1","b5"]],
+  [/\b(connections? to|connectors?|integrations?|data connectors?)\b/, ["a0","g1","g3","g5","g6","ax_sys","ax_crm"]],
+  [/\b(train\w*|enablement)\b/, ["d3","i3"]],
+  [/\b(account settings|data region|admin access)\b/, ["a2","a3","d3","i1"]],
+  [/\b(sso|single sign on)\b/, ["a3"]],
+  [/\b(nda|dpa|paperwork|security review)\b/, ["a4","a5"]],
+  [/\b(languages?|translation|multilingual)\b/, ["h4","i3"]],
+  [/\bslack channel\b/, ["ax_slack"]],
+  [/\bphone\b/, ["ax_phone"]],
+  [/\b(go live readiness|readiness checklist)\b/, ["ax_agents","a3","a4"]]
+];
+/* task: {t, feeds, form}. Returns {ids, via:"seeded"|"title"|"words"} or null. */
+function briefFeedsFor(task){
+  if(!task || task.form) return null;
+  const uniq=a=>a.filter((x,i)=>x && a.indexOf(x)===i);
+  if(Array.isArray(task.feeds) && task.feeds.length) return {ids:uniq(task.feeds.map(x=>String(x).trim())), via:"seeded"};
+  const n=briefNormTitle(task.t);
+  if(!n) return null;
+  if(BRIEF_FEEDS_TITLE[n]) return {ids:BRIEF_FEEDS_TITLE[n].slice(), via:"title"};
+  let ids=[]; BRIEF_FEEDS_WORDS.forEach(p=>{ if(p[0].test(n)) ids=ids.concat(p[1]); });
+  ids=uniq(ids);
+  return ids.length ? {ids, via:"words"} : null;
+}
+/* The brief lines a task needs, worst first (not started, waiting, unanswered, ready, not needed).
+   Only lines the form actually showed this client: a seeded id for a hidden question is skipped. */
+function briefTaskLines(model, ids){
+  if(!model || !model.lines || !ids || !ids.length) return [];
+  const rank={r:0,a:1,u:2,g:3,n:4};
+  return model.lines.filter(l=>ids.indexOf(l.id)>-1).slice()
+    .sort((a,b)=>(rank[a.unsure?"a":a.st]-rank[b.unsure?"a":b.st]) || (ids.indexOf(a.id)-ids.indexOf(b.id)));
+}
+/* One line for a chip: what the client still owes this task, or that everything it needs is in. */
+function briefFeedSummary(lines){
+  if(!lines || !lines.length) return null;
+  const toCome=lines.filter(l=>(l.st==="a"||l.st==="r") && !l.unsure);
+  const unsure=lines.filter(l=>l.unsure);
+  const open=lines.filter(l=>l.st==="u");
+  const ready=lines.filter(l=>l.st==="g" && !l.unsure);
+  const worst=toCome[0];
+  const label=worst ? "Waiting on readiness · "+worst.label+(worst.st==="r"?" not started":"")+(toCome.length>1?" +"+(toCome.length-1):"")
+    : unsure.length ? "Readiness · they were not sure about "+unsure[0].label+(unsure.length>1?" +"+(unsure.length-1):"")
+    : ready.length ? "Readiness answers provided · "+ready.length+(open.length?" of "+(ready.length+open.length):"")
+    : open.length ? "Readiness · "+open.length+" not answered yet" : "";
+  const tone=toCome.some(l=>l.st==="r") ? "red" : toCome.length ? "amber" : unsure.length ? "amber" : ready.length ? "green" : "";
+  return {label, tone, toCome, unsure, open, ready, counts:{toCome:toCome.length, unsure:unsure.length, open:open.length, ready:ready.length}};
+}
 /* BUILD-BRIEF:END */
 /* READINESS-COPY:END */
 /* ── readiness check → what each client has provided (16 Nov 2026) ─────────
@@ -1157,6 +1292,43 @@ function rtOwed(model, key, clientName){
     readiness:true, gate:false, form:"", milestone:false, link:"", log:[], steps:0, stepsOpen:0, waiting:false}));
 }
 /* READINESS-CLIENT:END */
+/* READINESS-FEED:BEGIN
+   Per-task view of the same answers (23 Nov 2026). briefFeedsFor / briefTaskLines /
+   briefFeedSummary come from the READINESS-COPY block (Internal Ops is the source). A task with
+   seeded feeds shows them as confirmed; a title or word match is shown as a suggestion. */
+function rtFeed(t){
+  if(!t||t.src||t.readiness)return null;                       // tracker tasks and client-owed tracker rows only
+  const c=CLIENTS[t.key];if(!c||!c.rdy||c.rdy.empty)return null;
+  if(t._feed!==undefined)return t._feed;
+  const f=briefFeedsFor({t:t.title,feeds:t.feeds,form:t.form});
+  if(!f){t._feed=null;return null;}
+  const lines=briefTaskLines(c.rdy,f.ids);
+  if(!lines.length){t._feed=null;return null;}
+  t._feed={via:f.via,lines,sum:briefFeedSummary(lines),sent:c.rdy.submittedAt||null,changed:c.rdy.savedAt||0};
+  return t._feed;
+}
+function rtFeedTag(t){
+  const f=rtFeed(t);if(!f||!f.sum||!f.sum.label)return '';
+  /* A word match is a guess: a neutral chip with the count, never a red or amber warning. */
+  if(f.via==='words')return '<span class="tag" title="Readiness answers that may apply, matched on words in the title. Open the task to see them.">Readiness answers may apply · '+f.lines.length+'</span>';
+  return '<span class="tag '+(f.sum.tone||'')+'" title="'+(f.via==='seeded'?'From the readiness questions this task is built on.':'Matched on the standard task wording. Open the task to see the answers.')+'">'+esc(f.sum.label)+'</span>';
+}
+function rtFeedHTML(t){
+  const f=rtFeed(t);if(!f)return '';
+  const c=CLIENTS[t.key];
+  const cut=s=>{s=String(s||'');return esc(s.length>320?s.slice(0,320)+'…':s).replace(/\n/g,'<br>');};
+  let h='<div><div class="dl">From their readiness check<small> · '+(f.sent?'sent '+fStamp(f.sent):'not sent yet, answers so far')+(f.changed?' · last saved '+fStamp(f.changed):'')+'</small></div><div class="rq-box rq-feed">';
+  if(f.via!=='seeded')h+='<div class="rq-note">'+(f.via==='title'?'Matched on the standard task wording.':'Suggested from the words in the task title, so it can be wide of the mark.')+' Answers below are '+esc(c.name)+'\'s own.</div>';
+  h+=f.lines.map(l=>{
+    const st=l.unsure?'a':l.st,tag=st==='g'?'green':st==='r'?'red':st==='a'?'amber':'';
+    const lab=l.unsure?'Not sure':BRIEF_ST[l.st];
+    const who=l.rag?briefDue(l)+(l.note?' · '+cut(l.note):''):'';
+    return '<div class="rq-line"><span class="tag '+tag+'">'+esc(lab)+'</span><div><b>'+esc(l.label)+'</b>'+(l.text?'<span>'+cut(l.text)+'</span>':'')+(who?'<small>'+who+'</small>':'')+(l.hint?'<em>'+esc(l.hint)+'</em>':'')+'</div></div>';
+  }).join('');
+  h+='<div class="rq-links">'+(c.briefUrl?'<a href="'+esc(c.briefUrl)+'" target="_blank" rel="noopener">Build brief &rarr;</a>':'')+(c.rdyUrl?'<a href="'+esc(c.rdyUrl)+'" target="_blank" rel="noopener">Open it in their hub &rarr;</a>':'')+'</div></div></div>';
+  return h;
+}
+/* READINESS-FEED:END */
 function rtKey(trackerKey){ const s=String(trackerKey||"").replace(/-tracker-v\d+$/,""); return /^[a-z0-9-]{1,60}$/.test(s) ? "readiness-"+s+"-v1" : ""; }
 function rtSnap(d){ try{ return typeof d==="string" ? (d?JSON.parse(d):null) : (d||null); }catch(e){ return null; } }
 function rtChipHTML(k){
@@ -1327,7 +1499,7 @@ async function loadAll(){
           status:stt[cid]||t.s||'Pending',start:dt.start,end:dt.end,late:dt.late,wk:dt.wk||0,wkEnd:dt.wkEnd||0,
           est:n?n.est:(sh?sh.est:(t.hrs||stepEst||null)),notion:n||null,shut:sh,desc:t.desc||'',bg:t.notes||'',card:cn[cid]||'',tip:t.tip||'',link:t.link||cl[cid]||'',
           log:Array.isArray(t.log)?t.log:[],sub,stages,
-          milestone:t.kind==='milestone',doneAt:t.doneAt||''});
+          milestone:t.kind==='milestone',doneAt:t.doneAt||'',form:t.form||'',feeds:Array.isArray(t.feeds)?t.feeds:null});
       });
       /* The client's own open tasks: not a to-do for the team, but what Nikki chases. */
       ((data.taskData[pid]||{}).client||[]).forEach((t,i)=>{
@@ -1336,7 +1508,7 @@ async function loadAll(){
         if(s==='Complete'||s==='Done')return;
         const dt=datesOf(t,trk,ws,null),sub=Array.isArray(t.sub)?t.sub:[];
         owed.push({id:tr.key+':'+cid,key:tr.key,cid,pid,pillar:trk.pillars[pid]||pid,title:t.t,owner:t.o||tr.name,status:s,start:dt.start,end:dt.end,late:dt.late,
-          gate:!!t.gate,form:t.form||'',milestone:t.kind==='milestone',link:t.link||cl[cid]||'',card:cn[cid]||'',log:Array.isArray(t.log)?t.log:[],
+          gate:!!t.gate,form:t.form||'',feeds:Array.isArray(t.feeds)?t.feeds:null,milestone:t.kind==='milestone',link:t.link||cl[cid]||'',card:cn[cid]||'',log:Array.isArray(t.log)?t.log:[],
           steps:sub.length,stepsOpen:sub.filter(x=>x&&x.s!=='Complete').length,waiting:s==='Dependency'});
       });
     });
@@ -2321,6 +2493,7 @@ function tagsHTML(t){
   else if(t.src)h+='<span class="tag'+(t.src==='Notion only'?' violet':'')+'">'+esc(t.src)+'</span>';
   if(t.clientManual)h+='<span class="tag violet" title="Client set by hand by '+esc(t.clientManual.by||'')+'">Client added by hand</span>';
   if(t.edited)h+='<span class="tag violet">Change queued</span>';
+  h+=rtFeedTag(t);
   return h;
 }
 function actionsHTML(t){
@@ -2517,7 +2690,7 @@ function rowHTML(t){
          :canF?'<button type="button" class="fzs'+(fz?' on':'')+'" data-act="focus" title="'+(fz?'In your Focus Zone. Click to remove.':'Add to your Focus Zone')+'" aria-pressed="'+fz+'">'+(fz?'&#9733;':'&#9734;')+'</button>':'')+
     '<span class="chev">&#9654;</span></div>'+odqHTML(t);
   if(S.audit)h+=audHTML(t);
-  if(open&&!(S.mode==='board'&&!onDesk()))h+='<div class="det"><div>'+actionsHTML(t)+aboutHTML(t)+kvHTML(t)+timeHTML(t)+linksHTML(t)+'</div>'+
+  if(open&&!(S.mode==='board'&&!onDesk()))h+='<div class="det"><div>'+actionsHTML(t)+aboutHTML(t)+kvHTML(t)+rtFeedHTML(t)+timeHTML(t)+linksHTML(t)+'</div>'+
     '<div><div class="dl" style="margin-top:0">Notes</div>'+notesHTML(t)+'<div class="comp">'+draftTA()+composerBtns(t)+'</div>'+
     '<div class="hint">Notes here are internal. The client does not see them.</div></div></div>';
   return h+'</div>';
@@ -2570,7 +2743,7 @@ function drawerHTML(t){
     '<button type="button" class="x" data-act="close" aria-label="Close">×</button></div>'+
     '<div class="db"><div>'+actionsHTML(t)+'</div>'+
     (t.parked?'<div class="pc"><small>Parked with '+COORD+' · '+fStamp(t.parked.askedAt)+'</small>'+quote(t.parked.question)+'</div>':'')+
-    kvHTML(t,true)+timeHTML(t)+aboutHTML(t)+linksHTML(t)+'<hr><div><div class="dl">Notes</div>'+notesHTML(t)+'</div></div>'+
+    kvHTML(t,true)+rtFeedHTML(t)+timeHTML(t)+aboutHTML(t)+linksHTML(t)+'<hr><div><div class="dl">Notes</div>'+notesHTML(t)+'</div></div>'+
     '<div class="df">'+draftTA()+composerBtns(t)+'<div class="hint">Notes here are internal. The client does not see them.</div></div></aside>';
 }
 
@@ -2585,7 +2758,7 @@ function deskHTML(mine){
     return '<div class="pk" data-id="'+esc(t.id)+'"><div class="pkt"><div><div class="pkl">'+av(p.by||t.owner,true)+'<span><b>'+esc(p.by||t.owner)+'</b> parked this · '+fStamp(p.askedAt)+' ·</span><span class="cl'+tyc(t)+'">'+esc(clientOf(t))+'</span>'+(t.pillar?'<span>'+esc(t.pillar)+'</span>':'')+'</div>'+
       '<div class="pkh">'+esc(t.title)+'</div><div class="pc">'+quote(p.question||'')+'</div></div>'+
       '<div class="pkr">'+dueHTML(t)+estHTML(t)+'<button type="button" class="lk" data-act="desk-toggle">'+n+' note'+(n===1?'':'s')+' · task detail</button></div></div>'+
-      (open?'<div class="pkd"><div>'+(aboutHTML(t)||'<div class="none">No description on this task.</div>')+'<div class="hint">Owner '+esc(t.owner)+(t.end?' · due '+DOW[t.end.getDay()]+' '+fD(t.end):'')+'</div>'+linksHTML(t)+'</div><div>'+notesHTML(t)+'</div></div>':'')+
+      (open?'<div class="pkd"><div>'+(aboutHTML(t)||'<div class="none">No description on this task.</div>')+'<div class="hint">Owner '+esc(t.owner)+(t.end?' · due '+DOW[t.end.getDay()]+' '+fD(t.end):'')+'</div>'+rtFeedHTML(t)+linksHTML(t)+'</div><div>'+notesHTML(t)+'</div></div>':'')+
       '<div class="pkf"><textarea data-ta="desk:'+esc(t.id)+'" placeholder="Answer '+esc(p.by||t.owner)+'…">'+esc(S.deskDraft[t.id]||'')+'</textarea>'+
       '<button type="button" class="pb hand" data-act="answer">Answer &amp; hand back to '+esc(t.owner)+'</button>'+
       '<button type="button" class="pb" data-act="reply">Reply, keep parked</button>'+
@@ -2813,6 +2986,7 @@ function owedRowHTML(o){
   if(o.readiness)tags+='<span class="tag amber">From their readiness check</span>'+(o.said?'<span>They said: '+esc(o.said)+'</span>':'');
   if(o.gate)tags+='<span class="tag red">Gate: blocks the build</span>';
   if(o.form)tags+='<span class="tag amber">'+esc(o.form)+' form</span>';
+  tags+=rtFeedTag(o);
   if(o.milestone)tags+='<span class="tag">Milestone</span>';
   if(o.staged)tags+='<span class="tag blue">Stage: '+esc(o.stage)+'</span>';
   else if(o.steps)tags+='<span class="tag">'+o.stepsOpen+' of '+o.steps+' parts open</span>';
