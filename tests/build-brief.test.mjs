@@ -17,8 +17,8 @@ const ops = fs.readFileSync(OPS, 'utf8');
 const form = fs.readFileSync(FORM, 'utf8');
 const between = (a, b) => { const i = ops.indexOf(a), j = ops.indexOf(b); assert.ok(i > -1 && j > i, 'markers present: ' + a); return ops.slice(i, j + b.length); };
 const code = between(BEGIN, END) + '\n' + between('/* BUILD-BRIEF:BEGIN', '/* BUILD-BRIEF:END */');
-const { briefModel, briefText, briefInputId, BRIEF_FORM, BRIEF_LABEL, BRIEF_Q_AREA, BRIEF_HINT } =
-  new Function(code + '\nreturn {briefModel, briefText, briefInputId, BRIEF_FORM, BRIEF_LABEL, BRIEF_Q_AREA, BRIEF_HINT};')();
+const { briefModel, briefText, briefInputId, BRIEF_FORM, BRIEF_LABEL, BRIEF_Q_AREA, BRIEF_HINT, BRIEF_FEEDS_TITLE, BRIEF_FEEDS_WORDS, briefFeedsFor, briefTaskLines, briefFeedSummary } =
+  new Function(code + '\nreturn {briefModel, briefText, briefInputId, BRIEF_FORM, BRIEF_LABEL, BRIEF_Q_AREA, BRIEF_HINT, BRIEF_FEEDS_TITLE, BRIEF_FEEDS_WORDS, briefFeedsFor, briefTaskLines, briefFeedSummary};')();
 
 test('the question list in Internal Ops matches the readiness form (run: node scripts/build-brief-map.mjs --write)', () => {
   assert.equal(between(BEGIN, END), block(form));
@@ -159,4 +159,38 @@ test('the Task Hub reads the hand-off: several people, a due date, and only a li
   // An ordinary chase is unchanged: one person, no due date.
   const chase = oneChase({ t: 'Reply to Acme', to: 'Chris,Greg', c: 'Acme' });
   assert.deepEqual([chase.kind, chase.to, chase.due], ['chase', ['Chris'], '']);
+});
+
+/* Readiness feeds: which questions a tracker task needs. */
+test('every feed id in the title map and the word map is a question in the form', () => {
+  const ids = new Set(BRIEF_FORM.sections.flatMap(s => s.items.map(i => i.id)));
+  for (const [t, l] of Object.entries(BRIEF_FEEDS_TITLE)) for (const id of l) assert.ok(ids.has(id), 'unknown question id ' + id + ' on "' + t + '"');
+  for (const [re, l] of BRIEF_FEEDS_WORDS) for (const id of l) assert.ok(ids.has(id), 'unknown question id ' + id + ' for ' + re);
+});
+
+test('seeded feeds win, then the standard title, then words; a form task feeds nothing', () => {
+  assert.deepEqual(briefFeedsFor({ t: 'Anything at all', feeds: ['ax_dns', 'b4', 'ax_dns'] }), { ids: ['ax_dns', 'b4'], via: 'seeded' });
+  assert.deepEqual(briefFeedsFor({ t: 'Check Intercom can send email from your domain' }), { ids: ['b1', 'b2', 'b3', 'b4', 'ax_dns', 'b5'], via: 'title' });
+  // Punctuation and case do not matter for the title match.
+  assert.equal(briefFeedsFor({ t: "Write Fin’s guidance from your tone of voice and example replies" }).via, 'title');
+  const w = briefFeedsFor({ t: 'Set up email channels and keep alert email out of support' });
+  assert.equal(w.via, 'words'); assert.ok(w.ids.includes('b1') && w.ids.includes('ax_dns'));
+  assert.equal(briefFeedsFor({ t: 'Complete the readiness check', form: 'readiness' }), null);
+  assert.equal(briefFeedsFor({ t: 'Review revised statement of work for completeness' }), null);
+});
+
+test('task lines come worst first and a summary names what the client still owes', () => {
+  const m = briefModel(SNAP, CTX);
+  const lines = briefTaskLines(m, ['b1', 'b2', 'b3', 'b4', 'ax_dns', 'b5']);
+  // b2 and b3 were never answered in SNAP (u); ax_dns is amber; b1 and b4 are given; b5 is a migration question, shown for a full project.
+  assert.equal(lines[0].id, 'ax_dns');
+  assert.ok(lines.every((l, i) => i === 0 || ({ r: 0, a: 1, u: 2, g: 3, n: 4 })[l.st] >= ({ r: 0, a: 1, u: 2, g: 3, n: 4 })[lines[i - 1].st]));
+  const sum = briefFeedSummary(lines);
+  assert.equal(sum.tone, 'amber'); assert.ok(sum.label.startsWith('Waiting on readiness · DNS records added'));
+  // Not shown to this client (hidden by a0) means not in the list, even when seeded.
+  assert.deepEqual(briefTaskLines(m, ['ax_phone']), []);
+  assert.equal(briefFeedSummary([]), null);
+  // Everything in: green, with the count.
+  const ready = briefTaskLines(m, ['b1', 'b4']);
+  assert.deepEqual([briefFeedSummary(ready).tone, briefFeedSummary(ready).label], ['green', 'Readiness answers provided · 2']);
 });
