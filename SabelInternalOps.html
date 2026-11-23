@@ -62,6 +62,7 @@ a{color:inherit}
 .navbtn{display:flex;align-items:center;gap:6px;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:13px;padding:5px 12px;border-radius:6px;cursor:pointer}
 .navbtn:hover{color:var(--ink)}
 .navbtn.on{background:var(--ink);color:var(--surface)}
+.finperf-frame{display:block;width:100%;height:calc(100vh - 140px);min-height:640px;border:0;border-radius:12px;background:transparent}
 .navbtn .count{font-size:11px;font-weight:700;background:var(--accent);color:#fff;border-radius:99px;padding:0 6px;line-height:16px}
 .navbtn.on .count{background:var(--accent)}
 .search{position:relative;flex:0 1 220px;min-width:132px}
@@ -575,6 +576,7 @@ dialog .dfoot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16
       <button class="navbtn" id="nav-today" data-act="today">Today <span class="count" id="today-count" hidden></span></button>
       <button class="navbtn" id="nav-sales" data-act="sales">Sales follow-up <span class="count" id="sales-count" hidden></span></button>
       <button class="navbtn" id="nav-lists" data-act="lists">Checklists</button>
+      <button class="navbtn" id="nav-finperf" data-act="finperf">Fin performance</button>
     </nav>
     <span class="spacer"></span>
     <div class="search">
@@ -1873,8 +1875,9 @@ function render(soft){
   else if(S.view==="board") v.innerHTML = boardView();
   else if(S.view==="sales") v.innerHTML = salesView();
   else if(S.view==="today") v.innerHTML = todayView();
+  else if(S.view==="finperf") v.innerHTML = finPerfView();
   else { S.view="overview"; v.innerHTML = overviewView(); }
-  ["overview","board","today","sales","lists"].forEach(k=>$("nav-"+k).classList.toggle("on", S.view===k));
+  ["overview","board","today","sales","lists","finperf"].forEach(k=>$("nav-"+k).classList.toggle("on", S.view===k));
   renderBadges();
   if(soft) sc.scrollTop=top;
 }
@@ -2618,13 +2621,20 @@ function listsView(){
   return h;
 }
 
+/* Fin performance: per-client Fin resolution and automation, refreshed Mon and Thu 4am Perth
+   by Sabio (data/fin-performance.json). Its own page, shown here in a frame so it keeps its layout. */
+function finPerfView(){
+  const v=String(Math.floor(Date.now()/600000));
+  return '<iframe class="finperf-frame" src="SabelFinPerformance.html?v='+v+'" title="Fin performance"></iframe>';
+}
+
 /* =====================================================================
    EVENTS
    ===================================================================== */
 function openClient(id){ S.view="client"; S.clientId=id; S.scopeOpen=false; location.hash="c="+id; render(); $("scroll").scrollTop=0; }
 function goOverview(){ S.view="overview"; S.clientId=null; history.replaceState(null,"",location.pathname+location.search+"#overview"); render(); $("scroll").scrollTop=0; }
 function goToday(){ S.view="today"; S.clientId=null; history.replaceState(null,"",location.pathname+location.search+"#today"); render(); $("scroll").scrollTop=0; }
-function routeFromHash(){ const m=location.hash.match(/c=([^&]+)/); if(m && byId(decodeURIComponent(m[1]))){ S.view="client"; S.clientId=decodeURIComponent(m[1]); } else if(["#lists","#sales","#today","#overview","#board"].includes(location.hash)){ S.view=location.hash.slice(1); } }
+function routeFromHash(){ const m=location.hash.match(/c=([^&]+)/); if(m && byId(decodeURIComponent(m[1]))){ S.view="client"; S.clientId=decodeURIComponent(m[1]); } else if(["#lists","#sales","#today","#overview","#board","#finperf"].includes(location.hash)){ S.view=location.hash.slice(1); } }
 window.addEventListener("hashchange", ()=>{ routeFromHash(); render(); });
 
 document.addEventListener("click", e=>{
@@ -2644,7 +2654,7 @@ document.addEventListener("click", e=>{
     case "board-type": S.prefs.board=Object.assign({}, S.prefs.board||{}, {type:t.dataset.v}); savePrefs(); return render(true);
     case "board-status": S.prefs.board=Object.assign({}, S.prefs.board||{}, {status:t.dataset.v}); savePrefs(); return render(true);
     case "board-sort": S.prefs.board=Object.assign({}, S.prefs.board||{}, {sort:t.dataset.v}); savePrefs(); return render(true);
-    case "board": case "sales": case "lists": S.view=a; S.clientId=null; history.replaceState(null,"",location.pathname+location.search+"#"+a); render(); $("scroll").scrollTop=0; return;
+    case "board": case "sales": case "lists": case "finperf": S.view=a; S.clientId=null; history.replaceState(null,"",location.pathname+location.search+"#"+a); render(); $("scroll").scrollTop=0; return;
     case "list-tab": S.listTab=t.dataset.v; return render(true);
     case "ed-add": { const pid=t.dataset.pid, id=pid+"-x"+Date.now().toString(36);
       const box=document.querySelector('input[data-ed="new"][data-pid="'+pid+'"]'), typed=box ? box.value.trim() : "";

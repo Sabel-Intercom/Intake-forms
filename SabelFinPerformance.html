@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Fin Performance · Sabel</title>
+<style>
+  :root{
+    --bg:#0B0B0C; --card:#0F1113; --card2:#141618; --card3:#191C20; --card4:#1E2228;
+    --w:#FFFFFF; --red:#E10600; --redDim:rgba(225,6,0,0.15); --body:#E2E8F0;
+    --muted:#94A3B8; --border:#2A3547; --border2:#1A2232; --mono:#64748B;
+    --green:#4ADE80; --amber:#FBBF24; --bad:#F87171; --blue:#60A5FA;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#F5F5F3; --card:#FFFFFF; --card2:#F1F2F3; --card3:#E9EBEE; --card4:#E3E5E8;
+      --w:#14171A; --redDim:rgba(225,6,0,0.08); --body:#3A4046; --muted:#6B7480; --border:#D2D6DB; --border2:#E3E5E8; --mono:#8C95A1;
+      --green:#15803D; --amber:#B45309; --bad:#B91C1C; --blue:#1D4ED8;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#F5F5F3; --card:#FFFFFF; --card2:#F1F2F3; --card3:#E9EBEE; --card4:#E3E5E8;
+    --w:#14171A; --redDim:rgba(225,6,0,0.08); --body:#3A4046; --muted:#6B7480; --border:#D2D6DB; --border2:#E3E5E8; --mono:#8C95A1;
+    --green:#15803D; --amber:#B45309; --bad:#B91C1C; --blue:#1D4ED8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--body);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  body::before{content:"";position:fixed;top:0;bottom:0;left:50%;width:1px;background:linear-gradient(180deg,transparent,rgba(225,6,0,0.10),transparent);pointer-events:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:28px clamp(12px,2.5vw,28px) 60px}
+  .head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+  .kick{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:8px}
+  h1{font-size:24px;font-weight:800;color:var(--w);letter-spacing:-.01em}
+  .sub{font-size:12.5px;color:var(--muted);margin-top:6px;max-width:760px;line-height:1.6}
+  .stamp{font-size:11px;color:var(--mono);letter-spacing:.04em;text-align:right;line-height:1.7}
+  .stamp b{color:var(--muted)}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:22px}
+  .tile{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--border2);border-top:3px solid var(--red);border-radius:12px;padding:14px 18px}
+  .tile .k{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mono);font-weight:700}
+  .tile .v{font-size:26px;font-weight:800;color:var(--w);margin-top:4px}
+  .tile .s{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .tools{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .tools input{background:var(--card);border:1px solid var(--border);color:var(--w);border-radius:6px;padding:7px 11px;font-size:12px;width:220px;max-width:100%}
+  .tools input[type=checkbox]{width:auto;padding:0}
+  .tools label{font-size:11.5px;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+  .tblwrap{border:1px solid var(--border2);border-radius:12px;overflow:hidden;background:var(--card)}
+  table{width:100%;border-collapse:collapse;font-size:12px;table-layout:auto}
+  th{background:var(--card3);color:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;text-align:right;padding:8px 6px;line-height:1.3;vertical-align:bottom;border-bottom:1px solid var(--border);font-weight:700;cursor:pointer;user-select:none;white-space:normal;word-break:normal}
+  th:first-child{text-align:left;padding-left:12px}
+  th.grp{cursor:default;text-align:center;color:var(--muted);background:var(--card2);border-bottom:1px solid var(--border2)}
+  th .arr{opacity:.5;margin-left:2px}
+  td{padding:8px 6px;border-bottom:1px solid var(--border2);vertical-align:middle}
+  td:first-child{padding-left:12px}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--card2)}
+  td.c{color:var(--w);font-weight:700;line-height:1.35}
+  td.c .gl{display:block;font-weight:400;font-size:10.5px;color:var(--mono);margin-top:2px}
+  td.c .tag{margin:3px 4px 0 0}
+  td.n{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+  td.sep,th.sep{border-left:1px solid var(--border2)}
+  .sortbar{display:none;gap:8px;align-items:center;font-size:11.5px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
+  /* Narrow windows: each client becomes a card, so nothing ever scrolls sideways */
+  @media (max-width:980px){
+    .tblwrap{border:none;background:transparent;overflow:visible}
+    table,tbody,tr,td{display:block;width:100%}
+    tr.hd{display:none}
+    tr.row{background:var(--card);border:1px solid var(--border2);border-radius:12px;margin-bottom:10px;padding:10px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px 12px}
+    tr.row:hover td{background:transparent}
+    tr.row td{border:none;padding:2px 0;text-align:left}
+    tr.row td.c{grid-column:1/-1;padding-bottom:6px;border-bottom:1px solid var(--border2);margin-bottom:2px}
+    tr.row td.n::before{content:attr(data-l);display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--mono);font-weight:700;margin-bottom:2px;white-space:normal}
+    td.sep{border-left:none}
+    .sortbar{display:flex}
+  }
+  .sortbar select{background:var(--card);border:1px solid var(--border);color:var(--w);border-radius:6px;padding:5px 8px;font-size:12px}
+  .muted{color:var(--mono)}
+  .pill{display:inline-block;min-width:44px;text-align:center;padding:2px 7px;border-radius:20px;font-weight:700;font-variant-numeric:tabular-nums}
+  .g{color:var(--green);background:color-mix(in srgb,var(--green) 13%,transparent)}
+  .a{color:var(--amber);background:color-mix(in srgb,var(--amber) 13%,transparent)}
+  .r{color:var(--bad);background:color-mix(in srgb,var(--bad) 13%,transparent)}
+  .na{color:var(--mono)}
+  .tr{font-size:11.5px;font-weight:700}
+  .up{color:var(--green)} .down{color:var(--bad)} .flat{color:var(--mono)}
+  .tag{display:inline-block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:20px;border:1px solid var(--border);color:var(--muted)}
+  .tag.err{border-color:var(--bad);color:var(--bad)}
+  .tag.new{border-color:var(--blue);color:var(--blue);margin-left:6px}
+  .notes{margin-top:18px;font-size:11.5px;color:var(--mono);line-height:1.8}
+  .notes b{color:var(--muted)}
+  .low{opacity:.75}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <div class="kick">Internal · Fin performance</div>
+      <h1>How Fin is doing, client by client</h1>
+      <p class="sub">Fin resolution for the last 30 days next to the score since go-live, so you can see which way each client is heading. Refreshed Mondays and Thursdays at 4am Perth. Read-only pull from each client's Intercom reporting.</p>
+    </div>
+    <div class="stamp" id="stamp">Loading…</div>
+  </div>
+  <div class="tiles" id="tiles"></div>
+  <div class="tools">
+    <input id="q" placeholder="Filter clients" oninput="render()">
+    <label><input type="checkbox" id="hideQuiet" onchange="render()"> Hide clients with no conversations</label>
+  </div>
+  <div class="sortbar">Sort by <select id="sortsel" onchange="var v=this.value.split(':');SORT={k:v[0],d:+v[1]};render()">
+    <option value="name:1">Client A to Z</option><option value="res30:-1">Resolution, last 30 days</option><option value="auto30:-1">Automation rate</option>
+    <option value="trend:-1">Change vs go-live</option><option value="conv30:-1">Conversations</option><option value="golive:1">Go-live date</option></select></div>
+  <div class="tblwrap"><table id="tbl"></table></div>
+  <div class="notes">
+    <b>All columns cover the last 30 days</b>, except "Since go-live" and "Change".
+    <b>Fin resolution rate</b> = conversations Fin resolved ÷ conversations Fin took part in. Green 50%+, amber 30 to 49%, red under 30%.
+    <b>Change</b> = last 30 days minus since go-live, in percentage points. Clients live under 30 days show "&lt;30d": their 30-day columns start at go-live, so migrated or test conversations are left out.
+    <b>Fin involved</b> = share of all conversations Fin took part in. <b>Automation rate</b> = conversations Fin resolved ÷ all conversations, so it shows how much of the total workload Fin takes off the team (resolution rate only counts the ones Fin joined). <b>Handover rate</b> = share of Fin conversations passed to a person. <b>First reply</b> = average hours to a first reply from a person.
+    <b>First-contact resolution</b> = whole workspace, people and Fin. Under 20 Fin conversations, scores are shown faded: treat them as early signs.
+    <b>Go-live</b> comes from each client's project tracker (hover the date to see the source). Hover any column heading for its full name. Clients without a tracker need a date set by hand. New Intercom workspaces are added automatically and marked New.
+  </div>
+</div>
+<script>
+(function(){ try{ var th=localStorage.getItem('sabel-ops-theme'); if(th==='dark'||th==='light') document.documentElement.setAttribute('data-theme',th); }catch(e){} })();
+var DATA=null, SORT={k:'name',d:1};
+function golTitle(c){ var s='Go-live source: '+(c.go_live_source||'not set'); if(c.tracker) s+=' ('+c.tracker+')'; if(c.note) s+='. '+c.note; return s.replace(/"/g,'&quot;'); }
+function pct(x){return x==null?null:Math.round(x*100)}
+function rPill(x,n){ if(x==null) return '<span class="na">–</span>'; var p=pct(x), c=p>=50?'g':(p>=30?'a':'r'); return '<span class="pill '+c+(n!=null&&n<20?' low':'')+'">'+p+'%</span>'; }
+function plain(x,suf){ return x==null?'<span class="na">–</span>':(x+(suf||'')); }
+function fmtDate(s){ if(!s) return '<span class="na">Not set</span>'; var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], x=s.split('-'); return (+x[2])+' '+M[+x[1]-1]+' '+x[0].slice(2); }
+function row(c){
+  var a=c.last30||{}, b=c.since_go_live||{};
+  var r30=a.fin_resolution_rate, rgl=b.fin_resolution_rate, tr=null;
+  if(r30!=null&&rgl!=null&&!c.last30_clipped_to_go_live) tr=pct(r30)-pct(rgl);
+  return {c:c,name:c.name,golive:c.go_live||'',conv30:a.conversations,inv30:a.fin_involvement,auto30:(a.conversations?(a.fin_resolved||0)/a.conversations:null),res30:r30,n30:a.fin_participated,
+    resgl:rgl,ngl:b.fin_participated,trend:tr,ho30:a.fin_handover_rate,frt30:a.first_response_hours,fcr30:a.first_contact_resolution_rate,
+    csat:a.csat_avg,csatn:a.csat_sample,convgl:b.conversations};
+}
+function status(c){
+  if(c.status==='error') return '<span class="tag err" title="'+(c.errors||[]).join(' | ').replace(/"/g,'&quot;')+'">Error</span>';
+  if(c.status==='not_live_yet') return ' <span class="tag">Not live</span>';
+  if(c.status==='no_go_live_date') return ' <span class="tag">No date</span>';
+  if(c.errors&&c.errors.length) return '<span class="tag err" title="'+c.errors.join(' | ').replace(/"/g,'&quot;')+'">Partial</span>';
+  return '';
+}
+var COLS=[['name','Client','Client'],['conv30','Convos','Conversations'],['inv30','Fin in&shy;volved','Fin involved'],['auto30','Auto&shy;mation','Automation rate'],['res30','Last 30 days','Resolution, 30 days'],['resgl','Since go-live','Resolution, since go-live'],['trend','Change','Change'],['ho30','Hand&shy;over','Handover rate'],['frt30','First reply (h)','First reply (hours)'],['fcr30','First con&shy;tact','First-contact resolution'],['csat','CSAT','CSAT']];
+function render(){
+  if(!DATA) return;
+  var q=document.getElementById('q').value.toLowerCase(), hide=document.getElementById('hideQuiet').checked;
+  var rows=DATA.clients.map(row).filter(function(r){ return (!q||r.name.toLowerCase().indexOf(q)>-1) && (!hide||r.conv30); });
+  rows.sort(function(x,y){ var a=x[SORT.k],b=y[SORT.k]; if(typeof a==='string') a=a.toLowerCase(); if(typeof b==='string') b=b.toLowerCase(); if((a==null||a==='')&&(b==null||b==='')) return 0; if(a==null||a==='') return 1; if(b==null||b==='') return -1; return (a>b?1:a<b?-1:0)*SORT.d; });
+  var h='<tr class="hd"><th class="grp"></th><th class="grp sep" colspan="3">Volume</th><th class="grp sep" colspan="3">Fin resolution rate</th><th class="grp sep" colspan="4">Service quality</th></tr><tr class="hd">';
+  var SEP={conv30:1,res30:1,ho30:1};
+  COLS.forEach(function(c){
+    h+='<th class="'+(SEP[c[0]]?'sep':'')+'" title="'+c[2]+'" onclick="srt(\''+c[0]+'\')">'+c[1]+(SORT.k===c[0]?'<span class="arr">'+(SORT.d>0?'▲':'▼')+'</span>':'')+'</th>'; });
+  h+='</tr>';
+  rows.forEach(function(r){
+    var t=r.c.last30_clipped_to_go_live?'<span class="tag" title="Live under 30 days, so both scores cover the same period">&lt;30d</span>':(r.trend==null?'<span class="na">–</span>':'<span class="tr '+(r.trend>0?'up':r.trend<0?'down':'flat')+'">'+(r.trend>0?'▲+':r.trend<0?'▼':'● ')+r.trend+'</span>');
+    var L=function(k){ for(var i=0;i<COLS.length;i++) if(COLS[i][0]===k) return COLS[i][2]; return ''; };
+    h+='<tr class="row"><td class="c">'+r.name+(r.c.new?' <span class="tag new">New</span>':'')+
+      '<span class="gl" title="'+golTitle(r.c)+'">Go-live '+fmtDate(r.c.go_live)+'</span>'+status(r.c)+'</td>'+
+      '<td class="n sep" data-l="'+L('conv30')+'">'+plain(r.conv30)+'</td>'+
+      '<td class="n" data-l="'+L('inv30')+'">'+plain(pct(r.inv30),'%')+'</td>'+
+      '<td class="n" data-l="'+L('auto30')+'" title="'+(r.c.last30&&r.c.last30.fin_resolved!=null?r.c.last30.fin_resolved+' resolved by Fin of '+r.conv30+' conversations':'')+'">'+plain(pct(r.auto30),'%')+'</td>'+
+      '<td class="n sep" data-l="'+L('res30')+'" title="'+(r.n30!=null?r.n30+' Fin conversations':'')+'">'+rPill(r.res30,r.n30)+'</td>'+
+      '<td class="n" data-l="'+L('resgl')+'" title="'+(r.ngl!=null?r.ngl+' Fin conversations since go-live':'')+'">'+rPill(r.resgl,r.ngl)+'</td>'+
+      '<td class="n" data-l="'+L('trend')+' (pts)">'+t+'</td>'+
+      '<td class="n sep" data-l="'+L('ho30')+'">'+plain(pct(r.ho30),'%')+'</td>'+
+      '<td class="n" data-l="'+L('frt30')+'">'+plain(r.frt30)+'</td>'+
+      '<td class="n" data-l="'+L('fcr30')+'">'+plain(pct(r.fcr30),'%')+'</td>'+
+      '<td class="n" data-l="'+L('csat')+'" title="'+(r.csatn?r.csatn+' ratings':'')+'">'+(r.csat==null?'<span class="na">–</span>':r.csat)+'</td></tr>';
+  });
+  document.getElementById('tbl').innerHTML=h;
+}
+function srt(k){ SORT.d=(SORT.k===k)?-SORT.d:(k==='name'||k==='golive'?1:-1); SORT.k=k; render(); }
+function tiles(){
+  var cs=DATA.clients, live=cs.filter(function(c){return c.last30&&c.last30.fin_participated}), conv=0, part=0, res=0;
+  live.forEach(function(c){ conv+=c.last30.conversations||0; part+=c.last30.fin_participated||0; res+=c.last30.fin_resolved||0; });
+  var ups=cs.map(row).filter(function(r){return r.trend!=null&&r.trend>0}).length, downs=cs.map(row).filter(function(r){return r.trend!=null&&r.trend<0}).length;
+  var errs=cs.filter(function(c){return c.status==='error'}).length;
+  document.getElementById('tiles').innerHTML=
+    '<div class="tile"><div class="k">Clients with Fin activity</div><div class="v">'+live.length+' / '+cs.length+'</div><div class="s">last 30 days</div></div>'+
+    '<div class="tile"><div class="k">Fin resolution, all clients</div><div class="v">'+(part?Math.round(res/part*100)+'%':'–')+'</div><div class="s">'+res+' of '+part+' Fin conversations</div></div>'+
+    '<div class="tile"><div class="k">Conversations</div><div class="v">'+conv.toLocaleString()+'</div><div class="s">last 30 days, clients with Fin</div></div>'+
+    '<div class="tile"><div class="k">Trend vs go-live</div><div class="v"><span class="up">▲'+ups+'</span> &nbsp;<span class="down">▼'+downs+'</span></div><div class="s">'+(errs?errs+' client(s) failed to refresh':'all clients refreshed')+'</div></div>';
+}
+fetch('data/fin-performance.json?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+  DATA=d; document.getElementById('stamp').innerHTML='Last refreshed<br><b>'+d.generated_label+'</b><br>Next: Mon &amp; Thu, 4am Perth';
+  tiles(); render();
+}).catch(function(e){ document.getElementById('stamp').textContent='Could not load data: '+e; });
+</script>
+</body>
+</html>

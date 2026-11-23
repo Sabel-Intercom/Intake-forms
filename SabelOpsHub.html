@@ -84,6 +84,7 @@
       <button class="tab"    id="t-tasks"     onclick="show('tasks')">Task Hub</button>
       <button class="tab"    id="t-readiness" onclick="show('readiness')">Readiness Check</button>
       <button class="tab"    id="t-feedback"  onclick="show('feedback')">Feedback Dashboard</button>
+      <button class="tab"    id="t-finperf"   onclick="show('finperf')">Fin Performance</button>
     </nav>
     <div class="nav-right">Internal use only</div>
     <button class="theme" id="theme-btn" onclick="toggleTheme()" title="Light or dark, for this browser">Theme</button>
@@ -131,12 +132,21 @@
           <p>Every piece of client feedback in one board: Intercom/Fin results, scores, referrals and case-study opportunities — with export and internal-only improvement notes.</p>
           <span class="go">Open feedback <span class="arrow">&rarr;</span></span>
         </button>
+        <button class="pillar" onclick="show('finperf')">
+          <span class="badge internal">Internal</span>
+          <div class="ico">&#128200;</div>
+          <h2>Fin Performance</h2>
+          <div class="sub">How Fin is doing, client by client</div>
+          <p>Each client's Fin resolution and automation rate for the last 30 days next to the score since go-live, with handover, first reply and CSAT. Refreshed Mondays and Thursdays at 4am Perth.</p>
+          <span class="go">Open Fin performance <span class="arrow">&rarr;</span></span>
+        </button>
       </div>
       <div class="foot-note">
         <b>Internal Ops</b> &mdash; every client from signature to close-out, step by step and gate by gate.<br>
         <b>Readiness Submissions</b> &mdash; client Readiness Check answers and the hard gates, before the kickoff is booked.<br>
         <b>Project Tracker Dashboard</b> &mdash; the team view of where all the client trackers stand.<br>
-        <b>Feedback Dashboard</b> &mdash; what clients are telling us, pulled live from the feedback webhook.
+        <b>Feedback Dashboard</b> &mdash; what clients are telling us, pulled live from the feedback webhook.<br>
+        <b>Fin Performance</b> &mdash; Fin resolution and automation per client, last 30 days against since go-live, refreshed Mondays and Thursdays.
       </div>
     </div>
   </section>
@@ -159,10 +169,14 @@
   <section class="view" id="feedback">
     <iframe id="frame-feedback" data-src="SabelFeedbackDashboard.html" title="Feedback Dashboard"></iframe>
   </section>
+
+  <section class="view" id="finperf">
+    <iframe id="frame-finperf" data-src="SabelFinPerformance.html" title="Fin Performance"></iframe>
+  </section>
 </div>
 
 <script>
-  var VIEWS = ['home','internal','tasks','readiness','feedback'];
+  var VIEWS = ['home','internal','tasks','readiness','feedback','finperf'];
 
   // Each tab is a separate page in an iframe, with its own cache entry — so
   // refreshing the hub does not necessarily re-fetch the tool inside it, and a
