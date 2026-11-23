@@ -1188,19 +1188,33 @@ function itemFilled(it){
   if(it.multi && nonEmpty(state.data[it.multi.id])) return true;
   return false;
 }
+function progSections(){
+  return activeSections().map(sec=>{
+    const list=activeItems(sec).filter(i=>i.t!=='note');
+    const filled=list.filter(itemFilled).length, total=list.length;
+    return { id:sec.id, title:sec.title, done: total>0 && filled>=total, filled, total };
+  });
+}
+function progSig(projectType,secs){
+  return JSON.stringify([projectType||'',(secs||[]).map(x=>[x.id,!!x.done,x.filled||0,x.total||0])]);
+}
+/* 'updated' is when the client's progress last changed (state.changedAt), never "now".
+   The tracker re-mirrors this summary onto the task's steps only when the stamp changes,
+   so a "now" stamp made every page load (or click between sections) wipe ticks the team
+   set by hand. changedAt only moves in save() when the progress itself moves. */
+function noteProgress(){
+  const sig=progSig(state.projectType,progSections());
+  if(sig!==state.pSig){ state.pSig=sig; state.changedAt=Date.now(); }
+}
 function buildP(){
-  return { form:'readiness', v:1, updated:new Date().toISOString(),
+  return { form:'readiness', v:1, updated:new Date(state.changedAt||state.savedAt||0).toISOString(),
     submitted: state.submittedAt ? new Date(state.submittedAt).toISOString() : null,
     projectType: state.projectType||'',
-    sections: activeSections().map(sec=>{
-      const list=activeItems(sec).filter(i=>i.t!=='note');
-      const filled=list.filter(itemFilled).length, total=list.length;
-      return { id:sec.id, title:sec.title, done: total>0 && filled>=total, filled, total };
-    }) };
+    sections: progSections() };
 }
 function snapshot(){
   const P=buildP();
-  return { v:FORM_V, savedAt:state.savedAt||Date.now(), step:state.step, projectType:state.projectType,
+  return { v:FORM_V, savedAt:state.savedAt||Date.now(), changedAt:state.changedAt||state.savedAt||0, step:state.step, projectType:state.projectType,
            data:state.data, reps:state.reps, submitted:!!state.submittedAt, submittedAt:state.submittedAt||null, P };
 }
 function tellParent(P){
@@ -1227,6 +1241,9 @@ function queueServer(){
 function applyDraft(d){
   state.data=d.data||{}; state.reps=d.reps||{}; state.projectType=d.projectType||''; state.step=d.step||0;
   state.savedAt=d.savedAt||0; state.submittedAt=d.submittedAt||null; state.hasDraft=true;
+  /* Progress stamp: carried from the saved copy so reopening the form never moves it. */
+  state.changedAt=d.changedAt||d.savedAt||0;
+  state.pSig=(d.P&&Array.isArray(d.P.sections))?progSig(d.P.projectType,d.P.sections):undefined;
   /* 27 Oct 2026: G2 (developer access) moved into Section A as ax_sys. Carry an old answer across once. */
   const D=state.data;
   if(D.s_g2 && !D.s_ax_sys){
@@ -1265,6 +1282,7 @@ async function syncServer(){
 function save(){
   readDOM();
   state.savedAt=Date.now();
+  noteProgress();
   const snap=snapshot();
   try{ localStorage.setItem(KEY, JSON.stringify(snap)); }catch(e){}
   state.hasDraft=true;
@@ -1280,7 +1298,7 @@ function startAgain(){
   if(!confirm('Clear your saved answers and start the form again?')) return;
   try{ localStorage.removeItem(KEY); }catch(e){}
   state.data={}; state.reps={}; state.projectType=''; state.step=0; state.hasDraft=false;
-  state.submittedAt=null; state.savedAt=Date.now();
+  state.submittedAt=null; state.savedAt=Date.now(); state.changedAt=state.savedAt; state.pSig=undefined;
   if(COMPANY_PREFILL) state.data.f_client=COMPANY_PREFILL;
   render();
   if(server.ok) pushServer(); else server.dirty=true;   // clear the server copy too
