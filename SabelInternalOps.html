@@ -769,23 +769,14 @@ const PHASES = [
   ["lead","Books the Day-30 review on the call"],
   ["nikki","Next working day: write-up from Notion Calls, Fireflies and #call-actions"],
   ["nikki","Go-live and Day-30 dates into this hub, then the calendar"],
-  ["nikki","Kick-off write-up saved to 00_Project Admin by the next working day"]]},
- {id:"p4", code:"S0 · W0.1", when:"Weeks 1 to 2", name:"Blueprint workshops", gate:"Design decisions made for S1 to S5.", steps:[
-  ["lead","Runs W0.1 (Light: folded into kickoff)","b"],
-  ["greg","Forge ingest: SOW, readiness answers, kickoff notes"],
-  ["greg","Workspace snapshot, playbook questions, provisioning plan","b"],
-  ["richard","Migration plan agreed instead of a full blueprint","mo"],
-  ["nikki","Workshop invites carry purpose, decisions and inputs"],
-  ["nikki","Write up decisions per stage; off-agenda items become Parked or Change request rows"]]},
- {id:"p5", code:"G0", when:"Within 5 days", name:"Blueprint signed", gate:"Blueprint signed. Tracker live. Dates in the calendar.", steps:[
-  ["greg","Generates the blueprint and tracker rows with phase dates"],
-  ["lead","Reviews the blueprint"],
-  ["nikki","Check the blueprint against the scope register"],
-  ["nikki","Send for signature; chase on day 3"],
-  ["client","Decision-maker signs the blueprint"],
-  ["nikki","Publish the tracker: key registered, trackers.json entry, key saved here and in Notion"],
-  ["nikki","Swap 'not yet' for the tracker key in the routine prompts"]]},
- {id:"p6", code:"S1 to S5", when:"Weeks 2 to N", name:"Build stages", gate:"Every stage signed off (G1 to G5).", steps:[
+  ["nikki","Kick-off write-up saved to 00_Project Admin by the next working day"],
+  ["nikki","Publish the tracker: key registered, trackers.json entry, key saved here and in Notion","","p5-5"],
+  ["nikki","Swap 'not yet' for the tracker key in the routine prompts","","p5-6"]]},
+ {id:"p6", code:"S1 to S5", when:"Kickoff to go-live", name:"Build stages", gate:"Every stage signed off (G1 to G5).", steps:[
+  ["greg","Forge ingest: SOW, readiness answers, kickoff notes","","p4-1"],
+  ["richard","Migration plan agreed instead of a full design review","mo","p4-3"],
+  ["lead","Initial design review 1 to 2 weeks into the build, if needed: direction on the operating model, hierarchy and data flow (Light: folded into kickoff)","b","p4-0"],
+  ["nikki","Design review written up per stage; off-agenda items become Parked or Change request rows","","p4-5"],
   ["lead","Opens each stage with its workshop and closes it with sign-off"],
   ["lead","Foundations, Knowledge and Fin configuration","b"],
   ["greg","Connectors, procedures and Forge builds, with a recap at each stage close","b"],
@@ -796,13 +787,13 @@ const PHASES = [
   ["client","Migration: signs off the sample in the channel (structure, assignment, attachments, fields, statuses, visibility)","m","p6-mg4"],
   ["nikki","Migration: sample sign-off recorded with date and person; exceptions list acknowledged","m","p6-mg5"],
   ["richard","Warns at 75% of hours; new scope by written change request"],
-  ["client","Supplies inputs by the blueprint dates and signs each stage gate"],
+  ["client","Supplies inputs by the agreed dates and signs each stage gate"],
   ["nikki","Weekly rhythm running: Monday asks, Thursday tracker truth, Friday note"],
   ["nikki","Meeting write-ups turned into tracker rows"],
   ["nikki","Out-of-scope requests on the Parked tile, billed as overage"],
   ["nikki","S3 baseline resolution rate written in the tracker","b"]]},
  {id:"p7", code:"S6", when:"Go-live minus 10", name:"UAT and QA", gate:"Written go-live sign-off. QA fails resolved or reasoned.", steps:[
-  ["client","Testers run UAT against the blueprint criteria"],
+  ["client","Testers run UAT against the agreed design"],
   ["lead","Training delivered and recorded"],
   ["lead","Cutover call booked"],
   ["nikki","Migration: final cutover confirmation sent (switch time, delta, freeze, open tickets, tags), client's reply received, and the confirmed details posted to Richard with the delta time in his calendar","m","p7-cf1"],
@@ -969,9 +960,13 @@ const STEP_INFO = {
    (training, cutover call, QA fixes, go-live sign-off, closing old inbound). They can be restored on the Checklists page.
    The three cutover confirmation steps are one (p7-cf1). The Stabilise gate (p9) is folded into Day-30: its one
    remaining step keeps its id, and GATE_ALIAS sends records that name p9 to p10. Ticks already saved are untouched.
-   The Blueprint gates (p4, p5) are deliberately left alone: that is a framework decision for Chris and Richard. */
+   18 Nov 2026: the Blueprint gates are gone. Since 6 Nov the build starts straight after kick-off and the design
+   review is a check-in 1 to 2 weeks into it, so p4 (Blueprint workshops) and p5 (Blueprint signed) are folded in:
+   the design review steps sit in Build stages (p6) and tracker publishing in Kickoff (p3), each keeping its old id
+   (p4-0/1/3/5, p5-5/6) so ticks and Checklists edits follow. The blueprint sign-off steps (p5-0..4) and the two
+   steps already hidden on the Checklists page (p4-2, p4-4) are dropped. GATE_ALIAS sends p4 and p5 to p6. */
 const TRIM_HIDE = new Set(["p3-0","p3-2","p3-3","p3-5","p7-1","p7-2","p7-4","p7-6","p7-cf2","p7-cf3","p8-0"]);
-const GATE_ALIAS = {p9:"p10"};
+const GATE_ALIAS = {p9:"p10", p4:"p6", p5:"p6"};
 /* A step Nikki added on the Checklists page lives in the store, not here. Its wording is replaced only while it still reads the old way. */
 const TRIM_REWORD = {"p2-xmvoq65hl":[/Kick-off Desk scope card/, "Check the scope in the Kick-off form in the client's hub against both SOWs (Sabel and Intercom): every line in or out, source noted, differences flagged for the kickoff call"]};
 function stepId(p){ let n=0; return s=>s[3]||(p.id+"-"+(n++)); }
@@ -1100,8 +1095,8 @@ function hasMigration(c){ return ["migration","full"].includes(projectType(c)); 
 const P_TO_M = {p0:"m0",p1:"m1",p2:"m2",p3:"m2",p4:"m2",p5:"m2",p6:"m3",p7:"m3",p8:"m3",p9:"m4",p10:"m4",p11:"m4"};
 function phasesForType(t){ return t==="audit" ? AUDIT_PHASES : t==="migration" ? MIGRATION_PHASES : t==="consult" ? CONSULT_PHASES : PHASES; }
 function phasesFor(c){ return isFlownetic(c) ? (hasMigration(c) ? FLOWNETIC_MIGRATION_PHASES : FLOWNETIC_PHASES) : phasesForType(projectType(c)); }
-function startFor(t,pid){ if(pid==="f0"||pid==="f1") return pid; pid=GATE_ALIAS[pid]||pid; const L=phasesForType(t); if(L.some(p=>p.id===pid)) return pid; if(t==="migration" && P_TO_M[pid]) return P_TO_M[pid]; return L[0].id; }
-function pidxOf(c,pid){ pid=GATE_ALIAS[pid]||pid; const L=phasesFor(c); if(projectType(c)==="migration" && P_TO_M[pid]) pid=P_TO_M[pid]; for(let i=0;i<L.length;i++){ if(L[i].id===pid) return i; } return 0; }
+function startFor(t,pid){ if(pid==="f0"||pid==="f1") return pid; const raw=pid; pid=GATE_ALIAS[pid]||pid; const L=phasesForType(t); if(L.some(p=>p.id===pid)) return pid; if(t==="migration" && P_TO_M[raw]) return P_TO_M[raw]; return L[0].id; }
+function pidxOf(c,pid){ const L=phasesFor(c); pid = projectType(c)==="migration" && P_TO_M[pid] ? P_TO_M[pid] : (GATE_ALIAS[pid]||pid); for(let i=0;i<L.length;i++){ if(L[i].id===pid) return i; } return 0; }
 
 /* ---------- standard checklists: the defaults above plus edits made on the Checklists page ----------
    Edits live in the portal store at templates.opsChecklists = {steps:{<id>:{t,o,tag,crit,hide}}, added:{<phase>:[{id,o,t,tag,crit}]}, order:{<phase>:[ids]}}.
@@ -1316,7 +1311,7 @@ function movedDue(c,p){ const m=c.hub && c.hub.dueMoved && c.hub.dueMoved[p.id];
 function phaseDue(c,p){ const m=movedDue(c,p); return m ? m.d : workedOutDue(c,p); }
 function dueBasis(c,p){
   const ko=c.hub&&c.hub.kickoffDate, id=p.id;
-  if(["p3","p4","p5"].includes(id)) return ko?"the Kickoff date":"the Signed date, as no Kickoff is set";
+  if(id==="p3") return ko?"the Kickoff date":"the Signed date, as no Kickoff is set";
   if(["m3","m4"].includes(id)) return c.goLiveDate?"the Go-live date":"the Signed date, as no Go-live is set";
   if(["p6","p7","p8","p9"].includes(id)) return "the Go-live date";
   if(["p10","p11"].includes(id)) return c.day30Date?"the Day-30 date":"the Go-live date";
@@ -1326,7 +1321,7 @@ function workedOutDue(c,p){
   const sg=isFlownetic(c)?"":c.signedDate, ko=(c.hub&&c.hub.kickoffDate)||"", gl=c.goLiveDate, d30=c.day30Date||addDays(gl,30);
   switch(p.id){
     case "p0": return sg; case "p1": return addDays(sg,7); case "p2": return addDays(sg,9);
-    case "p3": return ko || addDays(sg,14); case "p4": return addDays(ko||addDays(sg,14),10); case "p5": return addDays(ko||addDays(sg,14),15);
+    case "p3": return ko || addDays(sg,14);
     case "p6": return addDays(gl,-10); case "p7": return gl; case "p8": return gl; case "p9": return addDays(gl,14);
     case "p10": return d30; case "p11": return addDays(d30,14);
     case "m0": return sg; case "m1": return addDays(sg,5); case "m2": return addDays(sg,7); case "m3": return gl || addDays(sg,21); case "m4": return addDays(gl || addDays(sg,21),7);
@@ -1350,8 +1345,8 @@ function band(c){
   if(projectType(c)==="audit") return curIdx(c)>=AUDIT_PHASES.length ? "closed" : "audit";
   if(projectType(c)==="consult") return curIdx(c)>=CONSULT_PHASES.length ? "closed" : "consult";
   if(projectType(c)==="migration"){ const m=curIdx(c); return m<=2 ? "onboarding" : m===3 ? "migration" : m===4 ? "closing" : "closed"; }
-  const i=curIdx(c);
-  if(i<=5) return "onboarding"; if(i===6) return "build"; if(i<=8) return "golive"; if(i<=10) return "stabilise"; if(i===11) return "closing"; return "closed";
+  const p=PHASES[curIdx(c)]; if(!p) return "closed";
+  return {p6:"build", p7:"golive", p8:"golive", p10:"stabilise", p11:"closing"}[p.id] || "onboarding";
 }
 const BANDS = [
   ["scoping","Scoping"],["setup","Not set up in the hub"],["audit","Audit"],["onboarding","Onboarding · S0"],["build","Build · S1 to S5"],["migration","Migration run"],
@@ -1387,7 +1382,7 @@ function warnings(c){
   if(!typeSet(c)) w.push(["No project type set","Build, Migration, Build + Migration, Audit or Consultation only, in Details."]);
   if(tk && td && td.status===404) w.push(["Tracker key not registered: "+tk,"Add it to ALLOWED_KEYS in sabel-webhook, otherwise the tracker cannot save."]);
   if(tk && S.loaded.reg && !S.reg.some(t=>t.key===tk)) w.push(["Not in trackers.json: "+tk,"Add an entry so the dashboard and weekly sweeps find it."]);
-  if(hasHub(c) && !["audit","migration","consult"].includes(projectType(c)) && curIdx(c)>=5 && curIdx(c)<PHASES.length && !tk) w.push(["No tracker key yet","Needed once the blueprint is signed."]);
+  if(hasHub(c) && !["audit","migration","consult"].includes(projectType(c)) && curIdx(c)>PIDX.p3 && curIdx(c)<PHASES.length && !tk) w.push(["No tracker key yet","Needed once kick-off is done."]);
   if(c.goLiveDate && !c.day30Date && !["migration","consult"].includes(projectType(c))) w.push(["No Day-30 date","Set it once go-live is confirmed (go-live plus 30 days)."]);
   if(hasHub(c) && !["audit","migration","consult"].includes(projectType(c)) && curIdx(c)<=2 && !((c.hub.sowInputs||[]).length)) w.push(["No SOW client inputs listed","Use Import from SOW in Details, so they show in the client's Readiness Check."]);
   if(hasHub(c) && (S.inputsStatus||{})[c.id]==="unregistered") w.push(["SOW client inputs not published","Add readiness-inputs-v1 to ALLOWED_KEYS in sabel-webhook, then edit the list again."]);
@@ -1832,7 +1827,7 @@ function syncStage(c){
     : isFlownetic(c) ? (hasMigration(c) ? (L[i].id==="m4" ? "Offboarding" : L[i].id==="m3" ? "Active" : "Onboarding") : (i>=1 ? "Active" : "Onboarding"))
     : projectType(c)==="audit" ? (i>=2 ? "Active" : "Onboarding")
     : projectType(c)==="migration" ? (i===4 ? "Offboarding" : i>=3 ? "Active" : "Onboarding")
-    : i===11 ? "Offboarding" : i>=6 ? "Active" : "Onboarding";
+    : L[i].id==="p11" ? "Offboarding" : i>=PIDX.p6 ? "Active" : "Onboarding";
   if(c.stage!==want){ c.stage=want; return true; }
   return false;
 }
@@ -1998,7 +1993,7 @@ function clientCard(c){
   }
   return h+'</button>';
 }
-const OV_GROUPS=[["Onboarding","Signed through blueprint",["onboarding","audit","setup"]],
+const OV_GROUPS=[["Onboarding","Signed through kickoff",["onboarding","audit","setup"]],
   ["Build and migration runs","S1 to S5",["build","migration"]],
   ["UAT and go-live","S6 to S7",["golive"]],
   ["Stabilise and Day-30","S8",["stabilise"]],
@@ -2407,7 +2402,7 @@ function asidePanels(c,n,ko,tk,td,w){
     '<div style="display:grid;gap:6px"><span class="bar">'+(sum?'<i style="width:'+pct(sum.done)+';background:var(--good)"></i><i style="width:'+pct(sum.prog)+';background:var(--warn)"></i>':'')+'</span>'+
     '<div class="trow">'+(sum
       ? '<span>'+sum.done+' of '+sum.total+' complete</span><span>'+sum.client+' with client</span><span class="bl'+(sum.blocked?' on':'')+'">'+sum.blocked+' blocked</span>'
-      : '<span>'+(!tk ? 'Published when the blueprint is signed.'
+      : '<span>'+(!tk ? 'Published at kick-off.'
           : !td ? 'Loading…'
           : td.status===404 ? 'This key is not registered, so the tracker cannot save.'
           : !td.ok ? 'Could not reach the tracker store.'
