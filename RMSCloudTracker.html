@@ -2222,7 +2222,7 @@ function taskVisible(t){
 function inScope(pid,g){return (T[pid]&&T[pid][g]||[]).filter(t=>!t.parked);}
 function hiddenByDone(t){return hideDone&&t.s==='Complete';}
 function hiddenDoneCount(){let n=0;P.forEach(p=>['sabel','client'].forEach(g=>inScope(p.id,g).forEach(t=>{if(t.s==='Complete')n++;})));return n;}
-function parkedCount(){let n=0;P.forEach(p=>['sabel','client'].forEach(g=>(T[p.id][g]||[]).forEach(t=>{if(t.parked)n++;})));return n;}
+function parkedCount(){let n=0;P.forEach(p=>['sabel','client'].forEach(g=>(T[p.id][g]||[]).forEach(t=>{if(t.parked&&!t.p2)n++;})));return n;}
 function globalStats(){
   let total=0,complete=0,usedH=0,on=0,att=0,risk=0;
   P.forEach(ph=>{
@@ -2465,7 +2465,7 @@ function gotoTask(cid){
   // scroll it into view and flash-highlight it.
   closeRunwayPop();
   const t=resolveTask(cid);
-  if(t&&t.parked){setP('parked');}
+  if(t&&t.parked){setP(t.p2?'phase2':'parked');}
   else{
     const parts=cid.split('-');
     const phId=parts.slice(0,-2).join('-');
@@ -3097,7 +3097,7 @@ function resolveTask(cid){
     function hoistPhasedOld(){
       // Pillar and week boards: staged deliverables sit in their own full-width
       // strip above the two columns, so the columns keep the simple one-offs.
-      if(cur==='overview'||cur==='runway'||cur==='parked')return;
+      if(cur==='overview'||cur==='runway'||cur==='parked'||cur==='phase2')return;
       const main=document.getElementById('main');const cols=main.querySelector('.phase-cols');if(!cols)return;
       const cards=[...cols.querySelectorAll('.task.phased')];const isPillar=groupBy==='pillar'&&P.some(p=>p.id===cur);if(!cards.length&&!isPillar)return;
       const strip=document.createElement('div');strip.className='deliv-strip';
@@ -3287,7 +3287,7 @@ function resolveTask(cid){
         <div><label>Notes</label><textarea rows="2" placeholder="Notes for this deliverable..." oninput="saveNote('${cid}',this.value)">${esc(cardNotes[cid]!==undefined?cardNotes[cid]:(t.notes||''))}</textarea></div>
         <div style="margin-top:8px"><label>Link</label><input type="url" value="${esc(cardLinks[cid]!==undefined?cardLinks[cid]:(t.link||''))}" ${PH_INP} style="width:100%" placeholder="Paste a link..." onchange="saveLink('${cid}',this.value)"></div>
         <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
-          <button onclick="parkTask(event,'${cid}')" style="background:transparent;border:1px solid rgba(251,146,60,.3);color:var(--kFB923C);font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer">Move to out of scope</button>
+          <button onclick="parkTask(event,'${cid}')" style="background:transparent;border:1px solid rgba(251,146,60,.3);color:var(--kFB923C);font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer">Move to out of scope</button><button onclick="phase2Task(event,'${cid}')" style="background:transparent;border:1px solid rgba(96,165,250,.3);color:var(--k60A5FA);font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer">Move to phase 2</button>
           <button onclick="deleteTask(event,'${cid}')" style="background:transparent;border:1px solid rgba(248,113,113,.3);color:var(--kF87171);font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer">Remove deliverable</button>
         </div>
       </div>`;
@@ -3678,7 +3678,7 @@ function sdPhrase(t,st,lower){const l=String(st.p.l||'').trim();
 // Week board (older layout): no strip either. Each staged card moves into the column of
 // whoever holds the baton, slotted in by the active stage's due week.
 function hoistPhased(){
-  if(cur==='overview'||cur==='runway'||cur==='parked')return;
+  if(cur==='overview'||cur==='runway'||cur==='parked'||cur==='phase2')return;
   const main=document.getElementById('main');const cols=main&&main.querySelector('.phase-cols');if(!cols)return;
   const lists=[...cols.children].map(c=>c.querySelector(':scope > div'));if(lists.length<2||!lists[0]||!lists[1])return;
   const key=el=>{const t=resolveTask(String(el.id||'').replace(/^card-/,''));if(!t)return 999;
@@ -4161,7 +4161,7 @@ function hnTracker(){if(cur==='tracker'&&hnOpen==='tracker'){hnSetOpen('');rende
 function hnPillarClr(pid,pc){if(!pc)return 'var(--k64748B,#64748B)';
   try{const n=hnNeeds().now;if(n.some(r=>r.o&&r.o.pid===pid))return '#22C55E';}catch(e){}return '#5b9cf6';}
 function hnFirstOpenPillar(){const p=P.find(x=>{const m=phaseMini(x.id);return m.total&&m.done<m.total;});return p?p.id:'';}
-const HN_TRACKER_VIEWS=['tracker','focus','notes','decisions','runway','parked','hours'];
+const HN_TRACKER_VIEWS=['tracker','focus','notes','decisions','runway','parked','phase2','hours'];
 function hnInTracker(){const c=String(cur);return HN_TRACKER_VIEWS.includes(c)||c.indexOf('prog:')===0||/^Week /.test(c)||P.some(p=>p.id===c);}
 function hnPct(){const gs=globalStats();return gs.total?Math.round(gs.complete/gs.total*100):0;}
 function hnNeeds(){try{const all=ovAll();const co=all.filter(o=>o.side==='client'&&o.t.s!=='Complete'&&!isPhased(o.t));return youSplit(youCollect(all,co));}catch(e){return {now:[],later:[]};}}
@@ -4190,6 +4190,7 @@ function renderSidebar(){
     mats.push(btn('form:'+f.id,f.icon||'clipboard-check',esc(f.l),right,on));});
   if(typeof openStatusReport==='function')mats.push(btn('report','file-analytics','Status report','',false,'openStatusReport()'));
   if(typeof parkedCount==='function'&&parkedCount())mats.push(btn('parked','archive','Out of scope',`<span class="hn-right">${parkedCount()}</span>`,cur==='parked'));
+  if(typeof phase2Count==='function'&&phase2Count())mats.push(btn('phase2','calendar-plus','Phase 2',`<span class="hn-right">${phase2Count()}</span>`,cur==='phase2'));
   if(INTERNAL)mats.push(btn('hours','clock-dollar','Hours','',cur==='hours'));
   if(mats.length)h+=`<div class="hn-sec">Materials</div>`+mats.join('');
   // Editing tools switch (12 Oct 2026): remembered per browser, off by default in the client file.
@@ -4410,6 +4411,7 @@ function sdMaterials(){
   if(typeof openStatusReport==='function')m.push(`<button class="sd-mat" onclick="openStatusReport()"><span class="ic"><i class="ti ti-file-analytics"></i></span><span><b>Status report</b><span>Snapshot of today, as a PDF</span></span></button>`);
   if(typeof notesUnread==='function'){const u=notesUnread();m.push(`<button class="sd-mat" onclick="setP('notes')"><span class="ic${u?' y':''}"><i class="ti ti-messages"></i></span><span><b>Notes</b><span class="${u?'y':''}">${u?u+' new':'The thread on every task'}</span></span></button>`);}
   if(typeof parkedCount==='function'&&parkedCount())m.push(`<button class="sd-mat" onclick="setP('parked')"><span class="ic"><i class="ti ti-archive"></i></span><span><b>Out of scope</b><span>${parkedCount()} parked for later</span></span></button>`);
+  if(typeof phase2Count==='function'&&phase2Count())m.push(`<button class="sd-mat" onclick="setP('phase2')"><span class="ic"><i class="ti ti-calendar-plus"></i></span><span><b>Phase 2</b><span>${phase2Count()} planned for phase 2</span></span></button>`);
   return m.join('');
 }
 function homeView(){
@@ -4502,6 +4504,7 @@ function trackerView(){
   if(typeof decisionsView==='function')more+=tile('gavel','Decisions',decCount()||'',"setP('decisions')");
   if(goLiveDate&&typeof gateItems==='function')more+=tile('rocket','Go-live checklist',gateItems().filter(o=>!(o&&o.t&&o.t.s==='Complete')).length,"setP('runway')");
   if(typeof parkedCount==='function'&&parkedCount())more+=tile('archive','Out of scope',parkedCount(),"setP('parked')");
+  if(typeof phase2Count==='function'&&phase2Count())more+=tile('calendar-plus','Phase 2',phase2Count(),"setP('phase2')");
   if(INTERNAL)more+=tile('clock-dollar','Hours','',"setP('hours')");
   let tools=tile('table-export','Export actions','',"openActionsPop(event)",true)+tile('file-analytics','Snapshot (PDF)','',"openStatusReport()",true)+tile('download','Download data backup','',"downloadSnapshot()",true);
   if(typeof toggleTools==='function')tools+=tile(toolsOn?'tool':'lock',toolsOn?'Hide editing tools':'Show editing tools','',"toggleTools();renderMain()",true);
@@ -4949,7 +4952,7 @@ function qSettings(t,cid){
     <label><span>From call</span><input type="date" value="${t.call||''}" onchange="setTaskCall('${cid}',this.value)"><em>Shows it in Call actions</em></label>
     ${cands.length?`<label><span>Nest under</span><select onchange="demoteToSub('${cid}',this.value)"><option value="">Keep as its own task</option>${cands.map(o=>`<option value="${o.cid}">${esc(o.t.t)}</option>`).join('')}</select></label>`:''}
     <label class="chk"><input type="checkbox" ${t.kind==='milestone'?'checked':''} onchange="setTaskKind('${cid}',this.checked)">Milestone (checkpoint or sign-off)</label>
-    <div class="qset-x"><button onclick="parkTask(event,'${cid}')">Move to out of scope</button><button class="del" onclick="deleteTask(event,'${cid}')">Remove task</button></div>`:''}
+    <div class="qset-x"><button onclick="parkTask(event,'${cid}')">Move to out of scope</button><button onclick="phase2Task(event,'${cid}')">Move to phase 2</button><button class="del" onclick="deleteTask(event,'${cid}')">Remove task</button></div>`:''}
   </div>`;}
 (function(){const orig=renderMain;renderMain=function(){
   const c=String(cur);document.body.classList.toggle('q-on',P.some(p=>p.id===c)||/^Week /.test(c));
@@ -5410,7 +5413,7 @@ function dupHintHTML(matches){
     <div style="font-size:10px;font-weight:600;color:var(--kFBBF24);margin-bottom:2px;display:flex;align-items:center;gap:4px"><i class="ti ti-alert-triangle" style="font-size:11px"></i>May already exist:</div>
     ${matches.map(m=>`<div style="display:flex;align-items:center;gap:8px;padding:3px 0">
       <span style="font-size:11px;color:var(--kE2E8F0);flex:1;min-width:0;line-height:1.4">${esc(m.t.t)}</span>
-      <span style="font-size:10px;color:var(--k64748B);white-space:nowrap;flex-shrink:0">${esc(m.p.l)} · ${m.g==='client'?'Client':'Sabel'} · ${m.t.parked?'Out of scope':weekLabel(m.t.week||0)}</span>
+      <span style="font-size:10px;color:var(--k64748B);white-space:nowrap;flex-shrink:0">${esc(m.p.l)} · ${m.g==='client'?'Client':'Sabel'} · ${m.t.parked?(m.t.p2?'Phase 2':'Out of scope'):weekLabel(m.t.week||0)}</span>
       <button onclick="openDup(event,'${m.cid}')" style="background:transparent;border:1px solid var(--k2A3145);color:var(--k94A3B8);font-size:10px;font-family:inherit;border-radius:5px;padding:2px 8px;cursor:pointer;flex-shrink:0">Open</button>
     </div>`).join('')}
   </div>`;
@@ -5569,9 +5572,10 @@ function parkTask(e,cid){
 function unparkTask(e,cid){
   e.stopPropagation();
   const t=resolveTask(cid); if(!t)return;
-  delete t.parked;
+  const wasP2=!!t.p2;
+  delete t.parked; delete t.p2;
   expandedCards.delete(cid);
-  showToast('Moved back into scope');
+  showToast(wasP2?'Moved back into the plan. Give it a date':'Moved back into scope');
   render(); scheduleAutoSave();
 }
 // Estimated hours on parked cards. Client-visible estimates are a deliberate,
@@ -5612,9 +5616,10 @@ function addParkedTask(){
   const grp=side==='client'?'client':'sabel';
   if(!T[pid]){showToast('Pick a pillar');return;}
   const nt={t:v,o:grp==='client'?CLIENT_LABEL:'Chris',s:'Pending',d:'',week:0,parked:true,est:'TBC',notes:'',link:''};
-  if(grp==='client')nt.tip='Agreed as out of scope; talk to the Sabel team if you would like this scoped.';
+  if(cur==='phase2'){nt.p2=true;delete nt.est;if(grp==='client')nt.tip='Planned for phase 2.';}
+  else if(grp==='client')nt.tip='Agreed as out of scope; talk to the Sabel team if you would like this scoped.';
   T[pid][grp].push(nt);
-  showToast('Added to Out of scope');
+  showToast(nt.p2?'Added to Phase 2':'Added to Out of scope');
   render(); scheduleAutoSave();
 }
 
@@ -6089,7 +6094,7 @@ function hoursRollup(){
     ['sabel','client'].forEach(grp=>{
       ((T[ph.id]||{})[grp]||[]).forEach(t=>{
         const h=hrsState(t), eff=hrsEff(t);
-        if(t.parked){ if(eff!==null){parked+=eff;parkedN++;} return; }
+        if(t.parked){ if(!t.p2&&eff!==null){parked+=eff;parkedN++;} return; }
         if(eff===null){ untracked.push({pillar:ph.l,task:t.t,owner:t.o}); }
         else{
           pt+=eff; if(t.s==='Complete')pd+=eff;
@@ -6141,7 +6146,7 @@ function hoursView(){
         <td style="padding:4px 8px;text-align:right;color:var(--kA78BFA);font-size:11px">${fmtH(s.hrs)}</td>
         <td style="padding:4px 8px;color:var(--k64748B);font-size:11px">${s.s||''}</td></tr>`).join('');
       return `<tr style="border-top:1px solid var(--k1E2433)">
-        <td style="padding:7px 8px;font-size:12px;color:${dn?'var(--k475569)':'var(--kE2E8F0)'};${t.parked?'font-style:italic':''}">${esc(t.t)}${t.parked?' <span style="font-size:10px;color:var(--kFB923C)">out of scope</span>':''}</td>
+        <td style="padding:7px 8px;font-size:12px;color:${dn?'var(--k475569)':'var(--kE2E8F0)'};${t.parked?'font-style:italic':''}">${esc(t.t)}${t.parked?(t.p2?' <span style="font-size:10px;color:var(--k60A5FA)">phase 2</span>':' <span style="font-size:10px;color:var(--kFB923C)">out of scope</span>'):''}</td>
         <td style="padding:7px 8px;font-size:11px;color:var(--k64748B)">${esc(t.o||'')} · ${o.grp==='client'?'Client':'Sabel'} · ${spanWeeksText(t)}</td>
         <td style="padding:7px 8px;text-align:right;font-size:12px;font-weight:600;color:${o.h.over?'var(--kF87171)':(o.eff===null?'var(--k475569)':'var(--kA78BFA)')}">${o.eff===null?'not set':fmtH(o.eff)}${o.h.over?' (steps '+fmtH(o.h.steps)+')':''}</td>
         <td style="padding:7px 8px;font-size:11px;color:${dn?'var(--k4ADE80)':'var(--k64748B)'}">${esc(t.s||'')}</td>
@@ -6190,10 +6195,10 @@ function exportHoursCSV(){
       const t=o.t,h=o.h;
       rows.push([p.ph.l,t.t,'',o.grp==='client'?'Client':'Sabel',t.o||'',spanWeeksText(t),t.s||'',
         h.allotted===null?'':h.allotted, h.steps===null?'':h.steps,
-        h.rem===null?'':(h.rem+(h.over?' OVER ALLOTMENT':'')), t.parked?'Out of scope':'In scope']);
+        h.rem===null?'':(h.rem+(h.over?' OVER ALLOTMENT':'')), t.parked?(t.p2?'Phase 2':'Out of scope'):'In scope']);
       (t.sub||[]).forEach(s=>{
         rows.push([p.ph.l,s.t,t.t,o.grp==='client'?'Client':'Sabel',t.o||'',spanWeeksText(t),s.s||'',
-          typeof s.hrs==='number'?s.hrs:'', '','', t.parked?'Out of scope':'In scope']);
+          typeof s.hrs==='number'?s.hrs:'', '','', t.parked?(t.p2?'Phase 2':'Out of scope'):'In scope']);
       });
     });
     rows.push([p.ph.l,'PILLAR SUBTOTAL','','','','','',p.total,'','','In scope']);
@@ -6523,7 +6528,7 @@ function cardExpand(t,cid,isClient){
           ${hasLink?`<input type="url" value="${esc(curLink)}" style="width:100%;font-size:12px;color:var(--kE2E8F0);background:var(--k161B26);border:1px solid var(--k2A3145);border-radius:6px;padding:6px 10px;font-family:inherit;box-sizing:border-box" placeholder="Paste a link..." onclick="event.stopPropagation()" onchange="saveLink('${cid}',this.value)">`:linkEl}
         </div>
         <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
-          <button onclick="parkTask(event,'${cid}')" title="Agreed as out of scope for this engagement: parks the task in the Out of scope list" style="background:transparent;border:1px solid rgba(251,146,60,.3);color:var(--kFB923C);font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer">Move to out of scope</button>
+          <button onclick="parkTask(event,'${cid}')" title="Agreed as out of scope for this engagement: parks the task in the Out of scope list" style="background:transparent;border:1px solid rgba(251,146,60,.3);color:var(--kFB923C);font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer">Move to out of scope</button><button onclick="phase2Task(event,'${cid}')" title="Planned for a later phase: moves the task to the Phase 2 list" style="background:transparent;border:1px solid rgba(96,165,250,.3);color:var(--k60A5FA);font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer">Move to phase 2</button>
           <button onclick="deleteTask(event,'${cid}')" style="background:transparent;border:1px solid rgba(248,113,113,.3);color:var(--kF87171);font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer">Remove task</button>
         </div>
         </div>`:''}`;
@@ -7423,7 +7428,8 @@ function renderMain(){
     html=notesView();
   } else if(cur==='focus'){
     html=focusView();
-  } else if(cur==='parked'){
+  } else if(cur==='parked'||cur==='phase2'){
+    const P2V=cur==='phase2';
     // Out of scope (parking lot): parked tasks grouped by pillar. They keep
     // their pillar for context but count nowhere until moved back into scope.
     // Cards are editable in place (title, notes, link, sub-tasks) and carry an
@@ -7443,8 +7449,8 @@ function renderMain(){
           <span style="font-size:10px;color:var(--k64748B);white-space:nowrap;flex-shrink:0">${o.g==='client'?'Client action':'Sabel action'}</span>
           ${noteChip(t,cid)}
           ${oBdg(t.o)}
-          <span title="Estimated effort if this is scoped later" style="font-size:10px;color:var(--kFB923C);white-space:nowrap;flex-shrink:0;text-align:right;min-width:52px">${estLabel(t)}</span>
-          <button onclick="unparkTask(event,'${cid}')" style="background:transparent;border:1px solid var(--k2A3145);color:var(--k94A3B8);font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer;flex-shrink:0;white-space:nowrap">Move back into scope</button>
+          ${P2V?'':`<span title="Estimated effort if this is scoped later" style="font-size:10px;color:var(--kFB923C);white-space:nowrap;flex-shrink:0;text-align:right;min-width:52px">${estLabel(t)}</span>`}
+          <button onclick="unparkTask(event,'${cid}')" style="background:transparent;border:1px solid var(--k2A3145);color:var(--k94A3B8);font-size:11px;font-family:inherit;border-radius:6px;padding:4px 10px;cursor:pointer;flex-shrink:0;white-space:nowrap">${P2V?'Move back into the plan':'Move back into scope'}</button>
           <i class="ti ti-chevron-${isOpen?'up':'down'}" style="font-size:12px;color:var(--k475569);flex-shrink:0"></i>
         </div>`;
       if(!isOpen)return`<div id="card-${cid}">${head}</div>`;
@@ -7454,10 +7460,10 @@ function renderMain(){
             <label>Task title</label>
             <input id="ttl-${cid}" type="text" value="${esc(t.t)}" placeholder="Task title..." onclick="event.stopPropagation()" onchange="saveTitle('${cid}',this.value)">
           </div>
-          <div style="margin-bottom:10px">
+          ${P2V?'':`<div style="margin-bottom:10px">
             <label>Est. hours <span style="font-weight:400;color:var(--k64748B)">(a positive number, or TBC while unsized; shown only in this view)</span></label>
             <input type="text" value="${esc(estVal)}" placeholder="TBC" style="max-width:120px" onclick="event.stopPropagation()" onchange="setEst('${cid}',this.value)">
-          </div>
+          </div>`}
           <div style="margin-bottom:10px">
             <label>Sub-tasks</label>
             ${(t.sub||[]).map((st,i)=>{const sd=st.s==='Complete';return`<div style="display:flex;align-items:center;gap:7px;padding:3px 0">
@@ -7487,7 +7493,7 @@ function renderMain(){
     const groups=P.map(p=>{
       const items=[];
       ['client','sabel'].forEach(g=>(T[p.id]&&T[p.id][g]||[]).forEach((t,i)=>{
-        if(t.parked)items.push({t,g,cid:p.id+'-'+(g==='sabel'?'s':'c')+'-'+i});
+        if(t.parked&&!!t.p2===P2V)items.push({t,g,cid:p.id+'-'+(g==='sabel'?'s':'c')+'-'+i});
       }));
       if(!items.length)return '';
       return`<div style="background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:10px;padding:12px 14px;margin-bottom:16px">
@@ -7498,26 +7504,26 @@ function renderMain(){
         ${items.map(parkedCardHTML).join('')}
       </div>`;
     }).join('');
-    const n=parkedCount();
+    const n=P2V?phase2Count():parkedCount();
     const addForm=`<div style="background:var(--k161B26);border:1px solid var(--k1E2433);border-radius:10px;padding:12px 16px;margin-bottom:16px">
-      <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--k475569);margin-bottom:8px">Add out of scope item</div>
+      <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--k475569);margin-bottom:8px">${P2V?'Add phase 2 item':'Add out of scope item'}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap" onclick="event.stopPropagation()">
-        <input id="oos-title" type="text" placeholder="New out of scope item..." oninput="oosDupCheck(this.value)" onkeydown="if(event.key==='Enter')addParkedTask()" style="flex:2;min-width:170px;font-size:12px;color:var(--kE2E8F0);background:var(--k0F1117);border:1px solid var(--k2A3145);border-radius:6px;padding:6px 10px;font-family:inherit">
+        <input id="oos-title" type="text" placeholder="${P2V?'New phase 2 item...':'New out of scope item...'}" oninput="oosDupCheck(this.value)" onkeydown="if(event.key==='Enter')addParkedTask()" style="flex:2;min-width:170px;font-size:12px;color:var(--kE2E8F0);background:var(--k0F1117);border:1px solid var(--k2A3145);border-radius:6px;padding:6px 10px;font-family:inherit">
         <select id="oos-pillar" style="flex:1;min-width:110px;font-size:11px;color:var(--kE2E8F0);background:var(--k0F1117);border:1px solid var(--k2A3145);border-radius:6px;padding:6px 8px;font-family:inherit">${P.map(p=>`<option value="${p.id}">${p.l}</option>`).join('')}</select>
         <select id="oos-side" style="font-size:11px;color:var(--kE2E8F0);background:var(--k0F1117);border:1px solid var(--k2A3145);border-radius:6px;padding:6px 8px;font-family:inherit">
           <option value="sabel">Sabel action</option>
           <option value="client">Client action</option>
         </select>
-        <button onclick="addParkedTask()" style="background:transparent;border:1px solid rgba(251,146,60,.4);color:var(--kFB923C);font-size:11px;font-family:inherit;border-radius:6px;padding:6px 12px;cursor:pointer;white-space:nowrap"><i class="ti ti-plus" style="font-size:11px"></i> Add out of scope item</button>
+        <button onclick="addParkedTask()" style="background:transparent;border:1px solid rgba(251,146,60,.4);color:var(--kFB923C);font-size:11px;font-family:inherit;border-radius:6px;padding:6px 12px;cursor:pointer;white-space:nowrap"><i class="ti ti-plus" style="font-size:11px"></i> ${P2V?'Add phase 2 item':'Add out of scope item'}</button>
       </div>
       <div id="oos-dup" onclick="event.stopPropagation()"></div>
     </div>`;
     html=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
-        <i class="ti ti-archive" style="font-size:16px;color:var(--kFB923C)"></i>
-        <span style="font-size:18px;font-weight:600;color:var(--kE2E8F0)">Out of scope</span>
+        <i class="ti ti-${P2V?'calendar-plus':'archive'}" style="font-size:16px;color:${P2V?'var(--k60A5FA)':'var(--kFB923C)'}"></i>
+        <span style="font-size:18px;font-weight:600;color:var(--kE2E8F0)">${P2V?'Phase 2':'Out of scope'}</span>
       </div>
-      <div style="font-size:11px;color:var(--k475569);margin-bottom:1.25rem">Agreed as out of scope for this engagement. These tasks count nowhere until moved back into scope.</div>
-      ${n?groups:`<div style="font-size:12px;color:var(--k475569);padding:10px 0 16px">Nothing is out of scope.</div>`}
+      <div style="font-size:11px;color:var(--k475569);margin-bottom:1.25rem">${P2V?'Planned for phase 2. These tasks are not in the current plan: they have no dates and count nowhere until they are moved back into the plan.':'Agreed as out of scope for this engagement. These tasks count nowhere until moved back into scope.'}</div>
+      ${n?groups:`<div style="font-size:12px;color:var(--k475569);padding:10px 0 16px">${P2V?'Nothing is planned for phase 2 yet.':'Nothing is out of scope.'}</div>`}
       ${addForm}`;
   } else if(groupBy==='week'){
     const ws=weekStats(cur);
@@ -7630,6 +7636,7 @@ function setP(id){cur=id;activeFilters.clear();editingWeekStart=false;doneStripO
 function syncHash(){
   let h='#overview';
   if(cur==='parked')h='#parked';
+  else if(cur==='phase2')h='#phase2';
   else if(cur==='focus')h='#focus';
   else if(cur==='notes')h='#notes';
   else if(String(cur).startsWith('prog:'))h='#prog/'+cur.slice(5);
@@ -7652,9 +7659,10 @@ function applyHash(){
   if(raw==='#summary'){cur='overview';return;}  // the old Project overview link
   const fm=/^#form\/([\w-]+)$/.exec(raw);
   if(fm){cur=formById(fm[1])&&formTask(fm[1])?'form:'+fm[1]:'overview';return;}
-  const m=/^#(prog\/[\w-]+|overview|parked|runway|focus|notes|decisions|hoursview|pillar\/([\w-]+)|week\/(\d+))$/.exec(raw);
+  const m=/^#(prog\/[\w-]+|overview|parked|phase2|runway|focus|notes|decisions|hoursview|pillar\/([\w-]+)|week\/(\d+))$/.exec(raw);
   if(!m)return;
   if(m[1]==='parked'){cur='parked';}
+  else if(m[1]==='phase2'){cur='phase2';}
   else if(m[1]==='focus'){cur='focus';}
   else if(m[1]==='notes'){cur='notes';}
   else if(m[1].startsWith('prog/')&&PROG[m[1].slice(5)]){cur='prog:'+m[1].slice(5);}
@@ -7760,6 +7768,7 @@ function openStatusReport(){
   ${od.length?`<div class="card"><div class="sec">OVERDUE ITEMS</div><table>${odRows}</table></div>`:''}
   ${doneCard}
   ${pk>0?`<div style="position:relative;z-index:1;font-size:9.5px;color:#64748B;margin-top:2pt">${pk} item${pk===1?'':'s'} agreed out of scope.</div>`:''}
+  ${phase2Count()>0?`<div style="position:relative;z-index:1;font-size:9.5px;color:#64748B;margin-top:2pt">${phase2Count()} item${phase2Count()===1?'':'s'} planned for phase 2.</div>`:''}
   <div class="footer"><span>PERFECT MADE POSSIBLE&nbsp;&nbsp;·&nbsp;&nbsp;sabelcustomersuccess.com</span><span>Generated ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</span></div>
   </body></html>`;
   const w=window.open('','_blank');
@@ -7806,6 +7815,18 @@ loadInitial().then(()=>{applyHash();render();refreshForms();});
   try{renderSidebar();}catch(e){}
 })();
 
+</script>
+<script>/*PHASE2-TAB*/
+function phase2Count(){let n=0;P.forEach(p=>['sabel','client'].forEach(g=>(T[p.id][g]||[]).forEach(t=>{if(t.parked&&t.p2)n++;})));return n;}
+function phase2Task(e,cid){
+  e.stopPropagation();
+  const t=resolveTask(cid); if(!t)return;
+  if(!softConfirm('p2:'+cid,'Click Move to phase 2 again to confirm'))return;
+  t.parked=true; t.p2=true;
+  expandedCards.delete(cid);
+  showToast('Moved to Phase 2');
+  render(); scheduleAutoSave();
+}
 </script>
 </body>
 </html>
